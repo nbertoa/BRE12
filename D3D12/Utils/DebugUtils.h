@@ -1,11 +1,14 @@
 #pragma once
 
 #include <cassert>
+#include <comdef.h>
 #include <cstdlib>
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <iostream>
 #include <string>
+
+#include <Utils\StringUtils.h>
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define ASSERT(condition) \
@@ -65,9 +68,20 @@ inline void D3dSetDebugName(ID3D12DeviceChild* obj, const char* name) {
 class DxException {
 public:
 	DxException() = default;
-	DxException(const HRESULT hr, const std::wstring& functionName, const std::wstring& filename, const int32_t lineNumber);
+	DxException::DxException(const HRESULT hr, const std::wstring& functionName, const std::wstring& filename, const int32_t lineNumber)
+		: mErrorCode(hr)
+		, mFunctionName(functionName)
+		, mFilename(filename)
+		, mLineNumber(lineNumber)
+	{
+	}
 
-	std::wstring ToString() const;
+	std::wstring DxException::ToString() const {
+		// Get the string description of the error code.
+		_com_error err(mErrorCode);
+		const std::wstring msg = err.ErrorMessage();
+		return mFunctionName + L" failed in " + mFilename + L"; line " + std::to_wstring(mLineNumber) + L"; error: " + msg;
+	}
 
 	HRESULT mErrorCode = S_OK;
 	std::wstring mFunctionName = L"";

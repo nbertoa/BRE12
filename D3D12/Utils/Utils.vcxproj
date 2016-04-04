@@ -115,10 +115,6 @@
     <ClInclude Include="DebugUtils.h" />
     <ClInclude Include="StringUtils.h" />
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="DebugUtils.cpp" />
-    <ClCompile Include="StringUtils.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
