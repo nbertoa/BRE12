@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Main", "Main\Main.vcxproj", "{4EAB39FD-5BFF-43D4-8E55-0F775433AF16}"
 EndProject
@@ -24,6 +24,12 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Input", "Input\Input.vcxproj", "{CC8638C9-BEC2-49DC-89B3-0C51F6DDE9DA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GeometryGenerator", "GeometryGenerator\GeometryGenerator.vcxproj", "{0FB8C24B-EF27-4247-BA36-F8B54BC4E995}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "App", "App\App.vcxproj", "{6049D839-EC2B-482B-948E-887437E86552}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C7E94DAC-F9E2-4998-99EE-0F9B51FAC66B} = {C7E94DAC-F9E2-4998-99EE-0F9B51FAC66B}
+		{EED057CC-9080-435B-963B-C62CF4357144} = {EED057CC-9080-435B-963B-C62CF4357144}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +103,14 @@ Global
 		{0FB8C24B-EF27-4247-BA36-F8B54BC4E995}.Release|x64.Build.0 = Release|x64
 		{0FB8C24B-EF27-4247-BA36-F8B54BC4E995}.Release|x86.ActiveCfg = Release|Win32
 		{0FB8C24B-EF27-4247-BA36-F8B54BC4E995}.Release|x86.Build.0 = Release|Win32
+		{6049D839-EC2B-482B-948E-887437E86552}.Debug|x64.ActiveCfg = Debug|x64
+		{6049D839-EC2B-482B-948E-887437E86552}.Debug|x64.Build.0 = Debug|x64
+		{6049D839-EC2B-482B-948E-887437E86552}.Debug|x86.ActiveCfg = Debug|Win32
+		{6049D839-EC2B-482B-948E-887437E86552}.Debug|x86.Build.0 = Debug|Win32
+		{6049D839-EC2B-482B-948E-887437E86552}.Release|x64.ActiveCfg = Release|x64
+		{6049D839-EC2B-482B-948E-887437E86552}.Release|x64.Build.0 = Release|x64
+		{6049D839-EC2B-482B-948E-887437E86552}.Release|x86.ActiveCfg = Release|Win32
+		{6049D839-EC2B-482B-948E-887437E86552}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

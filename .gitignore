@@ -136,3 +136,15 @@
 /D3D12/Utils/*.user
 /D3D12/*.sdf
 /D3D12/*.opendb
+/D3D12/App/x64/Debug/*.idb
+/D3D12/App/x64/Debug/*.log
+/D3D12/App/x64/Debug/*.pdb
+/D3D12/App/x64/Debug/App.tlog/*.lastbuildstate
+/D3D12/App/x64/Debug/App.tlog/*.tlog
+/D3D12/App/x64/Release/*.log
+/D3D12/App/x64/Release/*.pdb
+/D3D12/App/x64/Release/App.tlog/*.lastbuildstate
+/D3D12/App/x64/Release/App.tlog/*.tlog
+/D3D12/*.db
+/D3D12/x64/Debug/*.pdb
+/D3D12/App/*.user
