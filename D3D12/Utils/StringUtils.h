@@ -23,7 +23,7 @@ inline std::string ToString(const std::wstring& source) {
 }
 
 inline std::wstring AnsiToWString(const std::string& str) {
-	WCHAR buffer[512];
-	MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, buffer, 512);
+	WCHAR buffer[512U];
+	MultiByteToWideChar(CP_ACP, 0U, str.c_str(), -1, buffer, 512);
 	return std::wstring(buffer);
 }

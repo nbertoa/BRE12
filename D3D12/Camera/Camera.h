@@ -91,7 +91,6 @@ private:
 	float mFarWindowHeight = 0.0f;
 
 	bool mViewDirty = true;
-	uint8_t mPadding[3];
 
 	// Cache View/Proj matrices.
 	DirectX::XMFLOAT4X4 mView = MathHelper::Identity4x4();

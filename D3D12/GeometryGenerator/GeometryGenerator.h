@@ -92,7 +92,7 @@ public:
 private:
 	void Subdivide(MeshData& meshData);
     Vertex MidPoint(const Vertex& v0, const Vertex& v1);
-    void BuildCylinderTopCap(const float bottomRadius, const float topRadius, const float height, const uint32_t sliceCount, const  uint32_t stackCount, MeshData& meshData);
-    void BuildCylinderBottomCap(const float bottomRadius, const float topRadius, const float height, const uint32_t sliceCount, const uint32_t stackCount, MeshData& meshData);
+    void BuildCylinderTopCap(const float topRadius, const float height, const uint32_t sliceCount, MeshData& meshData);
+    void BuildCylinderBottomCap(const float bottomRadius, const float height, const uint32_t sliceCount, MeshData& meshData);
 };
 

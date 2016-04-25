@@ -25,5 +25,4 @@ private:
 	int64_t mCurrTime = 0;
 
 	bool mStopped = false;
-	uint8_t mPadding[7];
 };

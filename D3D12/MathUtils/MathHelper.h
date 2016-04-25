@@ -57,7 +57,7 @@ public:
 		// translation row so that it doesn't get into our inverse-transpose
 		// calculation--we don't want the inverse-transpose of the translation.
         DirectX::XMMATRIX A = M;
-        A.r[3] = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+        A.r[3U] = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 
         DirectX::XMVECTOR det = DirectX::XMMatrixDeterminant(A);
         return DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(&det, A));

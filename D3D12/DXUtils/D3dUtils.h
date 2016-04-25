@@ -25,7 +25,7 @@ public:
 		// 0x022B & 0xff00
 		// 0x0200
 		// 512
-		return (byteSize + 255) & ~255;
+		return (byteSize + 255U) & ~255U;
 	}
 
 	static Microsoft::WRL::ComPtr<ID3DBlob> LoadBinary(const std::wstring& filename);

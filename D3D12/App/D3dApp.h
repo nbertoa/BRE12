@@ -34,7 +34,7 @@ public:
 
 	int Run();
 
-	virtual bool Initialize();
+	virtual void Initialize();
 	virtual LRESULT MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lParam);
 
 protected:
@@ -44,13 +44,13 @@ protected:
 	virtual void Draw(const Timer& gt) = 0;
 
 	// Convenience overrides for handling mouse input.
-	virtual void OnMouseDown(const WPARAM btnState, const int32_t x, const int32_t y) { }
-	virtual void OnMouseUp(const WPARAM btnState, const int32_t x, const int32_t y) { }
-	virtual void OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y) { }
+	virtual void OnMouseDown(const WPARAM /*btnState*/, const int32_t /*x*/, const int32_t /*y*/) { }
+	virtual void OnMouseUp(const WPARAM /*btnState*/, const int32_t /*x*/, const int32_t /*y*/) { }
+	virtual void OnMouseMove(const WPARAM /*btnState*/, const int32_t /*x*/, const int32_t /*y*/) { }
 
 protected:
-	bool InitMainWindow();
-	bool InitDirect3D();
+	void InitMainWindow();
+	void InitDirect3D();
 	void CreateCommandObjects();
 	void CreateSwapChain();
 
@@ -69,8 +69,8 @@ protected:
 protected:
 	static D3DApp* mApp;
 
-	HINSTANCE mhAppInst = nullptr; // application instance handle
-	HWND mhMainWnd = nullptr; // main window handle
+	HINSTANCE mAppInst = nullptr; // application instance handle
+	HWND mMainWnd = nullptr; // main window handle
 	bool mAppPaused = false;  // is the application paused?
 	bool mMinimized = false;  // is the application minimized?
 	bool mMaximized = false;  // is the application maximized?
@@ -78,23 +78,23 @@ protected:
 	bool mFullscreenState = false; // fullscreen enabled
 								  // Set true to use 4X MSAA (§4.1.8).  The default is false.
 	bool m4xMsaaState = false;    // 4X MSAA enabled
-	uint32_t m4xMsaaQuality = 0;  // quality level of 4X MSAA
+	uint32_t m4xMsaaQuality = 0U;  // quality level of 4X MSAA
 
 	Timer mTimer;
 
-	Microsoft::WRL::ComPtr<IDXGIFactory4> mdxgiFactory;
+	Microsoft::WRL::ComPtr<IDXGIFactory4> mDxgiFactory;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;
-	Microsoft::WRL::ComPtr<ID3D12Device> md3dDevice;
+	Microsoft::WRL::ComPtr<ID3D12Device> mD3dDevice;
 
 	Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
-	UINT64 mCurrentFence = 0;
+	uint64_t mCurrentFence = 0U;
 
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCmdListAlloc;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;
 
-	static const int32_t sSwapChainBufferCount = 2;
-	int32_t mCurrBackBuffer = 0;
+	static const uint32_t sSwapChainBufferCount = 2U;
+	uint32_t mCurrBackBuffer = 0U;
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[sSwapChainBufferCount];
 	Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer;
 
@@ -104,13 +104,14 @@ protected:
 	D3D12_VIEWPORT mScreenViewport;
 	D3D12_RECT mScissorRect;
 
-	uint32_t mRtvDescriptorSize = 0;
-	uint32_t mDsvDescriptorSize = 0;
-	uint32_t mCbvSrvUavDescriptorSize = 0;
+	uint32_t mRtvDescSize = 0U;
+	uint32_t mDsvDescSize = 0U;
+	uint32_t mCbvSrvUavDescSize = 0U;
+	uint32_t mSamplerDescSize = 0U;
 
 	// Derived class should set these in derived constructor to customize starting values.
 	std::wstring mMainWndCaption = L"D3d App";
-	D3D_DRIVER_TYPE md3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
+	D3D_DRIVER_TYPE mD3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
 	DXGI_FORMAT mBackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	DXGI_FORMAT mDepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	int32_t mClientWidth = 800;

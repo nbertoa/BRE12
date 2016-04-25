@@ -35,18 +35,21 @@
 #endif
 
 inline void D3dSetDebugName(IDXGIObject* obj, const char* name) {
+	ASSERT(name);
 	if (obj) {
 		obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
 	}
 }
 
 inline void D3dSetDebugName(ID3D12Device* obj, const char* name) {
+	ASSERT(name);
 	if (obj) {
 		obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
 	}
 }
 
 inline void D3dSetDebugName(ID3D12DeviceChild* obj, const char* name) {
+	ASSERT(name);
 	if (obj) {
 		obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
 	}
@@ -56,13 +59,13 @@ inline void D3dSetDebugName(ID3D12DeviceChild* obj, const char* name) {
 #define ThrowIfFailed(x)                                              \
 {                                                                     \
     HRESULT hr__ = (x);                                               \
-    std::wstring wfn = AnsiToWString(__FILE__);                       \
+    const std::wstring wfn = AnsiToWString(__FILE__);                 \
     if(FAILED(hr__)) { throw DxException(hr__, L#x, wfn, __LINE__); } \
 }
 #endif
 
 #ifndef ReleaseCom
-#define ReleaseCom(x) { if(x){ x->Release(); x = 0; } }
+#define ReleaseCom(x) { if(x){ x->Release(); x = nullptr; } }
 #endif
 
 class DxException {

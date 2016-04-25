@@ -11,7 +11,7 @@ public:
 	const Mouse& operator=(const Mouse& rhs) = delete;
 
 	enum MouseButton {
-		MouseButtonsLeft = 0,
+		MouseButtonsLeft = 0U,
 		MouseButtonsRight,
 		MouseButtonsMiddle,
 		MouseButtonsX1
@@ -27,10 +27,10 @@ public:
 	uint32_t X() const { return mX; }
 	uint32_t Y() const { return mY; }
 	uint32_t Wheel() const { return mWheel; }
-	bool IsButtonUp(const MouseButton b) const { return (mCurrentState.rgbButtons[b] & 0x80) == 0; }
-	bool IsButtonDown(const MouseButton b) const { return (mCurrentState.rgbButtons[b] & 0x80) != 0; }
-	bool WasButtonUp(const MouseButton b) const { return (mLastState.rgbButtons[b] & 0x80) == 0; }
-	bool WasButtonDown(const MouseButton b) const { return (mLastState.rgbButtons[b] & 0x80) != 0; }
+	bool IsButtonUp(const MouseButton b) const { return (mCurrentState.rgbButtons[b] & 0x80) == 0U; }
+	bool IsButtonDown(const MouseButton b) const { return (mCurrentState.rgbButtons[b] & 0x80) != 0U; }
+	bool WasButtonUp(const MouseButton b) const { return (mLastState.rgbButtons[b] & 0x80) == 0U; }
+	bool WasButtonDown(const MouseButton b) const { return (mLastState.rgbButtons[b] & 0x80) != 0U; }
 	bool WasButtonPressedThisFrame(const MouseButton b) const { return IsButtonDown(b) && WasButtonUp(b); }
 	bool WasButtonReleasedThisFrame(const MouseButton b) const { return IsButtonUp(b) && WasButtonDown(b); }
 	bool IsButtonHeldDown(const MouseButton b) const { return IsButtonDown(b) && WasButtonDown(b); }
@@ -40,7 +40,7 @@ private:
 	LPDIRECTINPUTDEVICE8 mDevice = nullptr;
 	DIMOUSESTATE mCurrentState = {};
 	DIMOUSESTATE mLastState = {};
-	uint32_t mX = 0;
-	uint32_t mY = 0;
-	uint32_t mWheel = 0;
+	uint32_t mX = 0U;
+	uint32_t mY = 0U;
+	uint32_t mWheel = 0U;
 };

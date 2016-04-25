@@ -17,10 +17,10 @@ public:
 
 	const uint8_t* const CurrentState() const { return mCurrentState; }
 	const uint8_t* const LastState() const { return mLastState; }
-	bool IsKeyUp(const uint8_t key) const { return (mCurrentState[key] & 0x80) == 0; }
-	bool IsKeyDown(const uint8_t key) const { return (mCurrentState[key] & 0x80) != 0; }
-	bool WasKeyUp(const uint8_t key) const { return (mLastState[key] & 0x80) == 0; }
-	bool WasKeyDown(const uint8_t key) const { return (mLastState[key] & 0x80) != 0; }
+	bool IsKeyUp(const uint8_t key) const { return (mCurrentState[key] & 0x80) == 0U; }
+	bool IsKeyDown(const uint8_t key) const { return (mCurrentState[key] & 0x80) != 0U; }
+	bool WasKeyUp(const uint8_t key) const { return (mLastState[key] & 0x80) == 0U; }
+	bool WasKeyDown(const uint8_t key) const { return (mLastState[key] & 0x80) != 0U; }
 	bool WasKeyPressedThisFrame(const uint8_t key) const { return IsKeyDown(key) && WasKeyUp(key); }
 	bool WasKeyReleasedThisFrame(const uint8_t key) const { return IsKeyUp(key) && WasKeyDown(key); }
 	bool IsKeyHeldDown(const uint8_t key) const { return IsKeyDown(key) && WasKeyDown(key); }
@@ -28,6 +28,6 @@ public:
 private:
 	IDirectInput8& mDirectInput;
 	LPDIRECTINPUTDEVICE8 mDevice = nullptr;
-	uint8_t mCurrentState[256] = {};
-	uint8_t mLastState[256] = {};
+	uint8_t mCurrentState[256U] = {};
+	uint8_t mLastState[256U] = {};
 };

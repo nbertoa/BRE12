@@ -13,8 +13,8 @@ void Camera::SetLens(const float fovY, const float aspect, const float zn, const
 	mNearZ = zn;
 	mFarZ = zf;
 
-	mNearWindowHeight = 2.0f * mNearZ * tanf( 0.5f*mFovY );
-	mFarWindowHeight  = 2.0f * mFarZ * tanf( 0.5f*mFovY );
+	mNearWindowHeight = 2.0f * mNearZ * tanf( 0.5f * mFovY );
+	mFarWindowHeight  = 2.0f * mFarZ * tanf( 0.5f * mFovY );
 
 	XMMATRIX P = XMMatrixPerspectiveFovLH(mFovY, mAspect, mNearZ, mFarZ);
 	XMStoreFloat4x4(&mProj, P);
@@ -109,25 +109,25 @@ void Camera::UpdateViewMatrix() {
 		XMStoreFloat3(&mUp, U);
 		XMStoreFloat3(&mLook, L);
 
-		mView(0, 0) = mRight.x;
-		mView(1, 0) = mRight.y;
-		mView(2, 0) = mRight.z;
-		mView(3, 0) = x;
+		mView(0U, 0U) = mRight.x;
+		mView(1U, 0U) = mRight.y;
+		mView(2U, 0U) = mRight.z;
+		mView(3U, 0U) = x;
 
-		mView(0, 1) = mUp.x;
-		mView(1, 1) = mUp.y;
-		mView(2, 1) = mUp.z;
-		mView(3, 1) = y;
+		mView(0U, 1U) = mUp.x;
+		mView(1U, 1U) = mUp.y;
+		mView(2U, 1U) = mUp.z;
+		mView(3U, 1U) = y;
 
-		mView(0, 2) = mLook.x;
-		mView(1, 2) = mLook.y;
-		mView(2, 2) = mLook.z;
-		mView(3, 2) = z;
+		mView(0U, 2U) = mLook.x;
+		mView(1U, 2U) = mLook.y;
+		mView(2U, 2U) = mLook.z;
+		mView(3U, 2U) = z;
 
-		mView(0, 3) = 0.0f;
-		mView(1, 3) = 0.0f;
-		mView(2, 3) = 0.0f;
-		mView(3, 3) = 1.0f;
+		mView(0U, 3U) = 0.0f;
+		mView(1U, 3U) = 0.0f;
+		mView(2U, 3U) = 0.0f;
+		mView(3U, 3U) = 1.0f;
 
 		mViewDirty = false;
 	}

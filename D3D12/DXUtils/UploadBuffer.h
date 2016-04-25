@@ -7,8 +7,8 @@ template<typename T>
 class UploadBuffer
 {
 public:
-	UploadBuffer(ID3D12Device& device, const uint32_t elementCount, const bool isConstantBuffer) :
-		mIsConstantBuffer(isConstantBuffer)
+	UploadBuffer(ID3D12Device& device, const uint32_t elementCount, const bool isConstantBuffer) 
+		: mIsConstantBuffer(isConstantBuffer)
 	{
 		mElementByteSize = sizeof(T);
 
@@ -23,10 +23,12 @@ public:
 			mElementByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(T));
 		}
 
+		CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_UPLOAD);
+		CD3DX12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Buffer(mElementByteSize * elementCount);
 		ThrowIfFailed(device.CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			&heapProps,
 			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(mElementByteSize*elementCount),
+			&resDesc,
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			nullptr,
 			IID_PPV_ARGS(&mUploadBuffer)));
@@ -41,8 +43,9 @@ public:
 	UploadBuffer& operator=(const UploadBuffer& rhs) = delete;
 	~UploadBuffer()
 	{
-		if (mUploadBuffer != nullptr)
+		if (mUploadBuffer != nullptr) {
 			mUploadBuffer->Unmap(0, nullptr);
+		}
 
 		mMappedData = nullptr;
 	}
@@ -54,6 +57,6 @@ public:
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> mUploadBuffer;
 	uint8_t* mMappedData = nullptr;
-	uint32_t mElementByteSize = 0;
+	uint32_t mElementByteSize = 0U;
 	bool mIsConstantBuffer = false;
 };
