@@ -7,10 +7,10 @@ Keyboard* Keyboard::gInstance = nullptr;
 Keyboard::Keyboard(IDirectInput8& directInput, const HWND windowHandle)
 	: mDirectInput(directInput)
 {
-	ASSERT_HR(mDirectInput.CreateDevice(GUID_SysKeyboard, &mDevice, nullptr));
+	CHECK_HR(mDirectInput.CreateDevice(GUID_SysKeyboard, &mDevice, nullptr));
 	ASSERT(mDevice);
-	ASSERT_HR(mDevice->SetDataFormat(&c_dfDIKeyboard));
-	ASSERT_HR(mDevice->SetCooperativeLevel(windowHandle, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
+	CHECK_HR(mDevice->SetDataFormat(&c_dfDIKeyboard));
+	CHECK_HR(mDevice->SetCooperativeLevel(windowHandle, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
 	mDevice->Acquire();
 }
 

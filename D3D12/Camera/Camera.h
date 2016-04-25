@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 
 #include <MathUtils\MathHelper.h>
+#include <Utils\DebugUtils.h>
 
 class Camera {
 public:
@@ -53,13 +54,13 @@ public:
 
 	// Get View/Proj matrices.
 	DirectX::XMMATRIX GetView() const {
-		assert(!mViewDirty);
+		ASSERT(!mViewDirty);
 		return XMLoadFloat4x4(&mView);
 	}
 	DirectX::XMMATRIX GetProj() const { return XMLoadFloat4x4(&mProj); }
 
 	DirectX::XMFLOAT4X4 GetView4x4f() const {
-		assert(!mViewDirty);
+		ASSERT(!mViewDirty);
 		return mView;
 	}
 	DirectX::XMFLOAT4X4 GetProj4x4f() const { return mProj; }

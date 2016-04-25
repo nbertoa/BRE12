@@ -10,8 +10,9 @@
 #ifndef __D3DX12_H__
 #define __D3DX12_H__
 
-#include <cassert>
 #include <d3d12.h>
+
+#include <Utils/DebugUtils.h>
 
 #if defined( __cplusplus )
 
@@ -718,7 +719,7 @@ struct CD3DX12_ROOT_DESCRIPTOR_TABLE : public D3D12_ROOT_DESCRIPTOR_TABLE
         UINT numDescriptorRanges,
         _In_reads_opt_(numDescriptorRanges) const D3D12_DESCRIPTOR_RANGE* _pDescriptorRanges)
     {
-		assert(_pDescriptorRanges);
+		ASSERT(_pDescriptorRanges);
         Init(numDescriptorRanges, _pDescriptorRanges);
     }
     
@@ -726,7 +727,7 @@ struct CD3DX12_ROOT_DESCRIPTOR_TABLE : public D3D12_ROOT_DESCRIPTOR_TABLE
         UINT numDescriptorRanges,
         _In_reads_(numDescriptorRanges) const D3D12_DESCRIPTOR_RANGE* _pDescriptorRanges)
     {
-		assert(_pDescriptorRanges);
+		ASSERT(_pDescriptorRanges);
         Init(*this, numDescriptorRanges, _pDescriptorRanges);
     }
     
@@ -735,7 +736,7 @@ struct CD3DX12_ROOT_DESCRIPTOR_TABLE : public D3D12_ROOT_DESCRIPTOR_TABLE
         UINT numDescriptorRanges,
         _In_reads_opt_(numDescriptorRanges) const D3D12_DESCRIPTOR_RANGE* _pDescriptorRanges)
     {
-		assert(_pDescriptorRanges);
+		ASSERT(_pDescriptorRanges);
         rootDescriptorTable.NumDescriptorRanges = numDescriptorRanges;
         rootDescriptorTable.pDescriptorRanges = _pDescriptorRanges;
     }

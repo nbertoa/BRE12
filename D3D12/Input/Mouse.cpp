@@ -7,10 +7,10 @@ Mouse* Mouse::gInstance = nullptr;
 Mouse::Mouse(IDirectInput8& directInput, const HWND windowHandle)
 	: mDirectInput(directInput)
 {
-	ASSERT_HR(mDirectInput.CreateDevice(GUID_SysMouse, &mDevice, nullptr));
+	CHECK_HR(mDirectInput.CreateDevice(GUID_SysMouse, &mDevice, nullptr));
 	ASSERT(mDevice);
-	ASSERT_HR(mDevice->SetDataFormat(&c_dfDIMouse));
-	ASSERT_HR(mDevice->SetCooperativeLevel(windowHandle, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
+	CHECK_HR(mDevice->SetDataFormat(&c_dfDIMouse));
+	CHECK_HR(mDevice->SetCooperativeLevel(windowHandle, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
 	mDevice->Acquire();
 }
 

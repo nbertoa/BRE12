@@ -1,14 +1,15 @@
 #pragma once
 
-#if defined(DEBUG) || defined(_DEBUG)
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
-
 #include <cstdint>
 
 #include <DXUtils\D3dUtils.h>
 #include <Timer\Timer.h>
+
+#if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
+#define _CRTDBG_MAP_ALLOC          
+#include <cstdlib>             
+#include <crtdbg.h>               
+#endif 
 
 // Link necessary d3d12 libraries.
 #pragma comment(lib,"d3dcompiler.lib")
@@ -40,8 +41,8 @@ public:
 protected:
 	virtual void CreateRtvAndDsvDescriptorHeaps();
 	virtual void OnResize();
-	virtual void Update(const Timer& gt) = 0;
-	virtual void Draw(const Timer& gt) = 0;
+	virtual void Update(const Timer& timer) = 0;
+	virtual void Draw(const Timer& timer) = 0;
 
 	// Convenience overrides for handling mouse input.
 	virtual void OnMouseDown(const WPARAM /*btnState*/, const int32_t /*x*/, const int32_t /*y*/) { }
@@ -89,9 +90,9 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
 	uint64_t mCurrentFence = 0U;
 
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCmdQueue;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCmdListAlloc;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCmdList;
 
 	static const uint32_t sSwapChainBufferCount = 2U;
 	uint32_t mCurrBackBuffer = 0U;

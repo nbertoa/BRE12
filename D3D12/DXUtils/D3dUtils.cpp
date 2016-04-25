@@ -14,7 +14,7 @@ Microsoft::WRL::ComPtr<ID3DBlob> D3dUtils::LoadBinary(const std::wstring& filena
 	fin.seekg(0U, std::ios_base::beg);
 
 	Microsoft::WRL::ComPtr<ID3DBlob> blob;
-	ThrowIfFailed(D3DCreateBlob(size, blob.GetAddressOf()));
+	CHECK_HR(D3DCreateBlob(size, blob.GetAddressOf()));
 
 	fin.read((char*)blob->GetBufferPointer(), size);
 	fin.close();
@@ -34,7 +34,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> D3dUtils::CreateDefaultBuffer(
 	// Create the actual default buffer resource.
 	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 	CD3DX12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Buffer(byteSize);
-	ThrowIfFailed(device.CreateCommittedResource(
+	CHECK_HR(device.CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -46,7 +46,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> D3dUtils::CreateDefaultBuffer(
 	// an intermediate upload heap. 
 	heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	resDesc = CD3DX12_RESOURCE_DESC::Buffer(byteSize);
-	ThrowIfFailed(device.CreateCommittedResource(
+	CHECK_HR(device.CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -99,7 +99,7 @@ Microsoft::WRL::ComPtr<ID3DBlob> D3dUtils::CompileShader(
 	if (errors != nullptr) {
 		OutputDebugStringA((char*)errors->GetBufferPointer());
 	}
-	ThrowIfFailed(hr);
+	CHECK_HR(hr);
 
 	return byteCode;
 }
