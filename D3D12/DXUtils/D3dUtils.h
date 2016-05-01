@@ -8,11 +8,8 @@
 #include <windows.h>
 #include <wrl.h>
 
-class D3dUtils
-{
+class D3dUtils {
 public:
-	static std::string ToString(const HRESULT hr);
-
 	static uint32_t CalcConstantBufferByteSize(const uint32_t byteSize) {
 		// Constant buffers must be a multiple of the minimum hardware
 		// allocation size (usually 256 bytes).  So round up to nearest
@@ -28,7 +25,7 @@ public:
 		return (byteSize + 255U) & ~255U;
 	}
 
-	static Microsoft::WRL::ComPtr<ID3DBlob> LoadBinary(const std::wstring& filename);
+	static Microsoft::WRL::ComPtr<ID3DBlob> LoadBlob(const std::string& filename);
 
 	static Microsoft::WRL::ComPtr<ID3D12Resource> CreateDefaultBuffer(
 		ID3D12Device& device,
@@ -36,10 +33,4 @@ public:
 		const void* initData,
 		const uint64_t byteSize,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer);
-
-	static Microsoft::WRL::ComPtr<ID3DBlob> CompileShader(
-		const std::wstring& filename,
-		const D3D_SHADER_MACRO* defines,
-		const std::string& entrypoint,
-		const std::string& target);
 };

@@ -3,14 +3,15 @@
 #include <cstdint>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
+#include <memory>
 
 class Keyboard {
 public:
-	static Keyboard* gInstance;
-
-	const Keyboard& operator=(const Keyboard& rhs) = delete;
+	static std::unique_ptr<Keyboard> gInstance;
 
 	Keyboard(IDirectInput8& directInput, const HWND windowHandle);
+	Keyboard(const Keyboard&) = delete;
+	const Keyboard& operator=(const Keyboard& rhs) = delete;
 	~Keyboard();
 
 	void Update();

@@ -53,6 +53,6 @@ inline void D3dSetDebugName(ID3D12DeviceChild* obj, const char* name) {
 	}
 }
 
-#ifndef ReleaseCom
-#define ReleaseCom(x) { if(x){ x->Release(); x = nullptr; } }
+#ifndef RELEASE_COM
+#define RELEASE_COM(x) { if(x){ x->Release(); x = nullptr; } }
 #endif

@@ -5,6 +5,8 @@
 class Timer {
 public:
 	Timer();
+	Timer(const Timer&) = delete;
+	const Timer& operator=(const Timer&) = delete;
 
 	float TotalTime() const; // in seconds
 	float DeltaTime() const; // in seconds

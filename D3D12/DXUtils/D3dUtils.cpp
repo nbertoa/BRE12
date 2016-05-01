@@ -5,23 +5,6 @@
 #include <DXUtils/d3dx12.h>
 #include <Utils\DebugUtils.h>
 
-
-Microsoft::WRL::ComPtr<ID3DBlob> D3dUtils::LoadBinary(const std::wstring& filename) {
-	std::ifstream fin(filename, std::ios::binary);
-
-	fin.seekg(0U, std::ios_base::end);
-	std::ifstream::pos_type size = (int)fin.tellg();
-	fin.seekg(0U, std::ios_base::beg);
-
-	Microsoft::WRL::ComPtr<ID3DBlob> blob;
-	CHECK_HR(D3DCreateBlob(size, blob.GetAddressOf()));
-
-	fin.read((char*)blob->GetBufferPointer(), size);
-	fin.close();
-
-	return blob;
-}
-
 Microsoft::WRL::ComPtr<ID3D12Resource> D3dUtils::CreateDefaultBuffer(
 	ID3D12Device& device,
 	ID3D12GraphicsCommandList& cmdList,
@@ -73,33 +56,23 @@ Microsoft::WRL::ComPtr<ID3D12Resource> D3dUtils::CreateDefaultBuffer(
 	// Note: uploadBuffer has to be kept alive after the above function calls because
 	// the command list has not been executed yet that performs the actual copy.
 	// The caller can Release the uploadBuffer after it knows the copy has been executed.
-
-
 	return defaultBuffer;
 }
 
-Microsoft::WRL::ComPtr<ID3DBlob> D3dUtils::CompileShader(
-	const std::wstring& filename,
-	const D3D_SHADER_MACRO* defines,
-	const std::string& entrypoint,
-	const std::string& target)
+Microsoft::WRL::ComPtr<ID3DBlob> D3dUtils::LoadBlob(const std::string& filename)
 {
-	uint32_t compileFlags = 0U;
-#if defined(DEBUG) || defined(_DEBUG)  
-	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
+	std::ifstream fin(filename, std::ios::binary);
+	ASSERT(fin);
 
-	HRESULT hr = S_OK;
+	fin.seekg(0, std::ios_base::end);
+	std::ifstream::pos_type size = (int)fin.tellg();
+	fin.seekg(0, std::ios_base::beg);
 
-	Microsoft::WRL::ComPtr<ID3DBlob> byteCode = nullptr;
-	Microsoft::WRL::ComPtr<ID3DBlob> errors;
-	hr = D3DCompileFromFile(filename.c_str(), defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-		entrypoint.c_str(), target.c_str(), compileFlags, 0, &byteCode, &errors);
+	Microsoft::WRL::ComPtr<ID3DBlob> blob;
+	CHECK_HR(D3DCreateBlob(size, blob.GetAddressOf()));
 
-	if (errors != nullptr) {
-		OutputDebugStringA((char*)errors->GetBufferPointer());
-	}
-	CHECK_HR(hr);
+	fin.read((char*)blob->GetBufferPointer(), size);
+	fin.close();
 
-	return byteCode;
+	return blob;
 }

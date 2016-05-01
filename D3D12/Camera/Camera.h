@@ -1,12 +1,15 @@
 #pragma once
 
 #include <DirectXMath.h>
+#include <memory>
 
 #include <MathUtils\MathHelper.h>
 #include <Utils\DebugUtils.h>
 
 class Camera {
 public:
+	static std::unique_ptr<Camera> gInstance;
+
 	Camera();
 
 	// Get/Set world camera position.

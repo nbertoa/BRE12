@@ -2,7 +2,7 @@
 
 #include <Utils/DebugUtils.h>
 
-Keyboard* Keyboard::gInstance = nullptr;
+std::unique_ptr<Keyboard> Keyboard::gInstance = nullptr;
 
 Keyboard::Keyboard(IDirectInput8& directInput, const HWND windowHandle)
 	: mDirectInput(directInput)

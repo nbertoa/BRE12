@@ -11,11 +11,6 @@
 #include <crtdbg.h>               
 #endif 
 
-// Link necessary d3d12 libraries.
-#pragma comment(lib,"d3dcompiler.lib")
-#pragma comment(lib, "D3D12.lib")
-#pragma comment(lib, "dxgi.lib")
-
 class D3DApp {
 protected:
 	D3DApp(HINSTANCE hInstance);
@@ -24,32 +19,26 @@ protected:
 	virtual ~D3DApp();
 
 public:
-	static D3DApp* GetApp();
+	static D3DApp* GetApp() { return mApp; }
 
-	HINSTANCE AppInst() const;
-	HWND MainWnd() const;
-	float AspectRatio() const;
-
-	bool Get4xMsaaState() const;
-	void Set4xMsaaState(const bool value);
-
-	int Run();
+	HINSTANCE AppInst() const { return mAppInst; }
+	HWND MainWnd() const { return mMainWnd; }
+	float AspectRatio() const { return (float)mWindowWidth / mWindowHeight; }
+	
+	int32_t Run();
 
 	virtual void Initialize();
 	virtual LRESULT MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lParam);
 
 protected:
 	virtual void CreateRtvAndDsvDescriptorHeaps();
-	virtual void OnResize();
-	virtual void Update(const Timer& timer) = 0;
+	virtual void CreateRtvAndDsv();
+	virtual void Update(const Timer& timer);
 	virtual void Draw(const Timer& timer) = 0;
 
-	// Convenience overrides for handling mouse input.
-	virtual void OnMouseDown(const WPARAM /*btnState*/, const int32_t /*x*/, const int32_t /*y*/) { }
-	virtual void OnMouseUp(const WPARAM /*btnState*/, const int32_t /*x*/, const int32_t /*y*/) { }
-	virtual void OnMouseMove(const WPARAM /*btnState*/, const int32_t /*x*/, const int32_t /*y*/) { }
-
-protected:
+	virtual void OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y);
+	
+	void InitSystems();
 	void InitMainWindow();
 	void InitDirect3D();
 	void CreateCommandObjects();
@@ -62,10 +51,6 @@ protected:
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const;
 
 	void CalculateFrameStats();
-
-	void LogAdapters();
-	void LogAdapterOutputs(IDXGIAdapter& adapter);
-	void LogOutputDisplayModes(IDXGIOutput& output, const DXGI_FORMAT format);
 	
 protected:
 	static D3DApp* mApp;
@@ -73,13 +58,6 @@ protected:
 	HINSTANCE mAppInst = nullptr; // application instance handle
 	HWND mMainWnd = nullptr; // main window handle
 	bool mAppPaused = false;  // is the application paused?
-	bool mMinimized = false;  // is the application minimized?
-	bool mMaximized = false;  // is the application maximized?
-	bool mResizing = false;   // are the resize bars being dragged?
-	bool mFullscreenState = false; // fullscreen enabled
-								  // Set true to use 4X MSAA (§4.1.8).  The default is false.
-	bool m4xMsaaState = false;    // 4X MSAA enabled
-	uint32_t m4xMsaaQuality = 0U;  // quality level of 4X MSAA
 
 	Timer mTimer;
 
@@ -111,11 +89,9 @@ protected:
 	uint32_t mSamplerDescSize = 0U;
 
 	// Derived class should set these in derived constructor to customize starting values.
-	std::wstring mMainWndCaption = L"D3d App";
-	D3D_DRIVER_TYPE mD3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
 	DXGI_FORMAT mBackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	DXGI_FORMAT mDepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	int32_t mClientWidth = 800;
-	int32_t mClientHeight = 600;
+	int32_t mWindowWidth = 1920;
+	int32_t mWindowHeight = 1080;
 };
 

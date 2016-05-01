@@ -2,61 +2,25 @@
 
 #include <cstdint>
 #include <d3d12.h>
+#include <wrl.h>
 
-template<typename T>
-class UploadBuffer
-{
+#include <DxUtils/d3dx12.h>
+#include <Utils/DebugUtils.h>
+
+class UploadBuffer{
 public:
-	UploadBuffer(ID3D12Device& device, const uint32_t elementCount, const bool isConstantBuffer) 
-		: mIsConstantBuffer(isConstantBuffer)
-	{
-		mElementByteSize = sizeof(T);
-
-		// Constant buffer elements need to be multiples of 256 bytes.
-		// This is because the hardware can only view constant data 
-		// at m*256 byte offsets and of n*256 byte lengths. 
-		// typedef struct D3D12_CONSTANT_BUFFER_VIEW_DESC {
-		// UINT64 OffsetInBytes; // multiple of 256
-		// UINT   SizeInBytes;   // multiple of 256
-		// } D3D12_CONSTANT_BUFFER_VIEW_DESC;
-		if (isConstantBuffer) {
-			mElementByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(T));
-		}
-
-		CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_UPLOAD);
-		CD3DX12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Buffer(mElementByteSize * elementCount);
-		ThrowIfFailed(device.CreateCommittedResource(
-			&heapProps,
-			D3D12_HEAP_FLAG_NONE,
-			&resDesc,
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			nullptr,
-			IID_PPV_ARGS(&mUploadBuffer)));
-
-		ThrowIfFailed(mUploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mMappedData)));
-
-		// We do not need to unmap until we are done with the resource.  However, we must not write to
-		// the resource while it is in use by the GPU (so we must use synchronization techniques).
-	}
+	UploadBuffer(ID3D12Device& device, const size_t elemSize, const uint32_t elemCount);
 
 	UploadBuffer(const UploadBuffer& rhs) = delete;
 	UploadBuffer& operator=(const UploadBuffer& rhs) = delete;
-	~UploadBuffer()
-	{
-		if (mUploadBuffer != nullptr) {
-			mUploadBuffer->Unmap(0, nullptr);
-		}
+	~UploadBuffer();
 
-		mMappedData = nullptr;
-	}
+	ID3D12Resource* Resource() const { return mBuffer.Get(); }
 
-	ID3D12Resource* Resource() const { return mUploadBuffer.Get(); }
-
-	void CopyData(const uint32_t elementIndex, const T& data) { memcpy(&mMappedData[elementIndex * mElementByteSize], &data, sizeof(T));	}
+	void CopyData(const uint32_t elemIndex, uint8_t* srcData, const size_t srcDataSize);
 
 private:
-	Microsoft::WRL::ComPtr<ID3D12Resource> mUploadBuffer;
+	Microsoft::WRL::ComPtr<ID3D12Resource> mBuffer;
 	uint8_t* mMappedData = nullptr;
-	uint32_t mElementByteSize = 0U;
-	bool mIsConstantBuffer = false;
+	size_t mElemSize = 0U;
 };
