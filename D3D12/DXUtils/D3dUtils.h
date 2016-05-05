@@ -24,13 +24,4 @@ public:
 		// 512
 		return (byteSize + 255U) & ~255U;
 	}
-
-	static Microsoft::WRL::ComPtr<ID3DBlob> LoadBlob(const std::string& filename);
-
-	static Microsoft::WRL::ComPtr<ID3D12Resource> CreateDefaultBuffer(
-		ID3D12Device& device,
-		ID3D12GraphicsCommandList& cmdList,
-		const void* initData,
-		const uint64_t byteSize,
-		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer);
 };

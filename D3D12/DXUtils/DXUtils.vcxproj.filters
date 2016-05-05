@@ -8,7 +8,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSTextureLoader.cpp" />
-    <ClCompile Include="D3dUtils.cpp" />
     <ClCompile Include="UploadBuffer.cpp" />
   </ItemGroup>
 </Project>
