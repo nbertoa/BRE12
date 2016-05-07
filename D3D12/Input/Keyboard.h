@@ -7,7 +7,7 @@
 
 class Keyboard {
 public:
-	static std::unique_ptr<Keyboard> gInstance;
+	static std::unique_ptr<Keyboard> gKeyboard;
 
 	Keyboard(IDirectInput8& directInput, const HWND windowHandle);
 	Keyboard(const Keyboard&) = delete;

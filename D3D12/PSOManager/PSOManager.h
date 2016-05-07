@@ -2,13 +2,16 @@
 
 #include <d3d12.h>
 #include <functional>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <wrl.h>
 
 class PSOManager {
 public:
-	PSOManager(ID3D12Device& device) : mDevice(device) {}
+	static std::unique_ptr<PSOManager> gPSOMgr;
+
+	PSOManager(Microsoft::WRL::ComPtr<ID3D12Device>& device) : mDevice(device) {}
 	PSOManager(const PSOManager&) = delete;
 	const PSOManager& operator=(const PSOManager&) = delete;
 
@@ -24,7 +27,7 @@ public:
 	void Clear() { mPSOById.clear(); }
 
 private:
-	ID3D12Device& mDevice;
+	Microsoft::WRL::ComPtr<ID3D12Device>& mDevice;
 
 	typedef std::pair<size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>> IdAndPSO;
 	typedef std::unordered_map<size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>> PSOById;

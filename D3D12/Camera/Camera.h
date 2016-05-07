@@ -8,7 +8,7 @@
 
 class Camera {
 public:
-	static std::unique_ptr<Camera> gInstance;
+	static std::unique_ptr<Camera> gCamera;
 
 	Camera();
 

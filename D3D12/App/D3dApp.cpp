@@ -7,6 +7,9 @@
 #include <DXUtils\d3dx12.h>
 #include <Input/Keyboard.h>
 #include <MathUtils/MathHelper.h>
+#include <PSOManager\PSOManager.h>
+#include <ResourceManager\ResourceManager.h>
+#include <ShaderManager\ShaderManager.h>
 #include <Utils\DebugUtils.h>
 
 D3DApp* D3DApp::mApp = nullptr;
@@ -30,7 +33,7 @@ D3DApp::~D3DApp() {
 }
 
 int32_t D3DApp::Run() {
-	ASSERT(Keyboard::gInstance.get());
+	ASSERT(Keyboard::gKeyboard.get());
 
 	MSG msg = { 0U };
 
@@ -48,7 +51,7 @@ int32_t D3DApp::Run() {
 
 			if (!mAppPaused) {
 				CalculateFrameStats();
-				Keyboard::gInstance->Update();
+				Keyboard::gKeyboard->Update();
 				Update(mTimer);
 				Draw(mTimer);
 			}
@@ -86,38 +89,38 @@ void D3DApp::CreateRtvAndDsvDescriptorHeaps() {
 void D3DApp::Update(const Timer& timer) {
 	static const float sCameraOffset = 10.0f;
 
-	ASSERT(Keyboard::gInstance.get());
+	ASSERT(Keyboard::gKeyboard.get());
 
 	const float dt = timer.DeltaTime();
 	const float offset = sCameraOffset * dt;
-	if (Keyboard::gInstance->IsKeyDown(DIK_W)) {
-		Camera::gInstance->Walk(offset);
+	if (Keyboard::gKeyboard->IsKeyDown(DIK_W)) {
+		Camera::gCamera->Walk(offset);
 	}
-	if (Keyboard::gInstance->IsKeyDown(DIK_S)) {
-		Camera::gInstance->Walk(-offset);
+	if (Keyboard::gKeyboard->IsKeyDown(DIK_S)) {
+		Camera::gCamera->Walk(-offset);
 	}
-	if (Keyboard::gInstance->IsKeyDown(DIK_A)) {
-		Camera::gInstance->Strafe(-offset);
+	if (Keyboard::gKeyboard->IsKeyDown(DIK_A)) {
+		Camera::gCamera->Strafe(-offset);
 	}
-	if (Keyboard::gInstance->IsKeyDown(DIK_D)) {
-		Camera::gInstance->Strafe(offset);
+	if (Keyboard::gKeyboard->IsKeyDown(DIK_D)) {
+		Camera::gCamera->Strafe(offset);
 	}
 
-	Camera::gInstance->UpdateViewMatrix();
+	Camera::gCamera->UpdateViewMatrix();
 }
 
 void D3DApp::OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y) {
 	static int32_t lastXY[2] = { 0, 0 };
 
-	ASSERT(Camera::gInstance.get());
+	ASSERT(Camera::gCamera.get());
 
 	if (btnState & MK_LBUTTON) {
 		// Make each pixel correspond to a quarter of a degree.+
 		const float dx = DirectX::XMConvertToRadians(0.25f * (float)(x - lastXY[0]));
 		const float dy = DirectX::XMConvertToRadians(0.25f * (float)(y - lastXY[1]));
 
-		Camera::gInstance->Pitch(dy);
-		Camera::gInstance->RotateY(dx);
+		Camera::gCamera->Pitch(dy);
+		Camera::gCamera->RotateY(dx);
 	}
 
 	lastXY[0] = x;
@@ -237,14 +240,23 @@ LRESULT D3DApp::MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lPar
 }
 
 void D3DApp::InitSystems() {
-	ASSERT(!Camera::gInstance.get());
-	Camera::gInstance = std::unique_ptr<Camera>(new Camera());
-	Camera::gInstance->SetLens(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
+	ASSERT(!Camera::gCamera.get());
+	Camera::gCamera = std::make_unique<Camera>();
+	Camera::gCamera->SetLens(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
 
-	ASSERT(!Keyboard::gInstance.get());
+	ASSERT(!Keyboard::gKeyboard.get());
 	LPDIRECTINPUT8 directInput;
 	CHECK_HR(DirectInput8Create(mAppInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID*)&directInput, nullptr));
-	Keyboard::gInstance = std::unique_ptr<Keyboard>(new Keyboard(*directInput, mMainWnd));
+	Keyboard::gKeyboard = std::make_unique<Keyboard>(*directInput, mMainWnd);
+
+	ASSERT(!PSOManager::gPSOMgr.get());
+	PSOManager::gPSOMgr = std::make_unique<PSOManager>(mD3dDevice);
+
+	ASSERT(!ResourceManager::gResourceMgr.get());
+	ResourceManager::gResourceMgr = std::make_unique<ResourceManager>();
+
+	ASSERT(!ShaderManager::gShaderMgr.get());
+	ShaderManager::gShaderMgr = std::make_unique<ShaderManager>();
 }
 
 void D3DApp::InitMainWindow() {

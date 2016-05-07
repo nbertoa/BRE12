@@ -3,6 +3,8 @@
 #include <DXUtils/d3dx12.h>
 #include <Utils/DebugUtils.h>
 
+std::unique_ptr<ResourceManager> ResourceManager::gResourceMgr = nullptr;
+
 size_t ResourceManager::CreateDefaultBuffer(
 	ID3D12Device& device,
 	ID3D12GraphicsCommandList& cmdList,

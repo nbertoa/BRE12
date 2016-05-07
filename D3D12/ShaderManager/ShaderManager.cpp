@@ -65,6 +65,8 @@ size_t ShaderManager::LoadShaderFile(const std::string& filename, D3D12_SHADER_B
 	return id;
 }
 
+std::unique_ptr<ShaderManager> ShaderManager::gShaderMgr = nullptr;
+
 Microsoft::WRL::ComPtr<ID3DBlob> ShaderManager::GetBlob(const size_t id) {
 	Microsoft::WRL::ComPtr<ID3DBlob> blob;
 	BlobById::iterator it = mBlobById.find(id);

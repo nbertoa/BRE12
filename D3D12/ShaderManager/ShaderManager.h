@@ -3,12 +3,15 @@
 #include <d3d12.h>
 #include <D3Dcommon.h>
 #include <functional>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <wrl.h>
 
 class ShaderManager {
 public:
+	static std::unique_ptr<ShaderManager> gShaderMgr;
+
 	ShaderManager() = default;
 	ShaderManager(const ShaderManager&) = delete;
 	const ShaderManager& operator=(const ShaderManager&) = delete;

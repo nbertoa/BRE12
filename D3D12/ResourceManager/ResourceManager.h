@@ -2,11 +2,14 @@
 
 #include <cstdint>
 #include <d3d12.h>
+#include <memory>
 #include <vector>
 #include <wrl.h>
 
 class ResourceManager {
 public:
+	static std::unique_ptr<ResourceManager> gResourceMgr;
+
 	ResourceManager() = default;
 	ResourceManager(const ResourceManager&) = delete;
 	const ResourceManager& operator=(const ResourceManager&) = delete;

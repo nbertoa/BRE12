@@ -2,6 +2,8 @@
 
 #include <Utils/DebugUtils.h>
 
+std::unique_ptr<PSOManager> PSOManager::gPSOMgr = nullptr;
+
 size_t PSOManager::CreateGraphicsPSO(const std::string& name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso) {
 	ASSERT(!name.empty());
 
@@ -11,7 +13,7 @@ size_t PSOManager::CreateGraphicsPSO(const std::string& name, const D3D12_GRAPHI
 		pso = it->second;
 	}
 	else {
-		CHECK_HR(mDevice.CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
+		CHECK_HR(mDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
 		mPSOById.insert(IdAndPSO(id, pso));
 	}
 	
