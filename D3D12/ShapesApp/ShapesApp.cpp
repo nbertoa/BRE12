@@ -13,17 +13,17 @@ ShapesApp::ShapesApp(HINSTANCE hInstance)
 {
 }
 
-void ShapesApp::Initialize() {
+void ShapesApp::Initialize() noexcept {
 	D3DApp::Initialize();
 
 	BuildPSO();
 }
 
-void ShapesApp::Update(const Timer& /*timer*/) {
+void ShapesApp::Update(const Timer& /*timer*/) noexcept {
 
 }
 
-void ShapesApp::Draw(const Timer& /*timer*/) {
+void ShapesApp::Draw(const Timer& /*timer*/) noexcept {
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
 	CHECK_HR(mDirectCmdListAlloc->Reset());
@@ -74,7 +74,7 @@ void ShapesApp::Draw(const Timer& /*timer*/) {
 	FlushCommandQueue();
 }
 
-void ShapesApp::BuildPSO() {
+void ShapesApp::BuildPSO() noexcept {
 	D3D12_INPUT_ELEMENT_DESC inputLayoutDesc[] = 
 	{
 		{"POSITION", 0U, DXGI_FORMAT_R32G32B32A32_FLOAT, 0U, 0U, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA , 0U},

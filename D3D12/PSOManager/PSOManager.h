@@ -15,16 +15,16 @@ public:
 	PSOManager(const PSOManager&) = delete;
 	const PSOManager& operator=(const PSOManager&) = delete;
 
-	std::size_t CreateGraphicsPSO(const std::string& name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso);
+	std::size_t CreateGraphicsPSO(const std::string& name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso) noexcept;
 
 	// Asserts if there is not a valid ID3D12PipelineState with current id
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> GetPSO(const std::size_t id);
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> GetPSO(const std::size_t id) noexcept;
 
 	// Asserts if id is not present
-	void Erase(const std::size_t id);
+	void Erase(const std::size_t id) noexcept;
 
 	// This will invalidate all ids.
-	void Clear() { mPSOById.clear(); }
+	void Clear() noexcept { mPSOById.clear(); }
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Device>& mDevice;

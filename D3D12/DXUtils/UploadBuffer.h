@@ -15,9 +15,9 @@ public:
 	UploadBuffer& operator=(const UploadBuffer& rhs) = delete;
 	~UploadBuffer();
 
-	ID3D12Resource* Resource() const { return mBuffer.Get(); }
+	ID3D12Resource* Resource() const noexcept { return mBuffer.Get(); }
 
-	void CopyData(const std::uint32_t elemIndex, std::uint8_t* srcData, const std::size_t srcDataSize);
+	void CopyData(const std::uint32_t elemIndex, std::uint8_t* srcData, const std::size_t srcDataSize) noexcept;
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBuffer;

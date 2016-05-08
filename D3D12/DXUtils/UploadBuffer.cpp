@@ -19,6 +19,6 @@ UploadBuffer::~UploadBuffer() {
 	mMappedData = nullptr;
 }
 
-void UploadBuffer::CopyData(const std::uint32_t elemIndex, std::uint8_t* srcData, const std::size_t srcDataSize) { 
+void UploadBuffer::CopyData(const std::uint32_t elemIndex, std::uint8_t* srcData, const std::size_t srcDataSize) noexcept {
 	memcpy(&mMappedData[elemIndex * mElemSize], &srcData, srcDataSize);
 }

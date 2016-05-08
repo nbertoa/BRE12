@@ -11,7 +11,7 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	const void* initData,
 	const std::uint64_t byteSize,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& defaultBuffer,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer)
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept
 {
 	ASSERT(initData);
 	ASSERT(byteSize > 0);
@@ -61,7 +61,7 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	return id;
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> ResourceManager::GetResource(const std::size_t id) {
+Microsoft::WRL::ComPtr<ID3D12Resource> ResourceManager::GetResource(const std::size_t id) noexcept {
 	ASSERT(id < mResources.size());
 	return mResources[id];
 }

@@ -4,7 +4,7 @@
 
 std::unique_ptr<PSOManager> PSOManager::gPSOMgr = nullptr;
 
-std::size_t PSOManager::CreateGraphicsPSO(const std::string& name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso) {
+std::size_t PSOManager::CreateGraphicsPSO(const std::string& name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso) noexcept {
 	ASSERT(!name.empty());
 
 	const std::size_t id{ mHash(name) };
@@ -20,7 +20,7 @@ std::size_t PSOManager::CreateGraphicsPSO(const std::string& name, const D3D12_G
 	return id;
 }
 
-Microsoft::WRL::ComPtr<ID3D12PipelineState> PSOManager::GetPSO(const std::size_t id) {
+Microsoft::WRL::ComPtr<ID3D12PipelineState> PSOManager::GetPSO(const std::size_t id) noexcept {
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pso;
 	PSOById::iterator it{ mPSOById.find(id) };
 	ASSERT(it != mPSOById.end());
@@ -28,7 +28,7 @@ Microsoft::WRL::ComPtr<ID3D12PipelineState> PSOManager::GetPSO(const std::size_t
 	return it->second;
 }
 
-void PSOManager::Erase(const std::size_t id) {
+void PSOManager::Erase(const std::size_t id) noexcept {
 	ASSERT(mPSOById.find(id) != mPSOById.end());
 	mPSOById.erase(id);
 }

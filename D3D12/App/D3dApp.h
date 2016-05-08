@@ -19,38 +19,38 @@ protected:
 	virtual ~D3DApp();
 
 public:
-	static D3DApp* GetApp() { return mApp; }
+	static D3DApp* GetApp() noexcept { return mApp; }
 
-	HINSTANCE AppInst() const { return mAppInst; }
-	HWND MainWnd() const { return mMainWnd; }
-	float AspectRatio() const { return (float)mWindowWidth / mWindowHeight; }
+	HINSTANCE AppInst() const noexcept { return mAppInst; }
+	HWND MainWnd() const noexcept { return mMainWnd; }
+	float AspectRatio() const noexcept { return (float)mWindowWidth / mWindowHeight; }
 	
-	int32_t Run();
+	std::int32_t Run() noexcept;
 
-	virtual void Initialize();
-	virtual LRESULT MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lParam);
+	virtual void Initialize() noexcept;
+	virtual LRESULT MsgProc(HWND hwnd, const std::int32_t msg, WPARAM wParam, LPARAM lParam) noexcept;
 
 protected:
-	virtual void CreateRtvAndDsvDescriptorHeaps();
-	virtual void CreateRtvAndDsv();
-	virtual void Update(const Timer& timer);
-	virtual void Draw(const Timer& timer) = 0;
+	virtual void CreateRtvAndDsvDescriptorHeaps() noexcept;
+	virtual void CreateRtvAndDsv() noexcept;
+	virtual void Update(const Timer& timer) noexcept;
+	virtual void Draw(const Timer& timer) noexcept = 0;
 
-	virtual void OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y);
+	virtual void OnMouseMove(const WPARAM btnState, const std::int32_t x, const std::int32_t y) noexcept;
 	
-	void InitSystems();
-	void InitMainWindow();
-	void InitDirect3D();
-	void CreateCommandObjects();
-	void CreateSwapChain();
+	void InitSystems() noexcept;
+	void InitMainWindow() noexcept;
+	void InitDirect3D() noexcept;
+	void CreateCommandObjects() noexcept;
+	void CreateSwapChain() noexcept;
 
-	void FlushCommandQueue();
+	void FlushCommandQueue() noexcept;
 
-	ID3D12Resource* CurrentBackBuffer() const;
-	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const;
-	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const;
+	ID3D12Resource* CurrentBackBuffer() const noexcept;
+	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const noexcept;
+	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
 
-	void CalculateFrameStats();
+	void CalculateFrameStats() noexcept;
 	
 protected:
 	static D3DApp* mApp;

@@ -24,13 +24,13 @@ public:
 		const void* initData,
 		const std::uint64_t byteSize,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& defaultBuffer,
-		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer);
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
 
 	// Asserts if resource id is not present
-	Microsoft::WRL::ComPtr<ID3D12Resource> GetResource(const std::size_t id);
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetResource(const std::size_t id) noexcept;
 
 	// This will invalidate all ids.
-	void Clear() { mResources.resize(0); }
+	void Clear() noexcept { mResources.resize(0); }
 
 private:
 	// Each index in the vector is the resource id

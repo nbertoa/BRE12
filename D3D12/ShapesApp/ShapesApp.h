@@ -19,15 +19,15 @@ public:
 	ShapesApp(const ShapesApp& rhs) = delete;
 	ShapesApp& operator=(const ShapesApp& rhs) = delete;
 
-	void Initialize() override;
+	void Initialize() noexcept override;
 	
 protected:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> mPSO;
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> mRootSignature;
 
-	void Update(const Timer& timer) override;
-	void Draw(const Timer& timer) override;
+	void Update(const Timer& timer) noexcept override;
+	void Draw(const Timer& timer) noexcept override;
 
-	void BuildPSO();
+	void BuildPSO() noexcept;
 };
 

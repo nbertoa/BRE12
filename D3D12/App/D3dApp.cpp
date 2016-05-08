@@ -32,7 +32,7 @@ D3DApp::~D3DApp() {
 	}
 }
 
-int32_t D3DApp::Run() {
+int32_t D3DApp::Run() noexcept {
 	ASSERT(Keyboard::gKeyboard.get());
 
 	MSG msg{0U};
@@ -64,13 +64,13 @@ int32_t D3DApp::Run() {
 	return (int)msg.wParam;
 }
 
-void D3DApp::Initialize() {
+void D3DApp::Initialize() noexcept {
 	InitMainWindow();
 	InitDirect3D();
 	InitSystems();
 }
 
-void D3DApp::CreateRtvAndDsvDescriptorHeaps() {
+void D3DApp::CreateRtvAndDsvDescriptorHeaps() noexcept {
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
 	rtvHeapDesc.NumDescriptors = sSwapChainBufferCount;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -86,7 +86,7 @@ void D3DApp::CreateRtvAndDsvDescriptorHeaps() {
 	CHECK_HR(mD3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(mDsvHeap.GetAddressOf())));
 }
 
-void D3DApp::Update(const Timer& timer) {
+void D3DApp::Update(const Timer& timer) noexcept {
 	static const float sCameraOffset{ 10.0f };
 
 	ASSERT(Keyboard::gKeyboard.get());
@@ -109,7 +109,7 @@ void D3DApp::Update(const Timer& timer) {
 	Camera::gCamera->UpdateViewMatrix();
 }
 
-void D3DApp::OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y) {
+void D3DApp::OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y) noexcept {
 	static int32_t lastXY[] = { 0, 0 };
 
 	ASSERT(Camera::gCamera.get());
@@ -127,7 +127,7 @@ void D3DApp::OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y
 	lastXY[1] = y;
 }
 
-void D3DApp::CreateRtvAndDsv() {
+void D3DApp::CreateRtvAndDsv() noexcept {
 	ASSERT(mD3dDevice);
 	ASSERT(mSwapChain);
 
@@ -179,7 +179,7 @@ void D3DApp::CreateRtvAndDsv() {
 	mScissorRect = { 0, 0, mWindowWidth, mWindowHeight };
 }
 
-LRESULT D3DApp::MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lParam) {
+LRESULT D3DApp::MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lParam) noexcept {
 	switch (msg) {
 		// WM_ACTIVATE is sent when the window is activated or deactivated.  
 		// We pause the game when the window is deactivated and unpause it 
@@ -239,7 +239,7 @@ LRESULT D3DApp::MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lPar
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-void D3DApp::InitSystems() {
+void D3DApp::InitSystems() noexcept {
 	ASSERT(!Camera::gCamera.get());
 	Camera::gCamera = std::make_unique<Camera>();
 	Camera::gCamera->SetLens(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
@@ -259,7 +259,7 @@ void D3DApp::InitSystems() {
 	ShaderManager::gShaderMgr = std::make_unique<ShaderManager>();
 }
 
-void D3DApp::InitMainWindow() {
+void D3DApp::InitMainWindow() noexcept {
 	WNDCLASS wc = {};
 	wc.style = CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc = MainWndProc;
@@ -288,7 +288,7 @@ void D3DApp::InitMainWindow() {
 	UpdateWindow(mMainWnd);
 }
 
-void D3DApp::InitDirect3D() {
+void D3DApp::InitDirect3D() noexcept {
 #if defined(DEBUG) || defined(_DEBUG) 
 	// Enable the D3D12 debug layer.
 	{
@@ -315,7 +315,7 @@ void D3DApp::InitDirect3D() {
 	CreateRtvAndDsv();
 }
 
-void D3DApp::CreateCommandObjects() {
+void D3DApp::CreateCommandObjects() noexcept {
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -329,7 +329,7 @@ void D3DApp::CreateCommandObjects() {
 	mCmdList->Close();
 }
 
-void D3DApp::CreateSwapChain() {
+void D3DApp::CreateSwapChain() noexcept {
 	DXGI_SWAP_CHAIN_DESC sd = {};
 	sd.BufferDesc.Width = mWindowWidth;
 	sd.BufferDesc.Height = mWindowHeight;
@@ -351,7 +351,7 @@ void D3DApp::CreateSwapChain() {
 	CHECK_HR(mDxgiFactory->CreateSwapChain(mCmdQueue.Get(), &sd, mSwapChain.GetAddressOf()));
 }
 
-void D3DApp::FlushCommandQueue() {
+void D3DApp::FlushCommandQueue() noexcept {
 	// Advance the fence value to mark commands up to this fence point.
 	++mCurrentFence;
 
@@ -374,19 +374,19 @@ void D3DApp::FlushCommandQueue() {
 	}
 }
 
-ID3D12Resource* D3DApp::CurrentBackBuffer() const {
+ID3D12Resource* D3DApp::CurrentBackBuffer() const noexcept {
 	return mSwapChainBuffer[mCurrBackBuffer].Get();
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE D3DApp::CurrentBackBufferView() const {
+D3D12_CPU_DESCRIPTOR_HANDLE D3DApp::CurrentBackBufferView() const noexcept {
 	return CD3DX12_CPU_DESCRIPTOR_HANDLE(mRtvHeap->GetCPUDescriptorHandleForHeapStart(), mCurrBackBuffer, mRtvDescSize);
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE D3DApp::DepthStencilView() const {
+D3D12_CPU_DESCRIPTOR_HANDLE D3DApp::DepthStencilView() const noexcept {
 	return mDsvHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
-void D3DApp::CalculateFrameStats() {
+void D3DApp::CalculateFrameStats() noexcept {
 	// Code computes the average frames per second, and also the 
 	// average time it takes to render one frame.  These stats 
 	// are appended to the window caption bar.

@@ -17,20 +17,20 @@ public:
 	const ShaderManager& operator=(const ShaderManager&) = delete;
 
 	// Returns id to get blob/shader byte code after creation
-	std::size_t LoadShaderFile(const std::string& filename, Microsoft::WRL::ComPtr<ID3DBlob>& blob);
-	std::size_t LoadShaderFile(const std::string& filename, D3D12_SHADER_BYTECODE& shaderByteCode);
+	std::size_t LoadShaderFile(const std::string& filename, Microsoft::WRL::ComPtr<ID3DBlob>& blob) noexcept;
+	std::size_t LoadShaderFile(const std::string& filename, D3D12_SHADER_BYTECODE& shaderByteCode) noexcept;
 
 	// Asserts if there is not a blob with current id
-	Microsoft::WRL::ComPtr<ID3DBlob> GetBlob(const std::size_t id);
+	Microsoft::WRL::ComPtr<ID3DBlob> GetBlob(const std::size_t id) noexcept;
 
 	// Asserts if there is not a blob with current id
-	D3D12_SHADER_BYTECODE GetShaderByteCode(const std::size_t id);
+	D3D12_SHADER_BYTECODE GetShaderByteCode(const std::size_t id) noexcept;
 
 	// Asserts if id is not present
-	void Erase(const std::size_t id);
+	void Erase(const std::size_t id) noexcept;
 
 	// This will invalidate all ids.
-	void Clear() { mBlobById.clear(); }
+	void Clear() noexcept { mBlobById.clear(); }
 
 private:
 	using IdAndBlob = std::pair<std::size_t, Microsoft::WRL::ComPtr<ID3DBlob>>;

@@ -8,7 +8,7 @@ Camera::Camera() {
 	SetLens(0.25f * MathHelper::Pi, 1.0f, 1.0f, 1000.0f);
 }
 
-void Camera::SetLens(const float fovY, const float aspect, const float zn, const float zf) {
+void Camera::SetLens(const float fovY, const float aspect, const float zn, const float zf) noexcept {
 	// cache properties
 	mFovY = fovY;
 	mAspect = aspect;
@@ -22,7 +22,7 @@ void Camera::SetLens(const float fovY, const float aspect, const float zn, const
 	XMStoreFloat4x4(&mProj, P);
 }
 
-void Camera::LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR worldUp) {
+void Camera::LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR worldUp) noexcept {
 	const XMVECTOR L( XMVector3Normalize(XMVectorSubtract(target, pos)) );
 	const XMVECTOR R( XMVector3Normalize(XMVector3Cross(worldUp, L)) );
 	const XMVECTOR U( XMVector3Cross(L, R) );
@@ -35,7 +35,7 @@ void Camera::LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR worldUp) {
 	mViewDirty = true;
 }
 
-void Camera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3& up) {
+void Camera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3& up) noexcept {
 	const XMVECTOR P( XMLoadFloat3(&pos) );
 	const XMVECTOR T( XMLoadFloat3(&target) );
 	const XMVECTOR U( XMLoadFloat3(&up) );
@@ -45,7 +45,7 @@ void Camera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3&
 	mViewDirty = true;
 }
 
-void Camera::Strafe(const float d) {
+void Camera::Strafe(const float d) noexcept {
 	// mPosition += d*mRight
 	const XMVECTOR s( XMVectorReplicate(d) );
 	const XMVECTOR r( XMLoadFloat3(&mRight) );
@@ -55,7 +55,7 @@ void Camera::Strafe(const float d) {
 	mViewDirty = true;
 }
 
-void Camera::Walk(const float d) {
+void Camera::Walk(const float d) noexcept {
 	// mPosition += d * mLook
 	const XMVECTOR s( XMVectorReplicate(d) );
 	const XMVECTOR l( XMLoadFloat3(&mLook) );
@@ -65,7 +65,7 @@ void Camera::Walk(const float d) {
 	mViewDirty = true;
 }
 
-void Camera::Pitch(const float angle) {
+void Camera::Pitch(const float angle) noexcept {
 	// Rotate up and look vector about the right vector.
 
 	const XMMATRIX R( XMMatrixRotationAxis(XMLoadFloat3(&mRight), angle) );
@@ -76,7 +76,7 @@ void Camera::Pitch(const float angle) {
 	mViewDirty = true;
 }
 
-void Camera::RotateY(const float angle) {
+void Camera::RotateY(const float angle) noexcept {
 	// Rotate the basis vectors about the world y-axis.
 
 	const XMMATRIX R( XMMatrixRotationY(angle) );
@@ -88,7 +88,7 @@ void Camera::RotateY(const float angle) {
 	mViewDirty = true;
 }
 
-void Camera::UpdateViewMatrix() {
+void Camera::UpdateViewMatrix() noexcept {
 	if(mViewDirty) {
 		XMVECTOR R( XMLoadFloat3(&mRight) );
 		XMVECTOR U( XMLoadFloat3(&mUp) );

@@ -128,11 +128,10 @@ struct handle_closer { void operator()(HANDLE h) { if (h) CloseHandle(h); } };
 
 using ScopedHandle = std::unique_ptr<void, handle_closer>;
 
-inline HANDLE safe_handle( HANDLE h ) { return (h == INVALID_HANDLE_VALUE) ? 0 : h; }
+inline HANDLE safe_handle( HANDLE h ) noexcept { return (h == INVALID_HANDLE_VALUE) ? 0 : h; }
 
 template<UINT TNameLength>
-inline void SetDebugObjectName(_In_ ID3D11DeviceChild* resource, _In_ const char (&name)[TNameLength])
-{
+inline void SetDebugObjectName(_In_ ID3D11DeviceChild* resource, _In_ const char (&name)[TNameLength]) noexcept {
 #if defined(_DEBUG) || defined(PROFILE)
     resource->SetPrivateData(WKPDID_D3DDebugObjectName, TNameLength - 1, name);
 #else
@@ -149,7 +148,7 @@ static HRESULT LoadTextureDataFromFile( _In_z_ const wchar_t* fileName,
                                         DDS_HEADER** header,
                                         uint8_t** bitData,
                                         std::size_t* bitSize
-                                      )
+                                      ) noexcept
 {
     if (!header || !bitData || !bitSize)
     {
@@ -272,7 +271,7 @@ static HRESULT LoadTextureDataFromFile( _In_z_ const wchar_t* fileName,
 //--------------------------------------------------------------------------------------
 // Return the BPP for a particular format
 //--------------------------------------------------------------------------------------
-static std::size_t BitsPerPixel( _In_ DXGI_FORMAT fmt )
+static std::size_t BitsPerPixel( _In_ DXGI_FORMAT fmt ) noexcept
 {
     switch( fmt )
     {
@@ -427,7 +426,7 @@ static void GetSurfaceInfo( _In_ std::size_t width,
                             _In_ DXGI_FORMAT fmt,
                             _Out_opt_ std::size_t* outNumBytes,
                             _Out_opt_ std::size_t* outRowBytes,
-                            _Out_opt_ std::size_t* outNumRows )
+                            _Out_opt_ std::size_t* outNumRows ) noexcept
 {
     std::size_t numBytes = 0;
     std::size_t rowBytes = 0;
@@ -554,7 +553,7 @@ static void GetSurfaceInfo( _In_ std::size_t width,
 //--------------------------------------------------------------------------------------
 #define ISBITMASK( r,g,b,a ) ( ddpf.RBitMask == r && ddpf.GBitMask == g && ddpf.BBitMask == b && ddpf.ABitMask == a )
 
-static DXGI_FORMAT GetDXGIFormat( const DDS_PIXELFORMAT& ddpf )
+static DXGI_FORMAT GetDXGIFormat( const DDS_PIXELFORMAT& ddpf ) noexcept
 {
     if (ddpf.flags & DDS_RGB)
     {
@@ -766,7 +765,7 @@ static DXGI_FORMAT GetDXGIFormat( const DDS_PIXELFORMAT& ddpf )
 
 
 //--------------------------------------------------------------------------------------
-static DXGI_FORMAT MakeSRGB( _In_ DXGI_FORMAT format )
+static DXGI_FORMAT MakeSRGB( _In_ DXGI_FORMAT format ) noexcept
 {
     switch( format )
     {
@@ -811,7 +810,7 @@ static HRESULT FillInitData( _In_ std::size_t width,
                              _Out_ std::size_t& theight,
                              _Out_ std::size_t& tdepth,
                              _Out_ std::size_t& skipMip,
-                             _Out_writes_(mipCount*arraySize) D3D11_SUBRESOURCE_DATA* initData )
+                             _Out_writes_(mipCount*arraySize) D3D11_SUBRESOURCE_DATA* initData ) noexcept
 {
     if ( !bitData || !initData )
     {
@@ -908,7 +907,7 @@ static HRESULT FillInitData12(_In_ std::size_t width,
 	_Out_ std::size_t& tdepth,
 	_Out_ std::size_t& skipMip,
 	_Out_writes_(mipCount*arraySize) D3D12_SUBRESOURCE_DATA* initData
-	)
+	) noexcept
 {
 	if (!bitData || !initData)
 	{
@@ -1008,7 +1007,7 @@ static HRESULT CreateD3DResources( _In_ ID3D11Device* d3dDevice,
                                    _In_ bool isCubeMap,
                                    _In_reads_opt_(mipCount*arraySize) D3D11_SUBRESOURCE_DATA* initData,
                                    _Outptr_opt_ ID3D11Resource** texture,
-                                   _Outptr_opt_ ID3D11ShaderResourceView** textureView )
+                                   _Outptr_opt_ ID3D11ShaderResourceView** textureView ) noexcept
 {
     if ( !d3dDevice )
         return E_POINTER;
@@ -1337,7 +1336,7 @@ static HRESULT CreateTextureFromDDS( _In_ ID3D11Device* d3dDevice,
                                      _In_ unsigned int miscFlags,
                                      _In_ bool forceSRGB,
                                      _Outptr_opt_ ID3D11Resource** texture,
-                                     _Outptr_opt_ ID3D11ShaderResourceView** textureView )
+                                     _Outptr_opt_ ID3D11ShaderResourceView** textureView ) noexcept
 {
     HRESULT hr = S_OK;
 
@@ -1683,7 +1682,7 @@ static HRESULT CreateTextureFromDDS12(
 	_In_ std::size_t maxsize,
 	_In_ bool /*forceSRGB*/,
 	ComPtr<ID3D12Resource>& texture,
-	ComPtr<ID3D12Resource>& textureUploadHeap)
+	ComPtr<ID3D12Resource>& textureUploadHeap) noexcept
 {
 	HRESULT hr = S_OK;
 
@@ -1879,7 +1878,7 @@ static HRESULT CreateTextureFromDDS12(
 }
 
 //--------------------------------------------------------------------------------------
-static DDS_ALPHA_MODE GetAlphaMode( _In_ const DDS_HEADER* header )
+static DDS_ALPHA_MODE GetAlphaMode( _In_ const DDS_HEADER* header ) noexcept
 {
     if ( header->ddspf.flags & DDS_FOURCC )
     {
@@ -1915,7 +1914,7 @@ HRESULT DirectX::CreateDDSTextureFromMemory( ID3D11Device* d3dDevice,
                                              ID3D11Resource** texture,
                                              ID3D11ShaderResourceView** textureView,
                                              std::size_t maxsize,
-                                             DDS_ALPHA_MODE* alphaMode )
+                                             DDS_ALPHA_MODE* alphaMode ) noexcept
 {
     return CreateDDSTextureFromMemoryEx( d3dDevice, nullptr, ddsData, ddsDataSize, maxsize,
                                          D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false,
@@ -1932,7 +1931,7 @@ HRESULT DirectX::CreateDDSTextureFromMemory12(
 	ComPtr<ID3D12Resource>& textureUploadHeap,
 	_In_ std::size_t maxsize,
 	_Out_opt_ DDS_ALPHA_MODE* alphaMode
-	)
+	) noexcept
 {
 	if (alphaMode)
 		(*alphaMode) = DDS_ALPHA_MODE::DDS_ALPHA_MODE_UNKNOWN;
@@ -2004,7 +2003,7 @@ HRESULT DirectX::CreateDDSTextureFromMemory( ID3D11Device* d3dDevice,
                                              ID3D11Resource** texture,
                                              ID3D11ShaderResourceView** textureView,
                                              std::size_t maxsize,
-                                             DDS_ALPHA_MODE* alphaMode )
+                                             DDS_ALPHA_MODE* alphaMode ) noexcept
 {
     return CreateDDSTextureFromMemoryEx( d3dDevice, d3dContext, ddsData, ddsDataSize, maxsize,
                                          D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false,
@@ -2023,7 +2022,7 @@ HRESULT DirectX::CreateDDSTextureFromMemoryEx( ID3D11Device* d3dDevice,
                                                bool forceSRGB,
                                                ID3D11Resource** texture,
                                                ID3D11ShaderResourceView** textureView,
-                                               DDS_ALPHA_MODE* alphaMode )
+                                               DDS_ALPHA_MODE* alphaMode ) noexcept
 {
     return CreateDDSTextureFromMemoryEx( d3dDevice, nullptr, ddsData, ddsDataSize, maxsize,
                                          usage, bindFlags, cpuAccessFlags, miscFlags, forceSRGB,
@@ -2043,7 +2042,7 @@ HRESULT DirectX::CreateDDSTextureFromMemoryEx( ID3D11Device* d3dDevice,
                                                bool forceSRGB,
                                                ID3D11Resource** texture,
                                                ID3D11ShaderResourceView** textureView,
-                                               DDS_ALPHA_MODE* alphaMode )
+                                               DDS_ALPHA_MODE* alphaMode ) noexcept
 {
     if ( texture )
     {
@@ -2132,7 +2131,7 @@ HRESULT DirectX::CreateDDSTextureFromFile( ID3D11Device* d3dDevice,
                                            ID3D11Resource** texture,
                                            ID3D11ShaderResourceView** textureView,
                                            std::size_t maxsize,
-                                           DDS_ALPHA_MODE* alphaMode )
+                                           DDS_ALPHA_MODE* alphaMode ) noexcept
 {
     return CreateDDSTextureFromFileEx( d3dDevice, nullptr, fileName, maxsize,
                                        D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false,
@@ -2145,7 +2144,7 @@ HRESULT DirectX::CreateDDSTextureFromFile12(_In_ ID3D12Device* device,
 	_Out_ ComPtr<ID3D12Resource>& texture,
 	_Out_ ComPtr<ID3D12Resource>& textureUploadHeap,
 	_In_ std::size_t maxsize,
-	_Out_opt_ DDS_ALPHA_MODE* alphaMode)
+	_Out_opt_ DDS_ALPHA_MODE* alphaMode) noexcept
 {
 	texture.Reset();
 	textureUploadHeap.Reset();
@@ -2234,7 +2233,7 @@ HRESULT DirectX::CreateDDSTextureFromFile( ID3D11Device* d3dDevice,
                                            ID3D11Resource** texture,
                                            ID3D11ShaderResourceView** textureView,
                                            std::size_t maxsize,
-                                           DDS_ALPHA_MODE* alphaMode )
+                                           DDS_ALPHA_MODE* alphaMode ) noexcept
 {
     return CreateDDSTextureFromFileEx( d3dDevice, d3dContext, fileName, maxsize,
                                        D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false,
@@ -2252,7 +2251,7 @@ HRESULT DirectX::CreateDDSTextureFromFileEx( ID3D11Device* d3dDevice,
                                              bool forceSRGB,
                                              ID3D11Resource** texture,
                                              ID3D11ShaderResourceView** textureView,
-                                             DDS_ALPHA_MODE* alphaMode )
+                                             DDS_ALPHA_MODE* alphaMode ) noexcept
 {
     return CreateDDSTextureFromFileEx( d3dDevice, nullptr, fileName, maxsize,
                                        usage, bindFlags, cpuAccessFlags, miscFlags, forceSRGB,
@@ -2271,7 +2270,7 @@ HRESULT DirectX::CreateDDSTextureFromFileEx( ID3D11Device* d3dDevice,
                                              bool forceSRGB,
                                              ID3D11Resource** texture,
                                              ID3D11ShaderResourceView** textureView,
-                                             DDS_ALPHA_MODE* alphaMode )
+                                             DDS_ALPHA_MODE* alphaMode ) noexcept
 {
     if ( texture )
     {

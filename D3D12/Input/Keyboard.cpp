@@ -19,7 +19,7 @@ Keyboard::~Keyboard() {
 	mDevice->Release();
 }
 
-void Keyboard::Update() {
+void Keyboard::Update() noexcept {
 	ASSERT(mDevice);
 	memcpy(mLastState, mCurrentState, sizeof(mCurrentState));
 	if (FAILED(mDevice->GetDeviceState(sizeof(mCurrentState), reinterpret_cast<LPVOID>(mCurrentState))) && SUCCEEDED(mDevice->Acquire())) {

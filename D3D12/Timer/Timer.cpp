@@ -10,7 +10,7 @@ Timer::Timer() {
 
 // Returns the total time elapsed since Reset() was called, NOT counting any
 // time when the clock is stopped.
-float Timer::TotalTime() const {
+float Timer::TotalTime() const noexcept {
 	// If we are stopped, do not count the time that has passed since we stopped.
 	// Moreover, if we previously already had a pause, the distance 
 	// mStopTime - mBaseTime includes paused time, which we do not want to count.
@@ -32,11 +32,11 @@ float Timer::TotalTime() const {
 	return (mStopped) ? (float)(((mStopTime - mPausedTime) - mBaseTime) * mSecondsPerCount) : (float)(((mCurrTime - mPausedTime) - mBaseTime) * mSecondsPerCount);
 }
 
-float Timer::DeltaTime()const {
+float Timer::DeltaTime() const noexcept {
 	return (float) mDeltaTime;
 }
 
-void Timer::Reset() {
+void Timer::Reset() noexcept {
 	std::int64_t currTime;
 	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
 
@@ -46,7 +46,7 @@ void Timer::Reset() {
 	mStopped = false;
 }
 
-void Timer::Start() {
+void Timer::Start() noexcept {
 	std::int64_t startTime;
 	QueryPerformanceCounter((LARGE_INTEGER*)&startTime);
 
@@ -64,7 +64,7 @@ void Timer::Start() {
 	}
 }
 
-void Timer::Stop() {
+void Timer::Stop() noexcept {
 	if (!mStopped) {
 		std::int64_t currTime;
 		QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
@@ -74,7 +74,7 @@ void Timer::Stop() {
 	}
 }
 
-void Timer::Tick() {
+void Timer::Tick() noexcept {
 	if (mStopped) {
 		mDeltaTime = 0.0;
 		return;

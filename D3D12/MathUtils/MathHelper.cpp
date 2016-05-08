@@ -8,7 +8,7 @@ using namespace DirectX;
 const float MathHelper::Infinity{ FLT_MAX };
 const float MathHelper::Pi{ 3.1415926535f };
 
-float MathHelper::AngleFromXY(const float x, const float y) {
+float MathHelper::AngleFromXY(const float x, const float y) noexcept {
 	float theta{ 0.0f };
  
 	// Quadrant I or IV
@@ -29,7 +29,7 @@ float MathHelper::AngleFromXY(const float x, const float y) {
 	return theta;
 }
 
-XMVECTOR MathHelper::RandUnitVec3() {
+XMVECTOR MathHelper::RandUnitVec3() noexcept {
 	const XMVECTOR One(XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
 	const XMVECTOR Zero(XMVectorZero());
 
@@ -50,7 +50,7 @@ XMVECTOR MathHelper::RandUnitVec3() {
 	}
 }
 
-XMVECTOR MathHelper::RandHemisphereUnitVec3(XMVECTOR n) {
+XMVECTOR MathHelper::RandHemisphereUnitVec3(XMVECTOR n) noexcept {
 	const XMVECTOR One(XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
 	const XMVECTOR Zero(XMVectorZero());
 

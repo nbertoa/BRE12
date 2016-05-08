@@ -20,7 +20,7 @@ public:
 	InitDirect3DApp& operator=(const InitDirect3DApp& rhs) = delete;
 	
 protected:
-	void Update(const Timer& timer) override;
-	void Draw(const Timer& timer)override;
+	void Update(const Timer& timer) noexcept override;
+	void Draw(const Timer& timer) noexcept override;
 };
 
