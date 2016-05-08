@@ -34,6 +34,6 @@ public:
 
 private:
 	// Each index in the vector is the resource id
-	typedef std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> Resources;
+	using Resources = std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>;
 	Resources mResources;
 };

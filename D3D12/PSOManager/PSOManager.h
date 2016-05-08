@@ -29,8 +29,8 @@ public:
 private:
 	Microsoft::WRL::ComPtr<ID3D12Device>& mDevice;
 
-	typedef std::pair<size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>> IdAndPSO;
-	typedef std::unordered_map<size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>> PSOById;
+	using IdAndPSO = std::pair<size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>>;
+	using PSOById = std::unordered_map<size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>>;
 	PSOById mPSOById;
 	std::hash<std::string> mHash;
 };

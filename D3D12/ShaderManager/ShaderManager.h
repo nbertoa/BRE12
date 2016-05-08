@@ -33,8 +33,8 @@ public:
 	void Clear() { mBlobById.clear(); }
 
 private:
-	typedef std::pair<size_t, Microsoft::WRL::ComPtr<ID3DBlob>> IdAndBlob;
-	typedef std::unordered_map<size_t, Microsoft::WRL::ComPtr<ID3DBlob>> BlobById;
+	using IdAndBlob = std::pair<size_t, Microsoft::WRL::ComPtr<ID3DBlob>>;
+	using BlobById = std::unordered_map<size_t, Microsoft::WRL::ComPtr<ID3DBlob>>;
 	BlobById mBlobById;
 	std::hash<std::string> mHash;
 };

@@ -16,7 +16,7 @@ namespace StringUtils {
 	}
 
 	inline std::string ToString(const std::wstring& source) {
-		typedef std::codecvt_utf8<wchar_t> convert_type;
+		using convert_type = std::codecvt_utf8<wchar_t>;
 		std::wstring_convert<convert_type, wchar_t> converter;
 		return converter.to_bytes(source);
 	}
