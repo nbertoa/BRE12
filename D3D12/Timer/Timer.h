@@ -17,14 +17,14 @@ public:
 	void Tick();  // Call every frame.
 
 private:
-	double mSecondsPerCount = 0.0;
-	double mDeltaTime = 0.0;
+	double mSecondsPerCount{ 0.0 };
+	double mDeltaTime{ 0.0 };
 
-	int64_t mBaseTime = 0;
-	int64_t mPausedTime = 0;
-	int64_t mStopTime = 0;
-	int64_t mPrevTime = 0;
-	int64_t mCurrTime = 0;
+	int64_t mBaseTime{ 0 };
+	int64_t mPausedTime{ 0 };
+	int64_t mStopTime{ 0 };
+	int64_t mPrevTime{ 0 };
+	int64_t mCurrTime{ 0 };
 
-	bool mStopped = false;
+	bool mStopped{ false };
 };

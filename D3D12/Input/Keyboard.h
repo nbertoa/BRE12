@@ -28,7 +28,7 @@ public:
 
 private:
 	IDirectInput8& mDirectInput;
-	LPDIRECTINPUTDEVICE8 mDevice = nullptr;
+	LPDIRECTINPUTDEVICE8 mDevice{ nullptr };
 	uint8_t mCurrentState[256U] = {};
 	uint8_t mLastState[256U] = {};
 };

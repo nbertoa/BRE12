@@ -35,7 +35,7 @@ D3DApp::~D3DApp() {
 int32_t D3DApp::Run() {
 	ASSERT(Keyboard::gKeyboard.get());
 
-	MSG msg = { 0U };
+	MSG msg{0U};
 
 	mTimer.Reset();
 
@@ -79,15 +79,15 @@ void D3DApp::CreateRtvAndDsvDescriptorHeaps() {
 	CHECK_HR(mD3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(mRtvHeap.GetAddressOf())));
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.NumDescriptors = 1U;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	dsvHeapDesc.NodeMask = 0;
+	dsvHeapDesc.NodeMask = 0U;
 	CHECK_HR(mD3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(mDsvHeap.GetAddressOf())));
 }
 
 void D3DApp::Update(const Timer& timer) {
-	static const float sCameraOffset = 10.0f;
+	static const float sCameraOffset{ 10.0f };
 
 	ASSERT(Keyboard::gKeyboard.get());
 
@@ -110,14 +110,14 @@ void D3DApp::Update(const Timer& timer) {
 }
 
 void D3DApp::OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y) {
-	static int32_t lastXY[2] = { 0, 0 };
+	static int32_t lastXY[] = { 0, 0 };
 
 	ASSERT(Camera::gCamera.get());
 
 	if (btnState & MK_LBUTTON) {
 		// Make each pixel correspond to a quarter of a degree.+
-		const float dx = DirectX::XMConvertToRadians(0.25f * (float)(x - lastXY[0]));
-		const float dy = DirectX::XMConvertToRadians(0.25f * (float)(y - lastXY[1]));
+		const float dx = {DirectX::XMConvertToRadians(0.25f * (float)(x - lastXY[0]))};
+		const float dy = {DirectX::XMConvertToRadians(0.25f * (float)(y - lastXY[1]))};
 
 		Camera::gCamera->Pitch(dy);
 		Camera::gCamera->RotateY(dx);
@@ -156,7 +156,7 @@ void D3DApp::CreateRtvAndDsv() {
 	optClear.Format = mDepthStencilFormat;
 	optClear.DepthStencil.Depth = 1.0f;
 	optClear.DepthStencil.Stencil = 0U;
-	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
+	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 	CHECK_HR(mD3dDevice->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
@@ -277,10 +277,10 @@ void D3DApp::InitMainWindow() {
 	// Compute window rectangle dimensions based on requested client area dimensions.
 	RECT r = { 0, 0, mWindowWidth, mWindowHeight };
 	AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, false);
-	const int32_t width = r.right - r.left;
-	const int32_t height = r.bottom - r.top;
+	const int32_t width{ r.right - r.left };
+	const int32_t height{ r.bottom - r.top };
 
-	const uint32_t dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+	const uint32_t dwStyle = { WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX };
 	mMainWnd = CreateWindow(L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, mAppInst, 0);
 	ASSERT(mMainWnd);
 
@@ -362,7 +362,7 @@ void D3DApp::FlushCommandQueue() {
 
 	// Wait until the GPU has completed commands up to this fence point.
 	if (mFence->GetCompletedValue() < mCurrentFence) {
-		const HANDLE eventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
 		ASSERT(eventHandle);
 
 		// Fire event when GPU hits current fence.  
@@ -391,20 +391,20 @@ void D3DApp::CalculateFrameStats() {
 	// average time it takes to render one frame.  These stats 
 	// are appended to the window caption bar.
 
-	static uint32_t frameCnt = 0U;
-	static float timeElapsed = 0.0f;
+	static uint32_t frameCnt{ 0U };
+	static float timeElapsed{ 0.0f };
 
 	++frameCnt;
 
 	// Compute averages over one second period.
-	if ((mTimer.TotalTime() - timeElapsed) >= 1.0f) {
-		const float fps = (float)frameCnt; // fps = frameCnt / 1
-		const float mspf = 1000.0f / fps;
+	if ((mTimer.TotalTime() - timeElapsed) > 1.0f) {
+		const float fps{ (float)frameCnt }; // fps = frameCnt / 1
+		const float mspf{ 1000.0f / fps };
 
-		const std::wstring fpsStr = std::to_wstring(fps);
-		const std::wstring mspfStr = std::to_wstring(mspf);
+		const std::wstring fpsStr{ std::to_wstring(fps) };
+		const std::wstring mspfStr{ std::to_wstring(mspf) };
 
-		const std::wstring windowText = L"    fps: " + fpsStr + L"   mspf: " + mspfStr;
+		const std::wstring windowText{ L"    fps: " + fpsStr + L"   mspf: " + mspfStr };
 
 		SetWindowText(mMainWnd, windowText.c_str());
 

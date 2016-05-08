@@ -37,7 +37,7 @@ void ShapesApp::Draw(const Timer& /*timer*/) {
 	mCmdList->RSSetScissorRects(1U, &mScissorRect);
 
 	// Indicate a state transition on the resource usage.
-	CD3DX12_RESOURCE_BARRIER resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	CD3DX12_RESOURCE_BARRIER resBarrier{ CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
 	mCmdList->ResourceBarrier(1, &resBarrier);
 
 	// Specify the buffers we are going to render to.

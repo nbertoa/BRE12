@@ -38,7 +38,7 @@ public:
 	float GetAspect() const { return mAspect; }
 	float GetFovY() const { return mFovY; }
 	float GetFovX() const {
-		const float halfWidth = 0.5f * GetNearWindowWidth();
+		const float halfWidth{ 0.5f * GetNearWindowWidth() };
 		return (float) (2.0 * atan(halfWidth / mNearZ));
 	}
 
@@ -87,16 +87,16 @@ private:
 	DirectX::XMFLOAT3 mLook = { 0.0f, 0.0f, 1.0f };
 
 	// Cache frustum properties.
-	float mNearZ = 0.0f;
-	float mFarZ = 0.0f;
-	float mAspect = 0.0f;
-	float mFovY = 0.0f;
-	float mNearWindowHeight = 0.0f;
-	float mFarWindowHeight = 0.0f;
+	float mNearZ{ 0.0f };
+	float mFarZ{ 0.0f };
+	float mAspect{ 0.0f };
+	float mFovY{ 0.0f };
+	float mNearWindowHeight{ 0.0f };
+	float mFarWindowHeight{ 0.0f };
 
-	bool mViewDirty = true;
+	bool mViewDirty{ true };
 
 	// Cache View/Proj matrices.
-	DirectX::XMFLOAT4X4 mView = MathHelper::Identity4x4();
-	DirectX::XMFLOAT4X4 mProj = MathHelper::Identity4x4();
+	DirectX::XMFLOAT4X4 mView{ MathHelper::Identity4x4() };
+	DirectX::XMFLOAT4X4 mProj{ MathHelper::Identity4x4() };
 };

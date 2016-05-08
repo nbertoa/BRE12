@@ -6,8 +6,8 @@ UploadBuffer::UploadBuffer(ID3D12Device& device, const size_t elemSize, const ui
 	ASSERT(elemSize > 0);
 	ASSERT(elemCount > 0);
 
-	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_UPLOAD);
-	CD3DX12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Buffer(mElemSize * elemCount);
+	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
+	CD3DX12_RESOURCE_DESC resDesc{ CD3DX12_RESOURCE_DESC::Buffer(mElemSize * elemCount) };
 	CHECK_HR(device.CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &resDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mBuffer)));
 	CHECK_HR(mBuffer->Map(0, nullptr, (void**)&mMappedData));
 }

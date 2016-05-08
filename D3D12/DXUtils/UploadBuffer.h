@@ -21,6 +21,6 @@ public:
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBuffer;
-	uint8_t* mMappedData = nullptr;
-	size_t mElemSize = 0U;
+	uint8_t* mMappedData{ nullptr };
+	size_t mElemSize{ 0U };
 };

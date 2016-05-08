@@ -43,7 +43,7 @@ void Timer::Reset() {
 	mBaseTime = currTime;
 	mPrevTime = currTime;
 	mStopTime = 0;
-	mStopped  = false;
+	mStopped = false;
 }
 
 void Timer::Start() {
@@ -60,7 +60,7 @@ void Timer::Start() {
 		mPausedTime += (startTime - mStopTime);
 		mPrevTime = startTime;
 		mStopTime = 0;
-		mStopped  = false;
+		mStopped = false;
 	}
 }
 
@@ -70,7 +70,7 @@ void Timer::Stop() {
 		QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
 
 		mStopTime = currTime;
-		mStopped  = true;
+		mStopped = true;
 	}
 }
 
