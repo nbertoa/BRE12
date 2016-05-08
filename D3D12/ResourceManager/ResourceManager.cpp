@@ -5,18 +5,18 @@
 
 std::unique_ptr<ResourceManager> ResourceManager::gResourceMgr = nullptr;
 
-size_t ResourceManager::CreateDefaultBuffer(
+std::size_t ResourceManager::CreateDefaultBuffer(
 	ID3D12Device& device,
 	ID3D12GraphicsCommandList& cmdList,
 	const void* initData,
-	const uint64_t byteSize,
+	const std::uint64_t byteSize,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& defaultBuffer,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer)
 {
 	ASSERT(initData);
 	ASSERT(byteSize > 0);
 
-	const size_t id{ mResources.size() };
+	const std::size_t id{ mResources.size() };
 
 	// Create the actual default buffer resource.
 	CD3DX12_HEAP_PROPERTIES heapProps{ CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT) };
@@ -61,7 +61,7 @@ size_t ResourceManager::CreateDefaultBuffer(
 	return id;
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> ResourceManager::GetResource(const size_t id) {
+Microsoft::WRL::ComPtr<ID3D12Resource> ResourceManager::GetResource(const std::size_t id) {
 	ASSERT(id < mResources.size());
 	return mResources[id];
 }

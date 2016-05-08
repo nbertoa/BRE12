@@ -15,7 +15,7 @@
 D3DApp* D3DApp::mApp = nullptr;
 
 LRESULT CALLBACK
-MainWndProc(HWND hwnd, const uint32_t msg, WPARAM wParam, LPARAM lParam) {
+MainWndProc(HWND hwnd, const std::uint32_t msg, WPARAM wParam, LPARAM lParam) {
 	return D3DApp::GetApp()->MsgProc(hwnd, msg, wParam, lParam);
 }
 
@@ -132,7 +132,7 @@ void D3DApp::CreateRtvAndDsv() {
 	ASSERT(mSwapChain);
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRtvHeap->GetCPUDescriptorHandleForHeapStart());
-	for (uint32_t i = 0U; i < sSwapChainBufferCount; ++i) {
+	for (std::uint32_t i = 0U; i < sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mSwapChainBuffer[i].GetAddressOf())));
 		mD3dDevice->CreateRenderTargetView(mSwapChainBuffer[i].Get(), nullptr, rtvHeapHandle);
 		rtvHeapHandle.Offset(1U, mRtvDescSize);
@@ -280,7 +280,7 @@ void D3DApp::InitMainWindow() {
 	const int32_t width{ r.right - r.left };
 	const int32_t height{ r.bottom - r.top };
 
-	const uint32_t dwStyle = { WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX };
+	const std::uint32_t dwStyle = { WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX };
 	mMainWnd = CreateWindow(L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, mAppInst, 0);
 	ASSERT(mMainWnd);
 
@@ -391,7 +391,7 @@ void D3DApp::CalculateFrameStats() {
 	// average time it takes to render one frame.  These stats 
 	// are appended to the window caption bar.
 
-	static uint32_t frameCnt{ 0U };
+	static std::uint32_t frameCnt{ 0U };
 	static float timeElapsed{ 0.0f };
 
 	++frameCnt;

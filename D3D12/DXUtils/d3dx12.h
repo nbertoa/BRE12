@@ -435,8 +435,8 @@ struct CD3DX12_RANGE : public D3D12_RANGE
         D3D12_RANGE(o)
     {}
     CD3DX12_RANGE( 
-        SIZE_T begin, 
-        SIZE_T end )
+        std::size_t begin, 
+        std::size_t end )
     {
         Begin = begin;
         End = end;
@@ -1333,7 +1333,7 @@ inline bool operator!=( const D3D12_RESOURCE_DESC& l, const D3D12_RESOURCE_DESC&
 inline void MemcpySubresource(
     _In_ const D3D12_MEMCPY_DEST* pDest,
     _In_ const D3D12_SUBRESOURCE_DATA* pSrc,
-    SIZE_T RowSizeInBytes,
+    std::size_t RowSizeInBytes,
     UINT NumRows,
     UINT NumSlices)
 {
@@ -1387,7 +1387,7 @@ inline UINT64 UpdateSubresources(
     D3D12_RESOURCE_DESC DestinationDesc = pDestinationResource->GetDesc();
     if (IntermediateDesc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER || 
         IntermediateDesc.Width < RequiredSize + pLayouts[0].Offset || 
-        RequiredSize > (SIZE_T)-1 || 
+        RequiredSize > (std::size_t)-1 || 
         (DestinationDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && 
             (FirstSubresource != 0 || NumSubresources != 1)))
     {
@@ -1403,9 +1403,9 @@ inline UINT64 UpdateSubresources(
     
     for (UINT i = 0; i < NumSubresources; ++i)
     {
-        if (pRowSizesInBytes[i] > (SIZE_T)-1) return 0;
+        if (pRowSizesInBytes[i] > (std::size_t)-1) return 0;
         D3D12_MEMCPY_DEST DestData = { pData + pLayouts[i].Offset, pLayouts[i].Footprint.RowPitch, pLayouts[i].Footprint.RowPitch * pNumRows[i] };
-        MemcpySubresource(&DestData, &pSrcData[i], (SIZE_T)pRowSizesInBytes[i], pNumRows[i], pLayouts[i].Footprint.Depth);
+        MemcpySubresource(&DestData, &pSrcData[i], (std::size_t)pRowSizesInBytes[i], pNumRows[i], pLayouts[i].Footprint.Depth);
     }
     pIntermediate->Unmap(0, NULL);
     
@@ -1444,7 +1444,7 @@ inline UINT64 UpdateSubresources(
     {
        return 0;
     }
-    void* pMem = HeapAlloc(GetProcessHeap(), 0, static_cast<SIZE_T>(MemToAlloc));
+    void* pMem = HeapAlloc(GetProcessHeap(), 0, static_cast<std::size_t>(MemToAlloc));
     if (pMem == NULL)
     {
        return 0;

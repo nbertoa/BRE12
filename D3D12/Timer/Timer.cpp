@@ -3,7 +3,7 @@
 #include <windows.h>
 
 Timer::Timer() {
-	int64_t countsPerSec;
+	std::int64_t countsPerSec;
 	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
 	mSecondsPerCount = 1.0 / (double)countsPerSec;
 }
@@ -37,7 +37,7 @@ float Timer::DeltaTime()const {
 }
 
 void Timer::Reset() {
-	int64_t currTime;
+	std::int64_t currTime;
 	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
 
 	mBaseTime = currTime;
@@ -47,7 +47,7 @@ void Timer::Reset() {
 }
 
 void Timer::Start() {
-	int64_t startTime;
+	std::int64_t startTime;
 	QueryPerformanceCounter((LARGE_INTEGER*)&startTime);
 
 	// Accumulate the time elapsed between stop and start pairs.
@@ -66,7 +66,7 @@ void Timer::Start() {
 
 void Timer::Stop() {
 	if (!mStopped) {
-		int64_t currTime;
+		std::int64_t currTime;
 		QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
 
 		mStopTime = currTime;
@@ -80,7 +80,7 @@ void Timer::Tick() {
 		return;
 	}
 
-	int64_t currTime;
+	std::int64_t currTime;
 	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
 	mCurrTime = currTime;
 

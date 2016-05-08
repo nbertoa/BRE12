@@ -28,10 +28,10 @@ namespace {
 }
 
 
-size_t ShaderManager::LoadShaderFile(const std::string& filename, Microsoft::WRL::ComPtr<ID3DBlob>& blob) {
+std::size_t ShaderManager::LoadShaderFile(const std::string& filename, Microsoft::WRL::ComPtr<ID3DBlob>& blob) {
 	ASSERT(!filename.empty());
 
-	const size_t id{ mHash(filename) };
+	const std::size_t id{ mHash(filename) };
 	BlobById::iterator it{ mBlobById.find(id) };
 	if (it != mBlobById.end()) {
 		blob = it->second;
@@ -46,11 +46,11 @@ size_t ShaderManager::LoadShaderFile(const std::string& filename, Microsoft::WRL
 	return id;
 }
 
-size_t ShaderManager::LoadShaderFile(const std::string& filename, D3D12_SHADER_BYTECODE& shaderByteCode) {
+std::size_t ShaderManager::LoadShaderFile(const std::string& filename, D3D12_SHADER_BYTECODE& shaderByteCode) {
 	ASSERT(!filename.empty());
 
 	Microsoft::WRL::ComPtr<ID3DBlob> blob;
-	const size_t id{ mHash(filename) };
+	const std::size_t id{ mHash(filename) };
 	BlobById::iterator it{ mBlobById.find(id) };
 	if (it != mBlobById.end()) {
 		blob = it->second;
@@ -69,7 +69,7 @@ size_t ShaderManager::LoadShaderFile(const std::string& filename, D3D12_SHADER_B
 
 std::unique_ptr<ShaderManager> ShaderManager::gShaderMgr = nullptr;
 
-Microsoft::WRL::ComPtr<ID3DBlob> ShaderManager::GetBlob(const size_t id) {
+Microsoft::WRL::ComPtr<ID3DBlob> ShaderManager::GetBlob(const std::size_t id) {
 	Microsoft::WRL::ComPtr<ID3DBlob> blob;
 	BlobById::iterator it{ mBlobById.find(id) };
 	ASSERT(it != mBlobById.end());
@@ -77,7 +77,7 @@ Microsoft::WRL::ComPtr<ID3DBlob> ShaderManager::GetBlob(const size_t id) {
 	return it->second;
 }
 
-D3D12_SHADER_BYTECODE ShaderManager::GetShaderByteCode(const size_t id) {
+D3D12_SHADER_BYTECODE ShaderManager::GetShaderByteCode(const std::size_t id) {
 	BlobById::iterator it{ mBlobById.find(id) };
 	ASSERT(it != mBlobById.end());
 	D3D12_SHADER_BYTECODE shaderByteCode{};
@@ -87,7 +87,7 @@ D3D12_SHADER_BYTECODE ShaderManager::GetShaderByteCode(const size_t id) {
 	return shaderByteCode;
 }
 
-void ShaderManager::Erase(const size_t id) {
+void ShaderManager::Erase(const std::size_t id) {
 	ASSERT(mBlobById.find(id) != mBlobById.end());
 	mBlobById.erase(id);
 }

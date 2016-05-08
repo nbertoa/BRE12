@@ -4,7 +4,7 @@
 
 using namespace DirectX;
 
-GeometryGenerator::MeshData GeometryGenerator::CreateBox(const float width, const float height, const float depth, const uint32_t numSubdivisions) {
+GeometryGenerator::MeshData GeometryGenerator::CreateBox(const float width, const float height, const float depth, const std::uint32_t numSubdivisions) {
     MeshData meshData;
 
     //
@@ -59,7 +59,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateBox(const float width, cons
 	// Create the indices.
 	//
 
-	uint32_t i[36U];
+	std::uint32_t i[36U];
 
 	// Fill in the front face index data
 	i[0] = 0; i[1] = 1; i[2] = 2;
@@ -88,16 +88,16 @@ GeometryGenerator::MeshData GeometryGenerator::CreateBox(const float width, cons
 	meshData.mIndices32.assign(&i[0], &i[36]);
 
     // Put a cap on the number of subdivisions.
-    const uint32_t clampedNumSubdivisions = std::min<uint32_t>(numSubdivisions, 6U);
+    const std::uint32_t clampedNumSubdivisions = std::min<std::uint32_t>(numSubdivisions, 6U);
 
-	for (uint32_t j = 0; j < clampedNumSubdivisions; ++j) {
+	for (std::uint32_t j = 0; j < clampedNumSubdivisions; ++j) {
 		Subdivide(meshData);
 	}
 
     return meshData;
 }
 
-GeometryGenerator::MeshData GeometryGenerator::CreateSphere(const float radius, const uint32_t sliceCount, const uint32_t stackCount) {
+GeometryGenerator::MeshData GeometryGenerator::CreateSphere(const float radius, const std::uint32_t sliceCount, const std::uint32_t stackCount) {
     MeshData meshData;
 
 	//
@@ -116,12 +116,12 @@ GeometryGenerator::MeshData GeometryGenerator::CreateSphere(const float radius, 
 	const float thetaStep = 2.0f * XM_PI / sliceCount;
 
 	// Compute vertices for each stack ring (do not count the poles as rings).
-	uint32_t count = stackCount - 1U;
-	for(uint32_t i = 1U; i <= count; ++i) {
+	std::uint32_t count = stackCount - 1U;
+	for(std::uint32_t i = 1U; i <= count; ++i) {
 		const float phi = i * phiStep;
 
 		// Vertices of ring.
-        for(uint32_t j = 0U; j <= sliceCount; ++j) {
+        for(std::uint32_t j = 0U; j <= sliceCount; ++j) {
 			const float theta = j * thetaStep;
 
 			Vertex v;
@@ -156,7 +156,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateSphere(const float radius, 
 	// and connects the top pole to the first ring.
 	//
 
-    for(uint32_t i = 1U; i <= sliceCount; ++i) {
+    for(std::uint32_t i = 1U; i <= sliceCount; ++i) {
 		meshData.mIndices32.push_back(0U);
 		meshData.mIndices32.push_back(i + 1U);
 		meshData.mIndices32.push_back(i);
@@ -168,11 +168,11 @@ GeometryGenerator::MeshData GeometryGenerator::CreateSphere(const float radius, 
 
 	// Offset the indices to the index of the first vertex in the first ring.
 	// This is just skipping the top pole vertex.
-    uint32_t baseIndex = 1U;
-    uint32_t ringVertexCount = sliceCount + 1U;
+    std::uint32_t baseIndex = 1U;
+    std::uint32_t ringVertexCount = sliceCount + 1U;
 	count = stackCount - 2U;
-	for(uint32_t i = 0U; i < count; ++i) {
-		for(uint32_t j = 0U; j < sliceCount; ++j) {
+	for(std::uint32_t i = 0U; i < count; ++i) {
+		for(std::uint32_t j = 0U; j < sliceCount; ++j) {
 			meshData.mIndices32.push_back(baseIndex + i * ringVertexCount + j);
 			meshData.mIndices32.push_back(baseIndex + i * ringVertexCount + j + 1U);
 			meshData.mIndices32.push_back(baseIndex + (i + 1U) * ringVertexCount + j);
@@ -189,12 +189,12 @@ GeometryGenerator::MeshData GeometryGenerator::CreateSphere(const float radius, 
 	//
 
 	// South pole vertex was added last.
-	const uint32_t southPoleIndex = (uint32_t)meshData.mVertices.size() - 1U;
+	const std::uint32_t southPoleIndex = (std::uint32_t)meshData.mVertices.size() - 1U;
 
 	// Offset the indices to the index of the first vertex in the last ring.
 	baseIndex = southPoleIndex - ringVertexCount;
 	
-	for(uint32_t i = 0U; i < sliceCount; ++i) {
+	for(std::uint32_t i = 0U; i < sliceCount; ++i) {
 		meshData.mIndices32.push_back(southPoleIndex);
 		meshData.mIndices32.push_back(baseIndex+i);
 		meshData.mIndices32.push_back(baseIndex+i+1);
@@ -220,9 +220,9 @@ void GeometryGenerator::Subdivide(MeshData& meshData) {
 	// *-----*-----*
 	// v0    m2     v2
 
-	const uint32_t numTris = (uint32_t)inputCopy.mIndices32.size() / 3U;
-	for(uint32_t i = 0; i < numTris; ++i) {
-		const uint32_t i3 = i * 3U;
+	const std::uint32_t numTris = (std::uint32_t)inputCopy.mIndices32.size() / 3U;
+	for(std::uint32_t i = 0; i < numTris; ++i) {
+		const std::uint32_t i3 = i * 3U;
 		Vertex v0 = inputCopy.mVertices[ inputCopy.mIndices32[i3 + 0U] ];
 		Vertex v1 = inputCopy.mVertices[ inputCopy.mIndices32[i3 + 1U] ];
 		Vertex v2 = inputCopy.mVertices[ inputCopy.mIndices32[i3 + 2U] ];
@@ -246,7 +246,7 @@ void GeometryGenerator::Subdivide(MeshData& meshData) {
 		meshData.mVertices.push_back(m1); // 4
 		meshData.mVertices.push_back(m2); // 5
 
-		const uint32_t i6 = i * 6U;
+		const std::uint32_t i6 = i * 6U;
  
 		meshData.mIndices32.push_back(i6 + 0U);
 		meshData.mIndices32.push_back(i6 + 3U);
@@ -295,11 +295,11 @@ GeometryGenerator::Vertex GeometryGenerator::MidPoint(const Vertex& v0, const Ve
     return v;
 }
 
-GeometryGenerator::MeshData GeometryGenerator::CreateGeosphere(const float radius, const uint32_t numSubdivisions) {
+GeometryGenerator::MeshData GeometryGenerator::CreateGeosphere(const float radius, const std::uint32_t numSubdivisions) {
     MeshData meshData;
 
 	// Put a cap on the number of subdivisions.
-	const uint32_t clampedNumSubdivisions = std::min<uint32_t>(numSubdivisions, 6U);
+	const std::uint32_t clampedNumSubdivisions = std::min<std::uint32_t>(numSubdivisions, 6U);
 
 	// Approximate a sphere by tessellating an icosahedron.
 
@@ -316,7 +316,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGeosphere(const float radiu
 		XMFLOAT3(Z, -X, 0.0f),  XMFLOAT3(-Z, -X, 0.0f)
 	};
 
-    uint32_t k[60U] =
+    std::uint32_t k[60U] =
 	{
 		1,4,0,  4,9,0,  4,5,9,  8,5,4,  1,8,4,    
 		1,10,8, 10,3,8, 8,3,5,  3,2,5,  3,7,2,    
@@ -327,16 +327,16 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGeosphere(const float radiu
     meshData.mVertices.resize(12U);
     meshData.mIndices32.assign(&k[0U], &k[60U]);
 
-	for (uint32_t i = 0U; i < 12U; ++i) {
+	for (std::uint32_t i = 0U; i < 12U; ++i) {
 		meshData.mVertices[i].mPosition = pos[i];
 	}
 
-	for (uint32_t i = 0U; i < clampedNumSubdivisions; ++i) {
+	for (std::uint32_t i = 0U; i < clampedNumSubdivisions; ++i) {
 		Subdivide(meshData);
 	}
 
 	// Project mVertices onto sphere and scale.
-	for (uint32_t i = 0U; i < meshData.mVertices.size(); ++i){
+	for (std::uint32_t i = 0U; i < meshData.mVertices.size(); ++i){
 		// Project onto unit sphere.
 		const XMVECTOR n = XMVector3Normalize(XMLoadFloat3(&meshData.mVertices[i].mPosition));
 
@@ -371,7 +371,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGeosphere(const float radiu
     return meshData;
 }
 
-GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(const float bottomRadius, const float topRadius, const float height, const uint32_t sliceCount, const uint32_t stackCount) {
+GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(const float bottomRadius, const float topRadius, const float height, const std::uint32_t sliceCount, const std::uint32_t stackCount) {
     MeshData meshData;
 
 	//
@@ -383,16 +383,16 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(const float bottom
 	// Amount to increment radius as we move up each stack level from bottom to top.
 	const float radiusStep = (topRadius - bottomRadius) / stackCount;
 
-	const uint32_t ringCount = stackCount + 1U;
+	const std::uint32_t ringCount = stackCount + 1U;
 
 	// Compute mVertices for each stack ring starting at the bottom and moving up.
-	for (uint32_t i = 0U; i < ringCount; ++i) {
+	for (std::uint32_t i = 0U; i < ringCount; ++i) {
 		const float y = -0.5f * height + i * stackHeight;
 		const float r = bottomRadius + i * radiusStep;
 
 		// mVertices of ring
 		const float dTheta = 2.0f * XM_PI / sliceCount;
-		for (uint32_t j = 0U; j <= sliceCount; ++j) {
+		for (std::uint32_t j = 0U; j <= sliceCount; ++j) {
 			Vertex vertex;
 
 			const float c = cosf(j * dTheta);
@@ -439,11 +439,11 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(const float bottom
 
 	// Add one because we duplicate the first and last vertex per ring
 	// since the texture coordinates are different.
-	const uint32_t ringVertexCount = sliceCount+1;
+	const std::uint32_t ringVertexCount = sliceCount+1;
 
 	// Compute indices for each stack.
-	for (uint32_t i = 0U; i < stackCount; ++i) {
-		for (uint32_t j = 0U; j < sliceCount; ++j) {
+	for (std::uint32_t i = 0U; i < stackCount; ++i) {
+		for (std::uint32_t j = 0U; j < sliceCount; ++j) {
 			meshData.mIndices32.push_back(i * ringVertexCount + j);
 			meshData.mIndices32.push_back((i + 1U) * ringVertexCount + j);
 			meshData.mIndices32.push_back((i + 1U) * ringVertexCount + j + 1U);
@@ -460,15 +460,15 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(const float bottom
     return meshData;
 }
 
-void GeometryGenerator::BuildCylinderTopCap(const float topRadius, const float height, const uint32_t sliceCount, MeshData& meshData)
+void GeometryGenerator::BuildCylinderTopCap(const float topRadius, const float height, const std::uint32_t sliceCount, MeshData& meshData)
 {
-	const uint32_t baseIndex = (uint32_t)meshData.mVertices.size();
+	const std::uint32_t baseIndex = (std::uint32_t)meshData.mVertices.size();
 
 	const float y = 0.5f * height;
 	const float dTheta = 2.0f * XM_PI / sliceCount;
 
 	// Duplicate cap ring mVertices because the texture coordinates and normals differ.
-	for(uint32_t i = 0U; i <= sliceCount; ++i) {
+	for(std::uint32_t i = 0U; i <= sliceCount; ++i) {
 		const float x = topRadius * cosf(i * dTheta);
 		const float z = topRadius * sinf(i * dTheta);
 
@@ -484,27 +484,27 @@ void GeometryGenerator::BuildCylinderTopCap(const float topRadius, const float h
 	meshData.mVertices.push_back( Vertex(0.0f, y, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.5f) );
 
 	// Index of center vertex.
-	const uint32_t centerIndex = (uint32_t)meshData.mVertices.size() - 1U;
+	const std::uint32_t centerIndex = (std::uint32_t)meshData.mVertices.size() - 1U;
 
-	for (uint32_t i = 0U; i < sliceCount; ++i) {
+	for (std::uint32_t i = 0U; i < sliceCount; ++i) {
 		meshData.mIndices32.push_back(centerIndex);
 		meshData.mIndices32.push_back(baseIndex + i + 1U);
 		meshData.mIndices32.push_back(baseIndex + i);
 	}
 }
 
-void GeometryGenerator::BuildCylinderBottomCap(const float bottomRadius, const float height, const uint32_t sliceCount, MeshData& meshData)
+void GeometryGenerator::BuildCylinderBottomCap(const float bottomRadius, const float height, const std::uint32_t sliceCount, MeshData& meshData)
 {
 	// 
 	// Build bottom cap.
 	//
 
-	const uint32_t baseIndex = (uint32_t)meshData.mVertices.size();
+	const std::uint32_t baseIndex = (std::uint32_t)meshData.mVertices.size();
 	const float y = -0.5f * height;
 
 	// mVertices of ring
 	const float dTheta = 2.0f * XM_PI / sliceCount;
-	for (uint32_t i = 0U; i <= sliceCount; ++i) {
+	for (std::uint32_t i = 0U; i <= sliceCount; ++i) {
 		const float x = bottomRadius * cosf(i * dTheta);
 		const float z = bottomRadius * sinf(i * dTheta);
 
@@ -520,20 +520,20 @@ void GeometryGenerator::BuildCylinderBottomCap(const float bottomRadius, const f
 	meshData.mVertices.push_back( Vertex(0.0f, y, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.5f) );
 
 	// Cache the index of center vertex.
-	const uint32_t centerIndex = (uint32_t)meshData.mVertices.size() - 1U;
+	const std::uint32_t centerIndex = (std::uint32_t)meshData.mVertices.size() - 1U;
 
-	for(uint32_t i = 0U; i < sliceCount; ++i) {
+	for(std::uint32_t i = 0U; i < sliceCount; ++i) {
 		meshData.mIndices32.push_back(centerIndex);
 		meshData.mIndices32.push_back(baseIndex + i);
 		meshData.mIndices32.push_back(baseIndex + i + 1U);
 	}
 }
 
-GeometryGenerator::MeshData GeometryGenerator::CreateGrid(const float width, const float depth, const uint32_t m, const uint32_t n) {
+GeometryGenerator::MeshData GeometryGenerator::CreateGrid(const float width, const float depth, const std::uint32_t m, const std::uint32_t n) {
     MeshData meshData;
 
-	const uint32_t vertexCount = m * n;
-	const uint32_t faceCount   = (m - 1U) * (n - 1U) * 2U;
+	const std::uint32_t vertexCount = m * n;
+	const std::uint32_t faceCount   = (m - 1U) * (n - 1U) * 2U;
 
 	//
 	// Create the mVertices.
@@ -549,9 +549,9 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGrid(const float width, con
 	const float dv = 1.0f / (m - 1U);
 
 	meshData.mVertices.resize(vertexCount);
-	for (uint32_t i = 0U; i < m; ++i) {
+	for (std::uint32_t i = 0U; i < m; ++i) {
 		const float z = halfDepth - i * dz;
-		for (uint32_t j = 0U; j < n; ++j) {
+		for (std::uint32_t j = 0U; j < n; ++j) {
 			const float x = -halfWidth + j * dx;
 
 			meshData.mVertices[i * n + j].mPosition = XMFLOAT3(x, 0.0f, z);
@@ -571,11 +571,11 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGrid(const float width, con
 	meshData.mIndices32.resize(faceCount * 3U); // 3 indices per face
 
 	// Iterate over each quad and compute indices.
-	uint32_t k = 0U;
-	const uint32_t count1 = m - 1U;
-	const uint32_t count2 = n - 1U;
-	for (uint32_t i = 0U; i < count1; ++i) {
-		for (uint32_t j = 0U; j < count2; ++j) {
+	std::uint32_t k = 0U;
+	const std::uint32_t count1 = m - 1U;
+	const std::uint32_t count2 = n - 1U;
+	for (std::uint32_t i = 0U; i < count1; ++i) {
+		for (std::uint32_t j = 0U; j < count2; ++j) {
 			meshData.mIndices32[k] = i * n + j;
 			meshData.mIndices32[k + 1U] = i * n + j + 1U;
 			meshData.mIndices32[k + 2U] = (i + 1U) * n + j;

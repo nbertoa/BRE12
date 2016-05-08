@@ -15,13 +15,13 @@ public:
 	PSOManager(const PSOManager&) = delete;
 	const PSOManager& operator=(const PSOManager&) = delete;
 
-	size_t CreateGraphicsPSO(const std::string& name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso);
+	std::size_t CreateGraphicsPSO(const std::string& name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso);
 
 	// Asserts if there is not a valid ID3D12PipelineState with current id
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> GetPSO(const size_t id);
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> GetPSO(const std::size_t id);
 
 	// Asserts if id is not present
-	void Erase(const size_t id);
+	void Erase(const std::size_t id);
 
 	// This will invalidate all ids.
 	void Clear() { mPSOById.clear(); }
@@ -29,8 +29,8 @@ public:
 private:
 	Microsoft::WRL::ComPtr<ID3D12Device>& mDevice;
 
-	using IdAndPSO = std::pair<size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>>;
-	using PSOById = std::unordered_map<size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>>;
+	using IdAndPSO = std::pair<std::size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>>;
+	using PSOById = std::unordered_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>>;
 	PSOById mPSOById;
 	std::hash<std::string> mHash;
 };

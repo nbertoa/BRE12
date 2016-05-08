@@ -18,16 +18,16 @@ public:
 	// Note: uploadBuffer has to be kept alive after the above function calls because
 	// the command list has not been executed yet that performs the actual copy.
 	// The caller can Release the uploadBuffer after it knows the copy has been executed.
-	size_t CreateDefaultBuffer(
+	std::size_t CreateDefaultBuffer(
 		ID3D12Device& device,
 		ID3D12GraphicsCommandList& cmdList,
 		const void* initData,
-		const uint64_t byteSize,
+		const std::uint64_t byteSize,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& defaultBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer);
 
 	// Asserts if resource id is not present
-	Microsoft::WRL::ComPtr<ID3D12Resource> GetResource(const size_t id);
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetResource(const std::size_t id);
 
 	// This will invalidate all ids.
 	void Clear() { mResources.resize(0); }

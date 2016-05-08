@@ -9,7 +9,7 @@
 
 class UploadBuffer{
 public:
-	UploadBuffer(ID3D12Device& device, const size_t elemSize, const uint32_t elemCount);
+	UploadBuffer(ID3D12Device& device, const std::size_t elemSize, const std::uint32_t elemCount);
 
 	UploadBuffer(const UploadBuffer& rhs) = delete;
 	UploadBuffer& operator=(const UploadBuffer& rhs) = delete;
@@ -17,10 +17,10 @@ public:
 
 	ID3D12Resource* Resource() const { return mBuffer.Get(); }
 
-	void CopyData(const uint32_t elemIndex, uint8_t* srcData, const size_t srcDataSize);
+	void CopyData(const std::uint32_t elemIndex, std::uint8_t* srcData, const std::size_t srcDataSize);
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBuffer;
-	uint8_t* mMappedData{ nullptr };
-	size_t mElemSize{ 0U };
+	std::uint8_t* mMappedData{ nullptr };
+	std::size_t mElemSize{ 0U };
 };

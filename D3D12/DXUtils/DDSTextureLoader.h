@@ -26,11 +26,7 @@
 #include <d3d11_1.h>
 #include "d3dx12.h"
 
-#pragma warning(push)
-#pragma warning(disable : 4005)
-#include <stdint.h>
-
-#pragma warning(pop)
+#include <cstdint>
 
 #if defined(_MSC_VER) && (_MSC_VER<1610) && !defined(_In_reads_)
 #define _In_reads_(exp)
@@ -46,7 +42,7 @@
 
 namespace DirectX
 {
-    enum DDS_ALPHA_MODE
+    enum class DDS_ALPHA_MODE : std::uint8_t
     {
         DDS_ALPHA_MODE_UNKNOWN       = 0,
         DDS_ALPHA_MODE_STRAIGHT      = 1,
@@ -58,20 +54,20 @@ namespace DirectX
     // Standard version
     HRESULT CreateDDSTextureFromMemory( _In_ ID3D11Device* d3dDevice,
                                         _In_reads_bytes_(ddsDataSize) const uint8_t* ddsData,
-                                        _In_ size_t ddsDataSize,
+                                        _In_ std::size_t ddsDataSize,
                                         _Outptr_opt_ ID3D11Resource** texture,
                                         _Outptr_opt_ ID3D11ShaderResourceView** textureView,
-                                        _In_ size_t maxsize = 0,
+                                        _In_ std::size_t maxsize = 0,
                                         _Out_opt_ DDS_ALPHA_MODE* alphaMode = nullptr
                                       );
 
 	HRESULT CreateDDSTextureFromMemory12(_In_ ID3D12Device* device,
 		                                 _In_ ID3D12GraphicsCommandList* cmdList,
 		                                 _In_reads_bytes_(ddsDataSize) const uint8_t* ddsData,
-		                                 _In_ size_t ddsDataSize,
+		                                 _In_ std::size_t ddsDataSize,
 		                                 _Out_ Microsoft::WRL::ComPtr<ID3D12Resource>& texture,
 		                                 _Out_ Microsoft::WRL::ComPtr<ID3D12Resource>& textureUploadHeap,
-		                                 _In_ size_t maxsize = 0,
+		                                 _In_ std::size_t maxsize = 0,
 		                                 _Out_opt_ DDS_ALPHA_MODE* alphaMode = nullptr
 		                                 );
 
@@ -79,7 +75,7 @@ namespace DirectX
                                       _In_z_ const wchar_t* szFileName,
                                       _Outptr_opt_ ID3D11Resource** texture,
                                       _Outptr_opt_ ID3D11ShaderResourceView** textureView,
-                                      _In_ size_t maxsize = 0,
+                                      _In_ std::size_t maxsize = 0,
                                       _Out_opt_ DDS_ALPHA_MODE* alphaMode = nullptr
                                     );
 
@@ -88,7 +84,7 @@ namespace DirectX
 		                               _In_z_ const wchar_t* szFileName,
 		                               _Out_ Microsoft::WRL::ComPtr<ID3D12Resource>& texture,
 		                               _Out_ Microsoft::WRL::ComPtr<ID3D12Resource>& textureUploadHeap,
-		                               _In_ size_t maxsize = 0,
+		                               _In_ std::size_t maxsize = 0,
 		                               _Out_opt_ DDS_ALPHA_MODE* alphaMode = nullptr
 		                               );
 
@@ -96,10 +92,10 @@ namespace DirectX
     HRESULT CreateDDSTextureFromMemory( _In_ ID3D11Device* d3dDevice,
                                         _In_opt_ ID3D11DeviceContext* d3dContext,
                                         _In_reads_bytes_(ddsDataSize) const uint8_t* ddsData,
-                                        _In_ size_t ddsDataSize,
+                                        _In_ std::size_t ddsDataSize,
                                         _Outptr_opt_ ID3D11Resource** texture,
                                         _Outptr_opt_ ID3D11ShaderResourceView** textureView,
-                                        _In_ size_t maxsize = 0,
+                                        _In_ std::size_t maxsize = 0,
                                         _Out_opt_ DDS_ALPHA_MODE* alphaMode = nullptr
                                       );
 
@@ -108,15 +104,15 @@ namespace DirectX
                                       _In_z_ const wchar_t* szFileName,
                                       _Outptr_opt_ ID3D11Resource** texture,
                                       _Outptr_opt_ ID3D11ShaderResourceView** textureView,
-                                      _In_ size_t maxsize = 0,
+                                      _In_ std::size_t maxsize = 0,
                                       _Out_opt_ DDS_ALPHA_MODE* alphaMode = nullptr
                                     );
 
     // Extended version
     HRESULT CreateDDSTextureFromMemoryEx( _In_ ID3D11Device* d3dDevice,
                                           _In_reads_bytes_(ddsDataSize) const uint8_t* ddsData,
-                                          _In_ size_t ddsDataSize,
-                                          _In_ size_t maxsize,
+                                          _In_ std::size_t ddsDataSize,
+                                          _In_ std::size_t maxsize,
                                           _In_ D3D11_USAGE usage,
                                           _In_ unsigned int bindFlags,
                                           _In_ unsigned int cpuAccessFlags,
@@ -129,7 +125,7 @@ namespace DirectX
 
     HRESULT CreateDDSTextureFromFileEx( _In_ ID3D11Device* d3dDevice,
                                         _In_z_ const wchar_t* szFileName,
-                                        _In_ size_t maxsize,
+                                        _In_ std::size_t maxsize,
                                         _In_ D3D11_USAGE usage,
                                         _In_ unsigned int bindFlags,
                                         _In_ unsigned int cpuAccessFlags,
@@ -144,8 +140,8 @@ namespace DirectX
     HRESULT CreateDDSTextureFromMemoryEx( _In_ ID3D11Device* d3dDevice,
                                           _In_opt_ ID3D11DeviceContext* d3dContext,
                                           _In_reads_bytes_(ddsDataSize) const uint8_t* ddsData,
-                                          _In_ size_t ddsDataSize,
-                                          _In_ size_t maxsize,
+                                          _In_ std::size_t ddsDataSize,
+                                          _In_ std::size_t maxsize,
                                           _In_ D3D11_USAGE usage,
                                           _In_ unsigned int bindFlags,
                                           _In_ unsigned int cpuAccessFlags,
@@ -159,7 +155,7 @@ namespace DirectX
     HRESULT CreateDDSTextureFromFileEx( _In_ ID3D11Device* d3dDevice,
                                         _In_opt_ ID3D11DeviceContext* d3dContext,
                                         _In_z_ const wchar_t* szFileName,
-                                        _In_ size_t maxsize,
+                                        _In_ std::size_t maxsize,
                                         _In_ D3D11_USAGE usage,
                                         _In_ unsigned int bindFlags,
                                         _In_ unsigned int cpuAccessFlags,

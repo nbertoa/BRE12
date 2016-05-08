@@ -10,7 +10,7 @@
 
 class D3dUtils {
 public:
-	static uint32_t CalcConstantBufferByteSize(const uint32_t byteSize) {
+	static std::uint32_t CalcConstantBufferByteSize(const std::uint32_t byteSize) {
 		// Constant buffers must be a multiple of the minimum hardware
 		// allocation size (usually 256 bytes).  So round up to nearest
 		// multiple of 256.  We do this by adding 255 and then masking off
