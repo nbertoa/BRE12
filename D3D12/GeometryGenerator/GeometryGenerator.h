@@ -67,32 +67,32 @@ public:
 
 	// Creates a box centered at the origin with the given dimensions, where each
     // face has m rows and n columns of vertices.
-    MeshData CreateBox(const float width, const float height, const float depth, const std::uint32_t numSubdivisions) noexcept;
+    static MeshData CreateBox(const float width, const float height, const float depth, const std::uint32_t numSubdivisions) noexcept;
 
 	// Creates a sphere centered at the origin with the given radius.  The
 	// slices and stacks parameters control the degree of tessellation.
-    MeshData CreateSphere(const float radius, const std::uint32_t sliceCount, const std::uint32_t stackCount) noexcept;
+	static MeshData CreateSphere(const float radius, const std::uint32_t sliceCount, const std::uint32_t stackCount) noexcept;
 
 	// Creates a geosphere centered at the origin with the given radius.  The
 	// depth controls the level of tessellation.
-    MeshData CreateGeosphere(const float radius, const std::uint32_t numSubdivisions) noexcept;
+	static MeshData CreateGeosphere(const float radius, const std::uint32_t numSubdivisions) noexcept;
 
 	// Creates a cylinder parallel to the y-axis, and centered about the origin.  
 	// The bottom and top radius can vary to form various cone shapes rather than true
 	// cylinders.  The slices and stacks parameters control the degree of tessellation.
-    MeshData CreateCylinder(const float bottomRadius, const float topRadius, const float height, const std::uint32_t sliceCount, const std::uint32_t stackCount) noexcept;
+	static MeshData CreateCylinder(const float bottomRadius, const float topRadius, const float height, const std::uint32_t sliceCount, const std::uint32_t stackCount) noexcept;
 
 	// Creates an mxn grid in the xz-plane with m rows and n columns, centered
 	// at the origin with the specified width and depth.
-    MeshData CreateGrid(const float width, const float depth, const std::uint32_t m, const std::uint32_t n) noexcept;
+	static MeshData CreateGrid(const float width, const float depth, const std::uint32_t m, const std::uint32_t n) noexcept;
 
 	// Creates a quad aligned with the screen.  This is useful for postprocessing and screen effects.
-    MeshData CreateQuad(const float x, const float y, const float w, const float h, const float depth) noexcept;
+	static MeshData CreateQuad(const float x, const float y, const float w, const float h, const float depth) noexcept;
 
 private:
-	void Subdivide(MeshData& meshData) noexcept;
-    Vertex MidPoint(const Vertex& v0, const Vertex& v1) noexcept;
-    void BuildCylinderTopCap(const float topRadius, const float height, const std::uint32_t sliceCount, MeshData& meshData) noexcept;
-    void BuildCylinderBottomCap(const float bottomRadius, const float height, const std::uint32_t sliceCount, MeshData& meshData) noexcept;
+	static void Subdivide(MeshData& meshData) noexcept;
+	static Vertex MidPoint(const Vertex& v0, const Vertex& v1) noexcept;
+	static void BuildCylinderTopCap(const float topRadius, const float height, const std::uint32_t sliceCount, MeshData& meshData) noexcept;
+	static void BuildCylinderBottomCap(const float bottomRadius, const float height, const std::uint32_t sliceCount, MeshData& meshData) noexcept;
 };
 

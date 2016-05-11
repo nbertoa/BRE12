@@ -1,6 +1,6 @@
 #include "UploadBuffer.h"
 
-UploadBuffer::UploadBuffer(ID3D12Device& device, const std::size_t elemSize, const std::uint32_t elemCount)
+UploadBuffer::UploadBuffer(ID3D12Device& device, const std::size_t elemSize, const std::size_t elemCount)
 	: mElemSize(elemSize)
 {
 	ASSERT(elemSize > 0);
@@ -19,6 +19,7 @@ UploadBuffer::~UploadBuffer() {
 	mMappedData = nullptr;
 }
 
-void UploadBuffer::CopyData(const std::uint32_t elemIndex, std::uint8_t* srcData, const std::size_t srcDataSize) noexcept {
-	memcpy(&mMappedData[elemIndex * mElemSize], &srcData, srcDataSize);
+void UploadBuffer::CopyData(const std::size_t elemIndex, void* srcData, const std::size_t srcDataSize) noexcept {
+	ASSERT(srcData);
+	memcpy(&mMappedData[elemIndex * mElemSize], srcData, srcDataSize);
 }

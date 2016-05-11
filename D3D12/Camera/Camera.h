@@ -62,6 +62,12 @@ public:
 	}
 	DirectX::XMMATRIX GetProj() const noexcept { return XMLoadFloat4x4(&mProj); }
 
+	DirectX::XMMATRIX GetViewProj() const noexcept {
+		const DirectX::XMMATRIX viewMatrix = GetView();
+		const DirectX::XMMATRIX projMatrix = GetProj();
+		return DirectX::XMMatrixMultiply(viewMatrix, projMatrix);
+	}
+
 	DirectX::XMFLOAT4X4 GetView4x4f() const noexcept {
 		ASSERT(!mViewDirty);
 		return mView;

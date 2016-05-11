@@ -1,16 +1,19 @@
 struct Input {
-	float4 PosH : POSITION;
-	float4 Color : COLOR;
+	float4 PosO : POSITION;
 };
 
+struct ObjConstants {
+	float4x4 mWVP;
+};
+ConstantBuffer<ObjConstants> gObjConstants : register(b0);
+
 struct Output {
+	
 	float4 PosH : SV_POSITION;
-	float4 Color : COLOR;
 };
 
 Output main(in const Input input) {
 	Output output;
-	output.PosH = input.PosH;
-	output.Color = input.Color;
+	output.PosH = mul(input.PosO, gObjConstants.mWVP);
 	return output;
 }
