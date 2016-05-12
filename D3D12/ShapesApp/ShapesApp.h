@@ -3,8 +3,8 @@
 #include <DirectXMath.h>
 #include <memory>
 
-#include <App/D3dApp.h>
-#include <DXUtils\UploadBuffer.h>
+#include <App/App.h>
+#include <ResourceManager\UploadBuffer.h>
 
 #if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
 #define _CRTDBG_MAP_ALLOC          
@@ -12,12 +12,7 @@
 #include <crtdbg.h>               
 #endif 
 
-// Link necessary d3d12 libraries.
-#pragma comment(lib,"d3dcompiler.lib")
-#pragma comment(lib, "D3D12.lib")
-#pragma comment(lib, "dxgi.lib")
-
-class ShapesApp : public D3DApp {
+class ShapesApp : public App {
 public:
 	ShapesApp(HINSTANCE hInstance);
 	ShapesApp(const ShapesApp& rhs) = delete;
@@ -48,14 +43,16 @@ protected:
 	std::uint32_t mNumIndices{ 0U };
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCBVHeap;	
-	std::unique_ptr<UploadBuffer> mCBVsUploadBuffer;	
+	UploadBuffer* mCBVsUploadBuffer{ nullptr };
 
-	void Update(const Timer& timer) noexcept override;
-	void Draw(const Timer& timer) noexcept override;
+	void Update(const float dt) noexcept override;
+	void Draw(const float dt) noexcept override;
 
 	void BuildPSO() noexcept;
 	void BuildVertexAndIndexBuffers() noexcept;
 	void BuildConstantBuffers() noexcept;
 	void BuildRootSignature() noexcept;
+
+	void UpdateConstantBuffers() noexcept;
 };
 

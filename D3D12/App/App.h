@@ -1,8 +1,12 @@
 #pragma once
 
 #include <cstdint>
+#include <d3d12.h>
+#include <D3Dcompiler.h>
+#include <dxgi1_4.h>
+#include <windows.h>
+#include <wrl.h>
 
-#include <DXUtils\D3dUtils.h>
 #include <Timer\Timer.h>
 
 #if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
@@ -11,30 +15,28 @@
 #include <crtdbg.h>               
 #endif 
 
-class D3DApp {
+class App {
 protected:
-	D3DApp(HINSTANCE hInstance);
-	D3DApp(const D3DApp& rhs) = delete;
-	D3DApp& operator=(const D3DApp& rhs) = delete;
-	virtual ~D3DApp();
+	App(HINSTANCE hInstance);
+	App(const App& rhs) = delete;
+	App& operator=(const App& rhs) = delete;
+	virtual ~App();
 
 public:
-	static D3DApp* GetApp() noexcept { return mApp; }
-
-	HINSTANCE AppInst() const noexcept { return mAppInst; }
-	HWND MainWnd() const noexcept { return mMainWnd; }
-	float AspectRatio() const noexcept { return (float)mWindowWidth / mWindowHeight; }
+	static App* GetApp() noexcept { return mApp; }	
 	
+	virtual void Initialize() noexcept;
 	std::int32_t Run() noexcept;
 
-	virtual void Initialize() noexcept;
-	virtual LRESULT MsgProc(HWND hwnd, const std::int32_t msg, WPARAM wParam, LPARAM lParam) noexcept;
+	LRESULT MsgProc(HWND hwnd, const std::int32_t msg, WPARAM wParam, LPARAM lParam) noexcept;
 
 protected:
+	float AspectRatio() const noexcept { return (float)mWindowWidth / mWindowHeight; }
+
 	virtual void CreateRtvAndDsvDescriptorHeaps() noexcept;
 	virtual void CreateRtvAndDsv() noexcept;
-	virtual void Update(const Timer& timer) noexcept;
-	virtual void Draw(const Timer& timer) noexcept = 0;
+	virtual void Update(const float dt) noexcept;
+	virtual void Draw(const float dt) noexcept = 0;
 
 	virtual void OnMouseMove(const WPARAM btnState, const std::int32_t x, const std::int32_t y) noexcept;
 	
@@ -53,7 +55,7 @@ protected:
 	void CalculateFrameStats() noexcept;
 	
 protected:
-	static D3DApp* mApp;
+	static App* mApp;
 
 	HINSTANCE mAppInst = nullptr; // application instance handle
 	HWND mMainWnd = nullptr; // main window handle

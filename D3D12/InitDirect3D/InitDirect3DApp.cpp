@@ -6,15 +6,15 @@
 #include <Utils\DebugUtils.h>
 
 InitDirect3DApp::InitDirect3DApp(HINSTANCE hInstance)
-	: D3DApp(hInstance)
+	: App(hInstance)
 {
 }
 
-void InitDirect3DApp::Update(const Timer& /*timer*/) noexcept {
+void InitDirect3DApp::Update(const float) noexcept {
 
 }
 
-void InitDirect3DApp::Draw(const Timer& /*timer*/) noexcept {
+void InitDirect3DApp::Draw(const float) noexcept {
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
 	CHECK_HR(mDirectCmdListAlloc->Reset());

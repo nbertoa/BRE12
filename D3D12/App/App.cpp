@@ -1,4 +1,4 @@
-#include "D3dApp.h"
+#include "App.h"
 
 #include <vector>
 #include <WindowsX.h>
@@ -9,30 +9,31 @@
 #include <MathUtils/MathHelper.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
+#include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <Utils\DebugUtils.h>
 
-D3DApp* D3DApp::mApp = nullptr;
+App* App::mApp = nullptr;
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, const std::uint32_t msg, WPARAM wParam, LPARAM lParam) {
-	return D3DApp::GetApp()->MsgProc(hwnd, msg, wParam, lParam);
+	return App::GetApp()->MsgProc(hwnd, msg, wParam, lParam);
 }
 
-D3DApp::D3DApp(HINSTANCE hInstance)
+App::App(HINSTANCE hInstance)
 	: mAppInst(hInstance)
 {
 	ASSERT(!mApp);
 	mApp = this;
 }
 
-D3DApp::~D3DApp() {
+App::~App() {
 	if (mD3dDevice != nullptr) {
 		FlushCommandQueue();
 	}
 }
 
-int32_t D3DApp::Run() noexcept {
+int32_t App::Run() noexcept {
 	ASSERT(Keyboard::gKeyboard.get());
 
 	MSG msg{0U};
@@ -50,10 +51,11 @@ int32_t D3DApp::Run() noexcept {
 			mTimer.Tick();
 
 			if (!mAppPaused) {
+				const float dt = mTimer.DeltaTime();
 				CalculateFrameStats();
 				Keyboard::gKeyboard->Update();
-				Update(mTimer);
-				Draw(mTimer);
+				Update(dt);
+				Draw(dt);
 			}
 			else {
 				Sleep(100U);
@@ -64,13 +66,13 @@ int32_t D3DApp::Run() noexcept {
 	return (int)msg.wParam;
 }
 
-void D3DApp::Initialize() noexcept {
+void App::Initialize() noexcept {
 	InitMainWindow();
 	InitDirect3D();
 	InitSystems();
 }
 
-void D3DApp::CreateRtvAndDsvDescriptorHeaps() noexcept {
+void App::CreateRtvAndDsvDescriptorHeaps() noexcept {
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
 	rtvHeapDesc.NumDescriptors = sSwapChainBufferCount;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -86,13 +88,12 @@ void D3DApp::CreateRtvAndDsvDescriptorHeaps() noexcept {
 	CHECK_HR(mD3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(mDsvHeap.GetAddressOf())));
 }
 
-void D3DApp::Update(const Timer& timer) noexcept {
+void App::Update(const float dt) noexcept {
 	static const float sCameraOffset{ 10.0f };
+	static const float sCameraMultiplier{ 5.0f };
 
 	ASSERT(Keyboard::gKeyboard.get());
-
-	const float dt = timer.DeltaTime();
-	const float offset = sCameraOffset * dt;
+	const float offset = sCameraOffset * (Keyboard::gKeyboard->IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * dt ;
 	if (Keyboard::gKeyboard->IsKeyDown(DIK_W)) {
 		Camera::gCamera->Walk(offset);
 	}
@@ -109,7 +110,7 @@ void D3DApp::Update(const Timer& timer) noexcept {
 	Camera::gCamera->UpdateViewMatrix();
 }
 
-void D3DApp::OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y) noexcept {
+void App::OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y) noexcept {
 	static int32_t lastXY[] = { 0, 0 };
 
 	ASSERT(Camera::gCamera.get());
@@ -127,7 +128,7 @@ void D3DApp::OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y
 	lastXY[1] = y;
 }
 
-void D3DApp::CreateRtvAndDsv() noexcept {
+void App::CreateRtvAndDsv() noexcept {
 	ASSERT(mD3dDevice);
 	ASSERT(mSwapChain);
 
@@ -179,7 +180,7 @@ void D3DApp::CreateRtvAndDsv() noexcept {
 	mScissorRect = { 0, 0, mWindowWidth, mWindowHeight };
 }
 
-LRESULT D3DApp::MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lParam) noexcept {
+LRESULT App::MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lParam) noexcept {
 	switch (msg) {
 		// WM_ACTIVATE is sent when the window is activated or deactivated.  
 		// We pause the game when the window is deactivated and unpause it 
@@ -239,7 +240,7 @@ LRESULT D3DApp::MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lPar
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-void D3DApp::InitSystems() noexcept {
+void App::InitSystems() noexcept {
 	ASSERT(!Camera::gCamera.get());
 	Camera::gCamera = std::make_unique<Camera>();
 	Camera::gCamera->SetLens(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
@@ -249,17 +250,20 @@ void D3DApp::InitSystems() noexcept {
 	CHECK_HR(DirectInput8Create(mAppInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID*)&directInput, nullptr));
 	Keyboard::gKeyboard = std::make_unique<Keyboard>(*directInput, mMainWnd);
 
-	ASSERT(!PSOManager::gPSOMgr.get());
-	PSOManager::gPSOMgr = std::make_unique<PSOManager>(mD3dDevice);
+	ASSERT(!PSOManager::gManager.get());
+	PSOManager::gManager = std::make_unique<PSOManager>(mD3dDevice);
 
-	ASSERT(!ResourceManager::gResourceMgr.get());
-	ResourceManager::gResourceMgr = std::make_unique<ResourceManager>();
+	ASSERT(!ResourceManager::gManager.get());
+	ResourceManager::gManager = std::make_unique<ResourceManager>(*mD3dDevice.Get());
 
-	ASSERT(!ShaderManager::gShaderMgr.get());
-	ShaderManager::gShaderMgr = std::make_unique<ShaderManager>();
+	ASSERT(!RootSignatureManager::gManager.get());
+	RootSignatureManager::gManager = std::make_unique<RootSignatureManager>(mD3dDevice);
+
+	ASSERT(!ShaderManager::gManager.get());
+	ShaderManager::gManager = std::make_unique<ShaderManager>();
 }
 
-void D3DApp::InitMainWindow() noexcept {
+void App::InitMainWindow() noexcept {
 	WNDCLASS wc = {};
 	wc.style = CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc = MainWndProc;
@@ -288,7 +292,7 @@ void D3DApp::InitMainWindow() noexcept {
 	UpdateWindow(mMainWnd);
 }
 
-void D3DApp::InitDirect3D() noexcept {
+void App::InitDirect3D() noexcept {
 #if defined(DEBUG) || defined(_DEBUG) 
 	// Enable the D3D12 debug layer.
 	{
@@ -315,7 +319,7 @@ void D3DApp::InitDirect3D() noexcept {
 	CreateRtvAndDsv();
 }
 
-void D3DApp::CreateCommandObjects() noexcept {
+void App::CreateCommandObjects() noexcept {
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -329,7 +333,7 @@ void D3DApp::CreateCommandObjects() noexcept {
 	mCmdList->Close();
 }
 
-void D3DApp::CreateSwapChain() noexcept {
+void App::CreateSwapChain() noexcept {
 	DXGI_SWAP_CHAIN_DESC sd = {};
 	sd.BufferDesc.Width = mWindowWidth;
 	sd.BufferDesc.Height = mWindowHeight;
@@ -351,7 +355,7 @@ void D3DApp::CreateSwapChain() noexcept {
 	CHECK_HR(mDxgiFactory->CreateSwapChain(mCmdQueue.Get(), &sd, mSwapChain.GetAddressOf()));
 }
 
-void D3DApp::FlushCommandQueue() noexcept {
+void App::FlushCommandQueue() noexcept {
 	// Advance the fence value to mark commands up to this fence point.
 	++mCurrentFence;
 
@@ -374,19 +378,19 @@ void D3DApp::FlushCommandQueue() noexcept {
 	}
 }
 
-ID3D12Resource* D3DApp::CurrentBackBuffer() const noexcept {
+ID3D12Resource* App::CurrentBackBuffer() const noexcept {
 	return mSwapChainBuffer[mCurrBackBuffer].Get();
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE D3DApp::CurrentBackBufferView() const noexcept {
+D3D12_CPU_DESCRIPTOR_HANDLE App::CurrentBackBufferView() const noexcept {
 	return CD3DX12_CPU_DESCRIPTOR_HANDLE(mRtvHeap->GetCPUDescriptorHandleForHeapStart(), mCurrBackBuffer, mRtvDescSize);
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE D3DApp::DepthStencilView() const noexcept {
+D3D12_CPU_DESCRIPTOR_HANDLE App::DepthStencilView() const noexcept {
 	return mDsvHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
-void D3DApp::CalculateFrameStats() noexcept {
+void App::CalculateFrameStats() noexcept {
 	// Code computes the average frames per second, and also the 
 	// average time it takes to render one frame.  These stats 
 	// are appended to the window caption bar.

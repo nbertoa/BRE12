@@ -9,7 +9,7 @@
 
 class PSOManager {
 public:
-	static std::unique_ptr<PSOManager> gPSOMgr;
+	static std::unique_ptr<PSOManager> gManager;
 
 	PSOManager(Microsoft::WRL::ComPtr<ID3D12Device>& device) : mDevice(device) {}
 	PSOManager(const PSOManager&) = delete;

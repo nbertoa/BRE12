@@ -3,11 +3,8 @@
   <ItemGroup>
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="UploadBuffer.h" />
-    <ClInclude Include="D3dUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSTextureLoader.cpp" />
-    <ClCompile Include="UploadBuffer.cpp" />
   </ItemGroup>
 </Project>

@@ -27,6 +27,7 @@ namespace {
 	}
 }
 
+std::unique_ptr<ShaderManager> ShaderManager::gManager = nullptr;
 
 std::size_t ShaderManager::LoadShaderFile(const std::string& filename, Microsoft::WRL::ComPtr<ID3DBlob>& blob) noexcept {
 	ASSERT(!filename.empty());
@@ -67,7 +68,15 @@ std::size_t ShaderManager::LoadShaderFile(const std::string& filename, D3D12_SHA
 	return id;
 }
 
-std::unique_ptr<ShaderManager> ShaderManager::gShaderMgr = nullptr;
+std::size_t ShaderManager::AddInputLayout(const std::string& name, const std::vector<D3D12_INPUT_ELEMENT_DESC>& desc) noexcept {
+	ASSERT(!name.empty());
+
+	const std::size_t id{ mHash(name) };
+	ASSERT(mInputLayoutById.find(id) == mInputLayoutById.end());
+	mInputLayoutById.insert(IdAndInputLayout{ id, desc });
+
+	return id;
+}
 
 Microsoft::WRL::ComPtr<ID3DBlob> ShaderManager::GetBlob(const std::size_t id) noexcept {
 	Microsoft::WRL::ComPtr<ID3DBlob> blob;
@@ -87,7 +96,19 @@ D3D12_SHADER_BYTECODE ShaderManager::GetShaderByteCode(const std::size_t id) noe
 	return shaderByteCode;
 }
 
-void ShaderManager::Erase(const std::size_t id) noexcept {
+const std::vector<D3D12_INPUT_ELEMENT_DESC>& ShaderManager::GetInputLayout(const std::size_t id) noexcept {
+	InputLayoutById::iterator it{ mInputLayoutById.find(id) };
+	ASSERT(it != mInputLayoutById.end());
+
+	return it->second;
+}
+
+void ShaderManager::EraseShader(const std::size_t id) noexcept {
 	ASSERT(mBlobById.find(id) != mBlobById.end());
 	mBlobById.erase(id);
+}
+
+void ShaderManager::EraseInputLayout(const std::size_t id) noexcept {
+	ASSERT(mInputLayoutById.find(id) != mInputLayoutById.end());
+	mInputLayoutById.erase(id);
 }

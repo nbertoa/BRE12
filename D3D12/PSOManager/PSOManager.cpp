@@ -2,7 +2,7 @@
 
 #include <Utils/DebugUtils.h>
 
-std::unique_ptr<PSOManager> PSOManager::gPSOMgr = nullptr;
+std::unique_ptr<PSOManager> PSOManager::gManager = nullptr;
 
 std::size_t PSOManager::CreateGraphicsPSO(const std::string& name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso) noexcept {
 	ASSERT(!name.empty());

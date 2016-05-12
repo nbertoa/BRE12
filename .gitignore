@@ -355,3 +355,16 @@
 /D3D12/ResourceManager/x64/Debug/*.xml
 /D3D12/ShaderManager/x64/Debug/*.xml
 /D3D12/ShapesApp/x64/Debug/*.xml
+/D3D12/RootSignatureManager/x64/Debug/*.idb
+/D3D12/RootSignatureManager/x64/Debug/RootSign.785C0C32.tlog/*.lastbuildstate
+/D3D12/RootSignatureManager/x64/Release/RootSign.785C0C32.tlog/*.lastbuildstate
+/D3D12/RootSignatureManager/x64/Debug/*.log
+/D3D12/RootSignatureManager/x64/Release/*.log
+/D3D12/RootSignatureManager/x64/Debug/*.pdb
+/D3D12/RootSignatureManager/x64/Release/*.pdb
+/D3D12/RootSignatureManager/x64/Debug/*.tlog
+/D3D12/RootSignatureManager/x64/Debug/RootSign.785C0C32.tlog/*.tlog
+/D3D12/RootSignatureManager/x64/Release/RootSign.785C0C32.tlog/*.tlog
+/D3D12/ResourceManager/*.tmp
+/D3D12/App/x64/Debug/*.xml
+/D3D12/RootSignatureManager/x64/Debug/*.xml

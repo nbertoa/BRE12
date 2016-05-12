@@ -3,21 +3,21 @@
 #include <DirectXColors.h>
 
 #include <Camera\Camera.h>
-#include <DXUtils\D3dUtils.h>
 #include <DXUtils\d3dx12.h>
 #include <GeometryGenerator\GeometryGenerator.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
+#include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <Utils\DebugUtils.h>
 
 ShapesApp::ShapesApp(HINSTANCE hInstance)
-	: D3DApp(hInstance)
+	: App(hInstance)
 {
 }
 
 void ShapesApp::Initialize() noexcept {
-	D3DApp::Initialize();
+	App::Initialize();
 
 	CHECK_HR(mCmdList->Reset(mDirectCmdListAlloc.Get(), nullptr));
 
@@ -35,15 +35,13 @@ void ShapesApp::Initialize() noexcept {
 	FlushCommandQueue();
 }
 
-void ShapesApp::Update(const Timer& timer) noexcept {
-	D3DApp::Update(timer);
+void ShapesApp::Update(const float dt) noexcept {
+	App::Update(dt);
 
-	DirectX::XMFLOAT4X4 wvpMatrix{};
-	DirectX::XMStoreFloat4x4(&wvpMatrix, DirectX::XMMatrixTranspose(Camera::gCamera->GetViewProj()));
-	mCBVsUploadBuffer->CopyData(0U, &wvpMatrix, sizeof(wvpMatrix));
+	UpdateConstantBuffers();
 }
 
-void ShapesApp::Draw(const Timer& /*timer*/) noexcept {
+void ShapesApp::Draw(const float) noexcept {
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
 	CHECK_HR(mDirectCmdListAlloc->Reset());
@@ -106,24 +104,27 @@ void ShapesApp::Draw(const Timer& /*timer*/) noexcept {
 void ShapesApp::BuildPSO() noexcept {
 	ASSERT(mRootSignature.Get());
 
-	D3D12_INPUT_ELEMENT_DESC inputLayoutDesc[] = 
+	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout  
 	{
 		{"POSITION", 0U, DXGI_FORMAT_R32G32B32A32_FLOAT, 0U, 0U, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA , 0U}
 	};
 
+	const std::string idName{ "position_input_layout" };
+	ShaderManager::gManager->AddInputLayout(idName, inputLayout);
+
 	D3D12_SHADER_BYTECODE vertexShader;
 	std::string filename = "ShapesApp/VS.cso";
-	ShaderManager::gShaderMgr->LoadShaderFile(filename, vertexShader);
+	ShaderManager::gManager->LoadShaderFile(filename, vertexShader);
 
 	D3D12_SHADER_BYTECODE pixelShader;
 	filename = "ShapesApp/PS.cso";
-	ShaderManager::gShaderMgr->LoadShaderFile(filename, pixelShader);
+	ShaderManager::gManager->LoadShaderFile(filename, pixelShader);
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	psoDesc.DSVFormat = mDepthStencilFormat;
-	psoDesc.InputLayout = { inputLayoutDesc, _countof(inputLayoutDesc) };
+	psoDesc.InputLayout = { inputLayout.data(), (std::uint32_t)inputLayout.size() };
 	psoDesc.NumRenderTargets = 1U;
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	psoDesc.pRootSignature = mRootSignature.Get();
@@ -136,7 +137,7 @@ void ShapesApp::BuildPSO() noexcept {
 	psoDesc.VS = vertexShader;
 
 	const std::string psoName = "default";
-	PSOManager::gPSOMgr->CreateGraphicsPSO(psoName, psoDesc, mPSO);
+	PSOManager::gManager->CreateGraphicsPSO(psoName, psoDesc, mPSO);
 }
 
 void ShapesApp::BuildVertexAndIndexBuffers() noexcept {
@@ -151,14 +152,16 @@ void ShapesApp::BuildVertexAndIndexBuffers() noexcept {
 
 	// Buffers creation
 	std::uint32_t byteSize = numVertices * sizeof(Vertex);
-	ResourceManager::gResourceMgr->CreateDefaultBuffer(*mD3dDevice.Get(), *mCmdList.Get(), vertices.data(), byteSize, mVertexBuffer, mUploadVertexBuffer);
+	std::string bufferName{ "vertex_buffer" };
+	ResourceManager::gManager->CreateDefaultBuffer(bufferName, *mCmdList.Get(), vertices.data(), byteSize, mVertexBuffer, mUploadVertexBuffer);
 	mVertexBufferView.BufferLocation = mVertexBuffer->GetGPUVirtualAddress();
 	mVertexBufferView.SizeInBytes = byteSize;
 	mVertexBufferView.StrideInBytes = sizeof(Vertex);
 
 	mNumIndices = (std::uint32_t)meshData.mIndices32.size();
 	byteSize = mNumIndices * sizeof(std::uint32_t);
-	ResourceManager::gResourceMgr->CreateDefaultBuffer(*mD3dDevice.Get(), *mCmdList.Get(), meshData.mIndices32.data(), byteSize, mIndexBuffer, mUploadIndexBuffer);
+	bufferName = std::string{ "index_buffer" };
+	ResourceManager::gManager->CreateDefaultBuffer(bufferName, *mCmdList.Get(), meshData.mIndices32.data(), byteSize, mIndexBuffer, mUploadIndexBuffer);
 	mIndexBufferView.BufferLocation = mIndexBuffer->GetGPUVirtualAddress();
 	mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	mIndexBufferView.SizeInBytes = byteSize;
@@ -178,30 +181,33 @@ void ShapesApp::BuildConstantBuffers() noexcept {
 	ASSERT(mCBVHeap.Get());
 
 	// Create constant buffer.
-	ASSERT(!mCBVsUploadBuffer.get());
-	const std::uint32_t elemSize = D3dUtils::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4));
-	mCBVsUploadBuffer = std::make_unique<UploadBuffer>(*mD3dDevice.Get(), elemSize, 1U);
+	const std::size_t elemSize = UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4));
+	const std::string& idStr{ "cbv" };
+	ResourceManager::gManager->CreateUploadBuffer(idStr, elemSize, 1U, mCBVsUploadBuffer);
 
 	// Create constant buffer view
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
 	cbvDesc.BufferLocation = mCBVsUploadBuffer->Resource()->GetGPUVirtualAddress();
-	cbvDesc.SizeInBytes = elemSize;
+	cbvDesc.SizeInBytes = (std::uint32_t)elemSize;
 
 	mD3dDevice->CreateConstantBufferView(&cbvDesc, mCBVHeap->GetCPUDescriptorHandleForHeapStart());
 }
 
 void ShapesApp::BuildRootSignature() noexcept {
-	// Build root parameter
+	// Build root parameter: 1 desc table with 1 CBV
 	CD3DX12_DESCRIPTOR_RANGE cbvTable{};
 	cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1U, 0U);
 	CD3DX12_ROOT_PARAMETER slotRootParameter{};
 	slotRootParameter.InitAsDescriptorTable(1U, &cbvTable);
 
 	// Build root signature
-	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(1U, &slotRootParameter, 0U, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-	Microsoft::WRL::ComPtr<ID3DBlob> serializedRootSig;
-	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob{nullptr};
-	CHECK_HR(D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, serializedRootSig.GetAddressOf(), errorBlob.GetAddressOf()));
-	ASSERT(mD3dDevice.Get());
-	CHECK_HR(mD3dDevice->CreateRootSignature(0U, serializedRootSig->GetBufferPointer(), serializedRootSig->GetBufferSize(), IID_PPV_ARGS(mRootSignature.GetAddressOf())));
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc{ 1U, &slotRootParameter, 0U, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT };
+	const std::string idStr{ "root_signature" };
+	RootSignatureManager::gManager->CreateRootSignature(idStr, rootSigDesc, mRootSignature);
+}
+
+void ShapesApp::UpdateConstantBuffers() noexcept {
+	DirectX::XMFLOAT4X4 wvpMatrix{};
+	DirectX::XMStoreFloat4x4(&wvpMatrix, DirectX::XMMatrixTranspose(Camera::gCamera->GetViewProj()));
+	mCBVsUploadBuffer->CopyData(0U, &wvpMatrix, sizeof(wvpMatrix));
 }
