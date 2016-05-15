@@ -7,7 +7,7 @@
 #include <Utils/DebugUtils.h>
 
 namespace {
-	Microsoft::WRL::ComPtr<ID3DBlob> LoadBlob(const std::string& filename) noexcept {
+	ID3DBlob* LoadBlob(const std::string& filename) noexcept {
 		ASSERT(!filename.empty());
 
 		std::ifstream fin{ filename, std::ios::binary };
@@ -17,8 +17,8 @@ namespace {
 		std::ifstream::pos_type size{ (int)fin.tellg() };
 		fin.seekg(0, std::ios_base::beg);
 
-		Microsoft::WRL::ComPtr<ID3DBlob> blob;
-		CHECK_HR(D3DCreateBlob(size, blob.GetAddressOf()));
+		ID3DBlob* blob;
+		CHECK_HR(D3DCreateBlob(size, &blob));
 
 		fin.read((char*)blob->GetBufferPointer(), size);
 		fin.close();
@@ -29,21 +29,20 @@ namespace {
 
 std::unique_ptr<ShaderManager> ShaderManager::gManager = nullptr;
 
-std::size_t ShaderManager::LoadShaderFile(const std::string& filename, Microsoft::WRL::ComPtr<ID3DBlob>& blob) noexcept {
+std::size_t ShaderManager::LoadShaderFile(const std::string& filename, ID3DBlob* &blob) noexcept {
 	ASSERT(!filename.empty());
 
 	const std::size_t id{ mHash(filename) };
 	BlobById::iterator it{ mBlobById.find(id) };
+
 	if (it != mBlobById.end()) {
-		blob = it->second;
+		blob = it->second.Get();
 	} 
 	else {
 		blob = LoadBlob(filename);
-		mBlobById.insert(IdAndBlob(id, blob));
+		mBlobById.insert(IdAndBlob(id, Microsoft::WRL::ComPtr<ID3DBlob>(blob)));
 	}
-
-	ASSERT(blob.Get());
-
+	
 	return id;
 }
 
@@ -78,12 +77,12 @@ std::size_t ShaderManager::AddInputLayout(const std::string& name, const std::ve
 	return id;
 }
 
-Microsoft::WRL::ComPtr<ID3DBlob> ShaderManager::GetBlob(const std::size_t id) noexcept {
+ID3DBlob& ShaderManager::GetBlob(const std::size_t id) noexcept {
 	Microsoft::WRL::ComPtr<ID3DBlob> blob;
 	BlobById::iterator it{ mBlobById.find(id) };
 	ASSERT(it != mBlobById.end());
 
-	return it->second;
+	return *it->second.Get();
 }
 
 D3D12_SHADER_BYTECODE ShaderManager::GetShaderByteCode(const std::size_t id) noexcept {

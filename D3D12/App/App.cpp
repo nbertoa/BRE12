@@ -23,7 +23,7 @@ MainWndProc(HWND hwnd, const std::uint32_t msg, WPARAM wParam, LPARAM lParam) {
 App::App(HINSTANCE hInstance)
 	: mAppInst(hInstance)
 {
-	ASSERT(!mApp);
+	ASSERT(mApp == nullptr);
 	mApp = this;
 }
 
@@ -34,7 +34,7 @@ App::~App() {
 }
 
 int32_t App::Run() noexcept {
-	ASSERT(Keyboard::gKeyboard.get());
+	ASSERT(Keyboard::gKeyboard.get() != nullptr);
 
 	MSG msg{0U};
 
@@ -92,7 +92,7 @@ void App::Update(const float dt) noexcept {
 	static const float sCameraOffset{ 10.0f };
 	static const float sCameraMultiplier{ 5.0f };
 
-	ASSERT(Keyboard::gKeyboard.get());
+	ASSERT(Keyboard::gKeyboard.get() != nullptr);
 	const float offset = sCameraOffset * (Keyboard::gKeyboard->IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * dt ;
 	if (Keyboard::gKeyboard->IsKeyDown(DIK_W)) {
 		Camera::gCamera->Walk(offset);
@@ -113,7 +113,7 @@ void App::Update(const float dt) noexcept {
 void App::OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y) noexcept {
 	static int32_t lastXY[] = { 0, 0 };
 
-	ASSERT(Camera::gCamera.get());
+	ASSERT(Camera::gCamera.get() != nullptr);
 
 	if (btnState & MK_LBUTTON) {
 		// Make each pixel correspond to a quarter of a degree.+
@@ -129,8 +129,8 @@ void App::OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y) n
 }
 
 void App::CreateRtvAndDsv() noexcept {
-	ASSERT(mD3dDevice);
-	ASSERT(mSwapChain);
+	ASSERT(mD3dDevice != nullptr);
+	ASSERT(mSwapChain != nullptr);
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRtvHeap->GetCPUDescriptorHandleForHeapStart());
 	for (std::uint32_t i = 0U; i < sSwapChainBufferCount; ++i) {
@@ -241,25 +241,25 @@ LRESULT App::MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lParam)
 }
 
 void App::InitSystems() noexcept {
-	ASSERT(!Camera::gCamera.get());
+	ASSERT(Camera::gCamera.get() == nullptr);
 	Camera::gCamera = std::make_unique<Camera>();
 	Camera::gCamera->SetLens(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
 
-	ASSERT(!Keyboard::gKeyboard.get());
+	ASSERT(Keyboard::gKeyboard.get() == nullptr);
 	LPDIRECTINPUT8 directInput;
 	CHECK_HR(DirectInput8Create(mAppInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID*)&directInput, nullptr));
 	Keyboard::gKeyboard = std::make_unique<Keyboard>(*directInput, mMainWnd);
 
-	ASSERT(!PSOManager::gManager.get());
-	PSOManager::gManager = std::make_unique<PSOManager>(mD3dDevice);
+	ASSERT(PSOManager::gManager.get() == nullptr);
+	PSOManager::gManager = std::make_unique<PSOManager>(*mD3dDevice.Get());
 
-	ASSERT(!ResourceManager::gManager.get());
+	ASSERT(ResourceManager::gManager.get() == nullptr);
 	ResourceManager::gManager = std::make_unique<ResourceManager>(*mD3dDevice.Get());
 
-	ASSERT(!RootSignatureManager::gManager.get());
-	RootSignatureManager::gManager = std::make_unique<RootSignatureManager>(mD3dDevice);
+	ASSERT(RootSignatureManager::gManager.get() == nullptr);
+	RootSignatureManager::gManager = std::make_unique<RootSignatureManager>(*mD3dDevice.Get());
 
-	ASSERT(!ShaderManager::gManager.get());
+	ASSERT(ShaderManager::gManager.get() == nullptr);
 	ShaderManager::gManager = std::make_unique<ShaderManager>();
 }
 

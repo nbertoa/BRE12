@@ -48,7 +48,7 @@ void ShapesApp::Draw(const float) noexcept {
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	CHECK_HR(mCmdList->Reset(mDirectCmdListAlloc.Get(), mPSO.Get()));
+	CHECK_HR(mCmdList->Reset(mDirectCmdListAlloc.Get(), mPSO));
 
 	// Set the viewport and scissor rect.  This needs to be reset whenever the command list is reset.
 	mCmdList->RSSetViewports(1U, &mScreenViewport);
@@ -68,8 +68,8 @@ void ShapesApp::Draw(const float) noexcept {
 	mCmdList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
 
 	mCmdList->SetDescriptorHeaps(1U, mCBVHeap.GetAddressOf());
-	ASSERT(mRootSignature.Get());
-	mCmdList->SetGraphicsRootSignature(mRootSignature.Get());
+	ASSERT(mRootSignature != nullptr);
+	mCmdList->SetGraphicsRootSignature(mRootSignature);
 	ASSERT(mCBVHeap.Get());	
 	const CD3DX12_GPU_DESCRIPTOR_HANDLE cbvGpuDescHandle{ mCBVHeap->GetGPUDescriptorHandleForHeapStart() };
 	mCmdList->SetGraphicsRootDescriptorTable(0U, cbvGpuDescHandle);
@@ -102,7 +102,7 @@ void ShapesApp::Draw(const float) noexcept {
 }
 
 void ShapesApp::BuildPSO() noexcept {
-	ASSERT(mRootSignature.Get());
+	ASSERT(mRootSignature != nullptr);
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout  
 	{
@@ -127,7 +127,7 @@ void ShapesApp::BuildPSO() noexcept {
 	psoDesc.InputLayout = { inputLayout.data(), (std::uint32_t)inputLayout.size() };
 	psoDesc.NumRenderTargets = 1U;
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	psoDesc.pRootSignature = mRootSignature.Get();
+	psoDesc.pRootSignature = mRootSignature;
 	psoDesc.PS = pixelShader;
 	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 	psoDesc.RTVFormats[0U] = mBackBufferFormat;

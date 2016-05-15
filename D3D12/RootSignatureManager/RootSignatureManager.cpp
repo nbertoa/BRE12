@@ -4,7 +4,7 @@
 
 std::unique_ptr<RootSignatureManager> RootSignatureManager::gManager = nullptr;
 
-std::size_t RootSignatureManager::CreateRootSignature(const std::string& name, const CD3DX12_ROOT_SIGNATURE_DESC& desc, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSign) noexcept {
+std::size_t RootSignatureManager::CreateRootSignature(const std::string& name, const CD3DX12_ROOT_SIGNATURE_DESC& desc, ID3D12RootSignature* &rootSign) noexcept {
 	ASSERT(!name.empty());
 
 	const std::size_t id{ mHash(name) };
@@ -13,7 +13,8 @@ std::size_t RootSignatureManager::CreateRootSignature(const std::string& name, c
 	Microsoft::WRL::ComPtr<ID3DBlob> serializedRootSig;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
 	CHECK_HR(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1, serializedRootSig.GetAddressOf(), errorBlob.GetAddressOf()));
-	CHECK_HR(mDevice->CreateRootSignature(0U, serializedRootSig->GetBufferPointer(), serializedRootSig->GetBufferSize(), IID_PPV_ARGS(rootSign.GetAddressOf())));
+	Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature = mRootSignatureById[id];
+	CHECK_HR(mDevice.CreateRootSignature(0U, serializedRootSig->GetBufferPointer(), serializedRootSig->GetBufferSize(), IID_PPV_ARGS(&rootSign)));
 	mRootSignatureById.insert(IdAndRootSignature{ id, rootSign });
 
 	return id;

@@ -14,7 +14,7 @@
 
 class ShapesApp : public App {
 public:
-	ShapesApp(HINSTANCE hInstance);
+	explicit ShapesApp(HINSTANCE hInstance);
 	ShapesApp(const ShapesApp& rhs) = delete;
 	ShapesApp& operator=(const ShapesApp& rhs) = delete;
 
@@ -30,14 +30,14 @@ protected:
 		DirectX::XMFLOAT4 mPosition{ 0.0f, 0.0f, 0.0f, 0.0f };
 	};
 
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> mPSO;
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> mRootSignature;
+	ID3D12PipelineState* mPSO{ nullptr };
+	ID3D12RootSignature* mRootSignature{ nullptr };
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> mVertexBuffer;
+	ID3D12Resource* mVertexBuffer{ nullptr };
 	Microsoft::WRL::ComPtr<ID3D12Resource> mUploadVertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> mIndexBuffer;
+	ID3D12Resource* mIndexBuffer{ nullptr };
 	Microsoft::WRL::ComPtr<ID3D12Resource> mUploadIndexBuffer;
 	D3D12_INDEX_BUFFER_VIEW mIndexBufferView{};
 	std::uint32_t mNumIndices{ 0U };

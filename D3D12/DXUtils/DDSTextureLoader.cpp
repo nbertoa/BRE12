@@ -1243,7 +1243,7 @@ static HRESULT CreateD3DResources12(
 	ComPtr<ID3D12Resource>& textureUploadHeap
 	)
 {
-	ASSERT(initData);
+	ASSERT(initData != nullptr);
 
 	if (device == nullptr)
 		return E_POINTER;

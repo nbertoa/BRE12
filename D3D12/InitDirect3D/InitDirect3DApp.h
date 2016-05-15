@@ -10,7 +10,7 @@
 
 class InitDirect3DApp : public App {
 public:
-	InitDirect3DApp(HINSTANCE hInstance);
+	explicit InitDirect3DApp(HINSTANCE hInstance);
 	InitDirect3DApp(const InitDirect3DApp& rhs) = delete;
 	InitDirect3DApp& operator=(const InitDirect3DApp& rhs) = delete;
 	

@@ -9,11 +9,11 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	const std::string& name,
 	ID3D12GraphicsCommandList& cmdList,
 	const void* initData,
-	const std::uint64_t byteSize,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& defaultBuffer,
+	const std::size_t byteSize,
+	ID3D12Resource* &defaultBuffer,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept
 {
-	ASSERT(initData);
+	ASSERT(initData != nullptr);
 	ASSERT(byteSize > 0);
 	ASSERT(!name.empty());
 
@@ -30,7 +30,7 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 		&resDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
-		IID_PPV_ARGS(defaultBuffer.GetAddressOf())));
+		IID_PPV_ARGS(&defaultBuffer)));
 
 	// In order to copy CPU memory data into our default buffer, we need to create
 	// an intermediate upload heap. 
@@ -53,13 +53,13 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	// Schedule to copy the data to the default buffer resource. At a high level, the helper function UpdateSubresources
 	// will copy the CPU memory into the intermediate upload heap.  Then, using ID3D12CommandList::CopySubresourceRegion,
 	// the intermediate upload heap data will be copied to mBuffer.
-	CD3DX12_RESOURCE_BARRIER resBarrier{ CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST) };
+	CD3DX12_RESOURCE_BARRIER resBarrier{ CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST) };
 	cmdList.ResourceBarrier(1, &resBarrier);
-	UpdateSubresources<1>(&cmdList, defaultBuffer.Get(), uploadBuffer.Get(), 0, 0, 1, &subResourceData);
-	resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+	UpdateSubresources<1>(&cmdList, defaultBuffer, uploadBuffer.Get(), 0, 0, 1, &subResourceData);
+	resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 	cmdList.ResourceBarrier(1, &resBarrier);
 
-	mResourceById.insert(IdAndResource{ id, defaultBuffer });
+	mResourceById.insert(IdAndResource{ id, Microsoft::WRL::ComPtr<ID3D12Resource>(defaultBuffer) });
 
 	return id;
 }
@@ -76,16 +76,16 @@ std::size_t ResourceManager::CreateUploadBuffer(const std::string& name, const s
 	return id;
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> ResourceManager::GetResource(const std::size_t id) noexcept {
+ID3D12Resource& ResourceManager::GetResource(const std::size_t id) noexcept {
 	ResourceById::iterator it{ mResourceById.find(id) };
 	ASSERT(it != mResourceById.end());
 
-	return it->second;
+	return *it->second.Get();
 }
 
-UploadBuffer* ResourceManager::GetUploadBuffer(const size_t id) noexcept {
+UploadBuffer& ResourceManager::GetUploadBuffer(const size_t id) noexcept {
 	UploadBufferById::iterator it{ mUploadBufferById.find(id) };
 	ASSERT(it != mUploadBufferById.end());
 
-	return it->second.get();
+	return *it->second.get();
 }

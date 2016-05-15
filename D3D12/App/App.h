@@ -17,7 +17,7 @@
 
 class App {
 protected:
-	App(HINSTANCE hInstance);
+	explicit App(HINSTANCE hInstance);
 	App(const App& rhs) = delete;
 	App& operator=(const App& rhs) = delete;
 	virtual ~App();

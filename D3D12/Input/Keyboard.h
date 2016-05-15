@@ -9,7 +9,7 @@ class Keyboard {
 public:
 	static std::unique_ptr<Keyboard> gKeyboard;
 
-	Keyboard(IDirectInput8& directInput, const HWND windowHandle);
+	explicit Keyboard(IDirectInput8& directInput, const HWND windowHandle);
 	Keyboard(const Keyboard&) = delete;
 	const Keyboard& operator=(const Keyboard& rhs) = delete;
 	~Keyboard();
