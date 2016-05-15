@@ -368,3 +368,4 @@
 /D3D12/ResourceManager/*.tmp
 /D3D12/App/x64/Debug/*.xml
 /D3D12/RootSignatureManager/x64/Debug/*.xml
+/D3D12/ResourceManager/ResourceManager.vcxproj.user

@@ -353,6 +353,9 @@ void App::CreateSwapChain() noexcept {
 
 	// Note: Swap chain uses queue to perform flush.
 	CHECK_HR(mDxgiFactory->CreateSwapChain(mCmdQueue.Get(), &sd, mSwapChain.GetAddressOf()));
+
+	// Resize the swap chain.
+	CHECK_HR(mSwapChain->ResizeBuffers(sSwapChainBufferCount, mWindowWidth, mWindowHeight, mBackBufferFormat, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
 }
 
 void App::FlushCommandQueue() noexcept {

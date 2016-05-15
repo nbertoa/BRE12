@@ -72,7 +72,8 @@ void ShapesApp::Draw(const float) noexcept {
 	mCmdList->SetGraphicsRootSignature(mRootSignature);
 	ASSERT(mCBVHeap.Get());	
 	const CD3DX12_GPU_DESCRIPTOR_HANDLE cbvGpuDescHandle{ mCBVHeap->GetGPUDescriptorHandleForHeapStart() };
-	mCmdList->SetGraphicsRootDescriptorTable(0U, cbvGpuDescHandle);
+	//mCmdList->SetGraphicsRootDescriptorTable(0U, cbvGpuDescHandle);
+	mCmdList->SetGraphicsRootConstantBufferView(0U, mCBVsUploadBuffer->Resource()->GetGPUVirtualAddress());
 
 	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferView);
 	mCmdList->IASetIndexBuffer(&mIndexBufferView);
@@ -195,13 +196,21 @@ void ShapesApp::BuildConstantBuffers() noexcept {
 
 void ShapesApp::BuildRootSignature() noexcept {
 	// Build root parameter: 1 desc table with 1 CBV
-	CD3DX12_DESCRIPTOR_RANGE cbvTable{};
-	cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1U, 0U);
+	/*CD3DX12_DESCRIPTOR_RANGE cbvTable{};
+	cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1U, 0U);*/
 	CD3DX12_ROOT_PARAMETER slotRootParameter{};
-	slotRootParameter.InitAsDescriptorTable(1U, &cbvTable);
+	//slotRootParameter.InitAsDescriptorTable(1U, &cbvTable);
+	slotRootParameter.InitAsConstantBufferView(0U, 0U, D3D12_SHADER_VISIBILITY_VERTEX);
 
 	// Build root signature
-	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc{ 1U, &slotRootParameter, 0U, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT };
+	const D3D12_ROOT_SIGNATURE_FLAGS flags =
+	    D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
+
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc{ 1U, &slotRootParameter, 0U, nullptr, flags };
 	const std::string idStr{ "root_signature" };
 	RootSignatureManager::gManager->CreateRootSignature(idStr, rootSigDesc, mRootSignature);
 }
