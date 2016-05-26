@@ -2,11 +2,12 @@
 
 #include <DXUtils/d3dx12.h>
 #include <Utils/DebugUtils.h>
+#include <Utils/HashUtils.h>
 
 std::unique_ptr<ResourceManager> ResourceManager::gManager = nullptr;
 
 std::size_t ResourceManager::CreateDefaultBuffer(
-	const std::string& name,
+	const char* name,
 	ID3D12GraphicsCommandList& cmdList,
 	const void* initData,
 	const std::size_t byteSize,
@@ -15,11 +16,15 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 {
 	ASSERT(initData != nullptr);
 	ASSERT(byteSize > 0);
-	ASSERT(!name.empty());
+	ASSERT(name != nullptr);
 
-	const std::size_t id{ mHash(name) };
+	const std::size_t id{ HashUtils::HashCString(name) };
+	ResourceById::accessor accessor;
 
-	ASSERT(mResourceById.find(id) == mResourceById.end());
+#ifdef _DEBUG
+	mResourceById.find(accessor, id);
+	ASSERT(accessor.empty());
+#endif
 
 	// Create the actual default buffer resource.
 	CD3DX12_HEAP_PROPERTIES heapProps{ CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT) };
@@ -59,33 +64,46 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 	cmdList.ResourceBarrier(1, &resBarrier);
 
-	mResourceById.insert(IdAndResource{ id, Microsoft::WRL::ComPtr<ID3D12Resource>(defaultBuffer) });
+	mResourceById.insert(accessor, id);
+	accessor->second = Microsoft::WRL::ComPtr<ID3D12Resource>(defaultBuffer);
+	accessor.release();
 
 	return id;
 }
 
-std::size_t ResourceManager::CreateUploadBuffer(const std::string& name, const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept {
-	ASSERT(!name.empty());
-	const std::size_t id{ mHash(name) };
-	ASSERT(mUploadBufferById.find(id) == mUploadBufferById.end());
+std::size_t ResourceManager::CreateUploadBuffer(const char* name, const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept {
+	ASSERT(name != nullptr);
+	const std::size_t id{ HashUtils::HashCString(name) };
+	UploadBufferById::accessor accessor;
+#ifdef _DEBUG
+	mUploadBufferById.find(accessor, id);
+	ASSERT(accessor.empty());
+#endif
 
-	std::unique_ptr<UploadBuffer>& uploadBuffer = mUploadBufferById[id];
-	uploadBuffer = std::make_unique<UploadBuffer>(mDevice, elemSize, elemCount);
-	buffer = uploadBuffer.get();
+	mUploadBufferById.insert(accessor, id);
+	accessor->second = std::make_unique<UploadBuffer>(mDevice, elemSize, elemCount);
+	buffer = accessor->second.get();
+	accessor.release();
 
 	return id;
 }
 
 ID3D12Resource& ResourceManager::GetResource(const std::size_t id) noexcept {
-	ResourceById::iterator it{ mResourceById.find(id) };
-	ASSERT(it != mResourceById.end());
+	ResourceById::accessor accessor;
+	mResourceById.find(accessor, id);
+	ASSERT(!accessor.empty());
+	ID3D12Resource* res{ accessor->second.Get() };
+	accessor.release();
 
-	return *it->second.Get();
+	return *res;
 }
 
 UploadBuffer& ResourceManager::GetUploadBuffer(const size_t id) noexcept {
-	UploadBufferById::iterator it{ mUploadBufferById.find(id) };
-	ASSERT(it != mUploadBufferById.end());
+	UploadBufferById::accessor accessor;
+	mUploadBufferById.find(accessor, id);
+	ASSERT(!accessor.empty());
+	UploadBuffer* buf{ accessor->second.get() };
+	accessor.release();
 
-	return *it->second.get();
+	return *buf;
 }

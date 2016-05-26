@@ -110,16 +110,13 @@ void ShapesApp::BuildPSO() noexcept {
 		{"POSITION", 0U, DXGI_FORMAT_R32G32B32A32_FLOAT, 0U, 0U, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA , 0U}
 	};
 
-	const std::string idName{ "position_input_layout" };
-	ShaderManager::gManager->AddInputLayout(idName, inputLayout);
+	ShaderManager::gManager->AddInputLayout("position_input_layout", inputLayout);
 
 	D3D12_SHADER_BYTECODE vertexShader;
-	std::string filename = "ShapesApp/VS.cso";
-	ShaderManager::gManager->LoadShaderFile(filename, vertexShader);
+	ShaderManager::gManager->LoadShaderFile("ShapesApp/VS.cso", vertexShader);
 
 	D3D12_SHADER_BYTECODE pixelShader;
-	filename = "ShapesApp/PS.cso";
-	ShaderManager::gManager->LoadShaderFile(filename, pixelShader);
+	ShaderManager::gManager->LoadShaderFile("ShapesApp/PS.cso", pixelShader);
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
@@ -137,8 +134,7 @@ void ShapesApp::BuildPSO() noexcept {
 	psoDesc.SampleMask = UINT_MAX;
 	psoDesc.VS = vertexShader;
 
-	const std::string psoName = "default";
-	PSOManager::gManager->CreateGraphicsPSO(psoName, psoDesc, mPSO);
+	PSOManager::gManager->CreateGraphicsPSO("default", psoDesc, mPSO);
 }
 
 void ShapesApp::BuildVertexAndIndexBuffers() noexcept {
@@ -153,16 +149,14 @@ void ShapesApp::BuildVertexAndIndexBuffers() noexcept {
 
 	// Buffers creation
 	std::uint32_t byteSize = numVertices * sizeof(Vertex);
-	std::string bufferName{ "vertex_buffer" };
-	ResourceManager::gManager->CreateDefaultBuffer(bufferName, *mCmdList.Get(), vertices.data(), byteSize, mVertexBuffer, mUploadVertexBuffer);
+	ResourceManager::gManager->CreateDefaultBuffer("vertex_buffer", *mCmdList.Get(), vertices.data(), byteSize, mVertexBuffer, mUploadVertexBuffer);
 	mVertexBufferView.BufferLocation = mVertexBuffer->GetGPUVirtualAddress();
 	mVertexBufferView.SizeInBytes = byteSize;
 	mVertexBufferView.StrideInBytes = sizeof(Vertex);
 
 	mNumIndices = (std::uint32_t)meshData.mIndices32.size();
 	byteSize = mNumIndices * sizeof(std::uint32_t);
-	bufferName = std::string{ "index_buffer" };
-	ResourceManager::gManager->CreateDefaultBuffer(bufferName, *mCmdList.Get(), meshData.mIndices32.data(), byteSize, mIndexBuffer, mUploadIndexBuffer);
+	ResourceManager::gManager->CreateDefaultBuffer("index_buffer", *mCmdList.Get(), meshData.mIndices32.data(), byteSize, mIndexBuffer, mUploadIndexBuffer);
 	mIndexBufferView.BufferLocation = mIndexBuffer->GetGPUVirtualAddress();
 	mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	mIndexBufferView.SizeInBytes = byteSize;
@@ -183,8 +177,7 @@ void ShapesApp::BuildConstantBuffers() noexcept {
 
 	// Create constant buffer.
 	const std::size_t elemSize = UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4));
-	const std::string& idStr{ "cbv" };
-	ResourceManager::gManager->CreateUploadBuffer(idStr, elemSize, 1U, mCBVsUploadBuffer);
+	ResourceManager::gManager->CreateUploadBuffer("cbv", elemSize, 1U, mCBVsUploadBuffer);
 
 	// Create constant buffer view
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
@@ -211,8 +204,7 @@ void ShapesApp::BuildRootSignature() noexcept {
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
 
 	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc{ 1U, &slotRootParameter, 0U, nullptr, flags };
-	const std::string idStr{ "root_signature" };
-	RootSignatureManager::gManager->CreateRootSignature(idStr, rootSigDesc, mRootSignature);
+	RootSignatureManager::gManager->CreateRootSignature("root_signature", rootSigDesc, mRootSignature);
 }
 
 void ShapesApp::UpdateConstantBuffers() noexcept {

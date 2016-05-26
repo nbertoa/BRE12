@@ -405,15 +405,8 @@ void App::CalculateFrameStats() noexcept {
 
 	// Compute averages over one second period.
 	if ((mTimer.TotalTime() - timeElapsed) > 1.0f) {
-		const float fps{ (float)frameCnt }; // fps = frameCnt / 1
-		const float mspf{ 1000.0f / fps };
-
-		const std::wstring fpsStr{ std::to_wstring(fps) };
-		const std::wstring mspfStr{ std::to_wstring(mspf) };
-
-		const std::wstring windowText{ L"    fps: " + fpsStr + L"   mspf: " + mspfStr };
-
-		SetWindowText(mMainWnd, windowText.c_str());
+		const float mspf{ 1000.0f / frameCnt };
+		SetWindowText(mMainWnd, std::to_wstring(mspf).c_str());
 
 		// Reset for next average.
 		frameCnt = 0U;
