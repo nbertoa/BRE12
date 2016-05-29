@@ -21,7 +21,12 @@ MainWndProc(HWND hwnd, const std::uint32_t msg, WPARAM wParam, LPARAM lParam) {
 }
 
 App::App(HINSTANCE hInstance)
-	: mAppInst(hInstance)
+#ifdef _DEBUG
+	: mTaskSchedulerInit()
+#else 
+	: mTaskSchedulerInit()
+#endif
+	, mAppInst(hInstance)
 {
 	ASSERT(mApp == nullptr);
 	mApp = this;
@@ -31,6 +36,8 @@ App::~App() {
 	if (mD3dDevice != nullptr) {
 		FlushCommandQueue();
 	}
+
+	mTaskSchedulerInit.terminate();
 }
 
 int32_t App::Run() noexcept {
@@ -53,9 +60,9 @@ int32_t App::Run() noexcept {
 			if (!mAppPaused) {
 				const float dt = mTimer.DeltaTime();
 				CalculateFrameStats();
-				Keyboard::gKeyboard->Update();
-				Update(dt);
 				Draw(dt);
+				Keyboard::gKeyboard->Update();
+				Update(dt);				
 			}
 			else {
 				Sleep(100U);
@@ -70,6 +77,9 @@ void App::Initialize() noexcept {
 	InitMainWindow();
 	InitDirect3D();
 	InitSystems();
+
+	//tbb::empty_task* parent{ CommandListProcessor::Create(mCmdListProcessor, mCmdQueue) };
+	//ASSERT(parent != nullptr);
 }
 
 void App::CreateRtvAndDsvDescriptorHeaps() noexcept {
@@ -366,7 +376,7 @@ void App::FlushCommandQueue() noexcept {
 	// are on the GPU timeline, the new fence point won't be set until the GPU finishes
 	// processing all the commands prior to this Signal().
 	CHECK_HR(mCmdQueue->Signal(mFence.Get(), mCurrentFence));
-
+	
 	// Wait until the GPU has completed commands up to this fence point.
 	if (mFence->GetCompletedValue() < mCurrentFence) {
 		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };

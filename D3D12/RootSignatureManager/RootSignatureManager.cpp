@@ -5,7 +5,7 @@
 
 std::unique_ptr<RootSignatureManager> RootSignatureManager::gManager = nullptr;
 
-std::size_t RootSignatureManager::CreateRootSignature(const char* name, const CD3DX12_ROOT_SIGNATURE_DESC& desc, ID3D12RootSignature* &rootSign) noexcept {
+std::size_t RootSignatureManager::CreateRootSignature(const char* name, const D3D12_ROOT_SIGNATURE_DESC& desc, ID3D12RootSignature* &rootSign) noexcept {
 	ASSERT(name != nullptr);
 
 	const std::size_t id{ HashUtils::HashCString(name) };

@@ -369,3 +369,17 @@
 /D3D12/App/x64/Debug/*.xml
 /D3D12/RootSignatureManager/x64/Debug/*.xml
 /D3D12/ResourceManager/ResourceManager.vcxproj.user
+/D3D12/RenderTask/x64/Debug/RenderTask.idb
+/D3D12/RenderTask/x64/Debug/RenderTask.tlog/RenderTask.lastbuildstate
+/D3D12/RenderTask/x64/Debug/RenderTask.log
+/D3D12/RenderTask/x64/Debug/RenderTask.pdb
+/D3D12/x64/Release/tbb.pdb
+/D3D12/x64/Release/tbb_preview.pdb
+/D3D12/x64/Release/tbbmalloc.pdb
+/D3D12/x64/Release/tbbmalloc_proxy.pdb
+/D3D12/RenderTask/x64/Debug/RenderTask.tlog/CL.command.1.tlog
+/D3D12/RenderTask/x64/Debug/RenderTask.tlog/CL.read.1.tlog
+/D3D12/RenderTask/x64/Debug/RenderTask.tlog/CL.write.1.tlog
+/D3D12/RenderTask/x64/Debug/RenderTask.tlog/Lib-link.read.1.tlog
+/D3D12/RenderTask/x64/Debug/RenderTask.tlog/Lib-link.write.1.tlog
+/D3D12/RenderTask/x64/Debug/RenderTask.tlog/lib.command.1.tlog

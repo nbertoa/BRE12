@@ -3,6 +3,7 @@
 #include <DirectXColors.h>
 
 #include <Camera\Camera.h>
+#include <DXutils/D3DFactory.h>
 #include <DXUtils\d3dx12.h>
 #include <GeometryGenerator\GeometryGenerator.h>
 #include <PSOManager\PSOManager.h>
@@ -91,6 +92,8 @@ void ShapesApp::Draw(const float) noexcept {
 	ID3D12CommandList* cmdLists[] = { mCmdList.Get() };
 	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 
+	//mCmdListProcessor->cmdListQueue()->push(mCmdList.Get());
+
 	// swap the back and front buffers
 	ASSERT(mSwapChain.Get());
 	CHECK_HR(mSwapChain->Present(0U, 0U));
@@ -105,10 +108,7 @@ void ShapesApp::Draw(const float) noexcept {
 void ShapesApp::BuildPSO() noexcept {
 	ASSERT(mRootSignature != nullptr);
 
-	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout  
-	{
-		{"POSITION", 0U, DXGI_FORMAT_R32G32B32A32_FLOAT, 0U, 0U, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA , 0U}
-	};
+	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout{ D3DFactory::PosInputLayout() };
 
 	ShaderManager::gManager->AddInputLayout("position_input_layout", inputLayout);
 
@@ -119,15 +119,15 @@ void ShapesApp::BuildPSO() noexcept {
 	ShaderManager::gManager->LoadShaderFile("ShapesApp/PS.cso", pixelShader);
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	psoDesc.BlendState = D3DFactory::DefaultBlendDesc();
+	psoDesc.DepthStencilState = D3DFactory::DefaultDepthStencilDesc();
 	psoDesc.DSVFormat = mDepthStencilFormat;
 	psoDesc.InputLayout = { inputLayout.data(), (std::uint32_t)inputLayout.size() };
 	psoDesc.NumRenderTargets = 1U;
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	psoDesc.pRootSignature = mRootSignature;
 	psoDesc.PS = pixelShader;
-	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	psoDesc.RasterizerState = D3DFactory::DefaultRasterizerDesc();
 	psoDesc.RTVFormats[0U] = mBackBufferFormat;
 	psoDesc.SampleDesc.Count = 1U;
 	psoDesc.SampleDesc.Quality = 0U;
@@ -203,7 +203,7 @@ void ShapesApp::BuildRootSignature() noexcept {
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
 
-	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc{ 1U, &slotRootParameter, 0U, nullptr, flags };
+	D3D12_ROOT_SIGNATURE_DESC rootSigDesc{ 1U, &slotRootParameter, 0U, nullptr, flags };
 	RootSignatureManager::gManager->CreateRootSignature("root_signature", rootSigDesc, mRootSignature);
 }
 
