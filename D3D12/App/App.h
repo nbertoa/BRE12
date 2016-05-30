@@ -101,6 +101,4 @@ protected:
 	DXGI_FORMAT mDepthStencilFormat{DXGI_FORMAT_D24_UNORM_S8_UINT};
 	int32_t mWindowWidth{1920};
 	int32_t mWindowHeight{1080};
-
-	CommandListProcessor* mCmdListProcessor;
 };

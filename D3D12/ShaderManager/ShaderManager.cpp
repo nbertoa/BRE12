@@ -76,22 +76,6 @@ std::size_t ShaderManager::LoadShaderFile(const char* filename, D3D12_SHADER_BYT
 	return id;
 }
 
-std::size_t ShaderManager::AddInputLayout(const char* name, const std::vector<D3D12_INPUT_ELEMENT_DESC>& desc) noexcept {
-	ASSERT(name != nullptr);
-
-	const std::size_t id{ HashUtils::HashCString(name) };
-	InputLayoutById::accessor accesor;
-#ifdef _DEBUG
-	mInputLayoutById.find(accesor, id);
-	ASSERT(accesor.empty());
-#endif
-	mInputLayoutById.insert(accesor, id);
-	accesor->second = desc;
-	accesor.release();
-
-	return id;
-}
-
 ID3DBlob& ShaderManager::GetBlob(const std::size_t id) noexcept {
 	BlobById::accessor accessor;
 	mBlobById.find(accessor, id);
@@ -117,28 +101,10 @@ D3D12_SHADER_BYTECODE ShaderManager::GetShaderByteCode(const std::size_t id) noe
 	return shaderByteCode;
 }
 
-const std::vector<D3D12_INPUT_ELEMENT_DESC>& ShaderManager::GetInputLayout(const std::size_t id) noexcept {
-	InputLayoutById::accessor accessor;
-	mInputLayoutById.find(accessor, id);
-	ASSERT(accessor.empty());
-	const std::vector<D3D12_INPUT_ELEMENT_DESC>& desc{ accessor->second };
-	accessor.release();
-	
-	return desc;
-}
-
 void ShaderManager::EraseShader(const std::size_t id) noexcept {
 	BlobById::accessor accessor;
 	mBlobById.find(accessor, id);
 	ASSERT(!accessor.empty());
 	mBlobById.erase(accessor);
-	accessor.release();
-}
-
-void ShaderManager::EraseInputLayout(const std::size_t id) noexcept {
-	InputLayoutById::accessor accessor;
-	mInputLayoutById.find(accessor, id);
-	ASSERT(!accessor.empty());
-	mInputLayoutById.erase(accessor);
 	accessor.release();
 }

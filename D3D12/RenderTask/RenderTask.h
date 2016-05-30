@@ -4,14 +4,19 @@
 #include <d3d12.h>
 #include <DirectXMath.h>
 #include <tbb/concurrent_vector.h>
+#include <wrl.h>
 
 #include <DXUtils/D3DFactory.h>
 #include <GeometryGenerator/GeometryGenerator.h>
 #include <MathUtils/MathHelper.h>
 
-// Fill this data and pass to RenderTask instance
+// Fill this data and pass to RenderTask::Init()
 struct RenderTaskInitData {
 	RenderTaskInitData() = default;
+	RenderTaskInitData(const RenderTaskInitData&) = delete;
+	const RenderTaskInitData& operator=(const RenderTaskInitData&) = delete;
+	
+	bool ValidateData() const;
 
 	const char* mRootSignName{ nullptr };
 	D3D12_ROOT_SIGNATURE_DESC mRootSignDesc{};
@@ -19,7 +24,9 @@ struct RenderTaskInitData {
 	using MeshDataVec = std::vector<GeometryGenerator::MeshData>;
 	MeshDataVec mMeshDataVec{};
 
-	// If a vertex shader filename is nullptr, then we do not load it.
+	const char* mPSOName{ nullptr };
+
+	// If a shader filename is nullptr, then we do not load it.
 	std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout{};
 	const char* mVSFilename{ nullptr };
 	const char* mGSFilename{ nullptr };
@@ -37,17 +44,18 @@ struct RenderTaskInitData {
 	std::uint32_t mSampleMask{ UINT_MAX };
 };
 
-// - Inherit from this class and implement virtual methods.
+// - Inherit from this class and reimplement virtual methods.
 class RenderTask {
 public:
-	explicit RenderTask() {};
+	explicit RenderTask(ID3D12Device* device);
+	RenderTask(const RenderTask&) = delete;
+	const RenderTask& operator=(const RenderTask&) = delete;
 
-	virtual void Init(const RenderTaskInitData& /*initData*/) noexcept {};
+	virtual void Init(const RenderTaskInitData& initData) noexcept;
 	virtual void Update() noexcept {};
 	
 	// Store new command lists in cmdLists  
 	virtual void BuildCmdLists(tbb::concurrent_vector<ID3D12CommandList*>& /*cmdLists*/) noexcept {};
-	virtual void Destroy() noexcept {};	
 
 private:
 	struct GeometryData {
@@ -55,17 +63,39 @@ private:
 
 		DirectX::XMFLOAT4X4 mWorld{ MathHelper::Identity4x4() };
 
+		const char* mVertexBufferName{ nullptr };
 		ID3D12Resource* mVertexBuffer{ nullptr };
+		Microsoft::WRL::ComPtr<ID3D12Resource> mUploadVertexBuffer;
+		D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
+
+		const char* mIndexBufferName{ nullptr };
 		ID3D12Resource* mIndexBuffer{ nullptr };
+		Microsoft::WRL::ComPtr<ID3D12Resource> mUploadIndexBuffer;
+		D3D12_INDEX_BUFFER_VIEW mIndexBufferView{};
 
 		std::uint32_t mIndexCount{ 0U };
 		std::uint32_t mStartIndexLoc{ 0U };
 		std::uint32_t mBaseVertexLoc{ 0U };
 	};
 
+	void BuildRootSignature(const char* rootSignName, const D3D12_ROOT_SIGNATURE_DESC& rootSignDesc) noexcept;
+	void BuildPSO(const RenderTaskInitData& initData) noexcept;
+	void BuildVertexAndIndexBuffers(
+		GeometryData& geomData, 
+		const void* vertsData, 
+		const std::uint32_t numVerts, 
+		const std::size_t vertexSize, 
+		const void* indexData,
+		const std::uint32_t numIndices) noexcept;
+	void BuildCommandObjects() noexcept;
+	
+	ID3D12Device* mDevice{ nullptr };
+
 	ID3D12RootSignature* mRootSign{ nullptr };
 	ID3D12PipelineState* mPSO{ nullptr };
-	D3D12_PRIMITIVE_TOPOLOGY mTopology{ D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST };
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCmdList;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mCmdListAllocator;
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
 	
 	using GeometryDataVec = std::vector<GeometryData>;
 	GeometryDataVec mGeomDataVec{};

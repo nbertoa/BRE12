@@ -110,8 +110,6 @@ void ShapesApp::BuildPSO() noexcept {
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout{ D3DFactory::PosInputLayout() };
 
-	ShaderManager::gManager->AddInputLayout("position_input_layout", inputLayout);
-
 	D3D12_SHADER_BYTECODE vertexShader;
 	ShaderManager::gManager->LoadShaderFile("ShapesApp/VS.cso", vertexShader);
 
