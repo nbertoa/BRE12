@@ -27,8 +27,8 @@ public:
 	void EraseShader(const std::size_t id) noexcept;
 
 	// Invalidate all ids.
-	void ClearShaders() noexcept { mBlobById.clear(); }
-	void Clear() noexcept { ClearShaders(); }
+	__forceinline void ClearShaders() noexcept { mBlobById.clear(); }
+	__forceinline void Clear() noexcept { ClearShaders(); }
 
 private:
 	using BlobById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3DBlob>>;

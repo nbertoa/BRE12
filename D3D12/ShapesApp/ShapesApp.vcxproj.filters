@@ -2,9 +2,11 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="ShapesApp.cpp" />
+    <ClCompile Include="ShapeTask.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShapesApp.h" />
+    <ClInclude Include="ShapeTask.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VS.hlsl" />

@@ -16,15 +16,15 @@ public:
 
 	void Update() noexcept;
 
-	const std::uint8_t* const CurrentState() const noexcept { return mCurrentState; }
-	const std::uint8_t* const LastState() const noexcept { return mLastState; }
-	bool IsKeyUp(const std::uint8_t key) const noexcept { return (mCurrentState[key] & 0x80) == 0U; }
-	bool IsKeyDown(const std::uint8_t key) const noexcept { return (mCurrentState[key] & 0x80) != 0U; }
-	bool WasKeyUp(const std::uint8_t key) const noexcept { return (mLastState[key] & 0x80) == 0U; }
-	bool WasKeyDown(const std::uint8_t key) const noexcept { return (mLastState[key] & 0x80) != 0U; }
-	bool WasKeyPressedThisFrame(const std::uint8_t key) const noexcept { return IsKeyDown(key) && WasKeyUp(key); }
-	bool WasKeyReleasedThisFrame(const std::uint8_t key) const noexcept { return IsKeyUp(key) && WasKeyDown(key); }
-	bool IsKeyHeldDown(const std::uint8_t key) const noexcept { return IsKeyDown(key) && WasKeyDown(key); }
+	__forceinline const std::uint8_t* const CurrentState() const noexcept { return mCurrentState; }
+	__forceinline const std::uint8_t* const LastState() const noexcept { return mLastState; }
+	__forceinline bool IsKeyUp(const std::uint8_t key) const noexcept { return (mCurrentState[key] & 0x80) == 0U; }
+	__forceinline bool IsKeyDown(const std::uint8_t key) const noexcept { return (mCurrentState[key] & 0x80) != 0U; }
+	__forceinline bool WasKeyUp(const std::uint8_t key) const noexcept { return (mLastState[key] & 0x80) == 0U; }
+	__forceinline bool WasKeyDown(const std::uint8_t key) const noexcept { return (mLastState[key] & 0x80) != 0U; }
+	__forceinline bool WasKeyPressedThisFrame(const std::uint8_t key) const noexcept { return IsKeyDown(key) && WasKeyUp(key); }
+	__forceinline bool WasKeyReleasedThisFrame(const std::uint8_t key) const noexcept { return IsKeyUp(key) && WasKeyDown(key); }
+	__forceinline bool IsKeyHeldDown(const std::uint8_t key) const noexcept { return IsKeyDown(key) && WasKeyDown(key); }
 
 private:
 	IDirectInput8& mDirectInput;

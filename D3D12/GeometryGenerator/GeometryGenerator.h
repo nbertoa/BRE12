@@ -50,7 +50,7 @@ public:
 		std::vector<Vertex> mVertices;
         std::vector<std::uint32_t> mIndices32;
 
-        std::vector<std::uint16_t>& GetIndices16() noexcept {
+		__forceinline std::vector<std::uint16_t>& GetIndices16() noexcept {
 			if(mIndices16.empty()) {
 				mIndices16.resize(mIndices32.size());
 				for (std::size_t i = 0; i < mIndices32.size(); ++i) {

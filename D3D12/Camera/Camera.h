@@ -13,40 +13,40 @@ public:
 	Camera();
 
 	// Get/Set world camera position.
-	DirectX::XMVECTOR GetPosition() const noexcept { return XMLoadFloat3(&mPosition); }
-	DirectX::XMFLOAT3 GetPosition3f() const noexcept { return mPosition; }
-	void SetPosition(const float x, const float y, const float z) noexcept {
+	__forceinline DirectX::XMVECTOR GetPosition() const noexcept { return XMLoadFloat3(&mPosition); }
+	__forceinline DirectX::XMFLOAT3 GetPosition3f() const noexcept { return mPosition; }
+	__forceinline void SetPosition(const float x, const float y, const float z) noexcept {
 		mPosition = DirectX::XMFLOAT3(x, y, z);
 		mViewDirty = true;
 	}
-	void SetPosition(const DirectX::XMFLOAT3& v) noexcept {
+	__forceinline void SetPosition(const DirectX::XMFLOAT3& v) noexcept {
 		mPosition = v;
 		mViewDirty = true;
 	}
 	
 	// Get camera basis vectors.
-	DirectX::XMVECTOR GetRight() const noexcept { return XMLoadFloat3(&mRight); }
-	DirectX::XMFLOAT3 GetRight3f() const noexcept { return mRight; }
-	DirectX::XMVECTOR GetUp() const noexcept { return XMLoadFloat3(&mUp); }
-	DirectX::XMFLOAT3 GetUp3f() const noexcept { return mUp; }
-	DirectX::XMVECTOR GetLook() const noexcept { return XMLoadFloat3(&mLook); }
-	DirectX::XMFLOAT3 GetLook3f() const noexcept { return mLook; }
+	__forceinline DirectX::XMVECTOR GetRight() const noexcept { return XMLoadFloat3(&mRight); }
+	__forceinline DirectX::XMFLOAT3 GetRight3f() const noexcept { return mRight; }
+	__forceinline DirectX::XMVECTOR GetUp() const noexcept { return XMLoadFloat3(&mUp); }
+	__forceinline DirectX::XMFLOAT3 GetUp3f() const noexcept { return mUp; }
+	__forceinline DirectX::XMVECTOR GetLook() const noexcept { return XMLoadFloat3(&mLook); }
+	__forceinline DirectX::XMFLOAT3 GetLook3f() const noexcept { return mLook; }
 
 	// Get frustum properties.
-	float GetNearZ() const noexcept { return mNearZ; }
-	float GetFarZ() const noexcept { return mFarZ; }
-	float GetAspect() const noexcept { return mAspect; }
-	float GetFovY() const noexcept { return mFovY; }
-	float GetFovX() const noexcept {
+	__forceinline float GetNearZ() const noexcept { return mNearZ; }
+	__forceinline float GetFarZ() const noexcept { return mFarZ; }
+	__forceinline float GetAspect() const noexcept { return mAspect; }
+	__forceinline float GetFovY() const noexcept { return mFovY; }
+	__forceinline float GetFovX() const noexcept {
 		const float halfWidth{ 0.5f * GetNearWindowWidth() };
 		return (float) (2.0 * atan(halfWidth / mNearZ));
 	}
 
 	// Get near and far plane dimensions in view space coordinates.
-	float GetNearWindowWidth() const noexcept { return mAspect * mNearWindowHeight; }
-	float GetNearWindowHeight() const noexcept { return mNearWindowHeight; }
-	float GetFarWindowWidth() const noexcept { return mAspect * mFarWindowHeight; }
-	float GetFarWindowHeight() const noexcept { return mFarWindowHeight; }
+	__forceinline float GetNearWindowWidth() const noexcept { return mAspect * mNearWindowHeight; }
+	__forceinline float GetNearWindowHeight() const noexcept { return mNearWindowHeight; }
+	__forceinline float GetFarWindowWidth() const noexcept { return mAspect * mFarWindowHeight; }
+	__forceinline float GetFarWindowHeight() const noexcept { return mFarWindowHeight; }
 	
 	// Set frustum.
 	void SetLens(const float fovY, const float aspect, const float zn, const float zf) noexcept;
@@ -56,23 +56,23 @@ public:
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up) noexcept;
 
 	// Get View/Proj matrices.
-	DirectX::XMMATRIX GetView() const noexcept {
+	__forceinline DirectX::XMMATRIX GetView() const noexcept {
 		ASSERT(!mViewDirty);
 		return XMLoadFloat4x4(&mView);
 	}
-	DirectX::XMMATRIX GetProj() const noexcept { return XMLoadFloat4x4(&mProj); }
+	__forceinline DirectX::XMMATRIX GetProj() const noexcept { return XMLoadFloat4x4(&mProj); }
 
-	DirectX::XMMATRIX GetViewProj() const noexcept {
+	__forceinline DirectX::XMMATRIX GetViewProj() const noexcept {
 		const DirectX::XMMATRIX viewMatrix = GetView();
 		const DirectX::XMMATRIX projMatrix = GetProj();
 		return DirectX::XMMatrixMultiply(viewMatrix, projMatrix);
 	}
 
-	DirectX::XMFLOAT4X4 GetView4x4f() const noexcept {
+	__forceinline DirectX::XMFLOAT4X4 GetView4x4f() const noexcept {
 		ASSERT(!mViewDirty);
 		return mView;
 	}
-	DirectX::XMFLOAT4X4 GetProj4x4f() const noexcept { return mProj; }
+	__forceinline DirectX::XMFLOAT4X4 GetProj4x4f() const noexcept { return mProj; }
 
 	// Strafe/Walk the camera a distance d.
 	void Strafe(const float d) noexcept;

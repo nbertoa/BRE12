@@ -34,7 +34,7 @@ public:
 	LRESULT MsgProc(HWND hwnd, const std::int32_t msg, WPARAM wParam, LPARAM lParam) noexcept;
 
 protected:
-	float AspectRatio() const noexcept { return (float)mWindowWidth / mWindowHeight; }
+	 __forceinline float AspectRatio() const noexcept { return (float)mWindowWidth / mWindowHeight; }
 
 	virtual void CreateRtvAndDsvDescriptorHeaps() noexcept;
 	virtual void CreateRtvAndDsv() noexcept;
@@ -76,8 +76,8 @@ protected:
 	std::uint64_t mCurrentFence{0U};
 
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCmdQueue;
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mPresentQueue;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCmdListAlloc;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mSecDirectCmdListAlloc;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCmdList;
 
 	static const std::uint32_t sSwapChainBufferCount{2U};

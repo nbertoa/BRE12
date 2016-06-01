@@ -335,6 +335,7 @@ void App::CreateCommandObjects() noexcept {
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	CHECK_HR(mD3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(mCmdQueue.GetAddressOf())));
 	CHECK_HR(mD3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(mDirectCmdListAlloc.GetAddressOf())));
+	CHECK_HR(mD3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(mSecDirectCmdListAlloc.GetAddressOf())));
 	CHECK_HR(mD3dDevice->CreateCommandList(0U, D3D12_COMMAND_LIST_TYPE_DIRECT, mDirectCmdListAlloc.Get(), nullptr, IID_PPV_ARGS(mCmdList.GetAddressOf())));
 
 	// Start off in a closed state.  This is because the first time we refer 

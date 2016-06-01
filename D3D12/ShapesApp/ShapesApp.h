@@ -2,9 +2,11 @@
 
 #include <DirectXMath.h>
 #include <memory>
+#include <tbb/concurrent_vector.h>
 
 #include <App/App.h>
 #include <ResourceManager\UploadBuffer.h>
+#include <ShapesApp/ShapeTask.h>
 
 #if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
 #define _CRTDBG_MAP_ALLOC          
@@ -30,29 +32,11 @@ protected:
 		DirectX::XMFLOAT4 mPosition{ 0.0f, 0.0f, 0.0f, 0.0f };
 	};
 
-	ID3D12PipelineState* mPSO{ nullptr };
-	ID3D12RootSignature* mRootSignature{ nullptr };
+	std::vector<ShapeTask*> mShapeTasks;
 
-	ID3D12Resource* mVertexBuffer{ nullptr };
-	Microsoft::WRL::ComPtr<ID3D12Resource> mUploadVertexBuffer;
-	D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
-
-	ID3D12Resource* mIndexBuffer{ nullptr };
-	Microsoft::WRL::ComPtr<ID3D12Resource> mUploadIndexBuffer;
-	D3D12_INDEX_BUFFER_VIEW mIndexBufferView{};
-	std::uint32_t mNumIndices{ 0U };
-
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCBVHeap;	
-	UploadBuffer* mCBVsUploadBuffer{ nullptr };
+	tbb::concurrent_vector<ID3D12CommandList*> mCmdLists;
 
 	void Update(const float dt) noexcept override;
 	void Draw(const float dt) noexcept override;
-
-	void BuildPSO() noexcept;
-	void BuildVertexAndIndexBuffers() noexcept;
-	void BuildConstantBuffers() noexcept;
-	void BuildRootSignature() noexcept;
-
-	void UpdateConstantBuffers() noexcept;
 };
 

@@ -22,7 +22,7 @@ public:
 	void Erase(const std::size_t id) noexcept;
 
 	// This will invalidate all ids.
-	void Clear() noexcept { mPSOById.clear(); }
+	__forceinline void Clear() noexcept { mPSOById.clear(); }
 
 private:
 	ID3D12Device& mDevice;

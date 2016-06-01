@@ -7,7 +7,7 @@
 #include <DxUtils/d3dx12.h>
 #include <Utils/DebugUtils.h>
 
-class UploadBuffer{
+class UploadBuffer {
 public:
 	UploadBuffer(ID3D12Device& device, const std::size_t elemSize, const std::uint32_t elemCount);
 
@@ -15,7 +15,7 @@ public:
 	UploadBuffer& operator=(const UploadBuffer& rhs) = delete;
 	~UploadBuffer();
 
-	ID3D12Resource* Resource() const noexcept { return mBuffer.Get(); }
+	__forceinline ID3D12Resource* Resource() const noexcept { return mBuffer.Get(); }
 
 	void CopyData(const std::uint32_t elemIndex, void* srcData, const std::size_t srcDataSize) noexcept;
 

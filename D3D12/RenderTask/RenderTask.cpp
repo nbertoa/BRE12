@@ -1,5 +1,8 @@
 #include "RenderTask.h"
 
+#include <random>
+#include <string>
+
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <RootSignatureManager/RootSignatureManager.h>
@@ -7,30 +10,32 @@
 #include <Utils/DebugUtils.h>
 
 bool RenderTaskInitData::ValidateData() const {
-	return 
-		mRootSignName != nullptr && 
-		!mMeshDataVec.empty() && 
-		mPSOName != nullptr &&
-		!mInputLayout.empty();
+	return !mMeshInfoVec.empty() && !mInputLayout.empty();
 }
 
-RenderTask::RenderTask(ID3D12Device* device)
-	: mDevice(device)
+RenderTask::RenderTask(const char* taskName, ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect)
+	: mTaskName(taskName)
+	, mDevice(device)
+	, mViewport(screenViewport)
+	, mScissorRect(scissorRect)
 {
-	ASSERT(mDevice);
+	ASSERT(taskName != nullptr);
+	ASSERT(device != nullptr);
 }
 
-void RenderTask::Init(const RenderTaskInitData& initData) noexcept {
+void RenderTask::Init(const RenderTaskInitData& initData, tbb::concurrent_vector<ID3D12CommandList*>& /*cmdLists*/) noexcept {
 	ASSERT(initData.ValidateData());
 
-	BuildRootSignature(initData.mRootSignName, initData.mRootSignDesc);
+	BuildRootSignature(initData.mRootSignDesc);
 	BuildPSO(initData);
 	BuildCommandObjects();
 }
 
-void RenderTask::BuildRootSignature(const char* rootSignName, const D3D12_ROOT_SIGNATURE_DESC& rootSignDesc) noexcept {
+void RenderTask::BuildRootSignature(const D3D12_ROOT_SIGNATURE_DESC& rootSignDesc) noexcept {
 	ASSERT(mRootSign == nullptr);
-	RootSignatureManager::gManager->CreateRootSignature(rootSignName, rootSignDesc, mRootSign);
+	
+	const std::string name{ mTaskName + "_rootSign" };
+	RootSignatureManager::gManager->CreateRootSignature(name.c_str(), rootSignDesc, mRootSign);
 }
 
 void RenderTask::BuildPSO(const RenderTaskInitData& initData) noexcept {
@@ -81,7 +86,8 @@ void RenderTask::BuildPSO(const RenderTaskInitData& initData) noexcept {
 	desc.SampleMask = initData.mSampleMask;
 	desc.VS = vertexShader;
 
-	PSOManager::gManager->CreateGraphicsPSO(initData.mPSOName, desc, mPSO);
+	const std::string name{ mTaskName + "_pso" };
+	PSOManager::gManager->CreateGraphicsPSO(name.c_str(), desc, mPSO);
 }
 
 void RenderTask::BuildVertexAndIndexBuffers(
@@ -92,9 +98,7 @@ void RenderTask::BuildVertexAndIndexBuffers(
 	const void* indexData,
 	const std::uint32_t numIndices) noexcept {
 
-	ASSERT(geomData.mIndexBufferName != nullptr);
 	ASSERT(geomData.mIndexBuffer == nullptr);
-	ASSERT(geomData.mVertexBufferName != nullptr);
 	ASSERT(geomData.mVertexBuffer == nullptr);
 	ASSERT(vertsData != nullptr);
 	ASSERT(numVerts > 0U);
@@ -105,14 +109,21 @@ void RenderTask::BuildVertexAndIndexBuffers(
 	ASSERT(mCmdListAllocator.Get() != nullptr);
 
 	std::uint32_t byteSize{ numVerts * (std::uint32_t)vertexSize };
-	ResourceManager::gManager->CreateDefaultBuffer(geomData.mVertexBufferName, *mCmdList.Get(), vertsData, byteSize, geomData.mVertexBuffer, geomData.mUploadVertexBuffer);
+
+	std::random_device rd;
+	std::mt19937 mt(rd());
+	std::uniform_int_distribution<std::size_t> dist(1, SIZE_T_MAX);
+
+	std::string name{ mTaskName + "_vertexBuffer" + std::to_string(dist(mt)) };
+	ResourceManager::gManager->CreateDefaultBuffer(name.c_str(), *mCmdList.Get(), vertsData, byteSize, geomData.mVertexBuffer, geomData.mUploadVertexBuffer);
 	geomData.mVertexBufferView.BufferLocation = geomData.mVertexBuffer->GetGPUVirtualAddress();
 	geomData.mVertexBufferView.SizeInBytes = byteSize;
 	geomData.mVertexBufferView.StrideInBytes = (std::uint32_t)vertexSize;
 
+	name = std::string{ mTaskName + "_indexBuffer" + std::to_string(dist(mt)) };
 	geomData.mIndexCount = numIndices;
 	byteSize = numIndices * sizeof(std::uint32_t);
-	ResourceManager::gManager->CreateDefaultBuffer(geomData.mIndexBufferName, *mCmdList.Get(), indexData, byteSize, geomData.mIndexBuffer, geomData.mUploadIndexBuffer);
+	ResourceManager::gManager->CreateDefaultBuffer(name.c_str(), *mCmdList.Get(), indexData, byteSize, geomData.mIndexBuffer, geomData.mUploadIndexBuffer);
 	geomData.mIndexBufferView.BufferLocation = geomData.mIndexBuffer->GetGPUVirtualAddress();
 	geomData.mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	geomData.mIndexBufferView.SizeInBytes = byteSize;

@@ -38,9 +38,9 @@ public:
 	UploadBuffer& GetUploadBuffer(const size_t id) noexcept;
 
 	// This will invalidate all ids.
-	void ClearDefaultBuffers() noexcept { mResourceById.clear(); }
-	void ClearUploadBuffers() noexcept { mUploadBufferById.clear(); }
-	void Clear() noexcept { ClearDefaultBuffers(); ClearUploadBuffers(); }
+	__forceinline void ClearDefaultBuffers() noexcept { mResourceById.clear(); }
+	__forceinline void ClearUploadBuffers() noexcept { mUploadBufferById.clear(); }
+	__forceinline void Clear() noexcept { ClearDefaultBuffers(); ClearUploadBuffers(); }
 
 private:
 	ID3D12Device& mDevice;

@@ -32,21 +32,21 @@
 }
 #endif
 
-inline void D3dSetDebugName(IDXGIObject* obj, const char* name) noexcept {
+__forceinline void D3dSetDebugName(IDXGIObject* obj, const char* name) noexcept {
 	ASSERT(name != nullptr);
 	if (obj) {
 		obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
 	}
 }
 
-inline void D3dSetDebugName(ID3D12Device* obj, const char* name) noexcept {
+__forceinline void D3dSetDebugName(ID3D12Device* obj, const char* name) noexcept {
 	ASSERT(name != nullptr);
 	if (obj) {
 		obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
 	}
 }
 
-inline void D3dSetDebugName(ID3D12DeviceChild* obj, const char* name) noexcept {
+__forceinline void D3dSetDebugName(ID3D12DeviceChild* obj, const char* name) noexcept {
 	ASSERT(name != nullptr);
 	if (obj) {
 		obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
