@@ -16,43 +16,35 @@
 # by the GNU General Public License. This exception does not however invalidate any other
 # reasons why the executable file might be covered by the GNU General Public License.
 
-# GNU Makefile that builds and runs example.
-run_cmd=
+# Common Makefile that builds and runs example.
+
+# Just specify your program basename
 PROG=binpack
-ARGS=4 N=1000
+ARGS= 4 N=1000
 PERF_RUN_ARGS=auto N=1000 silent
 
-# The C++ compiler
-ifneq (,$(shell which icc 2>/dev/null))
-CXX=icc
-endif # which icc
+# Trying to find if icl.exe is set
+CXX1 = $(TBB_CXX)-
+CXX2 = $(CXX1:icl.exe-=icl.exe)
+CXX  = $(CXX2:-=cl.exe)
 
-ifeq ($(shell uname), Linux)
-ifeq ($(target), android)
-LIBS+= --sysroot=$(SYSROOT)
-run_cmd=../../common/android.linux.launcher.sh
-else
-LIBS+= -lrt 
-endif
-else ifeq ($(shell uname), Darwin)
-override CXXFLAGS += -Wl,-rpath,$(TBBROOT)/lib
-endif
+# The C++ compiler options
+MYCXXFLAGS = /TP /EHsc /W3 /nologo /D _CONSOLE /D _MBCS /D WIN32 /D _CRT_SECURE_NO_DEPRECATE $(CXXFLAGS)
+MYLDFLAGS =/INCREMENTAL:NO /NOLOGO /DEBUG /FIXED:NO $(LDFLAGS)
 
-all:    release test
-
-release: *.cpp
-	$(CXX) -O2 -DNDEBUG $(CXXFLAGS) -o $(PROG) $^ -ltbb $(LIBS)
-
-debug: *.cpp
-	$(CXX) -O0 -g -DTBB_USE_DEBUG $(CXXFLAGS) -o $(PROG) $^ -ltbb_debug $(LIBS)
-
+all: release test
+release:
+	$(CXX) *.cpp /MD /O2 /D NDEBUG $(MYCXXFLAGS) /link tbb.lib $(LIBS) $(MYLDFLAGS) /OUT:$(PROG).exe
+debug:
+	$(CXX) *.cpp /MDd /Od /Zi /D TBB_USE_DEBUG /D _DEBUG $(MYCXXFLAGS) /link tbb_debug.lib $(LIBS) $(MYLDFLAGS) /OUT:$(PROG).exe
 clean:
-	$(RM) $(PROG) *.o *.d
-
+	@cmd.exe /C del $(PROG).exe *.obj *.?db *.manifest
 test:
-	$(run_cmd) ./$(PROG) $(ARGS)
+	$(PROG) $(ARGS)
+compiler_check:
+	@$(CXX) >nul 2>&1 || echo "$(CXX) command not found. Check if CXX=$(CXX) is set properly"
 
 perf_build: release
 
 perf_run:
-	$(run_cmd) ./$(PROG) $(PERF_RUN_ARGS)
+	$(PROG) $(PERF_RUN_ARGS)

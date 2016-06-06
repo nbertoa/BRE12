@@ -16,42 +16,39 @@
 # by the GNU General Public License. This exception does not however invalidate any other
 # reasons why the executable file might be covered by the GNU General Public License.
 
-# GNU Makefile that builds and runs example.
+# Common Makefile that builds and runs example.
 
+# Just specify your program basename
 run_cmd=
 PROG=fgbzip2
-ARGS=-b=9 -a $(PROG)
-PERF_RUN_ARGS=-b=9 -a $(PROG)
+ARGS=-b=9 -a $(PROG).exe
+PERF_RUN_ARGS=-b=9 -a $(PROG).exe
 
-# icpc by default
-ifneq (,$(shell which icc 2>/dev/null))
-    CXX=icpc
-endif
+# Trying to find if icl.exe is set
+CXX1 = $(TBB_CXX)-
+CXX2 = $(CXX1:icl.exe-=icl.exe)
+CXX  = $(CXX2:-=cl.exe)
 
-# autodetect C++11 support
-include ../../common/examples-common.inc
-
-ifeq ($(shell uname), Linux)
-LIBS+= -lrt -lpthread
-else ifeq ($(shell uname), Darwin)
-override CXXFLAGS += -Wl,-rpath,$(TBBROOT)/lib
-endif
+# The C++ compiler options
+MYCXXFLAGS = /EHsc /W3 /nologo /D _CONSOLE /D _MBCS /D WIN32 /D _CRT_SECURE_NO_WARNINGS /D _CRT_NONSTDC_NO_DEPRECATE /wd4267 /wd4244
+MYLDFLAGS =/INCREMENTAL:NO /NOLOGO /DEBUG /FIXED:NO $(LDFLAGS)
 
 all: release test
 
 release:
-	$(CXX) -O2 -DNDEBUG *.cpp $(CXXFLAGS) -o $(PROG) -ltbb $(LIBS) $(CXX0XFLAGS)
+	$(CXX) *.cpp /MD /O2 /Zi /D NDEBUG $(MYCXXFLAGS) /link tbb.lib $(LIBS) $(MYLDFLAGS) /OUT:$(PROG).exe
 
 debug:
-	$(CXX) -O0 -g -DTBB_USE_DEBUG *.cpp $(CXXFLAGS) -o $(PROG) -ltbb_debug $(LIBS)  $(CXX0XFLAGS)
+	$(CXX) *.cpp /MDd /Od /Zi /D TBB_USE_DEBUG /D _DEBUG $(MYCXXFLAGS) /link tbb_debug.lib $(LIBS) $(MYLDFLAGS) /OUT:$(PROG).exe
 
 clean:
-	$(RM) $(PROG) *.o *.d
+	@cmd.exe /C del $(PROG).exe *.obj *.?db *.manifest
 
 test:
-	$(run_cmd) ./$(PROG) $(ARGS)
+	$(PROG) $(ARGS)
 
 perf_build: release
 
 perf_run:
-	$(run_cmd) ./$(PROG) $(PERF_RUN_ARGS)
+	$(PROG) $(PERF_RUN_ARGS)
+

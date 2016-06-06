@@ -16,44 +16,37 @@
 # by the GNU General Public License. This exception does not however invalidate any other
 # reasons why the executable file might be covered by the GNU General Public License.
 
-# GNU Makefile that builds and runs example.
-run_cmd=
-PROG=tree_sum
+# Common Makefile that builds and runs example.
+
+# Just specify your program basename
+PROG=Tree_sum
 ARGS=
 PERF_RUN_ARGS=auto 100000000 silent
 
-# The C++ compiler
-ifneq (,$(shell which icc 2>/dev/null))
-CXX=icc
-endif # icc
+# Trying to find if icl.exe is set
+CXX1 = $(TBB_CXX)-
+CXX2 = $(CXX1:icl.exe-=icl.exe)
+CXX  = $(CXX2:-=cl.exe)
 
-ifeq ($(shell uname), Linux)
-ifeq ($(target), android)
-LIBS+= --sysroot=$(SYSROOT)
-run_cmd=../../common/android.linux.launcher.sh
-else
-LIBS+= -lrt 
-endif
-else ifeq ($(shell uname), Darwin)
-override CXXFLAGS += -Wl,-rpath,$(TBBROOT)/lib
-endif
+# The C++ compiler options
+MYCXXFLAGS = /TP /EHsc /W3 /nologo /D _CONSOLE /D _MBCS /D WIN32 $(CXXFLAGS)
+MYLDFLAGS =/INCREMENTAL:NO /NOLOGO /DEBUG /FIXED:NO $(LDFLAGS)
 
-all:	release test
-
-release: *.cpp
-	$(CXX) -O2 -DNDEBUG $(CXXFLAGS) -o $(PROG) $^ -ltbbmalloc -ltbb $(LIBS)
-
-debug: *.cpp
-	$(CXX) -O0 -g -DTBB_USE_DEBUG $(CXXFLAGS) -o $(PROG) $^ -ltbbmalloc_debug -ltbb_debug $(LIBS)
-
+all: release test
+release: compiler_check
+	$(CXX) *.cpp /MD /O2 /D NDEBUG $(MYCXXFLAGS) /link tbbmalloc.lib tbb.lib $(LIBS) $(MYLDFLAGS) /OUT:$(PROG).exe
+debug: compiler_check
+	$(CXX) *.cpp /MDd /Od /Zi /D TBB_USE_DEBUG /D _DEBUG $(MYCXXFLAGS) /link tbbmalloc_debug.lib tbb_debug.lib $(LIBS) $(MYLDFLAGS) /OUT:$(PROG).exe
 clean:
-	$(RM) $(PROG) *.o *.d
-
+	@cmd.exe /C del $(PROG).exe *.obj *.?db *.manifest
 test:
-	$(run_cmd) ./$(PROG) $(ARGS)
-	$(run_cmd) ./$(PROG) stdmalloc $(ARGS)
-
+	$(PROG) $(ARGS)
+	$(PROG) stdmalloc $(ARGS)
 perf_build: release
 
 perf_run:
-	$(run_cmd) ./$(PROG) $(PERF_RUN_ARGS)
+	$(PROG) $(PERF_RUN_ARGS)
+
+compiler_check:
+	@echo compiler_test>compiler_test && @$(CXX) /E compiler_test >nul 2>&1  || echo "$(CXX) command not found. Check if CXX=$(CXX) is set properly"
+	@cmd.exe /C del compiler_test

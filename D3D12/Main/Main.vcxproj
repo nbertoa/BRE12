@@ -41,14 +41,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -90,7 +90,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\external\tbb\lib\intel64\vc14;$(SolutionDir)$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
       <AdditionalDependencies>d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb_debug.lib;tbb_preview_debug.lib;tbbmalloc_debug.lib;tbbproxy_debug.lib;App.lib;Camera.lib;DXUtils.lib;GeometryGenerator.lib;InitDirect3D.lib;Input.lib;MathUtils.lib;PSOManager.lib;RenderTask.lib;ResourceManager.lib;RootSignatureManager.lib;ShaderManager.lib;ShapesApp.lib;Timer.lib;Utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -120,7 +120,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\;$(SolutionDir)\..\external\tbb\lib\intel64\vc14;</AdditionalLibraryDirectories>
       <AdditionalDependencies>d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb.lib;tbb_preview.lib;tbbmalloc.lib;tbbproxy.lib;App.lib;Camera.lib;DXUtils.lib;GeometryGenerator.lib;InitDirect3D.lib;Input.lib;MathUtils.lib;PSOManager.lib;RenderTask.lib;ResourceManager.lib;RootSignatureManager.lib;ShaderManager.lib;ShapesApp.lib;Timer.lib;Utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

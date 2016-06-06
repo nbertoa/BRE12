@@ -16,59 +16,38 @@
 # by the GNU General Public License. This exception does not however invalidate any other
 # reasons why the executable file might be covered by the GNU General Public License.
 
-# GNU Makefile that builds and runs example.
-run_cmd=
+# Common Makefile that builds and runs examples.
 PROG=sub_string_finder_extended
 ARGS=
 LIGHT_PROG=sub_string_finder
 
-# The C++ compiler
-ifneq (,$(shell which icc 2>/dev/null))
-CXX=icc
-endif # icc
+# The C++ compiler options
+# Trying to find if icl.exe is set
+CXX1 = $(TBB_CXX)-
+CXX2 = $(CXX1:icl.exe-=icl.exe)
+CXX  = $(CXX2:-=cl.exe)
 
-TBBLIB = -ltbb
-TBBLIB_DEBUG = -ltbb_debug
+MYCXXFLAGS = /TP /EHsc /W3 /nologo /D _CONSOLE /D _MBCS /D WIN32 $(offload:mic=/D__TBB_MIC_OFFLOAD /Qdiag-disable:3335,3440,3441) $(CXXFLAGS)
+MYLDFLAGS =/INCREMENTAL:NO /NOLOGO /DEBUG /FIXED:NO $(LDFLAGS)
 
-ifeq ($(offload), mic)
-override CXXFLAGS += -opt-report-phase:offload -D__TBB_MIC_OFFLOAD=1
-# Replace -ltbb with -tbb in the offload mode
-TBBLIB = -tbb
-TBBLIB_DEBUG += -offload-option,mic,ld,"-ltbb_debug"
-endif
+TBB_MIC_LIB = $(offload:mic=/Qtbb)
+TBB_DEBUG_MIC_LIB = $(offload:mic=/Qoffload-option,mic,link,"-ltbb_debug")
 
-ifeq ($(shell uname), Linux)
-ifeq ($(target), android)
-LIBS+= --sysroot=$(SYSROOT)
-run_cmd=../../common/android.linux.launcher.sh
-else
-LIBS+= -lrt 
-endif
-else ifeq ($(shell uname), Darwin)
-override CXXFLAGS += -Wl,-rpath,$(TBBROOT)/lib
-endif
-
-all:	release test
-
-release: *.cpp
-ifeq ($(offload),)
-	$(CXX) -O2 -DNDEBUG $(CXXFLAGS) -o sub_string_finder sub_string_finder.cpp $(TBBLIB) $(LIBS)
-	$(CXX) -O2 -DNDEBUG $(CXXFLAGS) -o sub_string_finder_pretty sub_string_finder_pretty.cpp $(TBBLIB) $(LIBS)
-endif
-	$(CXX) -O2 -DNDEBUG $(CXXFLAGS) -o sub_string_finder_extended sub_string_finder_extended.cpp $(TBBLIB) $(LIBS)
-
-debug: *.cpp
-ifeq ($(offload),)
-	$(CXX) -O0 -g -DTBB_USE_DEBUG $(CXXFLAGS) -o sub_string_finder sub_string_finder.cpp $(TBBLIB_DEBUG) $(LIBS)
-	$(CXX) -O0 -g -DTBB_USE_DEBUG $(CXXFLAGS) -o sub_string_finder_pretty sub_string_finder_pretty.cpp  $(TBBLIB_DEBUG) $(LIBS)
-endif
-	$(CXX) -O0 -g -DTBB_USE_DEBUG $(CXXFLAGS) -o sub_string_finder_extended sub_string_finder_extended.cpp $(TBBLIB_DEBUG) $(LIBS)
-
+all: release test
+release: compiler_check
+	$(CXX) sub_string_finder.cpp /MD /O2 /D NDEBUG $(MYCXXFLAGS) $(TBB_MIC_LIB) /link tbb.lib $(LIBS) $(MYLDFLAGS) /OUT:sub_string_finder.exe
+	$(CXX) sub_string_finder_extended.cpp /MD /O2 /D NDEBUG $(MYCXXFLAGS) $(TBB_MIC_LIB) /link tbb.lib $(LIBS) $(MYLDFLAGS) /OUT:sub_string_finder_extended.exe
+	$(CXX) sub_string_finder_pretty.cpp /MD /O2 /D NDEBUG $(MYCXXFLAGS) $(TBB_MIC_LIB) /link tbb.lib $(LIBS) $(MYLDFLAGS) /OUT:sub_string_finder_pretty.exe
+debug: compiler_check
+	$(CXX) sub_string_finder.cpp /MDd /Od /Zi /D TBB_USE_DEBUG /D _DEBUG $(MYCXXFLAGS) $(TBB_DEBUG_MIC_LIB) /link tbb_debug.lib $(LIBS) $(MYLDFLAGS) /OUT:sub_string_finder.exe
+	$(CXX) sub_string_finder_extended.cpp /MDd /Od /Zi /D TBB_USE_DEBUG /D _DEBUG $(MYCXXFLAGS) $(TBB_DEBUG_MIC_LIB) /link tbb_debug.lib $(LIBS) $(MYLDFLAGS) /OUT:sub_string_finder_extended.exe
+	$(CXX) sub_string_finder_pretty.cpp /MDd /Od /Zi /D TBB_USE_DEBUG /D _DEBUG $(MYCXXFLAGS) $(TBB_DEBUG_MIC_LIB) /link tbb_debug.lib $(LIBS) $(MYLDFLAGS) /OUT:sub_string_finder_pretty.exe
 clean:
-	$(RM) sub_string_finder sub_string_finder_extended sub_string_finder_pretty *.o *.d
-
+	@cmd.exe /C del sub_string_finder*.exe *.obj *.?db *.manifest
 test:
-	$(run_cmd) ./$(PROG) $(ARGS)
-
+	$(PROG) $(ARGS)
 light_test:
-	$(run_cmd) ./$(LIGHT_PROG) $(ARGS)
+	$(LIGHT_PROG) $(ARGS)
+compiler_check:
+	@echo compiler_test>compiler_test && @$(CXX) /E compiler_test >nul 2>&1  || echo "$(CXX) command not found. Check if CXX=$(CXX) is set properly"
+	@cmd.exe /C del compiler_test

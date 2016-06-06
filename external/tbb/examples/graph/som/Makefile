@@ -16,45 +16,31 @@
 # by the GNU General Public License. This exception does not however invalidate any other
 # reasons why the executable file might be covered by the GNU General Public License.
 
-# GNU Makefile that builds and runs example.
-NAME=som
-EXE=$(NAME).exe
+# Common Makefile that builds and runs example.
+
+# Just specify your program basename
+PROG=som
 ARGS=
 LIGHT_ARGS=4
 
-# The C++ compiler
-ifneq (,$(shell which icc 2>/dev/null))
-CXX=icc
-endif # icc
+# Trying to find if icl.exe is set
+CXX1 = $(TBB_CXX)-
+CXX2 = $(CXX1:icl.exe-=icl.exe)
+CXX  = $(CXX2:-=cl.exe)
 
-override CXXFLAGS += $(UI_CXXFLAGS)
+# The C++ compiler options
+MYCXXFLAGS = /TP /EHsc /W3 /nologo /D _CONSOLE /D _MBCS /D WIN32 /D _CRT_SECURE_NO_DEPRECATE $(CXXFLAGS)
+MYLDFLAGS =/INCREMENTAL:NO /NOLOGO /DEBUG /FIXED:NO $(LDFLAGS)
 
-SRCFILES = som_graph.cpp som.cpp
-
-ifeq ($(shell uname), Linux)
-LIBS+= -lrt 
-else ifeq ($(shell uname), Darwin)
-override CXXFLAGS += -Wl,-rpath,$(TBBROOT)/lib
-endif
-
-all:	release test
-
-release: $(SRCFILES)
-ifeq ($(compiler),xl)
-	# Avoiding "1586-346 (U) An error occurred during code generation.  The code generation return code was 40." with -O3.
-	$(CXX) -O2 -DNDEBUG $(CXXFLAGS) -o $(EXE) $(SRCFILES) -ltbb -ltbbmalloc $(LIBS)
-else
-	$(CXX) -O3 -DNDEBUG $(CXXFLAGS) -o $(EXE) $(SRCFILES) -ltbb -ltbbmalloc $(LIBS)
-endif
-
-debug:  $(SRCFILES)
-	$(CXX) -g -O0 -DTBB_USE_DEBUG -D_DEBUG $(CXXFLAGS) -o $(EXE) $(SRCFILES) -ltbb_debug -ltbbmalloc_debug $(LIBS)
-
+all: release test
+release: 
+	$(CXX) ./som_graph.cpp ./som.cpp /MD /O2 /D NDEBUG $(MYCXXFLAGS) /link tbb.lib $(LIBS) $(MYLDFLAGS) /OUT:$(PROG).exe
+debug: 
+	$(CXX) ./som_graph.cpp ./som.cpp /MDd /Od /Zi /D _DEBUG $(MYCXXFLAGS) /link tbb_debug.lib $(LIBS) $(MYLDFLAGS) /OUT:$(PROG).exe
 clean:
-	$(RM) $(EXE) *.o *.d
-
+	@cmd.exe /C del $(PROG).exe *.obj *.?db *.manifest
 test:
-	$(run_cmd) ./$(EXE) $(ARGS)
-
+	$(PROG) $(ARGS)
 light_test:
-	$(run_cmd) ./$(EXE) $(LIGHT_ARGS)
+	$(PROG) $(LIGHT_ARGS)
+

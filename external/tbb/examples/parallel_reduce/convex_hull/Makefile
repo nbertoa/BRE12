@@ -16,49 +16,41 @@
 # by the GNU General Public License. This exception does not however invalidate any other
 # reasons why the executable file might be covered by the GNU General Public License.
 
-# GNU Makefile that builds and runs example.
-run_cmd=
+# Common Makefile that builds and runs example.
 PROG=convex_hull_bench
 ARGS=
 PERF_RUN_ARGS = silent auto 40000000
 LIGHT_ARGS = 4 400
 
-# The C++ compiler
-ifneq (,$(shell which icc 2>/dev/null))
-CXX=icc
-endif # icc
+# Trying to find if icl.exe is set
+CXX1 = $(TBB_CXX)-
+CXX2 = $(CXX1:icl.exe-=icl.exe)
+CXX  = $(CXX2:-=cl.exe)
 
-ifeq ($(shell uname), Linux)
-ifeq ($(target), android)
-LIBS+= --sysroot=$(SYSROOT)
-run_cmd=../../common/android.linux.launcher.sh
-else
-LIBS+= -lrt 
-endif
-else ifeq ($(shell uname), Darwin)
-override CXXFLAGS += -Wl,-rpath,$(TBBROOT)/lib
-endif
+# The C++ compiler options
+# Below, _SECURE_SCL=0 is for VC9 and earlier, and _ITERATOR_DEBUG_LEVEL=0 is for VC10 and later
+MYCXXFLAGS = /TP /EHsc /W3 /nologo /D _CONSOLE /D _MBCS /D WIN32 /D _ITERATOR_DEBUG_LEVEL=0 /D _SECURE_SCL=0 $(CXXFLAGS)
+MYLDFLAGS =/INCREMENTAL:NO /NOLOGO /DEBUG /FIXED:NO $(LDFLAGS)
 
-all:	release test
-
-release: *.cpp
-	$(CXX) -O2 -DNDEBUG $(CXXFLAGS) -o convex_hull_sample convex_hull_sample.cpp -ltbb $(LIBS)
-	$(CXX) -O2 -DNDEBUG $(CXXFLAGS) -o convex_hull_bench convex_hull_bench.cpp -ltbb $(LIBS)
-
-debug: *.cpp
-	$(CXX) -O0 -g -DTBB_USE_DEBUG $(CXXFLAGS) -o convex_hull_sample convex_hull_sample.cpp -ltbb_debug $(LIBS)
-	$(CXX) -O0 -g -DTBB_USE_DEBUG $(CXXFLAGS) -o convex_hull_bench convex_hull_bench.cpp -ltbb_debug $(LIBS)
-
+all: release test
+release: compiler_check
+	$(CXX) convex_hull_sample.cpp /MD /O2 /D NDEBUG $(MYCXXFLAGS) /link tbb.lib $(LIBS) $(MYLDFLAGS) /OUT:convex_hull_sample.exe
+	$(CXX) convex_hull_bench.cpp /MD /O2 /D NDEBUG $(MYCXXFLAGS) /link tbb.lib $(LIBS) $(MYLDFLAGS) /OUT:convex_hull_bench.exe
+debug: compiler_check
+	$(CXX) convex_hull_sample.cpp /MDd /Od /Zi /D TBB_USE_DEBUG /D _DEBUG $(MYCXXFLAGS) /link tbb_debug.lib $(LIBS) $(MYLDFLAGS) /OUT:convex_hull_sample.exe
+	$(CXX) convex_hull_bench.cpp /MDd /Od /Zi /D TBB_USE_DEBUG /D _DEBUG $(MYCXXFLAGS) /link tbb_debug.lib $(LIBS) $(MYLDFLAGS) /OUT:convex_hull_bench.exe
 clean:
-	$(RM) convex_hull_bench convex_hull_sample *.o *.d
-
+	@cmd.exe /C del convex_hull*.exe *.obj *.?db *.manifest
+test:
+	$(PROG) $(ARGS)
 perf_build: release
 
 perf_run:
-	$(run_cmd) ./convex_hull_sample $(PERF_RUN_ARGS)
-
-test:
-	$(run_cmd) ./$(PROG) $(ARGS)
+	./convex_hull_sample $(PERF_RUN_ARGS)
 
 light_test:
-	$(run_cmd) ./$(PROG) $(LIGHT_ARGS)
+	./$(PROG) $(LIGHT_ARGS)
+
+compiler_check:
+	@echo compiler_test>compiler_test && @$(CXX) /E compiler_test >nul 2>&1  || echo "$(CXX) command not found. Check if CXX=$(CXX) is set properly"
+	@cmd.exe /C del compiler_test

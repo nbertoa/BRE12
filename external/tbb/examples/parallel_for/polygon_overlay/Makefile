@@ -16,75 +16,45 @@
 # by the GNU General Public License. This exception does not however invalidate any other
 # reasons why the executable file might be covered by the GNU General Public License.
 
-# GNU Makefile that builds and runs example.
-NAME=pover
+# Common Makefile that builds and runs example.
+
+# Just specify your program basename
+PROG=Pover
 ARGS=
 LIGHT_ARGS= --polys 10 --size 5x5
 
-# The C++ compiler
-ifneq (,$(shell which icc 2>/dev/null))
-CXX=icc
-endif # icc
+# Trying to find if icl.exe is set
+CXX1 = $(TBB_CXX)-
+CXX2 = $(CXX1:icl.exe-=icl.exe)
+CXX  = $(CXX2:-=cl.exe)
 
-include ../../common/gui/Makefile.gmake
+# The C++ compiler options
 
-ifeq ($(UI),x)
-UI_CXXFLAGS += -DX_FULLSYNC
-endif # X
+# Uncomment one of next lines to choose user interface type (console, gdiplus, direct draw)
+#UI = con
+UI = gdi
+#UI = dd
 
-override CXXFLAGS += $(UI_CXXFLAGS)
+# Machine architecture, auto-detected from TBB_TARGET_ARCH by default
+# Use XARCH variable to change it. See index.html for more information
+ARCH0 = $(TBB_TARGET_ARCH)-
+ARCH1 = $(ARCH0:ia32-=x86)
+ARCH2 = $(ARCH1:intel64-=AMD64)
+XARCH = $(ARCH2:-=x86)
 
-SRCFILES = ../../common/gui/$(UI)video.cpp pover_video.cpp polymain.cpp polyover.cpp
+MAKEINC = ../../common/gui/Makefile.win
 
-ifeq ($(shell uname), Linux)
-LIBS+= -lrt 
-else ifeq ($(shell uname), Darwin)
-override CXXFLAGS += -Wl,-rpath,$(TBBROOT)/lib
-endif
-
-all:	release test
-
-resources:
-ifeq ($(UI),mac)
-	mkdir -p $(APPRES)/en.lproj $(NAME).app/Contents/MacOS
-	cp ../../common/gui/xcode/tbbExample/tbbExample-Info.plist $(NAME).app/Contents/Info.plist
-	cp ../../common/gui/xcode/tbbExample/PkgInfo $(NAME).app/Contents
-	cp ../../common/gui/xcode/tbbExample/en.lproj/* $(APPRES)/en.lproj
-endif # OS X*
-
-release: $(SRCFILES) resources
-ifeq ($(compiler),xl)
-	# Avoiding "1586-346 (U) An error occurred during code generation.  The code generation return code was 40." with -O3.
-	$(CXX) -O2 -DNDEBUG $(CXXFLAGS) -o $(EXE) $(SRCFILES) -ltbb -ltbbmalloc $(LIBS)
-else
-ifeq ($(UI),mac)
-	$(CXX_UI) -O3 -DNDEBUG $(CXXFLAGS) -c $(MACUISOURCES)
-endif # OS X*
-	$(CXX) -O3 -DNDEBUG $(CXXFLAGS) -o $(EXE) $(SRCFILES) $(MACUIOBJS) -ltbb -ltbbmalloc $(LIBS)
-endif
-
-debug:  $(SRCFILES) resources
-ifeq ($(UI),mac)
-	$(CXX_UI) -g -O0 -DTBB_USE_DEBUG -D_DEBUG $(CXXFLAGS) -c $(MACUISOURCES)
-endif # OS X*
-	$(CXX) -g -O0 -DTBB_USE_DEBUG -D_DEBUG $(CXXFLAGS) -o $(EXE) $(SRCFILES) $(MACUIOBJS) -ltbb_debug -ltbbmalloc_debug $(LIBS)
-
+all: release test
+release: compiler_check
+	@$(MAKE) -f $(MAKEINC) UI=$(UI) CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" LFLAGS="$(LDFLAGS) tbb.lib tbbmalloc.lib $(LIBS)" XARCH=$(XARCH) RCNAME=pover SOURCE=*.cpp EXE=$(PROG).exe build_one
+debug: compiler_check
+	@$(MAKE) -f $(MAKEINC) UI=$(UI) DEBUG=_debug CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS) /D TBB_USE_DEBUG" LFLAGS="$(LDFLAGS) tbb_debug.lib tbbmalloc_debug.lib $(LIBS)" XARCH=$(XARCH) RCNAME=pover SOURCE=*.cpp EXE=$(PROG).exe build_one
 clean:
-	$(RM) $(EXE) *.o *.d
-ifeq ($(UI),mac)
-	rm -rf $(NAME).app
-endif
-
+	@cmd.exe /C del $(PROG).exe *.obj *.?db *.manifest msvs\pover.res
 test:
-ifeq ($(UI),mac)
-	export DYLD_LIBRARY_PATH="$(DYLD_LIBRARY_PATH):$(TBBLIBSPATH)"; $(run_cmd) ./$(EXE) $(ARGS)
-else
-	$(run_cmd) ./$(EXE) $(ARGS)
-endif
-
+	$(PROG) $(ARGS)
 light_test:
-ifeq ($(UI),mac)
-	export DYLD_LIBRARY_PATH="$(DYLD_LIBRARY_PATH):$(TBBLIBSPATH)"; $(run_cmd) ./$(EXE) $(LIGHT_ARGS)
-else
-	$(run_cmd) ./$(EXE) $(LIGHT_ARGS)
-endif
+	$(PROG) $(LIGHT_ARGS)
+compiler_check:
+	@echo compiler_test>compiler_test && @$(CXX) /E compiler_test >nul 2>&1  || echo "$(CXX) command not found. Check if CXX=$(CXX) is set properly"
+	@cmd.exe /C del compiler_test

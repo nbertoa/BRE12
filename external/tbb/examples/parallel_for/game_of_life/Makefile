@@ -16,38 +16,31 @@
 # by the GNU General Public License. This exception does not however invalidate any other
 # reasons why the executable file might be covered by the GNU General Public License.
 
-# GNU Makefile that builds and runs example.
-run_cmd=
+# Common Makefile that builds and runs example.
+
+# Just specify your program basename
 PROG=game_of_life
 ARGS=2:4 -t 5
 LIGHT_ARGS=1:2 -t 5
-ifneq (,$(shell which icc 2>/dev/null))
-CXX=icc
-endif # icc
 
-ifeq ($(shell uname), Linux)
-ifeq ($(target), android)
-LIBS+= --sysroot=$(SYSROOT)
-run_cmd=../../common/android.linux.launcher.sh
-else
-LIBS+= -lrt 
-endif
-else ifeq ($(shell uname), Darwin)
-override CXXFLAGS += -Wl,-rpath,$(TBBROOT)/lib
-endif
+# Trying to find if icl.exe is set
+CXX1 = $(TBB_CXX)-
+CXX2 = $(CXX1:icl.exe-=icl.exe)
+CXX  = $(CXX2:-=cl.exe)
 
-all:	release test
+# The C++ compiler options
+MYCXXFLAGS = /TP /EHsc /W3 /nologo /D _CONSOLE /D _MBCS /D WIN32 /D _CRT_SECURE_NO_DEPRECATE $(CXXFLAGS)
+MYLDFLAGS =/INCREMENTAL:NO /NOLOGO /DEBUG /FIXED:NO $(LDFLAGS)
 
-release: src/Evolution.cpp src/Update_state.cpp src/Game_of_life.cpp
-	$(CXX) -O2 -DNDEBUG -D_CONSOLE $(CXXFLAGS) -o $(PROG) $^ -ltbb $(LIBS)
-
-debug: src/Evolution.cpp src/Update_state.cpp src/Game_of_life.cpp
-	$(CXX) -O0 -D_CONSOLE -g -DTBB_USE_DEBUG $(CXXFLAGS) -o $(PROG) $^ -ltbb_debug $(LIBS)
-
+all: release test
+release: 
+	$(CXX) ./src/Evolution.cpp ./src/Game_of_life.cpp ./src/Update_state.cpp /MD /O2 /D NDEBUG $(MYCXXFLAGS) /link tbb.lib $(LIBS) $(MYLDFLAGS) /OUT:$(PROG).exe
+debug: 
+	$(CXX) ./src/Evolution.cpp ./src/Game_of_life.cpp ./src/Update_state.cpp /MDd /Od /Zi /D _DEBUG $(MYCXXFLAGS) /link tbb_debug.lib $(LIBS) $(MYLDFLAGS) /OUT:$(PROG).exe
 clean:
-	rm -f $(PROG) *.o *.d
-
+	@cmd.exe /C del $(PROG).exe *.obj *.?db *.manifest
 test:
-	$(run_cmd) ./$(PROG) $(ARGS)
+	$(PROG) $(ARGS)
 light_test:
-	$(run_cmd) ./$(PROG) $(LIGHT_ARGS)
+	$(PROG) $(LIGHT_ARGS)
+
