@@ -5,6 +5,8 @@
 #include <tbb/concurrent_hash_map.h>
 #include <wrl.h>
 
+#include <Utils/RandomNumberGenerator.h>
+
 class PSOManager {
 public:
 	static std::unique_ptr<PSOManager> gManager;
@@ -13,7 +15,7 @@ public:
 	PSOManager(const PSOManager&) = delete;
 	const PSOManager& operator=(const PSOManager&) = delete;
 
-	std::size_t CreateGraphicsPSO(const char* name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, ID3D12PipelineState* &pso) noexcept;
+	std::size_t CreateGraphicsPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, ID3D12PipelineState* &pso) noexcept;
 
 	// Asserts if there is not a valid ID3D12PipelineState with current id
 	ID3D12PipelineState& GetPSO(const std::size_t id) noexcept;
@@ -29,4 +31,6 @@ private:
 
 	using PSOById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>>;
 	PSOById mPSOById;
+
+	RandomNumberGenerator mRandGen;
 };

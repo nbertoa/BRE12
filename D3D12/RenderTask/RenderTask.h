@@ -14,6 +14,44 @@
 
 class UploadBuffer;
 
+struct GeometryData {
+	GeometryData() = default;
+
+	DirectX::XMFLOAT4X4 mWorld{ MathHelper::Identity4x4() };
+
+	ID3D12Resource* mVertexBuffer{ nullptr };
+	Microsoft::WRL::ComPtr<ID3D12Resource> mUploadVertexBuffer;
+	D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
+
+	ID3D12Resource* mIndexBuffer{ nullptr };
+	Microsoft::WRL::ComPtr<ID3D12Resource> mUploadIndexBuffer;
+	D3D12_INDEX_BUFFER_VIEW mIndexBufferView{};
+
+	std::uint32_t mIndexCount{ 0U };
+	std::uint32_t mStartIndexLoc{ 0U };
+	std::uint32_t mBaseVertexLoc{ 0U };
+};
+
+
+struct RenderTaskInput {
+	ID3D12Device* mDevice{ nullptr };
+	D3D12_VIEWPORT mViewport{};
+	D3D12_RECT mScissorRect{};
+
+	ID3D12DescriptorHeap* mCBVHeap{ nullptr };
+	ID3D12RootSignature* mRootSign{ nullptr };
+	ID3D12PipelineState* mPSO{ nullptr };
+
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCmdList;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mCmdListAllocator;
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
+
+	using GeometryDataVec = std::vector<GeometryData>;
+	GeometryDataVec mGeomDataVec{};
+
+	UploadBuffer* mObjectConstants{ nullptr };
+};
+
 struct MeshInfo {
 	explicit MeshInfo() = default;
 	explicit MeshInfo(const GeometryGenerator::MeshData* meshData, const DirectX::XMFLOAT4X4& world)
@@ -76,24 +114,6 @@ public:
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept = 0;
 
 protected:
-	struct GeometryData {
-		GeometryData() = default;
-
-		DirectX::XMFLOAT4X4 mWorld{ MathHelper::Identity4x4() };
-
-		ID3D12Resource* mVertexBuffer{ nullptr };
-		Microsoft::WRL::ComPtr<ID3D12Resource> mUploadVertexBuffer;
-		D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
-
-		ID3D12Resource* mIndexBuffer{ nullptr };
-		Microsoft::WRL::ComPtr<ID3D12Resource> mUploadIndexBuffer;
-		D3D12_INDEX_BUFFER_VIEW mIndexBufferView{};
-
-		std::uint32_t mIndexCount{ 0U };
-		std::uint32_t mStartIndexLoc{ 0U };
-		std::uint32_t mBaseVertexLoc{ 0U };
-	};
-
 	void BuildRootSignature(const D3D12_ROOT_SIGNATURE_DESC& rootSignDesc) noexcept;
 	void BuildPSO(const RenderTaskInitData& initData) noexcept;
 	void BuildVertexAndIndexBuffers(

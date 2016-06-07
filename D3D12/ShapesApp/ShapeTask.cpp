@@ -144,9 +144,8 @@ void ShapeTask::BuildConstantBuffers() noexcept {
 	
 	CHECK_HR(mDevice->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&mCBVHeap)));
 
-	const std::size_t elemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4)) };	
-	const std::string name{ mTaskName + "_cbv" };
-	ResourceManager::gManager->CreateUploadBuffer(name.c_str(), elemSize, geomCount, mObjectConstants);
+	const std::size_t elemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4)) };
+	ResourceManager::gManager->CreateUploadBuffer(elemSize, geomCount, mObjectConstants);
 	D3D12_GPU_VIRTUAL_ADDRESS cbAddress{ mObjectConstants->Resource()->GetGPUVirtualAddress() };
 	const std::size_t descHandleIncSize{ mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 	for (std::size_t i = 0UL; i < geomCount; ++i) {

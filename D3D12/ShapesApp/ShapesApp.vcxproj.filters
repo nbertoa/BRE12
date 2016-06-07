@@ -3,10 +3,12 @@
   <ItemGroup>
     <ClCompile Include="ShapesApp.cpp" />
     <ClCompile Include="ShapeTask.cpp" />
+    <ClCompile Include="ShapeInitTask.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShapesApp.h" />
     <ClInclude Include="ShapeTask.h" />
+    <ClInclude Include="ShapeInitTask.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VS.hlsl" />

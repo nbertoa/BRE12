@@ -121,6 +121,7 @@
   <ItemGroup>
     <ClInclude Include="DebugUtils.h" />
     <ClInclude Include="HashUtils.h" />
+    <ClInclude Include="RandomNumberGenerator.h" />
     <ClInclude Include="StringUtils.h" />
   </ItemGroup>
   <ItemGroup>

@@ -81,6 +81,26 @@ void ShapesApp::Initialize() noexcept {
 
 	mCmdLists.clear();
 	FlushCommandQueue();
+
+	/*
+
+	const float baseOffset{ 10.0f };
+	for (std::size_t i = 0UL; i < numMeshes; ++i) {
+	const MeshInfo& meshInfo{ initData.mMeshInfoVec[i] };
+	ASSERT(meshInfo.mData != nullptr);
+	const GeometryGenerator::MeshData& meshData{ *meshInfo.mData };
+	const std::uint32_t numVertices = (std::uint32_t)meshData.mVertices.size();
+	std::vector<Vertex> vertices;
+	vertices.reserve(numVertices);
+	for (const GeometryGenerator::Vertex& vtx : meshData.mVertices) {
+	vertices.push_back(Vertex{ DirectX::XMFLOAT4(vtx.mPosition.x, vtx.mPosition.y, vtx.mPosition.z, 1.0f) });
+	}
+
+	GeometryData geomData;
+	BuildVertexAndIndexBuffers(geomData, vertices.data(), numVertices, sizeof(Vertex), meshData.mIndices32.data(), (std::uint32_t)meshData.mIndices32.size());
+	geomData.mWorld = meshInfo.mWorld;
+	mGeomDataVec.push_back(geomData);
+	}*/
 }
 
 void ShapesApp::Update(const float dt) noexcept {

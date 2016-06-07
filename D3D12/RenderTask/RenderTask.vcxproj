@@ -116,9 +116,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="InitTask.cpp" />
     <ClCompile Include="RenderTask.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="InitTask.h" />
     <ClInclude Include="RenderTask.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

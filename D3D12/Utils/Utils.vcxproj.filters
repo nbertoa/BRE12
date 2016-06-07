@@ -4,6 +4,7 @@
     <ClInclude Include="StringUtils.h" />
     <ClInclude Include="DebugUtils.h" />
     <ClInclude Include="HashUtils.h" />
+    <ClInclude Include="RandomNumberGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HashUtils.cpp" />

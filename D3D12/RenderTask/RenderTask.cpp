@@ -1,8 +1,5 @@
 #include "RenderTask.h"
 
-#include <random>
-#include <string>
-
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <RootSignatureManager/RootSignatureManager.h>
@@ -33,9 +30,7 @@ void RenderTask::Init(const RenderTaskInitData& initData, tbb::concurrent_vector
 
 void RenderTask::BuildRootSignature(const D3D12_ROOT_SIGNATURE_DESC& rootSignDesc) noexcept {
 	ASSERT(mRootSign == nullptr);
-	
-	const std::string name{ mTaskName + "_rootSign" };
-	RootSignatureManager::gManager->CreateRootSignature(name.c_str(), rootSignDesc, mRootSign);
+	RootSignatureManager::gManager->CreateRootSignature(rootSignDesc, mRootSign);
 }
 
 void RenderTask::BuildPSO(const RenderTaskInitData& initData) noexcept {
@@ -86,8 +81,7 @@ void RenderTask::BuildPSO(const RenderTaskInitData& initData) noexcept {
 	desc.SampleMask = initData.mSampleMask;
 	desc.VS = vertexShader;
 
-	const std::string name{ mTaskName + "_pso" };
-	PSOManager::gManager->CreateGraphicsPSO(name.c_str(), desc, mPSO);
+	PSOManager::gManager->CreateGraphicsPSO(desc, mPSO);
 }
 
 void RenderTask::BuildVertexAndIndexBuffers(
@@ -109,21 +103,15 @@ void RenderTask::BuildVertexAndIndexBuffers(
 	ASSERT(mCmdListAllocator.Get() != nullptr);
 
 	std::uint32_t byteSize{ numVerts * (std::uint32_t)vertexSize };
-
-	std::random_device rd;
-	std::mt19937 mt(rd());
-	std::uniform_int_distribution<std::size_t> dist(1, SIZE_T_MAX);
-
-	std::string name{ mTaskName + "_vertexBuffer" + std::to_string(dist(mt)) };
-	ResourceManager::gManager->CreateDefaultBuffer(name.c_str(), *mCmdList.Get(), vertsData, byteSize, geomData.mVertexBuffer, geomData.mUploadVertexBuffer);
+	
+	ResourceManager::gManager->CreateDefaultBuffer(*mCmdList.Get(), vertsData, byteSize, geomData.mVertexBuffer, geomData.mUploadVertexBuffer);
 	geomData.mVertexBufferView.BufferLocation = geomData.mVertexBuffer->GetGPUVirtualAddress();
 	geomData.mVertexBufferView.SizeInBytes = byteSize;
 	geomData.mVertexBufferView.StrideInBytes = (std::uint32_t)vertexSize;
 
-	name = std::string{ mTaskName + "_indexBuffer" + std::to_string(dist(mt)) };
 	geomData.mIndexCount = numIndices;
 	byteSize = numIndices * sizeof(std::uint32_t);
-	ResourceManager::gManager->CreateDefaultBuffer(name.c_str(), *mCmdList.Get(), indexData, byteSize, geomData.mIndexBuffer, geomData.mUploadIndexBuffer);
+	ResourceManager::gManager->CreateDefaultBuffer(*mCmdList.Get(), indexData, byteSize, geomData.mIndexBuffer, geomData.mUploadIndexBuffer);
 	geomData.mIndexBufferView.BufferLocation = geomData.mIndexBuffer->GetGPUVirtualAddress();
 	geomData.mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	geomData.mIndexBufferView.SizeInBytes = byteSize;

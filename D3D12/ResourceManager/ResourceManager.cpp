@@ -2,12 +2,10 @@
 
 #include <DXUtils/d3dx12.h>
 #include <Utils/DebugUtils.h>
-#include <Utils/HashUtils.h>
 
 std::unique_ptr<ResourceManager> ResourceManager::gManager = nullptr;
 
 std::size_t ResourceManager::CreateDefaultBuffer(
-	const char* name,
 	ID3D12GraphicsCommandList& cmdList,
 	const void* initData,
 	const std::size_t byteSize,
@@ -16,9 +14,8 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 {
 	ASSERT(initData != nullptr);
 	ASSERT(byteSize > 0);
-	ASSERT(name != nullptr);
 
-	const std::size_t id{ HashUtils::HashCString(name) };
+	const std::size_t id{ mRandGen.RandomNumber() };
 	ResourceById::accessor accessor;
 
 #ifdef _DEBUG
@@ -71,9 +68,8 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	return id;
 }
 
-std::size_t ResourceManager::CreateUploadBuffer(const char* name, const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept {
-	ASSERT(name != nullptr);
-	const std::size_t id{ HashUtils::HashCString(name) };
+std::size_t ResourceManager::CreateUploadBuffer(const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept {
+	const std::size_t id{ mRandGen.RandomNumber() };
 	UploadBufferById::accessor accessor;
 #ifdef _DEBUG
 	mUploadBufferById.find(accessor, id);

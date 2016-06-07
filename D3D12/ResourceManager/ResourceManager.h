@@ -6,7 +6,8 @@
 #include <tbb/concurrent_hash_map.h>
 #include <wrl.h>
 
-#include "UploadBuffer.h"
+#include <ResourceManager/UploadBuffer.h>
+#include <Utils/RandomNumberGenerator.h>
 
 class ResourceManager {
 public:
@@ -22,8 +23,7 @@ public:
 	// The caller can Release the uploadBuffer after it knows the copy has been executed.
 	//
 	// Asserts if resource with the same name was already registered
-	std::size_t CreateDefaultBuffer(
-		const char* name,		
+	std::size_t CreateDefaultBuffer(	
 		ID3D12GraphicsCommandList& cmdList,
 		const void* initData,
 		const std::size_t byteSize,
@@ -31,7 +31,7 @@ public:
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
 
 	// Asserts if resource with the same name was already registered
-	std::size_t CreateUploadBuffer(const char* name, const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept;
+	std::size_t CreateUploadBuffer(const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept;
 
 	// Asserts if resource id is not present
 	ID3D12Resource& GetResource(const std::size_t id) noexcept;
@@ -50,4 +50,6 @@ private:
 
 	using UploadBufferById = tbb::concurrent_hash_map<std::size_t, std::unique_ptr<UploadBuffer>>;
 	UploadBufferById mUploadBufferById;
+
+	RandomNumberGenerator mRandGen;
 };

@@ -116,10 +116,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ShapeInitTask.cpp" />
     <ClCompile Include="ShapesApp.cpp" />
     <ClCompile Include="ShapeTask.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ShapeInitTask.h" />
     <ClInclude Include="ShapesApp.h" />
     <ClInclude Include="ShapeTask.h" />
   </ItemGroup>
