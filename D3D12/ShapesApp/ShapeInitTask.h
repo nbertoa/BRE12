@@ -4,12 +4,12 @@
 
 class ShapeInitTask : public InitTask {
 public:
-	explicit ShapeInitTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect);
+	explicit ShapeInitTask() = default;
 	ShapeInitTask(const ShapeInitTask&) = delete;
 	const ShapeInitTask& operator=(const ShapeInitTask&) = delete;
 
-	void Init(const InitTaskInput& input, tbb::concurrent_vector<ID3D12CommandList*>& cmdLists, RenderTaskInput& output) noexcept override;
+	void Execute(ID3D12Device& device, const InitTaskInput& input, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept override;
 
 private:
-	void BuildConstantBuffers(RenderTaskInput& output) noexcept;
+	void BuildConstantBuffers(ID3D12Device& device, CmdBuilderTaskInput& output) noexcept;
 };

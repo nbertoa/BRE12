@@ -4,6 +4,7 @@
 #include <D3Dcommon.h>
 #include <memory>
 #include <tbb\concurrent_hash_map.h>
+#include <tbb/mutex.h>
 #include <vector>
 #include <wrl.h>
 
@@ -37,4 +38,6 @@ private:
 	BlobById mBlobById;
 
 	RandomNumberGenerator mRandGen;
+
+	tbb::mutex mMutex;
 };

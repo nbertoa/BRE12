@@ -14,7 +14,7 @@ public:
 	RandomNumberGenerator(const RandomNumberGenerator&) = delete;
 	const RandomNumberGenerator& operator=(const RandomNumberGenerator&) = delete;
 
-	std::size_t RandomNumber() noexcept { return mDistribution(mGenerator); }
+	std::size_t RandomNumber() noexcept { return mDistribution(mGenerator); } 
 
 private:
 	std::random_device mRd;

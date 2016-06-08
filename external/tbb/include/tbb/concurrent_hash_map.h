@@ -755,6 +755,7 @@ public:
         //! Return reference to associated value in hash table.
         reference operator*() const {
             __TBB_ASSERT( this->my_node, "attempt to dereference empty accessor" );
+#pragma warning(suppress: 6011)
             return this->my_node->item;
         }
 
@@ -1424,12 +1425,14 @@ void concurrent_hash_map<Key,T,HashCompare,A>::clear() {
         segment_ptr_t buckets_ptr = my_table[s];
         size_type sz = segment_size( s ? s : 1 );
         for( segment_index_t i = 0; i < sz; i++ )
+#pragma warning(suppress: 28182)
             for( node_base *n = buckets_ptr[i].node_list; is_valid(n); n = buckets_ptr[i].node_list ) {
                 buckets_ptr[i].node_list = n->next;
                 delete_node( n );
             }
         if( s >= first_block) // the first segment or the next
             alloc.deallocate( buckets_ptr, sz );
+#pragma warning(suppress: 6326)
         else if( s == embedded_block && embedded_block != first_block )
             alloc.deallocate( buckets_ptr, segment_size(first_block)-embedded_buckets );
         if( s >= embedded_block ) my_table[s] = 0;

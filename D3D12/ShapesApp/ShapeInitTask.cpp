@@ -15,34 +15,28 @@ namespace {
 	};
 }
 
-ShapeInitTask::ShapeInitTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect)
-	: InitTask(device, screenViewport, scissorRect)
-{
-	ASSERT(device != nullptr);
-}
-
-void ShapeInitTask::Init(const InitTaskInput& input, tbb::concurrent_vector<ID3D12CommandList*>& cmdLists, RenderTaskInput& output) noexcept {
-	InitTask::Init(input, cmdLists, output);
+void ShapeInitTask::Execute(ID3D12Device& device, const InitTaskInput& input, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept {
+	InitTask::Execute(device, input, cmdLists, output);
 
 	ASSERT(output.mGeomDataVec.empty());
-	ASSERT(output.mCmdListAllocator.Get() != nullptr);
-	ASSERT(output.mCmdList.Get() != nullptr);
+	ASSERT(output.mCmdAlloc != nullptr);
+	ASSERT(output.mCmdList != nullptr);
 	ASSERT(output.mPSO != nullptr);
 
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
-	CHECK_HR(output.mCmdListAllocator->Reset());
+	CHECK_HR(output.mCmdAlloc->Reset());
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	CHECK_HR(output.mCmdList->Reset(output.mCmdListAllocator.Get(), output.mPSO));
+	CHECK_HR(output.mCmdList->Reset(output.mCmdAlloc, output.mPSO));
 
 	const std::size_t numMeshes{ input.mMeshInfoVec.size() };
 	output.mGeomDataVec.reserve(numMeshes);
 
 	const float baseOffset{ 10.0f };
 	for (std::size_t i = 0UL; i < numMeshes; ++i) {
-		const InitTaskInput::MeshInfo& meshInfo{ input.mMeshInfoVec[i] };
+		const MeshInfo& meshInfo{ input.mMeshInfoVec[i] };
 		ASSERT(meshInfo.ValidateData());
 		GeometryData geomData;
 		BuildVertexAndIndexBuffers(
@@ -52,20 +46,19 @@ void ShapeInitTask::Init(const InitTaskInput& input, tbb::concurrent_vector<ID3D
 			sizeof(Vertex), 
 			meshInfo.mIndices, 
 			meshInfo.mNumIndices,
-			*output.mCmdList.Get());
+			*output.mCmdList);
 		geomData.mWorld = meshInfo.mWorld;
 		output.mGeomDataVec.push_back(geomData);
 	}
 
 	output.mCmdList->Close();
-	cmdLists.push_back(output.mCmdList.Get());
+	cmdLists.push(output.mCmdList);
 
-	BuildConstantBuffers(output);
+	BuildConstantBuffers(device, output);
 }
 
-void ShapeInitTask::BuildConstantBuffers(RenderTaskInput& output) noexcept {
+void ShapeInitTask::BuildConstantBuffers(ID3D12Device& device, CmdBuilderTaskInput& output) noexcept {
 	ASSERT(output.mCBVHeap == nullptr);
-	ASSERT(mDevice != nullptr);
 	ASSERT(!output.mGeomDataVec.empty());
 	ASSERT(output.mObjectConstants == nullptr);
 
@@ -78,12 +71,12 @@ void ShapeInitTask::BuildConstantBuffers(RenderTaskInput& output) noexcept {
 	descHeapDesc.NumDescriptors = geomCount;
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 
-	CHECK_HR(output.mDevice->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&output.mCBVHeap)));
+	CHECK_HR(device.CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&output.mCBVHeap)));
 
 	const std::size_t elemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4)) };
 	ResourceManager::gManager->CreateUploadBuffer(elemSize, geomCount, output.mObjectConstants);
 	D3D12_GPU_VIRTUAL_ADDRESS cbAddress{ output.mObjectConstants->Resource()->GetGPUVirtualAddress() };
-	const std::size_t descHandleIncSize{ mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+	const std::size_t descHandleIncSize{ device.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
 		D3D12_CPU_DESCRIPTOR_HANDLE descHandle = output.mCBVHeap->GetCPUDescriptorHandleForHeapStart();
 		descHandle.ptr += i * descHandleIncSize;
@@ -92,6 +85,6 @@ void ShapeInitTask::BuildConstantBuffers(RenderTaskInput& output) noexcept {
 		cbvDesc.BufferLocation = cbAddress + i * elemSize;
 		cbvDesc.SizeInBytes = (std::uint32_t)elemSize;
 
-		mDevice->CreateConstantBufferView(&cbvDesc, descHandle);
+		device.CreateConstantBufferView(&cbvDesc, descHandle);
 	}
 }

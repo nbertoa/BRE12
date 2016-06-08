@@ -6,6 +6,7 @@ std::unique_ptr<PSOManager> PSOManager::gManager = nullptr;
 
 std::size_t PSOManager::CreateGraphicsPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, ID3D12PipelineState* &pso) noexcept {
 	const std::size_t id{ mRandGen.RandomNumber() };
+
 	PSOById::accessor accessor;
 	mPSOById.find(accessor, id);
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> auxPso;
@@ -13,7 +14,10 @@ std::size_t PSOManager::CreateGraphicsPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DE
 		auxPso = accessor->second.Get();
 	}
 	else {
+		mMutex.lock();
 		CHECK_HR(mDevice.CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&auxPso)));
+		mMutex.unlock();
+
 		mPSOById.insert(accessor, id);
 		accessor->second = auxPso;
 	}

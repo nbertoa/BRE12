@@ -4,47 +4,45 @@
 #include <d3d12.h>
 #include <DirectXMath.h>
 #include <string>
-#include <tbb/concurrent_vector.h>
+#include <tbb/concurrent_queue.h>
 #include <wrl.h>
 
 #include <DXUtils/D3DFactory.h>
 #include <GeometryGenerator/GeometryGenerator.h>
 #include <MathUtils/MathHelper.h>
-#include <RenderTask/RenderTask.h>
+#include <RenderTask/CmdBuilderTask.h>
 #include <Utils/DebugUtils.h>
 
 class UploadBuffer;
 
+struct MeshInfo {
+	explicit MeshInfo() = default;
+	explicit MeshInfo(const void* verts, const std::uint32_t numVerts, const void* indices, const std::uint32_t numIndices, DirectX::XMFLOAT4X4& world)
+		: mVerts(verts)
+		, mNumVerts(numVerts)
+		, mIndices(indices)
+		, mNumIndices(numIndices)
+		, mWorld(world)
+	{
+		ASSERT(mVerts != nullptr);
+		ASSERT(mNumVerts > 0U);
+		ASSERT(mIndices != nullptr);
+		ASSERT(mNumIndices > 0U);
+	}
+
+	bool ValidateData() const {
+		return mVerts != nullptr && mNumVerts > 0U && mIndices != nullptr && mNumIndices > 0U;
+	}
+
+	const void* mVerts{ nullptr };
+	std::uint32_t mNumVerts{ 0U };
+	const void* mIndices{ nullptr };
+	std::uint32_t mNumIndices{ 0U };
+	DirectX::XMFLOAT4X4 mWorld{ MathHelper::Identity4x4() };
+};
+
 struct InitTaskInput {
-	struct MeshInfo {
-		explicit MeshInfo() = default;
-		explicit MeshInfo(const void* verts, const std::uint32_t numVerts, const void* indices, const std::uint32_t numIndices, DirectX::XMFLOAT4X4& world)
-			: mVerts(verts)
-			, mNumVerts(numVerts)
-			, mIndices(indices)
-			, mNumIndices(numIndices)
-			, mWorld(world)
-		{
-			ASSERT(mVerts != nullptr);
-			ASSERT(mNumVerts > 0U);
-			ASSERT(mIndices != nullptr);
-			ASSERT(mNumIndices > 0U);
-		}
-
-		bool ValidateData() const {
-			return mVerts != nullptr && mNumVerts > 0U && mIndices != nullptr && mNumIndices > 0U;
-		}
-
-		const void* mVerts{ nullptr };
-		std::uint32_t mNumVerts{ 0U };
-		const void* mIndices{ nullptr };
-		std::uint32_t mNumIndices{ 0U };
-		DirectX::XMFLOAT4X4 mWorld{ MathHelper::Identity4x4() };
-	};
-
 	InitTaskInput() = default;
-	InitTaskInput(const InitTaskInput&) = delete;
-	const InitTaskInput& operator=(const InitTaskInput&) = delete;
 
 	bool ValidateData() const;
 
@@ -61,6 +59,9 @@ struct InitTaskInput {
 	const char* mHSFilename{ nullptr };
 	const char* mPSFilename{ nullptr };
 
+	D3D12_VIEWPORT mScreenViewport{ 0.0f, 0.0f, 1920.0f, 1080.0f, 0.0f, 1.0f };
+	D3D12_RECT mScissorRect{ 0, 0, 1920, 1080 };
+
 	D3D12_BLEND_DESC mBlendDesc = D3DFactory::DefaultBlendDesc();
 	D3D12_RASTERIZER_DESC mRasterizerDesc = D3DFactory::DefaultRasterizerDesc();
 	D3D12_DEPTH_STENCIL_DESC mDepthStencilDesc = D3DFactory::DefaultDepthStencilDesc();
@@ -75,12 +76,12 @@ struct InitTaskInput {
 // - Inherit from this class and reimplement virtual methods.
 class InitTask {
 public:
-	explicit InitTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect);
+	explicit InitTask() = default;
 	InitTask(const InitTask&) = delete;
 	const InitTask& operator=(const InitTask&) = delete;
 
 	// Store new initialization commands in cmdLists
-	virtual void Init(const InitTaskInput& input, tbb::concurrent_vector<ID3D12CommandList*>& cmdLists, RenderTaskInput& output) noexcept;
+	virtual void Execute(ID3D12Device& device, const InitTaskInput& input, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept;
 
 protected:
 	void BuildRootSignature(const D3D12_ROOT_SIGNATURE_DESC& rootSignDesc, ID3D12RootSignature* &rootSign) noexcept;
@@ -93,9 +94,6 @@ protected:
 		const void* indexData,
 		const std::uint32_t numIndices,
 		ID3D12GraphicsCommandList& cmdList) noexcept;
-	void BuildCommandObjects(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& cmdList, Microsoft::WRL::ComPtr<ID3D12CommandAllocator>& cmdListAlloc) noexcept;
-	
-	ID3D12Device* mDevice{ nullptr };
-	D3D12_VIEWPORT mViewport{};
-	D3D12_RECT mScissorRect{};
+
+	void BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* &cmdAlloc) noexcept;
 };

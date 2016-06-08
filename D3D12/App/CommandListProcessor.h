@@ -13,7 +13,7 @@ public:
 	
 	tbb::task* execute() override;
 
-	__forceinline tbb::concurrent_queue<ID3D12CommandList*>* cmdListQueue() noexcept { return &mCmdListQueue; }
+	__forceinline tbb::concurrent_queue<ID3D12CommandList*>& CmdListQueue() noexcept { return mCmdListQueue; }
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue>& mCmdQueue;

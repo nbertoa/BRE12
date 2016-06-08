@@ -4,6 +4,7 @@
 #include <d3d12.h>
 #include <memory>
 #include <tbb/concurrent_hash_map.h>
+#include <tbb/mutex.h>
 #include <wrl.h>
 
 #include <ResourceManager/UploadBuffer.h>
@@ -52,4 +53,6 @@ private:
 	UploadBufferById mUploadBufferById;
 
 	RandomNumberGenerator mRandGen;
+
+	tbb::mutex mMutex;
 };

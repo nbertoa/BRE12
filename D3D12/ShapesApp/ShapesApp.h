@@ -2,10 +2,11 @@
 
 #include <DirectXMath.h>
 #include <memory>
-#include <tbb/concurrent_vector.h>
+#include <tbb/concurrent_queue.h>
 
 #include <App/App.h>
 #include <ResourceManager\UploadBuffer.h>
+#include <ShapesApp/ShapeInitTask.h>
 #include <ShapesApp/ShapeTask.h>
 
 #if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
@@ -31,10 +32,11 @@ protected:
 
 		DirectX::XMFLOAT4 mPosition{ 0.0f, 0.0f, 0.0f, 0.0f };
 	};
-
+		
+	std::vector<CmdBuilderTaskInput> mCmdBuilderTaskInputs;
 	std::vector<ShapeTask*> mShapeTasks;
 
-	tbb::concurrent_vector<ID3D12CommandList*> mCmdLists;
+	tbb::concurrent_queue<ID3D12CommandList*> mCmdLists;
 
 	void Update(const float dt) noexcept override;
 	void Draw(const float dt) noexcept override;

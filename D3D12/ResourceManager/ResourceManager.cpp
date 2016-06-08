@@ -14,8 +14,9 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 {
 	ASSERT(initData != nullptr);
 	ASSERT(byteSize > 0);
-
+	
 	const std::size_t id{ mRandGen.RandomNumber() };
+
 	ResourceById::accessor accessor;
 
 #ifdef _DEBUG
@@ -26,6 +27,8 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	// Create the actual default buffer resource.
 	CD3DX12_HEAP_PROPERTIES heapProps{ CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT) };
 	CD3DX12_RESOURCE_DESC resDesc{ CD3DX12_RESOURCE_DESC::Buffer(byteSize) };
+
+	mMutex.lock();
 	CHECK_HR(mDevice.CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
@@ -33,11 +36,14 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
 		IID_PPV_ARGS(&defaultBuffer)));
+	mMutex.unlock();
 
 	// In order to copy CPU memory data into our default buffer, we need to create
 	// an intermediate upload heap. 
 	heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	resDesc = CD3DX12_RESOURCE_DESC::Buffer(byteSize);
+
+	mMutex.lock();
 	CHECK_HR(mDevice.CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
@@ -45,6 +51,8 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(uploadBuffer.GetAddressOf())));
+	mMutex.unlock();
+
 
 	// Describe the data we want to copy into the default buffer.
 	D3D12_SUBRESOURCE_DATA subResourceData = {};
@@ -70,6 +78,7 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 
 std::size_t ResourceManager::CreateUploadBuffer(const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept {
 	const std::size_t id{ mRandGen.RandomNumber() };
+
 	UploadBufferById::accessor accessor;
 #ifdef _DEBUG
 	mUploadBufferById.find(accessor, id);

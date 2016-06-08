@@ -4,6 +4,7 @@
 #include <WindowsX.h>
 
 #include <Camera/Camera.h>
+#include <CommandManager/CommandManager.h>
 #include <DXUtils\d3dx12.h>
 #include <Input/Keyboard.h>
 #include <MathUtils/MathHelper.h>
@@ -78,8 +79,8 @@ void App::Initialize() noexcept {
 	InitDirect3D();
 	InitSystems();
 
-	//tbb::empty_task* parent{ CommandListProcessor::Create(mCmdListProcessor, mCmdQueue) };
-	//ASSERT(parent != nullptr);
+	tbb::empty_task* parent{ CommandListProcessor::Create(mCmdListProcessor, mCmdQueue) };
+	ASSERT(parent != nullptr);
 }
 
 void App::CreateRtvAndDsvDescriptorHeaps() noexcept {
@@ -259,6 +260,9 @@ void App::InitSystems() noexcept {
 	LPDIRECTINPUT8 directInput;
 	CHECK_HR(DirectInput8Create(mAppInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID*)&directInput, nullptr));
 	Keyboard::gKeyboard = std::make_unique<Keyboard>(*directInput, mMainWnd);
+	
+	ASSERT(CommandManager::gManager.get() == nullptr);
+	CommandManager::gManager = std::make_unique<CommandManager>(*mD3dDevice.Get());
 
 	ASSERT(PSOManager::gManager.get() == nullptr);
 	PSOManager::gManager = std::make_unique<PSOManager>(*mD3dDevice.Get());

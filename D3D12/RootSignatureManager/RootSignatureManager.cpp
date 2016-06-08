@@ -9,7 +9,10 @@ std::size_t RootSignatureManager::CreateRootSignature(const D3D12_ROOT_SIGNATURE
 
 	Microsoft::WRL::ComPtr<ID3DBlob> serializedRootSig;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
+
+	mMutex.lock();
 	CHECK_HR(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1, serializedRootSig.GetAddressOf(), errorBlob.GetAddressOf()));
+	mMutex.unlock();
 
 	RootSignatureById::accessor accessor;
 #ifdef _DEBUG
@@ -19,7 +22,11 @@ std::size_t RootSignatureManager::CreateRootSignature(const D3D12_ROOT_SIGNATURE
 
 	mRootSignatureById.insert(accessor, id);
 	Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature = accessor->second;
+
+	mMutex.lock();
 	CHECK_HR(mDevice.CreateRootSignature(0U, serializedRootSig->GetBufferPointer(), serializedRootSig->GetBufferSize(), IID_PPV_ARGS(rootSignature.GetAddressOf())));
+	mMutex.unlock();
+	
 	rootSign = rootSignature.Get();
 	accessor.release();
 

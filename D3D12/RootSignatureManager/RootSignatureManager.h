@@ -4,6 +4,7 @@
 #include <memory>
 #include <random>
 #include <tbb\concurrent_hash_map.h>
+#include <tbb/mutex.h>
 #include <wrl.h>
 
 #include <Utils/RandomNumberGenerator.h>
@@ -35,4 +36,6 @@ private:
 	RootSignatureById mRootSignatureById;
 
 	RandomNumberGenerator mRandGen;
+
+	tbb::mutex mMutex;
 };

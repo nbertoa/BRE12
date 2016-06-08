@@ -8,9 +8,8 @@
 #include <windows.h>
 #include <wrl.h>
 
+#include <App/CommandListProcessor.h>
 #include <Timer\Timer.h>
-
-#include "CommandListProcessor.h"
 
 #if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
 #define _CRTDBG_MAP_ALLOC          
@@ -61,6 +60,7 @@ protected:
 	static App* mApp;
 
 	tbb::task_scheduler_init mTaskSchedulerInit;
+	CommandListProcessor* mCmdListProcessor{ nullptr };
 
 	HINSTANCE mAppInst = nullptr; // application instance handle
 	HWND mMainWnd = nullptr; // main window handle
@@ -100,5 +100,5 @@ protected:
 	DXGI_FORMAT mBackBufferFormat{DXGI_FORMAT_R8G8B8A8_UNORM};
 	DXGI_FORMAT mDepthStencilFormat{DXGI_FORMAT_D24_UNORM_S8_UINT};
 	int32_t mWindowWidth{1920};
-	int32_t mWindowHeight{1080};
+	int32_t mWindowHeight{1080};	
 };

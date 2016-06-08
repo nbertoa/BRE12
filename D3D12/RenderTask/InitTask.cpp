@@ -1,5 +1,6 @@
 #include "InitTask.h"
 
+#include <CommandManager/CommandManager.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <RootSignatureManager/RootSignatureManager.h>
@@ -10,22 +11,14 @@ bool InitTaskInput::ValidateData() const {
 	return !mMeshInfoVec.empty() && !mInputLayout.empty();
 }
 
-InitTask::InitTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect)
-	: mDevice(device)
-	, mViewport(screenViewport)
-	, mScissorRect(scissorRect)
-{
-	ASSERT(device != nullptr);
-}
-
-void InitTask::Init(const InitTaskInput& input, tbb::concurrent_vector<ID3D12CommandList*>& /*cmdLists*/, RenderTaskInput& output) noexcept {
+void InitTask::Execute(ID3D12Device& /*device*/, const InitTaskInput& input, tbb::concurrent_queue<ID3D12CommandList*>& /*cmdLists*/, CmdBuilderTaskInput& output) noexcept {
 	ASSERT(input.ValidateData());
 	
 	output.mTopology = input.mTopology;
 
 	BuildRootSignature(input.mRootSignDesc, output.mRootSign);
 	BuildPSO(input, *output.mRootSign, output.mPSO);
-	BuildCommandObjects(output.mCmdList, output.mCmdListAllocator);
+	BuildCommandObjects(output.mCmdList, output.mCmdAlloc);
 }
 
 void InitTask::BuildRootSignature(const D3D12_ROOT_SIGNATURE_DESC& rootSignDesc, ID3D12RootSignature* &rootSign) noexcept {
@@ -115,13 +108,12 @@ void InitTask::BuildVertexAndIndexBuffers(
 	geomData.mIndexBufferView.SizeInBytes = byteSize;
 }
 
-void InitTask::BuildCommandObjects(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& cmdList, Microsoft::WRL::ComPtr<ID3D12CommandAllocator>& cmdListAlloc) noexcept {
-	ASSERT(mDevice != nullptr);
+void InitTask::BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* &cmdAlloc) noexcept {
 	ASSERT(cmdList == nullptr);
-	ASSERT(cmdListAlloc == nullptr);
+	ASSERT(cmdAlloc == nullptr);
 
-	CHECK_HR(mDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(cmdListAlloc.GetAddressOf())));
-	CHECK_HR(mDevice->CreateCommandList(0U, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdListAlloc.Get(), nullptr, IID_PPV_ARGS(cmdList.GetAddressOf())));
+	CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
+	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
 
 	// Start off in a closed state.  This is because the first time we refer 
 	// to the command list we will Reset it, and it needs to be closed before
