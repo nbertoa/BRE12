@@ -26,7 +26,7 @@ void ShapesApp::Initialize() noexcept {
 	GeometryGenerator::MeshData sphere{ GeometryGenerator::CreateSphere(2, 100, 100) };
 	GeometryGenerator::MeshData box{ GeometryGenerator::CreateBox(2, 2, 2, 10) };
 
-	const std::size_t numInitTasks{ 200UL };
+	const std::size_t numInitTasks{ 5UL };
 
 	std::vector<ShapeInitTask*> initTasks{ numInitTasks };
 	for (std::size_t i = 0UL; i < numInitTasks; ++i) {
@@ -73,7 +73,7 @@ void ShapesApp::Initialize() noexcept {
 
 	for (std::size_t k = 0UL; k < numInitTasks; ++k) {
 		initData.mMeshInfoVec.clear();
-		for (std::size_t i = 0UL; i < 10; ++i) {
+		for (std::size_t i = 0UL; i < 20; ++i) {
 			const float tx{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
 			const float ty{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
 			const float tz{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
@@ -103,10 +103,6 @@ void ShapesApp::Initialize() noexcept {
 	);
 
 	FlushCommandQueue();
-}
-
-void ShapesApp::Update(const float dt) noexcept {
-	App::Update(dt);
 }
 
 void ShapesApp::Draw(const float) noexcept {
@@ -175,13 +171,13 @@ void ShapesApp::Draw(const float) noexcept {
 		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 	}
 
-	// swap the back and front buffers
-	ASSERT(mSwapChain.Get());
-	CHECK_HR(mSwapChain->Present(0U, 0U));
-	mCurrBackBuffer = (mCurrBackBuffer + 1U) % sSwapChainBufferCount;
-
 	// Wait until frame commands are complete.  This waiting is inefficient and is
 	// done for simplicity.  Later we will show how to organize our rendering code
 	// so we do not have to wait per frame.
 	FlushCommandQueue();
+
+	// swap the back and front buffers
+	ASSERT(mSwapChain.Get());
+	CHECK_HR(mSwapChain->Present(0U, 0U));
+	mCurrBackBuffer = (mCurrBackBuffer + 1U) % sSwapChainBufferCount;
 }

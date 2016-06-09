@@ -38,7 +38,6 @@ protected:
 
 	tbb::concurrent_queue<ID3D12CommandList*> mCmdLists;
 
-	void Update(const float dt) noexcept override;
 	void Draw(const float dt) noexcept override;
 };
 
