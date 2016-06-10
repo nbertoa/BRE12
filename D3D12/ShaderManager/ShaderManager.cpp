@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include <Utils/DebugUtils.h>
+#include <Utils/RandomNumberGenerator.h>
 
 namespace {
 	ID3DBlob* LoadBlob(const std::string& filename) noexcept {
@@ -32,7 +33,7 @@ std::unique_ptr<ShaderManager> ShaderManager::gManager = nullptr;
 std::size_t ShaderManager::LoadShaderFile(const char* filename, ID3DBlob* &blob) noexcept {
 	ASSERT(filename != nullptr);
 	
-	const std::size_t id{ mRandGen.RandomNumber() };
+	const std::size_t id{ sizeTRand() };
 
 	BlobById::accessor accessor;
 	mBlobById.find(accessor,id);
@@ -55,7 +56,7 @@ std::size_t ShaderManager::LoadShaderFile(const char* filename, D3D12_SHADER_BYT
 
 	Microsoft::WRL::ComPtr<ID3DBlob> blob;
 	
-	const std::size_t id{ mRandGen.RandomNumber() };
+	const std::size_t id{ sizeTRand() };
 
 	BlobById::accessor accessor;
 	mBlobById.find(accessor, id);

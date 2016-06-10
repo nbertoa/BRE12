@@ -7,12 +7,17 @@
 #include <CommandManager/CommandManager.h>
 #include <DXUtils\d3dx12.h>
 #include <Input/Keyboard.h>
+#include <Input/Mouse.h>
 #include <MathUtils/MathHelper.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <Utils\DebugUtils.h>
+
+namespace {
+	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
+}
 
 App* App::mApp = nullptr;
 
@@ -43,6 +48,7 @@ App::~App() {
 
 int32_t App::Run() noexcept {
 	ASSERT(Keyboard::gKeyboard.get() != nullptr);
+	ASSERT(Mouse::gMouse.get() != nullptr);
 
 	MSG msg{0U};
 
@@ -63,6 +69,7 @@ int32_t App::Run() noexcept {
 				CalculateFrameStats();
 				Draw(dt);
 				Keyboard::gKeyboard->Update();
+				Mouse::gMouse->Update();
 				Update(dt);				
 			}
 			else {
@@ -79,8 +86,8 @@ void App::Initialize() noexcept {
 	InitDirect3D();
 	InitSystems();
 
-	tbb::empty_task* parent{ CommandListProcessor::Create(mCmdListProcessor, mCmdQueue) };
-	ASSERT(parent != nullptr);
+	// Create command list processor thread.
+	CommandListProcessor::Create(mCmdListProcessor, mCmdQueue, MAX_NUM_CMD_LISTS);
 }
 
 void App::CreateRtvAndDsvDescriptorHeaps() noexcept {
@@ -100,10 +107,13 @@ void App::CreateRtvAndDsvDescriptorHeaps() noexcept {
 }
 
 void App::Update(const float dt) noexcept {
+	static std::int32_t lastXY[]{ 0UL, 0UL };
 	static const float sCameraOffset{ 10.0f };
 	static const float sCameraMultiplier{ 5.0f };
 
 	ASSERT(Keyboard::gKeyboard.get() != nullptr);
+	ASSERT(Mouse::gMouse.get() != nullptr);
+
 	const float offset = sCameraOffset * (Keyboard::gKeyboard->IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * dt ;
 	if (Keyboard::gKeyboard->IsKeyDown(DIK_W)) {
 		Camera::gCamera->Walk(offset);
@@ -118,18 +128,12 @@ void App::Update(const float dt) noexcept {
 		Camera::gCamera->Strafe(offset);
 	}
 
-	Camera::gCamera->UpdateViewMatrix();
-}
-
-void App::OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y) noexcept {
-	static int32_t lastXY[] = { 0, 0 };
-
-	ASSERT(Camera::gCamera.get() != nullptr);
-
-	if (btnState & MK_LBUTTON) {
+	const std::int32_t x{ Mouse::gMouse->X() };
+	const std::int32_t y{ Mouse::gMouse->Y() };
+	if (Mouse::gMouse->IsButtonDown(Mouse::MouseButtonsLeft)) {
 		// Make each pixel correspond to a quarter of a degree.+
-		const float dx = {DirectX::XMConvertToRadians(0.25f * (float)(x - lastXY[0]))};
-		const float dy = {DirectX::XMConvertToRadians(0.25f * (float)(y - lastXY[1]))};
+		const float dx{ DirectX::XMConvertToRadians(0.25f * (float)(x - lastXY[0])) };
+		const float dy{DirectX::XMConvertToRadians(0.25f * (float)(y - lastXY[1])) };
 
 		Camera::gCamera->Pitch(dy);
 		Camera::gCamera->RotateY(dx);
@@ -137,6 +141,8 @@ void App::OnMouseMove(const WPARAM btnState, const int32_t x, const int32_t y) n
 
 	lastXY[0] = x;
 	lastXY[1] = y;
+
+	Camera::gCamera->UpdateViewMatrix();
 }
 
 void App::CreateRtvAndDsv() noexcept {
@@ -236,10 +242,6 @@ LRESULT App::MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lParam)
 		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 200;
 		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 200;
 		return 0;
-
-	case WM_MOUSEMOVE:
-		OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		return 0;
 	case WM_KEYUP:
 		if (wParam == VK_ESCAPE) {
 			PostQuitMessage(0);
@@ -260,6 +262,9 @@ void App::InitSystems() noexcept {
 	LPDIRECTINPUT8 directInput;
 	CHECK_HR(DirectInput8Create(mAppInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID*)&directInput, nullptr));
 	Keyboard::gKeyboard = std::make_unique<Keyboard>(*directInput, mMainWnd);
+
+	ASSERT(Mouse::gMouse.get() == nullptr);
+	Mouse::gMouse = std::make_unique<Mouse>(*directInput, mMainWnd);
 	
 	ASSERT(CommandManager::gManager.get() == nullptr);
 	CommandManager::gManager = std::make_unique<CommandManager>(*mD3dDevice.Get());

@@ -1,11 +1,12 @@
 #include "PSOManager.h"
 
 #include <Utils/DebugUtils.h>
+#include <Utils/RandomNumberGenerator.h>
 
 std::unique_ptr<PSOManager> PSOManager::gManager = nullptr;
 
 std::size_t PSOManager::CreateGraphicsPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, ID3D12PipelineState* &pso) noexcept {
-	const std::size_t id{ mRandGen.RandomNumber() };
+	const std::size_t id{ sizeTRand() };
 
 	PSOById::accessor accessor;
 	mPSOById.find(accessor, id);

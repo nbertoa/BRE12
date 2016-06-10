@@ -8,7 +8,6 @@
 #include <wrl.h>
 
 #include <ResourceManager/UploadBuffer.h>
-#include <Utils/RandomNumberGenerator.h>
 
 class ResourceManager {
 public:
@@ -51,8 +50,6 @@ private:
 
 	using UploadBufferById = tbb::concurrent_hash_map<std::size_t, std::unique_ptr<UploadBuffer>>;
 	UploadBufferById mUploadBufferById;
-
-	RandomNumberGenerator mRandGen;
 
 	tbb::mutex mMutex;
 };

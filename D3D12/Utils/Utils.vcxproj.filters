@@ -8,5 +8,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HashUtils.cpp" />
+    <ClCompile Include="RandomNumberGenerator.cpp" />
   </ItemGroup>
 </Project>

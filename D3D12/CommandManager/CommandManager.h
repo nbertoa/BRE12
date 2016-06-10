@@ -7,8 +7,6 @@
 #include <tbb/mutex.h>
 #include <wrl.h>
 
-#include <Utils/RandomNumberGenerator.h>
-
 class CommandManager {
 public:
 	static std::unique_ptr<CommandManager> gManager;
@@ -37,8 +35,6 @@ private:
 
 	using CmdAllocById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12CommandAllocator>>;
 	CmdAllocById mCmdAllocById;
-
-	RandomNumberGenerator mRandGen;
 
 	tbb::mutex mMutex;
 };

@@ -5,17 +5,21 @@
 #include <tbb/task.h>
 #include <wrl.h>
 
+// You should use the static method to span a new command list processor thread.
+// Execute methods will check for command lists in its queue and execute them in cmdQueue.
+// It will execute at most mMaxNumCmdLists per execution operation.
 class CommandListProcessor : public tbb::task {
 public:
-	static tbb::empty_task* Create(CommandListProcessor* &cmdListProcessor, Microsoft::WRL::ComPtr<ID3D12CommandQueue>& cmdQueue);
+	static tbb::empty_task* Create(CommandListProcessor* &cmdListProcessor, Microsoft::WRL::ComPtr<ID3D12CommandQueue>& cmdQueue, const std::uint32_t maxNumCmdLists);
 
-	CommandListProcessor(Microsoft::WRL::ComPtr<ID3D12CommandQueue>& cmdQueue);
+	CommandListProcessor(Microsoft::WRL::ComPtr<ID3D12CommandQueue>& cmdQueue, const std::uint32_t maxNumCmdLists);
 	
 	tbb::task* execute() override;
 
 	__forceinline tbb::concurrent_queue<ID3D12CommandList*>& CmdListQueue() noexcept { return mCmdListQueue; }
 
 private:
+	std::uint32_t mMaxNumCmdLists{ 1U };
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue>& mCmdQueue;
 	tbb::concurrent_queue<ID3D12CommandList*> mCmdListQueue;
 };

@@ -8,8 +8,6 @@
 #include <vector>
 #include <wrl.h>
 
-#include <Utils/RandomNumberGenerator.h>
-
 class ShaderManager {
 public:
 	static std::unique_ptr<ShaderManager> gManager;
@@ -36,8 +34,6 @@ public:
 private:
 	using BlobById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3DBlob>>;
 	BlobById mBlobById;
-
-	RandomNumberGenerator mRandGen;
 
 	tbb::mutex mMutex;
 };

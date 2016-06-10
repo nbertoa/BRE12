@@ -39,8 +39,6 @@ protected:
 	virtual void CreateRtvAndDsv() noexcept;
 	virtual void Update(const float dt) noexcept;
 	virtual void Draw(const float dt) noexcept = 0;
-
-	virtual void OnMouseMove(const WPARAM btnState, const std::int32_t x, const std::int32_t y) noexcept;
 	
 	void InitSystems() noexcept;
 	void InitMainWindow() noexcept;
@@ -100,5 +98,5 @@ protected:
 	DXGI_FORMAT mBackBufferFormat{DXGI_FORMAT_R8G8B8A8_UNORM};
 	DXGI_FORMAT mDepthStencilFormat{DXGI_FORMAT_D24_UNORM_S8_UINT};
 	int32_t mWindowWidth{1920};
-	int32_t mWindowHeight{1080};	
+	int32_t mWindowHeight{1080};
 };

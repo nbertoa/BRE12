@@ -2,6 +2,7 @@
 
 #include <DXUtils/d3dx12.h>
 #include <Utils/DebugUtils.h>
+#include <Utils/RandomNumberGenerator.h>
 
 std::unique_ptr<ResourceManager> ResourceManager::gManager = nullptr;
 
@@ -15,7 +16,7 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	ASSERT(initData != nullptr);
 	ASSERT(byteSize > 0);
 	
-	const std::size_t id{ mRandGen.RandomNumber() };
+	const std::size_t id{ sizeTRand() };
 
 	ResourceById::accessor accessor;
 
@@ -77,7 +78,7 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 }
 
 std::size_t ResourceManager::CreateUploadBuffer(const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept {
-	const std::size_t id{ mRandGen.RandomNumber() };
+	const std::size_t id{ sizeTRand() };
 
 	UploadBufferById::accessor accessor;
 #ifdef _DEBUG

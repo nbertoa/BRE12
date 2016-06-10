@@ -7,8 +7,6 @@
 #include <tbb/mutex.h>
 #include <wrl.h>
 
-#include <Utils/RandomNumberGenerator.h>
-
 class RootSignatureManager {
 public:
 	static std::unique_ptr<RootSignatureManager> gManager;
@@ -34,8 +32,6 @@ private:
 
 	using RootSignatureById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12RootSignature>>;
 	RootSignatureById mRootSignatureById;
-
-	RandomNumberGenerator mRandGen;
 
 	tbb::mutex mMutex;
 };

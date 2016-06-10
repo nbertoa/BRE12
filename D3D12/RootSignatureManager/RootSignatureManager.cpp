@@ -1,11 +1,12 @@
 #include "RootSignatureManager.h"
 
 #include <Utils/DebugUtils.h>
+#include <Utils/RandomNumberGenerator.h>
 
 std::unique_ptr<RootSignatureManager> RootSignatureManager::gManager = nullptr;
 
 std::size_t RootSignatureManager::CreateRootSignature(const D3D12_ROOT_SIGNATURE_DESC& desc, ID3D12RootSignature* &rootSign) noexcept {
-	const std::size_t id{ mRandGen.RandomNumber() };
+	const std::size_t id{ sizeTRand() };
 
 	Microsoft::WRL::ComPtr<ID3DBlob> serializedRootSig;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;

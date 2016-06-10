@@ -21,6 +21,7 @@ Keyboard::~Keyboard() {
 
 void Keyboard::Update() noexcept {
 	ASSERT(mDevice != nullptr);
+
 	memcpy(mLastState, mCurrentState, sizeof(mCurrentState));
 	if (FAILED(mDevice->GetDeviceState(sizeof(mCurrentState), reinterpret_cast<LPVOID>(mCurrentState))) && SUCCEEDED(mDevice->Acquire())) {
 		mDevice->GetDeviceState(sizeof(mCurrentState), reinterpret_cast<LPVOID>(mCurrentState));

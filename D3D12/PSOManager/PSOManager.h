@@ -6,8 +6,6 @@
 #include <tbb/mutex.h>
 #include <wrl.h>
 
-#include <Utils/RandomNumberGenerator.h>
-
 class PSOManager {
 public:
 	static std::unique_ptr<PSOManager> gManager;
@@ -32,8 +30,6 @@ private:
 
 	using PSOById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>>;
 	PSOById mPSOById;
-
-	RandomNumberGenerator mRandGen;
 
 	tbb::mutex mMutex;
 };

@@ -1,11 +1,12 @@
 #include "CommandManager.h"
 
 #include <Utils/DebugUtils.h>
+#include <Utils/RandomNumberGenerator.h>
 
 std::unique_ptr<CommandManager> CommandManager::gManager = nullptr;
 
 std::size_t CommandManager::CreateCmdList(const D3D12_COMMAND_LIST_TYPE& type, ID3D12CommandAllocator& cmdAlloc, ID3D12GraphicsCommandList* &cmdList) noexcept {
-	const std::size_t id{ mRandGen.RandomNumber() };
+	const std::size_t id{ sizeTRand() };
 
 	CmdListById::accessor accessor;
 	mCmdListById.find(accessor, id);
@@ -29,7 +30,7 @@ std::size_t CommandManager::CreateCmdList(const D3D12_COMMAND_LIST_TYPE& type, I
 }
 
 std::size_t CommandManager::CreateCmdAlloc(const D3D12_COMMAND_LIST_TYPE& type, ID3D12CommandAllocator* &cmdAlloc) noexcept {
-	const std::size_t id{ mRandGen.RandomNumber() };
+	const std::size_t id{ sizeTRand() };
 	
 	CmdAllocById::accessor accessor;
 	mCmdAllocById.find(accessor, id);
