@@ -5,4 +5,4 @@
 #include <ctime>
 #include <thread>
 
-std::size_t sizeTRand();
+std::size_t sizeTRand() noexcept;

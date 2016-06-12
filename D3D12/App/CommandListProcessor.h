@@ -10,9 +10,9 @@
 // It will execute at most mMaxNumCmdLists per execution operation.
 class CommandListProcessor : public tbb::task {
 public:
-	static tbb::empty_task* Create(CommandListProcessor* &cmdListProcessor, Microsoft::WRL::ComPtr<ID3D12CommandQueue>& cmdQueue, const std::uint32_t maxNumCmdLists);
+	static tbb::empty_task* Create(CommandListProcessor* &cmdListProcessor, ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists);
 
-	CommandListProcessor(Microsoft::WRL::ComPtr<ID3D12CommandQueue>& cmdQueue, const std::uint32_t maxNumCmdLists);
+	CommandListProcessor(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists);
 	
 	tbb::task* execute() override;
 
@@ -20,6 +20,6 @@ public:
 
 private:
 	std::uint32_t mMaxNumCmdLists{ 1U };
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue>& mCmdQueue;
+	ID3D12CommandQueue* mCmdQueue{ nullptr };
 	tbb::concurrent_queue<ID3D12CommandList*> mCmdListQueue;
 };

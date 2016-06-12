@@ -15,7 +15,6 @@ public:
 	RootSignatureManager(const RootSignatureManager&) = delete;
 	const RootSignatureManager& operator=(const RootSignatureManager&) = delete;
 
-	// Asserts if name was already registered
 	std::size_t CreateRootSignature(const D3D12_ROOT_SIGNATURE_DESC& desc, ID3D12RootSignature* &rootSign) noexcept;
 
 	// Asserts id was not already registered

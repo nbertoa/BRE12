@@ -53,6 +53,17 @@ D3D12_BLEND_DESC D3DFactory::DefaultBlendDesc() noexcept {
 	return desc;
 }
 
+D3D12_HEAP_PROPERTIES D3DFactory::HeapProperties(const D3D12_HEAP_TYPE type) noexcept {
+	D3D12_HEAP_PROPERTIES heapProps{};
+	heapProps.Type = type;
+	heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	heapProps.CreationNodeMask = 1;
+	heapProps.VisibleNodeMask = 1;
+
+	return heapProps;
+}
+
 std::vector<D3D12_INPUT_ELEMENT_DESC> D3DFactory::PosInputLayout() noexcept {
 	std::vector<D3D12_INPUT_ELEMENT_DESC> desc
 	{

@@ -5,7 +5,6 @@
 
 #include <Camera\Camera.h>
 #include <DXutils/D3DFactory.h>
-#include <DXUtils\d3dx12.h>
 #include <GeometryGenerator\GeometryGenerator.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
@@ -90,7 +89,7 @@ void ShapesApp::Initialize() noexcept {
 
 	mShapeTasks.resize(initTasks.size());
 	for (std::size_t i = 0UL; i < mCmdBuilderTaskInputs.size(); ++i) {
-		mShapeTasks[i] = new ShapeTask(mD3dDevice.Get(), mScreenViewport, mScissorRect, mCmdBuilderTaskInputs[i]);
+		mShapeTasks[i] = new ShapeTask(mDevice.Get(), mScreenViewport, mScissorRect, mCmdBuilderTaskInputs[i]);
 	}
 
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
@@ -98,7 +97,7 @@ void ShapesApp::Initialize() noexcept {
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, initTasks.size()),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			initTasks[i]->Execute(*mD3dDevice.Get(), initDataVec[i], cmdListQueue, mCmdBuilderTaskInputs[i]);
+			initTasks[i]->Execute(*mDevice.Get(), initDataVec[i], cmdListQueue, mCmdBuilderTaskInputs[i]);
 	}
 	);
 
@@ -110,36 +109,32 @@ void ShapesApp::Draw(const float) noexcept {
 
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
-	CHECK_HR(mDirectCmdListAlloc->Reset());
+	CHECK_HR(mDirectCmdAlloc1->Reset());
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	CHECK_HR(mCmdList->Reset(mDirectCmdListAlloc.Get(), nullptr));
+	CHECK_HR(mCmdList1->Reset(mDirectCmdAlloc1, nullptr));
 
 	// Set the viewport and scissor rect.  This needs to be reset whenever the command list is reset.
-	mCmdList->RSSetViewports(1U, &mScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &mScissorRect);
+	mCmdList1->RSSetViewports(1U, &mScreenViewport);
+	mCmdList1->RSSetScissorRects(1U, &mScissorRect);
 
 	// Indicate a state transition on the resource usage.
 	CD3DX12_RESOURCE_BARRIER resBarrier{ CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
-	mCmdList->ResourceBarrier(1, &resBarrier);
+	mCmdList1->ResourceBarrier(1, &resBarrier);
 
 	// Specify the buffers we are going to render to.
 	const D3D12_CPU_DESCRIPTOR_HANDLE backBufferHandle = CurrentBackBufferView();
 	const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
-	mCmdList->OMSetRenderTargets(1U, &backBufferHandle, true, &dsvHandle);
+	mCmdList1->OMSetRenderTargets(1U, &backBufferHandle, true, &dsvHandle);
 
 	// Clear the back buffer and depth buffer.
-	mCmdList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::LightSteelBlue, 0U, nullptr);
-	mCmdList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
+	mCmdList1->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::LightSteelBlue, 0U, nullptr);
+	mCmdList1->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
 
 	// Done recording commands.
-	CHECK_HR(mCmdList->Close());
-
-	{
-		ID3D12CommandList* cmdLists[] = { mCmdList.Get() };
-		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
-	}
+	CHECK_HR(mCmdList1->Close());
+	cmdListQueue.push(mCmdList1);
 
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mShapeTasks.size(), 20),
 		[&](const tbb::blocked_range<size_t>& r) {
@@ -148,27 +143,22 @@ void ShapesApp::Draw(const float) noexcept {
 	}
 	);
 
-	// Wait until all command lists are executed
-	while (!cmdListQueue.empty()) {
-	}
-
-	CHECK_HR(mSecDirectCmdListAlloc->Reset());
+	CHECK_HR(mDirectCmdAlloc2->Reset());
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	CHECK_HR(mCmdList->Reset(mSecDirectCmdListAlloc.Get(), nullptr));
+	CHECK_HR(mCmdList2->Reset(mDirectCmdAlloc2, nullptr));
 	
 	// Indicate a state transition on the resource usage.
 	resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	mCmdList->ResourceBarrier(1U, &resBarrier);
+	mCmdList2->ResourceBarrier(1U, &resBarrier);
 
 	// Done recording commands.
-	CHECK_HR(mCmdList->Close());
+	CHECK_HR(mCmdList2->Close());
 
-	// Add the command list to the queue for execution.
 	{
-		ID3D12CommandList* cmdLists[] = { mCmdList.Get() };
-		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+		ID3D12CommandList* cmdLists[] = { mCmdList2 };
+		mCmdQueue->ExecuteCommandLists(1, cmdLists);
 	}
 
 	// Wait until frame commands are complete.  This waiting is inefficient and is

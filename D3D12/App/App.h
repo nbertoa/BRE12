@@ -68,31 +68,27 @@ protected:
 
 	Microsoft::WRL::ComPtr<IDXGIFactory4> mDxgiFactory;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;
-	Microsoft::WRL::ComPtr<ID3D12Device> mD3dDevice;
+	Microsoft::WRL::ComPtr<ID3D12Device> mDevice;
 
-	Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
+	ID3D12Fence* mFence{ nullptr };
 	std::uint64_t mCurrentFence{0U};
 
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCmdQueue;
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCmdListAlloc;
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mSecDirectCmdListAlloc;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCmdList;
+	ID3D12CommandQueue* mCmdQueue{ nullptr };
+	ID3D12CommandAllocator* mDirectCmdAlloc1{ nullptr };
+	ID3D12CommandAllocator* mDirectCmdAlloc2{ nullptr };
+	ID3D12GraphicsCommandList* mCmdList1{ nullptr };
+	ID3D12GraphicsCommandList* mCmdList2{ nullptr };
 
 	static const std::uint32_t sSwapChainBufferCount{2U};
 	std::uint32_t mCurrBackBuffer{0U};
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[sSwapChainBufferCount];
-	Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer;
+	ID3D12Resource* mDepthStencilBuffer{ nullptr };
 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRtvHeap;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDsvHeap;
+	ID3D12DescriptorHeap* mRtvHeap{ nullptr };
+	ID3D12DescriptorHeap* mDsvHeap{ nullptr };
 
 	D3D12_VIEWPORT mScreenViewport;
 	D3D12_RECT mScissorRect;
-
-	std::uint32_t mRtvDescSize{0U};
-	std::uint32_t mDsvDescSize{0U};
-	std::uint32_t mCbvSrvUavDescSize{0U};
-	std::uint32_t mSamplerDescSize{0U};
 
 	// Derived class should set these in derived constructor to customize starting values.
 	DXGI_FORMAT mBackBufferFormat{DXGI_FORMAT_R8G8B8A8_UNORM};

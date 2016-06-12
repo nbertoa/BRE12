@@ -5,7 +5,6 @@
 
 #include <Camera/Camera.h>
 #include <CommandManager/CommandManager.h>
-#include <DXUtils\d3dx12.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <MathUtils/MathHelper.h>
@@ -27,11 +26,7 @@ MainWndProc(HWND hwnd, const std::uint32_t msg, WPARAM wParam, LPARAM lParam) {
 }
 
 App::App(HINSTANCE hInstance)
-#ifdef _DEBUG
 	: mTaskSchedulerInit()
-#else 
-	: mTaskSchedulerInit()
-#endif
 	, mAppInst(hInstance)
 {
 	ASSERT(mApp == nullptr);
@@ -39,7 +34,7 @@ App::App(HINSTANCE hInstance)
 }
 
 App::~App() {
-	if (mD3dDevice != nullptr) {
+	if (mDevice != nullptr) {
 		FlushCommandQueue();
 	}
 
@@ -84,7 +79,7 @@ int32_t App::Run() noexcept {
 void App::Initialize() noexcept {
 	InitMainWindow();
 	InitDirect3D();
-	InitSystems();
+	
 
 	// Create command list processor thread.
 	CommandListProcessor::Create(mCmdListProcessor, mCmdQueue, MAX_NUM_CMD_LISTS);
@@ -96,14 +91,14 @@ void App::CreateRtvAndDsvDescriptorHeaps() noexcept {
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = 0;
-	CHECK_HR(mD3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(mRtvHeap.GetAddressOf())));
+	ResourceManager::gManager->CreateDescriptorHeap(rtvHeapDesc, mRtvHeap);
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
 	dsvHeapDesc.NumDescriptors = 1U;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	dsvHeapDesc.NodeMask = 0U;
-	CHECK_HR(mD3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(mDsvHeap.GetAddressOf())));
+	ResourceManager::gManager->CreateDescriptorHeap(dsvHeapDesc, mDsvHeap);
 }
 
 void App::Update(const float dt) noexcept {
@@ -114,6 +109,7 @@ void App::Update(const float dt) noexcept {
 	ASSERT(Keyboard::gKeyboard.get() != nullptr);
 	ASSERT(Mouse::gMouse.get() != nullptr);
 
+	// Update camera based on keyboard
 	const float offset = sCameraOffset * (Keyboard::gKeyboard->IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * dt ;
 	if (Keyboard::gKeyboard->IsKeyDown(DIK_W)) {
 		Camera::gCamera->Walk(offset);
@@ -128,6 +124,7 @@ void App::Update(const float dt) noexcept {
 		Camera::gCamera->Strafe(offset);
 	}
 
+	// Update camera based on mouse
 	const std::int32_t x{ Mouse::gMouse->X() };
 	const std::int32_t y{ Mouse::gMouse->Y() };
 	if (Mouse::gMouse->IsButtonDown(Mouse::MouseButtonsLeft)) {
@@ -146,14 +143,15 @@ void App::Update(const float dt) noexcept {
 }
 
 void App::CreateRtvAndDsv() noexcept {
-	ASSERT(mD3dDevice != nullptr);
+	ASSERT(mDevice != nullptr);
 	ASSERT(mSwapChain != nullptr);
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRtvHeap->GetCPUDescriptorHandleForHeapStart());
+	const std::uint32_t rtvDescSize{ mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mSwapChainBuffer[i].GetAddressOf())));
-		mD3dDevice->CreateRenderTargetView(mSwapChainBuffer[i].Get(), nullptr, rtvHeapHandle);
-		rtvHeapHandle.Offset(1U, mRtvDescSize);
+		mDevice->CreateRenderTargetView(mSwapChainBuffer[i].Get(), nullptr, rtvHeapHandle);
+		rtvHeapHandle.Offset(1U, rtvDescSize);
 	}
 
 	// Create the depth/stencil buffer and view.
@@ -175,16 +173,10 @@ void App::CreateRtvAndDsv() noexcept {
 	optClear.DepthStencil.Depth = 1.0f;
 	optClear.DepthStencil.Stencil = 0U;
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	CHECK_HR(mD3dDevice->CreateCommittedResource(
-		&heapProps,
-		D3D12_HEAP_FLAG_NONE,
-		&depthStencilDesc,
-		D3D12_RESOURCE_STATE_COMMON,
-		&optClear,
-		IID_PPV_ARGS(mDepthStencilBuffer.GetAddressOf())));
+	ResourceManager::gManager->CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, depthStencilDesc, D3D12_RESOURCE_STATE_COMMON, optClear, mDepthStencilBuffer);
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
-	mD3dDevice->CreateDepthStencilView(mDepthStencilBuffer.Get(), nullptr, DepthStencilView());
+	mDevice->CreateDepthStencilView(mDepthStencilBuffer, nullptr, DepthStencilView());
 
 	// Update the viewport transform to cover the client area.
 	mScreenViewport.TopLeftX = 0.0f;
@@ -267,16 +259,16 @@ void App::InitSystems() noexcept {
 	Mouse::gMouse = std::make_unique<Mouse>(*directInput, mMainWnd);
 	
 	ASSERT(CommandManager::gManager.get() == nullptr);
-	CommandManager::gManager = std::make_unique<CommandManager>(*mD3dDevice.Get());
+	CommandManager::gManager = std::make_unique<CommandManager>(*mDevice.Get());
 
 	ASSERT(PSOManager::gManager.get() == nullptr);
-	PSOManager::gManager = std::make_unique<PSOManager>(*mD3dDevice.Get());
+	PSOManager::gManager = std::make_unique<PSOManager>(*mDevice.Get());
 
 	ASSERT(ResourceManager::gManager.get() == nullptr);
-	ResourceManager::gManager = std::make_unique<ResourceManager>(*mD3dDevice.Get());
+	ResourceManager::gManager = std::make_unique<ResourceManager>(*mDevice.Get());
 
 	ASSERT(RootSignatureManager::gManager.get() == nullptr);
-	RootSignatureManager::gManager = std::make_unique<RootSignatureManager>(*mD3dDevice.Get());
+	RootSignatureManager::gManager = std::make_unique<RootSignatureManager>(*mDevice.Get());
 
 	ASSERT(ShaderManager::gManager.get() == nullptr);
 	ShaderManager::gManager = std::make_unique<ShaderManager>();
@@ -323,14 +315,12 @@ void App::InitDirect3D() noexcept {
 
 	// Create device
 	CHECK_HR(CreateDXGIFactory1(IID_PPV_ARGS(mDxgiFactory.GetAddressOf())));
-	CHECK_HR(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(mD3dDevice.GetAddressOf())));
+	CHECK_HR(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(mDevice.GetAddressOf())));
+
+	InitSystems();
 	
 	// Create fence and query descriptors sizes
-	CHECK_HR(mD3dDevice->CreateFence(0U, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(mFence.GetAddressOf())));
-	mRtvDescSize = mD3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	mDsvDescSize = mD3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-	mCbvSrvUavDescSize = mD3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	mSamplerDescSize = mD3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+	ResourceManager::gManager->CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 	
 	CreateCommandObjects();
 	CreateSwapChain();
@@ -342,15 +332,17 @@ void App::CreateCommandObjects() noexcept {
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	CHECK_HR(mD3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(mCmdQueue.GetAddressOf())));
-	CHECK_HR(mD3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(mDirectCmdListAlloc.GetAddressOf())));
-	CHECK_HR(mD3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(mSecDirectCmdListAlloc.GetAddressOf())));
-	CHECK_HR(mD3dDevice->CreateCommandList(0U, D3D12_COMMAND_LIST_TYPE_DIRECT, mDirectCmdListAlloc.Get(), nullptr, IID_PPV_ARGS(mCmdList.GetAddressOf())));
+	CommandManager::gManager->CreateCmdQueue(queueDesc, mCmdQueue);
+	CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mDirectCmdAlloc1);
+	CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mDirectCmdAlloc2);
+	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mDirectCmdAlloc1, mCmdList1);
+	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mDirectCmdAlloc2, mCmdList2);
 
 	// Start off in a closed state.  This is because the first time we refer 
 	// to the command list we will Reset it, and it needs to be closed before
 	// calling Reset.
-	mCmdList->Close();
+	mCmdList1->Close();
+	mCmdList2->Close();
 }
 
 void App::CreateSwapChain() noexcept {
@@ -372,7 +364,7 @@ void App::CreateSwapChain() noexcept {
 	sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	// Note: Swap chain uses queue to perform flush.
-	CHECK_HR(mDxgiFactory->CreateSwapChain(mCmdQueue.Get(), &sd, mSwapChain.GetAddressOf()));
+	CHECK_HR(mDxgiFactory->CreateSwapChain(mCmdQueue, &sd, mSwapChain.GetAddressOf()));
 
 	// Resize the swap chain.
 	CHECK_HR(mSwapChain->ResizeBuffers(sSwapChainBufferCount, mWindowWidth, mWindowHeight, mBackBufferFormat, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
@@ -385,7 +377,7 @@ void App::FlushCommandQueue() noexcept {
 	// Add an instruction to the command queue to set a new fence point.  Because we 
 	// are on the GPU timeline, the new fence point won't be set until the GPU finishes
 	// processing all the commands prior to this Signal().
-	CHECK_HR(mCmdQueue->Signal(mFence.Get(), mCurrentFence));
+	CHECK_HR(mCmdQueue->Signal(mFence, mCurrentFence));
 	
 	// Wait until the GPU has completed commands up to this fence point.
 	if (mFence->GetCompletedValue() < mCurrentFence) {
@@ -406,7 +398,8 @@ ID3D12Resource* App::CurrentBackBuffer() const noexcept {
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE App::CurrentBackBufferView() const noexcept {
-	return CD3DX12_CPU_DESCRIPTOR_HANDLE(mRtvHeap->GetCPUDescriptorHandleForHeapStart(), mCurrBackBuffer, mRtvDescSize);
+	const std::uint32_t rtvDescSize{ mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
+	return CD3DX12_CPU_DESCRIPTOR_HANDLE(mRtvHeap->GetCPUDescriptorHandleForHeapStart(), mCurrBackBuffer, rtvDescSize);
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE App::DepthStencilView() const noexcept {
