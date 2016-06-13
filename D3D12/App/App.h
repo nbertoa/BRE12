@@ -43,6 +43,7 @@ public:
 
 protected:
 	static App* mApp;
+	static const std::uint32_t sSwapChainBufferCount{ 2U };
 
 	__forceinline float AspectRatio() const noexcept { return (float)mWindowWidth / mWindowHeight; }
 
@@ -83,6 +84,7 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Device> mDevice;
 
 	ID3D12Fence* mFence{ nullptr };
+	ID3D12Fence* mFenceByFrameIndex[sSwapChainBufferCount]{ nullptr };
 	std::uint64_t mCurrentFence{0U};
 
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
@@ -90,8 +92,7 @@ protected:
 	ID3D12CommandAllocator* mDirectCmdAlloc2{ nullptr };
 	ID3D12GraphicsCommandList* mCmdList1{ nullptr };
 	ID3D12GraphicsCommandList* mCmdList2{ nullptr };
-
-	static const std::uint32_t sSwapChainBufferCount{2U};
+	
 	std::uint32_t mCurrBackBuffer{0U};
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[sSwapChainBufferCount];
 	ID3D12Resource* mDepthStencilBuffer{ nullptr };

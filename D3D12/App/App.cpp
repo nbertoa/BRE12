@@ -406,6 +406,9 @@ void App::InitDirect3D() noexcept {
 	
 	// Create fence and query descriptors sizes
 	ResourceManager::gManager->CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
+	for (std::uint32_t i = 0U; i < sSwapChainBufferCount; ++i) {
+		ResourceManager::gManager->CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFenceByFrameIndex[i]);
+	}
 	
 	CreateCommandObjects();
 	CreateSwapChain();
