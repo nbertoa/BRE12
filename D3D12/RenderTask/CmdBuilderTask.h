@@ -50,9 +50,9 @@ struct CmdBuilderTaskInput {
 // - Inherit from this class and reimplement virtual methods.
 class CmdBuilderTask {
 public:
-	explicit CmdBuilderTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect, CmdBuilderTaskInput& input);
-	CmdBuilderTask(const CmdBuilderTask&) = delete;
-	const CmdBuilderTask& operator=(const CmdBuilderTask&) = delete;
+	explicit CmdBuilderTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect);
+
+	__forceinline CmdBuilderTaskInput& TaskInput() noexcept { return mInput; }
 	
 	// Store new command lists in cmdLists  
 	virtual void Execute(
@@ -64,5 +64,5 @@ protected:
 	ID3D12Device* mDevice{ nullptr };
 	D3D12_VIEWPORT mViewport{};
 	D3D12_RECT mScissorRect{};
-	CmdBuilderTaskInput& mInput;
+	CmdBuilderTaskInput mInput;
 };

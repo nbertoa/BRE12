@@ -15,12 +15,12 @@ namespace {
 	};
 }
 
-void ShapeInitTask::Execute(ID3D12Device& device, const InitTaskInput& input, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept {
-	InitTask::Execute(device, input, cmdLists, output);
+void ShapeInitTask::Execute(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept {
+	InitTask::Execute(device, cmdLists, output);
 
 	ASSERT(output.mGeomDataVec.empty());
 	ASSERT(output.mCmdAlloc != nullptr);
-	ASSERT(output.mCmdList != nullptr);
+	ASSERT(output.mCmdList != nullptr); 
 	ASSERT(output.mPSO != nullptr);
 
 	// Reuse the memory associated with command recording.
@@ -31,12 +31,12 @@ void ShapeInitTask::Execute(ID3D12Device& device, const InitTaskInput& input, tb
 	// Reusing the command list reuses memory.
 	CHECK_HR(output.mCmdList->Reset(output.mCmdAlloc, output.mPSO));
 
-	const std::size_t numMeshes{ input.mMeshInfoVec.size() };
+	const std::size_t numMeshes{ mInput.mMeshInfoVec.size() };
 	output.mGeomDataVec.reserve(numMeshes);
 
 	const float baseOffset{ 10.0f };
 	for (std::size_t i = 0UL; i < numMeshes; ++i) {
-		const MeshInfo& meshInfo{ input.mMeshInfoVec[i] };
+		const MeshInfo& meshInfo{ mInput.mMeshInfoVec[i] };
 		ASSERT(meshInfo.ValidateData());
 		GeometryData geomData;
 		BuildVertexAndIndexBuffers(

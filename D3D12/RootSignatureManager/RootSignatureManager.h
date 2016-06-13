@@ -16,6 +16,7 @@ public:
 	const RootSignatureManager& operator=(const RootSignatureManager&) = delete;
 
 	std::size_t CreateRootSignature(const D3D12_ROOT_SIGNATURE_DESC& desc, ID3D12RootSignature* &rootSign) noexcept;
+	std::size_t CreateRootSignature(const D3D12_SHADER_BYTECODE& shaderByteCode, ID3D12RootSignature* &rootSign) noexcept;
 
 	// Asserts id was not already registered
 	ID3D12RootSignature& GetRootSignature(const std::size_t id) noexcept;

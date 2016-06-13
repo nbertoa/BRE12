@@ -9,6 +9,8 @@
 #include <wrl.h>
 
 #include <App/CommandListProcessor.h>
+#include <RenderTask/CmdBuilderTask.h>
+#include <RenderTask/InitTask.h>
 #include <Timer\Timer.h>
 
 #if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
@@ -18,19 +20,26 @@
 #endif 
 
 class App {
-protected:
+public:
 	explicit App(HINSTANCE hInstance);
 	App(const App& rhs) = delete;
 	App& operator=(const App& rhs) = delete;
 	virtual ~App();
 
-public:
 	static App* GetApp() noexcept { return mApp; }	
 	
-	virtual void Initialize() noexcept;
+	// Execute these methods in declaration order.
+	void Initialize() noexcept;
+	void InitializeTasks() noexcept;	
 	std::int32_t Run() noexcept;
 
 	LRESULT MsgProc(HWND hwnd, const std::int32_t msg, WPARAM wParam, LPARAM lParam) noexcept;
+
+	__forceinline std::vector<std::unique_ptr<InitTask>>& InitTasks() noexcept { return mInitTasks; }
+	__forceinline std::vector<std::unique_ptr<CmdBuilderTask>>& CmdBuilderTasks() noexcept { return mCmdBuilderTasks; }
+	__forceinline ID3D12Device& Device() noexcept { ASSERT(mDevice.Get() != nullptr);  return *mDevice.Get(); }
+	__forceinline const D3D12_VIEWPORT& Viewport() const noexcept { return mScreenViewport; }
+	__forceinline const D3D12_RECT& ScissorRect() const noexcept { return mScissorRect; }
 
 protected:
 	 __forceinline float AspectRatio() const noexcept { return (float)mWindowWidth / mWindowHeight; }
@@ -38,11 +47,11 @@ protected:
 	virtual void CreateRtvAndDsvDescriptorHeaps() noexcept;
 	virtual void CreateRtvAndDsv() noexcept;
 	virtual void Update(const float dt) noexcept;
-	virtual void Draw(const float dt) noexcept = 0;
+	virtual void Draw(const float dt) noexcept;
 	
 	void InitSystems() noexcept;
 	void InitMainWindow() noexcept;
-	void InitDirect3D() noexcept;
+	void InitDirect3D() noexcept;	
 	void CreateCommandObjects() noexcept;
 	void CreateSwapChain() noexcept;
 
@@ -65,6 +74,9 @@ protected:
 	bool mAppPaused = false;  // is the application paused?
 
 	Timer mTimer;
+
+	std::vector<std::unique_ptr<InitTask>> mInitTasks;
+	std::vector<std::unique_ptr<CmdBuilderTask>> mCmdBuilderTasks;
 
 	Microsoft::WRL::ComPtr<IDXGIFactory4> mDxgiFactory;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;

@@ -1,30 +1,24 @@
 #include "PSOManager.h"
 
 #include <Utils/DebugUtils.h>
-#include <Utils/RandomNumberGenerator.h>
+#include <Utils/NumberGeneration.h>
 
 std::unique_ptr<PSOManager> PSOManager::gManager = nullptr;
 
 std::size_t PSOManager::CreateGraphicsPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, ID3D12PipelineState* &pso) noexcept {
-	const std::size_t id{ sizeTRand() };
-
+	mMutex.lock();
+	CHECK_HR(mDevice.CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
+	mMutex.unlock();
+	
+	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
 	PSOById::accessor accessor;
+#ifdef _DEBUG
 	mPSOById.find(accessor, id);
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> auxPso;
-	if (!accessor.empty()) {
-		auxPso = accessor->second.Get();
-	}
-	else {
-		mMutex.lock();
-		CHECK_HR(mDevice.CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&auxPso)));
-		mMutex.unlock();
-
-		mPSOById.insert(accessor, id);
-		accessor->second = auxPso;
-	}
+	ASSERT(accessor.empty());
+#endif
+	mPSOById.insert(accessor, id);
+	accessor->second = Microsoft::WRL::ComPtr<ID3D12PipelineState>(pso);
 	accessor.release();
-
-	pso = auxPso.Get();
 	
 	return id;
 }

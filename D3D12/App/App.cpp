@@ -1,5 +1,7 @@
 #include "App.h"
 
+#include <DirectXColors.h>
+#include <tbb/parallel_for.h>
 #include <vector>
 #include <WindowsX.h>
 
@@ -41,6 +43,24 @@ App::~App() {
 	mTaskSchedulerInit.terminate();
 }
 
+void App::InitializeTasks() noexcept {
+	ASSERT(!mInitTasks.empty());
+	ASSERT(mInitTasks.size() == mCmdBuilderTasks.size());
+
+	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
+
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mInitTasks.size()),
+		[&](const tbb::blocked_range<size_t>& r) {
+		for (size_t i = r.begin(); i != r.end(); ++i)
+			mInitTasks[i]->Execute(*mDevice.Get(), cmdListQueue, mCmdBuilderTasks[i]->TaskInput());
+	}
+	);
+
+	while (!cmdListQueue.empty()) {}
+
+	FlushCommandQueue();
+}
+
 int32_t App::Run() noexcept {
 	ASSERT(Keyboard::gKeyboard.get() != nullptr);
 	ASSERT(Mouse::gMouse.get() != nullptr);
@@ -78,8 +98,9 @@ int32_t App::Run() noexcept {
 
 void App::Initialize() noexcept {
 	InitMainWindow();
-	InitDirect3D();
-	
+	InitDirect3D();	
+
+	Camera::gCamera->UpdateViewMatrix();
 
 	// Create command list processor thread.
 	CommandListProcessor::Create(mCmdListProcessor, mCmdQueue, MAX_NUM_CMD_LISTS);
@@ -140,6 +161,76 @@ void App::Update(const float dt) noexcept {
 	lastXY[1] = y;
 
 	Camera::gCamera->UpdateViewMatrix();
+}
+
+void App::Draw(const float) noexcept {
+	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
+
+	// Reuse the memory associated with command recording.
+	// We can only reset when the associated command lists have finished execution on the GPU.
+	CHECK_HR(mDirectCmdAlloc1->Reset());
+
+	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
+	// Reusing the command list reuses memory.
+	CHECK_HR(mCmdList1->Reset(mDirectCmdAlloc1, nullptr));
+
+	// Set the viewport and scissor rect.  This needs to be reset whenever the command list is reset.
+	mCmdList1->RSSetViewports(1U, &mScreenViewport);
+	mCmdList1->RSSetScissorRects(1U, &mScissorRect);
+
+	// Indicate a state transition on the resource usage.
+	CD3DX12_RESOURCE_BARRIER resBarrier{ CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
+	mCmdList1->ResourceBarrier(1, &resBarrier);
+
+	// Specify the buffers we are going to render to.
+	const D3D12_CPU_DESCRIPTOR_HANDLE backBufferHandle = CurrentBackBufferView();
+	const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
+	mCmdList1->OMSetRenderTargets(1U, &backBufferHandle, true, &dsvHandle);
+
+	// Clear the back buffer and depth buffer.
+	mCmdList1->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::LightSteelBlue, 0U, nullptr);
+	mCmdList1->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
+
+	// Done recording commands.
+	CHECK_HR(mCmdList1->Close());
+	cmdListQueue.push(mCmdList1);
+
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mCmdBuilderTasks.size(), 20),
+		[&](const tbb::blocked_range<size_t>& r) {
+		for (size_t i = r.begin(); i != r.end(); ++i)
+			mCmdBuilderTasks[i]->Execute(cmdListQueue, backBufferHandle, dsvHandle);
+	}
+	);
+
+	CHECK_HR(mDirectCmdAlloc2->Reset());
+
+	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
+	// Reusing the command list reuses memory.
+	CHECK_HR(mCmdList2->Reset(mDirectCmdAlloc2, nullptr));
+
+	// Indicate a state transition on the resource usage.
+	resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	mCmdList2->ResourceBarrier(1U, &resBarrier);
+
+	// Done recording commands.
+	CHECK_HR(mCmdList2->Close());
+
+	{
+		ID3D12CommandList* cmdLists[] = { mCmdList2 };
+		mCmdQueue->ExecuteCommandLists(1, cmdLists);
+	}
+
+	while (!cmdListQueue.empty()) {}
+
+	// Wait until frame commands are complete.  This waiting is inefficient and is
+	// done for simplicity.  Later we will show how to organize our rendering code
+	// so we do not have to wait per frame.
+	FlushCommandQueue();
+
+	// swap the back and front buffers
+	ASSERT(mSwapChain.Get());
+	CHECK_HR(mSwapChain->Present(0U, 0U));
+	mCurrBackBuffer = (mCurrBackBuffer + 1U) % sSwapChainBufferCount;
 }
 
 void App::CreateRtvAndDsv() noexcept {

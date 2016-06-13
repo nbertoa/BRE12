@@ -11,66 +11,61 @@ bool InitTaskInput::ValidateData() const {
 	return !mMeshInfoVec.empty() && !mInputLayout.empty();
 }
 
-void InitTask::Execute(ID3D12Device& /*device*/, const InitTaskInput& input, tbb::concurrent_queue<ID3D12CommandList*>& /*cmdLists*/, CmdBuilderTaskInput& output) noexcept {
-	ASSERT(input.ValidateData());
+void InitTask::Execute(ID3D12Device& /*device*/, tbb::concurrent_queue<ID3D12CommandList*>& /*cmdLists*/, CmdBuilderTaskInput& output) noexcept {
+	ASSERT(mInput.ValidateData());
 	
-	output.mTopology = input.mTopology;
+	output.mTopology = mInput.mTopology;
 
-	BuildRootSignature(input.mRootSignDesc, output.mRootSign);
-	BuildPSO(input, *output.mRootSign, output.mPSO);
+	BuildPSO(output.mRootSign, output.mPSO);
 	BuildCommandObjects(output.mCmdList, output.mCmdAlloc);
 }
 
-void InitTask::BuildRootSignature(const D3D12_ROOT_SIGNATURE_DESC& rootSignDesc, ID3D12RootSignature* &rootSign) noexcept {
-	ASSERT(rootSign == nullptr);
-	RootSignatureManager::gManager->CreateRootSignature(rootSignDesc, rootSign);
-}
-
-void InitTask::BuildPSO(const InitTaskInput& input, ID3D12RootSignature& rootSign, ID3D12PipelineState* &pso) noexcept {
+void InitTask::BuildPSO(ID3D12RootSignature* &rootSign, ID3D12PipelineState* &pso) noexcept {
 	ASSERT(pso == nullptr);
-	ASSERT(input.ValidateData());
+	ASSERT(mInput.ValidateData());
+	ASSERT(mInput.mVSFilename != nullptr);
+	ASSERT(rootSign == nullptr);
 
 	D3D12_SHADER_BYTECODE vertexShader{};
-	if (input.mVSFilename != nullptr) {
-		ShaderManager::gManager->LoadShaderFile(input.mVSFilename, vertexShader);
-	}
-
+	ShaderManager::gManager->LoadShaderFile(mInput.mVSFilename, vertexShader);
+	RootSignatureManager::gManager->CreateRootSignature(vertexShader, rootSign);
+	
 	D3D12_SHADER_BYTECODE geomShader{};
-	if (input.mGSFilename != nullptr) {
-		ShaderManager::gManager->LoadShaderFile(input.mGSFilename, geomShader);
+	if (mInput.mGSFilename != nullptr) {
+		ShaderManager::gManager->LoadShaderFile(mInput.mGSFilename, geomShader);
 	}
 
 	D3D12_SHADER_BYTECODE domainShader{};
-	if (input.mDSFilename != nullptr) {
-		ShaderManager::gManager->LoadShaderFile(input.mDSFilename, domainShader);
+	if (mInput.mDSFilename != nullptr) {
+		ShaderManager::gManager->LoadShaderFile(mInput.mDSFilename, domainShader);
 	}
 
 	D3D12_SHADER_BYTECODE hullShader{};
-	if (input.mHSFilename != nullptr) {
-		ShaderManager::gManager->LoadShaderFile(input.mHSFilename, hullShader);
+	if (mInput.mHSFilename != nullptr) {
+		ShaderManager::gManager->LoadShaderFile(mInput.mHSFilename, hullShader);
 	}
 
 	D3D12_SHADER_BYTECODE pixelShader{};
-	if (input.mPSFilename != nullptr) {
-		ShaderManager::gManager->LoadShaderFile(input.mPSFilename, pixelShader);
+	if (mInput.mPSFilename != nullptr) {
+		ShaderManager::gManager->LoadShaderFile(mInput.mPSFilename, pixelShader);
 	}
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = {};
-	desc.BlendState = input.mBlendDesc;
-	desc.DepthStencilState = input.mDepthStencilDesc;
+	desc.BlendState = mInput.mBlendDesc;
+	desc.DepthStencilState = mInput.mDepthStencilDesc;
 	desc.DS = domainShader;
-	desc.DSVFormat = input.mDepthStencilFormat;
+	desc.DSVFormat = mInput.mDepthStencilFormat;
 	desc.GS = geomShader;
 	desc.HS = hullShader;
-	desc.InputLayout = { input.mInputLayout.data(), (std::uint32_t)input.mInputLayout.size() };
-	desc.NumRenderTargets = input.mNumRenderTargets;
-	desc.PrimitiveTopologyType = input.mTopology;
-	desc.pRootSignature = &rootSign;
+	desc.InputLayout = { mInput.mInputLayout.data(), (std::uint32_t)mInput.mInputLayout.size() };
+	desc.NumRenderTargets = mInput.mNumRenderTargets;
+	desc.PrimitiveTopologyType = mInput.mTopology;
+	desc.pRootSignature = nullptr;
 	desc.PS = pixelShader;
 	desc.RasterizerState = D3DFactory::DefaultRasterizerDesc();
-	memcpy(desc.RTVFormats, input.mRTVFormats, sizeof(input.mRTVFormats));
-	desc.SampleDesc = input.mSampleDesc;
-	desc.SampleMask = input.mSampleMask;
+	memcpy(desc.RTVFormats, mInput.mRTVFormats, sizeof(mInput.mRTVFormats));
+	desc.SampleDesc = mInput.mSampleDesc;
+	desc.SampleMask = mInput.mSampleMask;
 	desc.VS = vertexShader;
 
 	PSOManager::gManager->CreateGraphicsPSO(desc, pso);

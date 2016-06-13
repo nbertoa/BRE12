@@ -46,8 +46,6 @@ struct InitTaskInput {
 
 	bool ValidateData() const;
 
-	D3D12_ROOT_SIGNATURE_DESC mRootSignDesc{};
-
 	using MeshInfoVec = std::vector<MeshInfo>;
 	MeshInfoVec mMeshInfoVec{};
 
@@ -77,15 +75,14 @@ struct InitTaskInput {
 class InitTask {
 public:
 	explicit InitTask() = default;
-	InitTask(const InitTask&) = delete;
-	const InitTask& operator=(const InitTask&) = delete;
+
+	__forceinline InitTaskInput& TaskInput() noexcept { return mInput; }
 
 	// Store new initialization commands in cmdLists
-	virtual void Execute(ID3D12Device& device, const InitTaskInput& input, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept;
+	virtual void Execute(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept;
 
 protected:
-	void BuildRootSignature(const D3D12_ROOT_SIGNATURE_DESC& rootSignDesc, ID3D12RootSignature* &rootSign) noexcept;
-	void BuildPSO(const InitTaskInput& input, ID3D12RootSignature& signRoot, ID3D12PipelineState* &pso) noexcept;
+	void BuildPSO(ID3D12RootSignature* &rootSign, ID3D12PipelineState* &pso) noexcept;
 	void BuildVertexAndIndexBuffers(
 		GeometryData& geomData,
 		const void* vertsData,
@@ -96,4 +93,6 @@ protected:
 		ID3D12GraphicsCommandList& cmdList) noexcept;
 
 	void BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* &cmdAlloc) noexcept;
+
+	InitTaskInput mInput{};
 };

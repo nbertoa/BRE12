@@ -4,9 +4,7 @@
 
 class ShapeTask : public CmdBuilderTask {
 public:
-	explicit ShapeTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect, CmdBuilderTaskInput& input);
-	ShapeTask(const ShapeTask&) = delete;
-	const ShapeTask& operator=(const ShapeTask&) = delete;
+	explicit ShapeTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect);
 
 	void Execute(
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdLists,

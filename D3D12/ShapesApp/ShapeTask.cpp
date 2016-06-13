@@ -18,8 +18,8 @@ namespace {
 	};
 }
 
-ShapeTask::ShapeTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect, CmdBuilderTaskInput& input)
-	: CmdBuilderTask(device, screenViewport, scissorRect, input)
+ShapeTask::ShapeTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect)
+	: CmdBuilderTask(device, screenViewport, scissorRect)
 {
 	ASSERT(device != nullptr);
 }

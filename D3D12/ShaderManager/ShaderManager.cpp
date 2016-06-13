@@ -5,7 +5,7 @@
 #include <fstream>
 
 #include <Utils/DebugUtils.h>
-#include <Utils/RandomNumberGenerator.h>
+#include <Utils/NumberGeneration.h>
 
 namespace {
 	ID3DBlob* LoadBlob(const std::string& filename) noexcept {
@@ -33,19 +33,18 @@ std::unique_ptr<ShaderManager> ShaderManager::gManager = nullptr;
 std::size_t ShaderManager::LoadShaderFile(const char* filename, ID3DBlob* &blob) noexcept {
 	ASSERT(filename != nullptr);
 	
-	const std::size_t id{ sizeTRand() };
+	mMutex.lock();
+	blob = LoadBlob(filename);
+	mMutex.unlock();
 
+	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
 	BlobById::accessor accessor;
-	mBlobById.find(accessor,id);
-
-	if (!accessor.empty()) {
-		blob = accessor->second.Get();
-	} 
-	else {
-		blob = LoadBlob(filename);
-		mBlobById.insert(accessor, id);
-		accessor->second = Microsoft::WRL::ComPtr<ID3DBlob>(blob);
-	}
+#ifdef _DEBUG
+	mBlobById.find(accessor, id);
+	ASSERT(accessor.empty());
+#endif
+	mBlobById.insert(accessor, id);
+	accessor->second = Microsoft::WRL::ComPtr<ID3DBlob>(blob);
 	accessor.release();
 
 	return id;
@@ -55,19 +54,18 @@ std::size_t ShaderManager::LoadShaderFile(const char* filename, D3D12_SHADER_BYT
 	ASSERT(filename != nullptr);
 
 	Microsoft::WRL::ComPtr<ID3DBlob> blob;
-	
-	const std::size_t id{ sizeTRand() };
+	mMutex.lock();
+	blob = LoadBlob(filename);
+	mMutex.unlock();
 
+	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
 	BlobById::accessor accessor;
+#ifdef _DEBUG
 	mBlobById.find(accessor, id);
-	if (!accessor.empty()) {
-		blob = accessor->second;
-	}
-	else {
-		blob = LoadBlob(filename);
-		mBlobById.insert(accessor, id);
-		accessor->second = blob;
-	}
+	ASSERT(accessor.empty());
+#endif
+	mBlobById.insert(accessor, id);
+	accessor->second = blob;
 	accessor.release();
 
 	ASSERT(blob.Get());
