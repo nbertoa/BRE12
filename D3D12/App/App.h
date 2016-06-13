@@ -42,7 +42,9 @@ public:
 	__forceinline const D3D12_RECT& ScissorRect() const noexcept { return mScissorRect; }
 
 protected:
-	 __forceinline float AspectRatio() const noexcept { return (float)mWindowWidth / mWindowHeight; }
+	static App* mApp;
+
+	__forceinline float AspectRatio() const noexcept { return (float)mWindowWidth / mWindowHeight; }
 
 	virtual void CreateRtvAndDsvDescriptorHeaps() noexcept;
 	virtual void CreateRtvAndDsv() noexcept;
@@ -56,16 +58,14 @@ protected:
 	void CreateSwapChain() noexcept;
 
 	void FlushCommandQueue() noexcept;
-
-	ID3D12Resource* CurrentBackBuffer() const noexcept;
-	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const noexcept;
-	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
+	void FlushCommandQueueAndPresent() noexcept;
 
 	void CalculateFrameStats() noexcept;
 	
-protected:
-	static App* mApp;
-
+	ID3D12Resource* CurrentBackBuffer() const noexcept;
+	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const noexcept;
+	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
+	
 	tbb::task_scheduler_init mTaskSchedulerInit;
 	CommandListProcessor* mCmdListProcessor{ nullptr };
 

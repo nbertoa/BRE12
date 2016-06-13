@@ -25,11 +25,10 @@ public:
 	D3D12_SHADER_BYTECODE GetShaderByteCode(const std::size_t id) noexcept;
 
 	// Asserts if id is not present
-	void EraseShader(const std::size_t id) noexcept;
+	void Erase(const std::size_t id) noexcept;
 
 	// Invalidate all ids.
-	__forceinline void ClearShaders() noexcept { mBlobById.clear(); }
-	__forceinline void Clear() noexcept { ClearShaders(); }
+	__forceinline void Clear() noexcept { mBlobById.clear(); }
 
 private:
 	using BlobById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3DBlob>>;

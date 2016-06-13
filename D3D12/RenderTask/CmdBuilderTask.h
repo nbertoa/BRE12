@@ -37,8 +37,12 @@ struct CmdBuilderTaskInput {
 	ID3D12RootSignature* mRootSign{ nullptr };
 	ID3D12PipelineState* mPSO{ nullptr };
 
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc{ nullptr };
+	ID3D12GraphicsCommandList* mCmdList1{ nullptr };
+	ID3D12CommandAllocator* mCmdAlloc1{ nullptr };
+
+	ID3D12GraphicsCommandList* mCmdList2{ nullptr };
+	ID3D12CommandAllocator* mCmdAlloc2{ nullptr };
+
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
 
 	using GeometryDataVec = std::vector<GeometryData>;
@@ -53,7 +57,7 @@ public:
 	explicit CmdBuilderTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect);
 
 	__forceinline CmdBuilderTaskInput& TaskInput() noexcept { return mInput; }
-	
+		
 	// Store new command lists in cmdLists  
 	virtual void Execute(
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdLists,
@@ -61,6 +65,8 @@ public:
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept = 0;
 
 protected:
+	void SwitchCmdListAndAlloc() noexcept;
+
 	ID3D12Device* mDevice{ nullptr };
 	D3D12_VIEWPORT mViewport{};
 	D3D12_RECT mScissorRect{};

@@ -49,6 +49,24 @@ std::size_t RootSignatureManager::CreateRootSignature(const D3D12_SHADER_BYTECOD
 	return id;
 }
 
+std::size_t RootSignatureManager::CreateRootSignature(ID3DBlob& rootSignBlob, ID3D12RootSignature* &rootSign) noexcept {
+	mMutex.lock();
+	mDevice.CreateRootSignature(0U, rootSignBlob.GetBufferPointer(), rootSignBlob.GetBufferSize(), IID_PPV_ARGS(&rootSign));
+	mMutex.unlock();
+
+	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	RootSignatureById::accessor accessor;
+#ifdef _DEBUG
+	mRootSignatureById.find(accessor, id);
+	ASSERT(accessor.empty());
+#endif
+	mRootSignatureById.insert(accessor, id);
+	accessor->second = Microsoft::WRL::ComPtr<ID3D12RootSignature>(rootSign);
+	accessor.release();
+
+	return id;
+}
+
 ID3D12RootSignature& RootSignatureManager::GetRootSignature(const std::size_t id) noexcept {
 	RootSignatureById::accessor accessor;
 	mRootSignatureById.find(accessor, id);

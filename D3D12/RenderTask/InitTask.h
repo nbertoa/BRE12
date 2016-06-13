@@ -51,6 +51,7 @@ struct InitTaskInput {
 
 	// If a shader filename is nullptr, then we do not load it.
 	std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout{};
+	const char* mRootSignFilename{ nullptr };
 	const char* mVSFilename{ nullptr };
 	const char* mGSFilename{ nullptr };
 	const char* mDSFilename{ nullptr };

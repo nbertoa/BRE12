@@ -17,18 +17,24 @@ void InitTask::Execute(ID3D12Device& /*device*/, tbb::concurrent_queue<ID3D12Com
 	output.mTopology = mInput.mTopology;
 
 	BuildPSO(output.mRootSign, output.mPSO);
-	BuildCommandObjects(output.mCmdList, output.mCmdAlloc);
+	BuildCommandObjects(output.mCmdList1, output.mCmdAlloc1);
+	BuildCommandObjects(output.mCmdList2, output.mCmdAlloc2);
 }
 
 void InitTask::BuildPSO(ID3D12RootSignature* &rootSign, ID3D12PipelineState* &pso) noexcept {
 	ASSERT(pso == nullptr);
 	ASSERT(mInput.ValidateData());
-	ASSERT(mInput.mVSFilename != nullptr);
+	ASSERT(mInput.mRootSignFilename != nullptr);
 	ASSERT(rootSign == nullptr);
 
+	ID3DBlob* rootSignBlob{ nullptr };
+	ShaderManager::gManager->LoadShaderFile(mInput.mRootSignFilename, rootSignBlob);
+	RootSignatureManager::gManager->CreateRootSignature(*rootSignBlob, rootSign);
+
 	D3D12_SHADER_BYTECODE vertexShader{};
-	ShaderManager::gManager->LoadShaderFile(mInput.mVSFilename, vertexShader);
-	RootSignatureManager::gManager->CreateRootSignature(vertexShader, rootSign);
+	if (mInput.mVSFilename != nullptr) {
+		ShaderManager::gManager->LoadShaderFile(mInput.mVSFilename, vertexShader);
+	}
 	
 	D3D12_SHADER_BYTECODE geomShader{};
 	if (mInput.mGSFilename != nullptr) {
@@ -60,7 +66,7 @@ void InitTask::BuildPSO(ID3D12RootSignature* &rootSign, ID3D12PipelineState* &ps
 	desc.InputLayout = { mInput.mInputLayout.data(), (std::uint32_t)mInput.mInputLayout.size() };
 	desc.NumRenderTargets = mInput.mNumRenderTargets;
 	desc.PrimitiveTopologyType = mInput.mTopology;
-	desc.pRootSignature = nullptr;
+	desc.pRootSignature = rootSign;
 	desc.PS = pixelShader;
 	desc.RasterizerState = D3DFactory::DefaultRasterizerDesc();
 	memcpy(desc.RTVFormats, mInput.mRTVFormats, sizeof(mInput.mRTVFormats));

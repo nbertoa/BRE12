@@ -424,3 +424,5 @@
 /D3D12/RenderTask/x64/Debug/inittask.nativecodeanalysis.xml
 /D3D12/Utils/x64/Debug/numbergeneration.nativecodeanalysis.xml
 /D3D12/RenderTask/x64/Debug/cmdbuildertask.nativecodeanalysis.xml
+/D3D12/x64/Debug/ShapesApp/RS.cso
+/D3D12/x64/Release/ShapesApp/RS.cso

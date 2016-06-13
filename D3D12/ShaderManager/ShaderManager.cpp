@@ -100,7 +100,7 @@ D3D12_SHADER_BYTECODE ShaderManager::GetShaderByteCode(const std::size_t id) noe
 	return shaderByteCode;
 }
 
-void ShaderManager::EraseShader(const std::size_t id) noexcept {
+void ShaderManager::Erase(const std::size_t id) noexcept {
 	BlobById::accessor accessor;
 	mBlobById.find(accessor, id);
 	ASSERT(!accessor.empty());

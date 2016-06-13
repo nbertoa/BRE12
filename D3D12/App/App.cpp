@@ -222,14 +222,8 @@ void App::Draw(const float) noexcept {
 
 	while (!cmdListQueue.empty()) {}
 
-	// Wait until frame commands are complete.  This waiting is inefficient and is
-	// done for simplicity.  Later we will show how to organize our rendering code
-	// so we do not have to wait per frame.
-	FlushCommandQueue();
+	FlushCommandQueueAndPresent();
 
-	// swap the back and front buffers
-	ASSERT(mSwapChain.Get());
-	CHECK_HR(mSwapChain->Present(0U, 0U));
 	mCurrBackBuffer = (mCurrBackBuffer + 1U) % sSwapChainBufferCount;
 }
 
@@ -482,6 +476,32 @@ void App::FlushCommandQueue() noexcept {
 		WaitForSingleObject(eventHandle, INFINITE);
 		CloseHandle(eventHandle);
 	}
+}
+
+void App::FlushCommandQueueAndPresent() noexcept {
+	// Advance the fence value to mark commands up to this fence point.
+	++mCurrentFence;
+
+	// Add an instruction to the command queue to set a new fence point.  Because we 
+	// are on the GPU timeline, the new fence point won't be set until the GPU finishes
+	// processing all the commands prior to this Signal().
+	CHECK_HR(mCmdQueue->Signal(mFence, mCurrentFence));
+
+	// Wait until the GPU has completed commands up to this fence point.
+	if (mFence->GetCompletedValue() < mCurrentFence) {
+		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
+		ASSERT(eventHandle);
+
+		// Fire event when GPU hits current fence.  
+		CHECK_HR(mFence->SetEventOnCompletion(mCurrentFence, eventHandle));
+
+		// Wait until the GPU hits current fence event is fired.
+		WaitForSingleObject(eventHandle, INFINITE);
+		CloseHandle(eventHandle);
+	}
+
+	ASSERT(mSwapChain.Get());
+	CHECK_HR(mSwapChain->Present(0U, 0U));
 }
 
 ID3D12Resource* App::CurrentBackBuffer() const noexcept {

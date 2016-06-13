@@ -23,6 +23,10 @@ public:
 	ID3D12CommandQueue& GetCmdQueue(const std::size_t id) noexcept;
 	ID3D12GraphicsCommandList& GetCmdList(const std::size_t id) noexcept;
 	ID3D12CommandAllocator& GetCmdAlloc(const std::size_t id) noexcept;
+	
+	void EraseCmdQueue(const std::size_t id) noexcept;
+	void EraseCmdList(const std::size_t id) noexcept;
+	void EraseCmdAlloc(const std::size_t id) noexcept;
 
 	// This will invalidate all ids.
 	__forceinline void ClearCmdQueues() noexcept { mCmdQueueById.clear(); }

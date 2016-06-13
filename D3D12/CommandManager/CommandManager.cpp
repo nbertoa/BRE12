@@ -88,3 +88,27 @@ ID3D12CommandAllocator& CommandManager::GetCmdAlloc(const std::size_t id) noexce
 
 	return *elem;
 }
+
+void CommandManager::EraseCmdQueue(const std::size_t id) noexcept {
+	CmdQueueById::accessor accessor;
+	mCmdQueueById.find(accessor, id);
+	ASSERT(!accessor.empty());
+	mCmdQueueById.erase(accessor);
+	accessor.release();
+}
+
+void CommandManager::EraseCmdList(const std::size_t id) noexcept {
+	CmdListById::accessor accessor;
+	mCmdListById.find(accessor, id);
+	ASSERT(!accessor.empty());
+	mCmdListById.erase(accessor);
+	accessor.release();
+}
+
+void CommandManager::EraseCmdAlloc(const std::size_t id) noexcept {
+	CmdAllocById::accessor accessor;
+	mCmdAllocById.find(accessor, id);
+	ASSERT(!accessor.empty());
+	mCmdAllocById.erase(accessor);
+	accessor.release();
+}

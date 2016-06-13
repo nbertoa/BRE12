@@ -19,17 +19,19 @@ void ShapeInitTask::Execute(ID3D12Device& device, tbb::concurrent_queue<ID3D12Co
 	InitTask::Execute(device, cmdLists, output);
 
 	ASSERT(output.mGeomDataVec.empty());
-	ASSERT(output.mCmdAlloc != nullptr);
-	ASSERT(output.mCmdList != nullptr); 
+	ASSERT(output.mCmdList1 != nullptr);
+	ASSERT(output.mCmdAlloc1 != nullptr);	
+	ASSERT(output.mCmdList2 != nullptr);
+	ASSERT(output.mCmdAlloc2 != nullptr);
 	ASSERT(output.mPSO != nullptr);
 
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
-	CHECK_HR(output.mCmdAlloc->Reset());
+	CHECK_HR(output.mCmdAlloc1->Reset());
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	CHECK_HR(output.mCmdList->Reset(output.mCmdAlloc, output.mPSO));
+	CHECK_HR(output.mCmdList1->Reset(output.mCmdAlloc1, output.mPSO));
 
 	const std::size_t numMeshes{ mInput.mMeshInfoVec.size() };
 	output.mGeomDataVec.reserve(numMeshes);
@@ -46,13 +48,13 @@ void ShapeInitTask::Execute(ID3D12Device& device, tbb::concurrent_queue<ID3D12Co
 			sizeof(Vertex), 
 			meshInfo.mIndices, 
 			meshInfo.mNumIndices,
-			*output.mCmdList);
+			*output.mCmdList1);
 		geomData.mWorld = meshInfo.mWorld;
 		output.mGeomDataVec.push_back(geomData);
 	}
 
-	output.mCmdList->Close();
-	cmdLists.push(output.mCmdList);
+	output.mCmdList1->Close();
+	cmdLists.push(output.mCmdList1);
 
 	BuildConstantBuffers(device, output);
 }

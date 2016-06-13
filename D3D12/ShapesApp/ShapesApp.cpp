@@ -51,6 +51,7 @@ void ShapesApp::Run(App& app) noexcept {
 	InitTaskInput initData{};
 	initData.mInputLayout = D3DFactory::PosInputLayout();
 	initData.mPSFilename = "ShapesApp/PS.cso";
+	initData.mRootSignFilename = "ShapesApp/RS.cso";
 	initData.mVSFilename = "ShapesApp/VS.cso";
 
 	const float meshSpaceOffset{ 50.0f };

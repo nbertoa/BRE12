@@ -187,3 +187,35 @@ ID3D12Fence& ResourceManager::GetFence(const std::size_t id) noexcept {
 
 	return *elem;
 }
+
+void ResourceManager::EraseResource(const std::size_t id) noexcept {
+	ResourceById::accessor accessor;
+	mResourceById.find(accessor, id);
+	ASSERT(!accessor.empty());
+	mResourceById.erase(accessor);
+	accessor.release();
+}
+
+void ResourceManager::EraseUploadBuffer(const std::size_t id) noexcept {
+	UploadBufferById::accessor accessor;
+	mUploadBufferById.find(accessor, id);
+	ASSERT(!accessor.empty());
+	mUploadBufferById.erase(accessor);
+	accessor.release();
+}
+
+void ResourceManager::EraseDescHeap(const std::size_t id) noexcept {
+	DescHeapById::accessor accessor;
+	mDescHeapById.find(accessor, id);
+	ASSERT(!accessor.empty());
+	mDescHeapById.erase(accessor);
+	accessor.release();
+}
+
+void ResourceManager::EraseFence(const std::size_t id) noexcept {
+	FenceById::accessor accessor;
+	mFenceById.find(accessor, id);
+	ASSERT(!accessor.empty());
+	mFenceById.erase(accessor);
+	accessor.release();
+}

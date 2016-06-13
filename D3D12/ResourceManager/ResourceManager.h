@@ -45,6 +45,11 @@ public:
 	ID3D12DescriptorHeap& GetDescriptorHeap(const std::size_t id) noexcept;
 	ID3D12Fence& GetFence(const std::size_t id) noexcept;
 
+	void EraseResource(const std::size_t id) noexcept;
+	void EraseUploadBuffer(const std::size_t id) noexcept;
+	void EraseDescHeap(const std::size_t id) noexcept;
+	void EraseFence(const std::size_t id) noexcept;
+
 	// This will invalidate all ids.
 	__forceinline void ClearResources() noexcept { mResourceById.clear(); }
 	__forceinline void ClearUploadBuffers() noexcept { mUploadBufferById.clear(); }
