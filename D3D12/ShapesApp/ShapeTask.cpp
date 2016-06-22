@@ -26,10 +26,13 @@ ShapeTask::ShapeTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport,
 
 void ShapeTask::Execute(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdLists,
+	const std::uint32_t currBackBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
 
-	SwitchCmdListAndAlloc();
+	//SwitchCmdListAndAlloc();
+	ID3D12CommandAllocator* cmdAlloc{ mInput.mCmdAlloc[currBackBuffer] };
+	ASSERT(cmdAlloc != nullptr);
 
 	// Update
 	ASSERT(mInput.mObjectConstants != nullptr);
@@ -43,43 +46,39 @@ void ShapeTask::Execute(
 		mInput.mObjectConstants->CopyData(i, &wvpMatrix, sizeof(wvpMatrix));
 	}
 
-	ASSERT(mInput.mCmdList1 != nullptr);
-	ASSERT(mInput.mCmdAlloc1 != nullptr);
-	ASSERT(mInput.mCmdList2 != nullptr);
-	ASSERT(mInput.mCmdAlloc2 != nullptr);
 	ASSERT(mInput.mCBVHeap != nullptr);
 	ASSERT(mInput.mRootSign != nullptr);
 	ASSERT(mInput.mPSO != nullptr);
 
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
-	CHECK_HR(mInput.mCmdAlloc1->Reset());
+	CHECK_HR(cmdAlloc->Reset());
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	CHECK_HR(mInput.mCmdList1->Reset(mInput.mCmdAlloc1, mInput.mPSO));
+	CHECK_HR(mInput.mCmdList->Reset(cmdAlloc, mInput.mPSO));
 
-	mInput.mCmdList1->RSSetViewports(1U, &mViewport);
-	mInput.mCmdList1->RSSetScissorRects(1U, &mScissorRect);
-	mInput.mCmdList1->OMSetRenderTargets(1U, &backBufferHandle, true, &depthStencilHandle);
+	mInput.mCmdList->RSSetViewports(1U, &mViewport);
+	mInput.mCmdList->RSSetScissorRects(1U, &mScissorRect);
+	mInput.mCmdList->OMSetRenderTargets(1U, &backBufferHandle, true, &depthStencilHandle);
 
-	mInput.mCmdList1->SetDescriptorHeaps(1U, &mInput.mCBVHeap);
-	mInput.mCmdList1->SetGraphicsRootSignature(mInput.mRootSign);
+	mInput.mCmdList->SetDescriptorHeaps(1U, &mInput.mCBVHeap);
+	mInput.mCmdList->SetGraphicsRootSignature(mInput.mRootSign);
 	D3D12_GPU_DESCRIPTOR_HANDLE cbvGpuDescHandle = mInput.mCBVHeap->GetGPUDescriptorHandleForHeapStart();
 	const std::size_t descHandleIncSize{ mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };	
-	mInput.mCmdList1->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mInput.mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
-		mInput.mCmdList1->SetGraphicsRootDescriptorTable(0U, cbvGpuDescHandle);
+		mInput.mCmdList->SetGraphicsRootDescriptorTable(0U, cbvGpuDescHandle);
 
 		const GeometryData& geomData{ mInput.mGeomDataVec[i] };
-		mInput.mCmdList1->IASetVertexBuffers(0U, 1U, &geomData.mVertexBufferView);
-		mInput.mCmdList1->IASetIndexBuffer(&geomData.mIndexBufferView);
-		mInput.mCmdList1->DrawIndexedInstanced(geomData.mIndexCount, 1U, geomData.mStartIndexLoc, geomData.mBaseVertexLoc, 0U);
+		mInput.mCmdList->IASetVertexBuffers(0U, 1U, &geomData.mVertexBufferView);
+		mInput.mCmdList->IASetIndexBuffer(&geomData.mIndexBufferView);
+		mInput.mCmdList->DrawIndexedInstanced(geomData.mIndexCount, 1U, geomData.mStartIndexLoc, geomData.mBaseVertexLoc, 0U);
 		cbvGpuDescHandle.ptr += descHandleIncSize;
 	}
 
-	mInput.mCmdList1->Close();
+	mInput.mCmdList->Close();
 
-	cmdLists.push(mInput.mCmdList1);
+	cmdLists.push(mInput.mCmdList);
 }

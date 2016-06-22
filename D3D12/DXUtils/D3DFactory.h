@@ -11,4 +11,5 @@ public:
 	static D3D12_HEAP_PROPERTIES HeapProperties(const D3D12_HEAP_TYPE type) noexcept;
 
 	static std::vector<D3D12_INPUT_ELEMENT_DESC> PosInputLayout() noexcept;
+	static std::vector<D3D12_INPUT_ELEMENT_DESC> PosNormalTangentTexCoordInputLayout() noexcept;
 };

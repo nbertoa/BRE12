@@ -17,8 +17,7 @@ void InitTask::Execute(ID3D12Device& /*device*/, tbb::concurrent_queue<ID3D12Com
 	output.mTopology = mInput.mTopology;
 
 	BuildPSO(output.mRootSign, output.mPSO);
-	BuildCommandObjects(output.mCmdList1, output.mCmdAlloc1);
-	BuildCommandObjects(output.mCmdList2, output.mCmdAlloc2);
+	BuildCommandObjects(output);
 }
 
 void InitTask::BuildPSO(ID3D12RootSignature* &rootSign, ID3D12PipelineState* &pso) noexcept {
@@ -109,15 +108,24 @@ void InitTask::BuildVertexAndIndexBuffers(
 	geomData.mIndexBufferView.SizeInBytes = byteSize;
 }
 
-void InitTask::BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* &cmdAlloc) noexcept {
-	ASSERT(cmdList == nullptr);
-	ASSERT(cmdAlloc == nullptr);
+void InitTask::BuildCommandObjects(CmdBuilderTaskInput& output) noexcept {
+	ASSERT(output.mCmdList == nullptr);
+	const std::uint32_t allocCount{ _countof(output.mCmdAlloc) };
 
-	CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
-	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
+#ifdef _DEBUG
+	for (std::uint32_t i = 0U; i < allocCount; ++i) {
+		ASSERT(output.mCmdAlloc[i] == nullptr);
+	}	
+#endif
+	
+	for (std::uint32_t i = 0U; i < allocCount; ++i) {
+		CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, output.mCmdAlloc[i]);
+	}
+
+	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *output.mCmdAlloc[0], output.mCmdList);
 
 	// Start off in a closed state.  This is because the first time we refer 
 	// to the command list we will Reset it, and it needs to be closed before
 	// calling Reset.
-	cmdList->Close();
+	output.mCmdList->Close();
 }

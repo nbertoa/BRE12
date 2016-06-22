@@ -4,34 +4,21 @@
 #include <ResourceManager/UploadBuffer.h>
 #include <Utils/DebugUtils.h>
 
-namespace {
-	struct Vertex {
-		Vertex() {}
-		Vertex(const DirectX::XMFLOAT4& p)
-			: mPosition(p)
-		{}
-
-		DirectX::XMFLOAT4 mPosition{ 0.0f, 0.0f, 0.0f, 0.0f };
-	};
-}
-
 void ShapeInitTask::Execute(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept {
 	InitTask::Execute(device, cmdLists, output);
 
 	ASSERT(output.mGeomDataVec.empty());
-	ASSERT(output.mCmdList1 != nullptr);
-	ASSERT(output.mCmdAlloc1 != nullptr);	
-	ASSERT(output.mCmdList2 != nullptr);
-	ASSERT(output.mCmdAlloc2 != nullptr);
+	ASSERT(output.mCmdList != nullptr);
+	ASSERT(output.mCmdAlloc[0] != nullptr);
 	ASSERT(output.mPSO != nullptr);
 
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
-	CHECK_HR(output.mCmdAlloc1->Reset());
+	CHECK_HR(output.mCmdAlloc[0]->Reset());
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	CHECK_HR(output.mCmdList1->Reset(output.mCmdAlloc1, output.mPSO));
+	CHECK_HR(output.mCmdList->Reset(output.mCmdAlloc[0], output.mPSO));
 
 	const std::size_t numMeshes{ mInput.mMeshInfoVec.size() };
 	output.mGeomDataVec.reserve(numMeshes);
@@ -45,16 +32,16 @@ void ShapeInitTask::Execute(ID3D12Device& device, tbb::concurrent_queue<ID3D12Co
 			geomData, 
 			meshInfo.mVerts, 
 			meshInfo.mNumVerts, 
-			sizeof(Vertex), 
+			sizeof(GeometryGenerator::Vertex), 
 			meshInfo.mIndices, 
 			meshInfo.mNumIndices,
-			*output.mCmdList1);
+			*output.mCmdList);
 		geomData.mWorld = meshInfo.mWorld;
 		output.mGeomDataVec.push_back(geomData);
 	}
 
-	output.mCmdList1->Close();
-	cmdLists.push(output.mCmdList1);
+	output.mCmdList->Close();
+	cmdLists.push(output.mCmdList);
 
 	BuildConstantBuffers(device, output);
 }

@@ -43,7 +43,7 @@ public:
 
 protected:
 	static App* mApp;
-	static const std::uint32_t sSwapChainBufferCount{ 2U };
+	static const std::uint32_t sSwapChainBufferCount{ 3U };
 
 	__forceinline float AspectRatio() const noexcept { return (float)mWindowWidth / mWindowHeight; }
 
@@ -59,14 +59,14 @@ protected:
 	void CreateSwapChain() noexcept;
 
 	void FlushCommandQueue() noexcept;
-	void FlushCommandQueueAndPresent() noexcept;
+	void SignalFenceAndPresent() noexcept;
 
 	void CalculateFrameStats() noexcept;
 	
 	ID3D12Resource* CurrentBackBuffer() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
-	
+		
 	tbb::task_scheduler_init mTaskSchedulerInit;
 	CommandListProcessor* mCmdListProcessor{ nullptr };
 
@@ -84,14 +84,17 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Device> mDevice;
 
 	ID3D12Fence* mFence{ nullptr };
-	ID3D12Fence* mFenceByFrameIndex[sSwapChainBufferCount]{ nullptr };
+	std::uint64_t mFenceByFrameIndex[sSwapChainBufferCount]{ 0UL };
 	std::uint64_t mCurrentFence{0U};
 
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
-	ID3D12CommandAllocator* mDirectCmdAlloc1{ nullptr };
-	ID3D12CommandAllocator* mDirectCmdAlloc2{ nullptr };
-	ID3D12GraphicsCommandList* mCmdList1{ nullptr };
-	ID3D12GraphicsCommandList* mCmdList2{ nullptr };
+
+	// We have 2 commands lists (for frame begin and frame end), and 2
+	// commands allocator per list
+	ID3D12CommandAllocator* mCmdAllocFrameBegin[sSwapChainBufferCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocFrameEnd[sSwapChainBufferCount]{ nullptr };
+	ID3D12GraphicsCommandList* mCmdListFrameBegin{ nullptr };
+	ID3D12GraphicsCommandList* mCmdListFrameEnd{ nullptr };
 	
 	std::uint32_t mCurrBackBuffer{0U};
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[sSwapChainBufferCount];

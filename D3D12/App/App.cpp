@@ -48,6 +48,7 @@ void App::InitializeTasks() noexcept {
 	ASSERT(mInitTasks.size() == mCmdBuilderTasks.size());
 
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
+	ASSERT(cmdListQueue.empty());
 
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mInitTasks.size()),
 		[&](const tbb::blocked_range<size_t>& r) {
@@ -82,10 +83,11 @@ int32_t App::Run() noexcept {
 			if (!mAppPaused) {
 				const float dt = mTimer.DeltaTime();
 				CalculateFrameStats();
-				Draw(dt);
+				Draw(dt);			
+
 				Keyboard::gKeyboard->Update();
 				Mouse::gMouse->Update();
-				Update(dt);				
+				Update(dt);
 			}
 			else {
 				Sleep(100U);
@@ -161,70 +163,93 @@ void App::Update(const float dt) noexcept {
 	lastXY[1] = y;
 
 	Camera::gCamera->UpdateViewMatrix();
+
+	// Has the GPU finished processing the commands of the current frame resource?
+	// If not, wait until the GPU has completed commands up to this fence point.
+	const std::uint64_t fence{ mFenceByFrameIndex[mCurrBackBuffer] };
+	const std::uint64_t completedFenceValue{ mFence->GetCompletedValue() };
+	if (completedFenceValue < fence)
+	{
+		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
+		ASSERT(eventHandle);
+
+		// Fire event when GPU hits current fence.  
+		CHECK_HR(mFence->SetEventOnCompletion(fence, eventHandle));
+
+		// Wait until the GPU hits current fence event is fired.
+		WaitForSingleObject(eventHandle, INFINITE);
+		const std::uint64_t newCompletedFenceValue{ mFence->GetCompletedValue() };
+		std::cout << newCompletedFenceValue << std::endl;
+		CloseHandle(eventHandle);
+	}
 }
 
 void App::Draw(const float) noexcept {
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
+	ASSERT(cmdListQueue.empty());
+
+	ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[mCurrBackBuffer] };
+	ID3D12CommandAllocator* cmdAllocFrameEnd{ mCmdAllocFrameEnd[mCurrBackBuffer] };
 
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
-	CHECK_HR(mDirectCmdAlloc1->Reset());
+	CHECK_HR(cmdAllocFrameBegin->Reset());
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	CHECK_HR(mCmdList1->Reset(mDirectCmdAlloc1, nullptr));
+	CHECK_HR(mCmdListFrameBegin->Reset(cmdAllocFrameBegin, nullptr));
 
 	// Set the viewport and scissor rect.  This needs to be reset whenever the command list is reset.
-	mCmdList1->RSSetViewports(1U, &mScreenViewport);
-	mCmdList1->RSSetScissorRects(1U, &mScissorRect);
+	mCmdListFrameBegin->RSSetViewports(1U, &mScreenViewport);
+	mCmdListFrameBegin->RSSetScissorRects(1U, &mScissorRect);
 
 	// Indicate a state transition on the resource usage.
 	CD3DX12_RESOURCE_BARRIER resBarrier{ CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
-	mCmdList1->ResourceBarrier(1, &resBarrier);
+	mCmdListFrameBegin->ResourceBarrier(1, &resBarrier);
 
 	// Specify the buffers we are going to render to.
 	const D3D12_CPU_DESCRIPTOR_HANDLE backBufferHandle = CurrentBackBufferView();
 	const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
-	mCmdList1->OMSetRenderTargets(1U, &backBufferHandle, true, &dsvHandle);
+	mCmdListFrameBegin->OMSetRenderTargets(1U, &backBufferHandle, true, &dsvHandle);
 
 	// Clear the back buffer and depth buffer.
-	mCmdList1->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::LightSteelBlue, 0U, nullptr);
-	mCmdList1->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
+	mCmdListFrameBegin->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::LightSteelBlue, 0U, nullptr);
+	mCmdListFrameBegin->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
 
 	// Done recording commands.
-	CHECK_HR(mCmdList1->Close());
-	cmdListQueue.push(mCmdList1);
+	CHECK_HR(mCmdListFrameBegin->Close());
+	cmdListQueue.push(mCmdListFrameBegin);
 
-	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mCmdBuilderTasks.size(), 20),
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mCmdBuilderTasks.size()),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mCmdBuilderTasks[i]->Execute(cmdListQueue, backBufferHandle, dsvHandle);
+			mCmdBuilderTasks[i]->Execute(cmdListQueue, mCurrBackBuffer, backBufferHandle, dsvHandle);
 	}
 	);
+	
+	while (!cmdListQueue.empty()) {}
 
-	CHECK_HR(mDirectCmdAlloc2->Reset());
+	CHECK_HR(cmdAllocFrameEnd->Reset());
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	CHECK_HR(mCmdList2->Reset(mDirectCmdAlloc2, nullptr));
+	CHECK_HR(mCmdListFrameEnd->Reset(cmdAllocFrameEnd, nullptr));
 
 	// Indicate a state transition on the resource usage.
 	resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	mCmdList2->ResourceBarrier(1U, &resBarrier);
+	mCmdListFrameEnd->ResourceBarrier(1U, &resBarrier);
 
 	// Done recording commands.
-	CHECK_HR(mCmdList2->Close());
+	CHECK_HR(mCmdListFrameEnd->Close());
 
 	{
-		ID3D12CommandList* cmdLists[] = { mCmdList2 };
+		ID3D12CommandList* cmdLists[] = { mCmdListFrameEnd };
 		mCmdQueue->ExecuteCommandLists(1, cmdLists);
 	}
 
 	while (!cmdListQueue.empty()) {}
 
-	FlushCommandQueueAndPresent();
-
-	mCurrBackBuffer = (mCurrBackBuffer + 1U) % sSwapChainBufferCount;
+	SignalFenceAndPresent();
 }
 
 void App::CreateRtvAndDsv() noexcept {
@@ -406,10 +431,7 @@ void App::InitDirect3D() noexcept {
 	
 	// Create fence and query descriptors sizes
 	ResourceManager::gManager->CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
-	for (std::uint32_t i = 0U; i < sSwapChainBufferCount; ++i) {
-		ResourceManager::gManager->CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFenceByFrameIndex[i]);
-	}
-	
+
 	CreateCommandObjects();
 	CreateSwapChain();
 	CreateRtvAndDsvDescriptorHeaps();
@@ -417,20 +439,25 @@ void App::InitDirect3D() noexcept {
 }
 
 void App::CreateCommandObjects() noexcept {
+	ASSERT(sSwapChainBufferCount > 0U);
+
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	CommandManager::gManager->CreateCmdQueue(queueDesc, mCmdQueue);
-	CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mDirectCmdAlloc1);
-	CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mDirectCmdAlloc2);
-	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mDirectCmdAlloc1, mCmdList1);
-	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mDirectCmdAlloc2, mCmdList2);
+
+	for (std::uint32_t i = 0U; i < sSwapChainBufferCount; ++i) {
+		CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameBegin[i]);
+		CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameEnd[i]);
+	}
+	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameBegin[0], mCmdListFrameBegin);
+	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameEnd[0], mCmdListFrameEnd);
 
 	// Start off in a closed state.  This is because the first time we refer 
 	// to the command list we will Reset it, and it needs to be closed before
 	// calling Reset.
-	mCmdList1->Close();
-	mCmdList2->Close();
+	mCmdListFrameBegin->Close();
+	mCmdListFrameEnd->Close();
 }
 
 void App::CreateSwapChain() noexcept {
@@ -481,30 +508,18 @@ void App::FlushCommandQueue() noexcept {
 	}
 }
 
-void App::FlushCommandQueueAndPresent() noexcept {
+void App::SignalFenceAndPresent() noexcept {
+	ASSERT(mSwapChain.Get());
+	CHECK_HR(mSwapChain->Present(0U, 0U));
+
 	// Advance the fence value to mark commands up to this fence point.
-	++mCurrentFence;
+	mFenceByFrameIndex[mCurrBackBuffer] = ++mCurrentFence;
+	mCurrBackBuffer = (mCurrBackBuffer + 1U) % sSwapChainBufferCount;
 
 	// Add an instruction to the command queue to set a new fence point.  Because we 
 	// are on the GPU timeline, the new fence point won't be set until the GPU finishes
 	// processing all the commands prior to this Signal().
 	CHECK_HR(mCmdQueue->Signal(mFence, mCurrentFence));
-
-	// Wait until the GPU has completed commands up to this fence point.
-	if (mFence->GetCompletedValue() < mCurrentFence) {
-		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
-		ASSERT(eventHandle);
-
-		// Fire event when GPU hits current fence.  
-		CHECK_HR(mFence->SetEventOnCompletion(mCurrentFence, eventHandle));
-
-		// Wait until the GPU hits current fence event is fired.
-		WaitForSingleObject(eventHandle, INFINITE);
-		CloseHandle(eventHandle);
-	}
-
-	ASSERT(mSwapChain.Get());
-	CHECK_HR(mSwapChain->Present(0U, 0U));
 }
 
 ID3D12Resource* App::CurrentBackBuffer() const noexcept {

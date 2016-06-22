@@ -37,11 +37,8 @@ struct CmdBuilderTaskInput {
 	ID3D12RootSignature* mRootSign{ nullptr };
 	ID3D12PipelineState* mPSO{ nullptr };
 
-	ID3D12GraphicsCommandList* mCmdList1{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc1{ nullptr };
-
-	ID3D12GraphicsCommandList* mCmdList2{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc2{ nullptr };
+	ID3D12GraphicsCommandList* mCmdList;
+	ID3D12CommandAllocator* mCmdAlloc[3U];
 
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
 
@@ -61,12 +58,11 @@ public:
 	// Store new command lists in cmdLists  
 	virtual void Execute(
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdLists,
+		const std::uint32_t currBackBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept = 0;
 
 protected:
-	void SwitchCmdListAndAlloc() noexcept;
-
 	ID3D12Device* mDevice{ nullptr };
 	D3D12_VIEWPORT mViewport{};
 	D3D12_RECT mScissorRect{};

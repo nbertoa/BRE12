@@ -93,7 +93,7 @@ protected:
 		const std::uint32_t numIndices,
 		ID3D12GraphicsCommandList& cmdList) noexcept;
 
-	void BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* &cmdAlloc) noexcept;
+	void BuildCommandObjects(CmdBuilderTaskInput& output) noexcept;
 
 	InitTaskInput mInput{};
 };

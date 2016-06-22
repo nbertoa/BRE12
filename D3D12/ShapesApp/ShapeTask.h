@@ -8,6 +8,7 @@ public:
 
 	void Execute(
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdLists,
+		const std::uint32_t currBackBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept override;	
 };
