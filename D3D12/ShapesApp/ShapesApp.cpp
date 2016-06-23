@@ -3,6 +3,7 @@
 #include <App/App.h>
 #include <DXutils/D3DFactory.h>
 #include <GeometryGenerator\GeometryGenerator.h>
+#include <GlobalData/Settings.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
@@ -17,7 +18,7 @@ void ShapesApp::Run(App& app) noexcept {
 	GeometryGenerator::MeshData sphere{ GeometryGenerator::CreateSphere(2, 100, 100) };
 	GeometryGenerator::MeshData box{ GeometryGenerator::CreateBox(2, 2, 2, 10) };
 
-	const std::size_t numTasks{ 20UL };
+	const std::size_t numTasks{ 30UL };
 	const std::size_t numGeometry{ 100UL };
 	std::vector<std::unique_ptr<InitTask>>& initTasks(app.InitTasks());
 	initTasks.resize(numTasks);
@@ -33,7 +34,7 @@ void ShapesApp::Run(App& app) noexcept {
 	const float meshSpaceOffset{ 50.0f };
 	for (std::size_t k = 0UL; k < numTasks; ++k) {
 		initTasks[k].reset(new ShapeInitTask());
-		cmdBuilderTasks[k].reset(new ShapeTask(&app.Device(), app.Viewport(), app.ScissorRect()));
+		cmdBuilderTasks[k].reset(new ShapeTask(&app.Device(), Settings::sScreenViewport, Settings::sScissorRect));
 
 		initData.mMeshInfoVec.clear();
 		for (std::size_t i = 0UL; i < numGeometry; ++i) {

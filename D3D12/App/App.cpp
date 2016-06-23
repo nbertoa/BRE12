@@ -48,7 +48,7 @@ void App::InitializeTasks() noexcept {
 	ASSERT(mInitTasks.size() == mCmdBuilderTasks.size());
 
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
-	ASSERT(cmdListQueue.empty());
+	ASSERT(mCmdListProcessor->IsIdle());
 
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mInitTasks.size()),
 		[&](const tbb::blocked_range<size_t>& r) {
@@ -57,7 +57,9 @@ void App::InitializeTasks() noexcept {
 	}
 	);
 
-	while (!cmdListQueue.empty()) {}
+	while (!mCmdListProcessor->IsIdle()) {
+		Sleep(0U);
+	}
 
 	FlushCommandQueue();
 }
@@ -83,11 +85,10 @@ int32_t App::Run() noexcept {
 			if (!mAppPaused) {
 				const float dt = mTimer.DeltaTime();
 				CalculateFrameStats();
-				Draw(dt);			
-
 				Keyboard::gKeyboard->Update();
 				Mouse::gMouse->Update();
 				Update(dt);
+				Draw(dt);			
 			}
 			else {
 				Sleep(100U);
@@ -110,7 +111,7 @@ void App::Initialize() noexcept {
 
 void App::CreateRtvAndDsvDescriptorHeaps() noexcept {
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-	rtvHeapDesc.NumDescriptors = sSwapChainBufferCount;
+	rtvHeapDesc.NumDescriptors = Settings::sSwapChainBufferCount;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = 0;
@@ -179,14 +180,17 @@ void App::Update(const float dt) noexcept {
 		// Wait until the GPU hits current fence event is fired.
 		WaitForSingleObject(eventHandle, INFINITE);
 		const std::uint64_t newCompletedFenceValue{ mFence->GetCompletedValue() };
-		std::cout << newCompletedFenceValue << std::endl;
 		CloseHandle(eventHandle);
 	}
 }
 
 void App::Draw(const float) noexcept {
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
-	ASSERT(cmdListQueue.empty());
+	ASSERT(mCmdListProcessor->IsIdle());
+
+	// Begin Frame task + # cmd build tasks
+	const std::uint32_t taskCount{ (std::uint32_t)mCmdBuilderTasks.size() + 1U };
+	mCmdListProcessor->resetExecutedTasksCounter();
 
 	ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[mCurrBackBuffer] };
 	ID3D12CommandAllocator* cmdAllocFrameEnd{ mCmdAllocFrameEnd[mCurrBackBuffer] };
@@ -200,8 +204,8 @@ void App::Draw(const float) noexcept {
 	CHECK_HR(mCmdListFrameBegin->Reset(cmdAllocFrameBegin, nullptr));
 
 	// Set the viewport and scissor rect.  This needs to be reset whenever the command list is reset.
-	mCmdListFrameBegin->RSSetViewports(1U, &mScreenViewport);
-	mCmdListFrameBegin->RSSetScissorRects(1U, &mScissorRect);
+	mCmdListFrameBegin->RSSetViewports(1U, &Settings::sScreenViewport);
+	mCmdListFrameBegin->RSSetScissorRects(1U, &Settings::sScissorRect);
 
 	// Indicate a state transition on the resource usage.
 	CD3DX12_RESOURCE_BARRIER resBarrier{ CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
@@ -227,13 +231,11 @@ void App::Draw(const float) noexcept {
 	}
 	);
 	
-	while (!cmdListQueue.empty()) {}
-
 	CHECK_HR(cmdAllocFrameEnd->Reset());
-
+	
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	CHECK_HR(mCmdListFrameEnd->Reset(cmdAllocFrameEnd, nullptr));
+	CHECK_HR(mCmdListFrameEnd->Reset(cmdAllocFrameEnd, nullptr));	
 
 	// Indicate a state transition on the resource usage.
 	resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -242,12 +244,16 @@ void App::Draw(const float) noexcept {
 	// Done recording commands.
 	CHECK_HR(mCmdListFrameEnd->Close());
 
-	{
-		ID3D12CommandList* cmdLists[] = { mCmdListFrameEnd };
-		mCmdQueue->ExecuteCommandLists(1, cmdLists);
+	// Wait until all previous tasks command lists are executed, before
+	// executing frame end command list
+	while (mCmdListProcessor->ExecutedTasksCounter() < taskCount) {
+		Sleep(0U);
 	}
 
-	while (!cmdListQueue.empty()) {}
+	{
+		ID3D12CommandList* cmdLists[] = { mCmdListFrameEnd };		
+		mCmdQueue->ExecuteCommandLists(1, cmdLists);
+	}
 
 	SignalFenceAndPresent();
 }
@@ -256,11 +262,17 @@ void App::CreateRtvAndDsv() noexcept {
 	ASSERT(mDevice != nullptr);
 	ASSERT(mSwapChain != nullptr);
 
+	// Setup RTV descriptor to specify sRGB format.
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = Settings::sRTVFormats[0U];
+	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRtvHeap->GetCPUDescriptorHandleForHeapStart());
 	const std::uint32_t rtvDescSize{ mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
-	for (std::uint32_t i = 0U; i < sSwapChainBufferCount; ++i) {
+
+	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mSwapChainBuffer[i].GetAddressOf())));
-		mDevice->CreateRenderTargetView(mSwapChainBuffer[i].Get(), nullptr, rtvHeapHandle);
+		mDevice->CreateRenderTargetView(mSwapChainBuffer[i].Get(), &rtvDesc, rtvHeapHandle);
 		rtvHeapHandle.Offset(1U, rtvDescSize);
 	}
 
@@ -268,18 +280,18 @@ void App::CreateRtvAndDsv() noexcept {
 	D3D12_RESOURCE_DESC depthStencilDesc = {};
 	depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	depthStencilDesc.Alignment = 0U;
-	depthStencilDesc.Width = mWindowWidth;
-	depthStencilDesc.Height = mWindowHeight;
+	depthStencilDesc.Width = Settings::sWindowWidth;
+	depthStencilDesc.Height = Settings::sWindowHeight;
 	depthStencilDesc.DepthOrArraySize = 1U;
 	depthStencilDesc.MipLevels = 1U;
-	depthStencilDesc.Format = mDepthStencilFormat;
+	depthStencilDesc.Format = Settings::sDepthStencilFormat;
 	depthStencilDesc.SampleDesc.Count = 1U;
 	depthStencilDesc.SampleDesc.Quality = 0U;
 	depthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
 	D3D12_CLEAR_VALUE optClear = {};
-	optClear.Format = mDepthStencilFormat;
+	optClear.Format = Settings::sDepthStencilFormat;
 	optClear.DepthStencil.Depth = 1.0f;
 	optClear.DepthStencil.Stencil = 0U;
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
@@ -287,16 +299,6 @@ void App::CreateRtvAndDsv() noexcept {
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
 	mDevice->CreateDepthStencilView(mDepthStencilBuffer, nullptr, DepthStencilView());
-
-	// Update the viewport transform to cover the client area.
-	mScreenViewport.TopLeftX = 0.0f;
-	mScreenViewport.TopLeftY = 0.0f;
-	mScreenViewport.Width = static_cast<float>(mWindowWidth);
-	mScreenViewport.Height = static_cast<float>(mWindowHeight);
-	mScreenViewport.MinDepth = 0.0f;
-	mScreenViewport.MaxDepth = 1.0f;
-
-	mScissorRect = { 0, 0, mWindowWidth, mWindowHeight };
 }
 
 LRESULT App::MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lParam) noexcept {
@@ -358,7 +360,7 @@ LRESULT App::MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lParam)
 void App::InitSystems() noexcept {
 	ASSERT(Camera::gCamera.get() == nullptr);
 	Camera::gCamera = std::make_unique<Camera>();
-	Camera::gCamera->SetLens(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
+	Camera::gCamera->SetLens(0.25f * MathHelper::Pi, Settings::AspectRatio(), 1.0f, 1000.0f);
 
 	ASSERT(Keyboard::gKeyboard.get() == nullptr);
 	LPDIRECTINPUT8 directInput;
@@ -400,7 +402,7 @@ void App::InitMainWindow() noexcept {
 	ASSERT(RegisterClass(&wc));
 
 	// Compute window rectangle dimensions based on requested client area dimensions.
-	RECT r = { 0, 0, mWindowWidth, mWindowHeight };
+	RECT r = { 0, 0, Settings::sWindowWidth, Settings::sWindowHeight };
 	AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, false);
 	const int32_t width{ r.right - r.left };
 	const int32_t height{ r.bottom - r.top };
@@ -439,14 +441,14 @@ void App::InitDirect3D() noexcept {
 }
 
 void App::CreateCommandObjects() noexcept {
-	ASSERT(sSwapChainBufferCount > 0U);
+	ASSERT(Settings::sSwapChainBufferCount > 0U);
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	CommandManager::gManager->CreateCmdQueue(queueDesc, mCmdQueue);
 
-	for (std::uint32_t i = 0U; i < sSwapChainBufferCount; ++i) {
+	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {
 		CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameBegin[i]);
 		CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameEnd[i]);
 	}
@@ -462,17 +464,17 @@ void App::CreateCommandObjects() noexcept {
 
 void App::CreateSwapChain() noexcept {
 	DXGI_SWAP_CHAIN_DESC sd = {};
-	sd.BufferDesc.Width = mWindowWidth;
-	sd.BufferDesc.Height = mWindowHeight;
+	sd.BufferDesc.Width = Settings::sWindowWidth;
+	sd.BufferDesc.Height = Settings::sWindowHeight;
 	sd.BufferDesc.RefreshRate.Numerator = 60U;
 	sd.BufferDesc.RefreshRate.Denominator = 1U;
-	sd.BufferDesc.Format = mBackBufferFormat;
+	sd.BufferDesc.Format = Settings::sBackBufferFormat;
 	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	sd.SampleDesc.Count =  1U;
 	sd.SampleDesc.Quality = 0U;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.BufferCount = sSwapChainBufferCount;
+	sd.BufferCount = Settings::sSwapChainBufferCount;
 	sd.OutputWindow = mMainWnd;
 	sd.Windowed = true;
 	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
@@ -482,7 +484,12 @@ void App::CreateSwapChain() noexcept {
 	CHECK_HR(mDxgiFactory->CreateSwapChain(mCmdQueue, &sd, mSwapChain.GetAddressOf()));
 
 	// Resize the swap chain.
-	CHECK_HR(mSwapChain->ResizeBuffers(sSwapChainBufferCount, mWindowWidth, mWindowHeight, mBackBufferFormat, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
+	CHECK_HR(mSwapChain->ResizeBuffers(
+		Settings::sSwapChainBufferCount, 
+		Settings::sWindowWidth, 
+		Settings::sWindowHeight, 
+		Settings::sBackBufferFormat,
+		DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
 }
 
 void App::FlushCommandQueue() noexcept {
@@ -514,7 +521,7 @@ void App::SignalFenceAndPresent() noexcept {
 
 	// Advance the fence value to mark commands up to this fence point.
 	mFenceByFrameIndex[mCurrBackBuffer] = ++mCurrentFence;
-	mCurrBackBuffer = (mCurrBackBuffer + 1U) % sSwapChainBufferCount;
+	mCurrBackBuffer = (mCurrBackBuffer + 1U) % Settings::sSwapChainBufferCount;
 
 	// Add an instruction to the command queue to set a new fence point.  Because we 
 	// are on the GPU timeline, the new fence point won't be set until the GPU finishes

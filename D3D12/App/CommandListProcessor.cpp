@@ -22,15 +22,15 @@ tbb::task* CommandListProcessor::execute() {
 	ASSERT(mMaxNumCmdLists > 0);
 
 	ID3D12CommandList* *cmdLists{ new ID3D12CommandList*[mMaxNumCmdLists] };
-	std::uint32_t cmdListsCount{ 0U };
 	while (mCmdQueue != nullptr) {
 		// Pop at most MAX_COMMAND_LISTS from command list queue
-		while (cmdListsCount < mMaxNumCmdLists && mCmdListQueue.try_pop(cmdLists[cmdListsCount])) {
-			++cmdListsCount;
+		while (mPendingCmdLists < mMaxNumCmdLists && mCmdListQueue.try_pop(cmdLists[mPendingCmdLists])) {
+			++mPendingCmdLists;
 		}
-		if (cmdListsCount != 0U) {
-			mCmdQueue->ExecuteCommandLists(cmdListsCount, cmdLists);
-			cmdListsCount = 0U;
+		if (mPendingCmdLists != 0U) {
+			mCmdQueue->ExecuteCommandLists(mPendingCmdLists, cmdLists);
+			mExecTasksCount += mPendingCmdLists;
+			mPendingCmdLists = 0U;
 		}
 		else {
 			Sleep(0U);

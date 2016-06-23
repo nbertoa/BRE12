@@ -9,6 +9,7 @@
 
 #include <DXUtils/D3DFactory.h>
 #include <GeometryGenerator/GeometryGenerator.h>
+#include <GlobalData/Settings.h>
 #include <MathUtils/MathHelper.h>
 #include <Utils/DebugUtils.h>
 
@@ -38,7 +39,7 @@ struct CmdBuilderTaskInput {
 	ID3D12PipelineState* mPSO{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdList;
-	ID3D12CommandAllocator* mCmdAlloc[3U];
+	ID3D12CommandAllocator* mCmdAlloc[Settings::sSwapChainBufferCount];
 
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
 

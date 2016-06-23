@@ -1,6 +1,7 @@
 #include "InitTask.h"
 
 #include <CommandManager/CommandManager.h>
+#include <GlobalData\Settings.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <RootSignatureManager/RootSignatureManager.h>
@@ -59,7 +60,7 @@ void InitTask::BuildPSO(ID3D12RootSignature* &rootSign, ID3D12PipelineState* &ps
 	desc.BlendState = mInput.mBlendDesc;
 	desc.DepthStencilState = mInput.mDepthStencilDesc;
 	desc.DS = domainShader;
-	desc.DSVFormat = mInput.mDepthStencilFormat;
+	desc.DSVFormat = Settings::sDepthStencilFormat;
 	desc.GS = geomShader;
 	desc.HS = hullShader;
 	desc.InputLayout = { mInput.mInputLayout.data(), (std::uint32_t)mInput.mInputLayout.size() };
@@ -68,7 +69,7 @@ void InitTask::BuildPSO(ID3D12RootSignature* &rootSign, ID3D12PipelineState* &ps
 	desc.pRootSignature = rootSign;
 	desc.PS = pixelShader;
 	desc.RasterizerState = D3DFactory::DefaultRasterizerDesc();
-	memcpy(desc.RTVFormats, mInput.mRTVFormats, sizeof(mInput.mRTVFormats));
+	memcpy(desc.RTVFormats, Settings::sRTVFormats, sizeof(Settings::sRTVFormats));
 	desc.SampleDesc = mInput.mSampleDesc;
 	desc.SampleMask = mInput.mSampleMask;
 	desc.VS = vertexShader;

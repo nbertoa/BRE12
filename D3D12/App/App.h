@@ -9,6 +9,7 @@
 #include <wrl.h>
 
 #include <App/CommandListProcessor.h>
+#include <GlobalData/Settings.h>
 #include <RenderTask/CmdBuilderTask.h>
 #include <RenderTask/InitTask.h>
 #include <Timer\Timer.h>
@@ -38,14 +39,9 @@ public:
 	__forceinline std::vector<std::unique_ptr<InitTask>>& InitTasks() noexcept { return mInitTasks; }
 	__forceinline std::vector<std::unique_ptr<CmdBuilderTask>>& CmdBuilderTasks() noexcept { return mCmdBuilderTasks; }
 	__forceinline ID3D12Device& Device() noexcept { ASSERT(mDevice.Get() != nullptr);  return *mDevice.Get(); }
-	__forceinline const D3D12_VIEWPORT& Viewport() const noexcept { return mScreenViewport; }
-	__forceinline const D3D12_RECT& ScissorRect() const noexcept { return mScissorRect; }
 
 protected:
-	static App* mApp;
-	static const std::uint32_t sSwapChainBufferCount{ 3U };
-
-	__forceinline float AspectRatio() const noexcept { return (float)mWindowWidth / mWindowHeight; }
+	static App* mApp;	
 
 	virtual void CreateRtvAndDsvDescriptorHeaps() noexcept;
 	virtual void CreateRtvAndDsv() noexcept;
@@ -84,31 +80,22 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Device> mDevice;
 
 	ID3D12Fence* mFence{ nullptr };
-	std::uint64_t mFenceByFrameIndex[sSwapChainBufferCount]{ 0UL };
+	std::uint64_t mFenceByFrameIndex[Settings::sSwapChainBufferCount]{ 0UL };
 	std::uint64_t mCurrentFence{0U};
 
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// We have 2 commands lists (for frame begin and frame end), and 2
 	// commands allocator per list
-	ID3D12CommandAllocator* mCmdAllocFrameBegin[sSwapChainBufferCount]{ nullptr };
-	ID3D12CommandAllocator* mCmdAllocFrameEnd[sSwapChainBufferCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocFrameBegin[Settings::sSwapChainBufferCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocFrameEnd[Settings::sSwapChainBufferCount]{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListFrameBegin{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListFrameEnd{ nullptr };
 	
 	std::uint32_t mCurrBackBuffer{0U};
-	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[sSwapChainBufferCount];
+	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[Settings::sSwapChainBufferCount];
 	ID3D12Resource* mDepthStencilBuffer{ nullptr };
 
 	ID3D12DescriptorHeap* mRtvHeap{ nullptr };
-	ID3D12DescriptorHeap* mDsvHeap{ nullptr };
-
-	D3D12_VIEWPORT mScreenViewport;
-	D3D12_RECT mScissorRect;
-
-	// Derived class should set these in derived constructor to customize starting values.
-	DXGI_FORMAT mBackBufferFormat{DXGI_FORMAT_R8G8B8A8_UNORM};
-	DXGI_FORMAT mDepthStencilFormat{DXGI_FORMAT_D24_UNORM_S8_UINT};
-	int32_t mWindowWidth{1920};
-	int32_t mWindowHeight{1080};
+	ID3D12DescriptorHeap* mDsvHeap{ nullptr };	
 };
