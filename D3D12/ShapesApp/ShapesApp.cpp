@@ -16,9 +16,9 @@ void ShapesApp::Run(App& app) noexcept {
 	app.Initialize();
 
 	GeometryGenerator::MeshData sphere{ GeometryGenerator::CreateSphere(2, 100, 100) };
-	GeometryGenerator::MeshData box{ GeometryGenerator::CreateBox(2, 2, 2, 10) };
+	GeometryGenerator::MeshData box{ GeometryGenerator::CreateBox(2, 2, 2, 2) };
 
-	const std::size_t numTasks{ 30UL };
+	const std::size_t numTasks{ 15UL };
 	const std::size_t numGeometry{ 100UL };
 	std::vector<std::unique_ptr<InitTask>>& initTasks(app.InitTasks());
 	initTasks.resize(numTasks);
@@ -44,7 +44,7 @@ void ShapesApp::Run(App& app) noexcept {
 
 			DirectX::XMFLOAT4X4 world;
 			DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));
-			initData.mMeshInfoVec.push_back(MeshInfo(sphere.mVertices.data(), (std::uint32_t)sphere.mVertices.size(), sphere.mIndices32.data(), (std::uint32_t)sphere.mIndices32.size(),  world));
+			initData.mMeshInfoVec.push_back(MeshInfo(box.mVertices.data(), (std::uint32_t)box.mVertices.size(), box.mIndices32.data(), (std::uint32_t)box.mIndices32.size(),  world));
 		}
 
 		initTasks[k]->TaskInput() = initData;

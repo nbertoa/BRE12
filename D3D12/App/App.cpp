@@ -62,6 +62,11 @@ void App::InitializeTasks() noexcept {
 	}
 
 	FlushCommandQueue();
+
+	const std::uint64_t count{ _countof(mFenceByFrameIndex) };
+	for (std::uint64_t i = 0UL; i < count; ++i) {
+		mFenceByFrameIndex[i] = mCurrentFence;
+	}
 }
 
 int32_t App::Run() noexcept {
@@ -133,7 +138,25 @@ void App::Update(const float dt) noexcept {
 	ASSERT(Keyboard::gKeyboard.get() != nullptr);
 	ASSERT(Mouse::gMouse.get() != nullptr);
 
-	// Update camera based on keyboard
+	// If we executed command lists for all frames, then we need to wait
+	// at least 1 of them to be completed, before continue generating command list for a frame. 
+	const std::uint64_t fence{ mFenceByFrameIndex[mCurrBackBuffer] };
+	const std::uint64_t completedFenceValue{ mFence->GetCompletedValue() };
+	if (completedFenceValue < fence)
+	{
+		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
+		ASSERT(eventHandle);
+
+		// Fire event when GPU hits current fence.  
+		CHECK_HR(mFence->SetEventOnCompletion(fence, eventHandle));
+
+		// Wait until the GPU hits current fence event is fired.
+		WaitForSingleObject(eventHandle, INFINITE);
+		const std::uint64_t newCompletedFenceValue{ mFence->GetCompletedValue() };
+		CloseHandle(eventHandle);
+	}
+
+	// Update camera based on keyboard 
 	const float offset = sCameraOffset * (Keyboard::gKeyboard->IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * dt ;
 	if (Keyboard::gKeyboard->IsKeyDown(DIK_W)) {
 		Camera::gCamera->Walk(offset);
@@ -164,24 +187,6 @@ void App::Update(const float dt) noexcept {
 	lastXY[1] = y;
 
 	Camera::gCamera->UpdateViewMatrix();
-
-	// Has the GPU finished processing the commands of the current frame resource?
-	// If not, wait until the GPU has completed commands up to this fence point.
-	const std::uint64_t fence{ mFenceByFrameIndex[mCurrBackBuffer] };
-	const std::uint64_t completedFenceValue{ mFence->GetCompletedValue() };
-	if (completedFenceValue < fence)
-	{
-		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
-		ASSERT(eventHandle);
-
-		// Fire event when GPU hits current fence.  
-		CHECK_HR(mFence->SetEventOnCompletion(fence, eventHandle));
-
-		// Wait until the GPU hits current fence event is fired.
-		WaitForSingleObject(eventHandle, INFINITE);
-		const std::uint64_t newCompletedFenceValue{ mFence->GetCompletedValue() };
-		CloseHandle(eventHandle);
-	}
 }
 
 void App::Draw(const float) noexcept {
@@ -464,9 +469,9 @@ void App::CreateCommandObjects() noexcept {
 
 void App::CreateSwapChain() noexcept {
 	DXGI_SWAP_CHAIN_DESC sd = {};
-	sd.BufferDesc.Width = Settings::sWindowWidth;
-	sd.BufferDesc.Height = Settings::sWindowHeight;
-	sd.BufferDesc.RefreshRate.Numerator = 60U;
+	sd.BufferDesc.Width = 0U;
+	sd.BufferDesc.Height = 0U;
+	sd.BufferDesc.RefreshRate.Numerator = 0U;
 	sd.BufferDesc.RefreshRate.Denominator = 1U;
 	sd.BufferDesc.Format = Settings::sBackBufferFormat;
 	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -477,8 +482,8 @@ void App::CreateSwapChain() noexcept {
 	sd.BufferCount = Settings::sSwapChainBufferCount;
 	sd.OutputWindow = mMainWnd;
 	sd.Windowed = true;
-	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-	sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	sd.Flags = 0;
 
 	// Note: Swap chain uses queue to perform flush.
 	CHECK_HR(mDxgiFactory->CreateSwapChain(mCmdQueue, &sd, mSwapChain.GetAddressOf()));
@@ -489,7 +494,7 @@ void App::CreateSwapChain() noexcept {
 		Settings::sWindowWidth, 
 		Settings::sWindowHeight, 
 		Settings::sBackBufferFormat,
-		DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
+		0));
 }
 
 void App::FlushCommandQueue() noexcept {
@@ -518,6 +523,8 @@ void App::FlushCommandQueue() noexcept {
 void App::SignalFenceAndPresent() noexcept {
 	ASSERT(mSwapChain.Get());
 	CHECK_HR(mSwapChain->Present(0U, 0U));
+
+	//FlushCommandQueue();
 
 	// Advance the fence value to mark commands up to this fence point.
 	mFenceByFrameIndex[mCurrBackBuffer] = ++mCurrentFence;

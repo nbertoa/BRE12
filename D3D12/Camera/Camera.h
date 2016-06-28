@@ -68,6 +68,10 @@ public:
 		return DirectX::XMMatrixMultiply(viewMatrix, projMatrix);
 	}
 
+	__forceinline DirectX::XMMATRIX GetTransposeViewProj() const noexcept {
+		return DirectX::XMMatrixTranspose(GetViewProj());
+	}
+
 	__forceinline DirectX::XMFLOAT4X4 GetView4x4f() const noexcept {
 		ASSERT(!mViewDirty);
 		return mView;

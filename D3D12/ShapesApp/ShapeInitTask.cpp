@@ -49,6 +49,7 @@ void ShapeInitTask::Execute(ID3D12Device& device, tbb::concurrent_queue<ID3D12Co
 void ShapeInitTask::BuildConstantBuffers(ID3D12Device& device, CmdBuilderTaskInput& output) noexcept {
 	ASSERT(output.mCBVHeap == nullptr);
 	ASSERT(!output.mGeomDataVec.empty());
+	ASSERT(output.mFrameConstants == nullptr);
 	ASSERT(output.mObjectConstants == nullptr);
 
 	const std::uint32_t geomCount{ (std::uint32_t)output.mGeomDataVec.size() };
@@ -57,23 +58,36 @@ void ShapeInitTask::BuildConstantBuffers(ID3D12Device& device, CmdBuilderTaskInp
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = geomCount;
+	descHeapDesc.NumDescriptors = geomCount + 1U; // +1 for frame constants
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	ResourceManager::gManager->CreateDescriptorHeap(descHeapDesc, output.mCBVHeap);
 
-	CHECK_HR(device.CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&output.mCBVHeap)));
+	const std::size_t descHandleIncSize{ device.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 
 	const std::size_t elemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4)) };
-	ResourceManager::gManager->CreateUploadBuffer(elemSize, geomCount, output.mObjectConstants);
-	D3D12_GPU_VIRTUAL_ADDRESS cbAddress{ output.mObjectConstants->Resource()->GetGPUVirtualAddress() };
-	const std::size_t descHandleIncSize{ device.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+
+	// Fill constant buffers descriptor heap with per objects constants buffer views
+	ResourceManager::gManager->CreateUploadBuffer(elemSize, geomCount, output.mObjectConstants);	
+	D3D12_GPU_VIRTUAL_ADDRESS cbObjGPUBaseAddress{ output.mObjectConstants->Resource()->GetGPUVirtualAddress() };	
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
 		D3D12_CPU_DESCRIPTOR_HANDLE descHandle = output.mCBVHeap->GetCPUDescriptorHandleForHeapStart();
 		descHandle.ptr += i * descHandleIncSize;
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
-		cbvDesc.BufferLocation = cbAddress + i * elemSize;
+		cbvDesc.BufferLocation = cbObjGPUBaseAddress + i * elemSize;
 		cbvDesc.SizeInBytes = (std::uint32_t)elemSize;
 
-		device.CreateConstantBufferView(&cbvDesc, descHandle);
+		ResourceManager::gManager->CreateConstantBufferView(cbvDesc, descHandle);
 	}
+
+	// Fill constnat buffers descriptor heap with per frame constant buffer view
+	ResourceManager::gManager->CreateUploadBuffer(elemSize, 1U, output.mFrameConstants);
+	D3D12_GPU_VIRTUAL_ADDRESS cbFrameGPUBaseAddress{ output.mFrameConstants->Resource()->GetGPUVirtualAddress() };
+	D3D12_CPU_DESCRIPTOR_HANDLE descHandle = output.mCBVHeap->GetCPUDescriptorHandleForHeapStart();
+	descHandle.ptr += geomCount * descHandleIncSize;
+
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
+	cbvDesc.BufferLocation = cbFrameGPUBaseAddress;
+	cbvDesc.SizeInBytes = (std::uint32_t)elemSize;
+	ResourceManager::gManager->CreateConstantBufferView(cbvDesc, descHandle);
 }

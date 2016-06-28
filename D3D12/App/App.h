@@ -81,7 +81,7 @@ protected:
 
 	ID3D12Fence* mFence{ nullptr };
 	std::uint64_t mFenceByFrameIndex[Settings::sSwapChainBufferCount]{ 0UL };
-	std::uint64_t mCurrentFence{0U};
+	std::uint64_t mCurrentFence{ 0UL };
 
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
@@ -92,7 +92,7 @@ protected:
 	ID3D12GraphicsCommandList* mCmdListFrameBegin{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListFrameEnd{ nullptr };
 	
-	std::uint32_t mCurrBackBuffer{0U};
+	std::uint32_t mCurrBackBuffer{ 0U };
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[Settings::sSwapChainBufferCount];
 	ID3D12Resource* mDepthStencilBuffer{ nullptr };
 

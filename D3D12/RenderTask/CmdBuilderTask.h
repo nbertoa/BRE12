@@ -46,6 +46,7 @@ struct CmdBuilderTaskInput {
 	using GeometryDataVec = std::vector<GeometryData>;
 	GeometryDataVec mGeomDataVec{};
 
+	UploadBuffer* mFrameConstants{ nullptr };
 	UploadBuffer* mObjectConstants{ nullptr };
 };
 

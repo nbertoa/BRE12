@@ -39,6 +39,8 @@ public:
 	std::size_t CreateDescriptorHeap(const D3D12_DESCRIPTOR_HEAP_DESC& desc, ID3D12DescriptorHeap* &descHeap) noexcept;
 	std::size_t CreateFence(const std::uint64_t initValue, const D3D12_FENCE_FLAGS& flags, ID3D12Fence* &fence) noexcept;
 
+	void CreateConstantBufferView(const D3D12_CONSTANT_BUFFER_VIEW_DESC& cbViewDesc, const D3D12_CPU_DESCRIPTOR_HANDLE& cpuDescHandle) noexcept;
+
 	// Asserts if resource id is not present
 	ID3D12Resource& GetResource(const std::size_t id) noexcept;
 	UploadBuffer& GetUploadBuffer(const std::size_t id) noexcept;

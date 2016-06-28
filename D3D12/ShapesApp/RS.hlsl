@@ -4,4 +4,5 @@
 "DENY_DOMAIN_SHADER_ROOT_ACCESS | " \
 "DENY_GEOMETRY_SHADER_ROOT_ACCESS | " \
 "DENY_PIXEL_SHADER_ROOT_ACCESS), " \
-"DescriptorTable(CBV(b0))" 
+"DescriptorTable(CBV(b0)), " \
+"CBV(b1)"

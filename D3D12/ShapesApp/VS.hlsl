@@ -6,9 +6,14 @@ struct Input {
 };
 
 struct ObjConstants {
-	float4x4 mWVP;
+	float4x4 mW;
 };
 ConstantBuffer<ObjConstants> gObjConstants : register(b0);
+
+struct FrameConstants {
+	float4x4 mVP;
+};
+ConstantBuffer<FrameConstants> gFrameConstants : register(b1);
 
 struct Output {
 	
@@ -17,6 +22,7 @@ struct Output {
 
 Output main(in const Input input) {
 	Output output;
-	output.PosH = mul(float4(input.PosO, 1.0f), gObjConstants.mWVP);
+	float4x4 wvp = mul(gObjConstants.mW, gFrameConstants.mVP);
+	output.PosH = mul(float4(input.PosO, 1.0f), wvp);
 	return output;
 }
