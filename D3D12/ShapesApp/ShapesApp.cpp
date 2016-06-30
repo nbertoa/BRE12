@@ -1,8 +1,8 @@
 #include "ShapesApp.h"
 
-#include <App/App.h>
 #include <DXutils/D3DFactory.h>
 #include <GeometryGenerator\GeometryGenerator.h>
+#include <GlobalData/D3dData.h>
 #include <GlobalData/Settings.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
@@ -34,7 +34,7 @@ void ShapesApp::Run(App& app) noexcept {
 	const float meshSpaceOffset{ 50.0f };
 	for (std::size_t k = 0UL; k < numTasks; ++k) {
 		initTasks[k].reset(new ShapeInitTask());
-		cmdBuilderTasks[k].reset(new ShapeTask(&app.Device(), Settings::sScreenViewport, Settings::sScissorRect));
+		cmdBuilderTasks[k].reset(new ShapeTask(D3dData::mDevice.Get(), Settings::sScreenViewport, Settings::sScissorRect));
 
 		initData.mMeshInfoVec.clear();
 		for (std::size_t i = 0UL; i < numGeometry; ++i) {

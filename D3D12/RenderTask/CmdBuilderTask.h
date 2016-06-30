@@ -35,11 +35,12 @@ struct GeometryData {
 
 struct CmdBuilderTaskInput {
 	ID3D12DescriptorHeap* mCBVHeap{ nullptr };
+	D3D12_GPU_DESCRIPTOR_HANDLE mCbvBaseGpuDescHandle;
 	ID3D12RootSignature* mRootSign{ nullptr };
 	ID3D12PipelineState* mPSO{ nullptr };
 
-	ID3D12GraphicsCommandList* mCmdList;
-	ID3D12CommandAllocator* mCmdAlloc[Settings::sSwapChainBufferCount];
+	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+	ID3D12CommandAllocator* mCmdAlloc[Settings::sSwapChainBufferCount]{ nullptr };
 
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
 

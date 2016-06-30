@@ -52,7 +52,7 @@ void ShapeTask::Execute(
 
 	mInput.mCmdList->SetDescriptorHeaps(1U, &mInput.mCBVHeap);
 	mInput.mCmdList->SetGraphicsRootSignature(mInput.mRootSign);
-	D3D12_GPU_DESCRIPTOR_HANDLE cbvHeapGPUDescHandle = mInput.mCBVHeap->GetGPUDescriptorHandleForHeapStart();
+	D3D12_GPU_DESCRIPTOR_HANDLE cbvHeapGPUDescHandle = mInput.mCbvBaseGpuDescHandle;
 	const std::size_t descHandleIncSize{ mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };	
 	mInput.mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 

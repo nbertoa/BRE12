@@ -7,6 +7,7 @@
 
 #include <Camera/Camera.h>
 #include <CommandManager/CommandManager.h>
+#include <GlobalData\D3dData.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <MathUtils/MathHelper.h>
@@ -36,11 +37,13 @@ App::App(HINSTANCE hInstance)
 }
 
 App::~App() {
-	if (mDevice != nullptr) {
-		FlushCommandQueue();
-	}
+	ASSERT(D3dData::mDevice.Get() != nullptr);
+	FlushCommandQueue();
 
 	mTaskSchedulerInit.terminate();
+
+	// We must change swap chain to windowed before release
+	D3dData::mSwapChain->SetFullscreenState(false, nullptr);
 }
 
 void App::InitializeTasks() noexcept {
@@ -53,7 +56,7 @@ void App::InitializeTasks() noexcept {
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mInitTasks.size()),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mInitTasks[i]->Execute(*mDevice.Get(), cmdListQueue, mCmdBuilderTasks[i]->TaskInput());
+			mInitTasks[i]->Execute(*D3dData::mDevice.Get(), cmdListQueue, mCmdBuilderTasks[i]->TaskInput());
 	}
 	);
 
@@ -140,7 +143,8 @@ void App::Update(const float dt) noexcept {
 
 	// If we executed command lists for all frames, then we need to wait
 	// at least 1 of them to be completed, before continue generating command list for a frame. 
-	const std::uint64_t fence{ mFenceByFrameIndex[mCurrBackBuffer] };
+	const std::uint32_t currBackBuffer{ D3dData::CurrentBackBufferIndex() };
+	const std::uint64_t fence{ mFenceByFrameIndex[currBackBuffer] };
 	const std::uint64_t completedFenceValue{ mFence->GetCompletedValue() };
 	if (completedFenceValue < fence)
 	{
@@ -197,8 +201,9 @@ void App::Draw(const float) noexcept {
 	const std::uint32_t taskCount{ (std::uint32_t)mCmdBuilderTasks.size() + 1U };
 	mCmdListProcessor->resetExecutedTasksCounter();
 
-	ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[mCurrBackBuffer] };
-	ID3D12CommandAllocator* cmdAllocFrameEnd{ mCmdAllocFrameEnd[mCurrBackBuffer] };
+	const std::uint32_t currBackBuffer{ D3dData::CurrentBackBufferIndex() };
+	ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[currBackBuffer] };
+	ID3D12CommandAllocator* cmdAllocFrameEnd{ mCmdAllocFrameEnd[currBackBuffer] };
 
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
@@ -232,7 +237,7 @@ void App::Draw(const float) noexcept {
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mCmdBuilderTasks.size()),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mCmdBuilderTasks[i]->Execute(cmdListQueue, mCurrBackBuffer, backBufferHandle, dsvHandle);
+			mCmdBuilderTasks[i]->Execute(cmdListQueue, currBackBuffer, backBufferHandle, dsvHandle);
 	}
 	);
 	
@@ -264,8 +269,8 @@ void App::Draw(const float) noexcept {
 }
 
 void App::CreateRtvAndDsv() noexcept {
-	ASSERT(mDevice != nullptr);
-	ASSERT(mSwapChain != nullptr);
+	ASSERT(D3dData::mDevice != nullptr);
+	ASSERT(D3dData::mSwapChain != nullptr);
 
 	// Setup RTV descriptor to specify sRGB format.
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
@@ -273,11 +278,11 @@ void App::CreateRtvAndDsv() noexcept {
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRtvHeap->GetCPUDescriptorHandleForHeapStart());
-	const std::uint32_t rtvDescSize{ mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
+	const std::uint32_t rtvDescSize{ D3dData::mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 
 	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {
-		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mSwapChainBuffer[i].GetAddressOf())));
-		mDevice->CreateRenderTargetView(mSwapChainBuffer[i].Get(), &rtvDesc, rtvHeapHandle);
+		CHECK_HR(D3dData::mSwapChain->GetBuffer(i, IID_PPV_ARGS(mSwapChainBuffer[i].GetAddressOf())));
+		D3dData::mDevice->CreateRenderTargetView(mSwapChainBuffer[i].Get(), &rtvDesc, rtvHeapHandle);
 		rtvHeapHandle.Offset(1U, rtvDescSize);
 	}
 
@@ -303,7 +308,7 @@ void App::CreateRtvAndDsv() noexcept {
 	ResourceManager::gManager->CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, depthStencilDesc, D3D12_RESOURCE_STATE_COMMON, optClear, mDepthStencilBuffer);
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
-	mDevice->CreateDepthStencilView(mDepthStencilBuffer, nullptr, DepthStencilView());
+	D3dData::mDevice->CreateDepthStencilView(mDepthStencilBuffer, nullptr, DepthStencilView());
 }
 
 LRESULT App::MsgProc(HWND hwnd, const int32_t msg, WPARAM wParam, LPARAM lParam) noexcept {
@@ -376,16 +381,16 @@ void App::InitSystems() noexcept {
 	Mouse::gMouse = std::make_unique<Mouse>(*directInput, mMainWnd);
 	
 	ASSERT(CommandManager::gManager.get() == nullptr);
-	CommandManager::gManager = std::make_unique<CommandManager>(*mDevice.Get());
+	CommandManager::gManager = std::make_unique<CommandManager>(*D3dData::mDevice.Get());
 
 	ASSERT(PSOManager::gManager.get() == nullptr);
-	PSOManager::gManager = std::make_unique<PSOManager>(*mDevice.Get());
+	PSOManager::gManager = std::make_unique<PSOManager>(*D3dData::mDevice.Get());
 
 	ASSERT(ResourceManager::gManager.get() == nullptr);
-	ResourceManager::gManager = std::make_unique<ResourceManager>(*mDevice.Get());
+	ResourceManager::gManager = std::make_unique<ResourceManager>(*D3dData::mDevice.Get());
 
 	ASSERT(RootSignatureManager::gManager.get() == nullptr);
-	RootSignatureManager::gManager = std::make_unique<RootSignatureManager>(*mDevice.Get());
+	RootSignatureManager::gManager = std::make_unique<RootSignatureManager>(*D3dData::mDevice.Get());
 
 	ASSERT(ShaderManager::gManager.get() == nullptr);
 	ShaderManager::gManager = std::make_unique<ShaderManager>();
@@ -412,8 +417,9 @@ void App::InitMainWindow() noexcept {
 	const int32_t width{ r.right - r.left };
 	const int32_t height{ r.bottom - r.top };
 
-	const std::uint32_t dwStyle = { WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX };
-	mMainWnd = CreateWindow(L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, mAppInst, 0);
+	//const std::uint32_t dwStyle = { WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX };
+	const std::uint32_t dwStyle = { WS_POPUP };
+	mMainWnd = CreateWindowEx(WS_EX_APPWINDOW, L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, mAppInst, 0);
 	ASSERT(mMainWnd);
 
 	ShowWindow(mMainWnd, SW_SHOW);
@@ -431,8 +437,8 @@ void App::InitDirect3D() noexcept {
 #endif
 
 	// Create device
-	CHECK_HR(CreateDXGIFactory1(IID_PPV_ARGS(mDxgiFactory.GetAddressOf())));
-	CHECK_HR(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(mDevice.GetAddressOf())));
+	CHECK_HR(CreateDXGIFactory1(IID_PPV_ARGS(D3dData::mDxgiFactory.GetAddressOf())));
+	CHECK_HR(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(D3dData::mDevice.GetAddressOf())));
 
 	InitSystems();
 	
@@ -468,10 +474,12 @@ void App::CreateCommandObjects() noexcept {
 }
 
 void App::CreateSwapChain() noexcept {
+	IDXGISwapChain* swapChain{ nullptr };
+
 	DXGI_SWAP_CHAIN_DESC sd = {};
 	sd.BufferDesc.Width = 0U;
 	sd.BufferDesc.Height = 0U;
-	sd.BufferDesc.RefreshRate.Numerator = 0U;
+	sd.BufferDesc.RefreshRate.Numerator = 60U;
 	sd.BufferDesc.RefreshRate.Denominator = 1U;
 	sd.BufferDesc.Format = Settings::sBackBufferFormat;
 	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -486,15 +494,16 @@ void App::CreateSwapChain() noexcept {
 	sd.Flags = 0;
 
 	// Note: Swap chain uses queue to perform flush.
-	CHECK_HR(mDxgiFactory->CreateSwapChain(mCmdQueue, &sd, mSwapChain.GetAddressOf()));
+	CHECK_HR(D3dData::mDxgiFactory->CreateSwapChain(mCmdQueue, &sd, &swapChain));
+
+	CHECK_HR(swapChain->QueryInterface(IID_PPV_ARGS(D3dData::mSwapChain.GetAddressOf())));
+
+	// Set sRGB color space
+	D3dData::mSwapChain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709);
+	D3dData::mSwapChain->SetFullscreenState(true, nullptr);
 
 	// Resize the swap chain.
-	CHECK_HR(mSwapChain->ResizeBuffers(
-		Settings::sSwapChainBufferCount, 
-		Settings::sWindowWidth, 
-		Settings::sWindowHeight, 
-		Settings::sBackBufferFormat,
-		0));
+	CHECK_HR(D3dData::mSwapChain->ResizeBuffers(0U, 0U, 0U, DXGI_FORMAT_UNKNOWN, 0U));
 }
 
 void App::FlushCommandQueue() noexcept {
@@ -521,14 +530,12 @@ void App::FlushCommandQueue() noexcept {
 }
 
 void App::SignalFenceAndPresent() noexcept {
-	ASSERT(mSwapChain.Get());
-	CHECK_HR(mSwapChain->Present(0U, 0U));
-
-	//FlushCommandQueue();
+	ASSERT(D3dData::mSwapChain.Get());
+	CHECK_HR(D3dData::mSwapChain->Present(0U, 0U));
 
 	// Advance the fence value to mark commands up to this fence point.
-	mFenceByFrameIndex[mCurrBackBuffer] = ++mCurrentFence;
-	mCurrBackBuffer = (mCurrBackBuffer + 1U) % Settings::sSwapChainBufferCount;
+	const std::uint32_t currBackBuffer{ D3dData::CurrentBackBufferIndex() };
+	mFenceByFrameIndex[currBackBuffer] = ++mCurrentFence;
 
 	// Add an instruction to the command queue to set a new fence point.  Because we 
 	// are on the GPU timeline, the new fence point won't be set until the GPU finishes
@@ -537,12 +544,14 @@ void App::SignalFenceAndPresent() noexcept {
 }
 
 ID3D12Resource* App::CurrentBackBuffer() const noexcept {
-	return mSwapChainBuffer[mCurrBackBuffer].Get();
+	const std::uint32_t currBackBuffer{ D3dData::mSwapChain->GetCurrentBackBufferIndex() };
+	return mSwapChainBuffer[currBackBuffer].Get();
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE App::CurrentBackBufferView() const noexcept {
-	const std::uint32_t rtvDescSize{ mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
-	return CD3DX12_CPU_DESCRIPTOR_HANDLE(mRtvHeap->GetCPUDescriptorHandleForHeapStart(), mCurrBackBuffer, rtvDescSize);
+	const std::uint32_t rtvDescSize{ D3dData::mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
+	const std::uint32_t currBackBuffer{ D3dData::CurrentBackBufferIndex() };
+	return D3D12_CPU_DESCRIPTOR_HANDLE{ mRtvHeap->GetCPUDescriptorHandleForHeapStart().ptr + currBackBuffer * rtvDescSize };
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE App::DepthStencilView() const noexcept {

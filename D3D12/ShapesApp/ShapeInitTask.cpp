@@ -61,6 +61,7 @@ void ShapeInitTask::BuildConstantBuffers(ID3D12Device& device, CmdBuilderTaskInp
 	descHeapDesc.NumDescriptors = geomCount + 1U; // +1 for frame constants
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	ResourceManager::gManager->CreateDescriptorHeap(descHeapDesc, output.mCBVHeap);
+	output.mCbvBaseGpuDescHandle = output.mCBVHeap->GetGPUDescriptorHandleForHeapStart();
 
 	const std::size_t descHandleIncSize{ device.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 
@@ -80,7 +81,7 @@ void ShapeInitTask::BuildConstantBuffers(ID3D12Device& device, CmdBuilderTaskInp
 		ResourceManager::gManager->CreateConstantBufferView(cbvDesc, descHandle);
 	}
 
-	// Fill constnat buffers descriptor heap with per frame constant buffer view
+	// Fill constant buffers descriptor heap with per frame constant buffer view
 	ResourceManager::gManager->CreateUploadBuffer(elemSize, 1U, output.mFrameConstants);
 	D3D12_GPU_VIRTUAL_ADDRESS cbFrameGPUBaseAddress{ output.mFrameConstants->Resource()->GetGPUVirtualAddress() };
 	D3D12_CPU_DESCRIPTOR_HANDLE descHandle = output.mCBVHeap->GetCPUDescriptorHandleForHeapStart();

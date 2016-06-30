@@ -2,8 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="Settings.h" />
+    <ClInclude Include="D3dData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="D3dData.cpp" />
   </ItemGroup>
 </Project>

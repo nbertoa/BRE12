@@ -114,9 +114,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="D3dData.h" />
     <ClInclude Include="Settings.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="D3dData.cpp" />
     <ClCompile Include="Settings.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

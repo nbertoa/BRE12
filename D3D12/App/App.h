@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <d3d12.h>
 #include <D3Dcompiler.h>
-#include <dxgi1_4.h>
 #include <tbb/task_scheduler_init.h>
 #include <windows.h>
 #include <wrl.h>
@@ -38,7 +37,6 @@ public:
 
 	__forceinline std::vector<std::unique_ptr<InitTask>>& InitTasks() noexcept { return mInitTasks; }
 	__forceinline std::vector<std::unique_ptr<CmdBuilderTask>>& CmdBuilderTasks() noexcept { return mCmdBuilderTasks; }
-	__forceinline ID3D12Device& Device() noexcept { ASSERT(mDevice.Get() != nullptr);  return *mDevice.Get(); }
 
 protected:
 	static App* mApp;	
@@ -63,6 +61,7 @@ protected:
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
 		
+	// Class that is executed in an async thread and get/execute command lists.
 	tbb::task_scheduler_init mTaskSchedulerInit;
 	CommandListProcessor* mCmdListProcessor{ nullptr };
 
@@ -74,10 +73,6 @@ protected:
 
 	std::vector<std::unique_ptr<InitTask>> mInitTasks;
 	std::vector<std::unique_ptr<CmdBuilderTask>> mCmdBuilderTasks;
-
-	Microsoft::WRL::ComPtr<IDXGIFactory4> mDxgiFactory;
-	Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;
-	Microsoft::WRL::ComPtr<ID3D12Device> mDevice;
 
 	ID3D12Fence* mFence{ nullptr };
 	std::uint64_t mFenceByFrameIndex[Settings::sSwapChainBufferCount]{ 0UL };
@@ -92,7 +87,6 @@ protected:
 	ID3D12GraphicsCommandList* mCmdListFrameBegin{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListFrameEnd{ nullptr };
 	
-	std::uint32_t mCurrBackBuffer{ 0U };
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[Settings::sSwapChainBufferCount];
 	ID3D12Resource* mDepthStencilBuffer{ nullptr };
 
