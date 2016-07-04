@@ -34,16 +34,19 @@ App::App(HINSTANCE hInstance)
 {
 	ASSERT(mApp == nullptr);
 	mApp = this;
+
+	mMasterRenderTaskParent = MasterRenderTask::Create(mMasterRenderTask);
 }
 
 App::~App() {
 	ASSERT(D3dData::mDevice.Get() != nullptr);
-	FlushCommandQueue();
+	//FlushCommandQueue();
 
+	mMasterRenderTask->Terminate();
 	mTaskSchedulerInit.terminate();
 
 	// We must change swap chain to windowed before release
-	D3dData::mSwapChain->SetFullscreenState(false, nullptr);
+	//D3dData::mSwapChain->SetFullscreenState(false, nullptr);
 }
 
 void App::InitializeTasks() noexcept {
@@ -75,6 +78,10 @@ void App::InitializeTasks() noexcept {
 int32_t App::Run() noexcept {
 	ASSERT(Keyboard::gKeyboard.get() != nullptr);
 	ASSERT(Mouse::gMouse.get() != nullptr);
+	ASSERT(mMasterRenderTaskParent != nullptr);
+	ASSERT(mMasterRenderTask != nullptr);
+	mMasterRenderTask->Init(mHwnd);
+	mMasterRenderTaskParent->spawn(*mMasterRenderTask);
 
 	MSG msg{0U};
 
@@ -92,11 +99,10 @@ int32_t App::Run() noexcept {
 
 			if (!mAppPaused) {
 				const float dt = mTimer.DeltaTime();
-				CalculateFrameStats();
 				Keyboard::gKeyboard->Update();
 				Mouse::gMouse->Update();
 				Update(dt);
-				Draw(dt);			
+				//Draw(dt);			
 			}
 			else {
 				Sleep(100U);
@@ -114,7 +120,8 @@ void App::Initialize() noexcept {
 	Camera::gCamera->UpdateViewMatrix();
 
 	// Create command list processor thread.
-	CommandListProcessor::Create(mCmdListProcessor, mCmdQueue, MAX_NUM_CMD_LISTS);
+	//CommandListProcessor::Create(mCmdListProcessor, mCmdQueue, MAX_NUM_CMD_LISTS)->spawn(*mCmdListProcessor);
+	//tbb::empty_task* parent{ MasterRenderTask::Create(mMasterRenderTask) };
 }
 
 void App::CreateRtvAndDsvDescriptorHeaps() noexcept {
@@ -143,7 +150,7 @@ void App::Update(const float dt) noexcept {
 
 	// If we executed command lists for all frames, then we need to wait
 	// at least 1 of them to be completed, before continue generating command list for a frame. 
-	const std::uint32_t currBackBuffer{ D3dData::CurrentBackBufferIndex() };
+	/*const std::uint32_t currBackBuffer{ D3dData::CurrentBackBufferIndex() };
 	const std::uint64_t fence{ mFenceByFrameIndex[currBackBuffer] };
 	const std::uint64_t completedFenceValue{ mFence->GetCompletedValue() };
 	if (completedFenceValue < fence)
@@ -158,7 +165,7 @@ void App::Update(const float dt) noexcept {
 		WaitForSingleObject(eventHandle, INFINITE);
 		const std::uint64_t newCompletedFenceValue{ mFence->GetCompletedValue() };
 		CloseHandle(eventHandle);
-	}
+	}*/
 
 	// Update camera based on keyboard 
 	const float offset = sCameraOffset * (Keyboard::gKeyboard->IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * dt ;
@@ -375,10 +382,10 @@ void App::InitSystems() noexcept {
 	ASSERT(Keyboard::gKeyboard.get() == nullptr);
 	LPDIRECTINPUT8 directInput;
 	CHECK_HR(DirectInput8Create(mAppInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID*)&directInput, nullptr));
-	Keyboard::gKeyboard = std::make_unique<Keyboard>(*directInput, mMainWnd);
+	Keyboard::gKeyboard = std::make_unique<Keyboard>(*directInput, mHwnd);
 
 	ASSERT(Mouse::gMouse.get() == nullptr);
-	Mouse::gMouse = std::make_unique<Mouse>(*directInput, mMainWnd);
+	Mouse::gMouse = std::make_unique<Mouse>(*directInput, mHwnd);
 	
 	ASSERT(CommandManager::gManager.get() == nullptr);
 	CommandManager::gManager = std::make_unique<CommandManager>(*D3dData::mDevice.Get());
@@ -419,36 +426,23 @@ void App::InitMainWindow() noexcept {
 
 	//const std::uint32_t dwStyle = { WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX };
 	const std::uint32_t dwStyle = { WS_POPUP };
-	mMainWnd = CreateWindowEx(WS_EX_APPWINDOW, L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, mAppInst, 0);
-	ASSERT(mMainWnd);
+	mHwnd = CreateWindowEx(WS_EX_APPWINDOW, L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, mAppInst, 0);
+	ASSERT(mHwnd);
 
-	ShowWindow(mMainWnd, SW_SHOW);
-	UpdateWindow(mMainWnd);
+	ShowWindow(mHwnd, SW_SHOW);
+	UpdateWindow(mHwnd);
 }
 
 void App::InitDirect3D() noexcept {
-#if defined(DEBUG) || defined(_DEBUG) 
-	// Enable the D3D12 debug layer.
-	{
-		Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
-		CHECK_HR(D3D12GetDebugInterface(IID_PPV_ARGS(debugController.GetAddressOf())));
-		debugController->EnableDebugLayer();
-	}
-#endif
-
-	// Create device
-	CHECK_HR(CreateDXGIFactory1(IID_PPV_ARGS(D3dData::mDxgiFactory.GetAddressOf())));
-	CHECK_HR(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(D3dData::mDevice.GetAddressOf())));
+	D3dData::InitDirect3D();
 
 	InitSystems();
 	
-	// Create fence and query descriptors sizes
-	ResourceManager::gManager->CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
-
+	/*ResourceManager::gManager->CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 	CreateCommandObjects();
-	CreateSwapChain();
+	D3dData::CreateSwapChain(mHwnd, *mCmdQueue);
 	CreateRtvAndDsvDescriptorHeaps();
-	CreateRtvAndDsv();
+	CreateRtvAndDsv();*/
 }
 
 void App::CreateCommandObjects() noexcept {
@@ -473,46 +467,9 @@ void App::CreateCommandObjects() noexcept {
 	mCmdListFrameEnd->Close();
 }
 
-void App::CreateSwapChain() noexcept {
-	IDXGISwapChain* swapChain{ nullptr };
-
-	DXGI_SWAP_CHAIN_DESC sd = {};
-	sd.BufferDesc.Width = 0U;
-	sd.BufferDesc.Height = 0U;
-	sd.BufferDesc.RefreshRate.Numerator = 60U;
-	sd.BufferDesc.RefreshRate.Denominator = 1U;
-	sd.BufferDesc.Format = Settings::sBackBufferFormat;
-	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	sd.SampleDesc.Count =  1U;
-	sd.SampleDesc.Quality = 0U;
-	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.BufferCount = Settings::sSwapChainBufferCount;
-	sd.OutputWindow = mMainWnd;
-	sd.Windowed = true;
-	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	sd.Flags = 0;
-
-	// Note: Swap chain uses queue to perform flush.
-	CHECK_HR(D3dData::mDxgiFactory->CreateSwapChain(mCmdQueue, &sd, &swapChain));
-
-	CHECK_HR(swapChain->QueryInterface(IID_PPV_ARGS(D3dData::mSwapChain.GetAddressOf())));
-
-	// Set sRGB color space
-	D3dData::mSwapChain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709);
-	D3dData::mSwapChain->SetFullscreenState(true, nullptr);
-
-	// Resize the swap chain.
-	CHECK_HR(D3dData::mSwapChain->ResizeBuffers(0U, 0U, 0U, DXGI_FORMAT_UNKNOWN, 0U));
-}
-
 void App::FlushCommandQueue() noexcept {
-	// Advance the fence value to mark commands up to this fence point.
 	++mCurrentFence;
 
-	// Add an instruction to the command queue to set a new fence point.  Because we 
-	// are on the GPU timeline, the new fence point won't be set until the GPU finishes
-	// processing all the commands prior to this Signal().
 	CHECK_HR(mCmdQueue->Signal(mFence, mCurrentFence));
 	
 	// Wait until the GPU has completed commands up to this fence point.
@@ -556,25 +513,4 @@ D3D12_CPU_DESCRIPTOR_HANDLE App::CurrentBackBufferView() const noexcept {
 
 D3D12_CPU_DESCRIPTOR_HANDLE App::DepthStencilView() const noexcept {
 	return mDsvHeap->GetCPUDescriptorHandleForHeapStart();
-}
-
-void App::CalculateFrameStats() noexcept {
-	// Code computes the average frames per second, and also the 
-	// average time it takes to render one frame.  These stats 
-	// are appended to the window caption bar.
-
-	static std::uint32_t frameCnt{ 0U };
-	static float timeElapsed{ 0.0f };
-
-	++frameCnt;
-
-	// Compute averages over one second period.
-	if ((mTimer.TotalTime() - timeElapsed) > 1.0f) {
-		const float mspf{ 1000.0f / frameCnt };
-		SetWindowText(mMainWnd, std::to_wstring(mspf).c_str());
-
-		// Reset for next average.
-		frameCnt = 0U;
-		timeElapsed += 1.0f;
-	}
 }

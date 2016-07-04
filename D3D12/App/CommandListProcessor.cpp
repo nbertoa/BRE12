@@ -6,8 +6,6 @@ tbb::empty_task* CommandListProcessor::Create(CommandListProcessor* &cmdListProc
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
 	parent->set_ref_count(2);
 	cmdListProcessor = new (parent->allocate_child()) CommandListProcessor(cmdQueue, maxNumCmdLists);
-	parent->spawn(*cmdListProcessor);
-
 	return parent;
 }
 

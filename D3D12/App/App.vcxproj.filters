@@ -3,9 +3,11 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="CommandListProcessor.cpp" />
+    <ClCompile Include="MasterRenderTask.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="CommandListProcessor.h" />
+    <ClInclude Include="MasterRenderTask.h" />
   </ItemGroup>
 </Project>

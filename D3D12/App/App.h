@@ -8,6 +8,7 @@
 #include <wrl.h>
 
 #include <App/CommandListProcessor.h>
+#include <App/MasterRenderTask.h>
 #include <GlobalData/Settings.h>
 #include <RenderTask/CmdBuilderTask.h>
 #include <RenderTask/InitTask.h>
@@ -35,28 +36,25 @@ public:
 
 	LRESULT MsgProc(HWND hwnd, const std::int32_t msg, WPARAM wParam, LPARAM lParam) noexcept;
 
-	__forceinline std::vector<std::unique_ptr<InitTask>>& InitTasks() noexcept { return mInitTasks; }
-	__forceinline std::vector<std::unique_ptr<CmdBuilderTask>>& CmdBuilderTasks() noexcept { return mCmdBuilderTasks; }
+	__forceinline std::vector<std::unique_ptr<InitTask>>& InitTasks() noexcept { ASSERT(mMasterRenderTask != nullptr); return mMasterRenderTask->InitTasks(); }
+	__forceinline std::vector<std::unique_ptr<CmdBuilderTask>>& CmdBuilderTasks() noexcept { ASSERT(mMasterRenderTask != nullptr); return mMasterRenderTask->CmdBuilderTasks(); }
 
 protected:
 	static App* mApp;	
 
-	virtual void CreateRtvAndDsvDescriptorHeaps() noexcept;
-	virtual void CreateRtvAndDsv() noexcept;
+	void CreateRtvAndDsvDescriptorHeaps() noexcept;
+	void CreateRtvAndDsv() noexcept;
 	virtual void Update(const float dt) noexcept;
-	virtual void Draw(const float dt) noexcept;
+	void Draw(const float dt) noexcept;
 	
 	void InitSystems() noexcept;
 	void InitMainWindow() noexcept;
 	void InitDirect3D() noexcept;	
 	void CreateCommandObjects() noexcept;
-	void CreateSwapChain() noexcept;
 
 	void FlushCommandQueue() noexcept;
 	void SignalFenceAndPresent() noexcept;
-
-	void CalculateFrameStats() noexcept;
-	
+		
 	ID3D12Resource* CurrentBackBuffer() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
@@ -64,9 +62,11 @@ protected:
 	// Class that is executed in an async thread and get/execute command lists.
 	tbb::task_scheduler_init mTaskSchedulerInit;
 	CommandListProcessor* mCmdListProcessor{ nullptr };
+	MasterRenderTask* mMasterRenderTask{ nullptr };
+	tbb::empty_task* mMasterRenderTaskParent{ nullptr };
 
 	HINSTANCE mAppInst = nullptr; // application instance handle
-	HWND mMainWnd = nullptr; // main window handle
+	HWND mHwnd = nullptr; // main window handle
 	bool mAppPaused = false;  // is the application paused?
 
 	Timer mTimer;

@@ -50,6 +50,6 @@ void ShapesApp::Run(App& app) noexcept {
 		initTasks[k]->TaskInput() = initData;
 	}
 
-	app.InitializeTasks();
+	//app.InitializeTasks();
 	app.Run();
 }
