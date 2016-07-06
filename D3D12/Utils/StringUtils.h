@@ -2,7 +2,6 @@
 
 #include <codecvt>
 #include <string>
-#include <windows.h>
 
 namespace StringUtils {
 	inline void ToWideString(const std::string& source, std::wstring& dest) noexcept {

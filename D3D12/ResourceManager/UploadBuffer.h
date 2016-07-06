@@ -1,11 +1,9 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <d3d12.h>
 #include <wrl.h>
-
-#include <DxUtils/d3dx12.h>
-#include <Utils/DebugUtils.h>
 
 class UploadBuffer {
 public:

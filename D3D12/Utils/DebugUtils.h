@@ -2,10 +2,6 @@
 
 #include <cassert>
 #include <comdef.h>
-#include <cstdlib>
-#include <d3d12.h>
-#include <dxgi1_4.h>
-#include <iostream>
 #include <string>
 
 #include <Utils\StringUtils.h>
@@ -30,29 +26,4 @@
 		abort(); \
 	} \
 }
-#endif
-
-__forceinline void D3dSetDebugName(IDXGIObject* obj, const char* name) noexcept {
-	ASSERT(name != nullptr);
-	if (obj) {
-		obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
-	}
-}
-
-__forceinline void D3dSetDebugName(ID3D12Device* obj, const char* name) noexcept {
-	ASSERT(name != nullptr);
-	if (obj) {
-		obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
-	}
-}
-
-__forceinline void D3dSetDebugName(ID3D12DeviceChild* obj, const char* name) noexcept {
-	ASSERT(name != nullptr);
-	if (obj) {
-		obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
-	}
-}
-
-#ifndef RELEASE_COM
-#define RELEASE_COM(x) { if(x){ x->Release(); x = nullptr; } }
 #endif

@@ -5,7 +5,6 @@
 #include <memory>
 #include <tbb\concurrent_hash_map.h>
 #include <tbb/mutex.h>
-#include <vector>
 #include <wrl.h>
 
 class ShaderManager {

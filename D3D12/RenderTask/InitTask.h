@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <d3d12.h>
 #include <DirectXMath.h>
-#include <string>
 #include <tbb/concurrent_queue.h>
 #include <wrl.h>
 
@@ -16,7 +15,7 @@
 class UploadBuffer;
 
 struct MeshInfo {
-	explicit MeshInfo() = default;
+	MeshInfo() = default;
 	explicit MeshInfo(const void* verts, const std::uint32_t numVerts, const void* indices, const std::uint32_t numIndices, DirectX::XMFLOAT4X4& world)
 		: mVerts(verts)
 		, mNumVerts(numVerts)
@@ -67,15 +66,19 @@ struct InitTaskInput {
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
 };
 
-// - Inherit from this class and reimplement virtual methods.
+// Task that given its InitTaskInput, initializes a CmdBuilderTaskOutput (that will be used to build command lists)
+// Steps:
+// - Inherit from InitTask and reimplement InitCmdBuilders() method (you should call InitTask::InitCmdBuilders() method in reimplementation)
+// - Fill InitTaskInput data (InitTask::TaskInput())
+// - Call InitTask::InitCmdBuilders() to fill CmdBuilderTaskInput accordingly.
 class InitTask {
 public:
-	explicit InitTask() = default;
+	InitTask() = default;
 
 	__forceinline InitTaskInput& TaskInput() noexcept { return mInput; }
 
-	// Store new initialization commands in cmdLists
-	virtual void Execute(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept;
+	// We require to pass the queue of command lists for initialization purposes (create resources, buffers, etc)
+	virtual void InitCmdBuilders(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept;
 
 protected:
 	void BuildPSO(ID3D12RootSignature* &rootSign, ID3D12PipelineState* &pso) noexcept;

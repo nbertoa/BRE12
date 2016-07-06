@@ -116,14 +116,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ShapeInitTask.cpp" />
+    <ClCompile Include="ShapesInitTask.cpp" />
     <ClCompile Include="ShapesApp.cpp" />
-    <ClCompile Include="ShapeTask.cpp" />
+    <ClCompile Include="ShapesCmdBuilderTask.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ShapeInitTask.h" />
+    <ClInclude Include="ShapesInitTask.h" />
     <ClInclude Include="ShapesApp.h" />
-    <ClInclude Include="ShapeTask.h" />
+    <ClInclude Include="ShapesCmdBuilderTask.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PS.hlsl">

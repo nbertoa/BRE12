@@ -29,13 +29,10 @@ void MasterRenderTask::Init(const HWND hwnd) noexcept {
 
 	mTimer.Reset();
 
-	D3dData::InitDirect3D();
 	InitSystems();
 
 	ResourceManager::gManager->CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
-	CreateCommandObjects();
-	D3dData::CreateSwapChain(mHwnd, *mCmdQueue);
-	CreateRtvAndDsvDescriptorHeaps();
+	CreateCommandObjects();	
 	CreateRtvAndDsv();
 
 	// Create and spawn command list processor thread.
@@ -60,21 +57,24 @@ void MasterRenderTask::InitSystems() noexcept {
 	ShaderManager::gManager = std::make_unique<ShaderManager>();
 }
 
-void MasterRenderTask::ExecuteInitTasks() noexcept {
+void MasterRenderTask::InitCmdBuilders() noexcept {
 	ASSERT(!mInitTasks.empty());
 	ASSERT(mInitTasks.size() == mCmdBuilderTasks.size());
 
+	// Init cmd builders and wait until all of them are finished
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
 	ASSERT(mCmdListProcessor->IsIdle());
-
-	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mInitTasks.size()),
+	const std::uint32_t taskCount{ (std::uint32_t)mInitTasks.size()};
+	mCmdListProcessor->ResetExecutedTasksCounter();
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mInitTasks[i]->Execute(*D3dData::mDevice.Get(), cmdListQueue, mCmdBuilderTasks[i]->TaskInput());
+			mInitTasks[i]->InitCmdBuilders(*D3dData::mDevice.Get(), cmdListQueue, mCmdBuilderTasks[i]->TaskInput());
 	}
 	);
 
-	while (!mCmdListProcessor->IsIdle()) {
+	// Wait until all command lists are executed
+	while (mCmdListProcessor->ExecutedTasksCounter() < taskCount) {
 		Sleep(0U);
 	}
 
@@ -103,7 +103,7 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 
 		// Begin Frame task + # cmd build tasks
 		const std::uint32_t taskCount{ (std::uint32_t)mCmdBuilderTasks.size() + 1U };
-		mCmdListProcessor->resetExecutedTasksCounter();
+		mCmdListProcessor->ResetExecutedTasksCounter();
 
 		const std::uint32_t currBackBuffer{ D3dData::CurrentBackBufferIndex() };
 		ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[currBackBuffer] };
@@ -141,7 +141,7 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mCmdBuilderTasks.size()),
 			[&](const tbb::blocked_range<size_t>& r) {
 			for (size_t i = r.begin(); i != r.end(); ++i)
-				mCmdBuilderTasks[i]->Execute(cmdListQueue, currBackBuffer, backBufferHandle, dsvHandle);
+				mCmdBuilderTasks[i]->BuildCommandLists(cmdListQueue, currBackBuffer, backBufferHandle, dsvHandle);
 		}
 		);
 
@@ -181,16 +181,19 @@ void MasterRenderTask::Finalize() noexcept {
 
 void MasterRenderTask::CreateRtvAndDsv() noexcept {
 	ASSERT(D3dData::mDevice != nullptr);
-	ASSERT(D3dData::mSwapChain != nullptr);
+	ASSERT(D3dData::mSwapChain == nullptr);
+
+	CreateRtvAndDsvDescriptorHeaps();
 
 	// Setup RTV descriptor to specify sRGB format.
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.Format = Settings::sRTVFormats[0U];
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
+	// Create swap chain and render target views
+	D3dData::CreateSwapChain(mHwnd, *mCmdQueue);
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRtvHeap->GetCPUDescriptorHandleForHeapStart());
 	const std::uint32_t rtvDescSize{ D3dData::mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
-
 	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {
 		CHECK_HR(D3dData::mSwapChain->GetBuffer(i, IID_PPV_ARGS(mSwapChainBuffer[i].GetAddressOf())));
 		D3dData::mDevice->CreateRenderTargetView(mSwapChainBuffer[i].Get(), &rtvDesc, rtvHeapHandle);
@@ -237,7 +240,7 @@ void MasterRenderTask::CreateCommandObjects() noexcept {
 	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameBegin[0], mCmdListFrameBegin);
 	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameEnd[0], mCmdListFrameEnd);
 
-	// Start off in a closed state.  This is because the first time we refer 
+	// Start off in a closed state. This is because the first time we refer 
 	// to the command list we will Reset it, and it needs to be closed before
 	// calling Reset.
 	mCmdListFrameBegin->Close();

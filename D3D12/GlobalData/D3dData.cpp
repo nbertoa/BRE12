@@ -3,11 +3,45 @@
 #include <GlobalData/Settings.h>
 #include <Utils/DebugUtils.h>
 
+namespace {
+	void InitMainWindow(HWND& hwnd, const HINSTANCE hInstance) noexcept {
+		WNDCLASS wc = {};
+		wc.style = CS_HREDRAW | CS_VREDRAW;
+		wc.lpfnWndProc = DefWindowProc;
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = 0;
+		wc.hInstance = hInstance;
+		wc.hIcon = LoadIcon(0, IDI_APPLICATION);
+		wc.hCursor = LoadCursor(0, IDC_ARROW);
+		wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
+		wc.lpszMenuName = 0;
+		wc.lpszClassName = L"MainWnd";
+
+		ASSERT(RegisterClass(&wc));
+
+		// Compute window rectangle dimensions based on requested client area dimensions.
+		RECT r = { 0, 0, Settings::sWindowWidth, Settings::sWindowHeight };
+		AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, false);
+		const int32_t width{ r.right - r.left };
+		const int32_t height{ r.bottom - r.top };
+
+		const std::uint32_t dwStyle = Settings::sFullscreen ? WS_POPUP : WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+		hwnd = CreateWindowEx(WS_EX_APPWINDOW, L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, hInstance, 0);
+		ASSERT(hwnd);
+
+		ShowWindow(hwnd, SW_SHOW);
+		UpdateWindow(hwnd);
+	}
+}
+
+HWND D3dData::mHwnd;
 Microsoft::WRL::ComPtr<IDXGIFactory4> D3dData::mDxgiFactory{ nullptr };
 Microsoft::WRL::ComPtr<IDXGISwapChain3> D3dData::mSwapChain{ nullptr };
 Microsoft::WRL::ComPtr<ID3D12Device> D3dData::mDevice{ nullptr };
 
-void D3dData::InitDirect3D() noexcept {
+void D3dData::InitDirect3D(const HINSTANCE hInstance) noexcept {
+	InitMainWindow(mHwnd, hInstance);
+
 #if defined(DEBUG) || defined(_DEBUG) 
 	// Enable the D3D12 debug layer.
 	{

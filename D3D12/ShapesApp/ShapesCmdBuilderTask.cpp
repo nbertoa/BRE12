@@ -1,4 +1,4 @@
-#include "ShapeTask.h"
+#include "ShapesCmdBuilderTask.h"
 
 #include <DirectXMath.h>
 
@@ -7,13 +7,13 @@
 #include <ResourceManager/UploadBuffer.h>
 #include <Utils/DebugUtils.h>
 
-ShapeTask::ShapeTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect)
+ShapesCmdBuilderTask::ShapesCmdBuilderTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect)
 	: CmdBuilderTask(device, screenViewport, scissorRect)
 {
 	ASSERT(device != nullptr);
 }
 
-void ShapeTask::Execute(
+void ShapesCmdBuilderTask::BuildCommandLists(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdLists,
 	const std::uint32_t currBackBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,

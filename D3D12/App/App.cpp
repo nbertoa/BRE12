@@ -14,15 +14,14 @@ namespace {
 
 App::App(HINSTANCE hInstance)
 	: mTaskSchedulerInit()
-	, mAppInst(hInstance)
 	, mMasterRenderTaskParent(MasterRenderTask::Create(mMasterRenderTask))
 {	
-	Init();
+	Init(hInstance);
 }
 
-void App::ExecuteInitTasks() noexcept {
+void App::InitCmdBuilders() noexcept {
 	ASSERT(mMasterRenderTask != nullptr);
-	mMasterRenderTask->ExecuteInitTasks();
+	mMasterRenderTask->InitCmdBuilders();
 }
 
 int32_t App::Run() noexcept {
@@ -53,10 +52,26 @@ int32_t App::Run() noexcept {
 	return (std::int32_t)msg.wParam;
 }
 
-void App::Init() noexcept {
-	InitMainWindow();
-	D3dData::InitDirect3D();
-	InitSystems();	
+void App::Init(const HINSTANCE hInstance) noexcept {
+	D3dData::InitDirect3D(hInstance);
+	InitSystems(D3dData::mHwnd, hInstance);
+}
+
+void App::InitSystems(const HWND hwnd, const HINSTANCE hInstance) noexcept {
+	ASSERT(Camera::gCamera.get() == nullptr);
+	Camera::gCamera = std::make_unique<Camera>();
+	Camera::gCamera->SetLens(0.25f * MathHelper::Pi, Settings::AspectRatio(), 1.0f, 1000.0f);
+	Camera::gCamera->UpdateViewMatrix();
+
+	ASSERT(Keyboard::gKeyboard.get() == nullptr);
+	LPDIRECTINPUT8 directInput;
+	CHECK_HR(DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID*)&directInput, nullptr));
+	Keyboard::gKeyboard = std::make_unique<Keyboard>(*directInput, hwnd);
+
+	ASSERT(Mouse::gMouse.get() == nullptr);
+	Mouse::gMouse = std::make_unique<Mouse>(*directInput, hwnd);
+
+	mMasterRenderTask->Init(hwnd);
 }
 
 void App::Update(const float dt) noexcept {
@@ -109,50 +124,4 @@ void App::Finalize() noexcept {
 	mMasterRenderTaskParent->wait_for_all();
 	mTaskSchedulerInit.terminate();
 	PostQuitMessage(0);
-}
-
-void App::InitSystems() noexcept {
-	ASSERT(Camera::gCamera.get() == nullptr);
-	Camera::gCamera = std::make_unique<Camera>();
-	Camera::gCamera->SetLens(0.25f * MathHelper::Pi, Settings::AspectRatio(), 1.0f, 1000.0f);
-	Camera::gCamera->UpdateViewMatrix();
-
-	ASSERT(Keyboard::gKeyboard.get() == nullptr);
-	LPDIRECTINPUT8 directInput;
-	CHECK_HR(DirectInput8Create(mAppInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID*)&directInput, nullptr));
-	Keyboard::gKeyboard = std::make_unique<Keyboard>(*directInput, mHwnd);
-
-	ASSERT(Mouse::gMouse.get() == nullptr);
-	Mouse::gMouse = std::make_unique<Mouse>(*directInput, mHwnd);
-
-	mMasterRenderTask->Init(mHwnd);
-}
-
-void App::InitMainWindow() noexcept {
-	WNDCLASS wc = {};
-	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.lpfnWndProc = DefWindowProc;
-	wc.cbClsExtra = 0;
-	wc.cbWndExtra = 0;
-	wc.hInstance = mAppInst;
-	wc.hIcon = LoadIcon(0, IDI_APPLICATION);
-	wc.hCursor = LoadCursor(0, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
-	wc.lpszMenuName = 0;
-	wc.lpszClassName = L"MainWnd";
-
-	ASSERT(RegisterClass(&wc));
-
-	// Compute window rectangle dimensions based on requested client area dimensions.
-	RECT r = { 0, 0, Settings::sWindowWidth, Settings::sWindowHeight };
-	AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, false);
-	const int32_t width{ r.right - r.left };
-	const int32_t height{ r.bottom - r.top };
-
-	const std::uint32_t dwStyle = Settings::sFullscreen ?  WS_POPUP : WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
-	mHwnd = CreateWindowEx(WS_EX_APPWINDOW, L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, mAppInst, 0);
-	ASSERT(mHwnd);
-
-	ShowWindow(mHwnd, SW_SHOW);
-	UpdateWindow(mHwnd);
 }

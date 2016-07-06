@@ -10,21 +10,27 @@
 #include <RenderTask\InitTask.h>
 #include <Timer/Timer.h>
 
-// You should use the static method to span a new command list processor thread.
-// Execute methods will check for command lists in its queue and execute them in cmdQueue.
-// It will execute at most mMaxNumCmdLists per execution operation.
+// It has the responsibility to construct command builders and also execute them (to generate/execute
+// command lists in the queue provided by CommandListProcessor)
+// Steps:
+// - Use MasterRenderTask::Create() to create an instance. You should
+//   spawn it using the returned parent tbb::task.
+// - When you spawn it, execute() method is automatically called. You should call to Init() and InitCmdBuilders() before spawning.
+// - When you want to terminate this task, you should call MasterRenderTask::Terminate() 
+//   and wait for termination using parent task.
 class MasterRenderTask : public tbb::task {
 public:
 	static tbb::empty_task* Create(MasterRenderTask* &masterRenderTask);
 
 	MasterRenderTask() = default;
 
+	// You should fill data before calling InitCmdBuilders
 	__forceinline std::vector<std::unique_ptr<InitTask>>& GetInitTasks() noexcept { return mInitTasks; }
 	__forceinline std::vector<std::unique_ptr<CmdBuilderTask>>& GetCmdBuilderTasks() noexcept { return mCmdBuilderTasks; }
 
-	// Execute in order
+	// Execute in order before spawning it.
 	void Init(const HWND hwnd) noexcept;
-	void ExecuteInitTasks() noexcept;
+	void InitCmdBuilders() noexcept;
 	
 	void Terminate() noexcept { mTerminate = true; }
 
@@ -41,6 +47,7 @@ private:
 	void CreateRtvAndDsv() noexcept;
 	void CreateCommandObjects() noexcept;
 
+	// Used to display milliseconds per frame in window caption (if windowed)
 	void CalculateFrameStats() noexcept;
 
 	ID3D12Resource* CurrentBackBuffer() const noexcept;
@@ -53,7 +60,7 @@ private:
 	HWND mHwnd{ 0 };
 
 	Timer mTimer;
-
+		
 	tbb::empty_task* mCmdListProcessorParent{ nullptr };
 	CommandListProcessor* mCmdListProcessor{ nullptr };
 

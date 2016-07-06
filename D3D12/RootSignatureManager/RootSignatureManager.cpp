@@ -1,6 +1,6 @@
 #include "RootSignatureManager.h"
 
-#include <d3dcompiler.h>
+#include <D3Dcompiler.h>
 
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>

@@ -21,6 +21,7 @@ public:
 	Mouse(const Mouse&) = delete;
 	const Mouse& operator=(const Mouse&) = delete;
 
+	// You should call update in each frame
 	void Update();
 
 	__forceinline const DIMOUSESTATE& CurrentState() { return mCurrentState; }

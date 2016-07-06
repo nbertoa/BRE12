@@ -1,5 +1,9 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-//   
+#pragma once
+
+#include <cstdint>
+#include <DirectXMath.h>
+#include <vector>
+
 // Defines a static class for procedurally generating the geometry of 
 // common mathematical objects.
 //
@@ -9,14 +13,6 @@
 //   1. Change the Direct3D cull mode or manually reverse the winding order.
 //   2. Invert the normal.
 //   3. Update the texture coordinates and tangent vectors.
-//////////////////////////////////////////////////////////////////////////////////////////
-
-#pragma once
-
-#include <cstdint>
-#include <DirectXMath.h>
-#include <vector>
-
 class GeometryGenerator {
 public:
 	struct Vertex {

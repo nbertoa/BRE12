@@ -12,7 +12,7 @@ bool InitTaskInput::ValidateData() const {
 	return !mMeshInfoVec.empty() && !mInputLayout.empty();
 }
 
-void InitTask::Execute(ID3D12Device& /*device*/, tbb::concurrent_queue<ID3D12CommandList*>& /*cmdLists*/, CmdBuilderTaskInput& output) noexcept {
+void InitTask::InitCmdBuilders(ID3D12Device& /*device*/, tbb::concurrent_queue<ID3D12CommandList*>& /*cmdLists*/, CmdBuilderTaskInput& output) noexcept {
 	ASSERT(mInput.ValidateData());
 	
 	output.mTopology = mInput.mTopology;

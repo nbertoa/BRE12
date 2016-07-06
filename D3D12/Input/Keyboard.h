@@ -14,6 +14,7 @@ public:
 	const Keyboard& operator=(const Keyboard& rhs) = delete;
 	~Keyboard();
 
+	// You should call update in each frame
 	void Update() noexcept;
 
 	__forceinline const std::uint8_t* const CurrentState() const noexcept { return mCurrentState; }

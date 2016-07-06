@@ -1,5 +1,9 @@
 #include "UploadBuffer.h"
 
+#include <DxUtils/d3dx12.h>
+#include <Utils/DebugUtils.h>
+
+
 UploadBuffer::UploadBuffer(ID3D12Device& device, const std::size_t elemSize, const std::uint32_t elemCount)
 	: mElemSize(elemSize)
 {

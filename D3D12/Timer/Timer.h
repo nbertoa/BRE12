@@ -8,10 +8,15 @@ public:
 	Timer(const Timer&) = delete;
 	const Timer& operator=(const Timer&) = delete;
 
-	float TotalTime() const noexcept; // in seconds
-	float DeltaTime() const noexcept; // in seconds
-	void Reset() noexcept; // Call before message loop.
-	void Tick() noexcept;  // Call every frame.
+	// Time in seconds (1.0f is 1 second)
+	float TotalTime() const noexcept;
+	float DeltaTime() const noexcept;
+
+	// Call before message loop.
+	void Reset() noexcept; 
+
+	// Call every frame.
+	void Tick() noexcept;  
 
 private:
 	double mSecondsPerCount{ 0.0 };

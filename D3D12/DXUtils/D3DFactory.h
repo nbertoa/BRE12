@@ -3,6 +3,7 @@
 #include <d3d12.h>
 #include <vector>
 
+// Used to generate common used data
 class D3DFactory {
 public:
 	static D3D12_RASTERIZER_DESC DefaultRasterizerDesc() noexcept;

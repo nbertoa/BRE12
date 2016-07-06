@@ -1,11 +1,11 @@
-#include "ShapeInitTask.h"
+#include "ShapesInitTask.h"
 
 #include <ResourceManager/ResourceManager.h>
 #include <ResourceManager/UploadBuffer.h>
 #include <Utils/DebugUtils.h>
 
-void ShapeInitTask::Execute(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept {
-	InitTask::Execute(device, cmdLists, output);
+void ShapesInitTask::InitCmdBuilders(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept {
+	InitTask::InitCmdBuilders(device, cmdLists, output);
 
 	ASSERT(output.mGeomDataVec.empty());
 	ASSERT(output.mCmdList != nullptr);
@@ -46,7 +46,7 @@ void ShapeInitTask::Execute(ID3D12Device& device, tbb::concurrent_queue<ID3D12Co
 	BuildConstantBuffers(device, output);
 }
 
-void ShapeInitTask::BuildConstantBuffers(ID3D12Device& device, CmdBuilderTaskInput& output) noexcept {
+void ShapesInitTask::BuildConstantBuffers(ID3D12Device& device, CmdBuilderTaskInput& output) noexcept {
 	ASSERT(output.mCBVHeap == nullptr);
 	ASSERT(!output.mGeomDataVec.empty());
 	ASSERT(output.mFrameConstants == nullptr);

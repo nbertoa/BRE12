@@ -51,15 +51,19 @@ struct CmdBuilderTaskInput {
 	UploadBuffer* mObjectConstants{ nullptr };
 };
 
-// - Inherit from this class and reimplement virtual methods.
+// Task that given its CmdBuilderTaskInput, creates command lists to be executed by CommandListProcessor.
+// Steps:
+// - Inherit from CmdBuilderTask and reimplement BuildCommandLists() method
+// - Refer to InitTask documentation to know how to initialize CmdBuilderTaskInput (you should get it through CmdBuilderTask::TaskInput())
+// - Call CmdBuilderTask::BuildCommandLists() to create command lists to execute in the GPU
 class CmdBuilderTask {
 public:
 	explicit CmdBuilderTask(ID3D12Device* device, const D3D12_VIEWPORT& screenViewport, const D3D12_RECT& scissorRect);
 
 	__forceinline CmdBuilderTaskInput& TaskInput() noexcept { return mInput; }
 		
-	// Store new command lists in cmdLists  
-	virtual void Execute(
+	// Build command lists and store them in the queue 
+	virtual void BuildCommandLists(
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdLists,
 		const std::uint32_t currBackBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,
