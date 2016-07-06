@@ -8,6 +8,7 @@
 #include <App/CommandListProcessor.h>
 #include <RenderTask\CmdBuilderTask.h>
 #include <RenderTask\InitTask.h>
+#include <Timer/Timer.h>
 
 // You should use the static method to span a new command list processor thread.
 // Execute methods will check for command lists in its queue and execute them in cmdQueue.
@@ -18,24 +19,29 @@ public:
 
 	MasterRenderTask() = default;
 
-	__forceinline std::vector<std::unique_ptr<InitTask>>& InitTasks() noexcept { return mInitTasks; }
-	__forceinline std::vector<std::unique_ptr<CmdBuilderTask>>& CmdBuilderTasks() noexcept { return mCmdBuilderTasks; }
+	__forceinline std::vector<std::unique_ptr<InitTask>>& GetInitTasks() noexcept { return mInitTasks; }
+	__forceinline std::vector<std::unique_ptr<CmdBuilderTask>>& GetCmdBuilderTasks() noexcept { return mCmdBuilderTasks; }
 
+	// Execute in order
 	void Init(const HWND hwnd) noexcept;
+	void ExecuteInitTasks() noexcept;
+	
 	void Terminate() noexcept { mTerminate = true; }
+
+	// Called when spawned
 	tbb::task* execute() override;
 
 private:
-	void InitializeTasks() noexcept;
-	void Draw() noexcept;
+	void InitSystems() noexcept;
+	
+	void ExecuteCmdBuilderTasks() noexcept;
+	void Finalize() noexcept;
 
 	void CreateRtvAndDsvDescriptorHeaps() noexcept;
 	void CreateRtvAndDsv() noexcept;
 	void CreateCommandObjects() noexcept;
 
 	void CalculateFrameStats() noexcept;
-
-	bool mTerminate{ false };
 
 	ID3D12Resource* CurrentBackBuffer() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const noexcept;
@@ -46,9 +52,12 @@ private:
 
 	HWND mHwnd{ 0 };
 
-	ID3D12CommandQueue* mCmdQueue{ nullptr };
+	Timer mTimer;
+
+	tbb::empty_task* mCmdListProcessorParent{ nullptr };
 	CommandListProcessor* mCmdListProcessor{ nullptr };
 
+	ID3D12CommandQueue* mCmdQueue{ nullptr };
 	ID3D12Fence* mFence{ nullptr };
 	std::uint64_t mFenceByFrameIndex[Settings::sSwapChainBufferCount]{ 0UL };
 	std::uint64_t mCurrentFence{ 0UL };
@@ -68,4 +77,6 @@ private:
 
 	std::vector<std::unique_ptr<InitTask>> mInitTasks;
 	std::vector<std::unique_ptr<CmdBuilderTask>> mCmdBuilderTasks;
+	
+	bool mTerminate{ false };
 };

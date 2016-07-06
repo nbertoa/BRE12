@@ -11,6 +11,7 @@ public:
 
 	__forceinline static float AspectRatio() noexcept { return (float)sWindowWidth / sWindowHeight; }
 
+	static const bool sFullscreen{ true };
 	static const std::uint32_t sSwapChainBufferCount{ 3U };
 	static const std::uint32_t sWindowWidth{ 1920U };
 	static const std::uint32_t sWindowHeight{ 1080U };

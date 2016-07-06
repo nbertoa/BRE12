@@ -8,12 +8,11 @@
 #include <crtdbg.h>               
 #endif 
 
-class ShapesApp {
+class ShapesApp : public TasksInitializer {
 public:
 	ShapesApp() = default;
 	ShapesApp(const ShapesApp& rhs) = delete;
 	ShapesApp& operator=(const ShapesApp& rhs) = delete;
-
-	void Run(App& app) noexcept;
+	void InitTasks(App& app) noexcept override;
 };
 

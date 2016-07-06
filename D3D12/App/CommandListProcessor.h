@@ -20,10 +20,12 @@ public:
 	__forceinline std::uint32_t ExecutedTasksCounter() const noexcept { return mExecTasksCount; }
 	
 	tbb::task* execute() override;
+	void Terminate() noexcept { mTerminate = true; }
 
 	__forceinline tbb::concurrent_queue<ID3D12CommandList*>& CmdListQueue() noexcept { return mCmdListQueue; }
 
 private:
+	bool mTerminate{ false };
 	std::uint32_t mExecTasksCount{ 0U };
 	std::atomic<std::uint32_t> mPendingCmdLists{ 0U };
 	std::uint32_t mMaxNumCmdLists{ 1U };

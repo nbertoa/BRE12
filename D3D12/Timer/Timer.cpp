@@ -8,28 +8,8 @@ Timer::Timer() {
 	mSecondsPerCount = 1.0 / (double)countsPerSec;
 }
 
-// Returns the total time elapsed since Reset() was called, NOT counting any
-// time when the clock is stopped.
 float Timer::TotalTime() const noexcept {
-	// If we are stopped, do not count the time that has passed since we stopped.
-	// Moreover, if we previously already had a pause, the distance 
-	// mStopTime - mBaseTime includes paused time, which we do not want to count.
-	// To correct this, we can subtract the paused time from mStopTime:  
-	//
-	//                     |<--paused time-->|
-	// ----*---------------*-----------------*------------*------------*------> time
-	//  mBaseTime       mStopTime        startTime     mStopTime    mCurrTime
-	//
-	// The distance mCurrTime - mBaseTime includes paused time,
-	// which we do not want to count.  To correct this, we can subtract 
-	// the paused time from mCurrTime:  
-	//
-	//  (mCurrTime - mPausedTime) - mBaseTime 
-	//
-	//                     |<--paused time-->|
-	// ----*---------------*-----------------*------------*------> time
-	//  mBaseTime       mStopTime        startTime     mCurrTime
-	return (mStopped) ? (float)(((mStopTime - mPausedTime) - mBaseTime) * mSecondsPerCount) : (float)(((mCurrTime - mPausedTime) - mBaseTime) * mSecondsPerCount);
+	return (float)((mCurrTime - mBaseTime) * mSecondsPerCount);
 }
 
 float Timer::DeltaTime() const noexcept {
@@ -42,44 +22,9 @@ void Timer::Reset() noexcept {
 
 	mBaseTime = currTime;
 	mPrevTime = currTime;
-	mStopTime = 0;
-	mStopped = false;
-}
-
-void Timer::Start() noexcept {
-	std::int64_t startTime;
-	QueryPerformanceCounter((LARGE_INTEGER*)&startTime);
-
-	// Accumulate the time elapsed between stop and start pairs.
-	//
-	//                     |<-------d------->|
-	// ----*---------------*-----------------*------------> time
-	//  mBaseTime       mStopTime        startTime     
-
-	if (mStopped) {
-		mPausedTime += (startTime - mStopTime);
-		mPrevTime = startTime;
-		mStopTime = 0;
-		mStopped = false;
-	}
-}
-
-void Timer::Stop() noexcept {
-	if (!mStopped) {
-		std::int64_t currTime;
-		QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
-
-		mStopTime = currTime;
-		mStopped = true;
-	}
 }
 
 void Timer::Tick() noexcept {
-	if (mStopped) {
-		mDeltaTime = 0.0;
-		return;
-	}
-
 	std::int64_t currTime;
 	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
 	mCurrTime = currTime;

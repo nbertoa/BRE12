@@ -3,26 +3,19 @@
 #include <DXutils/D3DFactory.h>
 #include <GeometryGenerator\GeometryGenerator.h>
 #include <GlobalData/D3dData.h>
-#include <GlobalData/Settings.h>
-#include <PSOManager\PSOManager.h>
-#include <ResourceManager\ResourceManager.h>
-#include <RootSignatureManager\RootSignatureManager.h>
-#include <ShaderManager\ShaderManager.h>
 #include <ShapesApp/ShapeInitTask.h>
 #include <ShapesApp/ShapeTask.h>
 #include <Utils\DebugUtils.h>
 
-void ShapesApp::Run(App& app) noexcept {
-	app.Initialize();
-
+void ShapesApp::InitTasks(App& app) noexcept {
 	GeometryGenerator::MeshData sphere{ GeometryGenerator::CreateSphere(2, 100, 100) };
 	GeometryGenerator::MeshData box{ GeometryGenerator::CreateBox(2, 2, 2, 2) };
 
 	const std::size_t numTasks{ 15UL };
 	const std::size_t numGeometry{ 100UL };
-	std::vector<std::unique_ptr<InitTask>>& initTasks(app.InitTasks());
+	std::vector<std::unique_ptr<InitTask>>& initTasks(app.GetInitTasks());
 	initTasks.resize(numTasks);
-	std::vector<std::unique_ptr<CmdBuilderTask>>& cmdBuilderTasks(app.CmdBuilderTasks());
+	std::vector<std::unique_ptr<CmdBuilderTask>>& cmdBuilderTasks(app.GetCmdBuilderTasks());
 	cmdBuilderTasks.resize(numTasks);
 
 	InitTaskInput initData{};
@@ -44,12 +37,11 @@ void ShapesApp::Run(App& app) noexcept {
 
 			DirectX::XMFLOAT4X4 world;
 			DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));
-			initData.mMeshInfoVec.push_back(MeshInfo(box.mVertices.data(), (std::uint32_t)box.mVertices.size(), box.mIndices32.data(), (std::uint32_t)box.mIndices32.size(),  world));
+			initData.mMeshInfoVec.push_back(MeshInfo(box.mVertices.data(), (std::uint32_t)box.mVertices.size(), box.mIndices32.data(), (std::uint32_t)box.mIndices32.size(), world));
 		}
 
 		initTasks[k]->TaskInput() = initData;
 	}
 
-	//app.InitializeTasks();
-	app.Run();
+	app.ExecuteInitTasks();
 }

@@ -56,10 +56,7 @@ public:
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up) noexcept;
 
 	// Get View/Proj matrices.
-	__forceinline DirectX::XMMATRIX GetView() const noexcept {
-		ASSERT(!mViewDirty);
-		return XMLoadFloat4x4(&mView);
-	}
+	__forceinline DirectX::XMMATRIX GetView() const noexcept { return XMLoadFloat4x4(&mView); }
 	__forceinline DirectX::XMMATRIX GetProj() const noexcept { return XMLoadFloat4x4(&mProj); }
 
 	__forceinline DirectX::XMMATRIX GetViewProj() const noexcept {
@@ -72,10 +69,7 @@ public:
 		return DirectX::XMMatrixTranspose(GetViewProj());
 	}
 
-	__forceinline DirectX::XMFLOAT4X4 GetView4x4f() const noexcept {
-		ASSERT(!mViewDirty);
-		return mView;
-	}
+	__forceinline DirectX::XMFLOAT4X4 GetView4x4f() const noexcept { return mView; }
 	__forceinline DirectX::XMFLOAT4X4 GetProj4x4f() const noexcept { return mProj; }
 
 	// Strafe/Walk the camera a distance d.
@@ -86,7 +80,7 @@ public:
 	void Pitch(const float angle) noexcept;
 	void RotateY(const float angle) noexcept;
 
-	// After modifying camera position/orientation, call to rebuild the view matrix.
+	// Rebuild view matrix
 	void UpdateViewMatrix() noexcept;
 
 private:

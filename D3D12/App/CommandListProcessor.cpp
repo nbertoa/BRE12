@@ -20,7 +20,7 @@ tbb::task* CommandListProcessor::execute() {
 	ASSERT(mMaxNumCmdLists > 0);
 
 	ID3D12CommandList* *cmdLists{ new ID3D12CommandList*[mMaxNumCmdLists] };
-	while (mCmdQueue != nullptr) {
+	while (!mTerminate) {
 		// Pop at most MAX_COMMAND_LISTS from command list queue
 		while (mPendingCmdLists < mMaxNumCmdLists && mCmdListQueue.try_pop(cmdLists[mPendingCmdLists])) {
 			++mPendingCmdLists;

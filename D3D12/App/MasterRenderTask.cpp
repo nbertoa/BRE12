@@ -3,10 +3,14 @@
 #include <DirectXColors.h>
 #include <tbb/parallel_for.h>
 
-#include <CommandManager\CommandManager.h>
-#include <ResourceManager\ResourceManager.h>
+#include <Camera/Camera.h>
+#include <CommandManager/CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GlobalData/D3dData.h>
+#include <PSOManager\PSOManager.h>
+#include <ResourceManager\ResourceManager.h>
+#include <RootSignatureManager\RootSignatureManager.h>
+#include <ShaderManager\ShaderManager.h>
 #include <Utils/DebugUtils.h>
 
 namespace {
@@ -23,17 +27,40 @@ tbb::empty_task* MasterRenderTask::Create(MasterRenderTask* &masterRenderTask) {
 void MasterRenderTask::Init(const HWND hwnd) noexcept {
 	mHwnd = hwnd;
 
+	mTimer.Reset();
+
+	D3dData::InitDirect3D();
+	InitSystems();
+
 	ResourceManager::gManager->CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 	CreateCommandObjects();
 	D3dData::CreateSwapChain(mHwnd, *mCmdQueue);
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateRtvAndDsv();
 
-	// Create command list processor thread.
-	CommandListProcessor::Create(mCmdListProcessor, mCmdQueue, MAX_NUM_CMD_LISTS)->spawn(*mCmdListProcessor);
+	// Create and spawn command list processor thread.
+	mCmdListProcessorParent = CommandListProcessor::Create(mCmdListProcessor, mCmdQueue, MAX_NUM_CMD_LISTS);
+	mCmdListProcessorParent->spawn(*mCmdListProcessor);
 }
 
-void MasterRenderTask::InitializeTasks() noexcept {
+void MasterRenderTask::InitSystems() noexcept {
+	ASSERT(CommandManager::gManager.get() == nullptr);
+	CommandManager::gManager = std::make_unique<CommandManager>(*D3dData::mDevice.Get());
+
+	ASSERT(PSOManager::gManager.get() == nullptr);
+	PSOManager::gManager = std::make_unique<PSOManager>(*D3dData::mDevice.Get());
+
+	ASSERT(ResourceManager::gManager.get() == nullptr);
+	ResourceManager::gManager = std::make_unique<ResourceManager>(*D3dData::mDevice.Get());
+
+	ASSERT(RootSignatureManager::gManager.get() == nullptr);
+	RootSignatureManager::gManager = std::make_unique<RootSignatureManager>(*D3dData::mDevice.Get());
+
+	ASSERT(ShaderManager::gManager.get() == nullptr);
+	ShaderManager::gManager = std::make_unique<ShaderManager>();
+}
+
+void MasterRenderTask::ExecuteInitTasks() noexcept {
 	ASSERT(!mInitTasks.empty());
 	ASSERT(mInitTasks.size() == mCmdBuilderTasks.size());
 
@@ -60,19 +87,17 @@ void MasterRenderTask::InitializeTasks() noexcept {
 }
 
 tbb::task* MasterRenderTask::execute() {
-	InitializeTasks();
-	Draw();
-
-	FlushCommandQueue();
-
-	// We must change swap chain to windowed before release
-	D3dData::mSwapChain->SetFullscreenState(false, nullptr);
-
+	ExecuteCmdBuilderTasks();
+	Finalize();		
 	return nullptr;
 }
 
-void MasterRenderTask::Draw() noexcept {
+void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 	while (!mTerminate) {
+		mTimer.Tick();
+		CalculateFrameStats();
+		Camera::gCamera->UpdateViewMatrix();
+
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
 		ASSERT(mCmdListProcessor->IsIdle());
 
@@ -148,6 +173,12 @@ void MasterRenderTask::Draw() noexcept {
 	}
 }
 
+void MasterRenderTask::Finalize() noexcept {
+	mCmdListProcessor->Terminate();
+	mCmdListProcessorParent->wait_for_all();
+	FlushCommandQueue();
+}
+
 void MasterRenderTask::CreateRtvAndDsv() noexcept {
 	ASSERT(D3dData::mDevice != nullptr);
 	ASSERT(D3dData::mSwapChain != nullptr);
@@ -218,7 +249,7 @@ void MasterRenderTask::CalculateFrameStats() noexcept {
 	// average time it takes to render one frame.  These stats 
 	// are appended to the window caption bar.
 
-	/*static std::uint32_t frameCnt{ 0U };
+	static std::uint32_t frameCnt{ 0U };
 	static float timeElapsed{ 0.0f };
 
 	++frameCnt;
@@ -231,7 +262,7 @@ void MasterRenderTask::CalculateFrameStats() noexcept {
 		// Reset for next average.
 		frameCnt = 0U;
 		timeElapsed += 1.0f;
-	}*/
+	}
 }
 
 void MasterRenderTask::CreateRtvAndDsvDescriptorHeaps() noexcept {

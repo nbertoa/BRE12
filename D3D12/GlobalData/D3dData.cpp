@@ -49,7 +49,7 @@ void D3dData::CreateSwapChain(const HWND hwnd, ID3D12CommandQueue& cmdQueue) noe
 
 	// Set sRGB color space
 	D3dData::mSwapChain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709);
-	D3dData::mSwapChain->SetFullscreenState(true, nullptr);
+	D3dData::mSwapChain->SetFullscreenState(Settings::sFullscreen, nullptr);
 
 	// Resize the swap chain.
 	CHECK_HR(D3dData::mSwapChain->ResizeBuffers(0U, 0U, 0U, DXGI_FORMAT_UNKNOWN, 0U));
