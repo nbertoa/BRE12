@@ -13,6 +13,6 @@ namespace NumberGeneration {
 
 	std::size_t IncrementalSizeT() noexcept {
 		static std::atomic<std::size_t> n{ 0UL };
-		return n++;
+		return n.fetch_add(1UL);
 	}
 }

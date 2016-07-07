@@ -4,7 +4,6 @@
 #include <memory>
 
 #include <MathUtils\MathHelper.h>
-#include <Utils\DebugUtils.h>
 
 class Camera {
 public:
@@ -69,8 +68,11 @@ public:
 		return DirectX::XMMatrixTranspose(GetViewProj());
 	}
 
-	__forceinline DirectX::XMFLOAT4X4 GetView4x4f() const noexcept { return mView; }
-	__forceinline DirectX::XMFLOAT4X4 GetProj4x4f() const noexcept { return mProj; }
+	__forceinline const DirectX::XMFLOAT4X4& GetView4x4f() const noexcept { return mView; }
+	__forceinline const DirectX::XMFLOAT4X4& GetProj4x4f() const noexcept { return mProj; }
+
+	void GetView4x4f(DirectX::XMFLOAT4X4& m) const noexcept;
+	void GetProj4x4f(DirectX::XMFLOAT4X4& m) const noexcept;
 
 	// Strafe/Walk the camera a distance d.
 	void Strafe(const float d) noexcept;
@@ -80,8 +82,8 @@ public:
 	void Pitch(const float angle) noexcept;
 	void RotateY(const float angle) noexcept;
 
-	// Rebuild view matrix
-	void UpdateViewMatrix() noexcept;
+	// Rebuild view matrix and returns true if it was rebuilt
+	bool UpdateViewMatrix() noexcept;
 
 private:
 	// Camera coordinate system with coordinates relative to world space.

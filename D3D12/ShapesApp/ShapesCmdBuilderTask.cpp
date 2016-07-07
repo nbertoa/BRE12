@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-#include <Camera/Camera.h>
+#include <MathUtils/MathHelper.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ResourceManager/UploadBuffer.h>
 #include <Utils/DebugUtils.h>
@@ -16,8 +16,10 @@ ShapesCmdBuilderTask::ShapesCmdBuilderTask(ID3D12Device* device, const D3D12_VIE
 void ShapesCmdBuilderTask::BuildCommandLists(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdLists,
 	const std::uint32_t currBackBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
+	const DirectX::XMFLOAT4X4 view,
+	const DirectX::XMFLOAT4X4 proj,
+	const D3D12_CPU_DESCRIPTOR_HANDLE backBufferHandle,
+	const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle) noexcept {
 
 	ID3D12CommandAllocator* cmdAlloc{ mInput.mCmdAlloc[currBackBuffer] };
 	ASSERT(cmdAlloc != nullptr);
@@ -25,7 +27,7 @@ void ShapesCmdBuilderTask::BuildCommandLists(
 	// Update view projection matrix
 	ASSERT(mInput.mFrameConstants != nullptr);
 	DirectX::XMFLOAT4X4 vp;
-	DirectX::XMStoreFloat4x4(&vp, Camera::gCamera->GetTransposeViewProj());
+	DirectX::XMStoreFloat4x4(&vp, MathHelper::GetTransposeViewProj(view, proj));
 	mInput.mFrameConstants->CopyData(0U, &vp, sizeof(vp));
 
 	// Update world

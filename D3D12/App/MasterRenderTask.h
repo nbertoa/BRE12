@@ -2,6 +2,7 @@
 
 #include <d3d12.h>
 #include <memory>
+#include <tbb/mutex.h> 
 #include <tbb/task.h>
 #include <vector>
 
@@ -36,6 +37,8 @@ public:
 
 	// Called when spawned
 	tbb::task* execute() override;
+
+	void UpdateViewAndProj(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& proj) noexcept;
 
 private:
 	void InitSystems() noexcept;
@@ -84,6 +87,11 @@ private:
 
 	std::vector<std::unique_ptr<InitTask>> mInitTasks;
 	std::vector<std::unique_ptr<CmdBuilderTask>> mCmdBuilderTasks;
+
+	DirectX::XMFLOAT4X4 mView{ MathHelper::Identity4x4() };
+	DirectX::XMFLOAT4X4 mProj{ MathHelper::Identity4x4() };
 	
 	bool mTerminate{ false };
+
+	tbb::mutex mMutex;
 };

@@ -66,8 +66,10 @@ public:
 	virtual void BuildCommandLists(
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdLists,
 		const std::uint32_t currBackBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept = 0;
+		const DirectX::XMFLOAT4X4 view,
+		const DirectX::XMFLOAT4X4 proj,
+		const D3D12_CPU_DESCRIPTOR_HANDLE backBufferHandle,
+		const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle) noexcept = 0;
 
 protected:
 	ID3D12Device* mDevice{ nullptr };

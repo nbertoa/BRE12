@@ -61,7 +61,6 @@ void App::InitSystems(const HWND hwnd, const HINSTANCE hInstance) noexcept {
 	ASSERT(Camera::gCamera.get() == nullptr);
 	Camera::gCamera = std::make_unique<Camera>();
 	Camera::gCamera->SetLens(0.25f * MathHelper::Pi, Settings::AspectRatio(), 1.0f, 1000.0f);
-	Camera::gCamera->UpdateViewMatrix();
 
 	ASSERT(Keyboard::gKeyboard.get() == nullptr);
 	LPDIRECTINPUT8 directInput;
@@ -79,6 +78,11 @@ void App::Update(const float dt) noexcept {
 	static const float sCameraOffset{ 10.0f };
 	static const float sCameraMultiplier{ 5.0f };
 
+	// Update master render thread matrices
+	if (Camera::gCamera->UpdateViewMatrix()) {
+		mMasterRenderTask->UpdateViewAndProj(Camera::gCamera->GetView4x4f(), Camera::gCamera->GetProj4x4f());
+	}
+
 	ASSERT(Keyboard::gKeyboard.get() != nullptr);
 	ASSERT(Mouse::gMouse.get() != nullptr);
 
@@ -88,7 +92,8 @@ void App::Update(const float dt) noexcept {
 	}
 
 	// Update camera based on keyboard 
-	const float offset = sCameraOffset * (Keyboard::gKeyboard->IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * dt ;
+	const float offset = sCameraOffset * (Keyboard::gKeyboard->IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * dt;
+	//const float offset = 0.00005f;
 	if (Keyboard::gKeyboard->IsKeyDown(DIK_W)) {
 		Camera::gCamera->Walk(offset);
 	}
@@ -108,7 +113,7 @@ void App::Update(const float dt) noexcept {
 	if (Mouse::gMouse->IsButtonDown(Mouse::MouseButtonsLeft)) {
 		// Make each pixel correspond to a quarter of a degree.
 		const float dx{ DirectX::XMConvertToRadians(0.25f * (float)(x - lastXY[0])) };
-		const float dy{DirectX::XMConvertToRadians(0.25f * (float)(y - lastXY[1])) };
+		const float dy{ DirectX::XMConvertToRadians(0.25f * (float)(y - lastXY[1])) };
 
 		Camera::gCamera->Pitch(dy);
 		Camera::gCamera->RotateY(dx);

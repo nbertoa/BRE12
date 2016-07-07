@@ -3,7 +3,6 @@
 #include <DirectXColors.h>
 #include <tbb/parallel_for.h>
 
-#include <Camera/Camera.h>
 #include <CommandManager/CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GlobalData/D3dData.h>
@@ -12,6 +11,9 @@
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <Utils/DebugUtils.h>
+
+
+#include <Camera/Camera.h>
 
 namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
@@ -92,11 +94,58 @@ tbb::task* MasterRenderTask::execute() {
 	return nullptr;
 }
 
+void MasterRenderTask::UpdateViewAndProj(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& proj) noexcept {
+	tbb::mutex::scoped_lock::scoped_lock(mMutex);
+	mProj = proj;
+	mView = view;
+}
+
 void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 	while (!mTerminate) {
 		mTimer.Tick();
-		CalculateFrameStats();
-		Camera::gCamera->UpdateViewMatrix();
+		//CalculateFrameStats();
+
+		DirectX::XMFLOAT4X4 view;
+		DirectX::XMFLOAT4X4 proj;
+		mMutex.lock();
+		proj = mProj;
+		view = mView;
+		mMutex.unlock();
+
+		std::wstring str;
+		str += std::wstring(L"Pos (");
+		str += std::to_wstring(mView(3U, 0U));
+		str += std::wstring(L" , ");
+		str += std::to_wstring(mView(3U, 1U));
+		str += std::wstring(L" , ");
+		str += std::to_wstring(mView(3U, 2U));
+		str += std::wstring(L")   ");
+
+		str += std::wstring(L"Right (");
+		str += std::to_wstring(mView(0U, 0U));
+		str += std::wstring(L" , ");
+		str += std::to_wstring(mView(1U, 0U));
+		str += std::wstring(L" , ");
+		str += std::to_wstring(mView(2U, 0U));
+		str += std::wstring(L")   ");
+
+		str += std::wstring(L"Up (");
+		str += std::to_wstring(mView(0U, 1U));
+		str += std::wstring(L" , ");
+		str += std::to_wstring(mView(1U, 1U));
+		str += std::wstring(L" , ");
+		str += std::to_wstring(mView(2U, 1U));
+		str += std::wstring(L")   ");
+
+		str += std::wstring(L"Look (");
+		str += std::to_wstring(mView(0U, 2U));
+		str += std::wstring(L" , ");
+		str += std::to_wstring(mView(1U, 2U));
+		str += std::wstring(L" , ");
+		str += std::to_wstring(mView(2U, 2U));
+		str += std::wstring(L")   ");
+
+		SetWindowText(mHwnd, str.c_str());
 
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
 		ASSERT(mCmdListProcessor->IsIdle());
@@ -141,7 +190,7 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mCmdBuilderTasks.size()),
 			[&](const tbb::blocked_range<size_t>& r) {
 			for (size_t i = r.begin(); i != r.end(); ++i)
-				mCmdBuilderTasks[i]->BuildCommandLists(cmdListQueue, currBackBuffer, backBufferHandle, dsvHandle);
+				mCmdBuilderTasks[i]->BuildCommandLists(cmdListQueue, currBackBuffer, mView, mProj, backBufferHandle, dsvHandle);
 		}
 		);
 

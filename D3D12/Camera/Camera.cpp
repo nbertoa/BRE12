@@ -1,11 +1,14 @@
 #include "Camera.h"
 
+#include <GlobalData/Settings.h>
+
 using namespace DirectX;
 
 std::unique_ptr<Camera> Camera::gCamera = nullptr;
 
 Camera::Camera() {
-	SetLens(0.25f * MathHelper::Pi, 1.0f, 1.0f, 1000.0f);
+	SetLens(Settings::sFieldOfView, Settings::AspectRatio(), Settings::sNearPlaneZ, Settings::sFarPlaneZ);
+	LookAt(mPosition, DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f), mUp);
 }
 
 void Camera::SetLens(const float fovY, const float aspect, const float zn, const float zf) noexcept {
@@ -20,6 +23,8 @@ void Camera::SetLens(const float fovY, const float aspect, const float zn, const
 
 	const XMMATRIX P{ XMMatrixPerspectiveFovLH(mFovY, mAspect, mNearZ, mFarZ) };
 	XMStoreFloat4x4(&mProj, P);
+
+	mViewDirty = true;
 }
 
 void Camera::LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR worldUp) noexcept {
@@ -45,8 +50,16 @@ void Camera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3&
 	mViewDirty = true;
 }
 
+void Camera::GetView4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
+	m = mView;
+}
+
+void Camera::GetProj4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
+	m = mProj;
+}
+
 void Camera::Strafe(const float d) noexcept {
-	// mPosition += d*mRight
+	// mPosition += d * mRight
 	const XMVECTOR s( XMVectorReplicate(d) );
 	const XMVECTOR r( XMLoadFloat3(&mRight) );
 	const XMVECTOR p( XMLoadFloat3(&mPosition) );
@@ -79,16 +92,17 @@ void Camera::Pitch(const float angle) noexcept {
 void Camera::RotateY(const float angle) noexcept {
 	// Rotate the basis vectors about the world y-axis.
 
-	const XMMATRIX R( XMMatrixRotationY(angle) );
+	const XMMATRIX R(XMMatrixRotationY(angle));
 
 	XMStoreFloat3(&mRight, XMVector3TransformNormal(XMLoadFloat3(&mRight), R));
 	XMStoreFloat3(&mUp, XMVector3TransformNormal(XMLoadFloat3(&mUp), R));
 	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
 
+
 	mViewDirty = true;
 }
 
-void Camera::UpdateViewMatrix() noexcept {
+bool Camera::UpdateViewMatrix() noexcept {
 	if(mViewDirty) {
 		XMVECTOR R( XMLoadFloat3(&mRight) );
 		XMVECTOR U( XMLoadFloat3(&mUp) );
@@ -132,5 +146,8 @@ void Camera::UpdateViewMatrix() noexcept {
 		mView(3U, 3U) = 1.0f;
 
 		mViewDirty = false;
+		return true;
 	}
+
+	return false;
 }
