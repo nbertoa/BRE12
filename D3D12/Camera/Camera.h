@@ -9,7 +9,7 @@ class Camera {
 public:
 	static std::unique_ptr<Camera> gCamera;
 
-	Camera();
+	Camera() = default;
 
 	// Get/Set world camera position.
 	__forceinline DirectX::XMVECTOR GetPosition() const noexcept { return XMLoadFloat3(&mPosition); }

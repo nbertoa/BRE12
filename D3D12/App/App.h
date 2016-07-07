@@ -7,7 +7,6 @@
 #include <App/MasterRenderTask.h>
 #include <RenderTask/CmdBuilderTask.h>
 #include <RenderTask/InitTask.h>
-#include <Timer\Timer.h>
 
 #if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
 #define _CRTDBG_MAP_ALLOC          
@@ -35,7 +34,7 @@ protected:
 	void Init(const HINSTANCE hInstance) noexcept;
 	void InitSystems(const HWND hwnd, const HINSTANCE hInstance) noexcept;
 
-	void Update(const float dt) noexcept;
+	void Update() noexcept;
 	void Finalize() noexcept;
 	
 	// Needed by Intel TBB
@@ -44,8 +43,6 @@ protected:
 	// Master render thread
 	MasterRenderTask* mMasterRenderTask{ nullptr };
 	tbb::empty_task* mMasterRenderTaskParent{ nullptr };
-	
-	Timer mTimer;
 };
 
 // Inherit from this class and implement the method that must:

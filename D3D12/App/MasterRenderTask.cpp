@@ -3,21 +3,23 @@
 #include <DirectXColors.h>
 #include <tbb/parallel_for.h>
 
+#include <Camera/Camera.h>
 #include <CommandManager/CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GlobalData/D3dData.h>
+#include <Input/Keyboard.h>
+#include <Input/Mouse.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <Utils/DebugUtils.h>
 
-
-#include <Camera/Camera.h>
-
 namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
 }
+
+using namespace DirectX;
 
 tbb::empty_task* MasterRenderTask::Create(MasterRenderTask* &masterRenderTask) {
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
@@ -94,59 +96,13 @@ tbb::task* MasterRenderTask::execute() {
 	return nullptr;
 }
 
-void MasterRenderTask::UpdateViewAndProj(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& proj) noexcept {
-	tbb::mutex::scoped_lock::scoped_lock(mMutex);
-	mProj = proj;
-	mView = view;
-}
-
 void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 	while (!mTerminate) {
 		mTimer.Tick();
-		//CalculateFrameStats();
+		CalculateFrameStats();
 
-		DirectX::XMFLOAT4X4 view;
-		DirectX::XMFLOAT4X4 proj;
-		mMutex.lock();
-		proj = mProj;
-		view = mView;
-		mMutex.unlock();
-
-		std::wstring str;
-		str += std::wstring(L"Pos (");
-		str += std::to_wstring(mView(3U, 0U));
-		str += std::wstring(L" , ");
-		str += std::to_wstring(mView(3U, 1U));
-		str += std::wstring(L" , ");
-		str += std::to_wstring(mView(3U, 2U));
-		str += std::wstring(L")   ");
-
-		str += std::wstring(L"Right (");
-		str += std::to_wstring(mView(0U, 0U));
-		str += std::wstring(L" , ");
-		str += std::to_wstring(mView(1U, 0U));
-		str += std::wstring(L" , ");
-		str += std::to_wstring(mView(2U, 0U));
-		str += std::wstring(L")   ");
-
-		str += std::wstring(L"Up (");
-		str += std::to_wstring(mView(0U, 1U));
-		str += std::wstring(L" , ");
-		str += std::to_wstring(mView(1U, 1U));
-		str += std::wstring(L" , ");
-		str += std::to_wstring(mView(2U, 1U));
-		str += std::wstring(L")   ");
-
-		str += std::wstring(L"Look (");
-		str += std::to_wstring(mView(0U, 2U));
-		str += std::wstring(L" , ");
-		str += std::to_wstring(mView(1U, 2U));
-		str += std::wstring(L" , ");
-		str += std::to_wstring(mView(2U, 2U));
-		str += std::wstring(L")   ");
-
-		SetWindowText(mHwnd, str.c_str());
-
+		UpdateCamera();
+		
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
 		ASSERT(mCmdListProcessor->IsIdle());
 
@@ -220,6 +176,51 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 
 		SignalFenceAndPresent();
 	}
+}
+
+void MasterRenderTask::UpdateCamera() noexcept {
+	static std::int32_t lastXY[]{ 0UL, 0UL };
+	static const float sCameraOffset{ 10.0f };
+	static const float sCameraMultiplier{ 5.0f };
+
+	ASSERT(Keyboard::gKeyboard.get() != nullptr);
+	ASSERT(Mouse::gMouse.get() != nullptr);
+
+	if (Camera::gCamera->UpdateViewMatrix()) {
+		mProj = Camera::gCamera->GetProj4x4f();
+		mView = Camera::gCamera->GetView4x4f();
+	}
+
+	// Update camera based on keyboard
+	const float offset = sCameraOffset * (Keyboard::gKeyboard->IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * mTimer.DeltaTime();
+	//const float offset = 0.00005f;
+	if (Keyboard::gKeyboard->IsKeyDown(DIK_W)) {
+		Camera::gCamera->Walk(offset);
+	}
+	if (Keyboard::gKeyboard->IsKeyDown(DIK_S)) {
+		Camera::gCamera->Walk(-offset);
+	}
+	if (Keyboard::gKeyboard->IsKeyDown(DIK_A)) {
+		Camera::gCamera->Strafe(-offset);
+	}
+	if (Keyboard::gKeyboard->IsKeyDown(DIK_D)) {
+		Camera::gCamera->Strafe(offset);
+	}
+
+	// Update camera based on mouse
+	const std::int32_t x{ Mouse::gMouse->X() };
+	const std::int32_t y{ Mouse::gMouse->Y() };
+	if (Mouse::gMouse->IsButtonDown(Mouse::MouseButtonsLeft)) {
+		// Make each pixel correspond to a quarter of a degree.
+		const float dx{ XMConvertToRadians(0.25f * (float)(x - lastXY[0])) };
+		const float dy{ XMConvertToRadians(0.25f * (float)(y - lastXY[1])) };
+
+		Camera::gCamera->Pitch(dy);
+		Camera::gCamera->RotateY(dx);
+	}
+
+	lastXY[0] = x;
+	lastXY[1] = y;
 }
 
 void MasterRenderTask::Finalize() noexcept {

@@ -1,15 +1,8 @@
 #include "Camera.h"
 
-#include <GlobalData/Settings.h>
-
 using namespace DirectX;
 
 std::unique_ptr<Camera> Camera::gCamera = nullptr;
-
-Camera::Camera() {
-	SetLens(Settings::sFieldOfView, Settings::AspectRatio(), Settings::sNearPlaneZ, Settings::sFarPlaneZ);
-	LookAt(mPosition, DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f), mUp);
-}
 
 void Camera::SetLens(const float fovY, const float aspect, const float zn, const float zf) noexcept {
 	// cache properties
@@ -60,9 +53,9 @@ void Camera::GetProj4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
 
 void Camera::Strafe(const float d) noexcept {
 	// mPosition += d * mRight
-	const XMVECTOR s( XMVectorReplicate(d) );
-	const XMVECTOR r( XMLoadFloat3(&mRight) );
-	const XMVECTOR p( XMLoadFloat3(&mPosition) );
+	const XMVECTOR s(XMVectorReplicate(d));
+	const XMVECTOR r(XMLoadFloat3(&mRight));
+	const XMVECTOR p(XMLoadFloat3(&mPosition));
 	XMStoreFloat3(&mPosition, XMVectorMultiplyAdd(s, r, p));
 
 	mViewDirty = true;
@@ -70,9 +63,9 @@ void Camera::Strafe(const float d) noexcept {
 
 void Camera::Walk(const float d) noexcept {
 	// mPosition += d * mLook
-	const XMVECTOR s( XMVectorReplicate(d) );
-	const XMVECTOR l( XMLoadFloat3(&mLook) );
-	const XMVECTOR p( XMLoadFloat3(&mPosition) );
+	const XMVECTOR s(XMVectorReplicate(d));
+	const XMVECTOR l(XMLoadFloat3(&mLook));
+	const XMVECTOR p(XMLoadFloat3(&mPosition));
 	XMStoreFloat3(&mPosition, XMVectorMultiplyAdd(s, l, p));
 
 	mViewDirty = true;
@@ -81,9 +74,9 @@ void Camera::Walk(const float d) noexcept {
 void Camera::Pitch(const float angle) noexcept {
 	// Rotate up and look vector about the right vector.
 
-	const XMMATRIX R( XMMatrixRotationAxis(XMLoadFloat3(&mRight), angle) );
+	const XMMATRIX R(XMMatrixRotationAxis(XMLoadFloat3(&mRight), angle));
 
-	XMStoreFloat3(&mUp,   XMVector3TransformNormal(XMLoadFloat3(&mUp), R));
+	XMStoreFloat3(&mUp, XMVector3TransformNormal(XMLoadFloat3(&mUp), R));
 	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
 
 	mViewDirty = true;
@@ -116,34 +109,12 @@ bool Camera::UpdateViewMatrix() noexcept {
 		// U, L already ortho-normal, so no need to normalize cross product.
 		R = XMVector3Cross(U, L);
 
-		// Fill in the view matrix entries.
-		const float x{ -XMVectorGetX(XMVector3Dot(P, R)) };
-		const float y{ -XMVectorGetX(XMVector3Dot(P, U)) };
-		const float z{ -XMVectorGetX(XMVector3Dot(P, L)) };
-
 		XMStoreFloat3(&mRight, R);
 		XMStoreFloat3(&mUp, U);
 		XMStoreFloat3(&mLook, L);
 
-		mView(0U, 0U) = mRight.x;
-		mView(1U, 0U) = mRight.y;
-		mView(2U, 0U) = mRight.z;
-		mView(3U, 0U) = x;
-
-		mView(0U, 1U) = mUp.x;
-		mView(1U, 1U) = mUp.y;
-		mView(2U, 1U) = mUp.z;
-		mView(3U, 1U) = y;
-
-		mView(0U, 2U) = mLook.x;
-		mView(1U, 2U) = mLook.y;
-		mView(2U, 2U) = mLook.z;
-		mView(3U, 2U) = z;
-
-		mView(0U, 3U) = 0.0f;
-		mView(1U, 3U) = 0.0f;
-		mView(2U, 3U) = 0.0f;
-		mView(3U, 3U) = 1.0f;
+		XMMATRIX viewMatrix = XMMatrixLookToLH(P, L, U);
+		XMStoreFloat4x4(&mView, viewMatrix);
 
 		mViewDirty = false;
 		return true;
