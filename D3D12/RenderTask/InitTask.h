@@ -14,9 +14,12 @@
 
 class UploadBuffer;
 
-struct MeshInfo {
-	MeshInfo() = default;
-	explicit MeshInfo(const void* verts, const std::uint32_t numVerts, const void* indices, const std::uint32_t numIndices, DirectX::XMFLOAT4X4& world)
+// Geometry information used in InitTaskInput to build vertex/index buffers
+// Take into account that internal data should be valid at least until InitTaskInput's InitTask
+// is executed.
+struct GeometryInfo {
+	GeometryInfo() = default;
+	explicit GeometryInfo(const void* verts, const std::uint32_t numVerts, const void* indices, const std::uint32_t numIndices, DirectX::XMFLOAT4X4& world)
 		: mVerts(verts)
 		, mNumVerts(numVerts)
 		, mIndices(indices)
@@ -45,7 +48,7 @@ struct InitTaskInput {
 
 	bool ValidateData() const;
 
-	using MeshInfoVec = std::vector<MeshInfo>;
+	using MeshInfoVec = std::vector<GeometryInfo>;
 	MeshInfoVec mMeshInfoVec{};
 
 	// If a shader filename is nullptr, then we do not load it.

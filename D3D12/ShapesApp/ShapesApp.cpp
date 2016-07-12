@@ -37,7 +37,7 @@ void ShapesApp::InitTasks(App& app) noexcept {
 
 			DirectX::XMFLOAT4X4 world;
 			DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));
-			initData.mMeshInfoVec.push_back(MeshInfo(box.mVertices.data(), (std::uint32_t)box.mVertices.size(), box.mIndices32.data(), (std::uint32_t)box.mIndices32.size(), world));
+			initData.mMeshInfoVec.push_back(GeometryInfo(box.mVertices.data(), (std::uint32_t)box.mVertices.size(), box.mIndices32.data(), (std::uint32_t)box.mIndices32.size(), world));
 		}
 
 		initTasks[k]->TaskInput() = initData;

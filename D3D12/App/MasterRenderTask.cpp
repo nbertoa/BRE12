@@ -84,9 +84,9 @@ void MasterRenderTask::InitCmdBuilders() noexcept {
 
 	FlushCommandQueue();
 
-	const std::uint64_t count{ _countof(mFenceByFrameIndex) };
+	const std::uint64_t count{ _countof(mFenceByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {
-		mFenceByFrameIndex[i] = mCurrentFence;
+		mFenceByQueuedFrameIndex[i] = mCurrentFence;
 	}
 }
 
@@ -110,9 +110,8 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 		const std::uint32_t taskCount{ (std::uint32_t)mCmdBuilderTasks.size() + 1U };
 		mCmdListProcessor->ResetExecutedTasksCounter();
 
-		const std::uint32_t currBackBuffer{ D3dData::CurrentBackBufferIndex() };
-		ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[currBackBuffer] };
-		ID3D12CommandAllocator* cmdAllocFrameEnd{ mCmdAllocFrameEnd[currBackBuffer] };
+		ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[mCurrQueuedFrameIndex] };
+		ID3D12CommandAllocator* cmdAllocFrameEnd{ mCmdAllocFrameEnd[mCurrQueuedFrameIndex] };
 
 		// Reuse the memory associated with command recording.
 		// We can only reset when the associated command lists have finished execution on the GPU.
@@ -146,7 +145,7 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mCmdBuilderTasks.size()),
 			[&](const tbb::blocked_range<size_t>& r) {
 			for (size_t i = r.begin(); i != r.end(); ++i)
-				mCmdBuilderTasks[i]->BuildCommandLists(cmdListQueue, currBackBuffer, mView, mProj, backBufferHandle, dsvHandle);
+				mCmdBuilderTasks[i]->BuildCommandLists(cmdListQueue, mView, mProj, backBufferHandle, dsvHandle);
 		}
 		);
 
@@ -276,14 +275,14 @@ void MasterRenderTask::CreateRtvAndDsv() noexcept {
 }
 
 void MasterRenderTask::CreateCommandObjects() noexcept {
-	ASSERT(Settings::sSwapChainBufferCount > 0U);
+	ASSERT(Settings::sQueuedFrameCount > 0U);
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	CommandManager::gManager->CreateCmdQueue(queueDesc, mCmdQueue);
 
-	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {
+	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameBegin[i]);
 		CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameEnd[i]);
 	}
@@ -372,18 +371,15 @@ void MasterRenderTask::SignalFenceAndPresent() noexcept {
 	ASSERT(D3dData::mSwapChain.Get());
 	CHECK_HR(D3dData::mSwapChain->Present(0U, 0U));
 
-	// Advance the fence value to mark commands up to this fence point.
-	const std::uint32_t currBackBuffer{ D3dData::CurrentBackBufferIndex() };
-	mFenceByFrameIndex[currBackBuffer] = ++mCurrentFence;
-
 	// Add an instruction to the command queue to set a new fence point.  Because we 
-	// are on the GPU timeline, the new fence point won't be set until the GPU finishes
+	// are on the GPU time line, the new fence point won't be set until the GPU finishes
 	// processing all the commands prior to this Signal().
+	mFenceByQueuedFrameIndex[mCurrQueuedFrameIndex] = ++mCurrentFence;
 	CHECK_HR(mCmdQueue->Signal(mFence, mCurrentFence));
 
 	// If we executed command lists for all frames, then we need to wait
 	// at least 1 of them to be completed, before continue generating command list for a frame. 
-	const std::uint64_t fence{ mFenceByFrameIndex[currBackBuffer] };
+	const std::uint64_t fence{ mFenceByQueuedFrameIndex[mCurrQueuedFrameIndex] };
 	const std::uint64_t completedFenceValue{ mFence->GetCompletedValue() };
 	if (completedFenceValue < fence) {
 		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
@@ -397,4 +393,6 @@ void MasterRenderTask::SignalFenceAndPresent() noexcept {
 		const std::uint64_t newCompletedFenceValue{ mFence->GetCompletedValue() };
 		CloseHandle(eventHandle);
 	}
+
+	mCurrQueuedFrameIndex = (mCurrQueuedFrameIndex + 1U) % Settings::sQueuedFrameCount;
 }

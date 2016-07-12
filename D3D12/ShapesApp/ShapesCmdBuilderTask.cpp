@@ -15,14 +15,14 @@ ShapesCmdBuilderTask::ShapesCmdBuilderTask(ID3D12Device* device, const D3D12_VIE
 
 void ShapesCmdBuilderTask::BuildCommandLists(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdLists,
-	const std::uint32_t currBackBuffer,
-	const DirectX::XMFLOAT4X4 view,
-	const DirectX::XMFLOAT4X4 proj,
-	const D3D12_CPU_DESCRIPTOR_HANDLE backBufferHandle,
-	const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle) noexcept {
+	const DirectX::XMFLOAT4X4& view,
+	const DirectX::XMFLOAT4X4& proj,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
 
-	ID3D12CommandAllocator* cmdAlloc{ mInput.mCmdAlloc[currBackBuffer] };
+	ID3D12CommandAllocator* cmdAlloc{ mInput.mCmdAlloc[mInput.mCurrCmdAllocIndex] };
 	ASSERT(cmdAlloc != nullptr);
+	mInput.mCurrCmdAllocIndex = (mInput.mCurrCmdAllocIndex + 1) % _countof(mInput.mCmdAlloc);
 
 	// Update view projection matrix
 	ASSERT(mInput.mFrameConstants != nullptr);

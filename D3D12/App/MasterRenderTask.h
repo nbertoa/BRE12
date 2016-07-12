@@ -67,13 +67,14 @@ private:
 
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 	ID3D12Fence* mFence{ nullptr };
-	std::uint64_t mFenceByFrameIndex[Settings::sSwapChainBufferCount]{ 0UL };
+	std::uint32_t mCurrQueuedFrameIndex{ 0U };
+	std::uint64_t mFenceByQueuedFrameIndex[Settings::sQueuedFrameCount]{ 0UL };
 	std::uint64_t mCurrentFence{ 0UL };
 
 	// We have 2 commands lists (for frame begin and frame end), and 2
 	// commands allocator per list
-	ID3D12CommandAllocator* mCmdAllocFrameBegin[Settings::sSwapChainBufferCount]{ nullptr };
-	ID3D12CommandAllocator* mCmdAllocFrameEnd[Settings::sSwapChainBufferCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocFrameBegin[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocFrameEnd[Settings::sQueuedFrameCount]{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListFrameBegin{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListFrameEnd{ nullptr };
 

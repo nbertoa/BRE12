@@ -25,7 +25,7 @@ void ShapesInitTask::InitCmdBuilders(ID3D12Device& device, tbb::concurrent_queue
 
 	const float baseOffset{ 10.0f };
 	for (std::size_t i = 0UL; i < numMeshes; ++i) {
-		const MeshInfo& meshInfo{ mInput.mMeshInfoVec[i] };
+		const GeometryInfo& meshInfo{ mInput.mMeshInfoVec[i] };
 		ASSERT(meshInfo.ValidateData());
 		GeometryData geomData;
 		BuildVertexAndIndexBuffers(

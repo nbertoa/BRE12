@@ -6,7 +6,7 @@
 #include <tbb/task.h>
 #include <wrl.h>
 
-// It has the responsibility of check for new command lists and execute them.
+// It has the responsibility to check for new command lists and execute them.
 // Steps:
 // - Use CommandListProcessor::Create() to create an instance. You should
 //   spawn it using the returned parent tbb::task.

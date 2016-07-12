@@ -40,7 +40,8 @@ struct CmdBuilderTaskInput {
 	ID3D12PipelineState* mPSO{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[Settings::sSwapChainBufferCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
+	std::uint32_t mCurrCmdAllocIndex{ 0U };
 
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
 
@@ -62,14 +63,13 @@ public:
 
 	__forceinline CmdBuilderTaskInput& TaskInput() noexcept { return mInput; }
 		
-	// Build command lists and store them in the queue 
+	// Build command lists and store them in the queue.
 	virtual void BuildCommandLists(
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdLists,
-		const std::uint32_t currBackBuffer,
-		const DirectX::XMFLOAT4X4 view,
-		const DirectX::XMFLOAT4X4 proj,
-		const D3D12_CPU_DESCRIPTOR_HANDLE backBufferHandle,
-		const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle) noexcept = 0;
+		const DirectX::XMFLOAT4X4& view,
+		const DirectX::XMFLOAT4X4& proj,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept = 0;
 
 protected:
 	ID3D12Device* mDevice{ nullptr };
