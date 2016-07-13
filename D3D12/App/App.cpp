@@ -24,9 +24,9 @@ App::App(HINSTANCE hInstance)
 void App::InitCmdBuilders() noexcept {
 	ASSERT(mMasterRenderTask != nullptr);
 	mMasterRenderTask->InitCmdBuilders();
-}
+} 
 
-int32_t App::Run() noexcept {
+std::int32_t App::Run() noexcept {
 	ASSERT(Keyboard::gKeyboard.get() != nullptr);
 	ASSERT(Mouse::gMouse.get() != nullptr);
 

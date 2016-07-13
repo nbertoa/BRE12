@@ -8,11 +8,11 @@
 #include <Utils\DebugUtils.h>
 
 void ShapesApp::InitTasks(App& app) noexcept {
-	GeometryGenerator::MeshData sphere{ GeometryGenerator::CreateSphere(2, 100, 100) };
+	GeometryGenerator::MeshData sphere{ GeometryGenerator::CreateSphere(2, 20, 20) };
 	GeometryGenerator::MeshData box{ GeometryGenerator::CreateBox(2, 2, 2, 2) };
 
-	const std::size_t numTasks{ 15UL };
-	const std::size_t numGeometry{ 100UL };
+	const std::size_t numTasks{ 16UL };
+	const std::size_t numGeometry{ 10UL };
 	std::vector<std::unique_ptr<InitTask>>& initTasks(app.GetInitTasks());
 	initTasks.resize(numTasks);
 	std::vector<std::unique_ptr<CmdBuilderTask>>& cmdBuilderTasks(app.GetCmdBuilderTasks());
@@ -24,7 +24,7 @@ void ShapesApp::InitTasks(App& app) noexcept {
 	initData.mRootSignFilename = "ShapesApp/RS.cso";
 	initData.mVSFilename = "ShapesApp/VS.cso";
 
-	const float meshSpaceOffset{ 50.0f };
+	const float meshSpaceOffset{ 200.0f };
 	for (std::size_t k = 0UL; k < numTasks; ++k) {
 		initTasks[k].reset(new ShapesInitTask());
 		cmdBuilderTasks[k].reset(new ShapesCmdBuilderTask(D3dData::mDevice.Get(), Settings::sScreenViewport, Settings::sScissorRect));
@@ -37,7 +37,7 @@ void ShapesApp::InitTasks(App& app) noexcept {
 
 			DirectX::XMFLOAT4X4 world;
 			DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));
-			initData.mMeshInfoVec.push_back(GeometryInfo(box.mVertices.data(), (std::uint32_t)box.mVertices.size(), box.mIndices32.data(), (std::uint32_t)box.mIndices32.size(), world));
+			initData.mMeshInfoVec.push_back(GeometryInfo(sphere.mVertices.data(), (std::uint32_t)sphere.mVertices.size(), sphere.mIndices32.data(), (std::uint32_t)sphere.mIndices32.size(), world));
 		}
 
 		initTasks[k]->TaskInput() = initData;

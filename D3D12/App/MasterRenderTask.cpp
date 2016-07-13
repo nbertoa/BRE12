@@ -71,8 +71,8 @@ void MasterRenderTask::InitCmdBuilders() noexcept {
 	const std::uint32_t taskCount{ (std::uint32_t)mInitTasks.size()};
 	mCmdListProcessor->ResetExecutedTasksCounter();
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount),
-		[&](const tbb::blocked_range<size_t>& r) {
-		for (size_t i = r.begin(); i != r.end(); ++i)
+		[&](const tbb::blocked_range<std::size_t>& r) {
+		for (std::size_t i = r.begin(); i != r.end(); ++i)
 			mInitTasks[i]->InitCmdBuilders(*D3dData::mDevice.Get(), cmdListQueue, mCmdBuilderTasks[i]->TaskInput());
 	}
 	);
@@ -113,35 +113,24 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 		ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[mCurrQueuedFrameIndex] };
 		ID3D12CommandAllocator* cmdAllocFrameEnd{ mCmdAllocFrameEnd[mCurrQueuedFrameIndex] };
 
-		// Reuse the memory associated with command recording.
-		// We can only reset when the associated command lists have finished execution on the GPU.
 		CHECK_HR(cmdAllocFrameBegin->Reset());
-
-		// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
-		// Reusing the command list reuses memory.
 		CHECK_HR(mCmdListFrameBegin->Reset(cmdAllocFrameBegin, nullptr));
 
-		// Set the viewport and scissor rect.  This needs to be reset whenever the command list is reset.
 		mCmdListFrameBegin->RSSetViewports(1U, &Settings::sScreenViewport);
 		mCmdListFrameBegin->RSSetScissorRects(1U, &Settings::sScissorRect);
 
-		// Indicate a state transition on the resource usage.
 		CD3DX12_RESOURCE_BARRIER resBarrier{ CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
 		mCmdListFrameBegin->ResourceBarrier(1, &resBarrier);
-
-		// Specify the buffers we are going to render to.
 		const D3D12_CPU_DESCRIPTOR_HANDLE backBufferHandle = CurrentBackBufferView();
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
 		mCmdListFrameBegin->OMSetRenderTargets(1U, &backBufferHandle, true, &dsvHandle);
 
-		// Clear the back buffer and depth buffer.
 		mCmdListFrameBegin->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::LightSteelBlue, 0U, nullptr);
 		mCmdListFrameBegin->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
 
-		// Done recording commands.
+		// Execute begin Frame task + # cmd build tasks
 		CHECK_HR(mCmdListFrameBegin->Close());
 		cmdListQueue.push(mCmdListFrameBegin);
-
 		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mCmdBuilderTasks.size()),
 			[&](const tbb::blocked_range<size_t>& r) {
 			for (size_t i = r.begin(); i != r.end(); ++i)
@@ -150,16 +139,11 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 		);
 
 		CHECK_HR(cmdAllocFrameEnd->Reset());
-
-		// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
-		// Reusing the command list reuses memory.
 		CHECK_HR(mCmdListFrameEnd->Reset(cmdAllocFrameEnd, nullptr));
 
-		// Indicate a state transition on the resource usage.
 		resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 		mCmdListFrameEnd->ResourceBarrier(1U, &resBarrier);
 
-		// Done recording commands.
 		CHECK_HR(mCmdListFrameEnd->Close());
 
 		// Wait until all previous tasks command lists are executed, before
@@ -376,23 +360,20 @@ void MasterRenderTask::SignalFenceAndPresent() noexcept {
 	// processing all the commands prior to this Signal().
 	mFenceByQueuedFrameIndex[mCurrQueuedFrameIndex] = ++mCurrentFence;
 	CHECK_HR(mCmdQueue->Signal(mFence, mCurrentFence));
+	mCurrQueuedFrameIndex = (mCurrQueuedFrameIndex + 1U) % Settings::sQueuedFrameCount;	
 
-	// If we executed command lists for all frames, then we need to wait
-	// at least 1 of them to be completed, before continue generating command list for a frame. 
-	const std::uint64_t fence{ mFenceByQueuedFrameIndex[mCurrQueuedFrameIndex] };
-	const std::uint64_t completedFenceValue{ mFence->GetCompletedValue() };
-	if (completedFenceValue < fence) {
+	// If we executed command lists for all queued frames, then we need to wait
+	// at least 1 of them to be completed, before continue generating command lists. 
+	const std::uint64_t oldestFence{ mFenceByQueuedFrameIndex[mCurrQueuedFrameIndex] };
+	if (mFence->GetCompletedValue() < oldestFence) {
 		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
 		ASSERT(eventHandle);
 
 		// Fire event when GPU hits current fence.  
-		CHECK_HR(mFence->SetEventOnCompletion(fence, eventHandle));
+		CHECK_HR(mFence->SetEventOnCompletion(oldestFence, eventHandle));
 
 		// Wait until the GPU hits current fence event is fired.
 		WaitForSingleObject(eventHandle, INFINITE);
-		const std::uint64_t newCompletedFenceValue{ mFence->GetCompletedValue() };
 		CloseHandle(eventHandle);
 	}
-
-	mCurrQueuedFrameIndex = (mCurrQueuedFrameIndex + 1U) % Settings::sQueuedFrameCount;
 }
