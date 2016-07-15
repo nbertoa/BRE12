@@ -118,10 +118,14 @@
   <ItemGroup>
     <ClCompile Include="InitTask.cpp" />
     <ClCompile Include="CmdBuilderTask.cpp" />
+    <ClCompile Include="PSOCreatorTask.cpp" />
+    <ClCompile Include="VertexIndexBufferCreatorTask.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InitTask.h" />
     <ClInclude Include="CmdBuilderTask.h" />
+    <ClInclude Include="PSOCreatorTask.h" />
+    <ClInclude Include="VertexIndexBufferCreatorTask.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

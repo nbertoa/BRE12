@@ -11,6 +11,7 @@
 #include <GeometryGenerator/GeometryGenerator.h>
 #include <GlobalData/Settings.h>
 #include <MathUtils/MathHelper.h>
+#include <RenderTask/VertexIndexBufferCreatorTask.h>
 #include <Utils/DebugUtils.h>
 
 class UploadBuffer;
@@ -20,17 +21,7 @@ struct GeometryData {
 
 	DirectX::XMFLOAT4X4 mWorld{ MathHelper::Identity4x4() };
 
-	ID3D12Resource* mVertexBuffer{ nullptr };
-	Microsoft::WRL::ComPtr<ID3D12Resource> mUploadVertexBuffer;
-	D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
-
-	ID3D12Resource* mIndexBuffer{ nullptr };
-	Microsoft::WRL::ComPtr<ID3D12Resource> mUploadIndexBuffer;
-	D3D12_INDEX_BUFFER_VIEW mIndexBufferView{};
-
-	std::uint32_t mIndexCount{ 0U };
-	std::uint32_t mStartIndexLoc{ 0U };
-	std::uint32_t mBaseVertexLoc{ 0U };
+	VertexIndexBufferCreatorTask::Output mBuffersInfo;
 };
 
 struct CmdBuilderTaskInput {

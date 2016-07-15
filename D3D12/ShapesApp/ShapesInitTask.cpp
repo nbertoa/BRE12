@@ -20,23 +20,19 @@ void ShapesInitTask::InitCmdBuilders(ID3D12Device& device, tbb::concurrent_queue
 	// Reusing the command list reuses memory.
 	CHECK_HR(output.mCmdList->Reset(output.mCmdAlloc[0], output.mPSO));
 
-	const std::size_t numMeshes{ mInput.mMeshInfoVec.size() };
+	const std::size_t numMeshes{ mInput.mVertexIndexBufferCreatorInputVec.size() };
 	output.mGeomDataVec.reserve(numMeshes);
 
 	const float baseOffset{ 10.0f };
 	for (std::size_t i = 0UL; i < numMeshes; ++i) {
-		const GeometryInfo& meshInfo{ mInput.mMeshInfoVec[i] };
-		ASSERT(meshInfo.ValidateData());
+		const VertexIndexBufferCreatorTask::Input& vertexIndexBuffers{ mInput.mVertexIndexBufferCreatorInputVec[i] };
+		ASSERT(vertexIndexBuffers.ValidateData());
 		GeometryData geomData;
 		BuildVertexAndIndexBuffers(
 			geomData, 
-			meshInfo.mVerts, 
-			meshInfo.mNumVerts, 
-			sizeof(GeometryGenerator::Vertex), 
-			meshInfo.mIndices, 
-			meshInfo.mNumIndices,
+			vertexIndexBuffers,
 			*output.mCmdList);
-		geomData.mWorld = meshInfo.mWorld;
+		geomData.mWorld = mInput.mWorldVec[i];
 		output.mGeomDataVec.push_back(geomData);
 	}
 

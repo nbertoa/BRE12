@@ -62,9 +62,9 @@ void ShapesCmdBuilderTask::BuildCommandLists(
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
 		const GeometryData& geomData{ mInput.mGeomDataVec[i] };
 		mInput.mCmdList->SetGraphicsRootDescriptorTable(0U, cbvHeapGPUDescHandle);		
-		mInput.mCmdList->IASetVertexBuffers(0U, 1U, &geomData.mVertexBufferView);
-		mInput.mCmdList->IASetIndexBuffer(&geomData.mIndexBufferView);
-		mInput.mCmdList->DrawIndexedInstanced(geomData.mIndexCount, 1U, geomData.mStartIndexLoc, geomData.mBaseVertexLoc, 0U);
+		mInput.mCmdList->IASetVertexBuffers(0U, 1U, &geomData.mBuffersInfo.mVertexBufferView);
+		mInput.mCmdList->IASetIndexBuffer(&geomData.mBuffersInfo.mIndexBufferView);
+		mInput.mCmdList->DrawIndexedInstanced(geomData.mBuffersInfo.mIndexCount, 1U, 0U, 0U, 0U);
 		cbvHeapGPUDescHandle.ptr += descHandleIncSize;
 	}
 
