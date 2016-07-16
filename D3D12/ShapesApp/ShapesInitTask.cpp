@@ -4,8 +4,8 @@
 #include <ResourceManager/UploadBuffer.h>
 #include <Utils/DebugUtils.h>
 
-void ShapesInitTask::InitCmdBuilders(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept {
-	InitTask::InitCmdBuilders(device, cmdLists, output);
+void ShapesInitTask::InitCmdBuilders(tbb::concurrent_queue<ID3D12CommandList*>& cmdLists, CmdBuilderTaskInput& output) noexcept {
+	InitTask::InitCmdBuilders(cmdLists, output);
 
 	ASSERT(output.mGeomDataVec.empty());
 	ASSERT(output.mCmdList != nullptr);
@@ -20,18 +20,15 @@ void ShapesInitTask::InitCmdBuilders(ID3D12Device& device, tbb::concurrent_queue
 	// Reusing the command list reuses memory.
 	CHECK_HR(output.mCmdList->Reset(output.mCmdAlloc[0], output.mPSO));
 
-	const std::size_t numMeshes{ mInput.mVertexIndexBufferCreatorInputVec.size() };
+	const std::size_t numMeshes{ mInput.mGeomBuffersCreatorInputVec.size() };
 	output.mGeomDataVec.reserve(numMeshes);
 
 	const float baseOffset{ 10.0f };
 	for (std::size_t i = 0UL; i < numMeshes; ++i) {
-		const VertexIndexBufferCreatorTask::Input& vertexIndexBuffers{ mInput.mVertexIndexBufferCreatorInputVec[i] };
-		ASSERT(vertexIndexBuffers.ValidateData());
+		const GeomBuffersCreator::Input& geomBuffers{ mInput.mGeomBuffersCreatorInputVec[i] };
+		ASSERT(geomBuffers.ValidateData());
 		GeometryData geomData;
-		BuildVertexAndIndexBuffers(
-			geomData, 
-			vertexIndexBuffers,
-			*output.mCmdList);
+		GeomBuffersCreator::Execute(*output.mCmdList, geomBuffers, geomData.mBuffersInfo);
 		geomData.mWorld = mInput.mWorldVec[i];
 		output.mGeomDataVec.push_back(geomData);
 	}
@@ -39,10 +36,10 @@ void ShapesInitTask::InitCmdBuilders(ID3D12Device& device, tbb::concurrent_queue
 	output.mCmdList->Close();
 	cmdLists.push(output.mCmdList);
 
-	BuildConstantBuffers(device, output);
+	BuildConstantBuffers(output);
 }
 
-void ShapesInitTask::BuildConstantBuffers(ID3D12Device& device, CmdBuilderTaskInput& output) noexcept {
+void ShapesInitTask::BuildConstantBuffers(CmdBuilderTaskInput& output) noexcept {
 	ASSERT(output.mCBVHeap == nullptr);
 	ASSERT(!output.mGeomDataVec.empty());
 	ASSERT(output.mFrameConstants == nullptr);
@@ -59,7 +56,7 @@ void ShapesInitTask::BuildConstantBuffers(ID3D12Device& device, CmdBuilderTaskIn
 	ResourceManager::gManager->CreateDescriptorHeap(descHeapDesc, output.mCBVHeap);
 	output.mCbvBaseGpuDescHandle = output.mCBVHeap->GetGPUDescriptorHandleForHeapStart();
 
-	const std::size_t descHandleIncSize{ device.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+	const std::size_t descHandleIncSize{ ResourceManager::gManager->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 
 	const std::size_t elemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4)) };
 

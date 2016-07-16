@@ -73,7 +73,7 @@ void MasterRenderTask::InitCmdBuilders() noexcept {
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount),
 		[&](const tbb::blocked_range<std::size_t>& r) {
 		for (std::size_t i = r.begin(); i != r.end(); ++i)
-			mInitTasks[i]->InitCmdBuilders(*D3dData::mDevice.Get(), cmdListQueue, mCmdBuilderTasks[i]->TaskInput());
+			mInitTasks[i]->InitCmdBuilders(cmdListQueue, mCmdBuilderTasks[i]->TaskInput());
 	}
 	);
 

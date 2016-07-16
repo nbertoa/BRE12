@@ -29,7 +29,7 @@ void ShapesApp::InitTasks(App& app) noexcept {
 		initTasks[k].reset(new ShapesInitTask());
 		cmdBuilderTasks[k].reset(new ShapesCmdBuilderTask(D3dData::mDevice.Get(), Settings::sScreenViewport, Settings::sScissorRect));
 
-		initData.mVertexIndexBufferCreatorInputVec.clear();
+		initData.mGeomBuffersCreatorInputVec.clear();
 		initData.mWorldVec.clear();
 		for (std::size_t i = 0UL; i < numGeometry; ++i) {
 			const float tx{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
@@ -38,7 +38,7 @@ void ShapesApp::InitTasks(App& app) noexcept {
 
 			DirectX::XMFLOAT4X4 world;
 			DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));
-			initData.mVertexIndexBufferCreatorInputVec.push_back(VertexIndexBufferCreatorTask::Input(sphere.mVertices.data(), (std::uint32_t)sphere.mVertices.size(), sizeof(GeometryGenerator::Vertex), sphere.mIndices32.data(), (std::uint32_t)sphere.mIndices32.size()));
+			initData.mGeomBuffersCreatorInputVec.push_back(GeomBuffersCreator::Input(sphere.mVertices.data(), (std::uint32_t)sphere.mVertices.size(), sizeof(GeometryGenerator::Vertex), sphere.mIndices32.data(), (std::uint32_t)sphere.mIndices32.size()));
 			initData.mWorldVec.push_back(world);
 		}
 

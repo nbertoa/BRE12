@@ -47,6 +47,10 @@ public:
 	ID3D12DescriptorHeap& GetDescriptorHeap(const std::size_t id) noexcept;
 	ID3D12Fence& GetFence(const std::size_t id) noexcept;
 
+	__forceinline std::size_t GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE descHeapType) const noexcept {
+		return mDevice.GetDescriptorHandleIncrementSize(descHeapType);
+	};
+
 	void EraseResource(const std::size_t id) noexcept;
 	void EraseUploadBuffer(const std::size_t id) noexcept;
 	void EraseDescHeap(const std::size_t id) noexcept;

@@ -1,11 +1,12 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <d3d12.h>
-#include <vector>
 #include <wrl.h>
 
-class VertexIndexBufferCreatorTask {
-public:
+// Given geometry data (vertices and indices), we can call Execute() to generate D3D vertex and index buffers
+namespace  GeomBuffersCreator {
 	struct Input {
 		Input() = default;
 		explicit Input(const void* verts, const std::uint32_t numVerts, const std::size_t vertexSize, const void* indices, const std::uint32_t numIndices);
@@ -30,9 +31,5 @@ public:
 		std::uint32_t mIndexCount{ 0U };
 	};
 
-	VertexIndexBufferCreatorTask(const std::vector<Input>& inputs);
-	void Execute(ID3D12GraphicsCommandList& cmdList, std::vector<Output>& outputs) noexcept;
-
-private:
-	std::vector<Input> mInputs;
-};
+	void Execute(ID3D12GraphicsCommandList& cmdList, const Input& input, Output& output) noexcept;
+}

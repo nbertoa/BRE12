@@ -3,13 +3,13 @@
   <ItemGroup>
     <ClCompile Include="InitTask.cpp" />
     <ClCompile Include="CmdBuilderTask.cpp" />
-    <ClCompile Include="PSOCreatorTask.cpp" />
-    <ClCompile Include="VertexIndexBufferCreatorTask.cpp" />
+    <ClCompile Include="GeomBuffersCreator.cpp" />
+    <ClCompile Include="PSOCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InitTask.h" />
     <ClInclude Include="CmdBuilderTask.h" />
-    <ClInclude Include="PSOCreatorTask.h" />
-    <ClInclude Include="VertexIndexBufferCreatorTask.h" />
+    <ClInclude Include="GeomBuffersCreator.h" />
+    <ClInclude Include="PSOCreator.h" />
   </ItemGroup>
 </Project>

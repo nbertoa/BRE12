@@ -445,3 +445,10 @@
 /D3D12/GlobalData/x64/Release/GlobalData.tlog/Lib-link.read.1.tlog
 /D3D12/GlobalData/x64/Release/GlobalData.tlog/Lib-link.write.1.tlog
 /D3D12/GlobalData/x64/Release/GlobalData.tlog/lib.command.1.tlog
+/D3D12/GlobalData/x64/Debug/GlobalData.Build.CppClean.log
+/D3D12/GlobalData/x64/Debug/NativeCodeAnalysis.read.1.tlog
+/D3D12/GlobalData/x64/Debug/d3ddata.nativecodeanalysis.xml
+/D3D12/GlobalData/x64/Debug/settings.nativecodeanalysis.xml
+/D3D12/GlobalData/x64/Debug/vc.nativecodeanalysis.all.xml
+/D3D12/RenderTask/x64/Debug/geombufferscreator.nativecodeanalysis.xml
+/D3D12/RenderTask/x64/Debug/psocreator.nativecodeanalysis.xml

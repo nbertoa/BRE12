@@ -9,54 +9,20 @@
 #include <Utils/DebugUtils.h>
 
 bool InitTaskInput::ValidateData() const {
-	return mVertexIndexBufferCreatorInputVec.empty() == false && mPSOCreatorInput.ValidateData();
+	return mGeomBuffersCreatorInputVec.empty() == false && mPSOCreatorInput.ValidateData();
 }
 
-void InitTask::InitCmdBuilders(ID3D12Device& /*device*/, tbb::concurrent_queue<ID3D12CommandList*>& /*cmdLists*/, CmdBuilderTaskInput& output) noexcept {
+void InitTask::InitCmdBuilders(tbb::concurrent_queue<ID3D12CommandList*>& /*cmdLists*/, CmdBuilderTaskInput& output) noexcept {
 	ASSERT(mInput.ValidateData());
 	
 	output.mTopology = mInput.mPSOCreatorInput.mTopology;
 
-	BuildPSO(output.mRootSign, output.mPSO);
+	PSOCreator::Output posCreatorOutput;
+	PSOCreator::Execute(mInput.mPSOCreatorInput, posCreatorOutput);
+	output.mRootSign = posCreatorOutput.mRootSign;
+	output.mPSO = posCreatorOutput.mPSO;
+
 	BuildCommandObjects(output);
-}
-
-void InitTask::BuildPSO(ID3D12RootSignature* &rootSign, ID3D12PipelineState* &pso) noexcept {
-	std::vector<PSOCreatorTask::Output> outputs;
-	PSOCreatorTask task({mInput.mPSOCreatorInput});
-	task.Execute(outputs);
-
-	ASSERT(outputs.size() == 1UL);
-	rootSign = outputs[0].mRootSign;
-	pso = outputs[0].mPSO;
-}
-
-void InitTask::BuildVertexAndIndexBuffers(
-	GeometryData& geomData,
-	const VertexIndexBufferCreatorTask::Input& vertexIndexBuffers,
-	ID3D12GraphicsCommandList& cmdList) noexcept {
-
-	ASSERT(geomData.mBuffersInfo.mIndexBuffer == nullptr);
-	ASSERT(geomData.mBuffersInfo.mVertexBuffer == nullptr);
-	ASSERT(vertexIndexBuffers.mVertsData != nullptr);
-	ASSERT(vertexIndexBuffers.mNumVerts > 0U);
-	ASSERT(vertexIndexBuffers.mVertexSize > 0UL);
-	ASSERT(vertexIndexBuffers.mIndexData != nullptr);
-	ASSERT(vertexIndexBuffers.mNumIndices > 0U);
-
-	std::uint32_t byteSize{ vertexIndexBuffers.mNumVerts * (std::uint32_t)vertexIndexBuffers.mVertexSize };
-
-	ResourceManager::gManager->CreateDefaultBuffer(cmdList, vertexIndexBuffers.mVertsData, byteSize, geomData.mBuffersInfo.mVertexBuffer, geomData.mBuffersInfo.mUploadVertexBuffer);
-	geomData.mBuffersInfo.mVertexBufferView.BufferLocation = geomData.mBuffersInfo.mVertexBuffer->GetGPUVirtualAddress();
-	geomData.mBuffersInfo.mVertexBufferView.SizeInBytes = byteSize;
-	geomData.mBuffersInfo.mVertexBufferView.StrideInBytes = (std::uint32_t)vertexIndexBuffers.mVertexSize;
-
-	geomData.mBuffersInfo.mIndexCount = vertexIndexBuffers.mNumIndices;
-	byteSize = vertexIndexBuffers.mNumIndices * sizeof(std::uint32_t);
-	ResourceManager::gManager->CreateDefaultBuffer(cmdList, vertexIndexBuffers.mIndexData, byteSize, geomData.mBuffersInfo.mIndexBuffer, geomData.mBuffersInfo.mUploadIndexBuffer);
-	geomData.mBuffersInfo.mIndexBufferView.BufferLocation = geomData.mBuffersInfo.mIndexBuffer->GetGPUVirtualAddress();
-	geomData.mBuffersInfo.mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	geomData.mBuffersInfo.mIndexBufferView.SizeInBytes = byteSize;
 }
 
 void InitTask::BuildCommandObjects(CmdBuilderTaskInput& output) noexcept {

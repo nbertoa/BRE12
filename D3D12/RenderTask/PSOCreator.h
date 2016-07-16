@@ -1,13 +1,11 @@
 #pragma once
 
 #include <d3d12.h>
-#include <vector>
 
 #include <DXUtils/D3DFactory.h>
 
 // Used to create Pipeline State Objects and Root Signatures (loaded from a shader file)
-class PSOCreatorTask {
-public:
+namespace PSOCreator {
 	struct Input {
 		Input() = default;
 
@@ -38,9 +36,5 @@ public:
 		ID3D12RootSignature* mRootSign{ nullptr };
 	};
 
-	PSOCreatorTask(const std::vector<Input>& inputs);
-	void Execute(std::vector<Output>& outputs) noexcept;
-
-private:
-	std::vector<Input> mInputs;
-};
+	void Execute(const Input& input, Output& output) noexcept;
+}

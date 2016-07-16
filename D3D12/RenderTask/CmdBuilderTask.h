@@ -11,7 +11,7 @@
 #include <GeometryGenerator/GeometryGenerator.h>
 #include <GlobalData/Settings.h>
 #include <MathUtils/MathHelper.h>
-#include <RenderTask/VertexIndexBufferCreatorTask.h>
+#include <RenderTask/GeomBuffersCreator.h>
 #include <Utils/DebugUtils.h>
 
 class UploadBuffer;
@@ -21,7 +21,7 @@ struct GeometryData {
 
 	DirectX::XMFLOAT4X4 mWorld{ MathHelper::Identity4x4() };
 
-	VertexIndexBufferCreatorTask::Output mBuffersInfo;
+	GeomBuffersCreator::Output mBuffersInfo;
 };
 
 struct CmdBuilderTaskInput {

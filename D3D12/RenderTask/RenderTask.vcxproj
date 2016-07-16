@@ -118,14 +118,14 @@
   <ItemGroup>
     <ClCompile Include="InitTask.cpp" />
     <ClCompile Include="CmdBuilderTask.cpp" />
-    <ClCompile Include="PSOCreatorTask.cpp" />
-    <ClCompile Include="VertexIndexBufferCreatorTask.cpp" />
+    <ClCompile Include="PSOCreator.cpp" />
+    <ClCompile Include="GeomBuffersCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InitTask.h" />
     <ClInclude Include="CmdBuilderTask.h" />
-    <ClInclude Include="PSOCreatorTask.h" />
-    <ClInclude Include="VertexIndexBufferCreatorTask.h" />
+    <ClInclude Include="PSOCreator.h" />
+    <ClInclude Include="GeomBuffersCreator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

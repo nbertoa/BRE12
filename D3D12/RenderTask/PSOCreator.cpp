@@ -1,4 +1,4 @@
-#include "PSOCreatorTask.h"
+#include "PSOCreator.h"
 
 #include <GlobalData/Settings.h>
 #include <PSOManager/PSOManager.h>
@@ -7,7 +7,7 @@
 #include <Utils/DebugUtils.h>
 
 namespace {
-	void BuildPSO(const PSOCreatorTask::Input& input, PSOCreatorTask::Output& output) noexcept {
+	void BuildPSO(const PSOCreator::Input& input, PSOCreator::Output& output) noexcept {
 		ID3DBlob* rootSignBlob{ nullptr };
 		ShaderManager::gManager->LoadShaderFile(input.mRootSignFilename, rootSignBlob);
 		RootSignatureManager::gManager->CreateRootSignature(*rootSignBlob, output.mRootSign);
@@ -59,21 +59,14 @@ namespace {
 	}
 }
 
-bool PSOCreatorTask::Input::ValidateData() const noexcept {
-	return mInputLayout.empty() == false && mRootSignFilename != nullptr;
-}
+namespace PSOCreator {
+	bool Input::ValidateData() const noexcept {
+		return mInputLayout.empty() == false && mRootSignFilename != nullptr;
+	}
 
-PSOCreatorTask::PSOCreatorTask(const std::vector<Input>& inputs) 
-	: mInputs(inputs)
-{
-}
-
-void PSOCreatorTask::Execute(std::vector<Output>& outputs) noexcept {
-	ASSERT(mInputs.empty() == false);
-
-	const std::size_t count{ mInputs.size() };
-	outputs.resize(count);
-	for (std::size_t i = 0UL; i < count; ++i) {
-		BuildPSO(mInputs[i], outputs[i]);
+	void Execute(const Input& input, Output& output) noexcept {
+		ASSERT(input.ValidateData());
+		BuildPSO(input, output);
 	}
 }
+
