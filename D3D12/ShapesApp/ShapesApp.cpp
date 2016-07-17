@@ -12,7 +12,7 @@ void ShapesApp::InitTasks(App& app) noexcept {
 	GeometryGenerator::MeshData box{ GeometryGenerator::CreateBox(2, 2, 2, 2) };
 
 	const std::size_t numTasks{ 4UL };
-	const std::size_t numGeometry{ 100UL };
+	const std::size_t numGeometry{ 16000UL };
 	std::vector<std::unique_ptr<InitTask>>& initTasks(app.GetInitTasks());
 	initTasks.resize(numTasks);
 	std::vector<std::unique_ptr<CmdBuilderTask>>& cmdBuilderTasks(app.GetCmdBuilderTasks());
@@ -29,8 +29,9 @@ void ShapesApp::InitTasks(App& app) noexcept {
 		initTasks[k].reset(new ShapesInitTask());
 		cmdBuilderTasks[k].reset(new ShapesCmdBuilderTask(D3dData::mDevice.Get(), Settings::sScreenViewport, Settings::sScissorRect));
 
-		initData.mGeomBuffersCreatorInputVec.clear();
-		initData.mWorldVec.clear();
+		initData.mGeomBuffersAndWorldMatsVec.clear();
+		InitTaskInput::GeomBuffersAndWorldMats newElem;
+		newElem.first = GeomBuffersCreator::Input(sphere.mVertices.data(), (std::uint32_t)sphere.mVertices.size(), sizeof(GeometryGenerator::Vertex), sphere.mIndices32.data(), (std::uint32_t)sphere.mIndices32.size());
 		for (std::size_t i = 0UL; i < numGeometry; ++i) {
 			const float tx{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
 			const float ty{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
@@ -38,9 +39,10 @@ void ShapesApp::InitTasks(App& app) noexcept {
 
 			DirectX::XMFLOAT4X4 world;
 			DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));
-			initData.mGeomBuffersCreatorInputVec.push_back(GeomBuffersCreator::Input(sphere.mVertices.data(), (std::uint32_t)sphere.mVertices.size(), sizeof(GeometryGenerator::Vertex), sphere.mIndices32.data(), (std::uint32_t)sphere.mIndices32.size()));
-			initData.mWorldVec.push_back(world);
+			newElem.second.push_back(world);
 		}
+
+		initData.mGeomBuffersAndWorldMatsVec.push_back(newElem);
 
 		initTasks[k]->TaskInput() = initData;
 	}

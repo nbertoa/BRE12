@@ -32,13 +32,16 @@ void ShapesCmdBuilderTask::BuildCommandLists(
 
 	// Update world
 	ASSERT(mInput.mObjectConstants != nullptr);
-	const std::uint32_t geomCount{ (std::uint32_t)mInput.mGeomDataVec.size() };
-	for (std::uint32_t i = 0U; i < geomCount; ++i) {
+	const std::size_t geomCount{ mInput.mGeomDataVec.size() };
+	for (std::size_t i = 0UL; i < geomCount; ++i) {
 		const GeometryData& geomData{ mInput.mGeomDataVec[i] };
-		DirectX::XMFLOAT4X4 w;
-		const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&geomData.mWorld));
-		DirectX::XMStoreFloat4x4(&w, wMatrix);
-		mInput.mObjectConstants->CopyData(i, &w, sizeof(w));
+		const std::uint32_t worldMatsCount{ (std::uint32_t)geomData.mWorldMats.size() };
+		for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
+			DirectX::XMFLOAT4X4 w;
+			const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&geomData.mWorldMats[j]));
+			DirectX::XMStoreFloat4x4(&w, wMatrix);
+			mInput.mObjectConstants->CopyData(j, &w, sizeof(w));
+		}
 	}
 
 	ASSERT(mInput.mCBVHeap != nullptr);
@@ -61,11 +64,14 @@ void ShapesCmdBuilderTask::BuildCommandLists(
 	// Set objects constants root parameter
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
 		const GeometryData& geomData{ mInput.mGeomDataVec[i] };
-		mInput.mCmdList->SetGraphicsRootDescriptorTable(0U, cbvHeapGPUDescHandle);		
 		mInput.mCmdList->IASetVertexBuffers(0U, 1U, &geomData.mBuffersInfo.mVertexBufferView);
 		mInput.mCmdList->IASetIndexBuffer(&geomData.mBuffersInfo.mIndexBufferView);
-		mInput.mCmdList->DrawIndexedInstanced(geomData.mBuffersInfo.mIndexCount, 1U, 0U, 0U, 0U);
-		cbvHeapGPUDescHandle.ptr += descHandleIncSize;
+		const std::size_t worldMatsCount{ geomData.mWorldMats.size() };
+		for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
+			mInput.mCmdList->SetGraphicsRootDescriptorTable(0U, cbvHeapGPUDescHandle);
+			mInput.mCmdList->DrawIndexedInstanced(geomData.mBuffersInfo.mIndexCount, 1U, 0U, 0U, 0U);
+			cbvHeapGPUDescHandle.ptr += descHandleIncSize;
+		}
 	}
 
 	// Set frame constants root parameter

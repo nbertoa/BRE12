@@ -9,7 +9,7 @@
 #include <Utils/DebugUtils.h>
 
 bool InitTaskInput::ValidateData() const {
-	return mGeomBuffersCreatorInputVec.empty() == false && mPSOCreatorInput.ValidateData();
+	return mGeomBuffersAndWorldMatsVec.empty() == false && mPSOCreatorInput.ValidateData();
 }
 
 void InitTask::InitCmdBuilders(tbb::concurrent_queue<ID3D12CommandList*>& /*cmdLists*/, CmdBuilderTaskInput& output) noexcept {

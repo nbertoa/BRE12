@@ -19,7 +19,7 @@ class UploadBuffer;
 struct GeometryData {
 	GeometryData() = default;
 
-	DirectX::XMFLOAT4X4 mWorld{ MathHelper::Identity4x4() };
+	std::vector<DirectX::XMFLOAT4X4> mWorldMats;
 
 	GeomBuffersCreator::Output mBuffersInfo;
 };

@@ -21,9 +21,10 @@ struct InitTaskInput {
 
 	bool ValidateData() const;
 
-	using GeomBuffersCreatorInputVec = std::vector<GeomBuffersCreator::Input>;
-	GeomBuffersCreatorInputVec mGeomBuffersCreatorInputVec{};
-	std::vector<DirectX::XMFLOAT4X4> mWorldVec;
+	using WorldMats = std::vector<DirectX::XMFLOAT4X4>;
+	using GeomBuffersAndWorldMats = std::pair<GeomBuffersCreator::Input, WorldMats>;
+	using GeomBuffersAndWorldMatsVec = std::vector<GeomBuffersAndWorldMats>;
+	GeomBuffersAndWorldMatsVec mGeomBuffersAndWorldMatsVec;
 
 	PSOCreator::Input mPSOCreatorInput;
 };

@@ -20,16 +20,17 @@ void ShapesInitTask::InitCmdBuilders(tbb::concurrent_queue<ID3D12CommandList*>& 
 	// Reusing the command list reuses memory.
 	CHECK_HR(output.mCmdList->Reset(output.mCmdAlloc[0], output.mPSO));
 
-	const std::size_t numMeshes{ mInput.mGeomBuffersCreatorInputVec.size() };
+	const std::size_t numMeshes{ mInput.mGeomBuffersAndWorldMatsVec.size() };
 	output.mGeomDataVec.reserve(numMeshes);
 
 	const float baseOffset{ 10.0f };
 	for (std::size_t i = 0UL; i < numMeshes; ++i) {
-		const GeomBuffersCreator::Input& geomBuffers{ mInput.mGeomBuffersCreatorInputVec[i] };
+		const InitTaskInput::GeomBuffersAndWorldMats& geomBuffersAndWorldMats{ mInput.mGeomBuffersAndWorldMatsVec[i] };
+		const GeomBuffersCreator::Input& geomBuffers{ geomBuffersAndWorldMats.first };
 		ASSERT(geomBuffers.ValidateData());
 		GeometryData geomData;
 		GeomBuffersCreator::Execute(*output.mCmdList, geomBuffers, geomData.mBuffersInfo);
-		geomData.mWorld = mInput.mWorldVec[i];
+		geomData.mWorldMats = geomBuffersAndWorldMats.second;
 		output.mGeomDataVec.push_back(geomData);
 	}
 
@@ -46,12 +47,17 @@ void ShapesInitTask::BuildConstantBuffers(CmdBuilderTaskInput& output) noexcept 
 	ASSERT(output.mObjectConstants == nullptr);
 
 	const std::uint32_t geomCount{ (std::uint32_t)output.mGeomDataVec.size() };
+	std::uint32_t numGeomDesc{ 0U };
+	for (std::size_t i = 0UL; i < geomCount; ++i) {
+		numGeomDesc += (std::uint32_t)output.mGeomDataVec[i].mWorldMats.size();
+	}
+	ASSERT(numGeomDesc != 0U);
 
 	// Create constant buffers descriptor heap
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = geomCount + 1U; // +1 for frame constants
+	descHeapDesc.NumDescriptors = numGeomDesc + 1U; // +1 for frame constants
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	ResourceManager::gManager->CreateDescriptorHeap(descHeapDesc, output.mCBVHeap);
 	output.mCbvBaseGpuDescHandle = output.mCBVHeap->GetGPUDescriptorHandleForHeapStart();
@@ -61,9 +67,9 @@ void ShapesInitTask::BuildConstantBuffers(CmdBuilderTaskInput& output) noexcept 
 	const std::size_t elemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4)) };
 
 	// Fill constant buffers descriptor heap with per objects constants buffer views
-	ResourceManager::gManager->CreateUploadBuffer(elemSize, geomCount, output.mObjectConstants);	
+	ResourceManager::gManager->CreateUploadBuffer(elemSize, numGeomDesc, output.mObjectConstants);
 	D3D12_GPU_VIRTUAL_ADDRESS cbObjGPUBaseAddress{ output.mObjectConstants->Resource()->GetGPUVirtualAddress() };	
-	for (std::size_t i = 0UL; i < geomCount; ++i) {
+	for (std::size_t i = 0UL; i < numGeomDesc; ++i) {
 		D3D12_CPU_DESCRIPTOR_HANDLE descHandle = output.mCBVHeap->GetCPUDescriptorHandleForHeapStart();
 		descHandle.ptr += i * descHandleIncSize;
 
@@ -78,7 +84,7 @@ void ShapesInitTask::BuildConstantBuffers(CmdBuilderTaskInput& output) noexcept 
 	ResourceManager::gManager->CreateUploadBuffer(elemSize, 1U, output.mFrameConstants);
 	D3D12_GPU_VIRTUAL_ADDRESS cbFrameGPUBaseAddress{ output.mFrameConstants->Resource()->GetGPUVirtualAddress() };
 	D3D12_CPU_DESCRIPTOR_HANDLE descHandle = output.mCBVHeap->GetCPUDescriptorHandleForHeapStart();
-	descHandle.ptr += geomCount * descHandleIncSize;
+	descHandle.ptr += numGeomDesc * descHandleIncSize;
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
 	cbvDesc.BufferLocation = cbFrameGPUBaseAddress;
