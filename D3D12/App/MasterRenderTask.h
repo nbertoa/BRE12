@@ -10,6 +10,8 @@
 #include <RenderTask\InitTask.h>
 #include <Timer/Timer.h>
 
+class Scene;
+
 // It has the responsibility to construct command builders and also execute them (to generate/execute
 // command lists in the queue provided by CommandListProcessor)
 // Steps:
@@ -24,13 +26,9 @@ public:
 
 	MasterRenderTask() = default;
 
-	// You should fill data before calling InitCmdBuilders
-	__forceinline std::vector<std::unique_ptr<InitTask>>& GetInitTasks() noexcept { return mInitTasks; }
-	__forceinline std::vector<std::unique_ptr<CmdBuilderTask>>& GetCmdBuilderTasks() noexcept { return mCmdBuilderTasks; }
-
 	// Execute in order before spawning it.
 	void Init(const HWND hwnd) noexcept;
-	void InitCmdBuilders() noexcept;
+	void InitCmdBuilders(Scene* scene) noexcept;
 	
 	void Terminate() noexcept { mTerminate = true; }
 
@@ -84,7 +82,6 @@ private:
 	ID3D12DescriptorHeap* mRtvHeap{ nullptr };
 	ID3D12DescriptorHeap* mDsvHeap{ nullptr };
 
-	std::vector<std::unique_ptr<InitTask>> mInitTasks;
 	std::vector<std::unique_ptr<CmdBuilderTask>> mCmdBuilderTasks;
 
 	DirectX::XMFLOAT4X4 mView{ MathHelper::Identity4x4() };

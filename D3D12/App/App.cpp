@@ -14,17 +14,22 @@ namespace {
 
 using namespace DirectX;
 
-App::App(HINSTANCE hInstance)
+App::App(HINSTANCE hInstance, Scene* scene)
 	: mTaskSchedulerInit()
 	, mMasterRenderTaskParent(MasterRenderTask::Create(mMasterRenderTask))
 {	
-	Init(hInstance);
+	ASSERT(scene != nullptr);
+
+	D3dData::InitDirect3D(hInstance);
+	InitSystems(D3dData::mHwnd, hInstance);
+	InitMasterRenderTask(scene);
 }
 
-void App::InitCmdBuilders() noexcept {
+void App::InitMasterRenderTask(Scene* scene) noexcept {
+	ASSERT(scene != nullptr);
 	ASSERT(mMasterRenderTask != nullptr);
-	mMasterRenderTask->InitCmdBuilders();
-} 
+	mMasterRenderTask->InitCmdBuilders(scene);
+}
 
 std::int32_t App::Run() noexcept {
 	ASSERT(Keyboard::gKeyboard.get() != nullptr);
@@ -48,11 +53,6 @@ std::int32_t App::Run() noexcept {
 	}
 
 	return (std::int32_t)msg.wParam;
-}
-
-void App::Init(const HINSTANCE hInstance) noexcept {
-	D3dData::InitDirect3D(hInstance);
-	InitSystems(D3dData::mHwnd, hInstance);
 }
 
 void App::InitSystems(const HWND hwnd, const HINSTANCE hInstance) noexcept {

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <d3d12.h>
+#include <tbb/concurrent_queue.h>
 #include <wrl.h>
 
 // Given geometry data (vertices and indices), we can call Execute() to generate D3D vertex and index buffers
@@ -31,5 +32,5 @@ namespace  GeomBuffersCreator {
 		std::uint32_t mIndexCount{ 0U };
 	};
 
-	void Execute(ID3D12GraphicsCommandList& cmdList, const Input& input, Output& output) noexcept;
+	void Execute(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, ID3D12GraphicsCommandList& cmdList, const Input& input, Output& output) noexcept;
 }

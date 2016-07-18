@@ -1,5 +1,7 @@
 #include "GeomBuffersCreator.h"
 
+#include <tbb/concurrent_queue.h>
+
 #include <ResourceManager/ResourceManager.h>
 #include <Utils/DebugUtils.h>
 
@@ -42,9 +44,11 @@ namespace GeomBuffersCreator {
 		return mVertsData != nullptr && mNumVerts != 0U && mVertexSize != 0UL && mIndexData != nullptr && mNumIndices != 0U;
 	}
 
-	void Execute(ID3D12GraphicsCommandList& cmdList, const Input& input, Output& output) noexcept {
+	void Execute(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, ID3D12GraphicsCommandList& cmdList, const Input& input, Output& output) noexcept {
 		ASSERT(input.ValidateData());
 		BuildVertexAndIndexBuffers(cmdList, input, output);
+		cmdList.Close();
+		cmdListQueue.push(&cmdList);
 	}
 }
 

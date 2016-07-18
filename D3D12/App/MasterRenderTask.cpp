@@ -3,6 +3,7 @@
 #include <DirectXColors.h>
 #include <tbb/parallel_for.h>
 
+#include <App/Scene.h>
 #include <Camera/Camera.h>
 #include <CommandManager/CommandManager.h>
 #include <DXUtils/d3dx12.h>
@@ -61,29 +62,11 @@ void MasterRenderTask::InitSystems() noexcept {
 	ShaderManager::gManager = std::make_unique<ShaderManager>();
 }
 
-void MasterRenderTask::InitCmdBuilders() noexcept {
-	ASSERT(!mInitTasks.empty());
-	ASSERT(mInitTasks.size() == mCmdBuilderTasks.size());
+void MasterRenderTask::InitCmdBuilders(Scene* scene) noexcept {
+	ASSERT(scene != nullptr);
 
-	// Init cmd builders and wait until all of them are finished
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
-	ASSERT(mCmdListProcessor->IsIdle());
-	const std::uint32_t taskCount{ (std::uint32_t)mInitTasks.size()};
-	mCmdListProcessor->ResetExecutedTasksCounter();
-	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount),
-		[&](const tbb::blocked_range<std::size_t>& r) {
-		for (std::size_t i = r.begin(); i != r.end(); ++i)
-			mInitTasks[i]->InitCmdBuilders(cmdListQueue, mCmdBuilderTasks[i]->TaskInput());
-	}
-	);
-
-	// Wait until all command lists are executed
-	while (mCmdListProcessor->ExecutedTasksCounter() < taskCount) {
-		Sleep(0U);
-	}
-
+	scene->GenerateTasks(mCmdListProcessor->CmdListQueue(), mCmdBuilderTasks);
 	FlushCommandQueue();
-
 	const std::uint64_t count{ _countof(mFenceByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {
 		mFenceByQueuedFrameIndex[i] = mCurrentFence;
@@ -131,7 +114,7 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 		// Execute begin Frame task + # cmd build tasks
 		CHECK_HR(mCmdListFrameBegin->Close());
 		cmdListQueue.push(mCmdListFrameBegin);
-		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, mCmdBuilderTasks.size()),
+		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount - 1, (taskCount - 1) / Settings::sCpuProcessors),
 			[&](const tbb::blocked_range<size_t>& r) {
 			for (size_t i = r.begin(); i != r.end(); ++i)
 				mCmdBuilderTasks[i]->BuildCommandLists(cmdListQueue, mView, mProj, backBufferHandle, dsvHandle);

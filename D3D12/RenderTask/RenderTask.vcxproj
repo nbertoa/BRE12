@@ -116,13 +116,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="InitTask.cpp" />
     <ClCompile Include="CmdBuilderTask.cpp" />
     <ClCompile Include="PSOCreator.cpp" />
     <ClCompile Include="GeomBuffersCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="InitTask.h" />
     <ClInclude Include="CmdBuilderTask.h" />
     <ClInclude Include="PSOCreator.h" />
     <ClInclude Include="GeomBuffersCreator.h" />

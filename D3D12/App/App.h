@@ -17,23 +17,16 @@
 // Its responsibility is to initialize Direct3D systems, mouse, keyboard, camera, MasterRenderTask, etc
 class App {
 public:
-	explicit App(HINSTANCE hInstance);
+	explicit App(HINSTANCE hInstance, Scene* scene);
 	App(const App& rhs) = delete;
-	App& operator=(const App& rhs) = delete;
-	
-	// Execute these methods in declaration order.		
-	void InitCmdBuilders() noexcept;
+	App& operator=(const App& rhs) = delete;		
 
 	// Runs program until Esc key is pressed.
 	std::int32_t Run() noexcept;
-	
-	// You should fill InitTasks and CmdBuilderTasks before calling to ExecuteInitTasks
-	__forceinline std::vector<std::unique_ptr<InitTask>>& GetInitTasks() noexcept { ASSERT(mMasterRenderTask != nullptr); return mMasterRenderTask->GetInitTasks(); }
-	__forceinline std::vector<std::unique_ptr<CmdBuilderTask>>& GetCmdBuilderTasks() noexcept { ASSERT(mMasterRenderTask != nullptr); return mMasterRenderTask->GetCmdBuilderTasks(); }
 
 protected:	
-	void Init(const HINSTANCE hInstance) noexcept;
 	void InitSystems(const HWND hwnd, const HINSTANCE hInstance) noexcept;
+	void InitMasterRenderTask(Scene* scene) noexcept;
 
 	void Update() noexcept;
 	void Finalize() noexcept;
