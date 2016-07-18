@@ -6,7 +6,7 @@
 #include <tbb/concurrent_queue.h>
 #include <wrl.h>
 
-// Given geometry data (vertices and indices), we can call Execute() to generate D3D vertex and index buffers
+// Used to create Vertex and Index buffers data
 namespace  GeomBuffersCreator {
 	struct Input {
 		Input() = default;

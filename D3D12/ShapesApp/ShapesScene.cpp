@@ -6,43 +6,20 @@
 #include <GlobalData/D3dData.h>
 #include <RenderTask/GeomBuffersCreator.h>
 #include <RenderTask/PSOCreator.h>
-#include <RenderTask/InitTask.h>
 #include <RenderTask/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ShapesApp/ShapesCmdBuilderTask.h>
 
 namespace {
-	void BuildCommandObjects(CmdBuilderTaskInput& output) noexcept {
-		ASSERT(output.mCmdList == nullptr);
-		const std::uint32_t allocCount{ _countof(output.mCmdAlloc) };
+	void BuildConstantBuffers(CmdBuilderTask& task) noexcept {
+		ASSERT(task.CVBHeap() == nullptr);
+		ASSERT(task.FrameConstants() == nullptr);
+		ASSERT(task.ObjectConstants() == nullptr);
 
-#ifdef _DEBUG
-		for (std::uint32_t i = 0U; i < allocCount; ++i) {
-			ASSERT(output.mCmdAlloc[i] == nullptr);
-		}
-#endif
-
-		for (std::uint32_t i = 0U; i < allocCount; ++i) {
-			CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, output.mCmdAlloc[i]);
-		}
-
-		CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *output.mCmdAlloc[0], output.mCmdList);
-
-		// Start off in a closed state.  This is because the first time we refer 
-		// to the command list we will Reset it, and it needs to be closed before
-		// calling Reset.
-		output.mCmdList->Close();
-	}
-
-	void BuildConstantBuffers(CmdBuilderTaskInput& output) noexcept {
-		ASSERT(output.mCBVHeap == nullptr);
-		ASSERT(output.mFrameConstants == nullptr);
-		ASSERT(output.mObjectConstants == nullptr);
-
-		const std::uint32_t geomCount{ (std::uint32_t)output.mGeomDataVec.size() };
+		const std::uint32_t geomCount{ (std::uint32_t)task.GeomDataVec().size() };
 		std::uint32_t numGeomDesc{ 0U };
 		for (std::size_t i = 0UL; i < geomCount; ++i) {
-			numGeomDesc += (std::uint32_t)output.mGeomDataVec[i].mWorldMats.size();
+			numGeomDesc += (std::uint32_t)task.GeomDataVec()[i].mWorldMats.size();
 		}
 		ASSERT(numGeomDesc != 0U);
 
@@ -52,18 +29,18 @@ namespace {
 		descHeapDesc.NodeMask = 0U;
 		descHeapDesc.NumDescriptors = numGeomDesc + 1U; // +1 for frame constants
 		descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		ResourceManager::gManager->CreateDescriptorHeap(descHeapDesc, output.mCBVHeap);
-		output.mCbvBaseGpuDescHandle = output.mCBVHeap->GetGPUDescriptorHandleForHeapStart();
+		ResourceManager::gManager->CreateDescriptorHeap(descHeapDesc, task.CVBHeap());
+		task.CBVBaseGpuDescHandle() = task.CVBHeap()->GetGPUDescriptorHandleForHeapStart();
 
 		const std::size_t descHandleIncSize{ ResourceManager::gManager->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 
 		const std::size_t elemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4)) };
 
 		// Fill constant buffers descriptor heap with per objects constants buffer views
-		ResourceManager::gManager->CreateUploadBuffer(elemSize, numGeomDesc, output.mObjectConstants);
-		D3D12_GPU_VIRTUAL_ADDRESS cbObjGPUBaseAddress{ output.mObjectConstants->Resource()->GetGPUVirtualAddress() };
+		ResourceManager::gManager->CreateUploadBuffer(elemSize, numGeomDesc, task.ObjectConstants());
+		D3D12_GPU_VIRTUAL_ADDRESS cbObjGPUBaseAddress{ task.ObjectConstants()->Resource()->GetGPUVirtualAddress() };
 		for (std::size_t i = 0UL; i < numGeomDesc; ++i) {
-			D3D12_CPU_DESCRIPTOR_HANDLE descHandle = output.mCBVHeap->GetCPUDescriptorHandleForHeapStart();
+			D3D12_CPU_DESCRIPTOR_HANDLE descHandle = task.CVBHeap()->GetCPUDescriptorHandleForHeapStart();
 			descHandle.ptr += i * descHandleIncSize;
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
@@ -74,9 +51,9 @@ namespace {
 		}
 
 		// Fill constant buffers descriptor heap with per frame constant buffer view
-		ResourceManager::gManager->CreateUploadBuffer(elemSize, 1U, output.mFrameConstants);
-		D3D12_GPU_VIRTUAL_ADDRESS cbFrameGPUBaseAddress{ output.mFrameConstants->Resource()->GetGPUVirtualAddress() };
-		D3D12_CPU_DESCRIPTOR_HANDLE descHandle = output.mCBVHeap->GetCPUDescriptorHandleForHeapStart();
+		ResourceManager::gManager->CreateUploadBuffer(elemSize, 1U, task.FrameConstants());
+		D3D12_GPU_VIRTUAL_ADDRESS cbFrameGPUBaseAddress{ task.FrameConstants()->Resource()->GetGPUVirtualAddress() };
+		D3D12_CPU_DESCRIPTOR_HANDLE descHandle = task.CVBHeap()->GetCPUDescriptorHandleForHeapStart();
 		descHandle.ptr += numGeomDesc * descHandleIncSize;
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
@@ -94,8 +71,6 @@ void ShapesScene::GenerateTasks(tbb::concurrent_queue<ID3D12CommandList*>& cmdLi
 
 	const std::size_t numTasks{ 4UL };
 	const std::size_t numGeometry{ 1000UL };
-	std::vector<std::unique_ptr<InitTask>> initTasks;
-	initTasks.resize(numTasks);
 	tasks.resize(numTasks);
 
 	// Create a command list 
@@ -127,14 +102,12 @@ void ShapesScene::GenerateTasks(tbb::concurrent_queue<ID3D12CommandList*>& cmdLi
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
 			std::unique_ptr<CmdBuilderTask>& task{ tasks[k] };
-			task.reset(new ShapesCmdBuilderTask(D3dData::mDevice.Get(), Settings::sScreenViewport, Settings::sScissorRect));
-			CmdBuilderTaskInput& taskInput{ task->TaskInput() };
-			taskInput.mPSO = psoCreatorOutput.mPSO;
-			taskInput.mRootSign = psoCreatorOutput.mRootSign;
-			BuildCommandObjects(taskInput);
+			task.reset(new ShapesCmdBuilderTask(*D3dData::mDevice.Get(), cmdListQueue));
+			task->PSO() = psoCreatorOutput.mPSO;
+			task->RootSign() = psoCreatorOutput.mRootSign;
 
-			taskInput.mGeomDataVec.resize(1UL);
-			GeometryData& geomData{ taskInput.mGeomDataVec.back() };
+			task->GeomDataVec().resize(1UL);
+			GeometryData& geomData{ task->GeomDataVec().back() };
 			geomData.mBuffersInfo = geomBuffersCreatorOutput;
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
 				const float tx{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
@@ -146,7 +119,7 @@ void ShapesScene::GenerateTasks(tbb::concurrent_queue<ID3D12CommandList*>& cmdLi
 				geomData.mWorldMats.push_back(world);
 			}
 
-			BuildConstantBuffers(taskInput);
+			BuildConstantBuffers(*task.get());
 		}
 	}
 	);

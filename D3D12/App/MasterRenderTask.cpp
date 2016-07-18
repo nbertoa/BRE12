@@ -117,7 +117,7 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount - 1, (taskCount - 1) / Settings::sCpuProcessors),
 			[&](const tbb::blocked_range<size_t>& r) {
 			for (size_t i = r.begin(); i != r.end(); ++i)
-				mCmdBuilderTasks[i]->BuildCommandLists(cmdListQueue, mView, mProj, backBufferHandle, dsvHandle);
+				mCmdBuilderTasks[i]->BuildCommandLists(mView, mProj, backBufferHandle, dsvHandle);
 		}
 		);
 

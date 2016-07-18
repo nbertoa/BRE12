@@ -7,7 +7,6 @@
 
 #include <App/CommandListProcessor.h>
 #include <RenderTask\CmdBuilderTask.h>
-#include <RenderTask\InitTask.h>
 #include <Timer/Timer.h>
 
 class Scene;

@@ -5,8 +5,6 @@
 #include <windows.h>
 
 #include <App/MasterRenderTask.h>
-#include <RenderTask/CmdBuilderTask.h>
-#include <RenderTask/InitTask.h>
 
 #if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
 #define _CRTDBG_MAP_ALLOC          
