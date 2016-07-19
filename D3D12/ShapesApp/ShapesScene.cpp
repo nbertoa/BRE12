@@ -16,10 +16,10 @@ namespace {
 		ASSERT(task.FrameConstants() == nullptr);
 		ASSERT(task.ObjectConstants() == nullptr);
 
-		const std::uint32_t geomCount{ (std::uint32_t)task.GeomDataVec().size() };
+		const std::uint32_t geomCount{ (std::uint32_t)task.GetGeometryVec().size() };
 		std::uint32_t numGeomDesc{ 0U };
 		for (std::size_t i = 0UL; i < geomCount; ++i) {
-			numGeomDesc += (std::uint32_t)task.GeomDataVec()[i].mWorldMats.size();
+			numGeomDesc += (std::uint32_t)task.WorldMatricesByGeomIndex()[i].size();
 		}
 		ASSERT(numGeomDesc != 0U);
 
@@ -106,17 +106,17 @@ void ShapesScene::GenerateTasks(tbb::concurrent_queue<ID3D12CommandList*>& cmdLi
 			task->PSO() = psoCreatorOutput.mPSO;
 			task->RootSign() = psoCreatorOutput.mRootSign;
 
-			task->GeomDataVec().resize(1UL);
-			GeometryData& geomData{ task->GeomDataVec().back() };
-			geomData.mBuffersInfo = geomBuffersCreatorOutput;
-			for (std::size_t i = 0UL; i < numGeometry; ++i) {
+			task->GetGeometryVec().resize(1UL, geomBuffersCreatorOutput);
+			CmdBuilderTask::MatricesByGeomIndex& worldMatByGeomIndex{ task->WorldMatricesByGeomIndex() };
+			worldMatByGeomIndex.resize(1UL, CmdBuilderTask::Matrices(numGeometry));
+			for (std::size_t i = 0UL; i < numGeometry; ++i) {				
 				const float tx{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
 				const float ty{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
 				const float tz{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
 
 				DirectX::XMFLOAT4X4 world;
 				DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));
-				geomData.mWorldMats.push_back(world);
+				worldMatByGeomIndex[0][i] = world;
 			}
 
 			BuildConstantBuffers(*task.get());

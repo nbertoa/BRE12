@@ -29,13 +29,12 @@ void ShapesCmdBuilderTask::BuildCommandLists(
 	mFrameConstants->CopyData(0U, &vp, sizeof(vp));
 
 	// Update world
-	const std::size_t geomCount{ mGeomDataVec.size() };
+	const std::size_t geomCount{ mGeometryVec.size() };
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
-		const GeometryData& geomData{ mGeomDataVec[i] };
-		const std::uint32_t worldMatsCount{ (std::uint32_t)geomData.mWorldMats.size() };
+		const std::uint32_t worldMatsCount{ (std::uint32_t)mWorldMatricesByGeomIndex[i].size() };
 		for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
 			DirectX::XMFLOAT4X4 w;
-			const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&geomData.mWorldMats[j]));
+			const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&mWorldMatricesByGeomIndex[i][j]));
 			DirectX::XMStoreFloat4x4(&w, wMatrix);
 			mObjectConstants->CopyData(j, &w, sizeof(w));
 		}
@@ -56,13 +55,12 @@ void ShapesCmdBuilderTask::BuildCommandLists(
 
 	// Set objects constants root parameter
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
-		const GeometryData& geomData{ mGeomDataVec[i] };
-		mCmdList->IASetVertexBuffers(0U, 1U, &geomData.mBuffersInfo.mVertexBufferView);
-		mCmdList->IASetIndexBuffer(&geomData.mBuffersInfo.mIndexBufferView);
-		const std::size_t worldMatsCount{ geomData.mWorldMats.size() };
+		mCmdList->IASetVertexBuffers(0U, 1U, &mGeometryVec[i].mVertexBufferView);
+		mCmdList->IASetIndexBuffer(&mGeometryVec[i].mIndexBufferView);
+		const std::size_t worldMatsCount{ mWorldMatricesByGeomIndex[i].size() };
 		for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
 			mCmdList->SetGraphicsRootDescriptorTable(0U, cbvHeapGPUDescHandle);
-			mCmdList->DrawIndexedInstanced(geomData.mBuffersInfo.mIndexCount, 1U, 0U, 0U, 0U);
+			mCmdList->DrawIndexedInstanced(mGeometryVec[i].mIndexCount, 1U, 0U, 0U, 0U);
 			cbvHeapGPUDescHandle.ptr += descHandleIncSize;
 		}
 	}

@@ -19,7 +19,8 @@ bool CmdBuilderTask::ValidateData() const noexcept {
 		mPSO != nullptr &&
 		mFrameConstants != nullptr &&
 		mObjectConstants != nullptr &&
-		mGeomDataVec.empty() == false;
+		mGeometryVec.empty() == false && 
+		mGeometryVec.size() == mWorldMatricesByGeomIndex.size();
 }
 
 void CmdBuilderTask::BuildCommandObjects() noexcept {

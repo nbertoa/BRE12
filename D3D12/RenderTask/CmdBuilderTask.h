@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <d3d12.h>
 #include <DirectXMath.h>
-#include <string>
 #include <tbb/concurrent_queue.h>
 #include <wrl.h>
 
@@ -16,20 +15,15 @@
 
 class UploadBuffer;
 
-struct GeometryData {
-	GeometryData() = default;
-
-	std::vector<DirectX::XMFLOAT4X4> mWorldMats;
-	GeomBuffersCreator::Output mBuffersInfo;
-};
-
 // Task that is responsible of command lists recording to be executed by CommandListProcessor.
 // Steps:
 // - Inherit from CmdBuilderTask and reimplement BuildCommandLists() method
 // - Call CmdBuilderTask::BuildCommandLists() to create command lists to execute in the GPU
 class CmdBuilderTask {
 public:
-	using GeometryDataVec = std::vector<GeometryData>;
+	using GeometryVec = std::vector<GeomBuffersCreator::Output>;
+	using Matrices = std::vector<DirectX::XMFLOAT4X4>;
+	using MatricesByGeomIndex = std::vector<Matrices>;
 
 	explicit CmdBuilderTask(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 		
@@ -44,7 +38,8 @@ public:
 	__forceinline UploadBuffer* &ObjectConstants() noexcept { return mObjectConstants; }
 	__forceinline D3D12_VIEWPORT& ScreenViewport() noexcept { return mScreenViewport; }
 	__forceinline D3D12_RECT& ScissorRector() noexcept { return mScissorRect; }
-	__forceinline GeometryDataVec& GeomDataVec() noexcept { return mGeomDataVec; }
+	__forceinline GeometryVec& GetGeometryVec() noexcept { return mGeometryVec; }
+	__forceinline MatricesByGeomIndex& WorldMatricesByGeomIndex() noexcept { return mWorldMatricesByGeomIndex; }
 
 	// Build command lists and push them to the queue.
 	virtual void BuildCommandLists(
@@ -78,7 +73,9 @@ protected:
 	D3D12_VIEWPORT mScreenViewport{ 0.0f, 0.0f, (float)Settings::sWindowWidth, (float)Settings::sWindowHeight, 0.0f, 1.0f };
 	D3D12_RECT mScissorRect{ 0, 0, Settings::sWindowWidth, Settings::sWindowHeight };
 	
-	GeometryDataVec mGeomDataVec{};
+	// We should have a vector of world matrices per geometry.	
+	GeometryVec mGeometryVec;
+	MatricesByGeomIndex mWorldMatricesByGeomIndex;
 
 private:
 	void BuildCommandObjects() noexcept;
