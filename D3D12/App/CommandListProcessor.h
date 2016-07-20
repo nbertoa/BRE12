@@ -8,17 +8,13 @@
 
 // It has the responsibility to check for new command lists and execute them.
 // Steps:
-// - Use CommandListProcessor::Create() to create an instance. You should
-//   spawn it using the returned parent tbb::task.
+// - Use CommandListProcessor::Create() to create and spawn an instance.
 // - When you spawn it, execute() method is automatically called. You should fill queue with
 //   command lists. You can use CommandListProcessor::CmdListQueue() for it.
 // - When you want to terminate this task, you should call CommandListProcessor::Terminate() 
-//   and wait for termination using parent task.
 class CommandListProcessor : public tbb::task {
 public:
-	static tbb::empty_task* Create(CommandListProcessor* &cmdListProcessor, ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists);
-
-	CommandListProcessor(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists);
+	static CommandListProcessor* Create(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists) noexcept;
 
 	// This method is used to know if there are no more pending commands lists to execute or to process.
 	// I thought this method was going to be thread safe, but that is not the case.
@@ -33,12 +29,17 @@ public:
 	__forceinline void ResetExecutedTasksCounter() noexcept { mExecTasksCount = 0U; }
 	__forceinline std::uint32_t ExecutedTasksCounter() const noexcept { return mExecTasksCount; }
 	
-	tbb::task* execute() override;
-	void Terminate() noexcept { mTerminate = true; }
-
+	// You should push all your recorded command lists in this queue
 	__forceinline tbb::concurrent_queue<ID3D12CommandList*>& CmdListQueue() noexcept { return mCmdListQueue; }
+		
+	void Terminate() noexcept;	
 
 private:
+	CommandListProcessor(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists);
+
+	// Called when tbb::task is spawned
+	tbb::task* execute() override;
+
 	bool mTerminate{ false };
 	std::uint32_t mExecTasksCount{ 0U };
 	std::atomic<std::uint32_t> mPendingCmdLists{ 0U };

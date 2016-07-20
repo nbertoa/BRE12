@@ -63,11 +63,13 @@ namespace {
 	}
 }
 
-void ShapesScene::GenerateTasks(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
+void ShapesScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
 
-	GeometryGenerator::MeshData sphere{ GeometryGenerator::CreateSphere(2, 20, 20) };
-	GeometryGenerator::MeshData box{ GeometryGenerator::CreateBox(2, 2, 2, 2) };
+	GeometryGenerator::MeshData sphere;
+	GeometryGenerator::CreateSphere(2.0f, 20U, 20U, sphere);
+	GeometryGenerator::MeshData box;
+	GeometryGenerator::CreateBox(2.0f, 2.0f, 2.0f, 2U, box);
 
 	const std::size_t numTasks{ 4UL };
 	const std::size_t numGeometry{ 1000UL };

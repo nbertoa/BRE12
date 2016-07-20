@@ -11,43 +11,30 @@
 
 class Scene;
 
-// It has the responsibility to construct command recorders and also execute them (to record/execute
+// It has the responsibility to build CmdListRecorder's and also execute them (to record/execute
 // command lists in the queue provided by CommandListProcessor)
 // Steps:
-// - Use MasterRender::Create() to create an instance. You should
-//   spawn it using the returned parent tbb::task.
-// - When you spawn it, execute() method is automatically called. You should call to Init() and InitCmdListRecorders() before spawning.
-// - When you want to terminate this task, you should call MasterRender::Terminate() 
-//   and wait for termination using parent task.
+// - Use MasterRender::Create() to create and spawn and instance.
+// - When you spawn it, execute() method is automatically called. 
+// - When you want to terminate this task, you should call MasterRender::Terminate()
 class MasterRender : public tbb::task {
 public:
-	static tbb::empty_task* Create(MasterRender* &masterRender);
+	static MasterRender* Create(const HWND hwnd, Scene* scene) noexcept;
 
-	MasterRender() = default;
-
-	// Execute in order before spawning it.
-	void Init(const HWND hwnd) noexcept;
-	void InitCmdListRecorders(Scene* scene) noexcept;
-	
-	void Terminate() noexcept { mTerminate = true; }
-
-	// Called when spawned
-	tbb::task* execute() override;
+	void Terminate() noexcept;
 
 private:
-	void InitSystems() noexcept;
-	
-	void ExecuteCmdListRecorders() noexcept;
-	void UpdateCamera() noexcept;
-	void Finalize() noexcept;
+	MasterRender(const HWND hwnd, Scene* scene);
+
+	// Called when tbb::task is spawned
+	tbb::task* execute() override;
+
+	void InitCmdListRecorders(Scene* scene) noexcept;
 
 	void CreateRtvAndDsvDescriptorHeaps() noexcept;
 	void CreateRtvAndDsv() noexcept;
 	void CreateCommandObjects() noexcept;
-
-	// Used to display milliseconds per frame in window caption (if windowed)
-	void CalculateFrameStats() noexcept;
-
+	
 	ID3D12Resource* CurrentBackBuffer() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
@@ -59,7 +46,6 @@ private:
 
 	Timer mTimer;
 		
-	tbb::empty_task* mCmdListProcessorParent{ nullptr };
 	CommandListProcessor* mCmdListProcessor{ nullptr };
 
 	ID3D12CommandQueue* mCmdQueue{ nullptr };

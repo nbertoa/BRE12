@@ -9,8 +9,8 @@ public:
 	const Timer& operator=(const Timer&) = delete;
 
 	// Time in seconds (1.0f is 1 second)
-	float TotalTime() const noexcept;
-	float DeltaTime() const noexcept;
+	float TotalTime() const noexcept { return (float)((mCurrTime - mBaseTime) * mSecondsPerCount); }
+	float DeltaTime() const noexcept { return (float)mDeltaTime; }
 
 	// Call before message loop.
 	void Reset() noexcept; 

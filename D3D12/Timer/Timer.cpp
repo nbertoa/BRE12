@@ -6,14 +6,7 @@ Timer::Timer() {
 	std::int64_t countsPerSec;
 	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
 	mSecondsPerCount = 1.0 / (double)countsPerSec;
-}
-
-float Timer::TotalTime() const noexcept {
-	return (float)((mCurrTime - mBaseTime) * mSecondsPerCount);
-}
-
-float Timer::DeltaTime() const noexcept {
-	return (float) mDeltaTime;
+	Reset();
 }
 
 void Timer::Reset() noexcept {

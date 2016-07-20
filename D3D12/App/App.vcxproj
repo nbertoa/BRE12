@@ -122,7 +122,6 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="CommandListProcessor.cpp" />
     <ClCompile Include="MasterRender.cpp" />
-    <ClCompile Include="Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />

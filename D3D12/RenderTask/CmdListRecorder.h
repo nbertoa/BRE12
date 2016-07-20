@@ -76,7 +76,4 @@ protected:
 	// We should have a vector of world matrices per geometry.	
 	GeometryVec mGeometryVec;
 	MatricesByGeomIndex mWorldMatricesByGeomIndex;
-
-private:
-	void BuildCommandObjects() noexcept;
 };

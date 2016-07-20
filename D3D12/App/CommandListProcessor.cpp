@@ -2,11 +2,10 @@
 
 #include <Utils/DebugUtils.h>
 
-tbb::empty_task* CommandListProcessor::Create(CommandListProcessor* &cmdListProcessor, ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists) {
+CommandListProcessor* CommandListProcessor::Create(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists) noexcept {
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
 	parent->set_ref_count(2);
-	cmdListProcessor = new (parent->allocate_child()) CommandListProcessor(cmdQueue, maxNumCmdLists);
-	return parent;
+	return new (parent->allocate_child()) CommandListProcessor(cmdQueue, maxNumCmdLists);
 }
 
 CommandListProcessor::CommandListProcessor(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists)
@@ -14,6 +13,7 @@ CommandListProcessor::CommandListProcessor(ID3D12CommandQueue* cmdQueue, const s
 	, mMaxNumCmdLists(maxNumCmdLists)
 {
 	ASSERT(maxNumCmdLists > 0U);
+	parent()->spawn(*this);
 }
 
 tbb::task* CommandListProcessor::execute() {
@@ -38,4 +38,9 @@ tbb::task* CommandListProcessor::execute() {
 	delete[] cmdLists;
 
 	return nullptr;
+}
+
+void CommandListProcessor::Terminate() noexcept {
+	mTerminate = true;
+	parent()->wait_for_all();
 }

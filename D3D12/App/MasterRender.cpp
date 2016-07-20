@@ -10,62 +10,110 @@
 #include <GlobalData/D3dData.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
-#include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
-#include <RootSignatureManager\RootSignatureManager.h>
-#include <ShaderManager\ShaderManager.h>
 #include <Utils/DebugUtils.h>
+
+using namespace DirectX;
 
 namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
+
+	void CalculateFrameStats(const float totalElapsedTime, const HWND hwnd) noexcept {
+		// Code computes the average frames per second, and also the 
+		// average time it takes to render one frame.  These stats 
+		// are appended to the window caption bar.
+
+		static std::uint32_t frameCnt{ 0U };
+		static float timeElapsed{ 0.0f };
+
+		++frameCnt;
+
+		// Compute averages over one second period.
+		if ((totalElapsedTime - timeElapsed) > 1.0f) {
+			const float mspf{ 1000.0f / frameCnt };
+			SetWindowText(hwnd, std::to_wstring(mspf).c_str());
+
+			// Reset for next average.
+			frameCnt = 0U;
+			timeElapsed += 1.0f;
+		}
+	}
+
+	void UpdateCamera(XMFLOAT4X4& view, XMFLOAT4X4& proj, const float deltaTime) noexcept {
+		static std::int32_t lastXY[]{ 0UL, 0UL };
+		static const float sCameraOffset{ 10.0f };
+		static const float sCameraMultiplier{ 5.0f };
+
+		ASSERT(Keyboard::gKeyboard.get() != nullptr);
+		ASSERT(Mouse::gMouse.get() != nullptr);
+
+		if (Camera::gCamera->UpdateViewMatrix()) {
+			proj = Camera::gCamera->GetProj4x4f();
+			view = Camera::gCamera->GetView4x4f();
+		}
+
+		// Update camera based on keyboard
+		const float offset = sCameraOffset * (Keyboard::gKeyboard->IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * deltaTime;
+		//const float offset = 0.00005f;
+		if (Keyboard::gKeyboard->IsKeyDown(DIK_W)) {
+			Camera::gCamera->Walk(offset);
+		}
+		if (Keyboard::gKeyboard->IsKeyDown(DIK_S)) {
+			Camera::gCamera->Walk(-offset);
+		}
+		if (Keyboard::gKeyboard->IsKeyDown(DIK_A)) {
+			Camera::gCamera->Strafe(-offset);
+		}
+		if (Keyboard::gKeyboard->IsKeyDown(DIK_D)) {
+			Camera::gCamera->Strafe(offset);
+		}
+
+		// Update camera based on mouse
+		const std::int32_t x{ Mouse::gMouse->X() };
+		const std::int32_t y{ Mouse::gMouse->Y() };
+		if (Mouse::gMouse->IsButtonDown(Mouse::MouseButtonsLeft)) {
+			// Make each pixel correspond to a quarter of a degree.
+			const float dx{ XMConvertToRadians(0.25f * (float)(x - lastXY[0])) };
+			const float dy{ XMConvertToRadians(0.25f * (float)(y - lastXY[1])) };
+
+			Camera::gCamera->Pitch(dy);
+			Camera::gCamera->RotateY(dx);
+		}
+
+		lastXY[0] = x;
+		lastXY[1] = y;
+	}
 }
 
 using namespace DirectX;
 
-tbb::empty_task* MasterRender::Create(MasterRender* &masterRender) {
+MasterRender* MasterRender::Create(const HWND hwnd, Scene* scene) noexcept {
+	ASSERT(scene != nullptr);
+
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
 	parent->set_ref_count(2);
-	masterRender = new (parent->allocate_child()) MasterRender();
-	return parent;
+	return new (parent->allocate_child()) MasterRender(hwnd, scene);
 }
 
-void MasterRender::Init(const HWND hwnd) noexcept {
-	mHwnd = hwnd;
-
-	mTimer.Reset();
-
-	InitSystems();
-
+MasterRender::MasterRender(const HWND hwnd, Scene* scene) 
+	: mHwnd(hwnd)
+{
 	ResourceManager::gManager->CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
-	CreateCommandObjects();	
+	CreateCommandObjects();
 	CreateRtvAndDsv();
 
 	// Create and spawn command list processor thread.
-	mCmdListProcessorParent = CommandListProcessor::Create(mCmdListProcessor, mCmdQueue, MAX_NUM_CMD_LISTS);
-	mCmdListProcessorParent->spawn(*mCmdListProcessor);
-}
-
-void MasterRender::InitSystems() noexcept {
-	ASSERT(CommandManager::gManager.get() == nullptr);
-	CommandManager::gManager = std::make_unique<CommandManager>(*D3dData::mDevice.Get());
-
-	ASSERT(PSOManager::gManager.get() == nullptr);
-	PSOManager::gManager = std::make_unique<PSOManager>(*D3dData::mDevice.Get());
-
-	ASSERT(ResourceManager::gManager.get() == nullptr);
-	ResourceManager::gManager = std::make_unique<ResourceManager>(*D3dData::mDevice.Get());
-
-	ASSERT(RootSignatureManager::gManager.get() == nullptr);
-	RootSignatureManager::gManager = std::make_unique<RootSignatureManager>(*D3dData::mDevice.Get());
-
-	ASSERT(ShaderManager::gManager.get() == nullptr);
-	ShaderManager::gManager = std::make_unique<ShaderManager>();
+	mCmdListProcessor = CommandListProcessor::Create(mCmdQueue, MAX_NUM_CMD_LISTS);
+	ASSERT(mCmdListProcessor != nullptr);
+	
+	InitCmdListRecorders(scene);
+	parent()->spawn(*this);
 }
 
 void MasterRender::InitCmdListRecorders(Scene* scene) noexcept {
 	ASSERT(scene != nullptr);
 
-	scene->GenerateTasks(mCmdListProcessor->CmdListQueue(), mCmdListRecorders);
+	scene->GenerateCmdListRecorders(mCmdListProcessor->CmdListQueue(), mCmdListRecorders);
 	FlushCommandQueue();
 	const std::uint64_t count{ _countof(mFenceByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {
@@ -73,19 +121,18 @@ void MasterRender::InitCmdListRecorders(Scene* scene) noexcept {
 	}
 }
 
-tbb::task* MasterRender::execute() {
-	ExecuteCmdListRecorders();
-	Finalize();		
-	return nullptr;
+void MasterRender::Terminate() noexcept {
+	mTerminate = true;
+	parent()->wait_for_all();
 }
 
-void MasterRender::ExecuteCmdListRecorders() noexcept {
+tbb::task* MasterRender::execute() {
 	while (!mTerminate) {
 		mTimer.Tick();
-		CalculateFrameStats();
+		CalculateFrameStats(mTimer.TotalTime(), mHwnd);
 
-		UpdateCamera();
-		
+		UpdateCamera(mView, mProj, mTimer.DeltaTime());
+
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
 		ASSERT(mCmdListProcessor->IsIdle());
 
@@ -142,57 +189,10 @@ void MasterRender::ExecuteCmdListRecorders() noexcept {
 
 		SignalFenceAndPresent();
 	}
-}
 
-void MasterRender::UpdateCamera() noexcept {
-	static std::int32_t lastXY[]{ 0UL, 0UL };
-	static const float sCameraOffset{ 10.0f };
-	static const float sCameraMultiplier{ 5.0f };
-
-	ASSERT(Keyboard::gKeyboard.get() != nullptr);
-	ASSERT(Mouse::gMouse.get() != nullptr);
-
-	if (Camera::gCamera->UpdateViewMatrix()) {
-		mProj = Camera::gCamera->GetProj4x4f();
-		mView = Camera::gCamera->GetView4x4f();
-	}
-
-	// Update camera based on keyboard
-	const float offset = sCameraOffset * (Keyboard::gKeyboard->IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * mTimer.DeltaTime();
-	//const float offset = 0.00005f;
-	if (Keyboard::gKeyboard->IsKeyDown(DIK_W)) {
-		Camera::gCamera->Walk(offset);
-	}
-	if (Keyboard::gKeyboard->IsKeyDown(DIK_S)) {
-		Camera::gCamera->Walk(-offset);
-	}
-	if (Keyboard::gKeyboard->IsKeyDown(DIK_A)) {
-		Camera::gCamera->Strafe(-offset);
-	}
-	if (Keyboard::gKeyboard->IsKeyDown(DIK_D)) {
-		Camera::gCamera->Strafe(offset);
-	}
-
-	// Update camera based on mouse
-	const std::int32_t x{ Mouse::gMouse->X() };
-	const std::int32_t y{ Mouse::gMouse->Y() };
-	if (Mouse::gMouse->IsButtonDown(Mouse::MouseButtonsLeft)) {
-		// Make each pixel correspond to a quarter of a degree.
-		const float dx{ XMConvertToRadians(0.25f * (float)(x - lastXY[0])) };
-		const float dy{ XMConvertToRadians(0.25f * (float)(y - lastXY[1])) };
-
-		Camera::gCamera->Pitch(dy);
-		Camera::gCamera->RotateY(dx);
-	}
-
-	lastXY[0] = x;
-	lastXY[1] = y;
-}
-
-void MasterRender::Finalize() noexcept {
 	mCmdListProcessor->Terminate();
-	mCmdListProcessorParent->wait_for_all();
 	FlushCommandQueue();
+	return nullptr;
 }
 
 void MasterRender::CreateRtvAndDsv() noexcept {
@@ -261,27 +261,6 @@ void MasterRender::CreateCommandObjects() noexcept {
 	// calling Reset.
 	mCmdListFrameBegin->Close();
 	mCmdListFrameEnd->Close();
-}
-
-void MasterRender::CalculateFrameStats() noexcept {
-	// Code computes the average frames per second, and also the 
-	// average time it takes to render one frame.  These stats 
-	// are appended to the window caption bar.
-
-	static std::uint32_t frameCnt{ 0U };
-	static float timeElapsed{ 0.0f };
-
-	++frameCnt;
-
-	// Compute averages over one second period.
-	if ((mTimer.TotalTime() - timeElapsed) > 1.0f) {
-		const float mspf{ 1000.0f / frameCnt };
-		SetWindowText(mHwnd, std::to_wstring(mspf).c_str());
-
-		// Reset for next average.
-		frameCnt = 0U;
-		timeElapsed += 1.0f;
-	}
 }
 
 void MasterRender::CreateRtvAndDsvDescriptorHeaps() noexcept {

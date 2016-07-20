@@ -73,9 +73,7 @@ void Camera::Walk(const float d) noexcept {
 
 void Camera::Pitch(const float angle) noexcept {
 	// Rotate up and look vector about the right vector.
-
 	const XMMATRIX R(XMMatrixRotationAxis(XMLoadFloat3(&mRight), angle));
-
 	XMStoreFloat3(&mUp, XMVector3TransformNormal(XMLoadFloat3(&mUp), R));
 	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
 
@@ -84,14 +82,11 @@ void Camera::Pitch(const float angle) noexcept {
 
 void Camera::RotateY(const float angle) noexcept {
 	// Rotate the basis vectors about the world y-axis.
-
 	const XMMATRIX R(XMMatrixRotationY(angle));
-
 	XMStoreFloat3(&mRight, XMVector3TransformNormal(XMLoadFloat3(&mRight), R));
 	XMStoreFloat3(&mUp, XMVector3TransformNormal(XMLoadFloat3(&mUp), R));
 	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
-
-
+	
 	mViewDirty = true;
 }
 
@@ -106,7 +101,7 @@ bool Camera::UpdateViewMatrix() noexcept {
 		L = XMVector3Normalize(L);
 		U = XMVector3Normalize(XMVector3Cross(L, R));
 
-		// U, L already ortho-normal, so no need to normalize cross product.
+		// U, L already orthonormal, so no need to normalize cross product.
 		R = XMVector3Cross(U, L);
 
 		XMStoreFloat3(&mRight, R);

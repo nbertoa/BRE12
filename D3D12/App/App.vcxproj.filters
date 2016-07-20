@@ -3,7 +3,6 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="CommandListProcessor.cpp" />
-    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="MasterRender.cpp" />
   </ItemGroup>
   <ItemGroup>

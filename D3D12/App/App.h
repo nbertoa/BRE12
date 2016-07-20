@@ -23,8 +23,7 @@ public:
 	std::int32_t Run() noexcept;
 
 protected:	
-	void InitSystems(const HWND hwnd, const HINSTANCE hInstance) noexcept;
-	void InitMasterRenderTask(Scene* scene) noexcept;
+	void InitMasterRenderTask(const HWND hwnd, Scene* scene) noexcept;
 
 	void Update() noexcept;
 	void Finalize() noexcept;
@@ -32,17 +31,6 @@ protected:
 	// Needed by Intel TBB
 	tbb::task_scheduler_init mTaskSchedulerInit;
 
-	// Master render thread
+	// Master render 
 	MasterRender* mMasterRender{ nullptr };
-	tbb::empty_task* mMasterRenderParentTask{ nullptr };
-};
-
-// Inherit from this class and implement the method that must:
-// - Initialize InitTasks
-// - Initialize CmdBuilderTasks
-// - Execute InitTasks
-class TasksInitializer {
-public:
-	TasksInitializer() = default;
-	virtual void InitTasks(App& app) noexcept = 0;
 };
