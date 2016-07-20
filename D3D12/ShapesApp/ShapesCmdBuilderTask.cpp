@@ -8,11 +8,11 @@
 #include <Utils/DebugUtils.h>
 
 ShapesCmdBuilderTask::ShapesCmdBuilderTask(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
-	: CmdBuilderTask(device, cmdListQueue)
+	: CmdListRecorder(device, cmdListQueue)
 {
 }
 
-void ShapesCmdBuilderTask::BuildCommandLists(
+void ShapesCmdBuilderTask::RecordCommandLists(
 	const DirectX::XMFLOAT4X4& view,
 	const DirectX::XMFLOAT4X4& proj,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,

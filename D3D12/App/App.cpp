@@ -16,7 +16,7 @@ using namespace DirectX;
 
 App::App(HINSTANCE hInstance, Scene* scene)
 	: mTaskSchedulerInit()
-	, mMasterRenderTaskParent(MasterRenderTask::Create(mMasterRenderTask))
+	, mMasterRenderParentTask(MasterRender::Create(mMasterRender))
 {	
 	ASSERT(scene != nullptr);
 
@@ -27,8 +27,8 @@ App::App(HINSTANCE hInstance, Scene* scene)
 
 void App::InitMasterRenderTask(Scene* scene) noexcept {
 	ASSERT(scene != nullptr);
-	ASSERT(mMasterRenderTask != nullptr);
-	mMasterRenderTask->InitCmdBuilders(scene);
+	ASSERT(mMasterRender != nullptr);
+	mMasterRender->InitCmdListRecorders(scene);
 }
 
 std::int32_t App::Run() noexcept {
@@ -36,9 +36,9 @@ std::int32_t App::Run() noexcept {
 	ASSERT(Mouse::gMouse.get() != nullptr);
 
 	// Spawn master render task
-	ASSERT(mMasterRenderTaskParent != nullptr);
-	ASSERT(mMasterRenderTask != nullptr);	
-	mMasterRenderTaskParent->spawn(*mMasterRenderTask);
+	ASSERT(mMasterRenderParentTask != nullptr);
+	ASSERT(mMasterRender != nullptr);	
+	mMasterRenderParentTask->spawn(*mMasterRender);
 
 	// Message loop
 	MSG msg{0U};
@@ -68,7 +68,7 @@ void App::InitSystems(const HWND hwnd, const HINSTANCE hInstance) noexcept {
 	ASSERT(Mouse::gMouse.get() == nullptr);
 	Mouse::gMouse = std::make_unique<Mouse>(*directInput, hwnd);
 
-	mMasterRenderTask->Init(hwnd);
+	mMasterRender->Init(hwnd);
 }
 
 void App::Update() noexcept {
@@ -84,8 +84,8 @@ void App::Update() noexcept {
 
 void App::Finalize() noexcept {
 	// Terminate master render task and wait for its finalization
-	mMasterRenderTask->Terminate();
-	mMasterRenderTaskParent->wait_for_all();
+	mMasterRender->Terminate();
+	mMasterRenderParentTask->wait_for_all();
 	mTaskSchedulerInit.terminate();
 	PostQuitMessage(0);
 }

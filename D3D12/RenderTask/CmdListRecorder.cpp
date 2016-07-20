@@ -1,16 +1,16 @@
-#include "CmdBuilderTask.h"
+#include "CmdListRecorder.h"
 
 #include <CommandManager/CommandManager.h>
 #include <Utils/DebugUtils.h>
 
-CmdBuilderTask::CmdBuilderTask(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
+CmdListRecorder::CmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
 	: mDevice(device)
 	, mCmdListQueue(cmdListQueue)
 {
 	BuildCommandObjects();
 }
 
-bool CmdBuilderTask::ValidateData() const noexcept {
+bool CmdListRecorder::ValidateData() const noexcept {
 	return
 		mCmdList != nullptr &&
 		mCmdAlloc != nullptr &&
@@ -23,7 +23,7 @@ bool CmdBuilderTask::ValidateData() const noexcept {
 		mGeometryVec.size() == mWorldMatricesByGeomIndex.size();
 }
 
-void CmdBuilderTask::BuildCommandObjects() noexcept {
+void CmdListRecorder::BuildCommandObjects() noexcept {
 	ASSERT(mCmdList == nullptr);
 	const std::uint32_t allocCount{ _countof(mCmdAlloc) };
 

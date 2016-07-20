@@ -4,7 +4,7 @@
 #include <vector>
 #include <windows.h>
 
-#include <App/MasterRenderTask.h>
+#include <App/MasterRender.h>
 
 #if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
 #define _CRTDBG_MAP_ALLOC          
@@ -12,7 +12,7 @@
 #include <crtdbg.h>               
 #endif 
 
-// Its responsibility is to initialize Direct3D systems, mouse, keyboard, camera, MasterRenderTask, etc
+// Its responsibility is to initialize Direct3D systems, mouse, keyboard, camera, MasterRender, etc
 class App {
 public:
 	explicit App(HINSTANCE hInstance, Scene* scene);
@@ -33,8 +33,8 @@ protected:
 	tbb::task_scheduler_init mTaskSchedulerInit;
 
 	// Master render thread
-	MasterRenderTask* mMasterRenderTask{ nullptr };
-	tbb::empty_task* mMasterRenderTaskParent{ nullptr };
+	MasterRender* mMasterRender{ nullptr };
+	tbb::empty_task* mMasterRenderParentTask{ nullptr };
 };
 
 // Inherit from this class and implement the method that must:

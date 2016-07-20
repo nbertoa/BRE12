@@ -121,13 +121,13 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="CommandListProcessor.cpp" />
-    <ClCompile Include="MasterRenderTask.cpp" />
+    <ClCompile Include="MasterRender.cpp" />
     <ClCompile Include="Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="CommandListProcessor.h" />
-    <ClInclude Include="MasterRenderTask.h" />
+    <ClInclude Include="MasterRender.h" />
     <ClInclude Include="Scene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

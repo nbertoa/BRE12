@@ -1,4 +1,4 @@
-#include "MasterRenderTask.h"
+#include "MasterRender.h"
 
 #include <DirectXColors.h>
 #include <tbb/parallel_for.h>
@@ -22,14 +22,14 @@ namespace {
 
 using namespace DirectX;
 
-tbb::empty_task* MasterRenderTask::Create(MasterRenderTask* &masterRenderTask) {
+tbb::empty_task* MasterRender::Create(MasterRender* &masterRender) {
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
 	parent->set_ref_count(2);
-	masterRenderTask = new (parent->allocate_child()) MasterRenderTask();
+	masterRender = new (parent->allocate_child()) MasterRender();
 	return parent;
 }
 
-void MasterRenderTask::Init(const HWND hwnd) noexcept {
+void MasterRender::Init(const HWND hwnd) noexcept {
 	mHwnd = hwnd;
 
 	mTimer.Reset();
@@ -45,7 +45,7 @@ void MasterRenderTask::Init(const HWND hwnd) noexcept {
 	mCmdListProcessorParent->spawn(*mCmdListProcessor);
 }
 
-void MasterRenderTask::InitSystems() noexcept {
+void MasterRender::InitSystems() noexcept {
 	ASSERT(CommandManager::gManager.get() == nullptr);
 	CommandManager::gManager = std::make_unique<CommandManager>(*D3dData::mDevice.Get());
 
@@ -62,10 +62,10 @@ void MasterRenderTask::InitSystems() noexcept {
 	ShaderManager::gManager = std::make_unique<ShaderManager>();
 }
 
-void MasterRenderTask::InitCmdBuilders(Scene* scene) noexcept {
+void MasterRender::InitCmdListRecorders(Scene* scene) noexcept {
 	ASSERT(scene != nullptr);
 
-	scene->GenerateTasks(mCmdListProcessor->CmdListQueue(), mCmdBuilderTasks);
+	scene->GenerateTasks(mCmdListProcessor->CmdListQueue(), mCmdListRecorders);
 	FlushCommandQueue();
 	const std::uint64_t count{ _countof(mFenceByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {
@@ -73,13 +73,13 @@ void MasterRenderTask::InitCmdBuilders(Scene* scene) noexcept {
 	}
 }
 
-tbb::task* MasterRenderTask::execute() {
-	ExecuteCmdBuilderTasks();
+tbb::task* MasterRender::execute() {
+	ExecuteCmdListRecorders();
 	Finalize();		
 	return nullptr;
 }
 
-void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
+void MasterRender::ExecuteCmdListRecorders() noexcept {
 	while (!mTerminate) {
 		mTimer.Tick();
 		CalculateFrameStats();
@@ -90,7 +90,7 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 		ASSERT(mCmdListProcessor->IsIdle());
 
 		// Begin Frame task + # cmd build tasks
-		const std::uint32_t taskCount{ (std::uint32_t)mCmdBuilderTasks.size() + 1U };
+		const std::uint32_t taskCount{ (std::uint32_t)mCmdListRecorders.size() + 1U };
 		mCmdListProcessor->ResetExecutedTasksCounter();
 
 		ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[mCurrQueuedFrameIndex] };
@@ -117,7 +117,7 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount - 1, (taskCount - 1) / Settings::sCpuProcessors),
 			[&](const tbb::blocked_range<size_t>& r) {
 			for (size_t i = r.begin(); i != r.end(); ++i)
-				mCmdBuilderTasks[i]->BuildCommandLists(mView, mProj, backBufferHandle, dsvHandle);
+				mCmdListRecorders[i]->RecordCommandLists(mView, mProj, backBufferHandle, dsvHandle);
 		}
 		);
 
@@ -144,7 +144,7 @@ void MasterRenderTask::ExecuteCmdBuilderTasks() noexcept {
 	}
 }
 
-void MasterRenderTask::UpdateCamera() noexcept {
+void MasterRender::UpdateCamera() noexcept {
 	static std::int32_t lastXY[]{ 0UL, 0UL };
 	static const float sCameraOffset{ 10.0f };
 	static const float sCameraMultiplier{ 5.0f };
@@ -189,13 +189,13 @@ void MasterRenderTask::UpdateCamera() noexcept {
 	lastXY[1] = y;
 }
 
-void MasterRenderTask::Finalize() noexcept {
+void MasterRender::Finalize() noexcept {
 	mCmdListProcessor->Terminate();
 	mCmdListProcessorParent->wait_for_all();
 	FlushCommandQueue();
 }
 
-void MasterRenderTask::CreateRtvAndDsv() noexcept {
+void MasterRender::CreateRtvAndDsv() noexcept {
 	ASSERT(D3dData::mDevice != nullptr);
 	ASSERT(D3dData::mSwapChain == nullptr);
 
@@ -241,7 +241,7 @@ void MasterRenderTask::CreateRtvAndDsv() noexcept {
 	D3dData::mDevice->CreateDepthStencilView(mDepthStencilBuffer, nullptr, DepthStencilView());
 }
 
-void MasterRenderTask::CreateCommandObjects() noexcept {
+void MasterRender::CreateCommandObjects() noexcept {
 	ASSERT(Settings::sQueuedFrameCount > 0U);
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
@@ -263,7 +263,7 @@ void MasterRenderTask::CreateCommandObjects() noexcept {
 	mCmdListFrameEnd->Close();
 }
 
-void MasterRenderTask::CalculateFrameStats() noexcept {
+void MasterRender::CalculateFrameStats() noexcept {
 	// Code computes the average frames per second, and also the 
 	// average time it takes to render one frame.  These stats 
 	// are appended to the window caption bar.
@@ -284,7 +284,7 @@ void MasterRenderTask::CalculateFrameStats() noexcept {
 	}
 }
 
-void MasterRenderTask::CreateRtvAndDsvDescriptorHeaps() noexcept {
+void MasterRender::CreateRtvAndDsvDescriptorHeaps() noexcept {
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
 	rtvHeapDesc.NumDescriptors = Settings::sSwapChainBufferCount;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -300,22 +300,22 @@ void MasterRenderTask::CreateRtvAndDsvDescriptorHeaps() noexcept {
 	ResourceManager::gManager->CreateDescriptorHeap(dsvHeapDesc, mDsvHeap);
 }
 
-ID3D12Resource* MasterRenderTask::CurrentBackBuffer() const noexcept {
+ID3D12Resource* MasterRender::CurrentBackBuffer() const noexcept {
 	const std::uint32_t currBackBuffer{ D3dData::mSwapChain->GetCurrentBackBufferIndex() };
 	return mSwapChainBuffer[currBackBuffer].Get();
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE MasterRenderTask::CurrentBackBufferView() const noexcept {
+D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::CurrentBackBufferView() const noexcept {
 	const std::uint32_t rtvDescSize{ D3dData::mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	const std::uint32_t currBackBuffer{ D3dData::CurrentBackBufferIndex() };
 	return D3D12_CPU_DESCRIPTOR_HANDLE{ mRtvHeap->GetCPUDescriptorHandleForHeapStart().ptr + currBackBuffer * rtvDescSize };
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE MasterRenderTask::DepthStencilView() const noexcept {
+D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::DepthStencilView() const noexcept {
 	return mDsvHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
-void MasterRenderTask::FlushCommandQueue() noexcept {
+void MasterRender::FlushCommandQueue() noexcept {
 	++mCurrentFence;
 
 	CHECK_HR(mCmdQueue->Signal(mFence, mCurrentFence));
@@ -334,7 +334,7 @@ void MasterRenderTask::FlushCommandQueue() noexcept {
 	}
 }
 
-void MasterRenderTask::SignalFenceAndPresent() noexcept {
+void MasterRender::SignalFenceAndPresent() noexcept {
 	ASSERT(D3dData::mSwapChain.Get());
 	CHECK_HR(D3dData::mSwapChain->Present(0U, 0U));
 

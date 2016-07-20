@@ -15,17 +15,17 @@
 
 class UploadBuffer;
 
-// Task that is responsible of command lists recording to be executed by CommandListProcessor.
+// Responsible of command lists recording to be executed by CommandListProcessor.
 // Steps:
-// - Inherit from CmdBuilderTask and reimplement BuildCommandLists() method
-// - Call CmdBuilderTask::BuildCommandLists() to create command lists to execute in the GPU
-class CmdBuilderTask {
+// - Inherit from CmdListRecorder and reimplement RecordCommandLists() method
+// - Call CmdListRecorder::RecordCommandLists() to create command lists to execute in the GPU
+class CmdListRecorder {
 public:
 	using GeometryVec = std::vector<GeomBuffersCreator::Output>;
 	using Matrices = std::vector<DirectX::XMFLOAT4X4>;
 	using MatricesByGeomIndex = std::vector<Matrices>;
 
-	explicit CmdBuilderTask(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	explicit CmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 		
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
@@ -42,7 +42,7 @@ public:
 	__forceinline MatricesByGeomIndex& WorldMatricesByGeomIndex() noexcept { return mWorldMatricesByGeomIndex; }
 
 	// Build command lists and push them to the queue.
-	virtual void BuildCommandLists(
+	virtual void RecordCommandLists(
 		const DirectX::XMFLOAT4X4& view,
 		const DirectX::XMFLOAT4X4& proj,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,

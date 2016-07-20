@@ -2,13 +2,13 @@
 
 #include <DirectXMath.h>
 
-#include <RenderTask/CmdBuilderTask.h>
+#include <RenderTask/CmdListRecorder.h>
 
-class ShapesCmdBuilderTask : public CmdBuilderTask {
+class ShapesCmdBuilderTask : public CmdListRecorder {
 public:
 	explicit ShapesCmdBuilderTask(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
-	void BuildCommandLists(
+	void RecordCommandLists(
 		const DirectX::XMFLOAT4X4& view,
 		const DirectX::XMFLOAT4X4& proj,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,

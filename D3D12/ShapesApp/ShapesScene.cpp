@@ -11,7 +11,7 @@
 #include <ShapesApp/ShapesCmdBuilderTask.h>
 
 namespace {
-	void BuildConstantBuffers(CmdBuilderTask& task) noexcept {
+	void BuildConstantBuffers(CmdListRecorder& task) noexcept {
 		ASSERT(task.CVBHeap() == nullptr);
 		ASSERT(task.FrameConstants() == nullptr);
 		ASSERT(task.ObjectConstants() == nullptr);
@@ -63,7 +63,7 @@ namespace {
 	}
 }
 
-void ShapesScene::GenerateTasks(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdBuilderTask>>& tasks) const noexcept {
+void ShapesScene::GenerateTasks(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
 
 	GeometryGenerator::MeshData sphere{ GeometryGenerator::CreateSphere(2, 20, 20) };
@@ -101,14 +101,14 @@ void ShapesScene::GenerateTasks(tbb::concurrent_queue<ID3D12CommandList*>& cmdLi
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, numTasks, numTasks / Settings::sCpuProcessors),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
-			std::unique_ptr<CmdBuilderTask>& task{ tasks[k] };
+			std::unique_ptr<CmdListRecorder>& task{ tasks[k] };
 			task.reset(new ShapesCmdBuilderTask(*D3dData::mDevice.Get(), cmdListQueue));
 			task->PSO() = psoCreatorOutput.mPSO;
 			task->RootSign() = psoCreatorOutput.mRootSign;
 
 			task->GetGeometryVec().resize(1UL, geomBuffersCreatorOutput);
-			CmdBuilderTask::MatricesByGeomIndex& worldMatByGeomIndex{ task->WorldMatricesByGeomIndex() };
-			worldMatByGeomIndex.resize(1UL, CmdBuilderTask::Matrices(numGeometry));
+			CmdListRecorder::MatricesByGeomIndex& worldMatByGeomIndex{ task->WorldMatricesByGeomIndex() };
+			worldMatByGeomIndex.resize(1UL, CmdListRecorder::Matrices(numGeometry));
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {				
 				const float tx{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
 				const float ty{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };

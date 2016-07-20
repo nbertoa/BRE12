@@ -6,28 +6,28 @@
 #include <vector>
 
 #include <App/CommandListProcessor.h>
-#include <RenderTask\CmdBuilderTask.h>
+#include <RenderTask\CmdListRecorder.h>
 #include <Timer/Timer.h>
 
 class Scene;
 
-// It has the responsibility to construct command builders and also execute them (to generate/execute
+// It has the responsibility to construct command recorders and also execute them (to record/execute
 // command lists in the queue provided by CommandListProcessor)
 // Steps:
-// - Use MasterRenderTask::Create() to create an instance. You should
+// - Use MasterRender::Create() to create an instance. You should
 //   spawn it using the returned parent tbb::task.
-// - When you spawn it, execute() method is automatically called. You should call to Init() and InitCmdBuilders() before spawning.
-// - When you want to terminate this task, you should call MasterRenderTask::Terminate() 
+// - When you spawn it, execute() method is automatically called. You should call to Init() and InitCmdListRecorders() before spawning.
+// - When you want to terminate this task, you should call MasterRender::Terminate() 
 //   and wait for termination using parent task.
-class MasterRenderTask : public tbb::task {
+class MasterRender : public tbb::task {
 public:
-	static tbb::empty_task* Create(MasterRenderTask* &masterRenderTask);
+	static tbb::empty_task* Create(MasterRender* &masterRender);
 
-	MasterRenderTask() = default;
+	MasterRender() = default;
 
 	// Execute in order before spawning it.
 	void Init(const HWND hwnd) noexcept;
-	void InitCmdBuilders(Scene* scene) noexcept;
+	void InitCmdListRecorders(Scene* scene) noexcept;
 	
 	void Terminate() noexcept { mTerminate = true; }
 
@@ -37,7 +37,7 @@ public:
 private:
 	void InitSystems() noexcept;
 	
-	void ExecuteCmdBuilderTasks() noexcept;
+	void ExecuteCmdListRecorders() noexcept;
 	void UpdateCamera() noexcept;
 	void Finalize() noexcept;
 
@@ -81,7 +81,7 @@ private:
 	ID3D12DescriptorHeap* mRtvHeap{ nullptr };
 	ID3D12DescriptorHeap* mDsvHeap{ nullptr };
 
-	std::vector<std::unique_ptr<CmdBuilderTask>> mCmdBuilderTasks;
+	std::vector<std::unique_ptr<CmdListRecorder>> mCmdListRecorders;
 
 	DirectX::XMFLOAT4X4 mView{ MathHelper::Identity4x4() };
 	DirectX::XMFLOAT4X4 mProj{ MathHelper::Identity4x4() };
