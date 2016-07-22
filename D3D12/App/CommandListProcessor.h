@@ -9,8 +9,8 @@
 // It has the responsibility to check for new command lists and execute them.
 // Steps:
 // - Use CommandListProcessor::Create() to create and spawn an instance.
-// - When you spawn it, execute() method is automatically called. You should fill queue with
-//   command lists. You can use CommandListProcessor::CmdListQueue() for it.
+// - When you spawn it, execute() method is automatically called. You should fill the queue with
+//   command lists. You can use CommandListProcessor::CmdListQueue() fto get it.
 // - When you want to terminate this task, you should call CommandListProcessor::Terminate() 
 class CommandListProcessor : public tbb::task {
 public:

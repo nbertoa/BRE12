@@ -11,8 +11,8 @@
 
 class Scene;
 
-// It has the responsibility to build CmdListRecorder's and also execute them (to record/execute
-// command lists in the queue provided by CommandListProcessor)
+// It has the responsibility to build CmdListRecorder's and also execute them 
+// (to record command lists and push to the queue provided by CommandListProcessor)
 // Steps:
 // - Use MasterRender::Create() to create and spawn and instance.
 // - When you spawn it, execute() method is automatically called. 

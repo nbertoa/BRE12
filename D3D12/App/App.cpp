@@ -1,12 +1,12 @@
 #include "App.h"
 
+#include <App/MasterRender.h>
 #include <Camera/Camera.h>
 #include <CommandManager/CommandManager.h>
 #include <GlobalData\D3dData.h>
 #include <GlobalData/Settings.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
-#include <MathUtils/MathHelper.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
@@ -14,8 +14,6 @@
 #include <Utils\DebugUtils.h>
 
 namespace {
-	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
-
 	void InitSystems(const HWND hwnd, const HINSTANCE hInstance) noexcept {
 		ASSERT(Camera::gCamera.get() == nullptr);
 		Camera::gCamera = std::make_unique<Camera>();
@@ -44,6 +42,23 @@ namespace {
 		ASSERT(ShaderManager::gManager.get() == nullptr);
 		ShaderManager::gManager = std::make_unique<ShaderManager>();
 	}
+
+	void InitMasterRenderTask(const HWND hwnd, Scene* scene, MasterRender* &masterRender) noexcept {
+		ASSERT(scene != nullptr);
+		ASSERT(masterRender == nullptr);
+		masterRender = MasterRender::Create(hwnd, scene);
+	}
+
+	void Update() noexcept {
+		ASSERT(Keyboard::gKeyboard.get() != nullptr);
+		ASSERT(Mouse::gMouse.get() != nullptr);
+
+		Keyboard::gKeyboard->Update();
+		Mouse::gMouse->Update();
+		if (Keyboard::gKeyboard->IsKeyDown(DIK_ESCAPE)) {
+			PostQuitMessage(0);
+		}
+	}
 }
 
 using namespace DirectX;
@@ -56,13 +71,13 @@ App::App(HINSTANCE hInstance, Scene* scene)
 	D3dData::InitDirect3D(hInstance);
 	const HWND hwnd{ D3dData::mHwnd };
 	InitSystems(hwnd, hInstance);
-	InitMasterRenderTask(hwnd, scene);
+	InitMasterRenderTask(hwnd, scene, mMasterRender);
 }
 
-void App::InitMasterRenderTask(const HWND hwnd, Scene* scene) noexcept {
-	ASSERT(scene != nullptr);
-	ASSERT(mMasterRender == nullptr);
-	mMasterRender = MasterRender::Create(hwnd, scene);
+App::~App() {
+	ASSERT(mMasterRender != nullptr);
+	mMasterRender->Terminate();
+	mTaskSchedulerInit.terminate();
 }
 
 std::int32_t App::Run() noexcept {
@@ -82,22 +97,4 @@ std::int32_t App::Run() noexcept {
 	}
 
 	return (std::int32_t)msg.wParam;
-}
-
-void App::Update() noexcept {
-	ASSERT(Keyboard::gKeyboard.get() != nullptr);
-	ASSERT(Mouse::gMouse.get() != nullptr);
-
-	Keyboard::gKeyboard->Update();
-	Mouse::gMouse->Update();
-	if (Keyboard::gKeyboard->IsKeyDown(DIK_ESCAPE)) {
-		Finalize();		
-	}
-}
-
-void App::Finalize() noexcept {
-	// Terminate master render task and wait for its finalization
-	mMasterRender->Terminate();
-	mTaskSchedulerInit.terminate();
-	PostQuitMessage(0);
 }
