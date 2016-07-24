@@ -8,9 +8,4 @@
     <ClInclude Include="ShapesCmdBuilderTask.h" />
     <ClInclude Include="ShapesScene.h" />
   </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="VS.hlsl" />
-    <FxCompile Include="PS.hlsl" />
-    <FxCompile Include="RS.hlsl" />
-  </ItemGroup>
 </Project>

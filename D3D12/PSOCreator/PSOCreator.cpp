@@ -68,5 +68,23 @@ namespace PSOCreator {
 		ASSERT(input.ValidateData());
 		BuildPSO(input, output);
 	}
+
+	Output CommonPSOData::mPSOData[(std::uint32_t)Technique::NUM_TECHNIQUES];
+
+	void CommonPSOData::Init() noexcept {
+		Input psoCreatorInput;
+		psoCreatorInput.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+		psoCreatorInput.mPSFilename = "PSOCreator/Black/PS.cso";
+		psoCreatorInput.mRootSignFilename = "PSOCreator/Black/RS.cso";
+		psoCreatorInput.mVSFilename = "PSOCreator/Black/VS.cso";
+		ASSERT(mPSOData[Technique::BLACK].mPSO == nullptr && mPSOData[Technique::BLACK].mRootSign == nullptr);
+		PSOCreator::Execute(psoCreatorInput, mPSOData[Technique::BLACK]);
+	}
+
+	const Output& CommonPSOData::GetData(const CommonPSOData::Technique tech) noexcept {
+		ASSERT(tech < CommonPSOData::Technique::NUM_TECHNIQUES);
+		return mPSOData[tech];
+	}
+
 }
 

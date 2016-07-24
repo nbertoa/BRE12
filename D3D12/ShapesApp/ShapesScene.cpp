@@ -4,9 +4,8 @@
 
 #include <CommandManager/CommandManager.h>
 #include <GlobalData/D3dData.h>
+#include <PSOCreator/PSOCreator.h>
 #include <RenderTask/GeomBuffersCreator.h>
-#include <RenderTask/PSOCreator.h>
-#include <RenderTask/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ShapesApp/ShapesCmdBuilderTask.h>
 
@@ -81,13 +80,7 @@ void ShapesScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12CommandLi
 	CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
 	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
 
-	PSOCreator::Input psoCreatorInput;
-	psoCreatorInput.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
-	psoCreatorInput.mPSFilename = "ShapesApp/PS.cso";
-	psoCreatorInput.mRootSignFilename = "ShapesApp/RS.cso";
-	psoCreatorInput.mVSFilename = "ShapesApp/VS.cso";
-	PSOCreator::Output psoCreatorOutput;
-	PSOCreator::Execute(psoCreatorInput, psoCreatorOutput);
+	const PSOCreator::Output& psoCreatorOutput(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::BLACK));
 
 	GeomBuffersCreator::Input geomBuffersCreatorInput(
 		sphere.mVertices.data(), 

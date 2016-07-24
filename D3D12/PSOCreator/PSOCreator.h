@@ -3,6 +3,7 @@
 #include <d3d12.h>
 
 #include <DXUtils/D3DFactory.h>
+#include <Utils/DebugUtils.h>
 
 // Used to create Pipeline State Objects and Root Signatures (loaded from a shader file)
 namespace PSOCreator {
@@ -37,4 +38,29 @@ namespace PSOCreator {
 	};
 
 	void Execute(const Input& input, Output& output) noexcept;
+
+	// Common Pipeline State Objects and Root Signatures that
+	// includes most common techniques (normal mapping, texture mapping, displacement mapping, etc)
+	class CommonPSOData {
+	public:
+		CommonPSOData() = default;
+		CommonPSOData(const CommonPSOData&) = delete;
+		const CommonPSOData& operator=(const CommonPSOData&) = delete;
+
+		enum Technique {
+			BLACK = 0,
+			BASIC,
+			TEXTURE_MAPPING,
+			NORMAL_MAPPING,
+			DISPLACEMENT_MAPPING,
+			TONE_MAPPING,
+			NUM_TECHNIQUES
+		};
+
+		static void Init() noexcept;
+		static const Output& GetData(const Technique tech) noexcept;
+
+	private:
+		static Output mPSOData[Technique::NUM_TECHNIQUES];
+	};
 }

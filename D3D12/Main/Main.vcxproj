@@ -91,7 +91,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\external\tbb\lib\intel64\vc14;$(SolutionDir)$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb_debug.lib;tbb_preview_debug.lib;tbbmalloc_debug.lib;tbbproxy_debug.lib;App.lib;Camera.lib;CommandManager.lib;DXUtils.lib;GeometryGenerator.lib;GlobalData.lib;Input.lib;MathUtils.lib;PSOManager.lib;RenderTask.lib;ResourceManager.lib;RootSignatureManager.lib;ShaderManager.lib;ShapesApp.lib;Timer.lib;Utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>App.lib;Camera.lib;CommandManager.lib;DXUtils.lib;GeometryGenerator.lib;GlobalData.lib;Input.lib;MathUtils.lib;PSOCreator.lib;PSOManager.lib;RenderTask.lib;ResourceManager.lib;RootSignatureManager.lib;ShaderManager.lib;ShapesApp.lib;Timer.lib;Utils.lib;d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb_debug.lib;tbb_preview_debug.lib;tbbmalloc_debug.lib;tbbproxy_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -121,7 +121,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\;$(SolutionDir)\..\external\tbb\lib\intel64\vc14;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb.lib;tbb_preview.lib;tbbmalloc.lib;tbbproxy.lib;App.lib;Camera.lib;CommandManager.lib;DXUtils.lib;GeometryGenerator.lib;GlobalData.lib;Input.lib;MathUtils.lib;PSOManager.lib;RenderTask.lib;ResourceManager.lib;RootSignatureManager.lib;ShaderManager.lib;ShapesApp.lib;Timer.lib;Utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>App.lib;Camera.lib;CommandManager.lib;DXUtils.lib;GeometryGenerator.lib;GlobalData.lib;Input.lib;MathUtils.lib;PSOCreator.lib;PSOManager.lib;RenderTask.lib;ResourceManager.lib;RootSignatureManager.lib;ShaderManager.lib;ShapesApp.lib;Timer.lib;Utils.lib;d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb.lib;tbb_preview.lib;tbbmalloc.lib;tbbproxy.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

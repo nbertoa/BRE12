@@ -2,12 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="GeomBuffersCreator.cpp" />
-    <ClCompile Include="PSOCreator.cpp" />
     <ClCompile Include="CmdListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeomBuffersCreator.h" />
-    <ClInclude Include="PSOCreator.h" />
     <ClInclude Include="CmdListRecorder.h" />
   </ItemGroup>
 </Project>

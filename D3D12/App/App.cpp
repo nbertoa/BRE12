@@ -7,6 +7,7 @@
 #include <GlobalData/Settings.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
+#include <PSOCreator/PSOCreator.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
@@ -41,6 +42,8 @@ namespace {
 
 		ASSERT(ShaderManager::gManager.get() == nullptr);
 		ShaderManager::gManager = std::make_unique<ShaderManager>();
+
+		PSOCreator::CommonPSOData::Init();
 	}
 
 	void InitMasterRenderTask(const HWND hwnd, Scene* scene, MasterRender* &masterRender) noexcept {
