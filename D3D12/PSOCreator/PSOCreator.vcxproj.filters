@@ -24,5 +24,19 @@
     <FxCompile Include="Black\VS.hlsl">
       <Filter>Black</Filter>
     </FxCompile>
+    <FxCompile Include="Basic\PS.hlsl">
+      <Filter>Basic</Filter>
+    </FxCompile>
+    <FxCompile Include="Basic\RS.hlsl">
+      <Filter>Basic</Filter>
+    </FxCompile>
+    <FxCompile Include="Basic\VS.hlsl">
+      <Filter>Basic</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Basic\Lighting.hlsli">
+      <Filter>Basic</Filter>
+    </None>
   </ItemGroup>
 </Project>

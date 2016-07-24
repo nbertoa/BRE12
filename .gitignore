@@ -544,3 +544,6 @@
 /D3D12/x64/Release/PSOCreator/Black/PS.cso
 /D3D12/x64/Release/PSOCreator/Black/RS.cso
 /D3D12/x64/Release/PSOCreator/Black/VS.cso
+/D3D12/x64/Debug/PSOCreator/Basic/PS.cso
+/D3D12/x64/Debug/PSOCreator/Basic/RS.cso
+/D3D12/x64/Debug/PSOCreator/Basic/VS.cso
