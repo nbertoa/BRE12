@@ -547,3 +547,6 @@
 /D3D12/x64/Debug/PSOCreator/Basic/PS.cso
 /D3D12/x64/Debug/PSOCreator/Basic/RS.cso
 /D3D12/x64/Debug/PSOCreator/Basic/VS.cso
+/D3D12/x64/Release/PSOCreator/Basic/PS.cso
+/D3D12/x64/Release/PSOCreator/Basic/RS.cso
+/D3D12/x64/Release/PSOCreator/Basic/VS.cso

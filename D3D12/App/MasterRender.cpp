@@ -17,28 +17,6 @@ using namespace DirectX;
 
 namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
-
-	void CalculateFrameStats(const float totalElapsedTime, const HWND hwnd) noexcept {
-		// Code computes the average frames per second, and also the 
-		// average time it takes to render one frame.  These stats 
-		// are appended to the window caption bar.
-
-		static std::uint32_t frameCnt{ 0U };
-		static float timeElapsed{ 0.0f };
-
-		++frameCnt;
-
-		// Compute averages over one second period.
-		if ((totalElapsedTime - timeElapsed) > 1.0f) {
-			const float mspf{ 1000.0f / frameCnt };
-			SetWindowText(hwnd, std::to_wstring(mspf).c_str());
-
-			// Reset for next average.
-			frameCnt = 0U;
-			timeElapsed += 1.0f;
-		}
-	}
-
 	void UpdateCamera(XMFLOAT4X4& view, XMFLOAT4X4& proj, const float deltaTime) noexcept {
 		static std::int32_t lastXY[]{ 0UL, 0UL };
 		static const float sCameraOffset{ 10.0f };
@@ -129,7 +107,6 @@ void MasterRender::Terminate() noexcept {
 tbb::task* MasterRender::execute() {
 	while (!mTerminate) {
 		mTimer.Tick();
-		CalculateFrameStats(mTimer.TotalTime(), mHwnd);
 
 		UpdateCamera(mView, mProj, mTimer.DeltaTime());
 

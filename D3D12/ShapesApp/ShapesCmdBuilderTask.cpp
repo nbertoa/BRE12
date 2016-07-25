@@ -66,8 +66,7 @@ void ShapesCmdBuilderTask::RecordCommandLists(
 	}
 
 	// Set frame constants root parameter
-	D3D12_GPU_VIRTUAL_ADDRESS cbFrameGPUBaseAddress{ mFrameConstants->Resource()->GetGPUVirtualAddress() };
-	mCmdList->SetGraphicsRootConstantBufferView(1U, cbFrameGPUBaseAddress);
+	mCmdList->SetGraphicsRootConstantBufferView(1U, mFrameConstants->Resource()->GetGPUVirtualAddress());
 	
 	mCmdList->Close();
 

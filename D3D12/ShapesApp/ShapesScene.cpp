@@ -26,7 +26,7 @@ namespace {
 		D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 		descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		descHeapDesc.NodeMask = 0U;
-		descHeapDesc.NumDescriptors = numGeomDesc + 1U; // +1 for frame constants
+		descHeapDesc.NumDescriptors = numGeomDesc; // +1 for frame constants
 		descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		ResourceManager::gManager->CreateDescriptorHeap(descHeapDesc, task.CVBHeap());
 		task.CBVBaseGpuDescHandle() = task.CVBHeap()->GetGPUDescriptorHandleForHeapStart();
@@ -51,14 +51,6 @@ namespace {
 
 		// Fill constant buffers descriptor heap with per frame constant buffer view
 		ResourceManager::gManager->CreateUploadBuffer(elemSize, 1U, task.FrameConstants());
-		D3D12_GPU_VIRTUAL_ADDRESS cbFrameGPUBaseAddress{ task.FrameConstants()->Resource()->GetGPUVirtualAddress() };
-		D3D12_CPU_DESCRIPTOR_HANDLE descHandle = task.CVBHeap()->GetCPUDescriptorHandleForHeapStart();
-		descHandle.ptr += numGeomDesc * descHandleIncSize;
-
-		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
-		cbvDesc.BufferLocation = cbFrameGPUBaseAddress;
-		cbvDesc.SizeInBytes = (std::uint32_t)elemSize;
-		ResourceManager::gManager->CreateConstantBufferView(cbvDesc, descHandle);
 	}
 }
 
@@ -71,7 +63,7 @@ void ShapesScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12CommandLi
 	GeometryGenerator::CreateBox(2.0f, 2.0f, 2.0f, 2U, box);
 
 	const std::size_t numTasks{ 4UL };
-	const std::size_t numGeometry{ 1000UL };
+	const std::size_t numGeometry{ 50000UL };
 	tasks.resize(numTasks);
 
 	// Create a command list 
@@ -92,7 +84,7 @@ void ShapesScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12CommandLi
 	GeomBuffersCreator::Output geomBuffersCreatorOutput;
 	GeomBuffersCreator::Execute(cmdListQueue, *cmdList, geomBuffersCreatorInput, geomBuffersCreatorOutput);
 	
-	const float meshSpaceOffset{ 200.0f };
+	const float meshSpaceOffset{ 500.0f };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, numTasks, numTasks / Settings::sCpuProcessors),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
