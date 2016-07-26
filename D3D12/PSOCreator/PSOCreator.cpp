@@ -79,6 +79,14 @@ namespace PSOCreator {
 		psoCreatorInput.mVSFilename = "PSOCreator/Black/VS.cso";
 		ASSERT(mPSOData[Technique::BLACK].mPSO == nullptr && mPSOData[Technique::BLACK].mRootSign == nullptr);
 		PSOCreator::Execute(psoCreatorInput, mPSOData[Technique::BLACK]);
+
+		psoCreatorInput = Input{};
+		psoCreatorInput.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+		psoCreatorInput.mPSFilename = "PSOCreator/Basic/PS.cso";
+		psoCreatorInput.mRootSignFilename = "PSOCreator/Basic/RS.cso";
+		psoCreatorInput.mVSFilename = "PSOCreator/Basic/VS.cso";
+		ASSERT(mPSOData[Technique::BASIC].mPSO == nullptr && mPSOData[Technique::BASIC].mRootSign == nullptr);
+		PSOCreator::Execute(psoCreatorInput, mPSOData[Technique::BASIC]);
 	}
 
 	const Output& CommonPSOData::GetData(const CommonPSOData::Technique tech) noexcept {

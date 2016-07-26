@@ -132,7 +132,7 @@ tbb::task* MasterRender::execute() {
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
 		mCmdListFrameBegin->OMSetRenderTargets(1U, &backBufferHandle, true, &dsvHandle);
 
-		mCmdListFrameBegin->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::LightSteelBlue, 0U, nullptr);
+		mCmdListFrameBegin->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0U, nullptr);
 		mCmdListFrameBegin->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
 
 		// Execute begin Frame task + # cmd build tasks

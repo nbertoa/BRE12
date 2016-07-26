@@ -63,6 +63,11 @@ public:
         return DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(&det, A));
 	}
 
+	static DirectX::XMMATRIX GetTranspose(const DirectX::XMFLOAT4X4& m) noexcept {
+		const DirectX::XMMATRIX matrix = XMLoadFloat4x4(&m);
+		return DirectX::XMMatrixTranspose(matrix);
+	}
+
 	static DirectX::XMMATRIX GetTransposeViewProj(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& proj) noexcept {
 		const DirectX::XMMATRIX viewMatrix = XMLoadFloat4x4(&view);
 		const DirectX::XMMATRIX projMatrix = XMLoadFloat4x4(&proj);

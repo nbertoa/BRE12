@@ -26,7 +26,7 @@ Output main(in const Input input) {
 	float4x4 wv = mul(gObjConstants.mW, gFrameConstants.mV);
 
 	Output output;
-	output.mPosV = mul(float4(input.mPosO, 0.0f), wv).xyz;
+	output.mPosV = mul(float4(input.mPosO, 1.0f), wv).xyz;
 	output.mNormalV = mul(float4(input.mNormalO, 0.0f), wv).xyz;
 	output.mPosH = mul(float4(output.mPosV, 1.0f), gFrameConstants.mP);
 

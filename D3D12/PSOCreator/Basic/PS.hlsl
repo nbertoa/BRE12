@@ -9,7 +9,7 @@ struct Input {
 struct FrameConstants {
 	float4x4 mV;
 };
-ConstantBuffer<FrameConstants> gFrameConstants : register(b1);
+ConstantBuffer<FrameConstants> gFrameConstants : register(b0);
 
 float smoothDistanceAtt(const float squaredDistance, const float invSqrAttRadius) {
 	const float factor = squaredDistance * invSqrAttRadius;
@@ -38,9 +38,9 @@ float getAngleAtt(const float3 normalizedLightVector, const float3 lightDir, con
 float4 main(const in Input input) : SV_TARGET{
 	const float3 normalV = normalize(input.mNormalV);
 	const float3 lightPosV = mul(float4(0.0f, 0.0f, 0.0f, 1.0f), gFrameConstants.mV).xyz;
-	const float lightRadius = 80.0f;
+	const float lightRadius = 800.0f;
 	float3 lightColor = float3(1.0f, 0.0f, 0.0f);
-	const float lightPower = 1.0f;
+	const float lightPower = 100.0f;
 	const float3 lightDir = lightPosV - input.mPosV;
 
 	// Process punctual light
@@ -55,5 +55,5 @@ float4 main(const in Input input) : SV_TARGET{
 	data.MetalMask = 0.0f;
 	data.Curvature = 1.0f;
 	const float3 final = att * lightColor * brdf(normalV, normalize(-input.mPosV), normalize(lightDir), data);
-	return float4(final, 1.0f);
+	return float4(att * lightColor, 1.0f);
 }
