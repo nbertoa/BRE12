@@ -2,16 +2,15 @@
 
 #include <cstdint>
 #include <d3d12.h>
-#include <memory>
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/mutex.h>
 #include <wrl.h>
 
 class CommandManager {
 public:
-	static std::unique_ptr<CommandManager> gManager;
-
-	explicit CommandManager(ID3D12Device& device) : mDevice(device) {}
+	static CommandManager& Create(ID3D12Device& device) noexcept;
+	static CommandManager& Get() noexcept;
+		
 	CommandManager(const CommandManager&) = delete;
 	const CommandManager& operator=(const CommandManager&) = delete;
 
@@ -35,6 +34,8 @@ public:
 	__forceinline void Clear() noexcept { ClearCmdQueues(); ClearCmdLists(); ClearCmdAllocs(); }
 
 private:
+	explicit CommandManager(ID3D12Device& device);
+
 	ID3D12Device& mDevice;
 
 	using CmdQueueById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12CommandQueue>>;

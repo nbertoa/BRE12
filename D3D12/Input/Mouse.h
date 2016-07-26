@@ -3,11 +3,11 @@
 #define DIRECTINPUT_VERSION 0x0800
 #include <cstdint>
 #include <dinput.h>
-#include <memory>
 
 class Mouse {
 public:
-	static std::unique_ptr<Mouse> gMouse;
+	static Mouse& Create(IDirectInput8& directInput, const HWND windowHandle) noexcept;
+	static Mouse& Get() noexcept;
 
 	enum MouseButton {
 		MouseButtonsLeft = 0,
@@ -15,8 +15,7 @@ public:
 		MouseButtonsMiddle,
 		MouseButtonsX1
 	};
-
-	Mouse(IDirectInput8& directInput, const HWND windowHandle);
+		
 	~Mouse();
 	Mouse(const Mouse&) = delete;
 	const Mouse& operator=(const Mouse&) = delete;
@@ -38,6 +37,8 @@ public:
 	__forceinline bool IsButtonHeldDown(const MouseButton b) const { return IsButtonDown(b) && WasButtonDown(b); }
 
 private:
+	explicit Mouse(IDirectInput8& directInput, const HWND windowHandle);
+
 	IDirectInput8& mDirectInput;
 	LPDIRECTINPUTDEVICE8 mDevice{ nullptr };
 	DIMOUSESTATE mCurrentState{};

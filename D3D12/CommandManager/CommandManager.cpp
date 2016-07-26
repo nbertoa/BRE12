@@ -1,9 +1,31 @@
 #include "CommandManager.h"
 
+#include <memory>
+
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
-std::unique_ptr<CommandManager> CommandManager::gManager = nullptr;
+namespace {
+	std::unique_ptr<CommandManager> gManager{ nullptr };
+}
+
+CommandManager& CommandManager::Create(ID3D12Device& device) noexcept{
+	ASSERT(gManager == nullptr);
+	gManager.reset(new CommandManager(device));
+	return *gManager.get();
+}
+
+CommandManager& CommandManager::Get() noexcept {
+	ASSERT(gManager != nullptr);
+	return *gManager.get();
+}
+
+
+
+CommandManager::CommandManager(ID3D12Device& device)
+	: mDevice(device) 
+{
+}
 
 std::size_t CommandManager::CreateCmdQueue(const D3D12_COMMAND_QUEUE_DESC& desc, ID3D12CommandQueue* &cmdQueue) noexcept {
 	mMutex.lock();

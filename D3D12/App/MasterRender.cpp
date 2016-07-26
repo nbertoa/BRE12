@@ -4,10 +4,10 @@
 #include <tbb/parallel_for.h>
 
 #include <App/Scene.h>
-#include <Camera/Camera.h>
 #include <CommandManager/CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GlobalData/D3dData.h>
+#include <GlobalData/Settings.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <ResourceManager\ResourceManager.h>
@@ -17,45 +17,42 @@ using namespace DirectX;
 
 namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
-	void UpdateCamera(XMFLOAT4X4& view, XMFLOAT4X4& proj, const float deltaTime) noexcept {
+	void UpdateCamera(Camera& camera, XMFLOAT4X4& view, XMFLOAT4X4& proj, const float deltaTime) noexcept {
 		static std::int32_t lastXY[]{ 0UL, 0UL };
 		static const float sCameraOffset{ 10.0f };
 		static const float sCameraMultiplier{ 5.0f };
 
-		ASSERT(Keyboard::gKeyboard.get() != nullptr);
-		ASSERT(Mouse::gMouse.get() != nullptr);
-
-		if (Camera::gCamera->UpdateViewMatrix()) {
-			proj = Camera::gCamera->GetProj4x4f();
-			view = Camera::gCamera->GetView4x4f();
+		if (camera.UpdateViewMatrix()) {
+			proj = camera.GetProj4x4f();
+			view = camera.GetView4x4f();
 		}
 
 		// Update camera based on keyboard
-		const float offset = sCameraOffset * (Keyboard::gKeyboard->IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * deltaTime;
+		const float offset = sCameraOffset * (Keyboard::Get().IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * deltaTime;
 		//const float offset = 0.00005f;
-		if (Keyboard::gKeyboard->IsKeyDown(DIK_W)) {
-			Camera::gCamera->Walk(offset);
+		if (Keyboard::Get().IsKeyDown(DIK_W)) {
+			camera.Walk(offset);
 		}
-		if (Keyboard::gKeyboard->IsKeyDown(DIK_S)) {
-			Camera::gCamera->Walk(-offset);
+		if (Keyboard::Get().IsKeyDown(DIK_S)) {
+			camera.Walk(-offset);
 		}
-		if (Keyboard::gKeyboard->IsKeyDown(DIK_A)) {
-			Camera::gCamera->Strafe(-offset);
+		if (Keyboard::Get().IsKeyDown(DIK_A)) {
+			camera.Strafe(-offset);
 		}
-		if (Keyboard::gKeyboard->IsKeyDown(DIK_D)) {
-			Camera::gCamera->Strafe(offset);
+		if (Keyboard::Get().IsKeyDown(DIK_D)) {
+			camera.Strafe(offset);
 		}
 
 		// Update camera based on mouse
-		const std::int32_t x{ Mouse::gMouse->X() };
-		const std::int32_t y{ Mouse::gMouse->Y() };
-		if (Mouse::gMouse->IsButtonDown(Mouse::MouseButtonsLeft)) {
+		const std::int32_t x{ Mouse::Get().X() };
+		const std::int32_t y{ Mouse::Get().Y() };
+		if (Mouse::Get().IsButtonDown(Mouse::MouseButtonsLeft)) {
 			// Make each pixel correspond to a quarter of a degree.
 			const float dx{ XMConvertToRadians(0.25f * (float)(x - lastXY[0])) };
 			const float dy{ XMConvertToRadians(0.25f * (float)(y - lastXY[1])) };
 
-			Camera::gCamera->Pitch(dy);
-			Camera::gCamera->RotateY(dx);
+			camera.Pitch(dy);
+			camera.RotateY(dx);
 		}
 
 		lastXY[0] = x;
@@ -65,20 +62,23 @@ namespace {
 
 using namespace DirectX;
 
-MasterRender* MasterRender::Create(const HWND hwnd, Scene* scene) noexcept {
+MasterRender* MasterRender::Create(const HWND hwnd, ID3D12Device& device, Scene* scene) noexcept {
 	ASSERT(scene != nullptr);
 
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
 	parent->set_ref_count(2);
-	return new (parent->allocate_child()) MasterRender(hwnd, scene);
+	return new (parent->allocate_child()) MasterRender(hwnd, device, scene);
 }
 
-MasterRender::MasterRender(const HWND hwnd, Scene* scene) 
+MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 	: mHwnd(hwnd)
+	, mDevice(device)
 {
-	ResourceManager::gManager->CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
+	ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 	CreateCommandObjects();
 	CreateRtvAndDsv();
+
+	mCamera.SetLens(Settings::sFieldOfView, Settings::AspectRatio(), Settings::sNearPlaneZ, Settings::sFarPlaneZ);
 
 	// Create and spawn command list processor thread.
 	mCmdListProcessor = CommandListProcessor::Create(mCmdQueue, MAX_NUM_CMD_LISTS);
@@ -108,7 +108,7 @@ tbb::task* MasterRender::execute() {
 	while (!mTerminate) {
 		mTimer.Tick();
 
-		UpdateCamera(mView, mProj, mTimer.DeltaTime());
+		UpdateCamera(mCamera, mView, mProj, mTimer.DeltaTime());
 
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
 		ASSERT(mCmdListProcessor->IsIdle());
@@ -173,9 +173,6 @@ tbb::task* MasterRender::execute() {
 }
 
 void MasterRender::CreateRtvAndDsv() noexcept {
-	ASSERT(D3dData::mDevice != nullptr);
-	ASSERT(D3dData::mSwapChain == nullptr);
-
 	CreateRtvAndDsvDescriptorHeaps();
 
 	// Setup RTV descriptor to specify sRGB format.
@@ -184,12 +181,14 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	// Create swap chain and render target views
+	ASSERT(mSwapChain == nullptr);
 	D3dData::CreateSwapChain(mHwnd, *mCmdQueue);
+	mSwapChain = &D3dData::SwapChain();
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRtvHeap->GetCPUDescriptorHandleForHeapStart());
-	const std::uint32_t rtvDescSize{ D3dData::mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
+	const std::uint32_t rtvDescSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {
-		CHECK_HR(D3dData::mSwapChain->GetBuffer(i, IID_PPV_ARGS(mSwapChainBuffer[i].GetAddressOf())));
-		D3dData::mDevice->CreateRenderTargetView(mSwapChainBuffer[i].Get(), &rtvDesc, rtvHeapHandle);
+		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mSwapChainBuffer[i].GetAddressOf())));
+		mDevice.CreateRenderTargetView(mSwapChainBuffer[i].Get(), &rtvDesc, rtvHeapHandle);
 		rtvHeapHandle.Offset(1U, rtvDescSize);
 	}
 
@@ -212,10 +211,10 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	optClear.DepthStencil.Depth = 1.0f;
 	optClear.DepthStencil.Stencil = 0U;
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::gManager->CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, depthStencilDesc, D3D12_RESOURCE_STATE_COMMON, optClear, mDepthStencilBuffer);
+	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, depthStencilDesc, D3D12_RESOURCE_STATE_COMMON, optClear, mDepthStencilBuffer);
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
-	D3dData::mDevice->CreateDepthStencilView(mDepthStencilBuffer, nullptr, DepthStencilView());
+	mDevice.CreateDepthStencilView(mDepthStencilBuffer, nullptr, DepthStencilView());
 }
 
 void MasterRender::CreateCommandObjects() noexcept {
@@ -224,14 +223,14 @@ void MasterRender::CreateCommandObjects() noexcept {
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	CommandManager::gManager->CreateCmdQueue(queueDesc, mCmdQueue);
+	CommandManager::Get().CreateCmdQueue(queueDesc, mCmdQueue);
 
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
-		CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameBegin[i]);
-		CommandManager::gManager->CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameEnd[i]);
+		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameBegin[i]);
+		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameEnd[i]);
 	}
-	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameBegin[0], mCmdListFrameBegin);
-	CommandManager::gManager->CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameEnd[0], mCmdListFrameEnd);
+	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameBegin[0], mCmdListFrameBegin);
+	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameEnd[0], mCmdListFrameEnd);
 
 	// Start off in a closed state. This is because the first time we refer 
 	// to the command list we will Reset it, and it needs to be closed before
@@ -246,24 +245,25 @@ void MasterRender::CreateRtvAndDsvDescriptorHeaps() noexcept {
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = 0;
-	ResourceManager::gManager->CreateDescriptorHeap(rtvHeapDesc, mRtvHeap);
+	ResourceManager::Get().CreateDescriptorHeap(rtvHeapDesc, mRtvHeap);
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
 	dsvHeapDesc.NumDescriptors = 1U;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	dsvHeapDesc.NodeMask = 0U;
-	ResourceManager::gManager->CreateDescriptorHeap(dsvHeapDesc, mDsvHeap);
+	ResourceManager::Get().CreateDescriptorHeap(dsvHeapDesc, mDsvHeap);
 }
 
 ID3D12Resource* MasterRender::CurrentBackBuffer() const noexcept {
-	const std::uint32_t currBackBuffer{ D3dData::mSwapChain->GetCurrentBackBufferIndex() };
+	ASSERT(mSwapChain != nullptr);
+	const std::uint32_t currBackBuffer{ mSwapChain->GetCurrentBackBufferIndex() };
 	return mSwapChainBuffer[currBackBuffer].Get();
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::CurrentBackBufferView() const noexcept {
-	const std::uint32_t rtvDescSize{ D3dData::mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
-	const std::uint32_t currBackBuffer{ D3dData::CurrentBackBufferIndex() };
+	const std::uint32_t rtvDescSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
+	const std::uint32_t currBackBuffer{ mSwapChain->GetCurrentBackBufferIndex() };
 	return D3D12_CPU_DESCRIPTOR_HANDLE{ mRtvHeap->GetCPUDescriptorHandleForHeapStart().ptr + currBackBuffer * rtvDescSize };
 }
 
@@ -291,8 +291,8 @@ void MasterRender::FlushCommandQueue() noexcept {
 }
 
 void MasterRender::SignalFenceAndPresent() noexcept {
-	ASSERT(D3dData::mSwapChain.Get());
-	CHECK_HR(D3dData::mSwapChain->Present(0U, 0U));
+	ASSERT(mSwapChain != nullptr);
+	CHECK_HR(mSwapChain->Present(0U, 0U));
 
 	// Add an instruction to the command queue to set a new fence point.  Because we 
 	// are on the GPU time line, the new fence point won't be set until the GPU finishes

@@ -1,12 +1,29 @@
 #include "Keyboard.h"
 
+#include <memory>
+
 #include <Utils/DebugUtils.h>
 
-std::unique_ptr<Keyboard> Keyboard::gKeyboard = nullptr;
+namespace {
+	std::unique_ptr<Keyboard> gKeyboard{ nullptr };
+}
+
+Keyboard& Keyboard::Create(IDirectInput8& directInput, const HWND windowHandle) noexcept {
+	ASSERT(gKeyboard == nullptr);
+	gKeyboard.reset(new Keyboard(directInput, windowHandle));
+	return *gKeyboard.get();
+}
+
+Keyboard& Keyboard::Get() noexcept {
+	ASSERT(gKeyboard != nullptr);
+	return *gKeyboard.get();
+}
 
 Keyboard::Keyboard(IDirectInput8& directInput, const HWND windowHandle)
 	: mDirectInput(directInput)
 {
+	ASSERT(gKeyboard == nullptr);
+
 	CHECK_HR(mDirectInput.CreateDevice(GUID_SysKeyboard, &mDevice, nullptr));
 	ASSERT(mDevice != nullptr);
 	CHECK_HR(mDevice->SetDataFormat(&c_dfDIKeyboard));

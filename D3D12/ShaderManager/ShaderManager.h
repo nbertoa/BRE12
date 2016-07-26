@@ -2,16 +2,15 @@
 
 #include <d3d12.h>
 #include <D3Dcommon.h>
-#include <memory>
 #include <tbb\concurrent_hash_map.h>
 #include <tbb/mutex.h>
 #include <wrl.h>
 
 class ShaderManager {
 public:
-	static std::unique_ptr<ShaderManager> gManager;
-
-	ShaderManager() = default;
+	static ShaderManager& Create() noexcept;
+	static ShaderManager& Get() noexcept;
+	
 	ShaderManager(const ShaderManager&) = delete;
 	const ShaderManager& operator=(const ShaderManager&) = delete;
 
@@ -30,6 +29,8 @@ public:
 	__forceinline void Clear() noexcept { mBlobById.clear(); }
 
 private:
+	ShaderManager() = default;
+
 	using BlobById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3DBlob>>;
 	BlobById mBlobById;
 

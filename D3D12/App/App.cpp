@@ -1,7 +1,6 @@
 #include "App.h"
 
 #include <App/MasterRender.h>
-#include <Camera/Camera.h>
 #include <CommandManager/CommandManager.h>
 #include <GlobalData\D3dData.h>
 #include <GlobalData/Settings.h>
@@ -16,49 +15,31 @@
 
 namespace {
 	void InitSystems(const HWND hwnd, const HINSTANCE hInstance) noexcept {
-		ASSERT(Camera::gCamera.get() == nullptr);
-		Camera::gCamera = std::make_unique<Camera>();
-		Camera::gCamera->SetLens(Settings::sFieldOfView, Settings::AspectRatio(), Settings::sNearPlaneZ, Settings::sFarPlaneZ);
-
-		ASSERT(Keyboard::gKeyboard.get() == nullptr);
 		LPDIRECTINPUT8 directInput;
 		CHECK_HR(DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID*)&directInput, nullptr));
-		Keyboard::gKeyboard = std::make_unique<Keyboard>(*directInput, hwnd);
+		Keyboard::Create(*directInput, hwnd);
+		Mouse::Create(*directInput, hwnd);
 
-		ASSERT(Mouse::gMouse.get() == nullptr);
-		Mouse::gMouse = std::make_unique<Mouse>(*directInput, hwnd);
-
-		ASSERT(CommandManager::gManager.get() == nullptr);
-		CommandManager::gManager = std::make_unique<CommandManager>(*D3dData::mDevice.Get());
-
-		ASSERT(PSOManager::gManager.get() == nullptr);
-		PSOManager::gManager = std::make_unique<PSOManager>(*D3dData::mDevice.Get());
-
-		ASSERT(ResourceManager::gManager.get() == nullptr);
-		ResourceManager::gManager = std::make_unique<ResourceManager>(*D3dData::mDevice.Get());
-
-		ASSERT(RootSignatureManager::gManager.get() == nullptr);
-		RootSignatureManager::gManager = std::make_unique<RootSignatureManager>(*D3dData::mDevice.Get());
-
-		ASSERT(ShaderManager::gManager.get() == nullptr);
-		ShaderManager::gManager = std::make_unique<ShaderManager>();
+		ID3D12Device& device{ D3dData::Device() };
+		CommandManager::Create(device);
+		PSOManager::Create(device);
+		ResourceManager::Create(device);
+		RootSignatureManager::Create(device);
+		ShaderManager::Create();
 
 		PSOCreator::CommonPSOData::Init();
 	}
 
-	void InitMasterRenderTask(const HWND hwnd, Scene* scene, MasterRender* &masterRender) noexcept {
+	void InitMasterRenderTask(const HWND hwnd, ID3D12Device& device, Scene* scene, MasterRender* &masterRender) noexcept {
 		ASSERT(scene != nullptr);
 		ASSERT(masterRender == nullptr);
-		masterRender = MasterRender::Create(hwnd, scene);
+		masterRender = MasterRender::Create(hwnd, device, scene);
 	}
 
 	void Update() noexcept {
-		ASSERT(Keyboard::gKeyboard.get() != nullptr);
-		ASSERT(Mouse::gMouse.get() != nullptr);
-
-		Keyboard::gKeyboard->Update();
-		Mouse::gMouse->Update();
-		if (Keyboard::gKeyboard->IsKeyDown(DIK_ESCAPE)) {
+		Keyboard::Get().Update();
+		Mouse::Get().Update();
+		if (Keyboard::Get().IsKeyDown(DIK_ESCAPE)) {
 			PostQuitMessage(0);
 		}
 	}
@@ -70,11 +51,9 @@ App::App(HINSTANCE hInstance, Scene* scene)
 	: mTaskSchedulerInit()
 {	
 	ASSERT(scene != nullptr);
-
 	D3dData::InitDirect3D(hInstance);
-	const HWND hwnd{ D3dData::mHwnd };
-	InitSystems(hwnd, hInstance);
-	InitMasterRenderTask(hwnd, scene, mMasterRender);
+	InitSystems(D3dData::Hwnd(), hInstance);
+	InitMasterRenderTask(D3dData::Hwnd(), D3dData::Device(), scene, mMasterRender);
 }
 
 App::~App() {
@@ -84,9 +63,6 @@ App::~App() {
 }
 
 std::int32_t App::Run() noexcept {
-	ASSERT(Keyboard::gKeyboard.get() != nullptr);
-	ASSERT(Mouse::gMouse.get() != nullptr);
-
 	// Message loop
 	MSG msg{0U};
 	while (msg.message != WM_QUIT) 	{

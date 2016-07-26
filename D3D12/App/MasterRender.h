@@ -1,11 +1,13 @@
 #pragma once
 
 #include <d3d12.h>
+#include <dxgi1_4.h>
 #include <memory>
 #include <tbb/task.h>
 #include <vector>
 
 #include <App/CommandListProcessor.h>
+#include <Camera/Camera.h>
 #include <RenderTask\CmdListRecorder.h>
 #include <Timer/Timer.h>
 
@@ -19,12 +21,12 @@ class Scene;
 // - When you want to terminate this task, you should call MasterRender::Terminate()
 class MasterRender : public tbb::task {
 public:
-	static MasterRender* Create(const HWND hwnd, Scene* scene) noexcept;
+	static MasterRender* Create(const HWND hwnd, ID3D12Device& device, Scene* scene) noexcept;
 
 	void Terminate() noexcept;
 
 private:
-	MasterRender(const HWND hwnd, Scene* scene);
+	explicit MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene);
 
 	// Called when tbb::task is spawned
 	tbb::task* execute() override;
@@ -43,6 +45,10 @@ private:
 	void SignalFenceAndPresent() noexcept;
 
 	HWND mHwnd{ 0 };
+	ID3D12Device& mDevice;
+	IDXGISwapChain3* mSwapChain{ nullptr };
+
+	Camera mCamera;
 
 	Timer mTimer;
 		

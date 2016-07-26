@@ -10,5 +10,9 @@
 // You should pass an instance to App constructor.
 class Scene {
 public:
+	Scene() = default;
+	Scene(const Scene&) = delete;
+	const Scene& operator=(const Scene&) = delete;
+
 	virtual void GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept = 0;
 };

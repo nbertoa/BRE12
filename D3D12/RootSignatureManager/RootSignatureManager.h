@@ -1,16 +1,15 @@
 #pragma once
 
 #include <d3d12.h>
-#include <memory>
 #include <tbb\concurrent_hash_map.h>
 #include <tbb/mutex.h>
 #include <wrl.h>
 
 class RootSignatureManager {
 public:
-	static std::unique_ptr<RootSignatureManager> gManager;
-
-	explicit RootSignatureManager(ID3D12Device& device) : mDevice(device) {}
+	static RootSignatureManager& Create(ID3D12Device& device) noexcept;
+	static RootSignatureManager& Get() noexcept;
+	
 	RootSignatureManager(const RootSignatureManager&) = delete;
 	const RootSignatureManager& operator=(const RootSignatureManager&) = delete;
 
@@ -28,6 +27,8 @@ public:
 	__forceinline void Clear() noexcept { mRootSignatureById.clear(); }
 
 private:
+	explicit RootSignatureManager(ID3D12Device& device);
+
 	ID3D12Device& mDevice;
 
 	using RootSignatureById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12RootSignature>>;

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <D3Dcompiler.h>
 #include <fstream>
+#include <memory>
 
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
@@ -26,9 +27,19 @@ namespace {
 
 		return blob;
 	}
+
+	std::unique_ptr<ShaderManager> gManager{ nullptr };
 }
 
-std::unique_ptr<ShaderManager> ShaderManager::gManager = nullptr;
+ShaderManager& ShaderManager::Create() noexcept {
+	ASSERT(gManager == nullptr);
+	gManager.reset(new ShaderManager());
+	return *gManager.get();
+}
+ShaderManager& ShaderManager::Get() noexcept {
+	ASSERT(gManager != nullptr);
+	return *gManager.get();
+}
 
 std::size_t ShaderManager::LoadShaderFile(const char* filename, ID3DBlob* &blob) noexcept {
 	ASSERT(filename != nullptr);

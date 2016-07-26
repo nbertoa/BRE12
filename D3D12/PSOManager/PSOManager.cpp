@@ -1,9 +1,28 @@
 #include "PSOManager.h"
 
+#include <memory>
+
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
-std::unique_ptr<PSOManager> PSOManager::gManager = nullptr;
+namespace {
+	std::unique_ptr<PSOManager> gManager{ nullptr };
+}
+
+PSOManager& PSOManager::Create(ID3D12Device& device) noexcept {
+	ASSERT(gManager == nullptr);
+	gManager.reset(new PSOManager(device));
+	return *gManager.get();
+}
+PSOManager& PSOManager::Get() noexcept {
+	ASSERT(gManager != nullptr);
+	return *gManager.get();
+}
+
+PSOManager::PSOManager(ID3D12Device& device) 
+	: mDevice(device) 
+{
+}
 
 std::size_t PSOManager::CreateGraphicsPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, ID3D12PipelineState* &pso) noexcept {
 	mMutex.lock();

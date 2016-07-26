@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <d3d12.h>
-#include <memory>
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/mutex.h>
 #include <wrl.h>
@@ -11,9 +10,9 @@
 
 class ResourceManager {
 public:
-	static std::unique_ptr<ResourceManager> gManager;
-
-	explicit ResourceManager(ID3D12Device& device) : mDevice(device) {}
+	static ResourceManager& Create(ID3D12Device& device) noexcept;
+	static ResourceManager& Get() noexcept;
+	
 	ResourceManager(const ResourceManager&) = delete;
 	const ResourceManager& operator=(const ResourceManager&) = delete;
 
@@ -64,6 +63,8 @@ public:
 	__forceinline void Clear() noexcept { ClearResources(); ClearUploadBuffers(); ClearDescriptorHeaps(); ClearFences(); }
 
 private:
+	explicit ResourceManager(ID3D12Device& device);
+
 	ID3D12Device& mDevice;
 
 	using ResourceById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12Resource>>;

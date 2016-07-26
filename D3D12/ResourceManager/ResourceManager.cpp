@@ -1,11 +1,30 @@
 #include "ResourceManager.h"
 
+#include <memory>
+
 #include <DXUtils/D3DFactory.h>
 #include <DXUtils/d3dx12.h>
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
-std::unique_ptr<ResourceManager> ResourceManager::gManager = nullptr;
+namespace {
+	std::unique_ptr<ResourceManager> gManager{ nullptr };
+}
+
+ResourceManager& ResourceManager::Create(ID3D12Device& device) noexcept {
+	ASSERT(gManager == nullptr);
+	gManager.reset(new ResourceManager(device));
+	return *gManager.get();
+}
+ResourceManager& ResourceManager::Get() noexcept {
+	ASSERT(gManager != nullptr);
+	return *gManager.get();
+}
+
+ResourceManager::ResourceManager(ID3D12Device& device)
+	: mDevice(device)
+{
+}
 
 std::size_t ResourceManager::CreateDefaultBuffer(
 	ID3D12GraphicsCommandList& cmdList,

@@ -3,13 +3,12 @@
 #include <cstdint>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
-#include <memory>
 
 class Keyboard {
 public:
-	static std::unique_ptr<Keyboard> gKeyboard;
+	static Keyboard& Create(IDirectInput8& directInput, const HWND windowHandle) noexcept;
+	static Keyboard& Get() noexcept;
 
-	explicit Keyboard(IDirectInput8& directInput, const HWND windowHandle);
 	Keyboard(const Keyboard&) = delete;
 	const Keyboard& operator=(const Keyboard& rhs) = delete;
 	~Keyboard();
@@ -28,6 +27,8 @@ public:
 	__forceinline bool IsKeyHeldDown(const std::uint8_t key) const noexcept { return IsKeyDown(key) && WasKeyDown(key); }
 
 private:
+	explicit Keyboard(IDirectInput8& directInput, const HWND windowHandle);
+
 	IDirectInput8& mDirectInput;
 	LPDIRECTINPUTDEVICE8 mDevice{ nullptr };
 	std::uint8_t mCurrentState[256U] = {};

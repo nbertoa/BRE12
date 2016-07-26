@@ -35,7 +35,7 @@ public:
 	void Terminate() noexcept;	
 
 private:
-	CommandListProcessor(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists);
+	explicit CommandListProcessor(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists);
 
 	// Called when tbb::task is spawned
 	tbb::task* execute() override;

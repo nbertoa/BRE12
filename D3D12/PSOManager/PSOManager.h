@@ -1,16 +1,15 @@
 #pragma once
 
 #include <d3d12.h>
-#include <memory>
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/mutex.h>
 #include <wrl.h>
 
 class PSOManager {
 public:
-	static std::unique_ptr<PSOManager> gManager;
-
-	explicit PSOManager(ID3D12Device& device) : mDevice(device) {}
+	static PSOManager& Create(ID3D12Device& device) noexcept;
+	static PSOManager& Get() noexcept;
+		
 	PSOManager(const PSOManager&) = delete;
 	const PSOManager& operator=(const PSOManager&) = delete;
 
@@ -26,6 +25,8 @@ public:
 	__forceinline void Clear() noexcept { mPSOById.clear(); }
 
 private:
+	explicit PSOManager(ID3D12Device& device);
+
 	ID3D12Device& mDevice;
 
 	using PSOById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>>;

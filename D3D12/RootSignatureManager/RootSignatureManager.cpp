@@ -1,11 +1,29 @@
 #include "RootSignatureManager.h"
 
 #include <D3Dcompiler.h>
+#include <memory>
 
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
-std::unique_ptr<RootSignatureManager> RootSignatureManager::gManager = nullptr;
+namespace {
+	std::unique_ptr<RootSignatureManager> gManager{ nullptr };
+}
+
+RootSignatureManager& RootSignatureManager::Create(ID3D12Device& device) noexcept {
+	ASSERT(gManager == nullptr);
+	gManager.reset(new RootSignatureManager(device));
+	return *gManager.get();
+}
+RootSignatureManager& RootSignatureManager::Get() noexcept {
+	ASSERT(gManager != nullptr);
+	return *gManager.get();
+}
+
+RootSignatureManager::RootSignatureManager(ID3D12Device& device)
+	: mDevice(device)
+{
+}
 
 std::size_t RootSignatureManager::CreateRootSignature(const D3D12_ROOT_SIGNATURE_DESC& desc, ID3D12RootSignature* &rootSign) noexcept {
 	Microsoft::WRL::ComPtr<ID3DBlob> serializedRootSig;

@@ -2,8 +2,6 @@
 
 using namespace DirectX;
 
-std::unique_ptr<Camera> Camera::gCamera = nullptr;
-
 void Camera::SetLens(const float fovY, const float aspect, const float zn, const float zf) noexcept {
 	// cache properties
 	mFovY = fovY;

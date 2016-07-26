@@ -9,32 +9,32 @@
 namespace {
 	void BuildPSO(const PSOCreator::Input& input, PSOCreator::Output& output) noexcept {
 		ID3DBlob* rootSignBlob{ nullptr };
-		ShaderManager::gManager->LoadShaderFile(input.mRootSignFilename, rootSignBlob);
-		RootSignatureManager::gManager->CreateRootSignature(*rootSignBlob, output.mRootSign);
+		ShaderManager::Get().LoadShaderFile(input.mRootSignFilename, rootSignBlob);
+		RootSignatureManager::Get().CreateRootSignature(*rootSignBlob, output.mRootSign);
 
 		D3D12_SHADER_BYTECODE vertexShader{};
 		if (input.mVSFilename != nullptr) {
-			ShaderManager::gManager->LoadShaderFile(input.mVSFilename, vertexShader);
+			ShaderManager::Get().LoadShaderFile(input.mVSFilename, vertexShader);
 		}
 
 		D3D12_SHADER_BYTECODE geomShader{};
 		if (input.mGSFilename != nullptr) {
-			ShaderManager::gManager->LoadShaderFile(input.mGSFilename, geomShader);
+			ShaderManager::Get().LoadShaderFile(input.mGSFilename, geomShader);
 		}
 
 		D3D12_SHADER_BYTECODE domainShader{};
 		if (input.mDSFilename != nullptr) {
-			ShaderManager::gManager->LoadShaderFile(input.mDSFilename, domainShader);
+			ShaderManager::Get().LoadShaderFile(input.mDSFilename, domainShader);
 		}
 
 		D3D12_SHADER_BYTECODE hullShader{};
 		if (input.mHSFilename != nullptr) {
-			ShaderManager::gManager->LoadShaderFile(input.mHSFilename, hullShader);
+			ShaderManager::Get().LoadShaderFile(input.mHSFilename, hullShader);
 		}
 
 		D3D12_SHADER_BYTECODE pixelShader{};
 		if (input.mPSFilename != nullptr) {
-			ShaderManager::gManager->LoadShaderFile(input.mPSFilename, pixelShader);
+			ShaderManager::Get().LoadShaderFile(input.mPSFilename, pixelShader);
 		}
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = {};
@@ -55,7 +55,7 @@ namespace {
 		desc.SampleMask = input.mSampleMask;
 		desc.VS = vertexShader;
 
-		PSOManager::gManager->CreateGraphicsPSO(desc, output.mPSO);
+		PSOManager::Get().CreateGraphicsPSO(desc, output.mPSO);
 	}
 }
 

@@ -1,15 +1,14 @@
 #pragma once
 
 #include <DirectXMath.h>
-#include <memory>
 
 #include <MathUtils\MathHelper.h>
 
 class Camera {
 public:
-	static std::unique_ptr<Camera> gCamera;
-
 	Camera() = default;
+	Camera(const Camera&) = delete;
+	const Camera& operator=(const Camera&) = delete;
 
 	// Get/Set world camera position.
 	__forceinline DirectX::XMVECTOR GetPosition() const noexcept { return XMLoadFloat3(&mPosition); }
@@ -102,7 +101,7 @@ private:
 
 	bool mViewDirty{ true };
 
-	// Cache View/Proj matrices.
+	// Cache View and Projection matrices.
 	DirectX::XMFLOAT4X4 mView{ MathHelper::Identity4x4() };
 	DirectX::XMFLOAT4X4 mProj{ MathHelper::Identity4x4() };
 };

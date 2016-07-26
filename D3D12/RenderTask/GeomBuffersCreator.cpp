@@ -11,14 +11,14 @@ namespace {
 
 		std::uint32_t byteSize{ input.mNumVerts * (std::uint32_t)input.mVertexSize };
 
-		ResourceManager::gManager->CreateDefaultBuffer(cmdList, input.mVertsData, byteSize, output.mVertexBuffer, output.mUploadVertexBuffer);
+		ResourceManager::Get().CreateDefaultBuffer(cmdList, input.mVertsData, byteSize, output.mVertexBuffer, output.mUploadVertexBuffer);
 		output.mVertexBufferView.BufferLocation = output.mVertexBuffer->GetGPUVirtualAddress();
 		output.mVertexBufferView.SizeInBytes = byteSize;
 		output.mVertexBufferView.StrideInBytes = (std::uint32_t)input.mVertexSize;
 
 		output.mIndexCount = input.mNumIndices;
 		byteSize = input.mNumIndices * sizeof(std::uint32_t);
-		ResourceManager::gManager->CreateDefaultBuffer(cmdList, input.mIndexData, byteSize, output.mIndexBuffer, output.mUploadIndexBuffer);
+		ResourceManager::Get().CreateDefaultBuffer(cmdList, input.mIndexData, byteSize, output.mIndexBuffer, output.mUploadIndexBuffer);
 		output.mIndexBufferView.BufferLocation = output.mIndexBuffer->GetGPUVirtualAddress();
 		output.mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 		output.mIndexBufferView.SizeInBytes = byteSize;

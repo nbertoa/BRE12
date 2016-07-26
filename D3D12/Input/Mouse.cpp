@@ -1,12 +1,28 @@
 #include "Mouse.h"
 
+#include <memory>
+
 #include <Utils/DebugUtils.h>
 
-std::unique_ptr<Mouse> Mouse::gMouse{ nullptr };
+namespace {
+	std::unique_ptr<Mouse> gMouse{ nullptr };
+}
+
+Mouse& Mouse::Create(IDirectInput8& directInput, const HWND windowHandle) noexcept {
+	ASSERT(gMouse == nullptr);
+	gMouse.reset(new Mouse(directInput, windowHandle));
+	return *gMouse.get();
+}
+Mouse& Mouse::Get() noexcept {
+	ASSERT(gMouse != nullptr);
+	return *gMouse.get();
+}
 
 Mouse::Mouse(IDirectInput8& directInput, const HWND windowHandle)
 	: mDirectInput(directInput)
 {
+	ASSERT(gMouse == nullptr);
+
 	CHECK_HR(mDirectInput.CreateDevice(GUID_SysMouse, &mDevice, nullptr));
 	ASSERT(mDevice != nullptr);
 	CHECK_HR(mDevice->SetDataFormat(&c_dfDIMouse));
