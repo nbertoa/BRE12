@@ -13,7 +13,7 @@ public:
 
 	static const bool sFullscreen{ true };
 	static const std::uint32_t sCpuProcessors{ 4U }; // This should be changed according your processor
-	static const std::uint32_t sSwapChainBufferCount{ 2U };
+	static const std::uint32_t sSwapChainBufferCount{ 4U };
 	static const std::uint32_t sQueuedFrameCount{ sSwapChainBufferCount - 1U };
 	static const std::uint32_t sWindowWidth{ 1920U };
 	static const std::uint32_t sWindowHeight{ 1080U };

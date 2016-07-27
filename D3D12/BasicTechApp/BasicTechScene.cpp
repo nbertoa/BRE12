@@ -58,10 +58,8 @@ namespace {
 void BasicTechScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
 
-	GeometryGenerator::MeshData sphere;
-	GeometryGenerator::CreateSphere(2.0f, 20U, 20U, sphere);
-	GeometryGenerator::MeshData box;
-	GeometryGenerator::CreateBox(2.0f, 2.0f, 2.0f, 2U, box);
+	GeometryGenerator::MeshData shape;
+	GeometryGenerator::CreateCylinder(1.0f, 1.0f, 4.0f, 50U, 50U, shape);
 
 	const std::size_t numTasks{ 4UL };
 	const std::size_t numGeometry{ 1000UL };
@@ -76,11 +74,11 @@ void BasicTechScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12Comman
 	const PSOCreator::Output& psoCreatorOutput(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::BASIC));
 
 	GeomBuffersCreator::Input geomBuffersCreatorInput(
-		sphere.mVertices.data(), 
-		(std::uint32_t)sphere.mVertices.size(), 
+		shape.mVertices.data(),
+		(std::uint32_t)shape.mVertices.size(),
 		sizeof(GeometryGenerator::Vertex), 
-		sphere.mIndices32.data(), 
-		(std::uint32_t)sphere.mIndices32.size()
+		shape.mIndices32.data(),
+		(std::uint32_t)shape.mIndices32.size()
 	);
 	GeomBuffersCreator::Output geomBuffersCreatorOutput;
 	GeomBuffersCreator::Execute(cmdListQueue, *cmdList, geomBuffersCreatorInput, geomBuffersCreatorOutput);
