@@ -60,8 +60,8 @@ void D3dData::CreateSwapChain(const HWND hwnd, ID3D12CommandQueue& cmdQueue) noe
 	IDXGISwapChain* swapChain{ nullptr };
 
 	DXGI_SWAP_CHAIN_DESC sd = {};
-	sd.BufferDesc.Width = 0U;
-	sd.BufferDesc.Height = 0U;
+	sd.BufferDesc.Width = Settings::sWindowWidth;
+	sd.BufferDesc.Height = Settings::sWindowHeight;
 	sd.BufferDesc.RefreshRate.Numerator = 60U;
 	sd.BufferDesc.RefreshRate.Denominator = 1U;
 	sd.BufferDesc.Format = Settings::sBackBufferFormat;
@@ -86,5 +86,5 @@ void D3dData::CreateSwapChain(const HWND hwnd, ID3D12CommandQueue& cmdQueue) noe
 	D3dData::mSwapChain->SetFullscreenState(Settings::sFullscreen, nullptr);
 
 	// Resize the swap chain.
-	CHECK_HR(D3dData::mSwapChain->ResizeBuffers(0U, 0U, 0U, DXGI_FORMAT_UNKNOWN, 0U));
+	CHECK_HR(D3dData::mSwapChain->ResizeBuffers(Settings::sSwapChainBufferCount, Settings::sWindowWidth, Settings::sWindowHeight, Settings::sBackBufferFormat, 0U));
 }

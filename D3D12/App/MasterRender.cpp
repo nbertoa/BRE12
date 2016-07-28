@@ -138,7 +138,8 @@ tbb::task* MasterRender::execute() {
 		// Execute begin Frame task + # cmd build tasks
 		CHECK_HR(mCmdListFrameBegin->Close());
 		cmdListQueue.push(mCmdListFrameBegin);
-		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount - 1, (taskCount - 1) / Settings::sCpuProcessors),
+		const std::uint32_t grainSize{ max(1U, (taskCount - 1) / Settings::sCpuProcessors) };
+		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount - 1, grainSize),
 			[&](const tbb::blocked_range<size_t>& r) {
 			for (size_t i = r.begin(); i != r.end(); ++i)
 				mCmdListRecorders[i]->RecordCommandLists(mView, mProj, backBufferHandle, dsvHandle);
@@ -292,7 +293,7 @@ void MasterRender::FlushCommandQueue() noexcept {
 
 void MasterRender::SignalFenceAndPresent() noexcept {
 	ASSERT(mSwapChain != nullptr);
-	CHECK_HR(mSwapChain->Present(0U, 0U));
+	CHECK_HR(mSwapChain->Present(1U, 0U));
 
 	// Add an instruction to the command queue to set a new fence point.  Because we 
 	// are on the GPU time line, the new fence point won't be set until the GPU finishes

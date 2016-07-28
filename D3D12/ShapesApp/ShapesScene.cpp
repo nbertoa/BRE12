@@ -29,7 +29,6 @@ namespace {
 		descHeapDesc.NumDescriptors = numGeomDesc; // +1 for frame constants
 		descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, task.CVBHeap());
-		task.CBVBaseGpuDescHandle() = task.CVBHeap()->GetGPUDescriptorHandleForHeapStart();
 
 		const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 
@@ -85,7 +84,8 @@ void ShapesScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12CommandLi
 	GeomBuffersCreator::Execute(cmdListQueue, *cmdList, geomBuffersCreatorInput, geomBuffersCreatorOutput);
 	
 	const float meshSpaceOffset{ 100.0f };
-	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, numTasks, numTasks / Settings::sCpuProcessors),
+	const std::uint32_t grainSize{ max(1U, (std::uint32_t)numTasks / Settings::sCpuProcessors) };
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, numTasks, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
 			std::unique_ptr<CmdListRecorder>& task{ tasks[k] };

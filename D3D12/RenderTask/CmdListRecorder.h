@@ -30,7 +30,6 @@ public:
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
 	__forceinline ID3D12DescriptorHeap* & CVBHeap() noexcept { return mCBVHeap; }
-	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& CBVBaseGpuDescHandle() noexcept { return mCbvBaseGpuDescHandle; }
 	__forceinline ID3D12RootSignature* &RootSign() noexcept { return mRootSign; }
 	__forceinline ID3D12PipelineState* &PSO() noexcept { return mPSO; }
 	__forceinline D3D12_PRIMITIVE_TOPOLOGY_TYPE& PrimitiveTopologyType() noexcept { return mTopology; }
@@ -64,7 +63,6 @@ protected:
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
 	ID3D12DescriptorHeap* mCBVHeap{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mCbvBaseGpuDescHandle;
 	ID3D12RootSignature* mRootSign{ nullptr };
 	ID3D12PipelineState* mPSO{ nullptr };
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };

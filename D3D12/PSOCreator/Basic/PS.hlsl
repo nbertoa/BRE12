@@ -8,24 +8,30 @@ struct Input {
 	float3 mNormalV : NORMAL_VIEW;
 };
 
+struct Material {
+	float4 mBaseColor_MetalMask;
+	float4 mReflectance_Smoothness;
+};
+ConstantBuffer<Material> gMaterial : register(b0);
+
 struct FrameConstants {
 	float4x4 mV;
 };
-ConstantBuffer<FrameConstants> gFrameConstants : register(b0);
+ConstantBuffer<FrameConstants> gFrameConstants : register(b1);
 
 float4 main(const in Input input) : SV_TARGET{
 	PunctualLight light;	
 	light.mPosV = mul(float4(0.0f, 0.0f, 0.0f, 1.0f), gFrameConstants.mV).xyz;
-	light.mRange = 800.0f;
+	light.mRange = 8000.0f;
 	light.mColor = float3(1.0f, 1.0f, 1.0f);
-	light.mPower = 1000.0f;
+	light.mPower = 2000.0f;
 	
 	const float3 luminance = computeLuminance(light, input.mPosV);
 
-	const float3 baseColor = float3(1.0f, 0.71f, 0.29f);
-	const float metalMask = 1.0f;
-	const float smoothness = 0.6f;
-	const float3 reflectance = float3(0.1f, 0.1f, 0.1f);
+	const float3 baseColor = gMaterial.mBaseColor_MetalMask.xyz;
+	const float metalMask = gMaterial.mBaseColor_MetalMask.w;
+	const float smoothness = gMaterial.mReflectance_Smoothness.w;
+	const float3 reflectance = gMaterial.mReflectance_Smoothness.xyz;
 	const float3 lightDirV = light.mPosV - input.mPosV;
 	const float3 normalV = normalize(input.mNormalV);
 
