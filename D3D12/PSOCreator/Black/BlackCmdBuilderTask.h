@@ -4,9 +4,9 @@
 
 #include <RenderTask/CmdListRecorder.h>
 
-class ShapesCmdBuilderTask : public CmdListRecorder {
+class BlackCmdBuilderTask : public CmdListRecorder {
 public:
-	explicit ShapesCmdBuilderTask(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	explicit BlackCmdBuilderTask(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
 	void RecordCommandLists(
 		const DirectX::XMFLOAT4X4& view,

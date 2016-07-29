@@ -4,16 +4,16 @@
 
 #include <CommandManager/CommandManager.h>
 #include <GlobalData/D3dData.h>
+#include <PSOCreator/Black/BlackCmdBuilderTask.h>
 #include <PSOCreator/PSOCreator.h>
 #include <RenderTask/GeomBuffersCreator.h>
 #include <ResourceManager/ResourceManager.h>
-#include <ShapesApp/ShapesCmdBuilderTask.h>
 
 namespace {
 	void BuildConstantBuffers(CmdListRecorder& task) noexcept {
-		ASSERT(task.CVBHeap() == nullptr);
-		ASSERT(task.FrameConstants() == nullptr);
-		ASSERT(task.ObjectConstants() == nullptr);
+		ASSERT(task.CbvSrvUavDescHeap() == nullptr);
+		ASSERT(task.FrameCBuffer() == nullptr);
+		ASSERT(task.ObjectCBuffer() == nullptr);
 
 		const std::uint32_t geomCount{ (std::uint32_t)task.GetGeometryVec().size() };
 		std::uint32_t numGeomDesc{ 0U };
@@ -26,30 +26,43 @@ namespace {
 		D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 		descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		descHeapDesc.NodeMask = 0U;
-		descHeapDesc.NumDescriptors = numGeomDesc; // +1 for frame constants
+		descHeapDesc.NumDescriptors = numGeomDesc;
 		descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, task.CVBHeap());
+		ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, task.CbvSrvUavDescHeap());
 
 		const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 
-		const std::size_t elemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4)) };
+		const std::size_t cbSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4)) };
 
 		// Fill constant buffers descriptor heap with per objects constants buffer views
-		ResourceManager::Get().CreateUploadBuffer(elemSize, numGeomDesc, task.ObjectConstants());
-		D3D12_GPU_VIRTUAL_ADDRESS cbObjGPUBaseAddress{ task.ObjectConstants()->Resource()->GetGPUVirtualAddress() };
+		ResourceManager::Get().CreateUploadBuffer(cbSize, numGeomDesc, task.ObjectCBuffer());
+		D3D12_GPU_VIRTUAL_ADDRESS objectsCBufferGpuAddress{ task.ObjectCBuffer()->Resource()->GetGPUVirtualAddress() };
 		for (std::size_t i = 0UL; i < numGeomDesc; ++i) {
-			D3D12_CPU_DESCRIPTOR_HANDLE descHandle = task.CVBHeap()->GetCPUDescriptorHandleForHeapStart();
-			descHandle.ptr += i * descHandleIncSize;
+			D3D12_CPU_DESCRIPTOR_HANDLE cbvSrvUavCpuDescHandle = task.CbvSrvUavDescHeap()->GetCPUDescriptorHandleForHeapStart();
+			cbvSrvUavCpuDescHandle.ptr += i * descHandleIncSize;
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
-			cbvDesc.BufferLocation = cbObjGPUBaseAddress + i * elemSize;
-			cbvDesc.SizeInBytes = (std::uint32_t)elemSize;
+			cbvDesc.BufferLocation = objectsCBufferGpuAddress + i * cbSize;
+			cbvDesc.SizeInBytes = (std::uint32_t)cbSize;
 
-			ResourceManager::Get().CreateConstantBufferView(cbvDesc, descHandle);
+			ResourceManager::Get().CreateConstantBufferView(cbvDesc, cbvSrvUavCpuDescHandle);
 		}
 
 		// Create upload buffer for frame constants
-		ResourceManager::Get().CreateUploadBuffer(elemSize, 1U, task.FrameConstants());
+		ResourceManager::Get().CreateUploadBuffer(cbSize, 1U, task.FrameCBuffer());
+
+		// Fill object cbuffer data
+		std::uint32_t k{ 0U };
+		for (std::size_t i = 0UL; i < geomCount; ++i) {
+			const std::uint32_t worldMatsCount{ (std::uint32_t)task.WorldMatricesByGeomIndex()[i].size() };
+			for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
+				DirectX::XMFLOAT4X4 w;
+				const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&task.WorldMatricesByGeomIndex()[i][j]));
+				DirectX::XMStoreFloat4x4(&w, wMatrix);
+				task.ObjectCBuffer()->CopyData(k + j, &w, sizeof(w));
+			}
+			k += worldMatsCount;
+		}
 	}
 }
 
@@ -89,7 +102,7 @@ void ShapesScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12CommandLi
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
 			std::unique_ptr<CmdListRecorder>& task{ tasks[k] };
-			task.reset(new ShapesCmdBuilderTask(D3dData::Device(), cmdListQueue));
+			task.reset(new BlackCmdBuilderTask(D3dData::Device(), cmdListQueue));
 			task->PSO() = psoCreatorOutput.mPSO;
 			task->RootSign() = psoCreatorOutput.mRootSign;
 

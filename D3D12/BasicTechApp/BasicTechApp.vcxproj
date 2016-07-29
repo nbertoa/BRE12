@@ -114,11 +114,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BasicTechCmdBuilderTask.cpp" />
     <ClCompile Include="BasicTechScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BasicTechCmdBuilderTask.h" />
     <ClInclude Include="BasicTechScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

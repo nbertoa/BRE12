@@ -29,12 +29,12 @@ public:
 		
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
-	__forceinline ID3D12DescriptorHeap* & CVBHeap() noexcept { return mCBVHeap; }
+	__forceinline ID3D12DescriptorHeap* & CbvSrvUavDescHeap() noexcept { return mCbvSrvUavDescHeap; }
 	__forceinline ID3D12RootSignature* &RootSign() noexcept { return mRootSign; }
 	__forceinline ID3D12PipelineState* &PSO() noexcept { return mPSO; }
 	__forceinline D3D12_PRIMITIVE_TOPOLOGY_TYPE& PrimitiveTopologyType() noexcept { return mTopology; }
-	__forceinline UploadBuffer* &FrameConstants() noexcept { return mFrameConstants; }
-	__forceinline UploadBuffer* &ObjectConstants() noexcept { return mObjectConstants; }
+	__forceinline UploadBuffer* &FrameCBuffer() noexcept { return mFrameCBuffer; }
+	__forceinline UploadBuffer* &ObjectCBuffer() noexcept { return mObjectCBuffer; }
 	__forceinline D3D12_VIEWPORT& ScreenViewport() noexcept { return mScreenViewport; }
 	__forceinline D3D12_RECT& ScissorRector() noexcept { return mScissorRect; }
 	__forceinline GeometryVec& GetGeometryVec() noexcept { return mGeometryVec; }
@@ -62,12 +62,12 @@ protected:
 
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
-	ID3D12DescriptorHeap* mCBVHeap{ nullptr };
+	ID3D12DescriptorHeap* mCbvSrvUavDescHeap{ nullptr };
 	ID3D12RootSignature* mRootSign{ nullptr };
 	ID3D12PipelineState* mPSO{ nullptr };
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
-	UploadBuffer* mFrameConstants{ nullptr };
-	UploadBuffer* mObjectConstants{ nullptr };
+	UploadBuffer* mFrameCBuffer{ nullptr };
+	UploadBuffer* mObjectCBuffer{ nullptr };
 	D3D12_VIEWPORT mScreenViewport{ 0.0f, 0.0f, (float)Settings::sWindowWidth, (float)Settings::sWindowHeight, 0.0f, 1.0f };
 	D3D12_RECT mScissorRect{ 0, 0, Settings::sWindowWidth, Settings::sWindowHeight };
 	

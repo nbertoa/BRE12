@@ -116,11 +116,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ShapesCmdBuilderTask.cpp" />
     <ClCompile Include="ShapesScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ShapesCmdBuilderTask.h" />
     <ClInclude Include="ShapesScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

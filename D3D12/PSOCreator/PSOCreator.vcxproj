@@ -116,9 +116,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Basic\BasicCmdBuilderTask.cpp" />
+    <ClCompile Include="Black\BlackCmdBuilderTask.cpp" />
     <ClCompile Include="PSOCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Basic\BasicCmdBuilderTask.h" />
+    <ClInclude Include="Black\BlackCmdBuilderTask.h" />
     <ClInclude Include="PSOCreator.h" />
   </ItemGroup>
   <ItemGroup>
@@ -188,7 +192,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Basic\Lighting.hlsli" />
+    <None Include="Lighting.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

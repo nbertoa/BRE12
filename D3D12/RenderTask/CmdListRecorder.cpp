@@ -37,11 +37,11 @@ bool CmdListRecorder::ValidateData() const noexcept {
 	return
 		mCmdList != nullptr &&
 		mCmdAlloc != nullptr &&
-		mCBVHeap != nullptr &&
+		mCbvSrvUavDescHeap != nullptr &&
 		mRootSign != nullptr &&
 		mPSO != nullptr &&
-		mFrameConstants != nullptr &&
-		mObjectConstants != nullptr &&
+		mFrameCBuffer != nullptr &&
+		mObjectCBuffer != nullptr &&
 		mGeometryVec.empty() == false && 
 		mGeometryVec.size() == mWorldMatricesByGeomIndex.size();
 }

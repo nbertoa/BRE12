@@ -1,4 +1,4 @@
-#include "Lighting.hlsli"
+#include "../Lighting.hlsli"
 
 #define BRDF_FROSTBITE 
 

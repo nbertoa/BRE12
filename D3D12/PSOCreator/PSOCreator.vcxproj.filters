@@ -2,9 +2,21 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="PSOCreator.cpp" />
+    <ClCompile Include="Black\BlackCmdBuilderTask.cpp">
+      <Filter>Black</Filter>
+    </ClCompile>
+    <ClCompile Include="Basic\BasicCmdBuilderTask.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PSOCreator.h" />
+    <ClInclude Include="Black\BlackCmdBuilderTask.h">
+      <Filter>Black</Filter>
+    </ClInclude>
+    <ClInclude Include="Basic\BasicCmdBuilderTask.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Black">
@@ -35,8 +47,6 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Basic\Lighting.hlsli">
-      <Filter>Basic</Filter>
-    </None>
+    <None Include="Lighting.hlsli" />
   </ItemGroup>
 </Project>
