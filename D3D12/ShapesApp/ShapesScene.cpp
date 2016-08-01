@@ -66,7 +66,7 @@ namespace {
 	}
 }
 
-void ShapesScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
+void ShapesScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
 
 	GeometryGenerator::MeshData sphere;

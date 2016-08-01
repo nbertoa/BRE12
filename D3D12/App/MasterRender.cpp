@@ -137,7 +137,7 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 void MasterRender::InitCmdListRecorders(Scene* scene) noexcept {
 	ASSERT(scene != nullptr);
 
-	scene->GenerateCmdListRecorders(mCmdListProcessor->CmdListQueue(), mCmdListRecorders);
+	scene->GenerateGeomPassRecorders(mCmdListProcessor->CmdListQueue(), mCmdListRecorders);
 	FlushCommandQueue();
 	const std::uint64_t count{ _countof(mFenceByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {

@@ -102,14 +102,14 @@ namespace {
 	}
 }
 
-void BasicTechScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
+void BasicTechScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
 
 	GeometryGenerator::MeshData shape;
 	GeometryGenerator::CreateSphere(2.0f, 50U, 50U, shape);
 
-	const std::size_t numTasks{ 4UL };
-	const std::size_t numGeometry{ 2500UL };
+	const std::size_t numTasks{ 1UL };
+	const std::size_t numGeometry{ 250UL };
 	tasks.resize(numTasks);
 
 	// Create a command list 

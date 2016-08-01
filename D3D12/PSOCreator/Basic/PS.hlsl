@@ -20,11 +20,11 @@ struct FrameConstants {
 ConstantBuffer<FrameConstants> gFrameConstants : register(b1);
 
 struct Output {	
-	float4 NormalV : SV_Target0;
-	float4 PosV : SV_Target1;
-	float4 BaseColor_MetalMask : SV_Target2;
-	float4 Reflectance_Smoothness : SV_Target3;
-	float4 Color : SV_Target4;
+	float4 mNormalV : SV_Target0;
+	float4 mPosV : SV_Target1;
+	float4 mBaseColor_MetalMask : SV_Target2;
+	float4 mReflectance_Smoothness : SV_Target3;
+	float4 mColor : SV_Target4;
 };
 
 Output main(const in Input input) {
@@ -51,7 +51,11 @@ Output main(const in Input input) {
 #else
 	illuminance = brdf_CookTorrance(normalV, normalize(-input.mPosV), normalize(lightDirV), baseColor, smoothness, reflectance, metalMask);
 #endif
-	output.Color = float4(luminance * illuminance, 1.0f);
-
+	output.mNormalV = float4(normalV, 0.0f);
+	output.mPosV = float4(input.mPosV, 1.0f);
+	output.mBaseColor_MetalMask = gMaterial.mBaseColor_MetalMask;
+	output.mReflectance_Smoothness = gMaterial.mReflectance_Smoothness;
+	output.mColor = float4(luminance * illuminance, 1.0f);
+	
 	return output;
 }

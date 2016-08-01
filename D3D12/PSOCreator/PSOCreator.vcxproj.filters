@@ -25,6 +25,9 @@
     <Filter Include="Basic">
       <UniqueIdentifier>{90df0df8-68d5-4fda-9646-96b13a93be87}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PunctualLight">
+      <UniqueIdentifier>{f31e1388-e30e-436b-92ef-a3c440f4e333}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Black\PS.hlsl">
@@ -44,6 +47,18 @@
     </FxCompile>
     <FxCompile Include="Basic\VS.hlsl">
       <Filter>Basic</Filter>
+    </FxCompile>
+    <FxCompile Include="PunctualLight\VS.hlsl">
+      <Filter>PunctualLight</Filter>
+    </FxCompile>
+    <FxCompile Include="PunctualLight\GS.hlsl">
+      <Filter>PunctualLight</Filter>
+    </FxCompile>
+    <FxCompile Include="PunctualLight\PS.hlsl">
+      <Filter>PunctualLight</Filter>
+    </FxCompile>
+    <FxCompile Include="PunctualLight\RS.hlsl">
+      <Filter>PunctualLight</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

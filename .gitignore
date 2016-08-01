@@ -575,3 +575,11 @@
 /D3D12/BasicTechApp/x64/Debug/vc.nativecodeanalysis.all.xml
 /D3D12/PSOCreator/x64/Debug/basiccmdlistrecorder.nativecodeanalysis.xml
 /D3D12/PSOCreator/x64/Debug/blackcmdlistrecorder.nativecodeanalysis.xml
+/D3D12/x64/Debug/PSOCreator/PunctualLight/GS.cso
+/D3D12/x64/Debug/PSOCreator/PunctualLight/PS.cso
+/D3D12/x64/Debug/PSOCreator/PunctualLight/RS.cso
+/D3D12/x64/Debug/PSOCreator/PunctualLight/VS.cso
+/D3D12/x64/Release/PSOCreator/PunctualLight/GS.cso
+/D3D12/x64/Release/PSOCreator/PunctualLight/PS.cso
+/D3D12/x64/Release/PSOCreator/PunctualLight/RS.cso
+/D3D12/x64/Release/PSOCreator/PunctualLight/VS.cso
