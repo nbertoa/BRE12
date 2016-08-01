@@ -1,5 +1,6 @@
 #include "PSOCreator.h"
 
+#include <App/MasterRender.h>
 #include <GlobalData/Settings.h>
 #include <PSOManager/PSOManager.h>
 #include <RootSignatureManager/RootSignatureManager.h>
@@ -41,7 +42,7 @@ namespace {
 		desc.BlendState = input.mBlendDesc;
 		desc.DepthStencilState = input.mDepthStencilDesc;
 		desc.DS = domainShader;
-		desc.DSVFormat = Settings::sDepthStencilFormat;
+		desc.DSVFormat = MasterRender::DepthStencilFormat();
 		desc.GS = geomShader;
 		desc.HS = hullShader;
 		desc.InputLayout = { input.mInputLayout.data(), (std::uint32_t)input.mInputLayout.size() };
@@ -50,7 +51,7 @@ namespace {
 		desc.pRootSignature = output.mRootSign;
 		desc.PS = pixelShader;
 		desc.RasterizerState = D3DFactory::DefaultRasterizerDesc();
-		memcpy(desc.RTVFormats, Settings::sRTVFormats, sizeof(Settings::sRTVFormats));
+		memcpy(desc.RTVFormats, MasterRender::GeomPassBuffersFormats(), sizeof(DXGI_FORMAT) * D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 		desc.SampleDesc = input.mSampleDesc;
 		desc.SampleMask = input.mSampleMask;
 		desc.VS = vertexShader;
@@ -77,6 +78,7 @@ namespace PSOCreator {
 		psoCreatorInput.mPSFilename = "PSOCreator/Black/PS.cso";
 		psoCreatorInput.mRootSignFilename = "PSOCreator/Black/RS.cso";
 		psoCreatorInput.mVSFilename = "PSOCreator/Black/VS.cso";
+		psoCreatorInput.mNumRenderTargets = MasterRender::NumRenderTargets();
 		ASSERT(mPSOData[Technique::BLACK].mPSO == nullptr && mPSOData[Technique::BLACK].mRootSign == nullptr);
 		PSOCreator::Execute(psoCreatorInput, mPSOData[Technique::BLACK]);
 
@@ -85,6 +87,7 @@ namespace PSOCreator {
 		psoCreatorInput.mPSFilename = "PSOCreator/Basic/PS.cso";
 		psoCreatorInput.mRootSignFilename = "PSOCreator/Basic/RS.cso";
 		psoCreatorInput.mVSFilename = "PSOCreator/Basic/VS.cso";
+		psoCreatorInput.mNumRenderTargets = MasterRender::NumRenderTargets();
 		ASSERT(mPSOData[Technique::BASIC].mPSO == nullptr && mPSOData[Technique::BASIC].mRootSign == nullptr);
 		PSOCreator::Execute(psoCreatorInput, mPSOData[Technique::BASIC]);
 	}

@@ -24,7 +24,7 @@ namespace PSOCreator {
 		D3D12_BLEND_DESC mBlendDesc = D3DFactory::DefaultBlendDesc();
 		D3D12_RASTERIZER_DESC mRasterizerDesc = D3DFactory::DefaultRasterizerDesc();
 		D3D12_DEPTH_STENCIL_DESC mDepthStencilDesc = D3DFactory::DefaultDepthStencilDesc();
-		std::uint32_t mNumRenderTargets{ 1U };
+		std::uint32_t mNumRenderTargets{ 0U };
 		DXGI_SAMPLE_DESC mSampleDesc{ 1U, 0U };
 		std::uint32_t mSampleMask{ UINT_MAX };
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };

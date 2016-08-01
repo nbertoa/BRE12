@@ -4,13 +4,13 @@
 
 #include <CommandManager/CommandManager.h>
 #include <GlobalData/D3dData.h>
-#include <PSOCreator/Black/BlackCmdBuilderTask.h>
+#include <PSOCreator/Black/BlackCmdListRecorder.h>
 #include <PSOCreator/PSOCreator.h>
 #include <RenderTask/GeomBuffersCreator.h>
 #include <ResourceManager/ResourceManager.h>
 
 namespace {
-	void BuildConstantBuffers(CmdListRecorder& task) noexcept {
+	void BuildConstantBuffers(BlackCmdListRecorder& task) noexcept {
 		ASSERT(task.CbvSrvUavDescHeap() == nullptr);
 		ASSERT(task.FrameCBuffer() == nullptr);
 		ASSERT(task.ObjectCBuffer() == nullptr);
@@ -102,7 +102,8 @@ void ShapesScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12CommandLi
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
 			std::unique_ptr<CmdListRecorder>& task{ tasks[k] };
-			task.reset(new BlackCmdBuilderTask(D3dData::Device(), cmdListQueue));
+			BlackCmdListRecorder* newTask{ new BlackCmdListRecorder(D3dData::Device(), cmdListQueue) };
+			task.reset(newTask);
 			task->PSO() = psoCreatorOutput.mPSO;
 			task->RootSign() = psoCreatorOutput.mRootSign;
 
@@ -119,7 +120,7 @@ void ShapesScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12CommandLi
 				worldMatByGeomIndex[0][i] = world;
 			}
 
-			BuildConstantBuffers(*task.get());
+			BuildConstantBuffers(*newTask);
 		}
 	}
 	);

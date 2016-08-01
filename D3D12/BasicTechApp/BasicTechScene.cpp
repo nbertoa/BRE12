@@ -5,7 +5,7 @@
 
 #include <CommandManager/CommandManager.h>
 #include <GlobalData/D3dData.h>
-#include <PSOCreator/Basic/BasicCmdBuilderTask.h>
+#include <PSOCreator/Basic/BasicCmdListRecorder.h>
 #include <PSOCreator/PSOCreator.h>
 #include <RenderTask/GeomBuffersCreator.h>
 #include <ResourceManager/ResourceManager.h>
@@ -16,7 +16,7 @@ namespace {
 		float mReflectance_Smoothness[4U];
 	};
 
-	void BuildConstantBuffers(BasicCmdBuilderTask& task) noexcept {
+	void BuildConstantBuffers(BasicCmdListRecorder& task) noexcept {
 		ASSERT(task.CbvSrvUavDescHeap() == nullptr);
 		ASSERT(task.FrameCBuffer() == nullptr);
 		ASSERT(task.ObjectCBuffer() == nullptr);
@@ -48,7 +48,8 @@ namespace {
 		const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 		D3D12_GPU_VIRTUAL_ADDRESS materialsGpuVAddress{ task.MaterialsCBuffer()->Resource()->GetGPUVirtualAddress() };
 		D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ task.ObjectCBuffer()->Resource()->GetGPUVirtualAddress() };
-		task.MaterialsCBufferGpuDescHandleBegin().ptr = task.CbvSrvUavDescHeap()->GetGPUDescriptorHandleForHeapStart().ptr + numGeomDesc * descHandleIncSize;
+		task.ObjectCBufferGpuDescHandleBegin() = task.CbvSrvUavDescHeap()->GetGPUDescriptorHandleForHeapStart();
+		task.MaterialsCBufferGpuDescHandleBegin().ptr = task.ObjectCBufferGpuDescHandleBegin().ptr + numGeomDesc * descHandleIncSize;
 		Material material;
 		for (std::size_t i = 0UL; i < numGeomDesc; ++i) {
 			D3D12_CPU_DESCRIPTOR_HANDLE cbvSrvUavCpuDescHandle = task.CbvSrvUavDescHeap()->GetCPUDescriptorHandleForHeapStart();
@@ -135,7 +136,7 @@ void BasicTechScene::GenerateCmdListRecorders(tbb::concurrent_queue<ID3D12Comman
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
 			std::unique_ptr<CmdListRecorder>& task{ tasks[k] };
-			BasicCmdBuilderTask* newTask{ new BasicCmdBuilderTask(D3dData::Device(), cmdListQueue) };
+			BasicCmdListRecorder* newTask{ new BasicCmdListRecorder(D3dData::Device(), cmdListQueue) };
 			task.reset(newTask);
 			task->PSO() = psoCreatorOutput.mPSO;
 			task->RootSign() = psoCreatorOutput.mRootSign;

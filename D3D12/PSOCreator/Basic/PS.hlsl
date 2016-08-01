@@ -19,7 +19,17 @@ struct FrameConstants {
 };
 ConstantBuffer<FrameConstants> gFrameConstants : register(b1);
 
-float4 main(const in Input input) : SV_TARGET{
+struct Output {	
+	float4 NormalV : SV_Target0;
+	float4 PosV : SV_Target1;
+	float4 BaseColor_MetalMask : SV_Target2;
+	float4 Reflectance_Smoothness : SV_Target3;
+	float4 Color : SV_Target4;
+};
+
+Output main(const in Input input) {
+	Output output = (Output)0;
+
 	PunctualLight light;	
 	light.mPosV = mul(float4(0.0f, 0.0f, 0.0f, 1.0f), gFrameConstants.mV).xyz;
 	light.mRange = 8000.0f;
@@ -41,5 +51,7 @@ float4 main(const in Input input) : SV_TARGET{
 #else
 	illuminance = brdf_CookTorrance(normalV, normalize(-input.mPosV), normalize(lightDirV), baseColor, smoothness, reflectance, metalMask);
 #endif
-	return float4(luminance * illuminance, 1.0f);
+	output.Color = float4(luminance * illuminance, 1.0f);
+
+	return output;
 }

@@ -8,10 +8,12 @@
 
 #include <App/CommandListProcessor.h>
 #include <Camera/Camera.h>
-#include <RenderTask\CmdListRecorder.h>
+#include <GlobalData\Settings.h>
 #include <Timer/Timer.h>
-
+#include <Utils/DebugUtils.h>
+;
 class Scene;
+class CmdListRecorder;
 
 // It has the responsibility to build CmdListRecorder's and also execute them 
 // (to record command lists and push to the queue provided by CommandListProcessor)
@@ -25,6 +27,17 @@ public:
 
 	void Terminate() noexcept;
 
+	__forceinline static const DXGI_FORMAT BackBufferFormat() noexcept { return sBackBufferFormat; }
+	__forceinline static const DXGI_FORMAT* RTVFormats() noexcept { return sRTVFormats; }
+	__forceinline static const DXGI_FORMAT* GeomPassBuffersFormats() noexcept { return sGeomPassBufferFormats; }
+
+
+	//
+	// TODO
+	//
+	__forceinline static const std::uint32_t NumRenderTargets() noexcept { return GEOMBUFFERS_COUNT + 1U; }
+	__forceinline static const DXGI_FORMAT DepthStencilFormat() noexcept { return sDepthStencilFormat; }
+
 private:
 	explicit MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene);
 
@@ -35,6 +48,7 @@ private:
 
 	void CreateRtvAndDsvDescriptorHeaps() noexcept;
 	void CreateRtvAndDsv() noexcept;
+	void CreateGeometryPassRtvs() noexcept;
 	void CreateCommandObjects() noexcept;
 	
 	ID3D12Resource* CurrentBackBuffer() const noexcept;
@@ -44,9 +58,14 @@ private:
 	void FlushCommandQueue() noexcept;
 	void SignalFenceAndPresent() noexcept;
 
+	static const DXGI_FORMAT sBackBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
+	static const DXGI_FORMAT sRTVFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
+	static const DXGI_FORMAT sGeomPassBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
+	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
+
 	HWND mHwnd{ 0 };
 	ID3D12Device& mDevice;
-	IDXGISwapChain3* mSwapChain{ nullptr };
+	Microsoft::WRL::ComPtr<IDXGISwapChain3> mSwapChain{ nullptr };
 
 	Camera mCamera;
 
@@ -66,9 +85,25 @@ private:
 	ID3D12CommandAllocator* mCmdAllocFrameEnd[Settings::sQueuedFrameCount]{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListFrameBegin{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListFrameEnd{ nullptr };
-
+	
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[Settings::sSwapChainBufferCount];
 	ID3D12Resource* mDepthStencilBuffer{ nullptr };
+
+	// Buffers used for geometry pass in deferred shading. They are:
+	// - Normals
+	// - Positions
+	// - BaseColor_MetalMask
+	// - Reflectance_Smoothness
+	enum GeomBuffers {
+		NORMAL = 0U,
+		POSITION,
+		BASECOLOR_METALMASK,
+		REFLECTANCE_SMOOTHNESS,
+		GEOMBUFFERS_COUNT
+	};
+	Microsoft::WRL::ComPtr<ID3D12Resource> mGeomPassBuffers[GEOMBUFFERS_COUNT];
+	D3D12_CPU_DESCRIPTOR_HANDLE mGeomPassBuffersRTVCpuDescHandles[GEOMBUFFERS_COUNT];
+	ID3D12DescriptorHeap* mGeomPassBuffersRTVDescHeap{ nullptr };
 
 	ID3D12DescriptorHeap* mRtvHeap{ nullptr };
 	ID3D12DescriptorHeap* mDsvHeap{ nullptr };

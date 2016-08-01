@@ -6,9 +6,9 @@
 #include <tbb/concurrent_queue.h>
 #include <wrl.h>
 
+#include <App/MasterRender.h>
 #include <DXUtils/D3DFactory.h>
 #include <GeometryGenerator/GeometryGenerator.h>
-#include <GlobalData/Settings.h>
 #include <MathUtils/MathHelper.h>
 #include <RenderTask/GeomBuffersCreator.h>
 #include <Utils/DebugUtils.h>
@@ -29,12 +29,13 @@ public:
 		
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
-	__forceinline ID3D12DescriptorHeap* & CbvSrvUavDescHeap() noexcept { return mCbvSrvUavDescHeap; }
+	__forceinline ID3D12DescriptorHeap* & CbvSrvUavDescHeap() noexcept { return mCbvSrvUavDescHeap; }	
 	__forceinline ID3D12RootSignature* &RootSign() noexcept { return mRootSign; }
 	__forceinline ID3D12PipelineState* &PSO() noexcept { return mPSO; }
 	__forceinline D3D12_PRIMITIVE_TOPOLOGY_TYPE& PrimitiveTopologyType() noexcept { return mTopology; }
 	__forceinline UploadBuffer* &FrameCBuffer() noexcept { return mFrameCBuffer; }
 	__forceinline UploadBuffer* &ObjectCBuffer() noexcept { return mObjectCBuffer; }
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& ObjectCBufferGpuDescHandleBegin() noexcept { return mObjectCBufferGpuDescHandleBegin; }
 	__forceinline D3D12_VIEWPORT& ScreenViewport() noexcept { return mScreenViewport; }
 	__forceinline D3D12_RECT& ScissorRector() noexcept { return mScissorRect; }
 	__forceinline GeometryVec& GetGeometryVec() noexcept { return mGeometryVec; }
@@ -44,7 +45,8 @@ public:
 	virtual void RecordCommandLists(
 		const DirectX::XMFLOAT4X4& view,
 		const DirectX::XMFLOAT4X4& proj,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferHandle,
+		const D3D12_CPU_DESCRIPTOR_HANDLE* geomPassRtvCpuDescHandles,
+		const std::uint32_t geomPassRtvCpuDescHandlesCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept = 0;
 
 protected:
@@ -74,4 +76,6 @@ protected:
 	// We should have a vector of world matrices per geometry.	
 	GeometryVec mGeometryVec;
 	MatricesByGeomIndex mWorldMatricesByGeomIndex;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescHandleBegin;
 };

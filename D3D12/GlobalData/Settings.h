@@ -20,10 +20,6 @@ public:
 	static const float sNearPlaneZ;
 	static const float sFarPlaneZ;
 	static const float sFieldOfView;
-
-	static const DXGI_FORMAT sBackBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
-	static const DXGI_FORMAT sRTVFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
-	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
 	
 	static const D3D12_VIEWPORT sScreenViewport;
 	static const D3D12_RECT sScissorRect;

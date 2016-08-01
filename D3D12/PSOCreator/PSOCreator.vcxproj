@@ -116,13 +116,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Basic\BasicCmdBuilderTask.cpp" />
-    <ClCompile Include="Black\BlackCmdBuilderTask.cpp" />
+    <ClCompile Include="Basic\BasicCmdListRecorder.cpp" />
+    <ClCompile Include="Black\BlackCmdListRecorder.cpp" />
     <ClCompile Include="PSOCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Basic\BasicCmdBuilderTask.h" />
-    <ClInclude Include="Black\BlackCmdBuilderTask.h" />
+    <ClInclude Include="Basic\BasicCmdListRecorder.h" />
+    <ClInclude Include="Black\BlackCmdListRecorder.h" />
     <ClInclude Include="PSOCreator.h" />
   </ItemGroup>
   <ItemGroup>
