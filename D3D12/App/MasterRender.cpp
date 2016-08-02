@@ -137,8 +137,12 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 void MasterRender::InitCmdListRecorders(Scene* scene) noexcept {
 	ASSERT(scene != nullptr);
 
-	scene->GenerateGeomPassRecorders(mCmdListProcessor->CmdListQueue(), mCmdListRecorders);
+	scene->GenerateGeomPassRecorders(mCmdListProcessor->CmdListQueue(), mGeomPassCmdListRecorders);
 	FlushCommandQueue();
+
+	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeomPassBuffers, GEOMBUFFERS_COUNT, mLightPassCmdListRecorders);
+	FlushCommandQueue();
+
 	const std::uint64_t count{ _countof(mFenceByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {
 		mFenceByQueuedFrameIndex[i] = mCurrentFence;
@@ -156,16 +160,19 @@ tbb::task* MasterRender::execute() {
 
 		UpdateCamera(mCamera, mView, mProj, mTimer.DeltaTime());
 
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue{ mCmdListProcessor->CmdListQueue() };
 		ASSERT(mCmdListProcessor->IsIdle());
 
-		// Begin Frame task + # cmd build tasks
-		const std::uint32_t taskCount{ (std::uint32_t)mCmdListRecorders.size() + 1U };
+		// Geom pass cmd list recorders 
+		std::uint32_t taskCount{ (std::uint32_t)mGeomPassCmdListRecorders.size() };
 		mCmdListProcessor->ResetExecutedTasksCounter();
 
 		ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[mCurrQueuedFrameIndex] };
+		ID3D12CommandAllocator* cmdAllocFrameMiddle{ mCmdAllocFrameMiddle[mCurrQueuedFrameIndex] };
 		ID3D12CommandAllocator* cmdAllocFrameEnd{ mCmdAllocFrameEnd[mCurrQueuedFrameIndex] };
 
+		//
+		// Begin frame task
+		//
 		CHECK_HR(cmdAllocFrameBegin->Reset());
 		CHECK_HR(mCmdListFrameBegin->Reset(cmdAllocFrameBegin, nullptr));
 
@@ -197,41 +204,86 @@ tbb::task* MasterRender::execute() {
 		}
 		
 		mCmdListFrameBegin->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
-
-		// Execute begin Frame task + # cmd build tasks
 		CHECK_HR(mCmdListFrameBegin->Close());
-		cmdListQueue.push(mCmdListFrameBegin);
-		const std::uint32_t grainSize{ max(1U, (taskCount - 1) / Settings::sCpuProcessors) };
-		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount - 1, grainSize),
+
+		// Execute begin Frame task + # cmd build tasks		
+		{
+			ID3D12CommandList* cmdLists[] = { mCmdListFrameBegin };
+			mCmdQueue->ExecuteCommandLists(1U, cmdLists);
+		}
+		std::uint32_t grainSize{ max(1U, (taskCount) / Settings::sCpuProcessors) };
+		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
 			[&](const tbb::blocked_range<size_t>& r) {
 			for (size_t i = r.begin(); i != r.end(); ++i)
-				mCmdListRecorders[i]->RecordCommandLists(mView, mProj, rtvCpuDescHandles, _countof(rtvCpuDescHandles), dsvHandle);
+				mGeomPassCmdListRecorders[i]->RecordCommandLists(mView, mProj, rtvCpuDescHandles, _countof(rtvCpuDescHandles), dsvHandle);
 		}
 		);
+
+		//
+		// Middle frame task
+		//
+		CHECK_HR(cmdAllocFrameMiddle->Reset());
+		CHECK_HR(mCmdListFrameMiddle->Reset(cmdAllocFrameMiddle, nullptr));
+
+		CD3DX12_RESOURCE_BARRIER rtToSrvBarriers[GEOMBUFFERS_COUNT]{
+			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[POSITION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[REFLECTANCE_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		};
+		mCmdListFrameMiddle->ResourceBarrier(_countof(rtToSrvBarriers), rtToSrvBarriers);
+
+		CHECK_HR(mCmdListFrameMiddle->Close());
+
+		// Wait until all previous tasks command lists are executed
+		while (mCmdListProcessor->ExecutedTasksCounter() < taskCount) {
+			Sleep(0U);
+		}
+
+		// Middle Frame task + # light pass cmd list recorders
+		taskCount = (std::uint32_t)mLightPassCmdListRecorders.size();
+		mCmdListProcessor->ResetExecutedTasksCounter();
+
+		// Execute begin Frame task + # cmd build tasks
+		{
+			ID3D12CommandList* cmdLists[] = { mCmdListFrameMiddle };
+			mCmdQueue->ExecuteCommandLists(1U, cmdLists);
+		}
+		grainSize = max(1U, taskCount / Settings::sCpuProcessors);
+		D3D12_CPU_DESCRIPTOR_HANDLE currBackBuffer(CurrentBackBufferView());
+		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
+			[&](const tbb::blocked_range<size_t>& r) {
+			for (size_t i = r.begin(); i != r.end(); ++i)
+				mLightPassCmdListRecorders[i]->RecordCommandLists(mView, mProj, &currBackBuffer, 1U, dsvHandle);
+		}
+		);
+
+		//
+		// End frame task
+		//
 
 		CHECK_HR(cmdAllocFrameEnd->Reset());
 		CHECK_HR(mCmdListFrameEnd->Reset(cmdAllocFrameEnd, nullptr));
 
 		CD3DX12_RESOURCE_BARRIER rtToPresentBarriers[GEOMBUFFERS_COUNT + 1U]{			
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[POSITION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[REFLECTANCE_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
+			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
+			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[POSITION].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
+			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
+			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[REFLECTANCE_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
 			CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
 		};
 		mCmdListFrameEnd->ResourceBarrier(_countof(rtToPresentBarriers), rtToPresentBarriers);
 
 		CHECK_HR(mCmdListFrameEnd->Close());
 
-		// Wait until all previous tasks command lists are executed, before
-		// executing frame end command list
+		// Wait until all previous tasks command lists are executed
 		while (mCmdListProcessor->ExecutedTasksCounter() < taskCount) {
 			Sleep(0U);
 		}
 
 		{
 			ID3D12CommandList* cmdLists[] = { mCmdListFrameEnd };
-			mCmdQueue->ExecuteCommandLists(1, cmdLists);
+			mCmdQueue->ExecuteCommandLists(1U, cmdLists);
 		}
 
 		SignalFenceAndPresent();
@@ -340,7 +392,7 @@ void MasterRender::CreateGeometryPassRtvs() noexcept {
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
-	// Creeate RTV's descriptors
+	// Create RTV's descriptors
 	for (std::uint32_t i = 0U; i < GEOMBUFFERS_COUNT; ++i) {
 		resDesc.Format = sGeomPassBufferFormats[i];
 		clearValue.Format = resDesc.Format;
@@ -363,15 +415,18 @@ void MasterRender::CreateCommandObjects() noexcept {
 
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameBegin[i]);
+		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameMiddle[i]);
 		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameEnd[i]);
 	}
 	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameBegin[0], mCmdListFrameBegin);
+	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameMiddle[0], mCmdListFrameMiddle);
 	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameEnd[0], mCmdListFrameEnd);
 
 	// Start off in a closed state. This is because the first time we refer 
 	// to the command list we will Reset it, and it needs to be closed before
 	// calling Reset.
 	mCmdListFrameBegin->Close();
+	mCmdListFrameMiddle->Close();
 	mCmdListFrameEnd->Close();
 }
 

@@ -11,7 +11,7 @@ public:
 	void RecordCommandLists(
 		const DirectX::XMFLOAT4X4& view,
 		const DirectX::XMFLOAT4X4& proj,
-		const D3D12_CPU_DESCRIPTOR_HANDLE* geomPassRtvCpuDescHandles,
-		const std::uint32_t geomPassRtvCpuDescHandlesCount,
+		const D3D12_CPU_DESCRIPTOR_HANDLE* rtvCpuDescHandles,
+		const std::uint32_t rtvCpuDescHandlesCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept override;	
 };

@@ -15,6 +15,10 @@ public:
 	const Scene& operator=(const Scene&) = delete;
 
 	virtual void GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept = 0;
-	virtual void GenerateLightPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept = 0;
+	virtual void GenerateLightPassRecorders(
+		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, 
+		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
+		const std::uint32_t geometryBuffersCount,
+		std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept = 0;
 	virtual void GeneratePostProcessingPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept = 0;
 };

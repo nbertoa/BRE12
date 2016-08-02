@@ -8,6 +8,9 @@
     <ClCompile Include="Basic\BasicCmdListRecorder.cpp">
       <Filter>Basic</Filter>
     </ClCompile>
+    <ClCompile Include="PunctualLight\PunctualLightCmdListRecorder.cpp">
+      <Filter>PunctualLight</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PSOCreator.h" />
@@ -16,6 +19,9 @@
     </ClInclude>
     <ClInclude Include="Basic\BasicCmdListRecorder.h">
       <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="PunctualLight\PunctualLightCmdListRecorder.h">
+      <Filter>PunctualLight</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -73,5 +73,5 @@ void BasicCmdListRecorder::RecordCommandLists(
 }
 
 bool BasicCmdListRecorder::ValidateData() const noexcept {
-	return CmdListRecorder::ValidateData() && mMaterialsCBuffer != nullptr;
+	return CmdListRecorder::ValidateData() && mFrameCBuffer != nullptr && mObjectCBuffer != nullptr && mGeometryVec.empty() == false && mMaterialsCBuffer != nullptr;
 }

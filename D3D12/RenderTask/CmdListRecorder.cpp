@@ -40,8 +40,5 @@ bool CmdListRecorder::ValidateData() const noexcept {
 		mCbvSrvUavDescHeap != nullptr &&
 		mRootSign != nullptr &&
 		mPSO != nullptr &&
-		mFrameCBuffer != nullptr &&
-		mObjectCBuffer != nullptr &&
-		mGeometryVec.empty() == false && 
 		mGeometryVec.size() == mWorldMatricesByGeomIndex.size();
 }

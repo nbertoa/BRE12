@@ -79,11 +79,13 @@ private:
 	std::uint64_t mFenceByQueuedFrameIndex[Settings::sQueuedFrameCount]{ 0UL };
 	std::uint64_t mCurrentFence{ 0UL };
 
-	// We have 2 commands lists (for frame begin and frame end), and 2
+	// We have 3 commands lists (for frame begin, frame middle and frame end), and 2
 	// commands allocator per list
 	ID3D12CommandAllocator* mCmdAllocFrameBegin[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocFrameMiddle[Settings::sQueuedFrameCount]{ nullptr };
 	ID3D12CommandAllocator* mCmdAllocFrameEnd[Settings::sQueuedFrameCount]{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListFrameBegin{ nullptr };
+	ID3D12GraphicsCommandList* mCmdListFrameMiddle{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListFrameEnd{ nullptr };
 	
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[Settings::sSwapChainBufferCount];
@@ -108,7 +110,9 @@ private:
 	ID3D12DescriptorHeap* mRtvHeap{ nullptr };
 	ID3D12DescriptorHeap* mDsvHeap{ nullptr };
 
-	std::vector<std::unique_ptr<CmdListRecorder>> mCmdListRecorders;
+	std::vector<std::unique_ptr<CmdListRecorder>> mGeomPassCmdListRecorders;
+
+	std::vector<std::unique_ptr<CmdListRecorder>> mLightPassCmdListRecorders;
 
 	DirectX::XMFLOAT4X4 mView{ MathHelper::Identity4x4() };
 	DirectX::XMFLOAT4X4 mProj{ MathHelper::Identity4x4() };

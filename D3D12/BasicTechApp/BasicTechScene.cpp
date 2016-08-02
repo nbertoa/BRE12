@@ -6,6 +6,7 @@
 #include <CommandManager/CommandManager.h>
 #include <GlobalData/D3dData.h>
 #include <PSOCreator/Basic/BasicCmdListRecorder.h>
+#include <PSOCreator/PunctualLight/PunctualLightCmdListRecorder.h>
 #include <PSOCreator/PSOCreator.h>
 #include <RenderTask/GeomBuffersCreator.h>
 #include <ResourceManager/ResourceManager.h>
@@ -78,8 +79,6 @@ namespace {
 			material.mReflectance_Smoothness[2] = MathHelper::RandF(0.0f, 1.0f);
 			material.mReflectance_Smoothness[3] = MathHelper::RandF(0.0f, 1.0f);
 			task.MaterialsCBuffer()->CopyData((std::uint32_t)i, &material, sizeof(material));
-
-
 		}
 
 		// Create frame constant buffer
@@ -158,5 +157,57 @@ void BasicTechScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12Comma
 		}
 	}
 	);
+}
+
+void BasicTechScene::GenerateLightPassRecorders(
+	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
+	const std::uint32_t geometryBuffersCount,
+	std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept 
+{
+	ASSERT(tasks.empty());
+	ASSERT(geometryBuffers != nullptr);
+	ASSERT(0 < geometryBuffersCount && geometryBuffersCount < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
+
+	const PSOCreator::Output& psoCreatorOutput(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::PUNCTUAL_LIGHT));
+
+	tasks.resize(1U);
+	std::unique_ptr<CmdListRecorder>& task{ tasks.back() };
+	PunctualLightCmdListRecorder* newTask{ new PunctualLightCmdListRecorder(D3dData::Device(), cmdListQueue) };
+	task.reset(newTask);
+	task->PSO() = psoCreatorOutput.mPSO;
+	task->RootSign() = psoCreatorOutput.mRootSign;
+
+	// Create CBV_SRV_UAV cbuffer descriptor heap
+	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
+	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	descHeapDesc.NodeMask = 0U;
+	descHeapDesc.NumDescriptors = geometryBuffersCount;
+	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, task->CbvSrvUavDescHeap());
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;	
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+
+	const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+	D3D12_CPU_DESCRIPTOR_HANDLE cbvSrvUavCpuDescHandle = task->CbvSrvUavDescHeap()->GetCPUDescriptorHandleForHeapStart();
+
+	for (std::uint32_t i = 0U; i < geometryBuffersCount; ++i) {
+		ID3D12Resource& res{ *geometryBuffers[i].Get() };
+		
+		srvDesc.Format = res.GetDesc().Format;
+		srvDesc.Texture2D.MipLevels = res.GetDesc().MipLevels;
+
+		ResourceManager::Get().CreateShaderResourceView(res, srvDesc, cbvSrvUavCpuDescHandle);
+
+		cbvSrvUavCpuDescHandle.ptr += descHandleIncSize;
+	}
+
+	// Create frame constant buffer
+	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4) * 2UL) };
+	ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, task->FrameCBuffer());
 }
 

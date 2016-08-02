@@ -119,11 +119,13 @@
     <ClCompile Include="Basic\BasicCmdListRecorder.cpp" />
     <ClCompile Include="Black\BlackCmdListRecorder.cpp" />
     <ClCompile Include="PSOCreator.cpp" />
+    <ClCompile Include="PunctualLight\PunctualLightCmdListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Basic\BasicCmdListRecorder.h" />
     <ClInclude Include="Black\BlackCmdListRecorder.h" />
     <ClInclude Include="PSOCreator.h" />
+    <ClInclude Include="PunctualLight\PunctualLightCmdListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Basic\PS.hlsl">

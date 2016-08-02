@@ -55,7 +55,7 @@ Output main(const in Input input) {
 	output.mPosV = float4(input.mPosV, 1.0f);
 	output.mBaseColor_MetalMask = gMaterial.mBaseColor_MetalMask;
 	output.mReflectance_Smoothness = gMaterial.mReflectance_Smoothness;
-	output.mColor = float4(luminance * illuminance, 1.0f);
+	//output.mColor = float4(luminance * illuminance, 1.0f);
 	
 	return output;
 }

@@ -22,7 +22,7 @@ struct Output {
 void main(const in point Input input[1], inout TriangleStream<Output> triangleStream) {
 	// Compute quad center position in view space.
 	// Then we can easily build a quad (two triangles) that face the camera.
-	const float4 lightCenterPosV = float4(input[0].mLightPosVAndRange.xyz, 1.0f);
+	float4 lightCenterPosV = float4(input[0].mLightPosVAndRange.xyz, 1.0f);
 
 	const float lightRadius = input[0].mLightPosVAndRange.w;
 

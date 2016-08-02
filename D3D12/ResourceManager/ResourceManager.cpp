@@ -141,6 +141,12 @@ void ResourceManager::CreateConstantBufferView(const D3D12_CONSTANT_BUFFER_VIEW_
 	mMutex.unlock();
 }
 
+void ResourceManager::CreateShaderResourceView(ID3D12Resource& res, const D3D12_SHADER_RESOURCE_VIEW_DESC& desc, const D3D12_CPU_DESCRIPTOR_HANDLE& cpuDescHandle) noexcept {
+	mMutex.lock();
+	mDevice.CreateShaderResourceView(&res, &desc, cpuDescHandle);
+	mMutex.unlock();
+}
+
 std::size_t ResourceManager::CreateUploadBuffer(const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept {
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
 	UploadBufferById::accessor accessor;
