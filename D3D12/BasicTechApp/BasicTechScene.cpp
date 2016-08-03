@@ -37,10 +37,10 @@ namespace {
 		descHeapDesc.NumDescriptors = numGeomDesc * 2;
 		descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, task.CbvSrvUavDescHeap());
-		
+
 		// Create materials cbuffer		
 		const std::size_t matCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(Material)) };
-		ResourceManager::Get().CreateUploadBuffer(matCBufferElemSize, numGeomDesc, task.MaterialsCBuffer());		
+		ResourceManager::Get().CreateUploadBuffer(matCBufferElemSize, numGeomDesc, task.MaterialsCBuffer());
 
 		// Create object cbuffer
 		const std::size_t objCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4)) };
@@ -107,8 +107,8 @@ void BasicTechScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12Comma
 	GeometryGenerator::MeshData shape;
 	GeometryGenerator::CreateSphere(2.0f, 50U, 50U, shape);
 
-	const std::size_t numTasks{ 1UL };
-	const std::size_t numGeometry{ 250UL };
+	const std::size_t numTasks{ 4UL };
+	const std::size_t numGeometry{ 1000UL };
 	tasks.resize(numTasks);
 
 	// Create a command list 
@@ -122,13 +122,13 @@ void BasicTechScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12Comma
 	GeomBuffersCreator::Input geomBuffersCreatorInput(
 		shape.mVertices.data(),
 		(std::uint32_t)shape.mVertices.size(),
-		sizeof(GeometryGenerator::Vertex), 
+		sizeof(GeometryGenerator::Vertex),
 		shape.mIndices32.data(),
 		(std::uint32_t)shape.mIndices32.size()
 	);
 	GeomBuffersCreator::Output geomBuffersCreatorOutput;
 	GeomBuffersCreator::Execute(cmdListQueue, *cmdList, geomBuffersCreatorInput, geomBuffersCreatorOutput);
-	
+
 	const float meshSpaceOffset{ 50.0f };
 	const std::uint32_t grainSize{ max(1U, (std::uint32_t)numTasks / Settings::sCpuProcessors) };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, numTasks, grainSize),
@@ -143,7 +143,7 @@ void BasicTechScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12Comma
 			task->GetGeometryVec().resize(1UL, geomBuffersCreatorOutput);
 			CmdListRecorder::MatricesByGeomIndex& worldMatByGeomIndex{ task->WorldMatricesByGeomIndex() };
 			worldMatByGeomIndex.resize(1UL, CmdListRecorder::Matrices(numGeometry));
-			for (std::size_t i = 0UL; i < numGeometry; ++i) {				
+			for (std::size_t i = 0UL; i < numGeometry; ++i) {
 				const float tx{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
 				const float ty{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
 				const float tz{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
@@ -163,7 +163,7 @@ void BasicTechScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
-	std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept 
+	std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept
 {
 	ASSERT(tasks.empty());
 	ASSERT(geometryBuffers != nullptr);
@@ -187,7 +187,7 @@ void BasicTechScene::GenerateLightPassRecorders(
 	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, task->CbvSrvUavDescHeap());
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;	
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
@@ -197,7 +197,7 @@ void BasicTechScene::GenerateLightPassRecorders(
 
 	for (std::uint32_t i = 0U; i < geometryBuffersCount; ++i) {
 		ID3D12Resource& res{ *geometryBuffers[i].Get() };
-		
+
 		srvDesc.Format = res.GetDesc().Format;
 		srvDesc.Texture2D.MipLevels = res.GetDesc().MipLevels;
 

@@ -16,20 +16,9 @@ Output main(in const Input input) {
 	float4 lightPosV = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	lightPosV = mul(lightPosV, gFrameConstants.mV);
 
-	/*const float nearPlaneZ = 1.0f;
-	const float lightMinZ = lightPosV.z - 8000.0f;
-	const float lightMaxZ = lightPosV.z + 8000.0f;
-	if (lightMinZ < nearPlaneZ && nearPlaneZ < lightMaxZ) {
-		lightPosV.z = nearPlaneZ;
-	}
-	else {
-		lightPosV.z = lightMinZ;
-	}*/
-
-
 	Output output = (Output)0;
-	output.mLightPosVAndRange = float4(lightPosV.xyz, 8000.0f);
-	output.mLightColorAndPower = float4(1.0f, 1.0f, 1.0f, 2000.0f);
+	output.mLightPosVAndRange = float4(lightPosV.xyz, 800.0f);
+	output.mLightColorAndPower = float4(1.0f, 1.0f, 1.0f, 4000.0f);
 	return output;
 }
 

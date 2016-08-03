@@ -46,7 +46,7 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	mCmdList->SetGraphicsRootConstantBufferView(0U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(1U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootDescriptorTable(2U, CbvSrvUavDescHeap()->GetGPUDescriptorHandleForHeapStart());
-	
+
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	mCmdList->DrawInstanced(1U, 1U, 0U, 0U);
 

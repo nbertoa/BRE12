@@ -47,7 +47,7 @@ namespace {
 		desc.DSVFormat = MasterRender::DepthStencilFormat();
 		desc.GS = geomShader;
 		desc.HS = hullShader;
-		desc.InputLayout = { input.mInputLayout.empty() ? nullptr : input.mInputLayout.data(), (std::uint32_t)input.mInputLayout.size() };		
+		desc.InputLayout = { input.mInputLayout.empty() ? nullptr : input.mInputLayout.data(), (std::uint32_t)input.mInputLayout.size() };
 		desc.NumRenderTargets = input.mNumRenderTargets;
 		desc.PrimitiveTopologyType = input.mTopology;
 		desc.pRootSignature = output.mRootSign;
@@ -106,6 +106,8 @@ namespace PSOCreator {
 		PSOCreator::Execute(psoCreatorInput, mPSOData[Technique::BASIC]);
 
 		psoCreatorInput = Input{};
+		psoCreatorInput.mBlendDesc = D3DFactory::AlwaysBlendDesc();
+		psoCreatorInput.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
 		psoCreatorInput.mGSFilename = "PSOCreator/PunctualLight/GS.cso";
 		psoCreatorInput.mPSFilename = "PSOCreator/PunctualLight/PS.cso";
 		psoCreatorInput.mRootSignFilename = "PSOCreator/PunctualLight/RS.cso";

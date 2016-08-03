@@ -35,20 +35,60 @@ namespace D3DFactory {
 		return desc;
 	}
 
+	D3D12_DEPTH_STENCIL_DESC DisableDepthStencilDesc() noexcept {
+		D3D12_DEPTH_STENCIL_DESC desc{};
+		desc.DepthEnable = false;
+		desc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+		desc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+		desc.StencilEnable = false;
+		desc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
+		desc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
+		const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp{ D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_ALWAYS };
+		desc.FrontFace = defaultStencilOp;
+		desc.BackFace = defaultStencilOp;
+
+		return desc;
+	}
+
 	D3D12_BLEND_DESC DefaultBlendDesc() noexcept {
 		D3D12_BLEND_DESC desc{};
-		desc.AlphaToCoverageEnable = FALSE;
-		desc.IndependentBlendEnable = FALSE;
-		const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc =
-		{
-			false, false,
-			D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-			D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-			D3D12_LOGIC_OP_NOOP,
-			D3D12_COLOR_WRITE_ENABLE_ALL,
-		};
+		desc.AlphaToCoverageEnable = false;
+		desc.IndependentBlendEnable = false;
+		D3D12_RENDER_TARGET_BLEND_DESC rtBlendDesc{};
+		rtBlendDesc.BlendEnable = false;
+		rtBlendDesc.LogicOpEnable = false;
+		rtBlendDesc.SrcBlend = D3D12_BLEND_ONE;
+		rtBlendDesc.DestBlend = D3D12_BLEND_ZERO;
+		rtBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+		rtBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+		rtBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+		rtBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+		rtBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+		rtBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 		for (std::int32_t i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
-			desc.RenderTarget[i] = defaultRenderTargetBlendDesc;
+			desc.RenderTarget[i] = rtBlendDesc;
+		}
+
+		return desc;
+	}
+
+	D3D12_BLEND_DESC AlwaysBlendDesc() noexcept {
+		D3D12_BLEND_DESC desc{};
+		desc.AlphaToCoverageEnable = true;
+		desc.IndependentBlendEnable = false;
+		D3D12_RENDER_TARGET_BLEND_DESC rtBlendDesc{};
+		rtBlendDesc.BlendEnable = true;
+		rtBlendDesc.LogicOpEnable = false;
+		rtBlendDesc.SrcBlend = D3D12_BLEND_ONE;
+		rtBlendDesc.DestBlend = D3D12_BLEND_ONE;
+		rtBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+		rtBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+		rtBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+		rtBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+		rtBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+		rtBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+		for (std::int32_t i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
+			desc.RenderTarget[i] = rtBlendDesc;
 		}
 
 		return desc;

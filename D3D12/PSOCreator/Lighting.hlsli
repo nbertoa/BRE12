@@ -185,8 +185,8 @@ float getAngleAtt(const float3 normalizedLightVector, const float3 lightDir, con
 	return attenuation;
 }
 
-float3 computeLuminance(PunctualLight light, const float3 posV) {
-	const float3 unnormalizedLightVector = light.mPosV - posV;
+float3 computeLuminance(PunctualLight light, const float3 geomPosV) {
+	const float3 unnormalizedLightVector = light.mPosV - geomPosV;
 	const float lightInvSqrAttRadius = 1.0f / (light.mRange * light.mRange);
 	const float att = getDistanceAtt(unnormalizedLightVector, lightInvSqrAttRadius);
 	return att * light.mPower * light.mColor / (4.0f * PI);
