@@ -1,14 +1,14 @@
-#include "MathHelper.h"
+#include "MathUtils.h"
 
 #include <cfloat>
 #include <cmath>
 
 using namespace DirectX;
 
-const float MathHelper::Infinity{ FLT_MAX };
-const float MathHelper::Pi{ 3.1415926535f };
+const float MathUtils::Infinity{ FLT_MAX };
+const float MathUtils::Pi{ 3.1415926535f };
 
-float MathHelper::AngleFromXY(const float x, const float y) noexcept {
+float MathUtils::AngleFromXY(const float x, const float y) noexcept {
 	float theta{ 0.0f };
  
 	// Quadrant I or IV
@@ -29,14 +29,14 @@ float MathHelper::AngleFromXY(const float x, const float y) noexcept {
 	return theta;
 }
 
-XMVECTOR MathHelper::RandUnitVec3() noexcept {
+XMVECTOR MathUtils::RandUnitVec3() noexcept {
 	const XMVECTOR One(XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
 	const XMVECTOR Zero(XMVectorZero());
 
 	// Keep trying until we get a point on/in the hemisphere.
 	while(true) {
 		// Generate random point in the cube [-1,1]^3.
-		const XMVECTOR v(XMVectorSet(MathHelper::RandF(-1.0f, 1.0f), MathHelper::RandF(-1.0f, 1.0f), MathHelper::RandF(-1.0f, 1.0f), 0.0f));
+		const XMVECTOR v(XMVectorSet(MathUtils::RandF(-1.0f, 1.0f), MathUtils::RandF(-1.0f, 1.0f), MathUtils::RandF(-1.0f, 1.0f), 0.0f));
 
 		// Ignore points outside the unit sphere in order to get an even distribution 
 		// over the unit sphere.  Otherwise points will clump more on the sphere near 
@@ -50,14 +50,14 @@ XMVECTOR MathHelper::RandUnitVec3() noexcept {
 	}
 }
 
-XMVECTOR MathHelper::RandHemisphereUnitVec3(XMVECTOR n) noexcept {
+XMVECTOR MathUtils::RandHemisphereUnitVec3(XMVECTOR n) noexcept {
 	const XMVECTOR One(XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
 	const XMVECTOR Zero(XMVectorZero());
 
 	// Keep trying until we get a point on/in the hemisphere.
 	while(true) {
 		// Generate random point in the cube [-1,1]^3.
-		const XMVECTOR v(XMVectorSet(MathHelper::RandF(-1.0f, 1.0f), MathHelper::RandF(-1.0f, 1.0f), MathHelper::RandF(-1.0f, 1.0f), 0.0f));
+		const XMVECTOR v(XMVectorSet(MathUtils::RandF(-1.0f, 1.0f), MathUtils::RandF(-1.0f, 1.0f), MathUtils::RandF(-1.0f, 1.0f), 0.0f));
 
 		// Ignore points outside the unit sphere in order to get an even distribution 
 		// over the unit sphere.  Otherwise points will clump more on the sphere near 

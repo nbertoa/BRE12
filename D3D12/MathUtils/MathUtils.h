@@ -4,7 +4,7 @@
 #include <DirectXMath.h>
 #include <cstdint>
 
-class MathHelper {
+class MathUtils {
 public:
 	// Returns random float in [0, 1).
 	static float RandF() noexcept {

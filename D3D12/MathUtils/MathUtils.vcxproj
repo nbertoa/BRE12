@@ -119,10 +119,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="MathHelper.cpp" />
+    <ClCompile Include="MathUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MathHelper.h" />
+    <ClInclude Include="MathUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

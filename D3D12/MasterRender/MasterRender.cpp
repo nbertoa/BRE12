@@ -3,15 +3,15 @@
 #include <DirectXColors.h>
 #include <tbb/parallel_for.h>
 
-#include <App/Scene.h>
 #include <CommandManager/CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GlobalData/D3dData.h>
 #include <GlobalData/Settings.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
-#include <RenderTask\CmdListRecorder.h>
 #include <ResourceManager\ResourceManager.h>
+#include <Scene/CmdListRecorder.h>
+#include <Scene/Scene.h>
 
 using namespace DirectX;
 

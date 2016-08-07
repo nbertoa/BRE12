@@ -3,9 +3,11 @@
   <ItemGroup>
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="UploadBuffer.h" />
+    <ClInclude Include="BufferCreator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="UploadBuffer.cpp" />
+    <ClCompile Include="BufferCreator.cpp" />
   </ItemGroup>
 </Project>

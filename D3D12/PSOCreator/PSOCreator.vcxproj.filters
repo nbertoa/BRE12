@@ -2,21 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="PSOCreator.cpp" />
-    <ClCompile Include="Basic\BasicCmdListRecorder.cpp">
-      <Filter>Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="PunctualLight\PunctualLightCmdListRecorder.cpp">
-      <Filter>PunctualLight</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PSOCreator.h" />
-    <ClInclude Include="Basic\BasicCmdListRecorder.h">
-      <Filter>Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="PunctualLight\PunctualLightCmdListRecorder.h">
-      <Filter>PunctualLight</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Basic">

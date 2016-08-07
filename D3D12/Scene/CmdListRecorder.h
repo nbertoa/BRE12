@@ -6,11 +6,10 @@
 #include <tbb/concurrent_queue.h>
 #include <wrl.h>
 
-#include <App/MasterRender.h>
 #include <DXUtils/D3DFactory.h>
-#include <GeometryGenerator/GeometryGenerator.h>
-#include <MathUtils/MathHelper.h>
-#include <RenderTask/BufferCreator.h>
+#include <GlobalData/Settings.h>
+#include <MathUtils/MathUtils.h>
+#include <ResourceManager/BufferCreator.h>
 #include <Utils/DebugUtils.h>
 
 class UploadBuffer;

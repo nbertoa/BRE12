@@ -116,10 +116,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BufferCreator.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="UploadBuffer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BufferCreator.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="UploadBuffer.cpp" />
   </ItemGroup>

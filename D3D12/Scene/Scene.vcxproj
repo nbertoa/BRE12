@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{6CBC2D49-0249-4F5E-B831-EFEF6DF31603}</ProjectGuid>
-    <RootNamespace>BasicTechApp</RootNamespace>
+    <ProjectGuid>{B195D08A-7191-4682-A9FD-4D0337B52AD1}</ProjectGuid>
+    <RootNamespace>Scene</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -114,10 +114,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BasicTechScene.cpp" />
+    <ClInclude Include="CmdListRecorder.h" />
+    <ClInclude Include="cmdListRecorders\BasicCmdListRecorder.h" />
+    <ClInclude Include="cmdListRecorders\PunctualLightCmdListRecorder.h" />
+    <ClInclude Include="Scene.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BasicTechScene.h" />
+    <ClCompile Include="CmdListRecorder.cpp" />
+    <ClCompile Include="cmdListRecorders\BasicCmdListRecorder.cpp" />
+    <ClCompile Include="cmdListRecorders\PunctualLightCmdListRecorder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

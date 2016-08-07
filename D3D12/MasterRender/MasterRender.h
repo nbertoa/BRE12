@@ -6,9 +6,9 @@
 #include <tbb/task.h>
 #include <vector>
 
-#include <App/CommandListProcessor.h>
 #include <Camera/Camera.h>
 #include <GlobalData\Settings.h>
+#include <MasterRender/CommandListProcessor.h>
 #include <Timer/Timer.h>
 #include <Utils/DebugUtils.h>
 ;
@@ -114,8 +114,8 @@ private:
 
 	std::vector<std::unique_ptr<CmdListRecorder>> mLightPassCmdListRecorders;
 
-	DirectX::XMFLOAT4X4 mView{ MathHelper::Identity4x4() };
-	DirectX::XMFLOAT4X4 mProj{ MathHelper::Identity4x4() };
+	DirectX::XMFLOAT4X4 mView{ MathUtils::Identity4x4() };
+	DirectX::XMFLOAT4X4 mProj{ MathUtils::Identity4x4() };
 	
 	bool mTerminate{ false };
 };

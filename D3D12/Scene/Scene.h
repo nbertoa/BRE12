@@ -2,7 +2,8 @@
 
 #include <memory>
 #include <vector>
-#include <RenderTask/CmdListRecorder.h>
+
+#include <Scene/CmdListRecorder.h>
 
 // You should inherit from this class and implement needed methods.
 // Its generated CmdListRecorder's are used by MasterRender to 

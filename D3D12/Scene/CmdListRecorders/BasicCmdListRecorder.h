@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-#include <RenderTask/CmdListRecorder.h>
+#include <Scene/CmdListRecorder.h>
 
 class BasicCmdListRecorder : public CmdListRecorder {
 public:

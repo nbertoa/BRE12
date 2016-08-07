@@ -1,11 +1,11 @@
 #include "App.h"
 
-#include <App/MasterRender.h>
 #include <CommandManager/CommandManager.h>
 #include <GlobalData\D3dData.h>
 #include <GlobalData/Settings.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
+#include <MasterRender/MasterRender.h>
 #include <PSOCreator/PSOCreator.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>

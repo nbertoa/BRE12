@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{785C0C32-B913-41A5-B676-190C706CE2F9}</ProjectGuid>
-    <RootNamespace>RootSignatureManager</RootNamespace>
+    <ProjectGuid>{4F315269-CB22-4AF6-BE08-B5BCC8D51350}</ProjectGuid>
+    <RootNamespace>MasterRender</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -68,9 +68,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -116,10 +114,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="RootSignatureManager.h" />
+    <ClCompile Include="CommandListProcessor.cpp" />
+    <ClCompile Include="MasterRender.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="RootSignatureManager.cpp" />
+    <ClInclude Include="CommandListProcessor.h" />
+    <ClInclude Include="MasterRender.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

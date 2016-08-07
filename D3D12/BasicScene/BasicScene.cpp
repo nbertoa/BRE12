@@ -1,15 +1,16 @@
-#include "BasicTechScene.h"
+#include "BasicScene.h"
 
 #include <algorithm>
 #include <tbb/parallel_for.h>
 
 #include <CommandManager/CommandManager.h>
+#include <GeometryGenerator/GeometryGenerator.h>
 #include <GlobalData/D3dData.h>
-#include <PSOCreator/Basic/BasicCmdListRecorder.h>
-#include <PSOCreator/PunctualLight/PunctualLightCmdListRecorder.h>
 #include <PSOCreator/PSOCreator.h>
-#include <RenderTask/BufferCreator.h>
+#include <ResourceManager/BufferCreator.h>
 #include <ResourceManager/ResourceManager.h>
+#include <Scene/CmdListRecorders/BasicCmdListRecorder.h>
+#include <Scene/CmdListRecorders/PunctualLightCmdListRecorder.h>
 
 namespace {
 	struct Material {
@@ -70,14 +71,14 @@ namespace {
 			ResourceManager::Get().CreateConstantBufferView(cBufferDesc, currMaterialCBufferDescHandle);
 
 			// Fill materials cbuffer data
-			material.mBaseColor_MetalMask[0] = MathHelper::RandF(0.0f, 1.0f);
-			material.mBaseColor_MetalMask[1] = MathHelper::RandF(0.0f, 1.0f);
-			material.mBaseColor_MetalMask[2] = MathHelper::RandF(0.0f, 1.0f);
-			material.mBaseColor_MetalMask[3] = MathHelper::RandF(0.0f, 1.0f);
-			material.mReflectance_Smoothness[0] = MathHelper::RandF(0.0f, 1.0f);
-			material.mReflectance_Smoothness[1] = MathHelper::RandF(0.0f, 1.0f);
-			material.mReflectance_Smoothness[2] = MathHelper::RandF(0.0f, 1.0f);
-			material.mReflectance_Smoothness[3] = MathHelper::RandF(0.0f, 1.0f);
+			material.mBaseColor_MetalMask[0] = MathUtils::RandF(0.0f, 1.0f);
+			material.mBaseColor_MetalMask[1] = MathUtils::RandF(0.0f, 1.0f);
+			material.mBaseColor_MetalMask[2] = MathUtils::RandF(0.0f, 1.0f);
+			material.mBaseColor_MetalMask[3] = MathUtils::RandF(0.0f, 1.0f);
+			material.mReflectance_Smoothness[0] = MathUtils::RandF(0.0f, 1.0f);
+			material.mReflectance_Smoothness[1] = MathUtils::RandF(0.0f, 1.0f);
+			material.mReflectance_Smoothness[2] = MathUtils::RandF(0.0f, 1.0f);
+			material.mReflectance_Smoothness[3] = MathUtils::RandF(0.0f, 1.0f);
 			task.MaterialsCBuffer()->CopyData((std::uint32_t)i, &material, sizeof(material));
 
 			currMaterialCBufferDescHandle.ptr += descHandleIncSize;
@@ -156,7 +157,7 @@ namespace {
 	}
 }
 
-void BasicTechScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
+void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
 
 	GeometryGenerator::MeshData shape;
@@ -204,9 +205,9 @@ void BasicTechScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12Comma
 			CmdListRecorder::MatricesByGeomIndex& worldMatByGeomIndex{ task->WorldMatricesByGeomIndex() };
 			worldMatByGeomIndex.resize(1UL, CmdListRecorder::Matrices(numGeometry));
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
-				const float tx{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
-				const float ty{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
-				const float tz{ MathHelper::RandF(-meshSpaceOffset, meshSpaceOffset) };
+				const float tx{ MathUtils::RandF(-meshSpaceOffset, meshSpaceOffset) };
+				const float ty{ MathUtils::RandF(-meshSpaceOffset, meshSpaceOffset) };
+				const float tz{ MathUtils::RandF(-meshSpaceOffset, meshSpaceOffset) };
 
 				DirectX::XMFLOAT4X4 world;
 				DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));
@@ -219,7 +220,7 @@ void BasicTechScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12Comma
 	);
 }
 
-void BasicTechScene::GenerateLightPassRecorders(
+void BasicScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
@@ -250,9 +251,9 @@ void BasicTechScene::GenerateLightPassRecorders(
 			task->GetVertexAndIndexBufferDataVec().resize(1UL);
 			worldMatByGeomIndex.resize(1UL, CmdListRecorder::Matrices(numLights));
 			for (std::size_t i = 0UL; i < numLights; ++i) {
-				const float tx{ MathHelper::RandF(-lightSpaceOffset, lightSpaceOffset) };
-				const float ty{ MathHelper::RandF(-lightSpaceOffset, lightSpaceOffset) };
-				const float tz{ MathHelper::RandF(-lightSpaceOffset, lightSpaceOffset) };
+				const float tx{ MathUtils::RandF(-lightSpaceOffset, lightSpaceOffset) };
+				const float ty{ MathUtils::RandF(-lightSpaceOffset, lightSpaceOffset) };
+				const float tz{ MathUtils::RandF(-lightSpaceOffset, lightSpaceOffset) };
 
 				DirectX::XMFLOAT4X4 world;
 				DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));

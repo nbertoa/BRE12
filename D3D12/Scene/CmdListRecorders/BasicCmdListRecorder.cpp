@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-#include <MathUtils/MathHelper.h>
+#include <MathUtils/MathUtils.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ResourceManager/UploadBuffer.h>
 #include <Utils/DebugUtils.h>
@@ -28,8 +28,8 @@ void BasicCmdListRecorder::RecordCommandLists(
 
 	// Update frame constants
 	DirectX::XMFLOAT4X4 vp[2U];
-	DirectX::XMStoreFloat4x4(&vp[0], MathHelper::GetTranspose(view));
-	DirectX::XMStoreFloat4x4(&vp[1], MathHelper::GetTranspose(proj));
+	DirectX::XMStoreFloat4x4(&vp[0], MathUtils::GetTranspose(view));
+	DirectX::XMStoreFloat4x4(&vp[1], MathUtils::GetTranspose(proj));
 	mFrameCBuffer->CopyData(0U, &vp, sizeof(vp));
 
 	CHECK_HR(cmdAlloc->Reset());
