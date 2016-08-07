@@ -49,8 +49,7 @@ namespace PSOCreator {
 		const CommonPSOData& operator=(const CommonPSOData&) = delete;
 
 		enum Technique {
-			BLACK = 0,
-			BASIC,
+			BASIC = 0,
 			TEXTURE_MAPPING,
 			NORMAL_MAPPING,
 			DISPLACEMENT_MAPPING,

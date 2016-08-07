@@ -10,7 +10,7 @@
 #include <DXUtils/D3DFactory.h>
 #include <GeometryGenerator/GeometryGenerator.h>
 #include <MathUtils/MathHelper.h>
-#include <RenderTask/GeomBuffersCreator.h>
+#include <RenderTask/BufferCreator.h>
 #include <Utils/DebugUtils.h>
 
 class UploadBuffer;
@@ -21,7 +21,8 @@ class UploadBuffer;
 // - Call CmdListRecorder::RecordCommandLists() to create command lists to execute in the GPU
 class CmdListRecorder {
 public:
-	using GeometryVec = std::vector<GeomBuffersCreator::Output>;
+	using VertexAndIndexBufferData = std::pair<BufferCreator::VertexBufferData, BufferCreator::IndexBufferData>;
+	using VertexAndIndexBufferDataVec = std::vector<VertexAndIndexBufferData>;
 	using Matrices = std::vector<DirectX::XMFLOAT4X4>;
 	using MatricesByGeomIndex = std::vector<Matrices>;
 
@@ -38,7 +39,7 @@ public:
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& ObjectCBufferGpuDescHandleBegin() noexcept { return mObjectCBufferGpuDescHandleBegin; }
 	__forceinline D3D12_VIEWPORT& ScreenViewport() noexcept { return mScreenViewport; }
 	__forceinline D3D12_RECT& ScissorRector() noexcept { return mScissorRect; }
-	__forceinline GeometryVec& GetGeometryVec() noexcept { return mGeometryVec; }
+	__forceinline VertexAndIndexBufferDataVec& GetVertexAndIndexBufferDataVec() noexcept { return mVertexAndIndexBufferDataVec; }
 	__forceinline MatricesByGeomIndex& WorldMatricesByGeomIndex() noexcept { return mWorldMatricesByGeomIndex; }
 
 	// Build command lists and push them to the queue.
@@ -74,7 +75,7 @@ protected:
 	D3D12_RECT mScissorRect{ 0, 0, Settings::sWindowWidth, Settings::sWindowHeight };
 	
 	// We should have a vector of world matrices per geometry.	
-	GeometryVec mGeometryVec;
+	VertexAndIndexBufferDataVec mVertexAndIndexBufferDataVec;
 	MatricesByGeomIndex mWorldMatricesByGeomIndex;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescHandleBegin;

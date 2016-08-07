@@ -49,17 +49,19 @@ void BasicCmdListRecorder::RecordCommandLists(
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Draw objects
-	const std::size_t geomCount{ mGeometryVec.size() };
+	const std::size_t geomCount{ mVertexAndIndexBufferDataVec.size() };
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
-		mCmdList->IASetVertexBuffers(0U, 1U, &mGeometryVec[i].mVertexBufferView);
-		mCmdList->IASetIndexBuffer(&mGeometryVec[i].mIndexBufferView);
+		mCmdList->IASetVertexBuffers(0U, 1U, &mVertexAndIndexBufferDataVec[i].first.mBufferView);
+		mCmdList->IASetIndexBuffer(&mVertexAndIndexBufferDataVec[i].second.mBufferView);
 		const std::size_t worldMatsCount{ mWorldMatricesByGeomIndex[i].size() };
 		for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
 			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDescHandle);
 			objectCBufferGpuDescHandle.ptr += descHandleIncSize;
+
 			mCmdList->SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDescHandle);
 			materialsCBufferGpuDescHandle.ptr += descHandleIncSize;
-			mCmdList->DrawIndexedInstanced(mGeometryVec[i].mIndexCount, 1U, 0U, 0U, 0U);
+
+			mCmdList->DrawIndexedInstanced(mVertexAndIndexBufferDataVec[i].second.mCount, 1U, 0U, 0U, 0U);
 		}
 	}
 
@@ -73,5 +75,10 @@ void BasicCmdListRecorder::RecordCommandLists(
 }
 
 bool BasicCmdListRecorder::ValidateData() const noexcept {
-	return CmdListRecorder::ValidateData() && mFrameCBuffer != nullptr && mObjectCBuffer != nullptr && mGeometryVec.empty() == false && mMaterialsCBuffer != nullptr;
+	return 
+		CmdListRecorder::ValidateData() && 
+		mFrameCBuffer != nullptr && 
+		mObjectCBuffer != nullptr && 
+		mVertexAndIndexBufferDataVec.empty() == false && 
+		mMaterialsCBuffer != nullptr;
 }

@@ -117,11 +117,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CmdListRecorder.cpp" />
-    <ClCompile Include="GeomBuffersCreator.cpp" />
+    <ClCompile Include="BufferCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CmdListRecorder.h" />
-    <ClInclude Include="GeomBuffersCreator.h" />
+    <ClInclude Include="BufferCreator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

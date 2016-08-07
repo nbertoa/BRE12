@@ -85,17 +85,7 @@ namespace PSOCreator {
 	Output CommonPSOData::mPSOData[(std::uint32_t)Technique::NUM_TECHNIQUES];
 
 	void CommonPSOData::Init() noexcept {
-		Input psoCreatorInput;
-		psoCreatorInput.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
-		psoCreatorInput.mPSFilename = "PSOCreator/Black/PS.cso";
-		psoCreatorInput.mRootSignFilename = "PSOCreator/Black/RS.cso";
-		psoCreatorInput.mVSFilename = "PSOCreator/Black/VS.cso";
-		psoCreatorInput.mNumRenderTargets = MasterRender::NumRenderTargets();
-		memcpy(psoCreatorInput.mRtFormats, MasterRender::GeomPassBuffersFormats(), sizeof(DXGI_FORMAT) * psoCreatorInput.mNumRenderTargets);
-		ASSERT(mPSOData[Technique::BLACK].mPSO == nullptr && mPSOData[Technique::BLACK].mRootSign == nullptr);
-		PSOCreator::Execute(psoCreatorInput, mPSOData[Technique::BLACK]);
-
-		psoCreatorInput = Input{};
+		Input psoCreatorInput{};
 		psoCreatorInput.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
 		psoCreatorInput.mPSFilename = "PSOCreator/Basic/PS.cso";
 		psoCreatorInput.mRootSignFilename = "PSOCreator/Basic/RS.cso";
@@ -113,7 +103,7 @@ namespace PSOCreator {
 		psoCreatorInput.mRootSignFilename = "PSOCreator/PunctualLight/RS.cso";
 		psoCreatorInput.mVSFilename = "PSOCreator/PunctualLight/VS.cso";
 		psoCreatorInput.mNumRenderTargets = 1U;
-		psoCreatorInput.mRtFormats[0U] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; /*TODO*/ //MasterRender::BackBufferFormat();
+		psoCreatorInput.mRtFormats[0U] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		const std::size_t rtCount{ _countof(psoCreatorInput.mRtFormats) };
 		for (std::size_t i = 1UL; i < rtCount; ++i) {
 			psoCreatorInput.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;

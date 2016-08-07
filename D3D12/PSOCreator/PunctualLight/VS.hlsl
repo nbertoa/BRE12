@@ -2,10 +2,15 @@ struct Input {
 	uint mVertexId : SV_VertexID;
 };
 
+struct ObjConstants {
+	float4x4 mW;
+};
+ConstantBuffer<ObjConstants> gObjConstants : register(b0);
+
 struct FrameConstants {
 	float4x4 mV;
 };
-ConstantBuffer<FrameConstants> gFrameConstants : register(b0);
+ConstantBuffer<FrameConstants> gFrameConstants : register(b1);
 
 struct Output {
 	nointerpolation float4 mLightPosVAndRange : LIGHT_POSITION_AND_RANGE;
@@ -14,10 +19,11 @@ struct Output {
 
 Output main(in const Input input) {
 	float4 lightPosV = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	lightPosV = mul(lightPosV, gFrameConstants.mV);
+	float4x4 wv = mul(gObjConstants.mW, gFrameConstants.mV);	
+	lightPosV = mul(lightPosV, wv);
 
 	Output output = (Output)0;
-	output.mLightPosVAndRange = float4(lightPosV.xyz, 800.0f);
+	output.mLightPosVAndRange = float4(lightPosV.xyz, 200.0f);
 	output.mLightColorAndPower = float4(1.0f, 1.0f, 1.0f, 4000.0f);
 	return output;
 }

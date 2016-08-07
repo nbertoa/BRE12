@@ -2,9 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="PSOCreator.cpp" />
-    <ClCompile Include="Black\BlackCmdListRecorder.cpp">
-      <Filter>Black</Filter>
-    </ClCompile>
     <ClCompile Include="Basic\BasicCmdListRecorder.cpp">
       <Filter>Basic</Filter>
     </ClCompile>
@@ -14,9 +11,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PSOCreator.h" />
-    <ClInclude Include="Black\BlackCmdListRecorder.h">
-      <Filter>Black</Filter>
-    </ClInclude>
     <ClInclude Include="Basic\BasicCmdListRecorder.h">
       <Filter>Basic</Filter>
     </ClInclude>
@@ -25,9 +19,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Black">
-      <UniqueIdentifier>{864bdd73-eb56-4aa1-bd4a-adeb7a288630}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Basic">
       <UniqueIdentifier>{90df0df8-68d5-4fda-9646-96b13a93be87}</UniqueIdentifier>
     </Filter>
@@ -36,15 +27,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Black\PS.hlsl">
-      <Filter>Black</Filter>
-    </FxCompile>
-    <FxCompile Include="Black\RS.hlsl">
-      <Filter>Black</Filter>
-    </FxCompile>
-    <FxCompile Include="Black\VS.hlsl">
-      <Filter>Black</Filter>
-    </FxCompile>
     <FxCompile Include="Basic\PS.hlsl">
       <Filter>Basic</Filter>
     </FxCompile>

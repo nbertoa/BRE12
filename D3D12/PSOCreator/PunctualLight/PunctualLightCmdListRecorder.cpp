@@ -43,12 +43,23 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	mCmdList->SetGraphicsRootSignature(mRootSign);
 
 	// Set frame constants root parameters
-	mCmdList->SetGraphicsRootConstantBufferView(0U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(1U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootDescriptorTable(2U, CbvSrvUavDescHeap()->GetGPUDescriptorHandleForHeapStart());
+	mCmdList->SetGraphicsRootConstantBufferView(2U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
+	mCmdList->SetGraphicsRootDescriptorTable(3U, CbvSrvUavDescHeap()->GetGPUDescriptorHandleForHeapStart());
 
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
-	mCmdList->DrawInstanced(1U, 1U, 0U, 0U);
+
+	const std::size_t descHandleIncSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDescHandle(mObjectCBufferGpuDescHandleBegin);
+	
+	// Draw objects
+	const std::size_t worldMatsCount{ mWorldMatricesByGeomIndex[0].size() };
+	for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
+		mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDescHandle);
+		objectCBufferGpuDescHandle.ptr += descHandleIncSize;
+
+		mCmdList->DrawInstanced(1U, 1U, 0U, 0U);
+	}
 
 	mCmdList->Close();
 
@@ -56,5 +67,5 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 }
 
 bool PunctualLightCmdListRecorder::ValidateData() const noexcept {
-	return CmdListRecorder::ValidateData() && mFrameCBuffer != nullptr;
+	return CmdListRecorder::ValidateData() && mFrameCBuffer != nullptr && mWorldMatricesByGeomIndex.size() == 1UL && mWorldMatricesByGeomIndex[0].empty() == false;
 }

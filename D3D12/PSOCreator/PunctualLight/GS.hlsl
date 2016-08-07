@@ -25,13 +25,11 @@ void main(const in point Input input[1], inout TriangleStream<Output> triangleSt
 	const float lightRadius = input[0].mLightPosVAndRange.w;
 
 	// Fix light z coordinate
-	const float nearPlaneZ = 1.0f;
+	const float nearPlaneZ = 1.0f; // TODO: Pass near plane Z in a constant buffer
 	const float lightMinZ = lightPosV.z - lightRadius;
 	const float lightMaxZ = lightPosV.z + lightRadius;
-	float lightZ = lightMinZ;
-	if (lightMinZ < nearPlaneZ && nearPlaneZ < lightMaxZ) {
-		lightZ = nearPlaneZ;
-	}
+	const float cond = lightMinZ < nearPlaneZ && nearPlaneZ < lightMaxZ;
+	const float lightZ = cond * nearPlaneZ + (1.0f - cond) * lightMinZ;
 
 	// Compute vertices positions and texture coordinates based on
 	// a quad whose center position is lightCenterPosV
