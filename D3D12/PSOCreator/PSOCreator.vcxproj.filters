@@ -5,6 +5,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PSOCreator.h" />
+    <ClInclude Include="Material.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Basic">
@@ -12,6 +13,9 @@
     </Filter>
     <Filter Include="PunctualLight">
       <UniqueIdentifier>{f31e1388-e30e-436b-92ef-a3c440f4e333}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShaderUtils">
+      <UniqueIdentifier>{970b0b1d-4e03-4ab5-8834-edba2d3807c8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -38,6 +42,8 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Lighting.hlsli" />
+    <None Include="ShaderUtils\Lighting.hlsli">
+      <Filter>ShaderUtils</Filter>
+    </None>
   </ItemGroup>
 </Project>

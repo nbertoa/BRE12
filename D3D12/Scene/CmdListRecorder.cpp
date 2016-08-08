@@ -34,11 +34,17 @@ CmdListRecorder::CmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3
 }
 
 bool CmdListRecorder::ValidateData() const noexcept {
+	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i ) {
+		if (mCmdAlloc[i] == nullptr) {
+			return false;
+		}
+	}
+
 	return
 		mCmdList != nullptr &&
-		mCmdAlloc != nullptr &&
 		mCbvSrvUavDescHeap != nullptr &&
+		mTopology != D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED &&
 		mRootSign != nullptr &&
-		mPSO != nullptr &&
-		mVertexAndIndexBufferDataVec.size() == mWorldMatricesByGeomIndex.size();
+		mPSO != nullptr && 
+		mObjectCBufferGpuDescHandleBegin.ptr != 0UL;
 }

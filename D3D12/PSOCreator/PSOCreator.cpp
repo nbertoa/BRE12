@@ -8,62 +8,31 @@
 #include <Utils/DebugUtils.h>
 
 namespace {
-	void BuildPSO(const PSOCreator::Input& input, PSOCreator::Output& output) noexcept {
-		ASSERT(input.ValidateData());
+	struct PSOParams {
+		PSOParams() = default;
 
-		ID3DBlob* rootSignBlob{ nullptr };
-		ShaderManager::Get().LoadShaderFile(input.mRootSignFilename, rootSignBlob);
-		RootSignatureManager::Get().CreateRootSignature(*rootSignBlob, output.mRootSign);
+		bool ValidateData() const noexcept;
 
-		D3D12_SHADER_BYTECODE vertexShader{};
-		if (input.mVSFilename != nullptr) {
-			ShaderManager::Get().LoadShaderFile(input.mVSFilename, vertexShader);
-		}
+		// If a shader filename is nullptr, then we do not load it.
+		std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout{};
+		const char* mRootSignFilename{ nullptr };
+		const char* mVSFilename{ nullptr };
+		const char* mGSFilename{ nullptr };
+		const char* mDSFilename{ nullptr };
+		const char* mHSFilename{ nullptr };
+		const char* mPSFilename{ nullptr };
 
-		D3D12_SHADER_BYTECODE geomShader{};
-		if (input.mGSFilename != nullptr) {
-			ShaderManager::Get().LoadShaderFile(input.mGSFilename, geomShader);
-		}
+		D3D12_BLEND_DESC mBlendDesc = D3DFactory::DefaultBlendDesc();
+		D3D12_RASTERIZER_DESC mRasterizerDesc = D3DFactory::DefaultRasterizerDesc();
+		D3D12_DEPTH_STENCIL_DESC mDepthStencilDesc = D3DFactory::DefaultDepthStencilDesc();
+		std::uint32_t mNumRenderTargets{ 0U };
+		DXGI_FORMAT mRtFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{ DXGI_FORMAT_UNKNOWN };
+		DXGI_SAMPLE_DESC mSampleDesc{ 1U, 0U };
+		std::uint32_t mSampleMask{ UINT_MAX };
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
+	};
 
-		D3D12_SHADER_BYTECODE domainShader{};
-		if (input.mDSFilename != nullptr) {
-			ShaderManager::Get().LoadShaderFile(input.mDSFilename, domainShader);
-		}
-
-		D3D12_SHADER_BYTECODE hullShader{};
-		if (input.mHSFilename != nullptr) {
-			ShaderManager::Get().LoadShaderFile(input.mHSFilename, hullShader);
-		}
-
-		D3D12_SHADER_BYTECODE pixelShader{};
-		if (input.mPSFilename != nullptr) {
-			ShaderManager::Get().LoadShaderFile(input.mPSFilename, pixelShader);
-		}
-
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = {};
-		desc.BlendState = input.mBlendDesc;
-		desc.DepthStencilState = input.mDepthStencilDesc;
-		desc.DS = domainShader;
-		desc.DSVFormat = MasterRender::DepthStencilFormat();
-		desc.GS = geomShader;
-		desc.HS = hullShader;
-		desc.InputLayout = { input.mInputLayout.empty() ? nullptr : input.mInputLayout.data(), (std::uint32_t)input.mInputLayout.size() };
-		desc.NumRenderTargets = input.mNumRenderTargets;
-		desc.PrimitiveTopologyType = input.mTopology;
-		desc.pRootSignature = output.mRootSign;
-		desc.PS = pixelShader;
-		desc.RasterizerState = D3DFactory::DefaultRasterizerDesc();
-		memcpy(desc.RTVFormats, input.mRtFormats, sizeof(input.mRtFormats));
-		desc.SampleDesc = input.mSampleDesc;
-		desc.SampleMask = input.mSampleMask;
-		desc.VS = vertexShader;
-
-		PSOManager::Get().CreateGraphicsPSO(desc, output.mPSO);
-	}
-}
-
-namespace PSOCreator {
-	bool Input::ValidateData() const noexcept {
+	bool PSOParams::ValidateData() const noexcept {
 		if (mNumRenderTargets == 0 || mNumRenderTargets > D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT || mRootSignFilename == nullptr) {
 			return false;
 		}
@@ -75,45 +44,113 @@ namespace PSOCreator {
 		}
 
 		return true;
+	}	
+
+	void BuildPSO(const PSOParams& psoParams, PSOCreator::PSOData& psoData) noexcept {
+		ASSERT(psoParams.ValidateData());
+
+		ID3DBlob* rootSignBlob{ nullptr };
+		ShaderManager::Get().LoadShaderFile(psoParams.mRootSignFilename, rootSignBlob);
+		RootSignatureManager::Get().CreateRootSignature(*rootSignBlob, psoData.mRootSign);
+
+		D3D12_SHADER_BYTECODE vertexShader{};
+		if (psoParams.mVSFilename != nullptr) {
+			ShaderManager::Get().LoadShaderFile(psoParams.mVSFilename, vertexShader);
+		}
+
+		D3D12_SHADER_BYTECODE geomShader{};
+		if (psoParams.mGSFilename != nullptr) {
+			ShaderManager::Get().LoadShaderFile(psoParams.mGSFilename, geomShader);
+		}
+
+		D3D12_SHADER_BYTECODE domainShader{};
+		if (psoParams.mDSFilename != nullptr) {
+			ShaderManager::Get().LoadShaderFile(psoParams.mDSFilename, domainShader);
+		}
+
+		D3D12_SHADER_BYTECODE hullShader{};
+		if (psoParams.mHSFilename != nullptr) {
+			ShaderManager::Get().LoadShaderFile(psoParams.mHSFilename, hullShader);
+		}
+
+		D3D12_SHADER_BYTECODE pixelShader{};
+		if (psoParams.mPSFilename != nullptr) {
+			ShaderManager::Get().LoadShaderFile(psoParams.mPSFilename, pixelShader);
+		}
+
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = {};
+		desc.BlendState = psoParams.mBlendDesc;
+		desc.DepthStencilState = psoParams.mDepthStencilDesc;
+		desc.DS = domainShader;
+		desc.DSVFormat = MasterRender::DepthStencilFormat();
+		desc.GS = geomShader;
+		desc.HS = hullShader;
+		desc.InputLayout = { psoParams.mInputLayout.empty() ? nullptr : psoParams.mInputLayout.data(), (std::uint32_t)psoParams.mInputLayout.size() };
+		desc.NumRenderTargets = psoParams.mNumRenderTargets;
+		desc.PrimitiveTopologyType = psoParams.mTopology;
+		desc.pRootSignature = psoData.mRootSign;
+		desc.PS = pixelShader;
+		desc.RasterizerState = D3DFactory::DefaultRasterizerDesc();
+		memcpy(desc.RTVFormats, psoParams.mRtFormats, sizeof(psoParams.mRtFormats));
+		desc.SampleDesc = psoParams.mSampleDesc;
+		desc.SampleMask = psoParams.mSampleMask;
+		desc.VS = vertexShader;
+
+		PSOManager::Get().CreateGraphicsPSO(desc, psoData.mPSO);
+
+		ASSERT(psoData.ValidateData());
 	}
 
-	void Execute(const Input& input, Output& output) noexcept {
-		ASSERT(input.ValidateData());
-		BuildPSO(input, output);
+	void CreatePSO(const PSOParams& psoParams, PSOCreator::PSOData& psoData) noexcept {
+		ASSERT(psoParams.ValidateData());
+		BuildPSO(psoParams, psoData);
+		ASSERT(psoData.ValidateData());
+	}
+}
+
+namespace PSOCreator {
+	PSOData CommonPSOData::mPSOData[(std::uint32_t)Technique::NUM_TECHNIQUES];
+
+	bool PSOData::ValidateData() const noexcept {
+		return mPSO != nullptr && mRootSign != nullptr;
 	}
 
-	Output CommonPSOData::mPSOData[(std::uint32_t)Technique::NUM_TECHNIQUES];
+	void Execute(const PSOParams& psoParams, PSOData& psoData) noexcept {
+		ASSERT(psoParams.ValidateData());
+		BuildPSO(psoParams, psoData);
+		ASSERT(psoData.ValidateData());
+	}
 
 	void CommonPSOData::Init() noexcept {
-		Input psoCreatorInput{};
-		psoCreatorInput.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
-		psoCreatorInput.mPSFilename = "PSOCreator/Basic/PS.cso";
-		psoCreatorInput.mRootSignFilename = "PSOCreator/Basic/RS.cso";
-		psoCreatorInput.mVSFilename = "PSOCreator/Basic/VS.cso";
-		psoCreatorInput.mNumRenderTargets = MasterRender::NumRenderTargets();
-		memcpy(psoCreatorInput.mRtFormats, MasterRender::GeomPassBuffersFormats(), sizeof(DXGI_FORMAT) * psoCreatorInput.mNumRenderTargets);
+		PSOParams psoParams{};
+		psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+		psoParams.mPSFilename = "PSOCreator/Basic/PS.cso";
+		psoParams.mRootSignFilename = "PSOCreator/Basic/RS.cso";
+		psoParams.mVSFilename = "PSOCreator/Basic/VS.cso";
+		psoParams.mNumRenderTargets = MasterRender::NumRenderTargets();
+		memcpy(psoParams.mRtFormats, MasterRender::GeomPassBuffersFormats(), sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
 		ASSERT(mPSOData[Technique::BASIC].mPSO == nullptr && mPSOData[Technique::BASIC].mRootSign == nullptr);
-		PSOCreator::Execute(psoCreatorInput, mPSOData[Technique::BASIC]);
+		PSOCreator::Execute(psoParams, mPSOData[Technique::BASIC]);
 
-		psoCreatorInput = Input{};
-		psoCreatorInput.mBlendDesc = D3DFactory::AlwaysBlendDesc();
-		psoCreatorInput.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
-		psoCreatorInput.mGSFilename = "PSOCreator/PunctualLight/GS.cso";
-		psoCreatorInput.mPSFilename = "PSOCreator/PunctualLight/PS.cso";
-		psoCreatorInput.mRootSignFilename = "PSOCreator/PunctualLight/RS.cso";
-		psoCreatorInput.mVSFilename = "PSOCreator/PunctualLight/VS.cso";
-		psoCreatorInput.mNumRenderTargets = 1U;
-		psoCreatorInput.mRtFormats[0U] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		const std::size_t rtCount{ _countof(psoCreatorInput.mRtFormats) };
+		psoParams = PSOParams{};
+		psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
+		psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
+		psoParams.mGSFilename = "PSOCreator/PunctualLight/GS.cso";
+		psoParams.mPSFilename = "PSOCreator/PunctualLight/PS.cso";
+		psoParams.mRootSignFilename = "PSOCreator/PunctualLight/RS.cso";
+		psoParams.mVSFilename = "PSOCreator/PunctualLight/VS.cso";
+		psoParams.mNumRenderTargets = 1U;
+		psoParams.mRtFormats[0U] = MasterRender::BackBufferRTFormat();
+		const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
 		for (std::size_t i = 1UL; i < rtCount; ++i) {
-			psoCreatorInput.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
+			psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 		}
-		psoCreatorInput.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+		psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 		ASSERT(mPSOData[Technique::PUNCTUAL_LIGHT].mPSO == nullptr && mPSOData[Technique::PUNCTUAL_LIGHT].mRootSign == nullptr);
-		PSOCreator::Execute(psoCreatorInput, mPSOData[Technique::PUNCTUAL_LIGHT]);
+		CreatePSO(psoParams, mPSOData[Technique::PUNCTUAL_LIGHT]);
 	}
 
-	const Output& CommonPSOData::GetData(const CommonPSOData::Technique tech) noexcept {
+	const PSOData& CommonPSOData::GetData(const CommonPSOData::Technique tech) noexcept {
 		ASSERT(tech < CommonPSOData::Technique::NUM_TECHNIQUES);
 		return mPSOData[tech];
 	}

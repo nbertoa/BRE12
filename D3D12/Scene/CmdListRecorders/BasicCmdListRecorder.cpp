@@ -53,7 +53,7 @@ void BasicCmdListRecorder::RecordCommandLists(
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
 		mCmdList->IASetVertexBuffers(0U, 1U, &mVertexAndIndexBufferDataVec[i].first.mBufferView);
 		mCmdList->IASetIndexBuffer(&mVertexAndIndexBufferDataVec[i].second.mBufferView);
-		const std::size_t worldMatsCount{ mWorldMatricesByGeomIndex[i].size() };
+		const std::size_t worldMatsCount{ mWorldMatrices[i].size() };
 		for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
 			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDescHandle);
 			objectCBufferGpuDescHandle.ptr += descHandleIncSize;
@@ -75,10 +75,18 @@ void BasicCmdListRecorder::RecordCommandLists(
 }
 
 bool BasicCmdListRecorder::ValidateData() const noexcept {
+	for (std::size_t i = 0UL; i < mWorldMatrices.size(); ++i) {
+		if (mWorldMatrices[i].empty()) {
+			return false;
+		}
+	}
+
 	return 
 		CmdListRecorder::ValidateData() && 
 		mFrameCBuffer != nullptr && 
 		mObjectCBuffer != nullptr && 
-		mVertexAndIndexBufferDataVec.empty() == false && 
+		mVertexAndIndexBufferDataVec.empty() == false && 	
+		mWorldMatrices.empty() == false &&
+		mVertexAndIndexBufferDataVec.size() == mWorldMatrices.size() &&
 		mMaterialsCBuffer != nullptr;
 }

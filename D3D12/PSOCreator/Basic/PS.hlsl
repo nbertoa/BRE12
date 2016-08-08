@@ -1,6 +1,7 @@
-#include "../Lighting.hlsli"
+//#include "../ShaderUtils/Lighting.hlsli"
 
-#define BRDF_FROSTBITE 
+//#define BRDF_FROSTBITE_ILLUMINANCE 
+//#define BRDF_FROSTBITE_LUMINANCE
 
 struct Input {
 	float4 mPosH : SV_POSITION;
@@ -24,35 +25,37 @@ struct Output {
 	float4 mPosV : SV_Target1;
 	float4 mBaseColor_MetalMask : SV_Target2;
 	float4 mReflectance_Smoothness : SV_Target3;
-	float4 mColor : SV_Target4;
+	//float4 mColor : SV_Target4;
 };
 
 Output main(const in Input input) {
-	Output output = (Output)0;
-
-	const float3 normalV = normalize(input.mNormalV);
-
-/*  PunctualLight light;	
+	/*PunctualLight light;
 	light.mPosV = mul(float4(0.0f, 0.0f, 0.0f, 1.0f), gFrameConstants.mV).xyz;
-	light.mRange = 30.0f;
+	light.mRange = 100.0f;
 	light.mColor = float3(1.0f, 1.0f, 1.0f);
-	light.mPower = 5000.0f;	
-	
-	const float3 luminance = computeLuminance(light, input.mPosV);
+	light.mPower = 100.0f;	
 	const float3 baseColor = gMaterial.mBaseColor_MetalMask.xyz;
 	const float metalMask = gMaterial.mBaseColor_MetalMask.w;
 	const float smoothness = gMaterial.mReflectance_Smoothness.w;
 	const float3 reflectance = gMaterial.mReflectance_Smoothness.xyz;
 	const float3 lightDirV = light.mPosV - input.mPosV;
 	
+	float3 luminance;
+#ifdef BRDF_FROSTBITE_LUMINANCE
+	luminance = computePunctualLightFrostbiteLuminance(light, input.mPosV);
+#else
+	luminance = computePunctualLightDirectLuminance(light, input.mPosV, normalize(input.mNormalV), 0.0000f);
+#endif
 
 	float3 illuminance;
-#ifdef BRDF_FROSTBITE
-	illuminance = brdf_FrostBite(normalV, normalize(-input.mPosV), normalize(lightDirV), baseColor, smoothness, reflectance, metalMask);
+#ifdef BRDF_FROSTBITE_ILLUMINANCE
+	illuminance = brdf_FrostBite(normalize(input.mNormalV), normalize(-input.mPosV), normalize(lightDirV), baseColor, smoothness, reflectance, metalMask);
 #else
-	illuminance = brdf_CookTorrance(normalV, normalize(-input.mPosV), normalize(lightDirV), baseColor, smoothness, reflectance, metalMask);
+	illuminance = brdf_CookTorrance(normalize(input.mNormalV), normalize(-input.mPosV), normalize(lightDirV), baseColor, smoothness, reflectance, metalMask);
 #endif*/
-	output.mNormalV = float4(normalV, 0.0f);
+
+	Output output = (Output)0;
+	output.mNormalV = float4(normalize(input.mNormalV), 0.0f);
 	output.mPosV = float4(input.mPosV, 1.0f);
 	output.mBaseColor_MetalMask = gMaterial.mBaseColor_MetalMask;
 	output.mReflectance_Smoothness = gMaterial.mReflectance_Smoothness;

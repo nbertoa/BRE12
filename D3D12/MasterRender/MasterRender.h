@@ -27,8 +27,8 @@ public:
 
 	void Terminate() noexcept;
 
+	__forceinline static const DXGI_FORMAT BackBufferRTFormat() noexcept { return sBackBufferRTFormat; }
 	__forceinline static const DXGI_FORMAT BackBufferFormat() noexcept { return sBackBufferFormat; }
-	__forceinline static const DXGI_FORMAT* RTVFormats() noexcept { return sRTVFormats; }
 	__forceinline static const DXGI_FORMAT* GeomPassBuffersFormats() noexcept { return sGeomPassBufferFormats; }
 
 
@@ -58,8 +58,8 @@ private:
 	void FlushCommandQueue() noexcept;
 	void SignalFenceAndPresent() noexcept;
 
+	static const DXGI_FORMAT sBackBufferRTFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
 	static const DXGI_FORMAT sBackBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
-	static const DXGI_FORMAT sRTVFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
 	static const DXGI_FORMAT sGeomPassBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
 	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
 

@@ -53,7 +53,7 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDescHandle(mObjectCBufferGpuDescHandleBegin);
 	
 	// Draw objects
-	const std::size_t worldMatsCount{ mWorldMatricesByGeomIndex[0].size() };
+	const std::size_t worldMatsCount{ mWorldMatrices.size() };
 	for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
 		mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDescHandle);
 		objectCBufferGpuDescHandle.ptr += descHandleIncSize;
@@ -67,5 +67,8 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 }
 
 bool PunctualLightCmdListRecorder::ValidateData() const noexcept {
-	return CmdListRecorder::ValidateData() && mFrameCBuffer != nullptr && mWorldMatricesByGeomIndex.size() == 1UL && mWorldMatricesByGeomIndex[0].empty() == false;
+	return 
+		CmdListRecorder::ValidateData() && 
+		mFrameCBuffer != nullptr && 
+		mWorldMatrices.empty() == false;
 }

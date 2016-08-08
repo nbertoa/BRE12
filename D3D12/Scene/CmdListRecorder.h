@@ -23,7 +23,7 @@ public:
 	using VertexAndIndexBufferData = std::pair<BufferCreator::VertexBufferData, BufferCreator::IndexBufferData>;
 	using VertexAndIndexBufferDataVec = std::vector<VertexAndIndexBufferData>;
 	using Matrices = std::vector<DirectX::XMFLOAT4X4>;
-	using MatricesByGeomIndex = std::vector<Matrices>;
+	using MatricesVec = std::vector<Matrices>;
 
 	explicit CmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 		
@@ -38,8 +38,6 @@ public:
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& ObjectCBufferGpuDescHandleBegin() noexcept { return mObjectCBufferGpuDescHandleBegin; }
 	__forceinline D3D12_VIEWPORT& ScreenViewport() noexcept { return mScreenViewport; }
 	__forceinline D3D12_RECT& ScissorRector() noexcept { return mScissorRect; }
-	__forceinline VertexAndIndexBufferDataVec& GetVertexAndIndexBufferDataVec() noexcept { return mVertexAndIndexBufferDataVec; }
-	__forceinline MatricesByGeomIndex& WorldMatricesByGeomIndex() noexcept { return mWorldMatricesByGeomIndex; }
 
 	// Build command lists and push them to the queue.
 	virtual void RecordCommandLists(
@@ -49,12 +47,12 @@ public:
 		const std::uint32_t rtvCpuDescHandlesCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept = 0;
 
-protected:
 	// This method validates all data (nullptr's, etc)
 	// When you inherit from this class, you should reimplement it to include
 	// new members
 	virtual bool ValidateData() const noexcept;
 
+protected:
 	ID3D12Device& mDevice;
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
@@ -72,10 +70,6 @@ protected:
 	UploadBuffer* mObjectCBuffer{ nullptr };
 	D3D12_VIEWPORT mScreenViewport{ 0.0f, 0.0f, (float)Settings::sWindowWidth, (float)Settings::sWindowHeight, 0.0f, 1.0f };
 	D3D12_RECT mScissorRect{ 0, 0, Settings::sWindowWidth, Settings::sWindowHeight };
-	
-	// We should have a vector of world matrices per geometry.	
-	VertexAndIndexBufferDataVec mVertexAndIndexBufferDataVec;
-	MatricesByGeomIndex mWorldMatricesByGeomIndex;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescHandleBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescHandleBegin{ 0UL };
 };

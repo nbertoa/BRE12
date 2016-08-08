@@ -6,6 +6,7 @@
 #include <CommandManager/CommandManager.h>
 #include <GeometryGenerator/GeometryGenerator.h>
 #include <GlobalData/D3dData.h>
+#include <PSOCreator/Material.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/BufferCreator.h>
 #include <ResourceManager/ResourceManager.h>
@@ -13,11 +14,6 @@
 #include <Scene/CmdListRecorders/PunctualLightCmdListRecorder.h>
 
 namespace {
-	struct Material {
-		float mBaseColor_MetalMask[4U];
-		float mReflectance_Smoothness[4U];
-	};
-
 	void BuildConstantBuffers(BasicCmdListRecorder& task) noexcept {
 		ASSERT(task.CbvSrvUavDescHeap() == nullptr);
 		ASSERT(task.FrameCBuffer() == nullptr);
@@ -27,7 +23,7 @@ namespace {
 		const std::uint32_t geomCount{ (std::uint32_t)task.GetVertexAndIndexBufferDataVec().size() };
 		std::uint32_t numGeomDesc{ 0U };
 		for (std::size_t i = 0UL; i < geomCount; ++i) {
-			numGeomDesc += (std::uint32_t)task.WorldMatricesByGeomIndex()[i].size();
+			numGeomDesc += (std::uint32_t)task.WorldMatrices()[i].size();
 		}
 		ASSERT(numGeomDesc != 0U);
 
@@ -92,10 +88,10 @@ namespace {
 		// Fill objects cbuffer data
 		std::uint32_t k = 0U;
 		for (std::size_t i = 0UL; i < geomCount; ++i) {
-			const std::uint32_t worldMatsCount{ (std::uint32_t)task.WorldMatricesByGeomIndex()[i].size() };
+			const std::uint32_t worldMatsCount{ (std::uint32_t)task.WorldMatrices()[i].size() };
 			for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
 				DirectX::XMFLOAT4X4 w;
-				const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&task.WorldMatricesByGeomIndex()[i][j]));
+				const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&task.WorldMatrices()[i][j]));
 				DirectX::XMStoreFloat4x4(&w, wMatrix);
 				task.ObjectCBuffer()->CopyData(k + j, &w, sizeof(w));
 			}
@@ -110,9 +106,8 @@ namespace {
 		ASSERT(task.ObjectCBuffer() == nullptr);
 
 		// We assume we have world matrices by geometry index 0 (but we do not have geometry here)
-		ASSERT(task.WorldMatricesByGeomIndex().size() == 1UL);
-		ASSERT(task.WorldMatricesByGeomIndex()[0].empty() == false);
-		const std::uint32_t lightsCount{ (std::uint32_t)task.WorldMatricesByGeomIndex()[0].size() };
+		ASSERT(task.WorldMatrices().empty() == false);
+		const std::uint32_t lightsCount{ (std::uint32_t)task.WorldMatrices().size() };
 		const std::uint32_t numGeomDesc{ lightsCount };
 
 		// Create CBV_SRV_UAV cbuffer descriptor heap
@@ -150,7 +145,7 @@ namespace {
 		// Fill objects cbuffer data
 		for (std::uint32_t j = 0UL; j < lightsCount; ++j) {
 			DirectX::XMFLOAT4X4 w;
-			const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&task.WorldMatricesByGeomIndex()[0][j]));
+			const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&task.WorldMatrices()[j]));
 			DirectX::XMStoreFloat4x4(&w, wMatrix);
 			task.ObjectCBuffer()->CopyData(j, &w, sizeof(w));
 		}
@@ -162,6 +157,8 @@ void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandLi
 
 	GeometryGenerator::MeshData shape;
 	GeometryGenerator::CreateSphere(2.0f, 50U, 50U, shape);
+	//GeometryGenerator::CreateCylinder(2.0f, 2.0f, 4, 20, 20, shape);
+	//GeometryGenerator::CreateBox(2, 2, 2, 2, shape);
 
 	const std::size_t numTasks{ 4UL };
 	const std::size_t numGeometry{ 1000UL };
@@ -173,7 +170,7 @@ void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandLi
 	CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
 	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
 
-	const PSOCreator::Output& psoCreatorOutput(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::BASIC));
+	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::BASIC));
 
 	// Create vertex buffer
 	BufferCreator::BufferParams vertexBufferParams(shape.mVertices.data(), (std::uint32_t)shape.mVertices.size(), sizeof(GeometryGenerator::Vertex));
@@ -198,12 +195,12 @@ void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandLi
 			std::unique_ptr<CmdListRecorder>& task{ tasks[k] };
 			BasicCmdListRecorder* newTask{ new BasicCmdListRecorder(D3dData::Device(), cmdListQueue) };
 			task.reset(newTask);
-			task->PSO() = psoCreatorOutput.mPSO;
-			task->RootSign() = psoCreatorOutput.mRootSign;
+			task->PSO() = psoData.mPSO;
+			task->RootSign() = psoData.mRootSign;
 						
-			task->GetVertexAndIndexBufferDataVec().resize(1UL, vAndIData);
-			CmdListRecorder::MatricesByGeomIndex& worldMatByGeomIndex{ task->WorldMatricesByGeomIndex() };
-			worldMatByGeomIndex.resize(1UL, CmdListRecorder::Matrices(numGeometry));
+			newTask->GetVertexAndIndexBufferDataVec().resize(1UL, vAndIData);
+			CmdListRecorder::MatricesVec& worldMatrices{ newTask->WorldMatrices() };
+			worldMatrices.resize(1UL, CmdListRecorder::Matrices(numGeometry));
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
 				const float tx{ MathUtils::RandF(-meshSpaceOffset, meshSpaceOffset) };
 				const float ty{ MathUtils::RandF(-meshSpaceOffset, meshSpaceOffset) };
@@ -211,10 +208,12 @@ void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandLi
 
 				DirectX::XMFLOAT4X4 world;
 				DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));
-				worldMatByGeomIndex[0][i] = world;
+				worldMatrices[0][i] = world;
 			}
 
 			BuildConstantBuffers(*newTask);
+
+			ASSERT(newTask->ValidateData());
 		}
 	}
 	);
@@ -230,13 +229,13 @@ void BasicScene::GenerateLightPassRecorders(
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(0 < geometryBuffersCount && geometryBuffersCount < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 
-	const PSOCreator::Output& psoCreatorOutput(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::PUNCTUAL_LIGHT));
+	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::PUNCTUAL_LIGHT));
 
-	const std::size_t numTasks{ 1UL };
-	const std::size_t numLights{ 2UL };
+	const std::size_t numTasks{ 4UL };
+	const std::size_t numLights{ 4UL };
 	tasks.resize(numTasks);
 
-	const float lightSpaceOffset{ 0.1f };
+	const float lightSpaceOffset{ 4.0f };
 	const std::uint32_t grainSize{ max(1U, (std::uint32_t)numTasks / Settings::sCpuProcessors) };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, numTasks, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
@@ -244,12 +243,11 @@ void BasicScene::GenerateLightPassRecorders(
 			std::unique_ptr<CmdListRecorder>& task{ tasks[k] };
 			PunctualLightCmdListRecorder* newTask{ new PunctualLightCmdListRecorder(D3dData::Device(), cmdListQueue) };
 			task.reset(newTask);
-			task->PSO() = psoCreatorOutput.mPSO;
-			task->RootSign() = psoCreatorOutput.mRootSign;
+			task->PSO() = psoData.mPSO;
+			task->RootSign() = psoData.mRootSign;
 
-			CmdListRecorder::MatricesByGeomIndex& worldMatByGeomIndex{ task->WorldMatricesByGeomIndex() };
-			task->GetVertexAndIndexBufferDataVec().resize(1UL);
-			worldMatByGeomIndex.resize(1UL, CmdListRecorder::Matrices(numLights));
+			CmdListRecorder::Matrices& worldMatrices{ newTask->WorldMatrices() };
+			worldMatrices.resize(numLights);
 			for (std::size_t i = 0UL; i < numLights; ++i) {
 				const float tx{ MathUtils::RandF(-lightSpaceOffset, lightSpaceOffset) };
 				const float ty{ MathUtils::RandF(-lightSpaceOffset, lightSpaceOffset) };
@@ -257,7 +255,7 @@ void BasicScene::GenerateLightPassRecorders(
 
 				DirectX::XMFLOAT4X4 world;
 				DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));
-				worldMatByGeomIndex[0][i] = world;
+				worldMatrices[i] = world;
 			}
 
 			BuildConstantBuffers(*newTask, geometryBuffersCount);
@@ -280,6 +278,8 @@ void BasicScene::GenerateLightPassRecorders(
 
 				cbvSrvUavCpuDescHandle.ptr += descHandleIncSize;
 			}
+
+			ASSERT(newTask->ValidateData());
 		}		
 	}
 	);

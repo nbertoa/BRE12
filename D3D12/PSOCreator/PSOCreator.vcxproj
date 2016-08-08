@@ -119,6 +119,7 @@
     <ClCompile Include="PSOCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Material.h" />
     <ClInclude Include="PSOCreator.h" />
   </ItemGroup>
   <ItemGroup>
@@ -208,7 +209,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Lighting.hlsli" />
+    <None Include="ShaderUtils\Lighting.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

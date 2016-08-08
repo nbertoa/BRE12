@@ -98,7 +98,7 @@ float3 brdf_FrostBite(const float3 N, const float3 V, const float3 L, const floa
 
 	const float3 H = normalize(V + L);
 	const float dotNL = saturate(dot(N, L));
-	const float dotNV = saturate(dot(N, V));
+	const float dotNV = abs(dot(N, V)) + 1e-5f; // avoid artifact
 	const float dotNH = saturate(dot(N, H));
 	const float dotLH = saturate(dot(L, H));
 
@@ -185,11 +185,32 @@ float getAngleAtt(const float3 normalizedLightVector, const float3 lightDir, con
 	return attenuation;
 }
 
-float3 computeLuminance(PunctualLight light, const float3 geomPosV) {
-	const float3 unnormalizedLightVector = light.mPosV - geomPosV;
+float3 computePunctualLightDirectLuminance(PunctualLight light, const float3 geomPosV, const float3 normalV, const float cutoff) {
+	// calculate normalized light vector and distance to sphere light surface
+	float r = light.mRange;
+	float3 L = light.mPosV - geomPosV;
+	float distance = length(L);
+	float d = max(distance - r, 0);
+	L /= distance;
+
+	// calculate basic attenuation
+	float denom = d / r + 1;
+	float attenuation = 1 / (denom*denom);
+
+	// scale and bias attenuation such that:
+	//   attenuation == 0 at extent of max influence
+	//   attenuation == 1 when d == 0
+	attenuation = (attenuation - cutoff) / (1 - cutoff);
+	attenuation = max(attenuation, 0);
+
+	return light.mColor * saturate(dot(L, normalV)) * attenuation;
+}
+
+float3 computePunctualLightFrostbiteLuminance(PunctualLight light, const float3 geomPosV, const float3 normalV) {
+	const float3 lightV = light.mPosV - geomPosV;
 	const float lightInvSqrAttRadius = 1.0f / (light.mRange * light.mRange);
-	const float att = getDistanceAtt(unnormalizedLightVector, lightInvSqrAttRadius);
-	return att * light.mPower * light.mColor / (4.0f * PI);
+	const float att = getDistanceAtt(lightV, lightInvSqrAttRadius);
+	return att * light.mPower * light.mColor * saturate(dot(normalize(lightV), normalV)) / (4.0f * PI);
 }
 
 #endif

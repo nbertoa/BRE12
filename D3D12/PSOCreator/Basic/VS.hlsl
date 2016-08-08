@@ -23,7 +23,7 @@ struct Output {
 };
 
 Output main(in const Input input) {
-	float4x4 wv = mul(gObjConstants.mW, gFrameConstants.mV);
+	const float4x4 wv = mul(gObjConstants.mW, gFrameConstants.mV);
 
 	Output output;
 	output.mPosV = mul(float4(input.mPosO, 1.0f), wv).xyz;

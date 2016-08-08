@@ -4,10 +4,12 @@
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="UploadBuffer.h" />
     <ClInclude Include="BufferCreator.h" />
+    <ClInclude Include="DDSTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="UploadBuffer.cpp" />
     <ClCompile Include="BufferCreator.cpp" />
+    <ClCompile Include="DDSTextureLoader.cpp" />
   </ItemGroup>
 </Project>

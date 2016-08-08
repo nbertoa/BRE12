@@ -30,7 +30,6 @@ namespace  BufferCreator {
 		D3D12_VERTEX_BUFFER_VIEW mBufferView{};
 		std::uint32_t mCount{ 0U };
 	};
-
 	
 	void CreateBuffer(ID3D12GraphicsCommandList& cmdList, const BufferParams& bufferParams, VertexBufferData& bufferData) noexcept;
 

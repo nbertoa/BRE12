@@ -8,6 +8,7 @@ class PunctualLightCmdListRecorder : public CmdListRecorder {
 public:
 	explicit PunctualLightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
+	__forceinline Matrices& WorldMatrices() noexcept { return mWorldMatrices; }
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& GeometryBuffersGpuDescHandleBegin() noexcept { return mGeometryBuffersGpuDescHandleBegin; }
 
 	void RecordCommandLists(
@@ -17,9 +18,10 @@ public:
 		const std::uint32_t geomPassRtvCpuDescHandlesCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept override;
 
-protected:
 	bool ValidateData() const noexcept override;
 
 private:
+	Matrices mWorldMatrices;
+
 	D3D12_GPU_DESCRIPTOR_HANDLE mGeometryBuffersGpuDescHandleBegin;
 };

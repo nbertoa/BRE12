@@ -23,7 +23,7 @@ Output main(in const Input input) {
 	lightPosV = mul(lightPosV, wv);
 
 	Output output = (Output)0;
-	output.mLightPosVAndRange = float4(lightPosV.xyz, 200.0f);
+	output.mLightPosVAndRange = float4(lightPosV.xyz, 30.0f);
 	output.mLightColorAndPower = float4(1.0f, 1.0f, 1.0f, 4000.0f);
 	return output;
 }

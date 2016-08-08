@@ -24,7 +24,7 @@
 
 #include <wrl.h>
 #include <d3d11_1.h>
-#include "d3dx12.h"
+#include <DXUtils/d3dx12.h>
 
 #include <cstdint>
 

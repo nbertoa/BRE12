@@ -95,13 +95,12 @@ namespace {
 
 using namespace DirectX;
 
-const DXGI_FORMAT MasterRender::sRTVFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
 const DXGI_FORMAT MasterRender::sGeomPassBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{	
 	DXGI_FORMAT_R32G32B32A32_FLOAT,
 	DXGI_FORMAT_R32G32B32A32_FLOAT,
 	DXGI_FORMAT_R32G32B32A32_FLOAT,
 	DXGI_FORMAT_R32G32B32A32_FLOAT,
-	DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+	sBackBufferRTFormat,
 	DXGI_FORMAT_UNKNOWN,
 	DXGI_FORMAT_UNKNOWN,
 	DXGI_FORMAT_UNKNOWN
@@ -299,7 +298,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 
 	// Setup RTV descriptor to specify sRGB format.
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-	rtvDesc.Format = sRTVFormats[0U];
+	rtvDesc.Format = sBackBufferRTFormat;
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	// Create swap chain and render target views

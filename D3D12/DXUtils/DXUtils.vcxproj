@@ -121,11 +121,9 @@
   <ItemGroup>
     <ClInclude Include="D3DFactory.h" />
     <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="DDSTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3DFactory.cpp" />
-    <ClCompile Include="DDSTextureLoader.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
