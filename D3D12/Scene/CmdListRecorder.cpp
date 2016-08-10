@@ -45,6 +45,5 @@ bool CmdListRecorder::ValidateData() const noexcept {
 		mCbvSrvUavDescHeap != nullptr &&
 		mTopology != D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED &&
 		mRootSign != nullptr &&
-		mPSO != nullptr && 
-		mObjectCBufferGpuDescHandleBegin.ptr != 0UL;
+		mPSO != nullptr;
 }

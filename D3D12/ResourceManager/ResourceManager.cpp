@@ -62,7 +62,6 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 		IID_PPV_ARGS(uploadBuffer.GetAddressOf())));
 	mMutex.unlock();
 
-
 	// Describe the data we want to copy into the default buffer.
 	D3D12_SUBRESOURCE_DATA subResourceData = {};
 	subResourceData.pData = initData;

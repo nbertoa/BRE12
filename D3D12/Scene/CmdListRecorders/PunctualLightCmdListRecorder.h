@@ -8,8 +8,15 @@ class PunctualLightCmdListRecorder : public CmdListRecorder {
 public:
 	explicit PunctualLightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
-	__forceinline Matrices& WorldMatrices() noexcept { return mWorldMatrices; }
+	__forceinline static std::uint32_t MaxNumLights() noexcept { return sMaxNumLights; }
+	__forceinline std::uint32_t& NumLights() noexcept { return mNumLights; }
+
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& GeometryBuffersGpuDescHandleBegin() noexcept { return mGeometryBuffersGpuDescHandleBegin; }
+
+	__forceinline UploadBuffer* &FrameCBuffer() noexcept { return mFrameCBuffer; }
+
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& LightCBufferGpuDescHandleBegin() noexcept { return mLightCBufferGpuDescHandleBegin; }
+	__forceinline UploadBuffer* &LightCBuffer() noexcept { return mLightCBuffer; }
 
 	void RecordCommandLists(
 		const DirectX::XMFLOAT4X4& view,
@@ -21,7 +28,14 @@ public:
 	bool ValidateData() const noexcept override;
 
 private:
-	Matrices mWorldMatrices;
+	static const std::uint32_t sMaxNumLights{ 250U };
+
+	std::uint32_t mNumLights{ 0U };
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mGeometryBuffersGpuDescHandleBegin;
+
+	UploadBuffer* mFrameCBuffer{ nullptr };
+
+	UploadBuffer* mLightCBuffer{ nullptr };
+	D3D12_GPU_DESCRIPTOR_HANDLE mLightCBufferGpuDescHandleBegin;
 };

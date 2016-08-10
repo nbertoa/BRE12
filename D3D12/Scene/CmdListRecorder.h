@@ -32,10 +32,7 @@ public:
 	__forceinline ID3D12DescriptorHeap* & CbvSrvUavDescHeap() noexcept { return mCbvSrvUavDescHeap; }	
 	__forceinline ID3D12RootSignature* &RootSign() noexcept { return mRootSign; }
 	__forceinline ID3D12PipelineState* &PSO() noexcept { return mPSO; }
-	__forceinline D3D12_PRIMITIVE_TOPOLOGY_TYPE& PrimitiveTopologyType() noexcept { return mTopology; }
-	__forceinline UploadBuffer* &FrameCBuffer() noexcept { return mFrameCBuffer; }
-	__forceinline UploadBuffer* &ObjectCBuffer() noexcept { return mObjectCBuffer; }
-	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& ObjectCBufferGpuDescHandleBegin() noexcept { return mObjectCBufferGpuDescHandleBegin; }
+	__forceinline D3D12_PRIMITIVE_TOPOLOGY_TYPE& PrimitiveTopologyType() noexcept { return mTopology; }	
 	__forceinline D3D12_VIEWPORT& ScreenViewport() noexcept { return mScreenViewport; }
 	__forceinline D3D12_RECT& ScissorRector() noexcept { return mScissorRect; }
 
@@ -66,10 +63,6 @@ protected:
 	ID3D12RootSignature* mRootSign{ nullptr };
 	ID3D12PipelineState* mPSO{ nullptr };
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
-	UploadBuffer* mFrameCBuffer{ nullptr };
-	UploadBuffer* mObjectCBuffer{ nullptr };
 	D3D12_VIEWPORT mScreenViewport{ 0.0f, 0.0f, (float)Settings::sWindowWidth, (float)Settings::sWindowHeight, 0.0f, 1.0f };
 	D3D12_RECT mScissorRect{ 0, 0, Settings::sWindowWidth, Settings::sWindowHeight };
-
-	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescHandleBegin{ 0UL };
 };

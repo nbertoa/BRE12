@@ -81,12 +81,15 @@ bool BasicCmdListRecorder::ValidateData() const noexcept {
 		}
 	}
 
-	return 
-		CmdListRecorder::ValidateData() && 
-		mFrameCBuffer != nullptr && 
-		mObjectCBuffer != nullptr && 
+	const bool result = 
+		CmdListRecorder::ValidateData() &&
+		mFrameCBuffer != nullptr &&
+		mObjectCBuffer != nullptr &&
+		mObjectCBufferGpuDescHandleBegin.ptr != 0UL &&
 		mVertexAndIndexBufferDataVec.empty() == false && 	
 		mWorldMatrices.empty() == false &&
 		mVertexAndIndexBufferDataVec.size() == mWorldMatrices.size() &&
 		mMaterialsCBuffer != nullptr;
+
+	return result;
 }

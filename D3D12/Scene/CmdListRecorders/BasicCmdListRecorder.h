@@ -10,6 +10,12 @@ public:
 
 	__forceinline VertexAndIndexBufferDataVec& GetVertexAndIndexBufferDataVec() noexcept { return mVertexAndIndexBufferDataVec; }
 	__forceinline MatricesVec& WorldMatrices() noexcept { return mWorldMatrices; }
+
+	__forceinline UploadBuffer* &FrameCBuffer() noexcept { return mFrameCBuffer; }
+	
+	__forceinline UploadBuffer* &ObjectCBuffer() noexcept { return mObjectCBuffer; }
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& ObjectCBufferGpuDescHandleBegin() noexcept { return mObjectCBufferGpuDescHandleBegin; }
+
 	__forceinline UploadBuffer* &MaterialsCBuffer() noexcept { return mMaterialsCBuffer; }
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& MaterialsCBufferGpuDescHandleBegin() noexcept { return mMaterialsCBufferGpuDescHandleBegin; }
 
@@ -26,6 +32,11 @@ private:
 	// We should have a vector of world matrices per geometry.	
 	VertexAndIndexBufferDataVec mVertexAndIndexBufferDataVec;
 	MatricesVec mWorldMatrices;
+
+	UploadBuffer* mFrameCBuffer{ nullptr };
+
+	UploadBuffer* mObjectCBuffer{ nullptr };
+	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescHandleBegin;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mMaterialsCBufferGpuDescHandleBegin;
 	UploadBuffer* mMaterialsCBuffer{ nullptr };

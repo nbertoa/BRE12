@@ -8,6 +8,7 @@
 #include <GlobalData/D3dData.h>
 #include <PSOCreator/Material.h>
 #include <PSOCreator/PSOCreator.h>
+#include <PSOCreator/PunctualLight.h>
 #include <ResourceManager/BufferCreator.h>
 #include <ResourceManager/ResourceManager.h>
 #include <Scene/CmdListRecorders/BasicCmdListRecorder.h>
@@ -103,52 +104,56 @@ namespace {
 	void BuildConstantBuffers(PunctualLightCmdListRecorder& task, const std::uint32_t geometryBuffersCount) noexcept {
 		ASSERT(task.CbvSrvUavDescHeap() == nullptr);
 		ASSERT(task.FrameCBuffer() == nullptr);
-		ASSERT(task.ObjectCBuffer() == nullptr);
+		ASSERT(task.LightCBuffer() == nullptr);
 
 		// We assume we have world matrices by geometry index 0 (but we do not have geometry here)
-		ASSERT(task.WorldMatrices().empty() == false);
-		const std::uint32_t lightsCount{ (std::uint32_t)task.WorldMatrices().size() };
-		const std::uint32_t numGeomDesc{ lightsCount };
+		ASSERT(task.NumLights() != 0U);
+		const std::uint32_t lightsCount{ task.NumLights() };
 
 		// Create CBV_SRV_UAV cbuffer descriptor heap
 		D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 		descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		descHeapDesc.NodeMask = 0U;
-		descHeapDesc.NumDescriptors = numGeomDesc + geometryBuffersCount;
+		descHeapDesc.NumDescriptors = geometryBuffersCount + lightsCount;
 		descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, task.CbvSrvUavDescHeap());
 
-		// Create object cbuffer
-		const std::size_t objCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4)) };
-		ResourceManager::Get().CreateUploadBuffer(objCBufferElemSize, numGeomDesc, task.ObjectCBuffer());
+		// Create lights cbuffer
+		const std::size_t lightCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(PunctualLight)) };
+		ResourceManager::Get().CreateUploadBuffer(lightCBufferElemSize, lightsCount, task.LightCBuffer());
 		const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-		task.ObjectCBufferGpuDescHandleBegin().ptr = task.CbvSrvUavDescHeap()->GetGPUDescriptorHandleForHeapStart().ptr + geometryBuffersCount * descHandleIncSize;
-		
-		// Create object cbuffer descriptors
-		// Fill materials cbuffers data		
-		D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ task.ObjectCBuffer()->Resource()->GetGPUVirtualAddress() };
-		D3D12_CPU_DESCRIPTOR_HANDLE currObjCBufferDescHandle{ task.CbvSrvUavDescHeap()->GetCPUDescriptorHandleForHeapStart().ptr + geometryBuffersCount * descHandleIncSize };
-		for (std::size_t i = 0UL; i < numGeomDesc; ++i) {
-			// Create object cbuffers descriptors
-			D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
-			cBufferDesc.BufferLocation = objCBufferGpuAddress + i * objCBufferElemSize;
-			cBufferDesc.SizeInBytes = (std::uint32_t)objCBufferElemSize;
-			ResourceManager::Get().CreateConstantBufferView(cBufferDesc, currObjCBufferDescHandle);
+		task.LightCBufferGpuDescHandleBegin().ptr = task.CbvSrvUavDescHeap()->GetGPUDescriptorHandleForHeapStart().ptr + geometryBuffersCount * descHandleIncSize;
 
-			currObjCBufferDescHandle.ptr += descHandleIncSize;
+		// Create light cbuffer descriptors and fill lights cbuffer data
+		D3D12_GPU_VIRTUAL_ADDRESS lightCBufferGpuAddress{ task.LightCBuffer()->Resource()->GetGPUVirtualAddress() };
+		D3D12_CPU_DESCRIPTOR_HANDLE currLightCBufferDescHandle{ task.CbvSrvUavDescHeap()->GetCPUDescriptorHandleForHeapStart().ptr + geometryBuffersCount * descHandleIncSize };
+		const float posOffset{ 50.0f };
+		const float rangeOffset{ 10.0f };
+		const float powerOffset{ 1000.0f };
+		PunctualLight light;
+		for (std::uint32_t i = 0UL; i < lightsCount; ++i) {
+			// Create light cbuffers descriptor
+			D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
+			cBufferDesc.BufferLocation = lightCBufferGpuAddress + i * lightCBufferElemSize;
+			cBufferDesc.SizeInBytes = (std::uint32_t)lightCBufferElemSize;
+			ResourceManager::Get().CreateConstantBufferView(cBufferDesc, currLightCBufferDescHandle);
+			currLightCBufferDescHandle.ptr += descHandleIncSize;
+
+			// Fill light data
+			light.mPosAndRange[0] = MathUtils::RandF(-posOffset, posOffset);
+			light.mPosAndRange[1] = MathUtils::RandF(-posOffset, posOffset);
+			light.mPosAndRange[2] = MathUtils::RandF(-posOffset, posOffset);
+			light.mPosAndRange[3] = MathUtils::RandF(rangeOffset, rangeOffset * 2U);
+			light.mColorAndPower[0] = MathUtils::RandF(0.5f, 1.0f);
+			light.mColorAndPower[1] = MathUtils::RandF(0.5f, 1.0f);
+			light.mColorAndPower[2] = MathUtils::RandF(0.5f, 1.0f);
+			light.mColorAndPower[3] = MathUtils::RandF(powerOffset, powerOffset * 2U);
+			task.LightCBuffer()->CopyData(i, &light, sizeof(PunctualLight));
 		}
 
 		// Create frame cbuffer
 		const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4) * 2UL) };
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, task.FrameCBuffer());
-
-		// Fill objects cbuffer data
-		for (std::uint32_t j = 0UL; j < lightsCount; ++j) {
-			DirectX::XMFLOAT4X4 w;
-			const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&task.WorldMatrices()[j]));
-			DirectX::XMStoreFloat4x4(&w, wMatrix);
-			task.ObjectCBuffer()->CopyData(j, &w, sizeof(w));
-		}
 	}
 }
 
@@ -232,10 +237,9 @@ void BasicScene::GenerateLightPassRecorders(
 	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::PUNCTUAL_LIGHT));
 
 	const std::size_t numTasks{ 4UL };
-	const std::size_t numLights{ 4UL };
+	const std::uint32_t numLights{ 250 };
 	tasks.resize(numTasks);
 
-	const float lightSpaceOffset{ 4.0f };
 	const std::uint32_t grainSize{ max(1U, (std::uint32_t)numTasks / Settings::sCpuProcessors) };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, numTasks, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
@@ -245,18 +249,7 @@ void BasicScene::GenerateLightPassRecorders(
 			task.reset(newTask);
 			task->PSO() = psoData.mPSO;
 			task->RootSign() = psoData.mRootSign;
-
-			CmdListRecorder::Matrices& worldMatrices{ newTask->WorldMatrices() };
-			worldMatrices.resize(numLights);
-			for (std::size_t i = 0UL; i < numLights; ++i) {
-				const float tx{ MathUtils::RandF(-lightSpaceOffset, lightSpaceOffset) };
-				const float ty{ MathUtils::RandF(-lightSpaceOffset, lightSpaceOffset) };
-				const float tz{ MathUtils::RandF(-lightSpaceOffset, lightSpaceOffset) };
-
-				DirectX::XMFLOAT4X4 world;
-				DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));
-				worldMatrices[i] = world;
-			}
+			newTask->NumLights() = numLights;
 
 			BuildConstantBuffers(*newTask, geometryBuffersCount);
 
