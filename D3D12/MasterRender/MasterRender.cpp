@@ -158,132 +158,11 @@ tbb::task* MasterRender::execute() {
 		mTimer.Tick();
 
 		UpdateCamera(mCamera, mView, mProj, mTimer.DeltaTime());
-
 		ASSERT(mCmdListProcessor->IsIdle());
 
-		// Geom pass cmd list recorders 
-		std::uint32_t taskCount{ (std::uint32_t)mGeomPassCmdListRecorders.size() };
-		mCmdListProcessor->ResetExecutedTasksCounter();
-
-		ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[mCurrQueuedFrameIndex] };
-		ID3D12CommandAllocator* cmdAllocFrameMiddle{ mCmdAllocFrameMiddle[mCurrQueuedFrameIndex] };
-		ID3D12CommandAllocator* cmdAllocFrameEnd{ mCmdAllocFrameEnd[mCurrQueuedFrameIndex] };
-
-		//
-		// Begin frame task
-		//
-		CHECK_HR(cmdAllocFrameBegin->Reset());
-		CHECK_HR(mCmdListFrameBegin->Reset(cmdAllocFrameBegin, nullptr));
-
-		mCmdListFrameBegin->RSSetViewports(1U, &Settings::sScreenViewport);
-		mCmdListFrameBegin->RSSetScissorRects(1U, &Settings::sScissorRect);
-
-		// Set resource barriers and render targets
-		CD3DX12_RESOURCE_BARRIER presentToRtBarriers[GEOMBUFFERS_COUNT + 1U]{ 			
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[POSITION].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[REFLECTANCE_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-			CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		};
-		mCmdListFrameBegin->ResourceBarrier(_countof(presentToRtBarriers), presentToRtBarriers);
-		const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescHandles[GEOMBUFFERS_COUNT + 1U]{			
-			mGeomPassBuffersRTVCpuDescHandles[NORMAL],
-			mGeomPassBuffersRTVCpuDescHandles[POSITION],
-			mGeomPassBuffersRTVCpuDescHandles[BASECOLOR_METALMASK],
-			mGeomPassBuffersRTVCpuDescHandles[REFLECTANCE_SMOOTHNESS],
-			CurrentBackBufferView(),
-		};
-		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
-		mCmdListFrameBegin->OMSetRenderTargets(_countof(rtvCpuDescHandles), rtvCpuDescHandles, false, &dsvHandle);
-		
-		mCmdListFrameBegin->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0U, nullptr);
-		for (std::uint32_t i = 0U; i < GEOMBUFFERS_COUNT; ++i) {
-			mCmdListFrameBegin->ClearRenderTargetView(mGeomPassBuffersRTVCpuDescHandles[i], DirectX::Colors::Black, 0U, nullptr);
-		}
-		
-		mCmdListFrameBegin->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
-		CHECK_HR(mCmdListFrameBegin->Close());
-
-		// Execute begin Frame task + # cmd build tasks		
-		{
-			ID3D12CommandList* cmdLists[] = { mCmdListFrameBegin };
-			mCmdQueue->ExecuteCommandLists(1U, cmdLists);
-		}
-		std::uint32_t grainSize{ max(1U, (taskCount) / Settings::sCpuProcessors) };
-		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
-			[&](const tbb::blocked_range<size_t>& r) {
-			for (size_t i = r.begin(); i != r.end(); ++i)
-				mGeomPassCmdListRecorders[i]->RecordCommandLists(mView, mProj, rtvCpuDescHandles, _countof(rtvCpuDescHandles), dsvHandle);
-		}
-		);
-
-		//
-		// Middle frame task
-		//
-		CHECK_HR(cmdAllocFrameMiddle->Reset());
-		CHECK_HR(mCmdListFrameMiddle->Reset(cmdAllocFrameMiddle, nullptr));
-
-		CD3DX12_RESOURCE_BARRIER rtToSrvBarriers[GEOMBUFFERS_COUNT]{
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[POSITION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[REFLECTANCE_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		};
-		mCmdListFrameMiddle->ResourceBarrier(_countof(rtToSrvBarriers), rtToSrvBarriers);
-
-		CHECK_HR(mCmdListFrameMiddle->Close());
-
-		// Wait until all previous tasks command lists are executed
-		while (mCmdListProcessor->ExecutedTasksCounter() < taskCount) {
-			Sleep(0U);
-		}
-
-		// Middle Frame task + # light pass cmd list recorders
-		taskCount = (std::uint32_t)mLightPassCmdListRecorders.size();
-		mCmdListProcessor->ResetExecutedTasksCounter();
-
-		// Execute begin Frame task + # cmd build tasks
-		{
-			ID3D12CommandList* cmdLists[] = { mCmdListFrameMiddle };
-			mCmdQueue->ExecuteCommandLists(1U, cmdLists);
-		}
-		grainSize = max(1U, taskCount / Settings::sCpuProcessors);
-		D3D12_CPU_DESCRIPTOR_HANDLE currBackBuffer(CurrentBackBufferView());
-		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
-			[&](const tbb::blocked_range<size_t>& r) {
-			for (size_t i = r.begin(); i != r.end(); ++i)
-				mLightPassCmdListRecorders[i]->RecordCommandLists(mView, mProj, &currBackBuffer, 1U, dsvHandle);
-		}
-		);
-
-		//
-		// End frame task
-		//
-
-		CHECK_HR(cmdAllocFrameEnd->Reset());
-		CHECK_HR(mCmdListFrameEnd->Reset(cmdAllocFrameEnd, nullptr));
-
-		CD3DX12_RESOURCE_BARRIER rtToPresentBarriers[GEOMBUFFERS_COUNT + 1U]{			
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[POSITION].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
-			CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[REFLECTANCE_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
-			CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
-		};
-		mCmdListFrameEnd->ResourceBarrier(_countof(rtToPresentBarriers), rtToPresentBarriers);
-
-		CHECK_HR(mCmdListFrameEnd->Close());
-
-		// Wait until all previous tasks command lists are executed
-		while (mCmdListProcessor->ExecutedTasksCounter() < taskCount) {
-			Sleep(0U);
-		}
-
-		{
-			ID3D12CommandList* cmdLists[] = { mCmdListFrameEnd };
-			mCmdQueue->ExecuteCommandLists(1U, cmdLists);
-		}
+		BeginFrameTask();
+		MiddleFrameTask();
+		EndFrameTask();
 
 		SignalFenceAndPresent();
 	}
@@ -291,6 +170,128 @@ tbb::task* MasterRender::execute() {
 	mCmdListProcessor->Terminate();
 	FlushCommandQueue();
 	return nullptr;
+}
+
+void MasterRender::BeginFrameTask() {
+	std::uint32_t taskCount{ (std::uint32_t)mGeomPassCmdListRecorders.size() };
+	mCmdListProcessor->ResetExecutedTasksCounter();
+
+	ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[mCurrQueuedFrameIndex] };
+
+	CHECK_HR(cmdAllocFrameBegin->Reset());
+	CHECK_HR(mCmdListFrameBegin->Reset(cmdAllocFrameBegin, nullptr));
+
+	mCmdListFrameBegin->RSSetViewports(1U, &Settings::sScreenViewport);
+	mCmdListFrameBegin->RSSetScissorRects(1U, &Settings::sScissorRect);
+
+	// Set resource barriers and render targets
+	CD3DX12_RESOURCE_BARRIER presentToRtBarriers[GEOMBUFFERS_COUNT + 1U]{
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[POSITION].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[REFLECTANCE_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
+	};
+	mCmdListFrameBegin->ResourceBarrier(_countof(presentToRtBarriers), presentToRtBarriers);
+	const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescHandles[GEOMBUFFERS_COUNT + 1U]{
+		mGeomPassBuffersRTVCpuDescHandles[NORMAL],
+		mGeomPassBuffersRTVCpuDescHandles[POSITION],
+		mGeomPassBuffersRTVCpuDescHandles[BASECOLOR_METALMASK],
+		mGeomPassBuffersRTVCpuDescHandles[REFLECTANCE_SMOOTHNESS],
+		CurrentBackBufferView(),
+	};
+	const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
+	mCmdListFrameBegin->OMSetRenderTargets(_countof(rtvCpuDescHandles), rtvCpuDescHandles, false, &dsvHandle);
+
+	mCmdListFrameBegin->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0U, nullptr);
+	for (std::uint32_t i = 0U; i < GEOMBUFFERS_COUNT; ++i) {
+		mCmdListFrameBegin->ClearRenderTargetView(mGeomPassBuffersRTVCpuDescHandles[i], DirectX::Colors::Black, 0U, nullptr);
+	}
+
+	mCmdListFrameBegin->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
+	CHECK_HR(mCmdListFrameBegin->Close());
+
+	// Execute begin Frame task + # cmd build tasks		
+	{
+		ID3D12CommandList* cmdLists[] = { mCmdListFrameBegin };
+		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	}
+
+	std::uint32_t grainSize{ max(1U, (taskCount) / Settings::sCpuProcessors) };
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
+		[&](const tbb::blocked_range<size_t>& r) {
+		for (size_t i = r.begin(); i != r.end(); ++i)
+			mGeomPassCmdListRecorders[i]->RecordCommandLists(mView, mProj, rtvCpuDescHandles, _countof(rtvCpuDescHandles), dsvHandle);
+	}
+	);
+
+	// Wait until all previous tasks command lists are executed
+	while (mCmdListProcessor->ExecutedTasksCounter() < taskCount) {
+		Sleep(0U);
+	}
+}
+
+void MasterRender::MiddleFrameTask() {
+	ID3D12CommandAllocator* cmdAllocFrameMiddle{ mCmdAllocFrameMiddle[mCurrQueuedFrameIndex] };
+
+	CHECK_HR(cmdAllocFrameMiddle->Reset());
+	CHECK_HR(mCmdListFrameMiddle->Reset(cmdAllocFrameMiddle, nullptr));
+
+	CD3DX12_RESOURCE_BARRIER rtToSrvBarriers[GEOMBUFFERS_COUNT]{
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[POSITION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[REFLECTANCE_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+	};
+	mCmdListFrameMiddle->ResourceBarrier(_countof(rtToSrvBarriers), rtToSrvBarriers);
+
+	CHECK_HR(mCmdListFrameMiddle->Close());
+
+	// Middle Frame task + # light pass cmd list recorders
+	const std::uint32_t taskCount((std::uint32_t)mLightPassCmdListRecorders.size());
+	mCmdListProcessor->ResetExecutedTasksCounter();
+
+	// Execute middle frame task
+	{
+		ID3D12CommandList* cmdLists[] = { mCmdListFrameMiddle };
+		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	}
+	const std::uint32_t grainSize(max(1U, taskCount / Settings::sCpuProcessors));
+	D3D12_CPU_DESCRIPTOR_HANDLE currBackBuffer(CurrentBackBufferView());
+	const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
+		[&](const tbb::blocked_range<size_t>& r) {
+		for (size_t i = r.begin(); i != r.end(); ++i)
+			mLightPassCmdListRecorders[i]->RecordCommandLists(mView, mProj, &currBackBuffer, 1U, dsvHandle);
+	}
+	);
+
+	// Wait until all previous tasks command lists are executed
+	while (mCmdListProcessor->ExecutedTasksCounter() < taskCount) {
+		Sleep(0U);
+	}
+}
+
+void MasterRender::EndFrameTask() {
+	ID3D12CommandAllocator* cmdAllocFrameEnd{ mCmdAllocFrameEnd[mCurrQueuedFrameIndex] };
+
+	CHECK_HR(cmdAllocFrameEnd->Reset());
+	CHECK_HR(mCmdListFrameEnd->Reset(cmdAllocFrameEnd, nullptr));
+
+	CD3DX12_RESOURCE_BARRIER rtToPresentBarriers[GEOMBUFFERS_COUNT + 1U]{
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[POSITION].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[REFLECTANCE_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
+		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
+	};
+	mCmdListFrameEnd->ResourceBarrier(_countof(rtToPresentBarriers), rtToPresentBarriers);
+
+	CHECK_HR(mCmdListFrameEnd->Close());
+	{
+		ID3D12CommandList* cmdLists[] = { mCmdListFrameEnd };
+		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	}
 }
 
 void MasterRender::CreateRtvAndDsv() noexcept {

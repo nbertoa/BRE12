@@ -40,6 +40,7 @@ public:
 
 	void CreateConstantBufferView(const D3D12_CONSTANT_BUFFER_VIEW_DESC& cbViewDesc, const D3D12_CPU_DESCRIPTOR_HANDLE& cpuDescHandle) noexcept;
 	void CreateShaderResourceView(ID3D12Resource& res, const D3D12_SHADER_RESOURCE_VIEW_DESC& desc, const D3D12_CPU_DESCRIPTOR_HANDLE& cpuDescHandle) noexcept;
+	void CreateUnorderedAccessView(ID3D12Resource& res, const D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, const D3D12_CPU_DESCRIPTOR_HANDLE& cpuDescHandle) noexcept;
 
 	// Asserts if resource id is not present
 	ID3D12Resource& GetResource(const std::size_t id) noexcept;

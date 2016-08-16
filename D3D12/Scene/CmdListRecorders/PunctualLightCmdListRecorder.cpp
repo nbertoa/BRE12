@@ -44,13 +44,12 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 
 	// Set root parameters
 	mCmdList->SetGraphicsRootConstantBufferView(0U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootConstantBufferView(1U, mLightCBuffer->Resource()->GetGPUVirtualAddress());//LightCBufferGpuDescHandleBegin());	
+	mCmdList->SetGraphicsRootDescriptorTable(1U, LightBufferGpuDescHandleBegin());
 	mCmdList->SetGraphicsRootConstantBufferView(2U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootDescriptorTable(3U, CbvSrvUavDescHeap()->GetGPUDescriptorHandleForHeapStart());
-
+	
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	
-	// Draw objects
 	mCmdList->DrawInstanced(mNumLights, 1U, 0U, 0U);
 
 	mCmdList->Close();
@@ -59,13 +58,13 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 }
 
 bool PunctualLightCmdListRecorder::ValidateData() const noexcept {
-	const bool result =  
+	const bool result =
 		CmdListRecorder::ValidateData() &&
 		mFrameCBuffer != nullptr &&
 		mNumLights != 0U &&
 		mNumLights <= sMaxNumLights &&
-		mLightCBuffer != nullptr &&
-		mLightCBufferGpuDescHandleBegin.ptr != 0UL;
+		mLightBuffer != nullptr &&
+		mLightBufferGpuDescHandleBegin.ptr != 0UL;
 
 	return result;
 }

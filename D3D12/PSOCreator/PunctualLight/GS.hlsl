@@ -1,8 +1,9 @@
+#include "../ShaderUtils/Lighting.hlsli"
+
 #define QUAD_VERTICES (4)
 
 struct Input {
-	nointerpolation float4 mLightPosVAndRange : LIGHT_POSITION_AND_RANGE;
-	nointerpolation float4 mLightColorAndPower : LIGHT_COLOR_AND_POWER;
+	nointerpolation PunctualLight mPunctualLight : PUNCTUAL_LIGHT;
 };
 
 struct FrameConstants {
@@ -13,16 +14,15 @@ ConstantBuffer<FrameConstants> gFrameConstants : register(b0);
 
 struct Output {
 	float4 mPosH : SV_POSITION;
-	nointerpolation float4 mLightPosVAndRange : LIGHT_POSITION_AND_RANGE;
-	nointerpolation float4 mLightColorAndPower : LIGHT_COLOR_AND_POWER;
+	nointerpolation PunctualLight mPunctualLight : PUNCTUAL_LIGHT;
 };
 
 [maxvertexcount(QUAD_VERTICES)]
 void main(const in point Input input[1], inout TriangleStream<Output> triangleStream) {
 	// Compute quad center position in view space.
 	// Then we can easily build a quad (two triangles) that face the camera.
-	float4 lightPosV = float4(input[0].mLightPosVAndRange.xyz, 1.0f);
-	const float lightRange = input[0].mLightPosVAndRange.w;
+	float4 lightPosV = float4(input[0].mPunctualLight.mLightPosVAndRange.xyz, 1.0f);
+	const float lightRange = input[0].mPunctualLight.mLightPosVAndRange.w;
 
 	// Fix light z coordinate
 	const float nearPlaneZ = 1.0f; // TODO: Pass near plane Z in a constant buffer
@@ -39,26 +39,22 @@ void main(const in point Input input[1], inout TriangleStream<Output> triangleSt
 
 	posV.xy = lightPosV.xy + float2(-lightRange, lightRange);
 	output.mPosH = mul(float4(posV, 1.0f), gFrameConstants.mP);
-	output.mLightPosVAndRange = input[0].mLightPosVAndRange;
-	output.mLightColorAndPower = input[0].mLightColorAndPower;
+	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
 	posV.xy = lightPosV.xy + float2(lightRange, lightRange);
 	output.mPosH = mul(float4(posV, 1.0f), gFrameConstants.mP);
-	output.mLightPosVAndRange = input[0].mLightPosVAndRange;
-	output.mLightColorAndPower = input[0].mLightColorAndPower;
+	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
 	posV.xy = lightPosV.xy + float2(-lightRange, -lightRange);
 	output.mPosH = mul(float4(posV, 1.0f), gFrameConstants.mP);
-	output.mLightPosVAndRange = input[0].mLightPosVAndRange;
-	output.mLightColorAndPower = input[0].mLightColorAndPower;
+	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
 	posV.xy = lightPosV.xy + float2(lightRange, -lightRange);
 	output.mPosH = mul(float4(posV, 1.0f), gFrameConstants.mP);
-	output.mLightPosVAndRange = input[0].mLightPosVAndRange;
-	output.mLightColorAndPower = input[0].mLightColorAndPower;
+	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
 	triangleStream.RestartStrip();

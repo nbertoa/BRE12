@@ -15,8 +15,8 @@ public:
 
 	__forceinline UploadBuffer* &FrameCBuffer() noexcept { return mFrameCBuffer; }
 
-	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& LightCBufferGpuDescHandleBegin() noexcept { return mLightCBufferGpuDescHandleBegin; }
-	__forceinline UploadBuffer* &LightCBuffer() noexcept { return mLightCBuffer; }
+	__forceinline UploadBuffer* &LightBuffer() noexcept { return mLightBuffer; }
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& LightBufferGpuDescHandleBegin() noexcept { return mLightBufferGpuDescHandleBegin; }
 
 	void RecordCommandLists(
 		const DirectX::XMFLOAT4X4& view,
@@ -36,6 +36,6 @@ private:
 
 	UploadBuffer* mFrameCBuffer{ nullptr };
 
-	UploadBuffer* mLightCBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mLightCBufferGpuDescHandleBegin;
+	UploadBuffer* mLightBuffer{ nullptr };
+	D3D12_GPU_DESCRIPTOR_HANDLE mLightBufferGpuDescHandleBegin;
 };

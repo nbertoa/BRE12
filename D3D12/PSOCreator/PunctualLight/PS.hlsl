@@ -5,8 +5,7 @@
 
 struct Input {
 	float4 mPosH : SV_POSITION;
-	nointerpolation float4 mLightPosVAndRange : LIGHT_POSITION_AND_RANGE;
-	nointerpolation float4 mLightColorAndPower : LIGHT_COLOR_AND_POWER;
+	nointerpolation PunctualLight mPunctualLight : PUNCTUAL_LIGHT;
 };
 
 Texture2D NormalV : register (t0);
@@ -23,18 +22,14 @@ Output main(const in Input input) {
 
 	const int3 texCoord = int3(input.mPosH.xy, 0);
 
-	PunctualLight light;
-	light.mPosV = input.mLightPosVAndRange.xyz;
-	light.mRange = input.mLightPosVAndRange.w;
-	light.mColor = input.mLightColorAndPower.xyz;
-	light.mPower = input.mLightColorAndPower.w;
+	PunctualLight light = input.mPunctualLight;
 
 	const float3 normalV = normalize(NormalV.Load(texCoord).xyz);
 	const float3 geomPosV = PositionV.Load(texCoord).xyz;
 
 	const float4 baseColor_metalmask = BaseColor_MetalMask.Load(texCoord);
 	const float4 reflectance_smoothness = Reflectance_Smoothness.Load(texCoord);
-	const float3 lightDirV = normalize(light.mPosV - geomPosV);	
+	const float3 lightDirV = normalize(light.mLightPosVAndRange.xyz - geomPosV);
 	// As we are working at view space, we do not need camera position to 
 	// compute vector from geometry position to camera.
 	const float3 viewV = normalize(-geomPosV);

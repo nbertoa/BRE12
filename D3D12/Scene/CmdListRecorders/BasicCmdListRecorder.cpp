@@ -48,6 +48,10 @@ void BasicCmdListRecorder::RecordCommandLists(
 		
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	// Set frame constants root parameters
+	mCmdList->SetGraphicsRootConstantBufferView(1U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
+	mCmdList->SetGraphicsRootConstantBufferView(3U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
+
 	// Draw objects
 	const std::size_t geomCount{ mVertexAndIndexBufferDataVec.size() };
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
@@ -64,10 +68,6 @@ void BasicCmdListRecorder::RecordCommandLists(
 			mCmdList->DrawIndexedInstanced(mVertexAndIndexBufferDataVec[i].second.mCount, 1U, 0U, 0U, 0U);
 		}
 	}
-
-	// Set frame constants root parameters
-	mCmdList->SetGraphicsRootConstantBufferView(1U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootConstantBufferView(3U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
 	
 	mCmdList->Close();
 
@@ -89,7 +89,8 @@ bool BasicCmdListRecorder::ValidateData() const noexcept {
 		mVertexAndIndexBufferDataVec.empty() == false && 	
 		mWorldMatrices.empty() == false &&
 		mVertexAndIndexBufferDataVec.size() == mWorldMatrices.size() &&
-		mMaterialsCBuffer != nullptr;
+		mMaterialsCBuffer != nullptr && 
+		mMaterialsCBufferGpuDescHandleBegin.ptr != 0UL;
 
 	return result;
 }

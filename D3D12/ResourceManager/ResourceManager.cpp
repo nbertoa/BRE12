@@ -146,6 +146,12 @@ void ResourceManager::CreateShaderResourceView(ID3D12Resource& res, const D3D12_
 	mMutex.unlock();
 }
 
+void ResourceManager::CreateUnorderedAccessView(ID3D12Resource& res, const D3D12_UNORDERED_ACCESS_VIEW_DESC& desc, const D3D12_CPU_DESCRIPTOR_HANDLE& cpuDescHandle) noexcept {
+	mMutex.lock();
+	mDevice.CreateUnorderedAccessView(&res, nullptr, &desc, cpuDescHandle);
+	mMutex.unlock();
+}
+
 std::size_t ResourceManager::CreateUploadBuffer(const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept {
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
 	UploadBufferById::accessor accessor;

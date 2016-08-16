@@ -55,6 +55,10 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
 
+	void BeginFrameTask();
+	void MiddleFrameTask();
+	void EndFrameTask();
+
 	void FlushCommandQueue() noexcept;
 	void SignalFenceAndPresent() noexcept;
 

@@ -155,10 +155,8 @@ float3 brdf_CookTorrance(const float3 N, const float3 V, const float3 L, const f
 //
 
 struct PunctualLight {
-	float3 mPower;
-	float mRange;
-	float3 mColor;
-	float3 mPosV;	
+	float4 mLightPosVAndRange;
+	float4 mLightColorAndPower;
 };
 
 float smoothDistanceAtt(const float squaredDistance, const float invSqrAttRadius) {
@@ -187,15 +185,15 @@ float getAngleAtt(const float3 normalizedLightVector, const float3 lightDir, con
 
 float3 computePunctualLightDirectLuminance(PunctualLight light, const float3 geomPosV, const float3 normalV, const float cutoff) {
 	// calculate normalized light vector and distance to sphere light surface
-	float r = light.mRange;
-	float3 L = light.mPosV - geomPosV;
+	float r = light.mLightPosVAndRange.w;
+	float3 L = light.mLightPosVAndRange.xyz - geomPosV;
 	float distance = length(L);
 	float d = max(distance - r, 0);
 	L /= distance;
 
 	// calculate basic attenuation
 	float denom = d / r + 1;
-	float attenuation = 1 / (denom*denom);
+	float attenuation = 1 / (denom * denom);
 
 	// scale and bias attenuation such that:
 	//   attenuation == 0 at extent of max influence
@@ -203,14 +201,15 @@ float3 computePunctualLightDirectLuminance(PunctualLight light, const float3 geo
 	attenuation = (attenuation - cutoff) / (1 - cutoff);
 	attenuation = max(attenuation, 0);
 
-	return light.mColor * saturate(dot(L, normalV)) * attenuation;
+	return light.mLightColorAndPower.xyz * saturate(dot(L, normalV)) * attenuation;
 }
 
 float3 computePunctualLightFrostbiteLuminance(PunctualLight light, const float3 geomPosV, const float3 normalV) {
-	const float3 lightV = light.mPosV - geomPosV;
-	const float lightInvSqrAttRadius = 1.0f / (light.mRange * light.mRange);
+	const float3 lightV = light.mLightPosVAndRange.xyz - geomPosV;
+	const float range = light.mLightPosVAndRange.w;
+	const float lightInvSqrAttRadius = 1.0f / (range * range);
 	const float att = getDistanceAtt(lightV, lightInvSqrAttRadius);
-	return att * light.mPower * light.mColor * saturate(dot(normalize(lightV), normalV)) / (4.0f * PI);
+	return att * light.mLightColorAndPower.w * light.mLightColorAndPower.xyz * saturate(dot(normalize(lightV), normalV)) / (4.0f * PI);
 }
 
 #endif
