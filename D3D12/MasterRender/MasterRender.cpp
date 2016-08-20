@@ -60,36 +60,31 @@ namespace {
 	}
 
 	void CreateSwapChain(const HWND hwnd, ID3D12CommandQueue& cmdQueue, Microsoft::WRL::ComPtr<IDXGISwapChain3>& swapChain3) noexcept {
-		IDXGISwapChain* swapChain{ nullptr };
+		IDXGISwapChain1* baseSwapChain{ nullptr };
 
-		DXGI_SWAP_CHAIN_DESC sd = {};
-		sd.BufferDesc.Width = Settings::sWindowWidth;
-		sd.BufferDesc.Height = Settings::sWindowHeight;
-		sd.BufferDesc.RefreshRate.Numerator = 60U;
-		sd.BufferDesc.RefreshRate.Denominator = 1U;
-		sd.BufferDesc.Format = MasterRender::BackBufferFormat();
-		sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-		sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-		sd.SampleDesc.Count = 1U;
-		sd.SampleDesc.Quality = 0U;
-		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		DXGI_SWAP_CHAIN_DESC1 sd = {};
+		sd.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 		sd.BufferCount = Settings::sSwapChainBufferCount;
-		sd.OutputWindow = hwnd;
-		sd.Windowed = true;
+		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		sd.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+		sd.Format = MasterRender::BackBufferFormat();
+		sd.SampleDesc.Count = 1U;
+		sd.Scaling = DXGI_SCALING_NONE;
+		sd.Stereo = false;
 		sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-		sd.Flags = 0;
 
-		// Note: Swap chain uses queue to perform flush.		
-		CHECK_HR(D3dData::Factory().CreateSwapChain(&cmdQueue, &sd, &swapChain));
+		CHECK_HR(D3dData::Factory().CreateSwapChainForHwnd(&cmdQueue, hwnd, &sd, nullptr, nullptr, &baseSwapChain));
+		CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain3.GetAddressOf())));
 
-		CHECK_HR(swapChain->QueryInterface(IID_PPV_ARGS(swapChain3.GetAddressOf())));
+		CHECK_HR(swapChain3->ResizeBuffers(Settings::sSwapChainBufferCount, Settings::sWindowWidth, Settings::sWindowHeight, MasterRender::BackBufferFormat(), sd.Flags));
 
 		// Set sRGB color space
 		swapChain3->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709);
-		swapChain3->SetFullscreenState(Settings::sFullscreen, nullptr);
 
-		// Resize the swap chain.
-		CHECK_HR(swapChain3->ResizeBuffers(Settings::sSwapChainBufferCount, Settings::sWindowWidth, Settings::sWindowHeight, MasterRender::BackBufferFormat(), 0U));
+		// Make window association
+		CHECK_HR(D3dData::Factory().MakeWindowAssociation(hwnd, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
+
+		CHECK_HR(swapChain3->SetMaximumFrameLatency(Settings::sQueuedFrameCount));
 	}
 }
 
@@ -467,7 +462,13 @@ void MasterRender::FlushCommandQueue() noexcept {
 
 void MasterRender::SignalFenceAndPresent() noexcept {
 	ASSERT(mSwapChain != nullptr);
-	CHECK_HR(mSwapChain->Present(1U, 0U));
+	static const HANDLE frameLatencyWaitableObj(mSwapChain->GetFrameLatencyWaitableObject());
+	const DWORD result(WaitForSingleObjectEx(frameLatencyWaitableObj, 0U, true));
+	if (result == WAIT_TIMEOUT) {
+ 		return;
+	}
+
+	CHECK_HR(mSwapChain->Present(0U, 0U));
 
 	// Add an instruction to the command queue to set a new fence point.  Because we 
 	// are on the GPU time line, the new fence point won't be set until the GPU finishes

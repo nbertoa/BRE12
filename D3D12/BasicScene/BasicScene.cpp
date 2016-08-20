@@ -187,7 +187,7 @@ void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandLi
 	//GeometryGenerator::CreateCylinder(2.0f, 2.0f, 4, 20, 20, shape);
 	//GeometryGenerator::CreateBox(2, 2, 2, 2, shape);
 
-	const std::size_t numGeometry{ 1000UL };
+	const std::size_t numGeometry{ 4000UL };
 	tasks.resize(Settings::sCpuProcessors);
 
 	// Create a command list 
@@ -255,7 +255,7 @@ void BasicScene::GenerateLightPassRecorders(
 
 	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::PUNCTUAL_LIGHT));
 
-	const std::uint32_t numLights{ 25 };
+	const std::uint32_t numLights{ 40 };
 	tasks.resize(Settings::sCpuProcessors);
 
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, 1U),
