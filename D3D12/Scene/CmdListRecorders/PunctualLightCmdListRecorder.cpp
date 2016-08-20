@@ -44,7 +44,7 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 
 	// Set root parameters
 	mCmdList->SetGraphicsRootConstantBufferView(0U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootDescriptorTable(1U, LightBufferGpuDescHandleBegin());
+	mCmdList->SetGraphicsRootDescriptorTable(1U, LightsBufferGpuDescHandleBegin());
 	mCmdList->SetGraphicsRootConstantBufferView(2U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootDescriptorTable(3U, CbvSrvUavDescHeap()->GetGPUDescriptorHandleForHeapStart());
 	
@@ -63,8 +63,8 @@ bool PunctualLightCmdListRecorder::ValidateData() const noexcept {
 		mFrameCBuffer != nullptr &&
 		mNumLights != 0U &&
 		mNumLights <= sMaxNumLights &&
-		mLightBuffer != nullptr &&
-		mLightBufferGpuDescHandleBegin.ptr != 0UL;
+		mLightsBuffer != nullptr &&
+		mLightsBufferGpuDescHandleBegin.ptr != 0UL;
 
 	return result;
 }
