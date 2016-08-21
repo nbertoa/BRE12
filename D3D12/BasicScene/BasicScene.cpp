@@ -55,7 +55,11 @@ namespace {
 
 	void BuildBuffers(BasicCmdListRecorder& task) noexcept {
 		ASSERT(task.CbvSrvUavDescHeap() == nullptr);
-		ASSERT(task.FrameCBuffer() == nullptr);
+#ifdef _DEBUG
+		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+			ASSERT(task.FrameCBuffer(i) == nullptr);
+		}		
+#endif
 		ASSERT(task.ObjectCBuffer() == nullptr);
 		ASSERT(task.MaterialsCBuffer() == nullptr);
 
@@ -132,14 +136,20 @@ namespace {
 			currObjCBufferDescHandle.ptr += descHandleIncSize;
 		}
 
-		// Create frame cbuffer
+		// Create frame cbuffers
 		const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4) * 2UL) };
-		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, task.FrameCBuffer());
+		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+			ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, task.FrameCBuffer(i));
+		}
 	}
 
 	void BuildBuffers(PunctualLightCmdListRecorder& task, const std::uint32_t descHeapOffset) noexcept {
 		ASSERT(task.CbvSrvUavDescHeap() == nullptr);
-		ASSERT(task.FrameCBuffer() == nullptr);
+#ifdef _DEBUG
+		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+			ASSERT(task.FrameCBuffer(i) == nullptr);
+		}
+#endif
 		ASSERT(task.LightsBuffer() == nullptr);
 
 		// We assume we have world matrices by geometry index 0 (but we do not have geometry here)
@@ -162,20 +172,30 @@ namespace {
 		const float powerOffset{ 1000.0f };
 		PunctualLight light;
 		for (std::uint32_t i = 0UL; i < lightsCount; ++i) {
-			light.mPosAndRange[0] = MathUtils::RandF(-posOffset, posOffset);
+			/*light.mPosAndRange[0] = MathUtils::RandF(-posOffset, posOffset);
 			light.mPosAndRange[1] = MathUtils::RandF(-posOffset, posOffset);
 			light.mPosAndRange[2] = MathUtils::RandF(-posOffset, posOffset);
 			light.mPosAndRange[3] = MathUtils::RandF(rangeOffset, rangeOffset * 2U);
 			light.mColorAndPower[0] = MathUtils::RandF(0.5f, 1.0f);
 			light.mColorAndPower[1] = MathUtils::RandF(0.5f, 1.0f);
 			light.mColorAndPower[2] = MathUtils::RandF(0.5f, 1.0f);
-			light.mColorAndPower[3] = MathUtils::RandF(powerOffset, powerOffset * 2U);
+			light.mColorAndPower[3] = MathUtils::RandF(powerOffset, powerOffset * 2U);*/
+			light.mPosAndRange[0] = 0.0f;
+			light.mPosAndRange[1] = 300.0f;
+			light.mPosAndRange[2] = 0.0f;
+			light.mPosAndRange[3] = 1000000.0f;
+			light.mColorAndPower[0] = 1.0f;
+			light.mColorAndPower[1] = 1.0f;
+			light.mColorAndPower[2] = 1.0f;
+			light.mColorAndPower[3] = 10000000.0f;
 			task.LightsBuffer()->CopyData(i, &light, sizeof(PunctualLight));
 		}
 
-		// Create frame cbuffer
+		// Create frame cbuffers
 		const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4) * 2UL) };
-		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, task.FrameCBuffer());
+		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+			ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, task.FrameCBuffer(i));
+		}		
 	}
 }
 
@@ -183,9 +203,10 @@ void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandLi
 	ASSERT(tasks.empty());
 
 	GeometryGenerator::MeshData shape;
-	GeometryGenerator::CreateSphere(2.0f, 50U, 50U, shape);
+	GeometryGenerator::CreateSphere(5.0f, 50U, 50U, shape);
 	//GeometryGenerator::CreateCylinder(2.0f, 2.0f, 4, 20, 20, shape);
 	//GeometryGenerator::CreateBox(2, 2, 2, 2, shape);
+	//GeometryGenerator::CreateGrid(2, 2, 50, 50, shape);
 
 	const std::size_t numGeometry{ 4000UL };
 	tasks.resize(Settings::sCpuProcessors);
@@ -213,7 +234,7 @@ void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandLi
 
 	CmdListRecorder::VertexAndIndexBufferData vAndIData(std::make_pair(vertexBufferData, indexBufferData));
 
-	const float meshSpaceOffset{ 50.0f };
+	const float meshSpaceOffset{ 200.0f };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, 1U),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
@@ -255,10 +276,11 @@ void BasicScene::GenerateLightPassRecorders(
 
 	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::PUNCTUAL_LIGHT));
 
-	const std::uint32_t numLights{ 40 };
-	tasks.resize(Settings::sCpuProcessors);
+	const std::uint32_t numLights{ 1 };
+	const std::uint32_t numTasks{ 1U };
+	tasks.resize(numTasks);
 
-	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, 1U),
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, numTasks, 1U),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
 			PunctualLightCmdListRecorder& task{ *new PunctualLightCmdListRecorder(D3dData::Device(), cmdListQueue) };

@@ -13,7 +13,7 @@ public:
 
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& GeometryBuffersGpuDescHandleBegin() noexcept { return mGeometryBuffersGpuDescHandleBegin; }
 
-	__forceinline UploadBuffer* &FrameCBuffer() noexcept { return mFrameCBuffer; }
+	__forceinline UploadBuffer* &FrameCBuffer(const std::uint32_t index) noexcept { ASSERT(index <Settings::sQueuedFrameCount); return mFrameCBuffer[index]; }
 
 	__forceinline UploadBuffer* &LightsBuffer() noexcept { return mLightsBuffer; }
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& LightsBufferGpuDescHandleBegin() noexcept { return mLightsBufferGpuDescHandleBegin; }
@@ -34,7 +34,7 @@ private:
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mGeometryBuffersGpuDescHandleBegin;
 
-	UploadBuffer* mFrameCBuffer{ nullptr };
+	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
 
 	UploadBuffer* mLightsBuffer{ nullptr };
 	D3D12_GPU_DESCRIPTOR_HANDLE mLightsBufferGpuDescHandleBegin;

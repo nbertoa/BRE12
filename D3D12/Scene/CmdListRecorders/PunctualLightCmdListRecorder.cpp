@@ -22,15 +22,15 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	ASSERT(rtvCpuDescHandles != nullptr);
 	ASSERT(rtvCpuDescHandlesCount > 0);
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrCmdAllocIndex] };
-	ASSERT(cmdAlloc != nullptr);
-	mCurrCmdAllocIndex = (mCurrCmdAllocIndex + 1) % _countof(mCmdAlloc);
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
+	ASSERT(cmdAlloc != nullptr);	
 
 	// Update frame constants
 	DirectX::XMFLOAT4X4 vp[2U];
 	DirectX::XMStoreFloat4x4(&vp[0], MathUtils::GetTranspose(view));
 	DirectX::XMStoreFloat4x4(&vp[1], MathUtils::GetTranspose(proj));
-	mFrameCBuffer->CopyData(0U, &vp, sizeof(vp));
+	UploadBuffer& frameCBuffer{ *mFrameCBuffer[mCurrFrameIndex] };
+	frameCBuffer.CopyData(0U, &vp, sizeof(vp));
 
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, mPSO));
@@ -43,9 +43,10 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	mCmdList->SetGraphicsRootSignature(mRootSign);
 
 	// Set root parameters
-	mCmdList->SetGraphicsRootConstantBufferView(0U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
+	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(frameCBuffer.Resource()->GetGPUVirtualAddress());
+	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootDescriptorTable(1U, LightsBufferGpuDescHandleBegin());
-	mCmdList->SetGraphicsRootConstantBufferView(2U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
+	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootDescriptorTable(3U, CbvSrvUavDescHeap()->GetGPUDescriptorHandleForHeapStart());
 	
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
@@ -55,12 +56,20 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	mCmdList->Close();
 
 	mCmdListQueue.push(mCmdList);
+
+	// Next frame
+	mCurrFrameIndex = (mCurrFrameIndex + 1) % _countof(mCmdAlloc);
 }
 
 bool PunctualLightCmdListRecorder::ValidateData() const noexcept {
+	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+		if (mFrameCBuffer[i] == nullptr) {
+			return false;
+		}
+	}
+
 	const bool result =
 		CmdListRecorder::ValidateData() &&
-		mFrameCBuffer != nullptr &&
 		mNumLights != 0U &&
 		mNumLights <= sMaxNumLights &&
 		mLightsBuffer != nullptr &&

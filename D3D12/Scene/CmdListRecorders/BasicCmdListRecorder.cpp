@@ -22,15 +22,15 @@ void BasicCmdListRecorder::RecordCommandLists(
 	ASSERT(geomPassRtvCpuDescHandles != nullptr);
 	ASSERT(geomPassRtvCpuDescHandlesCount > 0);
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrCmdAllocIndex] };
-	ASSERT(cmdAlloc != nullptr);
-	mCurrCmdAllocIndex = (mCurrCmdAllocIndex + 1) % _countof(mCmdAlloc);
-
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
+	ASSERT(cmdAlloc != nullptr);	
+	
 	// Update frame constants
 	DirectX::XMFLOAT4X4 vp[2U];
 	DirectX::XMStoreFloat4x4(&vp[0], MathUtils::GetTranspose(view));
 	DirectX::XMStoreFloat4x4(&vp[1], MathUtils::GetTranspose(proj));
-	mFrameCBuffer->CopyData(0U, &vp, sizeof(vp));
+	UploadBuffer& frameCBuffer(*mFrameCBuffer[mCurrFrameIndex]);
+	frameCBuffer.CopyData(0U, &vp, sizeof(vp));
 
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, mPSO));
@@ -49,8 +49,9 @@ void BasicCmdListRecorder::RecordCommandLists(
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Set frame constants root parameters
-	mCmdList->SetGraphicsRootConstantBufferView(1U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootConstantBufferView(3U, mFrameCBuffer->Resource()->GetGPUVirtualAddress());
+	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(frameCBuffer.Resource()->GetGPUVirtualAddress());
+	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootConstantBufferView(3U, frameCBufferGpuVAddress);
 
 	// Draw objects
 	const std::size_t geomCount{ mVertexAndIndexBufferDataVec.size() };
@@ -72,6 +73,9 @@ void BasicCmdListRecorder::RecordCommandLists(
 	mCmdList->Close();
 
 	mCmdListQueue.push(mCmdList);
+
+	// Next frame
+	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;
 }
 
 bool BasicCmdListRecorder::ValidateData() const noexcept {
@@ -81,9 +85,14 @@ bool BasicCmdListRecorder::ValidateData() const noexcept {
 		}
 	}
 
+	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
+		if (mFrameCBuffer[i] == nullptr) {
+			return false;
+		}
+	}
+
 	const bool result = 
 		CmdListRecorder::ValidateData() &&
-		mFrameCBuffer != nullptr &&
 		mObjectCBuffer != nullptr &&
 		mObjectCBufferGpuDescHandleBegin.ptr != 0UL &&
 		mVertexAndIndexBufferDataVec.empty() == false && 	

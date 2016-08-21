@@ -463,12 +463,9 @@ void MasterRender::FlushCommandQueue() noexcept {
 void MasterRender::SignalFenceAndPresent() noexcept {
 	ASSERT(mSwapChain != nullptr);
 	static const HANDLE frameLatencyWaitableObj(mSwapChain->GetFrameLatencyWaitableObject());
-	const DWORD result(WaitForSingleObjectEx(frameLatencyWaitableObj, 0U, true));
-	if (result == WAIT_TIMEOUT) {
- 		return;
-	}
+	WaitForSingleObjectEx(frameLatencyWaitableObj, INFINITE, true);
 
-	CHECK_HR(mSwapChain->Present(0U, 0U));
+	CHECK_HR(mSwapChain->Present(1U, 0U));
 
 	// Add an instruction to the command queue to set a new fence point.  Because we 
 	// are on the GPU time line, the new fence point won't be set until the GPU finishes
@@ -478,7 +475,7 @@ void MasterRender::SignalFenceAndPresent() noexcept {
 	mCurrQueuedFrameIndex = (mCurrQueuedFrameIndex + 1U) % Settings::sQueuedFrameCount;	
 
 	// If we executed command lists for all queued frames, then we need to wait
-	// at least 1 of them to be completed, before continue generating command lists. 
+	// at least 1 of them to be completed, before continue recording command lists. 
 	const std::uint64_t oldestFence{ mFenceByQueuedFrameIndex[mCurrQueuedFrameIndex] };
 	if (mFence->GetCompletedValue() < oldestFence) {
 		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };

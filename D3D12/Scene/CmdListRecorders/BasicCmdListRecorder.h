@@ -11,7 +11,7 @@ public:
 	__forceinline VertexAndIndexBufferDataVec& GetVertexAndIndexBufferDataVec() noexcept { return mVertexAndIndexBufferDataVec; }
 	__forceinline MatricesVec& WorldMatrices() noexcept { return mWorldMatrices; }
 
-	__forceinline UploadBuffer* &FrameCBuffer() noexcept { return mFrameCBuffer; }
+	__forceinline UploadBuffer* &FrameCBuffer(const std::uint32_t index) noexcept { ASSERT(index < Settings::sQueuedFrameCount); return mFrameCBuffer[index]; }
 	
 	__forceinline UploadBuffer* &ObjectCBuffer() noexcept { return mObjectCBuffer; }
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& ObjectCBufferGpuDescHandleBegin() noexcept { return mObjectCBufferGpuDescHandleBegin; }
@@ -33,7 +33,7 @@ private:
 	VertexAndIndexBufferDataVec mVertexAndIndexBufferDataVec;
 	MatricesVec mWorldMatrices;
 
-	UploadBuffer* mFrameCBuffer{ nullptr };
+	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
 
 	UploadBuffer* mObjectCBuffer{ nullptr };
 	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescHandleBegin;
