@@ -13,6 +13,9 @@
 #include <Scene/CmdListRecorder.h>
 #include <Scene/Scene.h>
 
+// Uncomment to use Vsync. We do not use a boolean to avoid branches
+//#define V_SYNC
+
 using namespace DirectX;
 
 namespace {
@@ -66,7 +69,11 @@ namespace {
 		sd.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 		sd.BufferCount = Settings::sSwapChainBufferCount;
 		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+#ifdef V_SYNC
 		sd.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+#else 
+		sd.Flags = 0U;
+#endif
 		sd.Format = MasterRender::BackBufferFormat();
 		sd.SampleDesc.Count = 1U;
 		sd.Scaling = DXGI_SCALING_NONE;
@@ -84,7 +91,9 @@ namespace {
 		// Make window association
 		CHECK_HR(D3dData::Factory().MakeWindowAssociation(hwnd, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
 
+#ifdef V_SYNC
 		CHECK_HR(swapChain3->SetMaximumFrameLatency(Settings::sQueuedFrameCount));
+#endif
 	}
 }
 
@@ -462,10 +471,15 @@ void MasterRender::FlushCommandQueue() noexcept {
 
 void MasterRender::SignalFenceAndPresent() noexcept {
 	ASSERT(mSwapChain != nullptr);
+
+#ifdef V_SYNC
 	static const HANDLE frameLatencyWaitableObj(mSwapChain->GetFrameLatencyWaitableObject());
 	WaitForSingleObjectEx(frameLatencyWaitableObj, INFINITE, true);
-
 	CHECK_HR(mSwapChain->Present(1U, 0U));
+#else
+	CHECK_HR(mSwapChain->Present(0U, 0U));
+#endif
+	
 
 	// Add an instruction to the command queue to set a new fence point.  Because we 
 	// are on the GPU time line, the new fence point won't be set until the GPU finishes
