@@ -183,11 +183,11 @@ namespace {
 			light.mPosAndRange[0] = 0.0f;
 			light.mPosAndRange[1] = 300.0f;
 			light.mPosAndRange[2] = 0.0f;
-			light.mPosAndRange[3] = 1000000.0f;
+			light.mPosAndRange[3] = 100000.0f;
 			light.mColorAndPower[0] = 1.0f;
 			light.mColorAndPower[1] = 1.0f;
 			light.mColorAndPower[2] = 1.0f;
-			light.mColorAndPower[3] = 10000000.0f;
+			light.mColorAndPower[3] = 1000000.0f;
 			task.LightsBuffer()->CopyData(i, &light, sizeof(PunctualLight));
 		}
 

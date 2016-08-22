@@ -23,7 +23,7 @@ namespace {
 	void UpdateCamera(Camera& camera, XMFLOAT4X4& view, XMFLOAT4X4& proj, const float deltaTime) noexcept {
 		static std::int32_t lastXY[]{ 0UL, 0UL };
 		static const float sCameraOffset{ 10.0f };
-		static const float sCameraMultiplier{ 5.0f };
+		static const float sCameraMultiplier{ 20.0f };
 
 		if (camera.UpdateViewMatrix()) {
 			proj = camera.GetProj4x4f();
@@ -100,11 +100,10 @@ namespace {
 using namespace DirectX;
 
 const DXGI_FORMAT MasterRender::sGeomPassBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{	
-	DXGI_FORMAT_R32G32B32A32_FLOAT,
-	DXGI_FORMAT_R32G32B32A32_FLOAT,
-	DXGI_FORMAT_R32G32B32A32_FLOAT,
-	DXGI_FORMAT_R32G32B32A32_FLOAT,
-	sBackBufferRTFormat,
+	DXGI_FORMAT_R16G16_FLOAT,	
+	DXGI_FORMAT_R8G8B8A8_UNORM,
+	DXGI_FORMAT_R8G8B8A8_UNORM,
+	DXGI_FORMAT_R16_UNORM,
 	DXGI_FORMAT_UNKNOWN,
 	DXGI_FORMAT_UNKNOWN,
 	DXGI_FORMAT_UNKNOWN
@@ -190,19 +189,18 @@ void MasterRender::BeginFrameTask() {
 
 	// Set resource barriers and render targets
 	CD3DX12_RESOURCE_BARRIER presentToRtBarriers[GEOMBUFFERS_COUNT + 1U]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[POSITION].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),		
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[REFLECTANCE_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[DEPTH].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
 	mCmdListFrameBegin->ResourceBarrier(_countof(presentToRtBarriers), presentToRtBarriers);
-	const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescHandles[GEOMBUFFERS_COUNT + 1U]{
-		mGeomPassBuffersRTVCpuDescHandles[NORMAL],
-		mGeomPassBuffersRTVCpuDescHandles[POSITION],
+	const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescHandles[GEOMBUFFERS_COUNT]{
+		mGeomPassBuffersRTVCpuDescHandles[NORMAL],		
 		mGeomPassBuffersRTVCpuDescHandles[BASECOLOR_METALMASK],
 		mGeomPassBuffersRTVCpuDescHandles[REFLECTANCE_SMOOTHNESS],
-		CurrentBackBufferView(),
+		mGeomPassBuffersRTVCpuDescHandles[DEPTH]
 	};
 	const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
 	mCmdListFrameBegin->OMSetRenderTargets(_countof(rtvCpuDescHandles), rtvCpuDescHandles, false, &dsvHandle);
@@ -242,10 +240,10 @@ void MasterRender::MiddleFrameTask() {
 	CHECK_HR(mCmdListFrameMiddle->Reset(cmdAllocFrameMiddle, nullptr));
 
 	CD3DX12_RESOURCE_BARRIER rtToSrvBarriers[GEOMBUFFERS_COUNT]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[POSITION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),		
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[REFLECTANCE_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[DEPTH].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 	};
 	mCmdListFrameMiddle->ResourceBarrier(_countof(rtToSrvBarriers), rtToSrvBarriers);
 
@@ -283,10 +281,10 @@ void MasterRender::EndFrameTask() {
 	CHECK_HR(mCmdListFrameEnd->Reset(cmdAllocFrameEnd, nullptr));
 
 	CD3DX12_RESOURCE_BARRIER rtToPresentBarriers[GEOMBUFFERS_COUNT + 1U]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[POSITION].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),		
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[REFLECTANCE_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[DEPTH].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
 		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
 	};
 	mCmdListFrameEnd->ResourceBarrier(_countof(rtToPresentBarriers), rtToPresentBarriers);
@@ -444,6 +442,11 @@ D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::CurrentBackBufferView() const noexcept
 	const std::uint32_t rtvDescSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	const std::uint32_t currBackBuffer{ mSwapChain->GetCurrentBackBufferIndex() };
 	return D3D12_CPU_DESCRIPTOR_HANDLE{ mRtvHeap->GetCPUDescriptorHandleForHeapStart().ptr + currBackBuffer * rtvDescSize };
+}
+
+ID3D12Resource* MasterRender::DepthStencilBuffer() const noexcept {
+	ASSERT(mDepthStencilBuffer != nullptr);
+	return mDepthStencilBuffer;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::DepthStencilView() const noexcept {

@@ -46,5 +46,8 @@
     <None Include="ShaderUtils\Lighting.hlsli">
       <Filter>ShaderUtils</Filter>
     </None>
+    <None Include="ShaderUtils\Utils.hlsli">
+      <Filter>ShaderUtils</Filter>
+    </None>
   </ItemGroup>
 </Project>

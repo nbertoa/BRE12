@@ -1,17 +1,21 @@
 #include "../ShaderUtils/Lighting.hlsli"
+#include "../ShaderUtils/Utils.hlsli"
 
 #define BRDF_FROSTBITE_ILLUMINANCE 
 #define BRDF_FROSTBITE_LUMINANCE
 
+#define FAR_PLANE_DISTANCE 5000.0f
+
 struct Input {
 	float4 mPosH : SV_POSITION;
+	float3 mPosV : VIEW_RAY;
 	nointerpolation PunctualLight mPunctualLight : PUNCTUAL_LIGHT;
 };
 
-Texture2D NormalV : register (t0);
-Texture2D PositionV : register (t1);
-Texture2D BaseColor_MetalMask : register (t2);
-Texture2D Reflectance_Smoothness : register (t3);
+Texture2D<float2> NormalV : register (t0);
+Texture2D<float4> BaseColor_MetalMask : register (t1);
+Texture2D<float4> Reflectance_Smoothness : register (t2);
+Texture2D<float> Depth : register (t3);
 
 struct Output {
 	float4 mColor : SV_Target0;
@@ -20,15 +24,19 @@ struct Output {
 Output main(const in Input input) {
 	Output output = (Output)0;
 
-	const int3 texCoord = int3(input.mPosH.xy, 0);
+	const int3 screenCoord = int3(input.mPosH.xy, 0);
+	
+	// Reconstruct geometry position in view space
+	const float normalizedDepth = Depth.Load(screenCoord);
+	const float3 viewRay = float3(input.mPosV.xy * (FAR_PLANE_DISTANCE / input.mPosV.z), FAR_PLANE_DISTANCE);
+	const float3 geomPosV = viewRay * normalizedDepth;
 
 	PunctualLight light = input.mPunctualLight;
 
-	const float3 normalV = normalize(NormalV.Load(texCoord).xyz);
-	const float3 geomPosV = PositionV.Load(texCoord).xyz;
+	const float3 normalV = normalize(Decode(NormalV.Load(screenCoord)));
 
-	const float4 baseColor_metalmask = BaseColor_MetalMask.Load(texCoord);
-	const float4 reflectance_smoothness = Reflectance_Smoothness.Load(texCoord);
+	const float4 baseColor_metalmask = BaseColor_MetalMask.Load(screenCoord);
+	const float4 reflectance_smoothness = Reflectance_Smoothness.Load(screenCoord);
 	const float3 lightDirV = normalize(light.mLightPosVAndRange.xyz - geomPosV);
 	// As we are working at view space, we do not need camera position to 
 	// compute vector from geometry position to camera.

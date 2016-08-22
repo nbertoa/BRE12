@@ -26,11 +26,11 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	ASSERT(cmdAlloc != nullptr);	
 
 	// Update frame constants
-	DirectX::XMFLOAT4X4 vp[2U];
-	DirectX::XMStoreFloat4x4(&vp[0], MathUtils::GetTranspose(view));
-	DirectX::XMStoreFloat4x4(&vp[1], MathUtils::GetTranspose(proj));
+	DirectX::XMFLOAT4X4 matrices[2U];
+	DirectX::XMStoreFloat4x4(&matrices[0], MathUtils::GetTranspose(view));
+	DirectX::XMStoreFloat4x4(&matrices[1], MathUtils::GetTranspose(proj));
 	UploadBuffer& frameCBuffer{ *mFrameCBuffer[mCurrFrameIndex] };
-	frameCBuffer.CopyData(0U, &vp, sizeof(vp));
+	frameCBuffer.CopyData(0U, &matrices, sizeof(matrices));
 
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, mPSO));

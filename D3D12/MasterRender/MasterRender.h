@@ -53,6 +53,7 @@ private:
 	
 	ID3D12Resource* CurrentBackBuffer() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const noexcept;
+	ID3D12Resource* DepthStencilBuffer() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
 
 	void BeginFrameTask();
@@ -65,7 +66,7 @@ private:
 	static const DXGI_FORMAT sBackBufferRTFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
 	static const DXGI_FORMAT sBackBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
 	static const DXGI_FORMAT sGeomPassBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
-	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
+	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D32_FLOAT };
 
 	HWND mHwnd{ 0 };
 	ID3D12Device& mDevice;
@@ -101,10 +102,10 @@ private:
 	// - BaseColor_MetalMask
 	// - Reflectance_Smoothness
 	enum GeomBuffers {
-		NORMAL = 0U,
-		POSITION,
+		NORMAL = 0U,		
 		BASECOLOR_METALMASK,
 		REFLECTANCE_SMOOTHNESS,
+		DEPTH,
 		GEOMBUFFERS_COUNT
 	};
 	Microsoft::WRL::ComPtr<ID3D12Resource> mGeomPassBuffers[GEOMBUFFERS_COUNT];

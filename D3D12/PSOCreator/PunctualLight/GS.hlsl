@@ -7,13 +7,14 @@ struct Input {
 };
 
 struct FrameConstants {
-	float4x4 mPad0; // We do not need this, but we do this to reuse FrameConstant buffer used in VS
+	float4x4 mV; // We do not need this, but we do this to reuse FrameConstant buffer used in VS
 	float4x4 mP;
 };
 ConstantBuffer<FrameConstants> gFrameConstants : register(b0);
 
 struct Output {
 	float4 mPosH : SV_POSITION;
+	float3 mPosV : VIEW_RAY;
 	nointerpolation PunctualLight mPunctualLight : PUNCTUAL_LIGHT;
 };
 
@@ -21,7 +22,7 @@ struct Output {
 void main(const in point Input input[1], inout TriangleStream<Output> triangleStream) {
 	// Compute quad center position in view space.
 	// Then we can easily build a quad (two triangles) that face the camera.
-	float4 lightPosV = float4(input[0].mPunctualLight.mLightPosVAndRange.xyz, 1.0f);
+	const float4 lightPosV = float4(input[0].mPunctualLight.mLightPosVAndRange.xyz, 1.0f);
 	const float lightRange = input[0].mPunctualLight.mLightPosVAndRange.w;
 
 	// Fix light z coordinate
@@ -39,21 +40,25 @@ void main(const in point Input input[1], inout TriangleStream<Output> triangleSt
 
 	posV.xy = lightPosV.xy + float2(-lightRange, lightRange);
 	output.mPosH = mul(float4(posV, 1.0f), gFrameConstants.mP);
+	output.mPosV = posV;
 	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
 	posV.xy = lightPosV.xy + float2(lightRange, lightRange);
 	output.mPosH = mul(float4(posV, 1.0f), gFrameConstants.mP);
+	output.mPosV = posV;
 	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
 	posV.xy = lightPosV.xy + float2(-lightRange, -lightRange);
 	output.mPosH = mul(float4(posV, 1.0f), gFrameConstants.mP);
+	output.mPosV = posV;
 	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
 	posV.xy = lightPosV.xy + float2(lightRange, -lightRange);
 	output.mPosH = mul(float4(posV, 1.0f), gFrameConstants.mP);
+	output.mPosV = posV;
 	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
