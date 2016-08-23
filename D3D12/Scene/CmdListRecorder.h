@@ -20,22 +20,16 @@ class UploadBuffer;
 // - Call CmdListRecorder::RecordCommandLists() to create command lists to execute in the GPU
 class CmdListRecorder {
 public:
-	using VertexAndIndexBufferData = std::pair<BufferCreator::VertexBufferData, BufferCreator::IndexBufferData>;
-	using VertexAndIndexBufferDataVec = std::vector<VertexAndIndexBufferData>;
-	using Matrices = std::vector<DirectX::XMFLOAT4X4>;
-	using MatricesVec = std::vector<Matrices>;
+	struct GeometryData {
+		GeometryData() = default;
+
+		BufferCreator::VertexBufferData mVertexBufferData;
+		BufferCreator::IndexBufferData mIndexBufferData;
+		std::vector<DirectX::XMFLOAT4X4> mWorldMatrices;
+	};
 
 	explicit CmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 			
-	// Base command data. Once you inherits from this class, you should add
-	// more class members that represent the extra information you need (like resources, for example)
-	__forceinline ID3D12DescriptorHeap* & CbvSrvUavDescHeap() noexcept { return mCbvSrvUavDescHeap; }	
-	__forceinline ID3D12RootSignature* &RootSign() noexcept { return mRootSign; }
-	__forceinline ID3D12PipelineState* &PSO() noexcept { return mPSO; }
-	__forceinline D3D12_PRIMITIVE_TOPOLOGY_TYPE& PrimitiveTopologyType() noexcept { return mTopology; }	
-	__forceinline D3D12_VIEWPORT& ScreenViewport() noexcept { return mScreenViewport; }
-	__forceinline D3D12_RECT& ScissorRector() noexcept { return mScissorRect; }
-
 	// Build command lists and push them to the queue.
 	virtual void RecordCommandLists(
 		const DirectX::XMFLOAT4X4& view,

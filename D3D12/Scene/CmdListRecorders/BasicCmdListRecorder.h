@@ -4,20 +4,18 @@
 
 #include <Scene/CmdListRecorder.h>
 
+struct Material;
+
 class BasicCmdListRecorder : public CmdListRecorder {
 public:
 	explicit BasicCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
-	__forceinline VertexAndIndexBufferDataVec& GetVertexAndIndexBufferDataVec() noexcept { return mVertexAndIndexBufferDataVec; }
-	__forceinline MatricesVec& WorldMatrices() noexcept { return mWorldMatrices; }
-
-	__forceinline UploadBuffer* &FrameCBuffer(const std::uint32_t index) noexcept { ASSERT(index < Settings::sQueuedFrameCount); return mFrameCBuffer[index]; }
-	
-	__forceinline UploadBuffer* &ObjectCBuffer() noexcept { return mObjectCBuffer; }
-	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& ObjectCBufferGpuDescHandleBegin() noexcept { return mObjectCBufferGpuDescHandleBegin; }
-
-	__forceinline UploadBuffer* &MaterialsCBuffer() noexcept { return mMaterialsCBuffer; }
-	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& MaterialsCBufferGpuDescHandleBegin() noexcept { return mMaterialsCBufferGpuDescHandleBegin; }
+	void Init(
+		const GeometryData* geometryDataVec,
+		const std::uint32_t numGeomData,
+		const Material* materials,
+		const std::uint32_t numMaterials
+		) noexcept;
 
 	void RecordCommandLists(
 		const DirectX::XMFLOAT4X4& view,
@@ -29,9 +27,9 @@ public:
 	bool ValidateData() const noexcept;
 
 private:
-	// We should have a vector of world matrices per geometry.	
-	VertexAndIndexBufferDataVec mVertexAndIndexBufferDataVec;
-	MatricesVec mWorldMatrices;
+	void BuildBuffers(const Material* materials, const std::uint32_t numMaterials) noexcept;
+
+	std::vector<GeometryData> mGeometryDataVec;
 
 	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
 
