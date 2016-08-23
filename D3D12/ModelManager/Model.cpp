@@ -11,7 +11,7 @@
 #include <ModelManager/Mesh.h>
 #include <Utils/DebugUtils.h>
 
-Model::Model(const char* filename) {
+Model::Model(const char* filename, ID3D12GraphicsCommandList& cmdList) {
 	ASSERT(filename != nullptr);
 	Assimp::Importer importer;
 	const std::uint32_t flags{ aiProcessPreset_TargetRealtime_Fast | aiProcess_ConvertToLeftHanded };
@@ -28,8 +28,12 @@ Model::Model(const char* filename) {
 	for (std::uint32_t i = 0U; i < scene->mNumMeshes; ++i) {
 		aiMesh* mesh{ scene->mMeshes[i] };
 		ASSERT(mesh != nullptr);
-		mMeshes.push_back(new Mesh(*mesh));
+		mMeshes.push_back(new Mesh(*mesh, cmdList));
 	}
+}
+
+Model::Model(const GeometryGenerator::MeshData& meshData, ID3D12GraphicsCommandList& cmdList) {
+	mMeshes.push_back(new Mesh(meshData, cmdList));
 }
 
 Model::~Model() {

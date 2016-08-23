@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Main", "Main\Main.vcxproj", "{4EAB39FD-5BFF-43D4-8E55-0F775433AF16}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -124,6 +124,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BasicScene", "BasicScene\Ba
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModelManager", "ModelManager\ModelManager.vcxproj", "{C46829C3-0991-48CB-8103-780A52D0EA2C}"
 	ProjectSection(ProjectDependencies) = postProject
+		{0FB8C24B-EF27-4247-BA36-F8B54BC4E995} = {0FB8C24B-EF27-4247-BA36-F8B54BC4E995}
 		{D7555BA5-692B-454C-AD9A-B5E2FE782E56} = {D7555BA5-692B-454C-AD9A-B5E2FE782E56}
 		{ED8231FF-791A-4C2F-9FE2-B49DEE3A9F79} = {ED8231FF-791A-4C2F-9FE2-B49DEE3A9F79}
 	EndProjectSection
