@@ -2,6 +2,8 @@
 
 #include <MathUtils/MathUtils.h>
 
+const char* Settings::sResourcesPath{ "../../../external/resources/" };
+
 const float Settings::sNearPlaneZ{ 5.0f };
 const float Settings::sFarPlaneZ{ 5000.0f };
 const float Settings::sFieldOfView{ 0.25f * MathUtils::Pi };

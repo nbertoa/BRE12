@@ -675,3 +675,10 @@
 /D3D12/ModelManager/x64/Release/ModelManager.tlog/Lib-link.write.1.tlog
 /D3D12/ModelManager/x64/Release/ModelManager.tlog/ModelManager.lastbuildstate
 /D3D12/ModelManager/x64/Release/ModelManager.tlog/lib.command.1.tlog
+/D3D12/App/x64/Release/App.tlog/unsuccessfulbuild
+/D3D12/BasicScene/x64/Release/BasicScene.tlog/unsuccessfulbuild
+/D3D12/GlobalData/x64/Release/GlobalData.tlog/unsuccessfulbuild
+/D3D12/Main/x64/Release/Main.tlog/unsuccessfulbuild
+/D3D12/MasterRender/x64/Release/MasterRender.tlog/unsuccessfulbuild
+/D3D12/PSOCreator/x64/Release/PSOCreator.tlog/unsuccessfulbuild
+/D3D12/Scene/x64/Release/Scene.tlog/unsuccessfulbuild

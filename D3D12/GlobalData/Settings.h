@@ -11,6 +11,7 @@ public:
 
 	__forceinline static float AspectRatio() noexcept { return (float)sWindowWidth / sWindowHeight; }
 
+	static const char* sResourcesPath;
 	static const bool sFullscreen{ true };
 	static const std::uint32_t sCpuProcessors{ 4U }; // This should be changed according your processor
 	static const std::uint32_t sSwapChainBufferCount{ 4U };
