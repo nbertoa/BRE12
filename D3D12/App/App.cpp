@@ -6,6 +6,7 @@
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <MasterRender/MasterRender.h>
+#include <ModelManager\ModelManager.h>
 #include <PSOCreator/PSOCreator.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
@@ -22,6 +23,7 @@ namespace {
 
 		ID3D12Device& device{ D3dData::Device() };
 		CommandManager::Create(device);
+		ModelManager::Create();
 		PSOManager::Create(device);
 		ResourceManager::Create(device);
 		RootSignatureManager::Create(device);
