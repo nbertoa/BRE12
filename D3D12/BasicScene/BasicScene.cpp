@@ -15,44 +15,6 @@
 #include <Scene/CmdListRecorders/PunctualLightCmdListRecorder.h>
 
 namespace {
-	void CreateGeometryBuffersSRVs(
-		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
-		const std::uint32_t geometryBuffersCount, 
-		D3D12_CPU_DESCRIPTOR_HANDLE baseCpuDescHandle) {
-		ASSERT(geometryBuffers != nullptr);
-		ASSERT(baseCpuDescHandle.ptr != 0UL);
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-
-		const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-		for (std::uint32_t i = 0U; i < geometryBuffersCount; ++i) {
-			ID3D12Resource& res{ *geometryBuffers[i].Get() };
-
-			srvDesc.Format = res.GetDesc().Format;
-			srvDesc.Texture2D.MipLevels = res.GetDesc().MipLevels;
-
-			ResourceManager::Get().CreateShaderResourceView(res, srvDesc, baseCpuDescHandle);
-
-			baseCpuDescHandle.ptr += descHandleIncSize;
-		}
-	}
-
-	void CreateLightsBufferSRV(ID3D12Resource& res, const std::uint32_t numLights, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle) {
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-		srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.Format = res.GetDesc().Format;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-		srvDesc.Buffer.FirstElement = 0UL;
-		srvDesc.Buffer.NumElements = numLights;
-		srvDesc.Buffer.StructureByteStride = sizeof(PunctualLight);
-		ResourceManager::Get().CreateShaderResourceView(res, srvDesc, cpuDescHandle);
-	}
-
 	void BuildBuffers(BasicCmdListRecorder& task) noexcept {
 		ASSERT(task.CbvSrvUavDescHeap() == nullptr);
 #ifdef _DEBUG
@@ -142,61 +104,6 @@ namespace {
 			ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, task.FrameCBuffer(i));
 		}
 	}
-
-	void BuildBuffers(PunctualLightCmdListRecorder& task, const std::uint32_t descHeapOffset) noexcept {
-		ASSERT(task.CbvSrvUavDescHeap() == nullptr);
-#ifdef _DEBUG
-		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
-			ASSERT(task.FrameCBuffer(i) == nullptr);
-		}
-#endif
-		ASSERT(task.LightsBuffer() == nullptr);
-
-		// We assume we have world matrices by geometry index 0 (but we do not have geometry here)
-		ASSERT(task.NumLights() != 0U);
-		const std::uint32_t lightsCount{ task.NumLights() };
-
-		// Create CBV_SRV_UAV cbuffer descriptor heap
-		D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
-		descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		descHeapDesc.NodeMask = 0U;
-		descHeapDesc.NumDescriptors = descHeapOffset + lightsCount;
-		descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, task.CbvSrvUavDescHeap());
-
-		// Create lights buffer and fill it
-		const std::size_t lightBufferElemSize{ sizeof(PunctualLight) };
-		ResourceManager::Get().CreateUploadBuffer(lightBufferElemSize, lightsCount, task.LightsBuffer());
-		const float posOffset{ 50.0f };
-		const float rangeOffset{ 10.0f };
-		const float powerOffset{ 1000.0f };
-		PunctualLight light;
-		for (std::uint32_t i = 0UL; i < lightsCount; ++i) {
-			/*light.mPosAndRange[0] = MathUtils::RandF(-posOffset, posOffset);
-			light.mPosAndRange[1] = MathUtils::RandF(-posOffset, posOffset);
-			light.mPosAndRange[2] = MathUtils::RandF(-posOffset, posOffset);
-			light.mPosAndRange[3] = MathUtils::RandF(rangeOffset, rangeOffset * 2U);
-			light.mColorAndPower[0] = MathUtils::RandF(0.5f, 1.0f);
-			light.mColorAndPower[1] = MathUtils::RandF(0.5f, 1.0f);
-			light.mColorAndPower[2] = MathUtils::RandF(0.5f, 1.0f);
-			light.mColorAndPower[3] = MathUtils::RandF(powerOffset, powerOffset * 2U);*/
-			light.mPosAndRange[0] = 0.0f;
-			light.mPosAndRange[1] = 300.0f;
-			light.mPosAndRange[2] = 0.0f;
-			light.mPosAndRange[3] = 100000.0f;
-			light.mColorAndPower[0] = 1.0f;
-			light.mColorAndPower[1] = 1.0f;
-			light.mColorAndPower[2] = 1.0f;
-			light.mColorAndPower[3] = 1000000.0f;
-			task.LightsBuffer()->CopyData(i, &light, sizeof(PunctualLight));
-		}
-
-		// Create frame cbuffers
-		const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4) * 2UL) };
-		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
-			ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, task.FrameCBuffer(i));
-		}		
-	}
 }
 
 void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
@@ -274,9 +181,6 @@ void BasicScene::GenerateLightPassRecorders(
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(0 < geometryBuffersCount && geometryBuffersCount < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 
-	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::PUNCTUAL_LIGHT));
-
-	const std::uint32_t numLights{ 1 };
 	const std::uint32_t numTasks{ 1U };
 	tasks.resize(numTasks);
 
@@ -285,24 +189,16 @@ void BasicScene::GenerateLightPassRecorders(
 		for (size_t k = r.begin(); k != r.end(); ++k) {
 			PunctualLightCmdListRecorder& task{ *new PunctualLightCmdListRecorder(D3dData::Device(), cmdListQueue) };
 			tasks[k].reset(&task);
-			task.PSO() = psoData.mPSO;
-			task.RootSign() = psoData.mRootSign;
-			task.NumLights() = numLights;
-
-			const std::uint32_t descHeapOffset(geometryBuffersCount + 1U);
-			BuildBuffers(task, descHeapOffset);
-
-			// Create geometry buffers SRVs
-			D3D12_CPU_DESCRIPTOR_HANDLE cbvSrvUavCpuDescHandle(task.CbvSrvUavDescHeap()->GetCPUDescriptorHandleForHeapStart());
-			CreateGeometryBuffersSRVs(geometryBuffers, geometryBuffersCount, cbvSrvUavCpuDescHandle);
-			
-			// Create lights buffer SRV
-			const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-			D3D12_CPU_DESCRIPTOR_HANDLE lightsBufferCpuDescHandle{ cbvSrvUavCpuDescHandle.ptr + geometryBuffersCount * descHandleIncSize };
-			CreateLightsBufferSRV(*task.LightsBuffer()->Resource(), task.NumLights(), lightsBufferCpuDescHandle);
-			task.LightsBufferGpuDescHandleBegin().ptr = task.CbvSrvUavDescHeap()->GetGPUDescriptorHandleForHeapStart().ptr + geometryBuffersCount * descHandleIncSize;
-
-			ASSERT(task.ValidateData());
+			PunctualLight light;
+			light.mPosAndRange[0] = 0.0f;
+			light.mPosAndRange[1] = 300.0f;
+			light.mPosAndRange[2] = 0.0f;
+			light.mPosAndRange[3] = 100000.0f;
+			light.mColorAndPower[0] = 1.0f;
+			light.mColorAndPower[1] = 1.0f;
+			light.mColorAndPower[2] = 1.0f;
+			light.mColorAndPower[3] = 1000000.0f;
+			task.Init(geometryBuffers, geometryBuffersCount, &light, 1U);
 		}		
 	}
 	);

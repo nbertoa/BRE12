@@ -22,7 +22,7 @@ UploadBuffer::~UploadBuffer() {
 	mMappedData = nullptr;
 }
 
-void UploadBuffer::CopyData(const std::uint32_t elemIndex, void* srcData, const std::size_t srcDataSize) noexcept {
+void UploadBuffer::CopyData(const std::uint32_t elemIndex, const void* srcData, const std::size_t srcDataSize) noexcept {
 	ASSERT(srcData);
 	memcpy(mMappedData + elemIndex * mElemSize, srcData, srcDataSize);
 }

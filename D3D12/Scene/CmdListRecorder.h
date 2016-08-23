@@ -26,7 +26,7 @@ public:
 	using MatricesVec = std::vector<Matrices>;
 
 	explicit CmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
-		
+			
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
 	__forceinline ID3D12DescriptorHeap* & CbvSrvUavDescHeap() noexcept { return mCbvSrvUavDescHeap; }	

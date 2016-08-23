@@ -4,19 +4,17 @@
 
 #include <Scene/CmdListRecorder.h>
 
+struct PunctualLight;
+
 class PunctualLightCmdListRecorder : public CmdListRecorder {
 public:
 	explicit PunctualLightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
-	__forceinline static std::uint32_t MaxNumLights() noexcept { return sMaxNumLights; }
-	__forceinline std::uint32_t& NumLights() noexcept { return mNumLights; }
-
-	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& GeometryBuffersGpuDescHandleBegin() noexcept { return mGeometryBuffersGpuDescHandleBegin; }
-
-	__forceinline UploadBuffer* &FrameCBuffer(const std::uint32_t index) noexcept { ASSERT(index <Settings::sQueuedFrameCount); return mFrameCBuffer[index]; }
-
-	__forceinline UploadBuffer* &LightsBuffer() noexcept { return mLightsBuffer; }
-	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE& LightsBufferGpuDescHandleBegin() noexcept { return mLightsBufferGpuDescHandleBegin; }
+	void Init(
+		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
+		const std::uint32_t geometryBuffersCount,
+		const PunctualLight* lights,
+		const std::uint32_t numLights) noexcept;
 
 	void RecordCommandLists(
 		const DirectX::XMFLOAT4X4& view,
@@ -28,7 +26,7 @@ public:
 	bool ValidateData() const noexcept override;
 
 private:
-	static const std::uint32_t sMaxNumLights{ 250U };
+	void BuildBuffers(const PunctualLight* lights, const std::uint32_t descHeapOffset) noexcept;
 
 	std::uint32_t mNumLights{ 0U };
 
