@@ -51,8 +51,8 @@ namespace GeometryGenerator {
 	void CreateCylinder(
 		const float bottomRadius, 
 		const float topRadius, 
-		const float height, const 
-		std::uint32_t sliceCount, 
+		const float height, 
+		const std::uint32_t sliceCount, 
 		const std::uint32_t stackCount, 
 		MeshData& meshData) noexcept;
 

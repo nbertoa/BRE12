@@ -2,11 +2,16 @@
 
 #include <vector>
 
+#include <GeometryGenerator/GeometryGenerator.h>
+
+struct ID3D12GraphicsCommandList;
 class Mesh;
 
 class Model {
 public:
-	Model(const char* filename);
+	explicit Model(const char* filename, ID3D12GraphicsCommandList& cmdList);
+	explicit Model(const GeometryGenerator::MeshData& meshData, ID3D12GraphicsCommandList& cmdList);
+
 	Model(const Model& rhs) = delete;
 	Model& operator=(const Model& rhs) = delete;
 	~Model();
