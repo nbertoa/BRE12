@@ -15,7 +15,7 @@
 void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
 
-	const std::size_t numGeometry{ 4000UL };
+	const std::size_t numGeometry{ 10UL };
 	tasks.resize(Settings::sCpuProcessors);
 
 	// Create a command list 
@@ -25,7 +25,7 @@ void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandLi
 	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
 
 	Model* model;
-	ModelManager::Get().CreateSphere(5.0f, 50U, 50U, model, *cmdList);
+	ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, *cmdList);
 	ASSERT(model != nullptr);
 
 	cmdList->Close();
@@ -42,8 +42,9 @@ void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandLi
 		geomData.mWorldMatrices.reserve(numGeometry);
 	}
 
-	const float meshSpaceOffset{ 200.0f };
-	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, 1U),
+	const float meshSpaceOffset{ 20.0f };
+	const float scaleFactor{ 0.1f };
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, numGeometry),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
 			BasicCmdListRecorder& task{ *new BasicCmdListRecorder(D3dData::Device(), cmdListQueue) };
@@ -55,8 +56,10 @@ void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandLi
 				const float ty{ MathUtils::RandF(-meshSpaceOffset, meshSpaceOffset) };
 				const float tz{ MathUtils::RandF(-meshSpaceOffset, meshSpaceOffset) };
 
+				const float s{ scaleFactor };
+
 				DirectX::XMFLOAT4X4 world;
-				DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranslation(tx, ty, tz));
+				DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixScaling(s, s, s) * DirectX::XMMatrixTranslation(tx, ty, tz));
 				currGeomData.mWorldMatrices.push_back(world);
 			}
 
@@ -67,10 +70,10 @@ void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandLi
 				material.mBaseColor_MetalMask[0] = MathUtils::RandF(0.0f, 1.0f);
 				material.mBaseColor_MetalMask[1] = MathUtils::RandF(0.0f, 1.0f);
 				material.mBaseColor_MetalMask[2] = MathUtils::RandF(0.0f, 1.0f);
-				material.mBaseColor_MetalMask[3] = MathUtils::RandF(0.0f, 1.0f);
-				material.mReflectance_Smoothness[0] = MathUtils::RandF(0.0f, 1.0f);
-				material.mReflectance_Smoothness[1] = MathUtils::RandF(0.0f, 1.0f);
-				material.mReflectance_Smoothness[2] = MathUtils::RandF(0.0f, 1.0f);
+				material.mBaseColor_MetalMask[3] = (float)MathUtils::Rand(0U, 1U);
+				material.mReflectance_Smoothness[0] = 0.7f;
+				material.mReflectance_Smoothness[1] = 0.7f;
+				material.mReflectance_Smoothness[2] = 0.7f;
 				material.mReflectance_Smoothness[3] = MathUtils::RandF(0.0f, 1.0f);
 				materials.push_back(material);
 			}
@@ -99,16 +102,26 @@ void BasicScene::GenerateLightPassRecorders(
 		for (size_t k = r.begin(); k != r.end(); ++k) {
 			PunctualLightCmdListRecorder& task{ *new PunctualLightCmdListRecorder(D3dData::Device(), cmdListQueue) };
 			tasks[k].reset(&task);
-			PunctualLight light;
-			light.mPosAndRange[0] = 0.0f;
-			light.mPosAndRange[1] = 300.0f;
-			light.mPosAndRange[2] = 0.0f;
-			light.mPosAndRange[3] = 100000.0f;
-			light.mColorAndPower[0] = 1.0f;
-			light.mColorAndPower[1] = 1.0f;
-			light.mColorAndPower[2] = 1.0f;
-			light.mColorAndPower[3] = 1000000.0f;
-			task.Init(geometryBuffers, geometryBuffersCount, &light, 1U);
+			PunctualLight light[2];
+			light[0].mPosAndRange[0] = 0.0f;
+			light[0].mPosAndRange[1] = 300.0f;
+			light[0].mPosAndRange[2] = 0.0f;
+			light[0].mPosAndRange[3] = 100000.0f;
+			light[0].mColorAndPower[0] = 1.0f;
+			light[0].mColorAndPower[1] = 1.0f;
+			light[0].mColorAndPower[2] = 1.0f;
+			light[0].mColorAndPower[3] = 1000000.0f;
+
+			light[1].mPosAndRange[0] = 0.0f;
+			light[1].mPosAndRange[1] = -300.0f;
+			light[1].mPosAndRange[2] = 0.0f;
+			light[1].mPosAndRange[3] = 100000.0f;
+			light[1].mColorAndPower[0] = 1.0f;
+			light[1].mColorAndPower[1] = 1.0f;
+			light[1].mColorAndPower[2] = 1.0f;
+			light[1].mColorAndPower[3] = 1000000.0f;
+
+			task.Init(geometryBuffers, geometryBuffersCount, light, _countof(light));
 		}		
 	}
 	);

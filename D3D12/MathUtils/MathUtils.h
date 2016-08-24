@@ -13,11 +13,10 @@ public:
 
 	// Returns random float in [a, b).
 	static float RandF(const float a, const float b) noexcept {
-		return a + RandF() * ( b - a);
+		return a + RandF() * (b - a);
 	}
 
-    static int Rand(const int32_t a, const int32_t b) noexcept
-    {
+    static int Rand(const int32_t a, const int32_t b) noexcept {
         return a + rand() % ((b - a) + 1);
     }
 

@@ -7,15 +7,19 @@
 #include <iostream>
 #include <sstream>
 
+#include <GlobalData/Settings.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ModelManager/Mesh.h>
 #include <Utils/DebugUtils.h>
 
 Model::Model(const char* filename, ID3D12GraphicsCommandList& cmdList) {
 	ASSERT(filename != nullptr);
+	std::string filePath(Settings::sResourcesPath);
+	filePath += filename;
+
 	Assimp::Importer importer;
 	const std::uint32_t flags{ aiProcessPreset_TargetRealtime_Fast | aiProcess_ConvertToLeftHanded };
-	const aiScene* scene{ importer.ReadFile(filename, flags) };
+	const aiScene* scene{ importer.ReadFile(filePath.c_str(), flags) };
 	if (scene == nullptr) {
 		const std::string errorMsg{ importer.GetErrorString() };
 		const std::wstring msg = StringUtils::AnsiToWString(errorMsg);

@@ -26,7 +26,7 @@ void main(const in point Input input[1], inout TriangleStream<Output> triangleSt
 	const float lightRange = input[0].mPunctualLight.mLightPosVAndRange.w;
 
 	// Fix light z coordinate
-	const float nearPlaneZ = 5.0f; // TODO: Pass near plane Z in a constant buffer
+	const float nearPlaneZ = 1.0f; // TODO: Pass near plane Z in a constant buffer
 	const float lightMinZ = lightPosV.z - lightRange;
 	const float lightMaxZ = lightPosV.z + lightRange;
 	const float cond = lightMinZ < nearPlaneZ && nearPlaneZ < lightMaxZ;
