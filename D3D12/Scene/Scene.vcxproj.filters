@@ -9,6 +9,9 @@
       <Filter>CmdListRecorders</Filter>
     </ClInclude>
     <ClInclude Include="CmdListRecorder.h" />
+    <ClInclude Include="CmdListRecorders\TextureCmdListRecorder.h">
+      <Filter>CmdListRecorders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="CmdListRecorders">
@@ -23,5 +26,8 @@
       <Filter>CmdListRecorders</Filter>
     </ClCompile>
     <ClCompile Include="CmdListRecorder.cpp" />
+    <ClCompile Include="CmdListRecorders\TextureCmdListRecorder.cpp">
+      <Filter>CmdListRecorders</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

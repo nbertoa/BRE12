@@ -9,6 +9,9 @@ class Mesh;
 
 class Model {
 public:
+	// Command lists are used to store buffers creation (vertex and index per mesh)
+	// cmdList must be in recorded state before calling these method.
+	// cmdList must be executed after calling these methods, to create the commited resource.
 	explicit Model(const char* filename, ID3D12GraphicsCommandList& cmdList);
 	explicit Model(const GeometryGenerator::MeshData& meshData, ID3D12GraphicsCommandList& cmdList);
 

@@ -71,6 +71,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -119,12 +122,14 @@
     <ClInclude Include="CmdListRecorder.h" />
     <ClInclude Include="cmdListRecorders\BasicCmdListRecorder.h" />
     <ClInclude Include="cmdListRecorders\PunctualLightCmdListRecorder.h" />
+    <ClInclude Include="CmdListRecorders\TextureCmdListRecorder.h" />
     <ClInclude Include="Scene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CmdListRecorder.cpp" />
     <ClCompile Include="cmdListRecorders\BasicCmdListRecorder.cpp" />
     <ClCompile Include="cmdListRecorders\PunctualLightCmdListRecorder.cpp" />
+    <ClCompile Include="CmdListRecorders\TextureCmdListRecorder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

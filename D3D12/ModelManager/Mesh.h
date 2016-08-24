@@ -21,6 +21,9 @@ public:
 	__forceinline BufferCreator::IndexBufferData& IndexBufferData() noexcept { ASSERT(mIndexBufferData.ValidateData()); return mIndexBufferData; }
 
 private:
+	// Command lists are used to store buffers creation (vertex and index per mesh)
+	// cmdList must be in recorded state before calling these method.
+	// cmdList must be executed after calling these methods, to create the commited resource.
 	explicit Mesh(const aiMesh& mesh, ID3D12GraphicsCommandList& cmdList);
 	explicit Mesh(const GeometryGenerator::MeshData& meshData, ID3D12GraphicsCommandList& cmdList);
 

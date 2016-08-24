@@ -18,6 +18,9 @@
     <Filter Include="ShaderUtils">
       <UniqueIdentifier>{970b0b1d-4e03-4ab5-8834-edba2d3807c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TextureMapping">
+      <UniqueIdentifier>{18f90d08-51aa-4db3-82c3-c3f9997a86bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Basic\PS.hlsl">
@@ -40,6 +43,15 @@
     </FxCompile>
     <FxCompile Include="PunctualLight\RS.hlsl">
       <Filter>PunctualLight</Filter>
+    </FxCompile>
+    <FxCompile Include="TextureMapping\PS.hlsl">
+      <Filter>TextureMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="TextureMapping\RS.hlsl">
+      <Filter>TextureMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="TextureMapping\VS.hlsl">
+      <Filter>TextureMapping</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
