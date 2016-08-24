@@ -4,23 +4,16 @@
 #include <tbb/parallel_for.h>
 
 #include <CommandManager/CommandManager.h>
-#include <GeometryGenerator/GeometryGenerator.h>
 #include <GlobalData/D3dData.h>
+#include <ModelManager\Mesh.h>
+#include <ModelManager\ModelManager.h>
 #include <PSOCreator/Material.h>
 #include <PSOCreator/PunctualLight.h>
-#include <ResourceManager/BufferCreator.h>
-#include <ResourceManager/ResourceManager.h>
 #include <Scene/CmdListRecorders/BasicCmdListRecorder.h>
 #include <Scene/CmdListRecorders/PunctualLightCmdListRecorder.h>
 
 void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
-
-	GeometryGenerator::MeshData shape;
-	GeometryGenerator::CreateSphere(5.0f, 50U, 50U, shape);
-	//GeometryGenerator::CreateCylinder(2.0f, 2.0f, 4, 20, 20, shape);
-	//GeometryGenerator::CreateBox(2, 2, 2, 2, shape);
-	//GeometryGenerator::CreateGrid(2, 2, 50, 50, shape);
 
 	const std::size_t numGeometry{ 4000UL };
 	tasks.resize(Settings::sCpuProcessors);
@@ -31,24 +24,21 @@ void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandLi
 	CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
 	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
 
-	// Create vertex buffer
-	BufferCreator::BufferParams vertexBufferParams(shape.mVertices.data(), (std::uint32_t)shape.mVertices.size(), sizeof(GeometryGenerator::Vertex));
-	BufferCreator::VertexBufferData vertexBufferData;
-	BufferCreator::CreateBuffer(*cmdList, vertexBufferParams, vertexBufferData);
-
-	// Create index buffer
-	BufferCreator::BufferParams indexBufferParams(shape.mIndices32.data(), (std::uint32_t)shape.mIndices32.size(), sizeof(std::uint32_t));
-	BufferCreator::IndexBufferData indexBufferData;
-	BufferCreator::CreateBuffer(*cmdList, indexBufferParams, indexBufferData);
+	Model* model;
+	ModelManager::Get().CreateSphere(5.0f, 50U, 50U, model, *cmdList);
+	ASSERT(model != nullptr);
 
 	cmdList->Close();
 	cmdListQueue.push(cmdList);
 
+	ASSERT(model->HasMeshes());	
+	Mesh& mesh{ *model->Meshes()[0U] };
+
 	std::vector<CmdListRecorder::GeometryData> geomDataVec;
 	geomDataVec.resize(Settings::sCpuProcessors);
 	for (CmdListRecorder::GeometryData& geomData : geomDataVec) {
-		geomData.mVertexBufferData = vertexBufferData;
-		geomData.mIndexBufferData = indexBufferData;
+		geomData.mVertexBufferData = mesh.VertexBufferData();
+		geomData.mIndexBufferData = mesh.IndexBufferData();
 		geomData.mWorldMatrices.reserve(numGeometry);
 	}
 
