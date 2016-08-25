@@ -22,6 +22,9 @@
     <Filter Include="NormalMapping">
       <UniqueIdentifier>{3712b720-bef4-4f1e-9d80-c1db74f89740}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HeightMapping">
+      <UniqueIdentifier>{93a6c746-6d3f-435f-8e05-adba5f781538}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Basic\PS.hlsl">
@@ -62,6 +65,21 @@
     </FxCompile>
     <FxCompile Include="NormalMapping\RS.hlsl">
       <Filter>NormalMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="HeightMapping\VS.hlsl">
+      <Filter>HeightMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="HeightMapping\PS.hlsl">
+      <Filter>HeightMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="HeightMapping\DS.hlsl">
+      <Filter>HeightMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="HeightMapping\HS.hlsl">
+      <Filter>HeightMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="HeightMapping\RS.hlsl">
+      <Filter>HeightMapping</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

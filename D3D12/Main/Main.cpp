@@ -2,6 +2,7 @@
 
 #include <App/App.h>
 #include <BasicScene/BasicScene.h>
+#include <HeightScene\HeightScene.h>
 #include <NormalScene\NormalScene.h>
 #include <TextureScene\TextureScene.h>
 

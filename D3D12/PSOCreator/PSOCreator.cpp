@@ -152,6 +152,19 @@ namespace PSOCreator {
 		ASSERT(mPSOData[Technique::NORMAL_MAPPING].mPSO == nullptr && mPSOData[Technique::NORMAL_MAPPING].mRootSign == nullptr);
 		PSOCreator::Execute(psoParams, mPSOData[Technique::NORMAL_MAPPING]);
 
+		/*psoParams = PSOParams{};
+		psoParams.mDSFilename = "PSOCreator/HeightMapping/DS.cso";
+		psoParams.mHSFilename = "PSOCreator/HeightMapping/HS.cso";
+		psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+		psoParams.mPSFilename = "PSOCreator/HeightMapping/PS.cso";
+		psoParams.mRootSignFilename = "PSOCreator/HeightMapping/RS.cso";
+		psoParams.mVSFilename = "PSOCreator/HeightMapping/VS.cso";
+		psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;		
+		psoParams.mNumRenderTargets = MasterRender::NumRenderTargets();
+		memcpy(psoParams.mRtFormats, MasterRender::GeomPassBuffersFormats(), sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
+		ASSERT(mPSOData[Technique::HEIGHT_MAPPING].mPSO == nullptr && mPSOData[Technique::HEIGHT_MAPPING].mRootSign == nullptr);
+		PSOCreator::Execute(psoParams, mPSOData[Technique::HEIGHT_MAPPING]);*/
+
 		psoParams = PSOParams{};
 		psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
 		psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
