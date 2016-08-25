@@ -4,18 +4,20 @@
 #include <tbb/parallel_for.h>
 
 #include <CommandManager/CommandManager.h>
+#include <DXUtils/Material.h>
+#include <DXUtils/PunctualLight.h>
+#include <DXUtils/Texture.h>
 #include <GlobalData/D3dData.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
-#include <PSOCreator/Material.h>
-#include <PSOCreator/PunctualLight.h>
-#include <Scene/CmdListRecorders/BasicCmdListRecorder.h>
+#include <ResourceManager\ResourceManager.h>
+#include <Scene/CmdListRecorders/TextureCmdListRecorder.h>
 #include <Scene/CmdListRecorders/PunctualLightCmdListRecorder.h>
 
 void TextureScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
 
-	const std::size_t numGeometry{ 10UL };
+	const std::size_t numGeometry{ 100UL };
 	tasks.resize(Settings::sCpuProcessors);
 
 	// Create a command list 
@@ -23,9 +25,16 @@ void TextureScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12Command
 	ID3D12CommandAllocator* cmdAlloc;
 	CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
 	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
+	
+	Texture* tex[2] = { new Texture, new Texture };
+	ResourceManager::Get().LoadTextureFromFile("textures/rock1_diffuse.dds", tex[0]->mBuffer, tex[0]->mUploadBuffer, *cmdList);
+	ASSERT(tex[0]->ValidateData());
+	ResourceManager::Get().LoadTextureFromFile("textures/bricks2_diffuse.dds", tex[1]->mBuffer, tex[1]->mUploadBuffer, *cmdList);
+	ASSERT(tex[1]->ValidateData());
 
 	Model* model;
-	ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, *cmdList);
+	//ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, *cmdList);
+	ModelManager::Get().CreateSphere(4.0f, 50, 50, model, *cmdList);
 	ASSERT(model != nullptr);
 
 	cmdList->Close();
@@ -42,12 +51,12 @@ void TextureScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12Command
 		geomData.mWorldMatrices.reserve(numGeometry);
 	}
 
-	const float meshSpaceOffset{ 20.0f };
-	const float scaleFactor{ 0.1f };
+	const float meshSpaceOffset{ 100.0f };
+	const float scaleFactor{ 1.0f };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, numGeometry),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
-			BasicCmdListRecorder& task{ *new BasicCmdListRecorder(D3dData::Device(), cmdListQueue) };
+			TextureCmdListRecorder& task{ *new TextureCmdListRecorder(D3dData::Device(), cmdListQueue) };
 			tasks[k].reset(&task);
 						
 			CmdListRecorder::GeometryData& currGeomData{ geomDataVec[k] };
@@ -67,9 +76,9 @@ void TextureScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12Command
 			materials.reserve(numGeometry);
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
 				Material material;
-				material.mBaseColor_MetalMask[0] = MathUtils::RandF(0.0f, 1.0f);
-				material.mBaseColor_MetalMask[1] = MathUtils::RandF(0.0f, 1.0f);
-				material.mBaseColor_MetalMask[2] = MathUtils::RandF(0.0f, 1.0f);
+				material.mBaseColor_MetalMask[0] = 1.0f;
+				material.mBaseColor_MetalMask[1] = 1.0f;
+				material.mBaseColor_MetalMask[2] = 1.0f;
 				material.mBaseColor_MetalMask[3] = (float)MathUtils::Rand(0U, 1U);
 				material.mReflectance_Smoothness[0] = 0.7f;
 				material.mReflectance_Smoothness[1] = 0.7f;
@@ -78,7 +87,13 @@ void TextureScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12Command
 				materials.push_back(material);
 			}
 
-			task.Init(&currGeomData, 1U, materials.data(), (std::uint32_t)materials.size());
+			std::vector<Texture> textures;
+			textures.reserve(numGeometry);
+			for (std::size_t i = 0UL; i < numGeometry; ++i) {
+				textures.push_back(*tex[i % _countof(tex)]);
+			}
+
+			task.Init(&currGeomData, 1U, materials.data(), (std::uint32_t)materials.size(), textures.data(), (std::uint32_t)textures.size());
 		}
 	}
 	);

@@ -2,9 +2,9 @@
 
 #include <DirectXMath.h>
 
+#include <DXUtils/PunctualLight.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
-#include <PSOCreator/PunctualLight.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ResourceManager/UploadBuffer.h>
 #include <Utils/DebugUtils.h>

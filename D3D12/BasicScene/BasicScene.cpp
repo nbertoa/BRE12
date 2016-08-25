@@ -4,11 +4,11 @@
 #include <tbb/parallel_for.h>
 
 #include <CommandManager/CommandManager.h>
+#include <DXUtils/Material.h>
+#include <DXUtils/PunctualLight.h>
 #include <GlobalData/D3dData.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
-#include <PSOCreator/Material.h>
-#include <PSOCreator/PunctualLight.h>
 #include <Scene/CmdListRecorders/BasicCmdListRecorder.h>
 #include <Scene/CmdListRecorders/PunctualLightCmdListRecorder.h>
 

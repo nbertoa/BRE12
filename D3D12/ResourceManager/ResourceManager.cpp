@@ -4,8 +4,11 @@
 
 #include <DXUtils/D3DFactory.h>
 #include <DXUtils/d3dx12.h>
+#include <GlobalData\Settings.h>
+#include <ResourceManager\DDSTextureLoader.h>
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
+#include <Utils\StringUtils.h>
 
 namespace {
 	std::unique_ptr<ResourceManager> gManager{ nullptr };
@@ -24,6 +27,38 @@ ResourceManager& ResourceManager::Get() noexcept {
 ResourceManager::ResourceManager(ID3D12Device& device)
 	: mDevice(device)
 {
+}
+
+std::size_t ResourceManager::LoadTextureFromFile(
+	const char* filename, 
+	ID3D12Resource* &res, 
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
+	ID3D12GraphicsCommandList& cmdList) noexcept {
+	ASSERT(filename != nullptr);
+	std::string filePath(Settings::sResourcesPath);
+	filePath += filename;
+
+	const std::wstring filePathW(StringUtils::ToWideString(filePath));
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+
+	mMutex.lock();
+	CHECK_HR(DirectX::CreateDDSTextureFromFile12(&mDevice, &cmdList, filePathW.c_str(), resource, uploadBuffer));
+	mMutex.unlock();
+
+	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	ResourceById::accessor accessor;
+#ifdef _DEBUG
+	mResourceById.find(accessor, id);
+	ASSERT(accessor.empty());
+#endif
+	mResourceById.insert(accessor, id);
+	accessor->second = resource;
+	accessor.release();
+
+	res = resource.Get();
+
+	return id;
 }
 
 std::size_t ResourceManager::CreateDefaultBuffer(

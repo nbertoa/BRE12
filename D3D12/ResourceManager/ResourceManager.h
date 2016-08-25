@@ -16,6 +16,12 @@ public:
 	ResourceManager(const ResourceManager&) = delete;
 	const ResourceManager& operator=(const ResourceManager&) = delete;
 
+	std::size_t LoadTextureFromFile(
+		const char* filename, 
+		ID3D12Resource* &res, 
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
+		ID3D12GraphicsCommandList& cmdList) noexcept;
+
 	// Note: uploadBuffer has to be kept alive after the above function calls because
 	// the command list has not been executed yet that performs the actual copy.
 	// The caller can Release the uploadBuffer after it knows the copy has been executed.

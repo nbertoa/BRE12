@@ -122,9 +122,7 @@
     <ClCompile Include="PSOCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Material.h" />
     <ClInclude Include="PSOCreator.h" />
-    <ClInclude Include="PunctualLight.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Basic\PS.hlsl">

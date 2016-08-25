@@ -5,6 +5,7 @@
 #include <Scene/CmdListRecorder.h>
 
 struct Material;
+struct Texture;
 
 class TextureCmdListRecorder : public CmdListRecorder {
 public:
@@ -14,7 +15,9 @@ public:
 		const GeometryData* geometryDataVec,
 		const std::uint32_t numGeomData,
 		const Material* materials,
-		const std::uint32_t numMaterials
+		const std::uint32_t numMaterials,
+		const Texture* textures,
+		const std::uint32_t numTextures
 	) noexcept;
 
 	void RecordCommandLists(
@@ -27,7 +30,7 @@ public:
 	bool ValidateData() const noexcept;
 
 private:
-	void BuildBuffers(const Material* materials, const std::uint32_t numMaterials) noexcept;
+	void BuildBuffers(const Material* materials, const Texture* textures, const std::uint32_t dataCount) noexcept;
 
 	std::vector<GeometryData> mGeometryDataVec;
 
@@ -38,4 +41,6 @@ private:
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mMaterialsCBufferGpuDescHandleBegin;
 	UploadBuffer* mMaterialsCBuffer{ nullptr };
+
+	D3D12_GPU_DESCRIPTOR_HANDLE mTexturesBufferGpuDescHandleBegin;
 };

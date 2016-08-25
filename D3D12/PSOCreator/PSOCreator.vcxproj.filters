@@ -5,8 +5,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PSOCreator.h" />
-    <ClInclude Include="Material.h" />
-    <ClInclude Include="PunctualLight.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Basic">
