@@ -6,12 +6,16 @@
 #include <Utils/DebugUtils.h>
 
 namespace {
-	void CreateVertexBuffer(ID3D12GraphicsCommandList& cmdList, const BufferCreator::BufferParams& bufferParams, BufferCreator::VertexBufferData& bufferData) {
+	void CreateVertexBuffer(
+		ID3D12GraphicsCommandList& cmdList, 
+		const BufferCreator::BufferParams& bufferParams, 
+		BufferCreator::VertexBufferData& bufferData,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) {
 		ASSERT(bufferParams.ValidateData());
 
 		// Create buffer
 		const std::uint32_t byteSize{ bufferParams.mElemCount * (std::uint32_t)bufferParams.mElemSize };
-		ResourceManager::Get().CreateDefaultBuffer(cmdList, bufferParams.mData, byteSize, bufferData.mBuffer, bufferData.mUploadBuffer);
+		ResourceManager::Get().CreateDefaultBuffer(cmdList, bufferParams.mData, byteSize, bufferData.mBuffer, uploadBuffer);
 		bufferData.mCount = bufferParams.mElemCount;
 
 		// Fill view
@@ -22,13 +26,17 @@ namespace {
 		ASSERT(bufferData.ValidateData());
 	}
 
-	void CreateIndexBuffer(ID3D12GraphicsCommandList& cmdList, const BufferCreator::BufferParams& bufferParams, BufferCreator::IndexBufferData& bufferData) {
+	void CreateIndexBuffer(
+		ID3D12GraphicsCommandList& cmdList, 
+		const BufferCreator::BufferParams& bufferParams, 
+		BufferCreator::IndexBufferData& bufferData,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) {
 		ASSERT(bufferParams.ValidateData());
 
 		// Create buffer
 		const std::uint32_t elemSize{ (std::uint32_t)bufferParams.mElemSize };
 		const std::uint32_t byteSize{ bufferParams.mElemCount * elemSize };
-		ResourceManager::Get().CreateDefaultBuffer(cmdList, bufferParams.mData, byteSize, bufferData.mBuffer, bufferData.mUploadBuffer);
+		ResourceManager::Get().CreateDefaultBuffer(cmdList, bufferParams.mData, byteSize, bufferData.mBuffer, uploadBuffer);
 		bufferData.mCount = bufferParams.mElemCount;
 
 		// Set index format
@@ -76,15 +84,18 @@ namespace BufferCreator {
 		return 
 			mBuffer != nullptr && 
 			mCount != 0U && 
-			mUploadBuffer.Get() != nullptr && 
 			mBufferView.BufferLocation != invalidView.BufferLocation &&
 			mBufferView.SizeInBytes != invalidView.SizeInBytes &&
 			mBufferView.StrideInBytes != invalidView.StrideInBytes;
 	}
 
-	void CreateBuffer(ID3D12GraphicsCommandList& cmdList, const BufferParams& bufferParams, VertexBufferData& bufferData) noexcept {
+	void CreateBuffer(
+		ID3D12GraphicsCommandList& cmdList, 
+		const BufferParams& bufferParams, 
+		VertexBufferData& bufferData,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept {
 		ASSERT(bufferParams.ValidateData());
-		CreateVertexBuffer(cmdList, bufferParams, bufferData);
+		CreateVertexBuffer(cmdList, bufferParams, bufferData, uploadBuffer);
 		ASSERT(bufferData.ValidateData());
 	}
 
@@ -94,15 +105,18 @@ namespace BufferCreator {
 		return
 			mBuffer != nullptr && 
 			mCount != 0U && 
-			mUploadBuffer.Get() != nullptr && 
 			mBufferView.BufferLocation != invalidView.BufferLocation &&
 			mBufferView.Format != invalidView.Format &&
 			mBufferView.SizeInBytes != invalidView.SizeInBytes;
 	}
 
-	void CreateBuffer(ID3D12GraphicsCommandList& cmdList, const BufferParams& bufferParams, IndexBufferData& bufferData) noexcept {
+	void CreateBuffer(
+		ID3D12GraphicsCommandList& cmdList, 
+		const BufferParams& bufferParams, 
+		IndexBufferData& bufferData,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept {
 		ASSERT(bufferParams.ValidateData());
-		CreateIndexBuffer(cmdList, bufferParams, bufferData);
+		CreateIndexBuffer(cmdList, bufferParams, bufferData, uploadBuffer);
 		ASSERT(bufferData.ValidateData());
 	}
 }

@@ -1,10 +1,12 @@
 #pragma once
 
 #include <vector>
+#include <wrl.h>
 
 #include <GeometryGenerator/GeometryGenerator.h>
 
 struct ID3D12GraphicsCommandList;
+struct ID3D12Resource;
 class Mesh;
 
 class Model {
@@ -12,8 +14,17 @@ public:
 	// Command lists are used to store buffers creation (vertex and index per mesh)
 	// cmdList must be in recorded state before calling these method.
 	// cmdList must be executed after calling these methods, to create the commited resource.
-	explicit Model(const char* filename, ID3D12GraphicsCommandList& cmdList);
-	explicit Model(const GeometryGenerator::MeshData& meshData, ID3D12GraphicsCommandList& cmdList);
+	explicit Model(
+		const char* filename, 
+		ID3D12GraphicsCommandList& cmdList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
+
+	explicit Model(
+		const GeometryGenerator::MeshData& meshData, 
+		ID3D12GraphicsCommandList& cmdList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
 
 	Model(const Model& rhs) = delete;
 	Model& operator=(const Model& rhs) = delete;

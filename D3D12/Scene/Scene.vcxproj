@@ -130,6 +130,7 @@
     <ClCompile Include="cmdListRecorders\BasicCmdListRecorder.cpp" />
     <ClCompile Include="cmdListRecorders\PunctualLightCmdListRecorder.cpp" />
     <ClCompile Include="CmdListRecorders\TextureCmdListRecorder.cpp" />
+    <ClCompile Include="Scene.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

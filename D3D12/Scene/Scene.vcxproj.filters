@@ -29,5 +29,6 @@
     <ClCompile Include="CmdListRecorders\TextureCmdListRecorder.cpp">
       <Filter>CmdListRecorders</Filter>
     </ClCompile>
+    <ClCompile Include="Scene.cpp" />
   </ItemGroup>
 </Project>

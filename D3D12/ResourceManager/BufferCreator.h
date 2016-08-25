@@ -26,12 +26,15 @@ namespace  BufferCreator {
 		bool ValidateData() const noexcept;
 
 		ID3D12Resource* mBuffer{ nullptr };
-		Microsoft::WRL::ComPtr<ID3D12Resource> mUploadBuffer{ nullptr };
 		D3D12_VERTEX_BUFFER_VIEW mBufferView{};
 		std::uint32_t mCount{ 0U };
 	};
 	
-	void CreateBuffer(ID3D12GraphicsCommandList& cmdList, const BufferParams& bufferParams, VertexBufferData& bufferData) noexcept;
+	void CreateBuffer(
+		ID3D12GraphicsCommandList& cmdList, 
+		const BufferParams& bufferParams, 
+		VertexBufferData& bufferData,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
 
 	struct IndexBufferData {
 		IndexBufferData() = default;
@@ -39,10 +42,13 @@ namespace  BufferCreator {
 		bool ValidateData() const noexcept;
 
 		ID3D12Resource* mBuffer{ nullptr };
-		Microsoft::WRL::ComPtr<ID3D12Resource> mUploadBuffer{ nullptr };
 		D3D12_INDEX_BUFFER_VIEW mBufferView{};
 		std::uint32_t mCount{ 0U };
 	};
 
-	void CreateBuffer(ID3D12GraphicsCommandList& cmdList, const BufferParams& bufferParams, IndexBufferData& bufferData) noexcept;
+	void CreateBuffer(
+		ID3D12GraphicsCommandList& cmdList, 
+		const BufferParams& bufferParams, 
+		IndexBufferData& bufferData,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
 }

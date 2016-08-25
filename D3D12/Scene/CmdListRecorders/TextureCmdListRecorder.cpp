@@ -3,7 +3,6 @@
 #include <DirectXMath.h>
 
 #include <DXUtils/Material.h>
-#include <DXUtils/Texture.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
@@ -20,7 +19,7 @@ void TextureCmdListRecorder::Init(
 	const std::uint32_t numGeomData,
 	const Material* materials,
 	const std::uint32_t numMaterials,
-	const Texture* textures,
+	ID3D12Resource** textures,
 	const std::uint32_t numTextures) noexcept
 {
 	ASSERT(ValidateData() == false);
@@ -154,7 +153,7 @@ bool TextureCmdListRecorder::ValidateData() const noexcept {
 	return result;
 }
 
-void TextureCmdListRecorder::BuildBuffers(const Material* materials, const Texture* textures, const std::uint32_t dataCount) noexcept {
+void TextureCmdListRecorder::BuildBuffers(const Material* materials, ID3D12Resource** textures, const std::uint32_t dataCount) noexcept {
 	ASSERT(materials != nullptr);
 	ASSERT(dataCount != 0UL);
 
@@ -231,7 +230,7 @@ void TextureCmdListRecorder::BuildBuffers(const Material* materials, const Textu
 		ResourceManager::Get().CreateConstantBufferView(cBufferDesc, currMaterialCBufferDescHandle);
 
 		// Create texture descriptor
-		ID3D12Resource& res{ *textures[i].mBuffer };
+		ID3D12Resource& res{ *textures[i] };
 		srvDesc.Format = res.GetDesc().Format;
 		srvDesc.Texture2D.MipLevels = res.GetDesc().MipLevels;
 		ResourceManager::Get().CreateShaderResourceView(res, srvDesc, currTextureBufferDescHandle);

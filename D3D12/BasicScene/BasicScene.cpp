@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <tbb/parallel_for.h>
 
-#include <CommandManager/CommandManager.h>
 #include <DXUtils/Material.h>
 #include <DXUtils/PunctualLight.h>
 #include <GlobalData/D3dData.h>
@@ -12,24 +11,22 @@
 #include <Scene/CmdListRecorders/BasicCmdListRecorder.h>
 #include <Scene/CmdListRecorders/PunctualLightCmdListRecorder.h>
 
-void BasicScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
+void BasicScene::GenerateGeomPassRecorders(
+	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, 
+	CmdListHelper& cmdListHelper, 
+	std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
 
 	const std::size_t numGeometry{ 10UL };
 	tasks.resize(Settings::sCpuProcessors);
 
-	// Create a command list 
-	ID3D12GraphicsCommandList* cmdList;
-	ID3D12CommandAllocator* cmdAlloc;
-	CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
-	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
-
 	Model* model;
-	ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, *cmdList);
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
+	ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, cmdListHelper.CmdList(), uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
 
-	cmdList->Close();
-	cmdListQueue.push(cmdList);
+	cmdListHelper.ExecuteCmdList();
 
 	ASSERT(model->HasMeshes());	
 	Mesh& mesh{ *model->Meshes()[0U] };

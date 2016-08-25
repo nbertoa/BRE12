@@ -3,10 +3,8 @@
 #include <algorithm>
 #include <tbb/parallel_for.h>
 
-#include <CommandManager/CommandManager.h>
 #include <DXUtils/Material.h>
 #include <DXUtils/PunctualLight.h>
-#include <DXUtils/Texture.h>
 #include <GlobalData/D3dData.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
@@ -14,31 +12,31 @@
 #include <Scene/CmdListRecorders/TextureCmdListRecorder.h>
 #include <Scene/CmdListRecorders/PunctualLightCmdListRecorder.h>
 
-void TextureScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
+void TextureScene::GenerateGeomPassRecorders(
+	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+	CmdListHelper& cmdListHelper, 
+	std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
 
 	const std::size_t numGeometry{ 100UL };
 	tasks.resize(Settings::sCpuProcessors);
-
-	// Create a command list 
-	ID3D12GraphicsCommandList* cmdList;
-	ID3D12CommandAllocator* cmdAlloc;
-	CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
-	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
 	
-	Texture* tex[2] = { new Texture, new Texture };
-	ResourceManager::Get().LoadTextureFromFile("textures/rock1_diffuse.dds", tex[0]->mBuffer, tex[0]->mUploadBuffer, *cmdList);
-	ASSERT(tex[0]->ValidateData());
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks2_diffuse.dds", tex[1]->mBuffer, tex[1]->mUploadBuffer, *cmdList);
-	ASSERT(tex[1]->ValidateData());
+	ID3D12Resource* tex[2] = { nullptr, nullptr };
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex0;
+	ResourceManager::Get().LoadTextureFromFile("textures/rock1_diffuse.dds", tex[0], uploadBufferTex0, cmdListHelper.CmdList());
+	ASSERT(tex[0] != nullptr);
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex1;
+	ResourceManager::Get().LoadTextureFromFile("textures/bricks2_diffuse.dds", tex[1], uploadBufferTex1, cmdListHelper.CmdList());
+	ASSERT(tex[1] != nullptr);
 
 	Model* model;
-	//ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, *cmdList);
-	ModelManager::Get().CreateSphere(4.0f, 50, 50, model, *cmdList);
+	//ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, cmdListHelper.CmdList(), uploadVertexBuffer, uploadIndexBuffer);
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
+	ModelManager::Get().CreateSphere(4.0f, 50, 50, model, cmdListHelper.CmdList(), uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
 
-	cmdList->Close();
-	cmdListQueue.push(cmdList);
+	cmdListHelper.ExecuteCmdList();
 
 	ASSERT(model->HasMeshes());	
 	Mesh& mesh{ *model->Meshes()[0U] };
@@ -87,10 +85,10 @@ void TextureScene::GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12Command
 				materials.push_back(material);
 			}
 
-			std::vector<Texture> textures;
+			std::vector<ID3D12Resource*> textures;
 			textures.reserve(numGeometry);
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
-				textures.push_back(*tex[i % _countof(tex)]);
+				textures.push_back(tex[i % _countof(tex)]);
 			}
 
 			task.Init(&currGeomData, 1U, materials.data(), (std::uint32_t)materials.size(), textures.data(), (std::uint32_t)textures.size());

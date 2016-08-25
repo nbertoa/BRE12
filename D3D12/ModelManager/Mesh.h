@@ -24,8 +24,16 @@ private:
 	// Command lists are used to store buffers creation (vertex and index per mesh)
 	// cmdList must be in recorded state before calling these method.
 	// cmdList must be executed after calling these methods, to create the commited resource.
-	explicit Mesh(const aiMesh& mesh, ID3D12GraphicsCommandList& cmdList);
-	explicit Mesh(const GeometryGenerator::MeshData& meshData, ID3D12GraphicsCommandList& cmdList);
+	explicit Mesh(
+		const aiMesh& mesh, 
+		ID3D12GraphicsCommandList& cmdList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
+	explicit Mesh(
+		const GeometryGenerator::MeshData& meshData, 
+		ID3D12GraphicsCommandList& cmdList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
 
 	BufferCreator::VertexBufferData mVertexBufferData;
 	BufferCreator::IndexBufferData mIndexBufferData;

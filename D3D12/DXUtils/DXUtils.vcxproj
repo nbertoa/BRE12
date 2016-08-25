@@ -123,7 +123,6 @@
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="PunctualLight.h" />
-    <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3DFactory.cpp" />

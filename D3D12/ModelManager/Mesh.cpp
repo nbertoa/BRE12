@@ -58,24 +58,30 @@ namespace {
 		BufferCreator::VertexBufferData& vertexBufferData,
 		BufferCreator::IndexBufferData& indexBufferData,
 		const GeometryGenerator::MeshData& meshData,
-		ID3D12GraphicsCommandList& cmdList) noexcept {
+		ID3D12GraphicsCommandList& cmdList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept {
 		ASSERT(vertexBufferData.ValidateData() == false);
 		ASSERT(indexBufferData.ValidateData() == false);
 
 		// Create vertex buffer
 		BufferCreator::BufferParams vertexBufferParams(meshData.mVertices.data(), (std::uint32_t)meshData.mVertices.size(), sizeof(GeometryGenerator::Vertex));
-		BufferCreator::CreateBuffer(cmdList, vertexBufferParams, vertexBufferData);
+		BufferCreator::CreateBuffer(cmdList, vertexBufferParams, vertexBufferData, uploadVertexBuffer);
 
 		// Create index buffer
 		BufferCreator::BufferParams indexBufferParams(meshData.mIndices32.data(), (std::uint32_t)meshData.mIndices32.size(), sizeof(std::uint32_t));
-		BufferCreator::CreateBuffer(cmdList, indexBufferParams, indexBufferData);
+		BufferCreator::CreateBuffer(cmdList, indexBufferParams, indexBufferData, uploadIndexBuffer);
 
 		ASSERT(vertexBufferData.ValidateData());
 		ASSERT(indexBufferData.ValidateData());
 	}
 }
 
-Mesh::Mesh(const aiMesh& mesh, ID3D12GraphicsCommandList& cmdList) {
+Mesh::Mesh(
+	const aiMesh& mesh, 
+	ID3D12GraphicsCommandList& cmdList,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) {
 	GeometryGenerator::MeshData meshData;
 
 	// Positions and Normals
@@ -123,14 +129,18 @@ Mesh::Mesh(const aiMesh& mesh, ID3D12GraphicsCommandList& cmdList) {
 		CalculateTangentArray(meshData, mesh.mNumFaces);
 	}
 
-	CreateData(mVertexBufferData, mIndexBufferData, meshData, cmdList);
+	CreateData(mVertexBufferData, mIndexBufferData, meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 
 	ASSERT(mVertexBufferData.ValidateData());
 	ASSERT(mIndexBufferData.ValidateData());
 }
 
-Mesh::Mesh(const GeometryGenerator::MeshData& meshData, ID3D12GraphicsCommandList& cmdList) {
-	CreateData(mVertexBufferData, mIndexBufferData, meshData, cmdList);
+Mesh::Mesh(
+	const GeometryGenerator::MeshData& meshData, 
+	ID3D12GraphicsCommandList& cmdList,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) {
+	CreateData(mVertexBufferData, mIndexBufferData, meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 
 	ASSERT(mVertexBufferData.ValidateData());
 	ASSERT(mIndexBufferData.ValidateData());

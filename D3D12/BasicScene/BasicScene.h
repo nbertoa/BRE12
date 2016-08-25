@@ -4,7 +4,10 @@
 
 class BasicScene : public Scene {
 public:	
-	void GenerateGeomPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept override;
+	void GenerateGeomPassRecorders(
+		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, 
+		CmdListHelper& cmdListHelper, 
+		std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept override;
 	
 	void GenerateLightPassRecorders(
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,

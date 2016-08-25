@@ -5,7 +5,6 @@
     <ClInclude Include="D3DFactory.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="PunctualLight.h" />
-    <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3DFactory.cpp" />

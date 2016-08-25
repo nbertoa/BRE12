@@ -21,11 +21,16 @@ ModelManager& ModelManager::Get() noexcept {
 	return *gManager.get();
 }
 
-std::size_t ModelManager::LoadModel(const char* filename, Model* &model, ID3D12GraphicsCommandList& cmdList) noexcept {
+std::size_t ModelManager::LoadModel(
+	const char* filename, 
+	Model* &model, 
+	ID3D12GraphicsCommandList& cmdList,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept {
 	ASSERT(filename != nullptr);
 
 	mMutex.lock();
-	model = new Model(filename, cmdList);
+	model = new Model(filename, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -41,12 +46,20 @@ std::size_t ModelManager::LoadModel(const char* filename, Model* &model, ID3D12G
 	return id;
 }
 
-std::size_t ModelManager::CreateBox(const float width, const float height, const float depth, const std::uint32_t numSubdivisions, Model* &model, ID3D12GraphicsCommandList& cmdList) noexcept {
+std::size_t ModelManager::CreateBox(
+	const float width, 
+	const float height, 
+	const float depth, 
+	const std::uint32_t numSubdivisions,
+	Model* &model, 
+	ID3D12GraphicsCommandList& cmdList,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept {
 	GeometryGenerator::MeshData meshData;
 	GeometryGenerator::CreateBox(width, height, depth, numSubdivisions, meshData);
 
 	mMutex.lock();
-	model = new Model(meshData, cmdList);
+	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -62,12 +75,19 @@ std::size_t ModelManager::CreateBox(const float width, const float height, const
 	return id;
 }
 
-std::size_t ModelManager::CreateSphere(const float radius, const std::uint32_t sliceCount, const std::uint32_t stackCount, Model* &model, ID3D12GraphicsCommandList& cmdList) noexcept {
+std::size_t ModelManager::CreateSphere(
+	const float radius, 
+	const std::uint32_t sliceCount, 
+	const std::uint32_t stackCount, 
+	Model* &model, 
+	ID3D12GraphicsCommandList& cmdList,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept {
 	GeometryGenerator::MeshData meshData;
 	GeometryGenerator::CreateSphere(radius, sliceCount, stackCount, meshData);
 
 	mMutex.lock();
-	model = new Model(meshData, cmdList);
+	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -83,12 +103,18 @@ std::size_t ModelManager::CreateSphere(const float radius, const std::uint32_t s
 	return id;
 }
 
-std::size_t ModelManager::CreateGeosphere(const float radius, const std::uint32_t numSubdivisions, Model* &model, ID3D12GraphicsCommandList& cmdList) noexcept {
+std::size_t ModelManager::CreateGeosphere(
+	const float radius, 
+	const std::uint32_t numSubdivisions, 
+	Model* &model, 
+	ID3D12GraphicsCommandList& cmdList,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept {
 	GeometryGenerator::MeshData meshData;
 	GeometryGenerator::CreateGeosphere(radius, numSubdivisions, meshData);
 
 	mMutex.lock();
-	model = new Model(meshData, cmdList);
+	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -111,12 +137,14 @@ std::size_t ModelManager::CreateCylinder(
 	const std::uint32_t sliceCount,
 	const std::uint32_t stackCount,
 	Model* &model
-	, ID3D12GraphicsCommandList& cmdList) noexcept {
+	, ID3D12GraphicsCommandList& cmdList,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept {
 	GeometryGenerator::MeshData meshData;
 	GeometryGenerator::CreateCylinder(bottomRadius, topRadius, height, sliceCount, stackCount, meshData);
 
 	mMutex.lock();
-	model = new Model(meshData, cmdList);
+	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -132,12 +160,19 @@ std::size_t ModelManager::CreateCylinder(
 	return id;
 }
 
-std::size_t ModelManager::CreateGrid(const float width, const float depth, const std::uint32_t m, const std::uint32_t n, Model* &model, ID3D12GraphicsCommandList& cmdList) noexcept {
+std::size_t ModelManager::CreateGrid(
+	const float width, 
+	const float depth, 
+	const std::uint32_t m, 
+	const std::uint32_t n, Model* &model, 
+	ID3D12GraphicsCommandList& cmdList,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept {
 	GeometryGenerator::MeshData meshData;
 	GeometryGenerator::CreateGrid(width, depth, m, n, meshData);
 
 	mMutex.lock();
-	model = new Model(meshData, cmdList);
+	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -153,12 +188,21 @@ std::size_t ModelManager::CreateGrid(const float width, const float depth, const
 	return id;
 }
 
-std::size_t ModelManager::CreateQuad(const float x, const float y, const float w, const float h, const float depth, Model* &model, ID3D12GraphicsCommandList& cmdList) noexcept {
+std::size_t ModelManager::CreateQuad(
+	const float x, 
+	const float y, 
+	const float w, 
+	const float h, 
+	const float depth, 
+	Model* &model, 
+	ID3D12GraphicsCommandList& cmdList,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept {
 	GeometryGenerator::MeshData meshData;
 	GeometryGenerator::CreateQuad(x, y, w, h, depth, meshData);
 
 	mMutex.lock();
-	model = new Model(meshData, cmdList);
+	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };

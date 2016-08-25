@@ -707,3 +707,15 @@
 /D3D12/x64/Release/PSOCreator/TextureMapping/PS.cso
 /D3D12/x64/Release/PSOCreator/TextureMapping/RS.cso
 /D3D12/x64/Release/PSOCreator/TextureMapping/VS.cso
+/D3D12/Scene/x64/Debug/scene.nativecodeanalysis.xml
+/D3D12/Scene/x64/Debug/texturecmdlistrecorder.nativecodeanalysis.xml
+/D3D12/TextureScene/x64/Debug/NativeCodeAnalysis.read.1.tlog
+/D3D12/TextureScene/x64/Debug/TextureScene.Build.CppClean.log
+/D3D12/TextureScene/x64/Debug/texturescene.nativecodeanalysis.xml
+/D3D12/TextureScene/x64/Debug/vc.nativecodeanalysis.all.xml
+/D3D12/ModelManager/x64/Debug/ModelManager.Build.CppClean.log
+/D3D12/ModelManager/x64/Debug/NativeCodeAnalysis.read.1.tlog
+/D3D12/ModelManager/x64/Debug/mesh.nativecodeanalysis.xml
+/D3D12/ModelManager/x64/Debug/model.nativecodeanalysis.xml
+/D3D12/ModelManager/x64/Debug/modelmanager.nativecodeanalysis.xml
+/D3D12/ModelManager/x64/Debug/vc.nativecodeanalysis.all.xml

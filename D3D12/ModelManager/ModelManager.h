@@ -17,19 +17,44 @@ public:
 	const ModelManager& operator=(const ModelManager&) = delete;
 
 	// Returns id to get model after creation
-	std::size_t LoadModel(const char* filename, Model* &model, ID3D12GraphicsCommandList& cmdList) noexcept;
+	std::size_t LoadModel(
+		const char* filename, 
+		Model* &model, ID3D12GraphicsCommandList& cmdList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
 	// Creates a box centered at the origin with the given dimensions, where each
 	// face has m rows and n columns of vertices.
-	std::size_t CreateBox(const float width, const float height, const float depth, const std::uint32_t numSubdivisions, Model* &model, ID3D12GraphicsCommandList& cmdList) noexcept;
+	std::size_t CreateBox(
+		const float width, 
+		const float height, 
+		const float depth, 
+		const std::uint32_t numSubdivisions, 
+		Model* &model, 
+		ID3D12GraphicsCommandList& cmdList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
 	// Creates a sphere centered at the origin with the given radius.  The
 	// slices and stacks parameters control the degree of tessellation.
-	std::size_t CreateSphere(const float radius, const std::uint32_t sliceCount, const std::uint32_t stackCount, Model* &model, ID3D12GraphicsCommandList& cmdList) noexcept;
+	std::size_t CreateSphere(
+		const float radius, 
+		const std::uint32_t sliceCount, 
+		const std::uint32_t stackCount, 
+		Model* &model, 
+		ID3D12GraphicsCommandList& cmdList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
 	// Creates a geosphere centered at the origin with the given radius.  The
 	// depth controls the level of tessellation.
-	std::size_t CreateGeosphere(const float radius, const std::uint32_t numSubdivisions, Model* &model, ID3D12GraphicsCommandList& cmdList) noexcept;
+	std::size_t CreateGeosphere(
+		const float radius, 
+		const std::uint32_t numSubdivisions, 
+		Model* &model, 
+		ID3D12GraphicsCommandList& cmdList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
 	// Creates a cylinder parallel to the y-axis, and centered about the origin.  
 	// The bottom and top radius can vary to form various cone shapes rather than true
@@ -41,14 +66,33 @@ public:
 		const std::uint32_t sliceCount,
 		const std::uint32_t stackCount,
 		Model* &model,
-		ID3D12GraphicsCommandList& cmdList) noexcept;
+		ID3D12GraphicsCommandList& cmdList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
 	// Creates an mxn grid in the xz-plane with m rows and n columns, centered
 	// at the origin with the specified width and depth.
-	std::size_t CreateGrid(const float width, const float depth, const std::uint32_t m, const std::uint32_t n, Model* &model, ID3D12GraphicsCommandList& cmdList) noexcept;
+	std::size_t CreateGrid(
+		const float width, 
+		const float depth, 
+		const std::uint32_t m, 
+		const std::uint32_t n, 
+		Model* &model, 
+		ID3D12GraphicsCommandList& cmdList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
 	// Creates a quad aligned with the screen.  This is useful for post-processing and screen effects.
-	std::size_t CreateQuad(const float x, const float y, const float w, const float h, const float depth, Model* &model, ID3D12GraphicsCommandList& cmdList) noexcept;
+	std::size_t CreateQuad(
+		const float x, 
+		const float y, 
+		const float w, 
+		const float h,
+		const float depth, 
+		Model* &model, 
+		ID3D12GraphicsCommandList& cmdList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
 	// Asserts if id does not exist
 	Model& GetModel(const std::size_t id) noexcept;

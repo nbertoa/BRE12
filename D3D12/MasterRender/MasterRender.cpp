@@ -139,11 +139,10 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 void MasterRender::InitCmdListRecorders(Scene* scene) noexcept {
 	ASSERT(scene != nullptr);
 
-	scene->GenerateGeomPassRecorders(mCmdListProcessor->CmdListQueue(), mGeomPassCmdListRecorders);
-	FlushCommandQueue();
-
+	CHECK_HR(mCmdListFrameBegin->Reset(mCmdAllocFrameBegin[0U], nullptr));
+	CmdListHelper cmdListHelper(*mCmdQueue, *mFence, mCurrentFence, *mCmdListFrameBegin);
+	scene->GenerateGeomPassRecorders(mCmdListProcessor->CmdListQueue(), cmdListHelper, mGeomPassCmdListRecorders);
 	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeomPassBuffers, GEOMBUFFERS_COUNT, mLightPassCmdListRecorders);
-	FlushCommandQueue();
 
 	const std::uint64_t count{ _countof(mFenceByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {

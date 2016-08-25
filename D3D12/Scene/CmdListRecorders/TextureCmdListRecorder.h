@@ -16,7 +16,7 @@ public:
 		const std::uint32_t numGeomData,
 		const Material* materials,
 		const std::uint32_t numMaterials,
-		const Texture* textures,
+		ID3D12Resource** textures,
 		const std::uint32_t numTextures
 	) noexcept;
 
@@ -30,7 +30,7 @@ public:
 	bool ValidateData() const noexcept;
 
 private:
-	void BuildBuffers(const Material* materials, const Texture* textures, const std::uint32_t dataCount) noexcept;
+	void BuildBuffers(const Material* materials, ID3D12Resource** textures, const std::uint32_t dataCount) noexcept;
 
 	std::vector<GeometryData> mGeometryDataVec;
 
