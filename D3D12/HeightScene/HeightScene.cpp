@@ -116,15 +116,7 @@ void HeightScene::GenerateGeomPassRecorders(
 				normals.push_back(normal[i % _countof(normal)]);
 			}
 
-			task.Init(
-				&currGeomData,
-				1U,
-				materials.data(),
-				(std::uint32_t)materials.size(),
-				textures.data(),
-				(std::uint32_t)textures.size(),
-				normals.data(),
-				(std::uint32_t)normals.size());
+			task.Init(&currGeomData, 1U, materials.data(), textures.data(), normals.data(), (std::uint32_t)normals.size());
 		}
 	}
 	);

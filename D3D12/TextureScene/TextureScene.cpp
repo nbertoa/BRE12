@@ -91,7 +91,7 @@ void TextureScene::GenerateGeomPassRecorders(
 				textures.push_back(tex[i % _countof(tex)]);
 			}
 
-			task.Init(&currGeomData, 1U, materials.data(), (std::uint32_t)materials.size(), textures.data(), (std::uint32_t)textures.size());
+			task.Init(&currGeomData, 1U, materials.data(), textures.data(), (std::uint32_t)textures.size());
 		}
 	}
 	);

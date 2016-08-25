@@ -18,21 +18,17 @@ void NormalCmdListRecorder::Init(
 	const GeometryData* geometryDataVec,
 	const std::uint32_t numGeomData,
 	const Material* materials,
-	const std::uint32_t numMaterials,
 	ID3D12Resource** textures,
-	const std::uint32_t numTextures,
 	ID3D12Resource** normals,
-	const std::uint32_t numNormals) noexcept
+	const std::uint32_t numResources) noexcept
 {
 	ASSERT(ValidateData() == false);
 	ASSERT(geometryDataVec != nullptr);
 	ASSERT(numGeomData != 0U);
-	ASSERT(materials != nullptr);
-	ASSERT(numMaterials > 0UL);
+	ASSERT(materials != nullptr);	
 	ASSERT(textures != nullptr);
-	ASSERT(numMaterials == numTextures);
 	ASSERT(normals != nullptr);
-	ASSERT(numTextures == numNormals);
+	ASSERT(numResources > 0UL);
 
 	// Check that the total number of matrices (geometry to be drawn) will be equal to available materials
 #ifdef _DEBUG
@@ -42,7 +38,7 @@ void NormalCmdListRecorder::Init(
 		totalNumMatrices += numMatrices;
 		ASSERT(numMatrices != 0UL);
 	}
-	ASSERT(totalNumMatrices == numMaterials);
+	ASSERT(totalNumMatrices == numResources);
 #endif
 	mGeometryDataVec.reserve(numGeomData);
 	for (std::uint32_t i = 0U; i < numGeomData; ++i) {
@@ -54,7 +50,7 @@ void NormalCmdListRecorder::Init(
 	mPSO = psoData.mPSO;
 	mRootSign = psoData.mRootSign;
 
-	BuildBuffers(materials, textures, normals, numMaterials);
+	BuildBuffers(materials, textures, normals, numResources);
 
 	ASSERT(ValidateData());
 }
@@ -250,16 +246,16 @@ void NormalCmdListRecorder::BuildBuffers(
 		ResourceManager::Get().CreateConstantBufferView(cBufferDesc, currMaterialCBufferDescHandle);
 
 		// Create texture descriptor
-		ID3D12Resource& res{ *textures[i] };
-		srvDesc.Format = res.GetDesc().Format;
-		srvDesc.Texture2D.MipLevels = res.GetDesc().MipLevels;
-		ResourceManager::Get().CreateShaderResourceView(res, srvDesc, currTextureBufferDescHandle);
+		ID3D12Resource* res{ textures[i] };
+		srvDesc.Format = res->GetDesc().Format;
+		srvDesc.Texture2D.MipLevels = res->GetDesc().MipLevels;
+		ResourceManager::Get().CreateShaderResourceView(*res, srvDesc, currTextureBufferDescHandle);
 
 		// Create normal texture descriptor
-		ID3D12Resource& normalRes{ *normals[i] };
-		srvDesc.Format = normalRes.GetDesc().Format;
-		srvDesc.Texture2D.MipLevels = normalRes.GetDesc().MipLevels;
-		ResourceManager::Get().CreateShaderResourceView(normalRes, srvDesc, currNormalsBufferDescHandle);
+		res = normals[i];
+		srvDesc.Format = res->GetDesc().Format;
+		srvDesc.Texture2D.MipLevels = res->GetDesc().MipLevels;
+		ResourceManager::Get().CreateShaderResourceView(*res, srvDesc, currNormalsBufferDescHandle);
 
 		mMaterialsCBuffer->CopyData((std::uint32_t)i, &materials[i], sizeof(Material));
 

@@ -14,11 +14,9 @@ public:
 		const GeometryData* geometryDataVec,
 		const std::uint32_t numGeomData,
 		const Material* materials,
-		const std::uint32_t numMaterials,
 		ID3D12Resource** textures,
-		const std::uint32_t numTextures,
 		ID3D12Resource** normals,
-		const std::uint32_t numNormals
+		const std::uint32_t numResources
 	) noexcept;
 
 	void RecordCommandLists(
