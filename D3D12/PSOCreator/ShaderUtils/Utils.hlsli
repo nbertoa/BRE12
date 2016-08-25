@@ -25,4 +25,14 @@ float3 Decode(float2 encN) {
 	return n;
 }
 
+// Map a normal from [-1.0f, 1.0f] to [0.0f, 1.0f]
+float3 MapNormal(const float3 n) {
+	return n * 0.5f + float3(0.5f, 0.5f, 0.5f);
+}
+
+// UnMap a normal from [0.0f, 1.0f] to [-1.0f, 1.0f]
+float3 UnmapNormal(const float3 n) {
+	return n * 2.0f - float3(1.0f, 1.0f, 1.0f);
+}
+
 #endif

@@ -143,6 +143,16 @@ namespace PSOCreator {
 		PSOCreator::Execute(psoParams, mPSOData[Technique::TEXTURE_MAPPING]);
 
 		psoParams = PSOParams{};
+		psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+		psoParams.mPSFilename = "PSOCreator/NormalMapping/PS.cso";
+		psoParams.mRootSignFilename = "PSOCreator/NormalMapping/RS.cso";
+		psoParams.mVSFilename = "PSOCreator/NormalMapping/VS.cso";
+		psoParams.mNumRenderTargets = MasterRender::NumRenderTargets();
+		memcpy(psoParams.mRtFormats, MasterRender::GeomPassBuffersFormats(), sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
+		ASSERT(mPSOData[Technique::NORMAL_MAPPING].mPSO == nullptr && mPSOData[Technique::NORMAL_MAPPING].mRootSign == nullptr);
+		PSOCreator::Execute(psoParams, mPSOData[Technique::NORMAL_MAPPING]);
+
+		psoParams = PSOParams{};
 		psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
 		psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
 		psoParams.mGSFilename = "PSOCreator/PunctualLight/GS.cso";

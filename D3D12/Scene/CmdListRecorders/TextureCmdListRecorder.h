@@ -5,7 +5,6 @@
 #include <Scene/CmdListRecorder.h>
 
 struct Material;
-struct Texture;
 
 class TextureCmdListRecorder : public CmdListRecorder {
 public:

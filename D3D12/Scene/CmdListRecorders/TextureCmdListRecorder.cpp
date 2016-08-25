@@ -155,6 +155,7 @@ bool TextureCmdListRecorder::ValidateData() const noexcept {
 
 void TextureCmdListRecorder::BuildBuffers(const Material* materials, ID3D12Resource** textures, const std::uint32_t dataCount) noexcept {
 	ASSERT(materials != nullptr);
+	ASSERT(textures != nullptr);
 	ASSERT(dataCount != 0UL);
 
 	ASSERT(mCbvSrvUavDescHeap == nullptr);

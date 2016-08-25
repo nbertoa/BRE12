@@ -121,6 +121,7 @@
   <ItemGroup>
     <ClInclude Include="CmdListRecorder.h" />
     <ClInclude Include="cmdListRecorders\BasicCmdListRecorder.h" />
+    <ClInclude Include="CmdListRecorders\NormalCmdListRecorder.h" />
     <ClInclude Include="cmdListRecorders\PunctualLightCmdListRecorder.h" />
     <ClInclude Include="CmdListRecorders\TextureCmdListRecorder.h" />
     <ClInclude Include="Scene.h" />
@@ -128,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="CmdListRecorder.cpp" />
     <ClCompile Include="cmdListRecorders\BasicCmdListRecorder.cpp" />
+    <ClCompile Include="CmdListRecorders\NormalCmdListRecorder.cpp" />
     <ClCompile Include="cmdListRecorders\PunctualLightCmdListRecorder.cpp" />
     <ClCompile Include="CmdListRecorders\TextureCmdListRecorder.cpp" />
     <ClCompile Include="Scene.cpp" />

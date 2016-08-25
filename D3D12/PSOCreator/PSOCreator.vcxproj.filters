@@ -19,6 +19,9 @@
     <Filter Include="TextureMapping">
       <UniqueIdentifier>{18f90d08-51aa-4db3-82c3-c3f9997a86bf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="NormalMapping">
+      <UniqueIdentifier>{3712b720-bef4-4f1e-9d80-c1db74f89740}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Basic\PS.hlsl">
@@ -50,6 +53,15 @@
     </FxCompile>
     <FxCompile Include="TextureMapping\VS.hlsl">
       <Filter>TextureMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="NormalMapping\VS.hlsl">
+      <Filter>NormalMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="NormalMapping\PS.hlsl">
+      <Filter>NormalMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="NormalMapping\RS.hlsl">
+      <Filter>NormalMapping</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

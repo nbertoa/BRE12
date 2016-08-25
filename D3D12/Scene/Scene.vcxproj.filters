@@ -12,6 +12,9 @@
     <ClInclude Include="CmdListRecorders\TextureCmdListRecorder.h">
       <Filter>CmdListRecorders</Filter>
     </ClInclude>
+    <ClInclude Include="CmdListRecorders\NormalCmdListRecorder.h">
+      <Filter>CmdListRecorders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="CmdListRecorders">
@@ -30,5 +33,8 @@
       <Filter>CmdListRecorders</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="CmdListRecorders\NormalCmdListRecorder.cpp">
+      <Filter>CmdListRecorders</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -35,7 +35,7 @@ Output main(const in Input input) {
 	const float3 normal = normalize(input.mNormalV);
 	output.mNormalV = Encode(normal);
 	const float3 diffuseColor = DiffuseTexture.Sample(TexSampler, input.mTexCoordO).rgb;
-	output.mBaseColor_MetalMask = float4(gMaterial.mBaseColor_MetalMask.xyz * diffuseColor, gMaterial.mBaseColor_MetalMask.w);
+	output.mBaseColor_MetalMask = float4(diffuseColor, gMaterial.mBaseColor_MetalMask.w);//float4(gMaterial.mBaseColor_MetalMask.xyz * diffuseColor, gMaterial.mBaseColor_MetalMask.w);
 	output.mReflectance_Smoothness = gMaterial.mReflectance_Smoothness;
 	output.mDepthV = input.mPosV.z / FAR_PLANE_DISTANCE;
 
