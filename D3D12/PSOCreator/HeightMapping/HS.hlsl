@@ -1,10 +1,10 @@
 #define NUM_PATCH_POINTS 3
 
 struct Input {
-	float4 mPosO : POSITION;
+	float3 mPosO : POSITION;
 	float3 mNormalO : NORMAL;
-	float2 mTexCoordO : TEXCOORD0;
 	float3 mTangentO : TANGENT;
+	float2 mTexCoordO : TEXCOORD0;	
 };
 
 struct HullShaderConstantOutput {
@@ -13,10 +13,10 @@ struct HullShaderConstantOutput {
 };
 
 struct Output {
-	float4 mPosO : POSITION;
-	float3 mNormalO : NORMAL;
-	float2 mTexCoordO : TEXCOORD0;
+	float3 mPosO : POSITION;
+	float3 mNormalO : NORMAL;	
 	float3 mTangentO : TANGENT;
+	float2 mTexCoordO : TEXCOORD0;
 };
 
 HullShaderConstantOutput constant_hull_shader(const InputPatch<Input, NUM_PATCH_POINTS> patch, const uint patchID : SV_PrimitiveID) {

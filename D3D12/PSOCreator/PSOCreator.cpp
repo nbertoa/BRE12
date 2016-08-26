@@ -152,7 +152,7 @@ namespace PSOCreator {
 		ASSERT(mPSOData[Technique::NORMAL_MAPPING].mPSO == nullptr && mPSOData[Technique::NORMAL_MAPPING].mRootSign == nullptr);
 		PSOCreator::Execute(psoParams, mPSOData[Technique::NORMAL_MAPPING]);
 
-		/*psoParams = PSOParams{};
+		psoParams = PSOParams{};
 		psoParams.mDSFilename = "PSOCreator/HeightMapping/DS.cso";
 		psoParams.mHSFilename = "PSOCreator/HeightMapping/HS.cso";
 		psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
@@ -163,7 +163,7 @@ namespace PSOCreator {
 		psoParams.mNumRenderTargets = MasterRender::NumRenderTargets();
 		memcpy(psoParams.mRtFormats, MasterRender::GeomPassBuffersFormats(), sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
 		ASSERT(mPSOData[Technique::HEIGHT_MAPPING].mPSO == nullptr && mPSOData[Technique::HEIGHT_MAPPING].mRootSign == nullptr);
-		PSOCreator::Execute(psoParams, mPSOData[Technique::HEIGHT_MAPPING]);*/
+		PSOCreator::Execute(psoParams, mPSOData[Technique::HEIGHT_MAPPING]);
 
 		psoParams = PSOParams{};
 		psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();

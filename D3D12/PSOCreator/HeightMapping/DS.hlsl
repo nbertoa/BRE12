@@ -6,10 +6,10 @@ struct HullShaderConstantOutput {
 };
 
 struct Input {
-	float4 mPosO : POSITION;
+	float3 mPosO : POSITION;
 	float3 mNormalO : NORMAL;
-	float2 mTexCoordO : TEXCOORD0;
 	float3 mTangentO : TANGENT;
+	float2 mTexCoordO : TEXCOORD0;	
 };
 
 struct ObjConstants {
@@ -26,10 +26,10 @@ ConstantBuffer<FrameConstants> gFrameConstants : register(b1);
 struct Output {
 	float4 mPosH : SV_Position;
 	float3 mPosV : POS_VIEW;
-	float3 mNormalV : NORMAL;
-	float2 mTexCoordO : TEXCOORD0;
+	float3 mNormalV : NORMAL;	
 	float3 mTangentV : TANGENT;
 	float3 mBinormalV : BINORMAL;
+	float2 mTexCoordO : TEXCOORD0;
 };
 
 SamplerState TexSampler : register (s0);
@@ -42,17 +42,18 @@ Output main(const HullShaderConstantOutput IN, const float3 uvw : SV_DomainLocat
 	Output output = (Output)0;
 
 	output.mTexCoordO = uvw.x * patch[0].mTexCoordO + uvw.y * patch[1].mTexCoordO + uvw.z * patch[2].mTexCoordO;
+	output.mTexCoordO *= 2.0f;
 
 	const float3 normalO = normalize(uvw.x * patch[0].mNormalO + uvw.y * patch[1].mNormalO + uvw.z * patch[2].mNormalO);
 	output.mNormalV = normalize(mul(float4(normalO, 0.0f), wv).xyz);
 
 	// Compute SV_Position by displacing object position in y coordinate
-	float4 posV = mul(uvw.x * patch[0].mPosO + uvw.y * patch[1].mPosO + uvw.z * patch[2].mPosO, wv);
+	float4 posV = mul(float4(uvw.x * patch[0].mPosO + uvw.y * patch[1].mPosO + uvw.z * patch[2].mPosO, 1.0f), wv);
 	// Choose the mipmap level based on distance to the eye; specifically, choose the next miplevel every MipInterval units, and clamp the miplevel in [0,6].
 	const float MipInterval = 20.0f;
 	const float mipLevel = clamp((length(posV) - MipInterval) / MipInterval, 0.0f, 6.0f);
-	const float DisplacementScale = 1.0f;
-	const float displacement = (HeightTexture.SampleLevel(TexSampler, output.mTexCoordO, mipLevel).x - 1.0f) * DisplacementScale;
+	const float DisplacementScale = 0.2f;
+	const float displacement = (2.0f * HeightTexture.SampleLevel(TexSampler, output.mTexCoordO, 0).x - 1.0f) * DisplacementScale;
 	// Offset vertex along normal
 	posV += float4(output.mNormalV * displacement, 0.0f);
 	output.mPosH = mul(posV, gFrameConstants.mP);

@@ -5,7 +5,7 @@
 struct Input {
 	float4 mPosH : SV_POSITION;
 	float3 mPosV : POS_VIEW;
-	float3 mNormalV : NORMAL_VIEW;
+	float3 mNormalV : NORMAL;
 	float3 mTangentV : TANGENT;
 	float3 mBinormalV : BINORMAL;
 	float2 mTexCoordO : TEXCOORD;

@@ -9,7 +9,7 @@ struct Output {
 	float3 mPosO : POSITION;
 	float3 mNormalO : NORMAL;
 	float3 mTangentO : TANGENT;
-	float2 mTexCoordO : TEXCOORD;
+	float2 mTexCoordO : TEXCOORD0;
 };
 
 Output main(in const Input input) {

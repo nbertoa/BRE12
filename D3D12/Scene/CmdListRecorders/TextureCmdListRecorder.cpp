@@ -18,17 +18,15 @@ void TextureCmdListRecorder::Init(
 	const GeometryData* geometryDataVec,
 	const std::uint32_t numGeomData,
 	const Material* materials,
-	const std::uint32_t numMaterials,
 	ID3D12Resource** textures,
-	const std::uint32_t numTextures) noexcept
+	const std::uint32_t numResources) noexcept
 {
 	ASSERT(ValidateData() == false);
 	ASSERT(geometryDataVec != nullptr);
 	ASSERT(numGeomData != 0U);
 	ASSERT(materials != nullptr);
-	ASSERT(numMaterials > 0UL);
+	ASSERT(numResources > 0UL);
 	ASSERT(textures != nullptr);
-	ASSERT(numMaterials == numTextures);
 
 	// Check that the total number of matrices (geometry to be drawn) will be equal to available materials
 #ifdef _DEBUG
@@ -38,7 +36,7 @@ void TextureCmdListRecorder::Init(
 		totalNumMatrices += numMatrices;
 		ASSERT(numMatrices != 0UL);
 	}
-	ASSERT(totalNumMatrices == numMaterials);
+	ASSERT(totalNumMatrices == numResources);
 #endif
 	mGeometryDataVec.reserve(numGeomData);
 	for (std::uint32_t i = 0U; i < numGeomData; ++i) {
@@ -50,7 +48,7 @@ void TextureCmdListRecorder::Init(
 	mPSO = psoData.mPSO;
 	mRootSign = psoData.mRootSign;
 
-	BuildBuffers(materials, textures, numMaterials);
+	BuildBuffers(materials, textures, numResources);
 
 	ASSERT(ValidateData());
 }
