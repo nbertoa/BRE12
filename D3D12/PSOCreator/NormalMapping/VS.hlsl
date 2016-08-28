@@ -1,3 +1,5 @@
+#include "../ShaderUtils/CBuffers.hlsli"
+
 struct Input {
 	float3 mPosO : POSITION;
 	float3 mNormalO : NORMAL;
@@ -5,10 +7,7 @@ struct Input {
 	float2 mTexCoordO : TEXCOORD;
 };
 
-struct ObjConstants {
-	float4x4 mW;
-};
-ConstantBuffer<ObjConstants> gObjConstants : register(b0);
+ConstantBuffer<ObjectCBuffer> gObjConstants : register(b0);
 
 struct FrameConstants {
 	float4x4 mV;

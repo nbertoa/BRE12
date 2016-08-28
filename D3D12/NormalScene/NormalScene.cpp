@@ -23,15 +23,15 @@ void NormalScene::GenerateGeomPassRecorders(
 
 	ID3D12Resource* tex[] = { nullptr, nullptr, nullptr, nullptr, nullptr };
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex[_countof(tex)];
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks_diffuse.dds", tex[0], uploadBufferTex[0], cmdListHelper.CmdList());
+	ResourceManager::Get().LoadTextureFromFile("textures/bricks.dds", tex[0], uploadBufferTex[0], cmdListHelper.CmdList());
 	ASSERT(tex[0] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks2_diffuse.dds", tex[1], uploadBufferTex[1], cmdListHelper.CmdList());
+	ResourceManager::Get().LoadTextureFromFile("textures/bricks2.dds", tex[1], uploadBufferTex[1], cmdListHelper.CmdList());
 	ASSERT(tex[1] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/rock_diffuse.dds", tex[2], uploadBufferTex[2], cmdListHelper.CmdList());
+	ResourceManager::Get().LoadTextureFromFile("textures/rock.dds", tex[2], uploadBufferTex[2], cmdListHelper.CmdList());
 	ASSERT(tex[2] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/floor_diffuse.dds", tex[3], uploadBufferTex[3], cmdListHelper.CmdList());
+	ResourceManager::Get().LoadTextureFromFile("textures/floor.dds", tex[3], uploadBufferTex[3], cmdListHelper.CmdList());
 	ASSERT(tex[3] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/concrete_diffuse.dds", tex[4], uploadBufferTex[4], cmdListHelper.CmdList());
+	ResourceManager::Get().LoadTextureFromFile("textures/concrete.dds", tex[4], uploadBufferTex[4], cmdListHelper.CmdList());
 	ASSERT(tex[4] != nullptr);
 
 	ID3D12Resource* normal[] = { nullptr, nullptr, nullptr, nullptr, nullptr };

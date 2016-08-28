@@ -6,7 +6,6 @@
 "CBV(b1, visibility = SHADER_VISIBILITY_DOMAIN), " \
 "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_DOMAIN), " \
 "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_PIXEL), " \
-"CBV(b1, visibility = SHADER_VISIBILITY_PIXEL)," \
 "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \
 "DescriptorTable(SRV(t1), visibility = SHADER_VISIBILITY_PIXEL), " \
 "StaticSampler(s0, filter=FILTER_MIN_MAG_MIP_LINEAR)"

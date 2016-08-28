@@ -14,11 +14,6 @@ struct Input {
 
 ConstantBuffer<Material> gMaterial : register(b0);
 
-struct FrameConstants {
-	float4x4 mV;
-};
-ConstantBuffer<FrameConstants> gFrameConstants : register(b1);
-
 SamplerState TexSampler : register (s0);
 Texture2D DiffuseTexture : register (t0);
 Texture2D NormalTexture : register (t1);

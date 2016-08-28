@@ -347,6 +347,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ShaderUtils\CBuffers.hlsli" />
     <None Include="ShaderUtils\Lighting.hlsli" />
     <None Include="ShaderUtils\Material.hlsli" />
     <None Include="ShaderUtils\Utils.hlsli" />

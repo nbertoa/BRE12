@@ -1,3 +1,4 @@
+#include "../ShaderUtils/CBuffers.hlsli"
 #include "../ShaderUtils/Utils.hlsli"
 
 #define FAR_PLANE_DISTANCE 5000.0f
@@ -14,11 +15,6 @@ struct Material {
 	float4 mReflectance_Smoothness;
 };
 ConstantBuffer<Material> gMaterial : register(b0);
-
-struct FrameConstants {
-	float4x4 mV;
-};
-ConstantBuffer<FrameConstants> gFrameConstants : register(b1);
 
 SamplerState TexSampler : register (s0);
 Texture2D DiffuseTexture : register (t0);

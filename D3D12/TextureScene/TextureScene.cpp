@@ -23,10 +23,10 @@ void TextureScene::GenerateGeomPassRecorders(
 	
 	ID3D12Resource* tex[2] = { nullptr, nullptr };
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex0;
-	ResourceManager::Get().LoadTextureFromFile("textures/rock1_diffuse.dds", tex[0], uploadBufferTex0, cmdListHelper.CmdList());
+	ResourceManager::Get().LoadTextureFromFile("textures/rock.dds", tex[0], uploadBufferTex0, cmdListHelper.CmdList());
 	ASSERT(tex[0] != nullptr);
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex1;
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks2_diffuse.dds", tex[1], uploadBufferTex1, cmdListHelper.CmdList());
+	ResourceManager::Get().LoadTextureFromFile("textures/bricks2.dds", tex[1], uploadBufferTex1, cmdListHelper.CmdList());
 	ASSERT(tex[1] != nullptr);
 
 	Model* model;

@@ -92,5 +92,8 @@
     <None Include="ShaderUtils\Material.hlsli">
       <Filter>ShaderUtils</Filter>
     </None>
+    <None Include="ShaderUtils\CBuffers.hlsli">
+      <Filter>ShaderUtils</Filter>
+    </None>
   </ItemGroup>
 </Project>

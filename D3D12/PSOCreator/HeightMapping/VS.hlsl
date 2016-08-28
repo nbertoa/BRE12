@@ -1,3 +1,5 @@
+#include "../ShaderUtils/CBuffers.hlsli"
+
 #define MIN_TESS_DISTANCE 25.0f
 #define MAX_TESS_DISTANCE 1.0f
 #define MIN_TESS_FACTOR 1.0f
@@ -10,10 +12,7 @@ struct Input {
 	float2 mTexCoordO : TEXCOORD;
 };
 
-struct ObjConstants {
-	float4x4 mW;
-};
-ConstantBuffer<ObjConstants> gObjConstants : register(b0);
+ConstantBuffer<ObjectCBuffer> gObjConstants : register(b0);
 
 struct FrameConstants {
 	float4x4 mV;

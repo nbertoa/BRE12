@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 
+#include <DXUtils\CBuffers.h>
 #include <DXUtils/Material.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
@@ -100,7 +101,6 @@ void HeightCmdListRecorder::RecordCommandLists(
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(frameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootConstantBufferView(5U, frameCBufferGpuVAddress);
 
 	// Draw objects
 	const std::size_t geomCount{ mGeometryDataVec.size() };
@@ -119,10 +119,10 @@ void HeightCmdListRecorder::RecordCommandLists(
 			mCmdList->SetGraphicsRootDescriptorTable(4U, materialsCBufferGpuDescHandle);
 			materialsCBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(6U, texturesBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(5U, texturesBufferGpuDescHandle);
 			texturesBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(7U, normalsBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(6U, normalsBufferGpuDescHandle);
 			normalsBufferGpuDescHandle.ptr += descHandleIncSize;
 			
 			mCmdList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
@@ -197,19 +197,19 @@ void HeightCmdListRecorder::BuildBuffers(
 	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
 
 	// Create object cbuffer and fill it
-	const std::size_t objCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4)) };
+	const std::size_t objCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ObjectCBuffer)) };
 	ResourceManager::Get().CreateUploadBuffer(objCBufferElemSize, dataCount, mObjectCBuffer);
 	mObjectCBufferGpuDescHandleBegin = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart();
 	std::uint32_t k = 0U;
 	const std::size_t numGeomData{ mGeometryDataVec.size() };
+	ObjectCBuffer objCBuffer;
 	for (std::size_t i = 0UL; i < numGeomData; ++i) {
 		GeometryData& geomData{ mGeometryDataVec[i] };
 		const std::uint32_t worldMatsCount{ (std::uint32_t)geomData.mWorldMatrices.size() };
 		for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
-			DirectX::XMFLOAT4X4 w;
 			const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&geomData.mWorldMatrices[j]));
-			DirectX::XMStoreFloat4x4(&w, wMatrix);
-			mObjectCBuffer->CopyData(k + j, &w, sizeof(w));
+			DirectX::XMStoreFloat4x4(&objCBuffer.mWorld, wMatrix);
+			mObjectCBuffer->CopyData(k + j, &objCBuffer, sizeof(objCBuffer));
 		}
 
 		k += worldMatsCount;
