@@ -7,7 +7,7 @@ namespace {
 }
 
 void MaterialFactory::InitMaterials() noexcept {
-	const float smoothness{ 0.95f };
+	const float smoothness{ 0.8f };
 
 	Material* m = &sMaterials[GOLD];
 	m->mBaseColor_MetalMask[0U] = 1.0f;
@@ -45,6 +45,9 @@ void MaterialFactory::InitMaterials() noexcept {
 	m->mReflectance_Smoothness[3U] = smoothness;
 
 	m = &sMaterials[PLASTIC_GLASS_LOW];
+	m->mBaseColor_MetalMask[0U] = 0.7f;
+	m->mBaseColor_MetalMask[1U] = 0.7f;
+	m->mBaseColor_MetalMask[2U] = 0.3f;
 	m->mBaseColor_MetalMask[3U] = 0.0f;
 	m->mReflectance_Smoothness[0U] = 0.03f;
 	m->mReflectance_Smoothness[1U] = 0.03f;
@@ -52,6 +55,9 @@ void MaterialFactory::InitMaterials() noexcept {
 	m->mReflectance_Smoothness[3U] = smoothness;
 
 	m = &sMaterials[PLASTIC_HIGH];
+	m->mBaseColor_MetalMask[0U] = 0.7f;
+	m->mBaseColor_MetalMask[1U] = 0.3f;
+	m->mBaseColor_MetalMask[2U] = 0.7f;
 	m->mBaseColor_MetalMask[3U] = 0.0f;
 	m->mReflectance_Smoothness[0U] = 0.05f;
 	m->mReflectance_Smoothness[1U] = 0.05f;
@@ -59,6 +65,9 @@ void MaterialFactory::InitMaterials() noexcept {
 	m->mReflectance_Smoothness[3U] = smoothness;
 
 	m = &sMaterials[GLASS_HIGH];
+	m->mBaseColor_MetalMask[0U] = 0.3f;
+	m->mBaseColor_MetalMask[1U] = 0.7f;
+	m->mBaseColor_MetalMask[2U] = 0.7f;
 	m->mBaseColor_MetalMask[3U] = 0.0f;
 	m->mReflectance_Smoothness[0U] = 0.08f;
 	m->mReflectance_Smoothness[1U] = 0.08f;

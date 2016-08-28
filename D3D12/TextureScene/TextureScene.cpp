@@ -39,7 +39,7 @@ void TextureScene::GenerateGeomPassRecorders(
 	cmdListHelper.ExecuteCmdList();
 
 	ASSERT(model->HasMeshes());	
-	Mesh& mesh{ *model->Meshes()[0U] };
+	const Mesh& mesh{ model->Meshes()[0U] };
 
 	std::vector<CmdListRecorder::GeometryData> geomDataVec;
 	geomDataVec.resize(Settings::sCpuProcessors);

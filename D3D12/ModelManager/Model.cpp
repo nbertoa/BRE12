@@ -9,7 +9,6 @@
 
 #include <GlobalData/Settings.h>
 #include <ResourceManager/ResourceManager.h>
-#include <ModelManager/Mesh.h>
 #include <Utils/DebugUtils.h>
 
 Model::Model(
@@ -36,7 +35,7 @@ Model::Model(
 	for (std::uint32_t i = 0U; i < scene->mNumMeshes; ++i) {
 		aiMesh* mesh{ scene->mMeshes[i] };
 		ASSERT(mesh != nullptr);
-		mMeshes.push_back(new Mesh(*mesh, cmdList, uploadVertexBuffer, uploadIndexBuffer));
+		mMeshes.push_back(Mesh(*mesh, cmdList, uploadVertexBuffer, uploadIndexBuffer));
 	}
 }
 
@@ -45,11 +44,5 @@ Model::Model(
 	ID3D12GraphicsCommandList& cmdList,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) {
-	mMeshes.push_back(new Mesh(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer));
-}
-
-Model::~Model() {
-	for (Mesh* mesh : mMeshes) {
-		delete mesh;
-	}
+	mMeshes.push_back(Mesh(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer));
 }

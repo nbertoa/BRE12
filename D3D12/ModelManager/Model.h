@@ -4,10 +4,10 @@
 #include <wrl.h>
 
 #include <GeometryGenerator/GeometryGenerator.h>
+#include <ModelManager/Mesh.h>
 
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
-class Mesh;
 
 class Model {
 public:
@@ -28,11 +28,10 @@ public:
 
 	Model(const Model& rhs) = delete;
 	Model& operator=(const Model& rhs) = delete;
-	~Model();
 
 	__forceinline bool HasMeshes() const noexcept { return (mMeshes.size() > 0UL); }
-	__forceinline const std::vector<Mesh*>& Meshes() const noexcept { return mMeshes; }
+	__forceinline const std::vector<Mesh>& Meshes() const noexcept { return mMeshes; }
 
 private:
-	std::vector<Mesh*> mMeshes;
+	std::vector<Mesh> mMeshes;
 };
