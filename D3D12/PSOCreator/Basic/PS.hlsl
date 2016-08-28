@@ -2,8 +2,6 @@
 #include "../ShaderUtils/Material.hlsli"
 #include "../ShaderUtils/Utils.hlsli"
 
-#define FAR_PLANE_DISTANCE 5000.0f
-
 struct Input {
 	float4 mPosH : SV_POSITION;
 	float3 mPosV : POS_VIEW;
@@ -11,6 +9,7 @@ struct Input {
 };
 
 ConstantBuffer<Material> gMaterial : register(b0);
+ConstantBuffer<ImmutableCBuffer> gImmutableConstants : register(b1);
 
 struct Output {	
 	float2 mNormalV : SV_Target0;	
@@ -25,7 +24,7 @@ Output main(const in Input input) {
 	output.mNormalV = Encode(normal);
 	output.mBaseColor_MetalMask = gMaterial.mBaseColor_MetalMask;
 	output.mReflectance_Smoothness = gMaterial.mReflectance_Smoothness;
-	output.mDepthV = input.mPosV.z / FAR_PLANE_DISTANCE;
+	output.mDepthV = input.mPosV.z / gImmutableConstants.mNearZ_FarZ_ScreenW_ScreenH.y;
 	
 	return output;
 }

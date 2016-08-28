@@ -90,7 +90,9 @@ void BasicCmdListRecorder::RecordCommandLists(
 
 	// Set frame constants root parameters
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
+	D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
 
 	// Draw objects
 	const std::size_t geomCount{ mGeometryDataVec.size() };
@@ -220,4 +222,10 @@ void BasicCmdListRecorder::BuildBuffers(const Material* materials, const std::ui
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
+
+	// Create immutable cbuffer
+	const std::size_t immutableCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ImmutableCBuffer)) };	
+	ResourceManager::Get().CreateUploadBuffer(immutableCBufferElemSize, 1U, mImmutableCBuffer);
+	ImmutableCBuffer immutableCBuffer;
+	mImmutableCBuffer->CopyData(0U, &immutableCBuffer, sizeof(immutableCBuffer));
 }

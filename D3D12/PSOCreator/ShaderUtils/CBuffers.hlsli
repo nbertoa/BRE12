@@ -11,4 +11,8 @@ struct FrameCBuffer {
 	float4x4 mP;
 };
 
+struct ImmutableCBuffer {
+	float4 mNearZ_FarZ_ScreenW_ScreenH;
+};
+
 #endif

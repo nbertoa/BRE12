@@ -1,6 +1,8 @@
 #pragma once
 
 #include <DirectXMath.h>
+
+#include <GlobalData\Settings.h>
 #include <MathUtils\MathUtils.h>
 
 struct ObjectCBuffer {
@@ -15,4 +17,10 @@ struct FrameCBuffer {
 
 	DirectX::XMFLOAT4X4 mView{ MathUtils::Identity4x4() };
 	DirectX::XMFLOAT4X4 mProj{ MathUtils::Identity4x4() };
+};
+
+struct ImmutableCBuffer {
+	ImmutableCBuffer() = default;
+
+	float mNearZ_FarZ_ScreenW_ScreenH[4U]{ Settings::sNearPlaneZ, Settings::sFarPlaneZ, (float)Settings::sWindowWidth, (float)Settings::sWindowHeight };
 };
