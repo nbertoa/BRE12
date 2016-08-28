@@ -6,8 +6,10 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="PunctualLight.h" />
     <ClInclude Include="CBuffers.h" />
+    <ClInclude Include="MaterialFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3DFactory.cpp" />
+    <ClCompile Include="MaterialFactory.cpp" />
   </ItemGroup>
 </Project>

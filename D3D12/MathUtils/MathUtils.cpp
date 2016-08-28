@@ -75,3 +75,15 @@ XMVECTOR MathUtils::RandHemisphereUnitVec3(XMVECTOR n) noexcept {
 		return XMVector3Normalize(v);
 	}
 }
+
+void MathUtils::ComputeMatrix(
+	DirectX::XMFLOAT4X4& m,
+	const float tx,
+	const float ty,
+	const float tz,
+	const float sx,
+	const float sy,
+	const float sz) noexcept
+{
+	DirectX::XMStoreFloat4x4(&m, DirectX::XMMatrixScaling(sx, sy, sz) * DirectX::XMMatrixTranslation(tx, ty, tz));
+}

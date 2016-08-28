@@ -73,6 +73,15 @@ public:
 		return DirectX::XMMatrixTranspose(DirectX::XMMatrixMultiply(viewMatrix, projMatrix));
 	}
 
+	static void ComputeMatrix(
+		DirectX::XMFLOAT4X4& m,
+		const float tx,
+		const float ty,
+		const float tz,
+		const float sx = 1.0f,
+		const float sy = 1.0f,
+		const float sz = 1.0f) noexcept;
+
     static DirectX::XMFLOAT4X4 Identity4x4() noexcept {
         static DirectX::XMFLOAT4X4 I(
             1.0f, 0.0f, 0.0f, 0.0f,

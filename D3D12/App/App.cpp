@@ -1,6 +1,7 @@
 #include "App.h"
 
 #include <CommandManager/CommandManager.h>
+#include <DXUtils/MaterialFactory.h>
 #include <GlobalData\D3dData.h>
 #include <GlobalData/Settings.h>
 #include <Input/Keyboard.h>
@@ -24,6 +25,7 @@ namespace {
 		ID3D12Device& device{ D3dData::Device() };
 		CommandManager::Create(device);
 		ModelManager::Create();
+		MaterialFactory::InitMaterials();
 		PSOManager::Create(device);
 		ResourceManager::Create(device);
 		RootSignatureManager::Create(device);

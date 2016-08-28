@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C7E94DAC-F9E2-4998-99EE-0F9B51FAC66B}</ProjectGuid>
-    <RootNamespace>DXUtils</RootNamespace>
+    <ProjectGuid>{E3093A16-3C9B-4A67-BF46-2A9703E2DF83}</ProjectGuid>
+    <RootNamespace>Demo1Scene</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -68,12 +68,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -119,16 +114,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="D3DFactory.h" />
-    <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="Material.h" />
-    <ClInclude Include="CBuffers.h" />
-    <ClInclude Include="MaterialFactory.h" />
-    <ClInclude Include="PunctualLight.h" />
+    <ClInclude Include="Demo1Scene.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="D3DFactory.cpp" />
-    <ClCompile Include="MaterialFactory.cpp" />
+    <ClCompile Include="Demo1Scene.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
