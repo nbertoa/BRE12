@@ -137,6 +137,7 @@ bool BasicCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result = 
 		CmdListRecorder::ValidateData() &&
+		mImmutableCBuffer != nullptr &&
 		mObjectCBuffer != nullptr &&
 		mObjectCBufferGpuDescHandleBegin.ptr != 0UL &&
 		numGeomData != 0UL &&
