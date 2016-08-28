@@ -13,12 +13,7 @@ struct Input {
 };
 
 ConstantBuffer<ObjectCBuffer> gObjConstants : register(b0);
-
-struct FrameConstants {
-	float4x4 mV;
-	float4x4 mP;
-};
-ConstantBuffer<FrameConstants> gFrameConstants : register(b1);
+ConstantBuffer<FrameCBuffer> gFrameConstants : register(b1);
 
 struct Output {
 	float3 mPosV : POSITION;
@@ -35,7 +30,7 @@ Output main(in const Input input) {
 	output.mPosV = mul(float4(input.mPosO, 1.0f), wv).xyz;
 	output.mNormalV = mul(input.mNormalO, (float3x3)wv);
 	output.mTangentV = mul(input.mTangentO, (float3x3)wv);
-	output.mTexCoordO = input.mTexCoordO;
+	output.mTexCoordO = gObjConstants.mTexTransform * input.mTexCoordO;
 
 	const float d = length(output.mPosV);
 

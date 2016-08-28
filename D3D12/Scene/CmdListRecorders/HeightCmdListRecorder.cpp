@@ -72,11 +72,11 @@ void HeightCmdListRecorder::RecordCommandLists(
 	ASSERT(cmdAlloc != nullptr);
 
 	// Update frame constants
-	DirectX::XMFLOAT4X4 vp[2U];
-	DirectX::XMStoreFloat4x4(&vp[0], MathUtils::GetTranspose(view));
-	DirectX::XMStoreFloat4x4(&vp[1], MathUtils::GetTranspose(proj));
-	UploadBuffer& frameCBuffer(*mFrameCBuffer[mCurrFrameIndex]);
-	frameCBuffer.CopyData(0U, &vp, sizeof(vp));
+	FrameCBuffer frameCBuffer;
+	DirectX::XMStoreFloat4x4(&frameCBuffer.mView, MathUtils::GetTranspose(view));
+	DirectX::XMStoreFloat4x4(&frameCBuffer.mProj, MathUtils::GetTranspose(proj));
+	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrFrameIndex]);
+	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, mPSO));
@@ -98,7 +98,7 @@ void HeightCmdListRecorder::RecordCommandLists(
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
 	// Set frame constants root parameters
-	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(frameCBuffer.Resource()->GetGPUVirtualAddress());
+	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
 
@@ -287,7 +287,7 @@ void HeightCmdListRecorder::BuildBuffers(
 	}
 
 	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4) * 2UL) };
+	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}

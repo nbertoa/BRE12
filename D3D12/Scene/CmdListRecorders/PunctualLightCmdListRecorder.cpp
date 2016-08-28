@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 
+#include <DXUtils\CBuffers.h>
 #include <DXUtils/PunctualLight.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
@@ -102,11 +103,11 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	ASSERT(cmdAlloc != nullptr);	
 
 	// Update frame constants
-	DirectX::XMFLOAT4X4 matrices[2U];
-	DirectX::XMStoreFloat4x4(&matrices[0], MathUtils::GetTranspose(view));
-	DirectX::XMStoreFloat4x4(&matrices[1], MathUtils::GetTranspose(proj));
-	UploadBuffer& frameCBuffer{ *mFrameCBuffer[mCurrFrameIndex] };
-	frameCBuffer.CopyData(0U, &matrices, sizeof(matrices));
+	FrameCBuffer frameCBuffer;
+	DirectX::XMStoreFloat4x4(&frameCBuffer.mView, MathUtils::GetTranspose(view));
+	DirectX::XMStoreFloat4x4(&frameCBuffer.mProj, MathUtils::GetTranspose(proj));
+	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrFrameIndex]);
+	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, mPSO));
@@ -119,7 +120,7 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	mCmdList->SetGraphicsRootSignature(mRootSign);
 
 	// Set root parameters
-	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(frameCBuffer.Resource()->GetGPUVirtualAddress());
+	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescHandleBegin);
 	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
@@ -182,7 +183,7 @@ void PunctualLightCmdListRecorder::BuildBuffers(const PunctualLight* lights, con
 	}
 
 	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(DirectX::XMFLOAT4X4) * 2UL) };
+	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}

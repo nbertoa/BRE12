@@ -1,3 +1,4 @@
+#include "../ShaderUtils/CBuffers.hlsli"
 #include "../ShaderUtils/Lighting.hlsli"
 
 #define MAX_NUM_LIGHTS 250
@@ -6,10 +7,7 @@ struct Input {
 	uint mVertexId : SV_VertexID;
 };
 
-struct FrameConstants {
-	float4x4 mV;
-};
-ConstantBuffer<FrameConstants> gFrameConstants : register(b0);
+ConstantBuffer<FrameCBuffer> gFrameConstants : register(b0);
 
 StructuredBuffer<PunctualLight> gPunctualLights : register(t0);
 

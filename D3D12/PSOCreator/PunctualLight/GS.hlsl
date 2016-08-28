@@ -1,3 +1,4 @@
+#include "../ShaderUtils/CBuffers.hlsli"
 #include "../ShaderUtils/Lighting.hlsli"
 
 #define QUAD_VERTICES (4)
@@ -6,11 +7,7 @@ struct Input {
 	nointerpolation PunctualLight mPunctualLight : PUNCTUAL_LIGHT;
 };
 
-struct FrameConstants {
-	float4x4 mV; // We do not need this, but we do this to reuse FrameConstant buffer used in VS
-	float4x4 mP;
-};
-ConstantBuffer<FrameConstants> gFrameConstants : register(b0);
+ConstantBuffer<FrameCBuffer> gFrameConstants : register(b0);
 
 struct Output {
 	float4 mPosH : SV_POSITION;

@@ -8,12 +8,7 @@ struct Input {
 };
 
 ConstantBuffer<ObjectCBuffer> gObjConstants : register(b0);
-
-struct FrameConstants {
-	float4x4 mV;
-	float4x4 mP;
-};
-ConstantBuffer<FrameConstants> gFrameConstants : register(b1);
+ConstantBuffer<FrameCBuffer> gFrameConstants : register(b1);
 
 struct Output {	
 	float4 mPosH : SV_POSITION;

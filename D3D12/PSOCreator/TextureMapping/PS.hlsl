@@ -1,4 +1,5 @@
 #include "../ShaderUtils/CBuffers.hlsli"
+#include "../ShaderUtils/Material.hlsli"
 #include "../ShaderUtils/Utils.hlsli"
 
 #define FAR_PLANE_DISTANCE 5000.0f
@@ -10,10 +11,6 @@ struct Input {
 	float2 mTexCoordO : TEXCOORD;
 };
 
-struct Material {
-	float4 mBaseColor_MetalMask;
-	float4 mReflectance_Smoothness;
-};
 ConstantBuffer<Material> gMaterial : register(b0);
 
 SamplerState TexSampler : register (s0);

@@ -15,11 +15,7 @@ struct Input {
 	float2 mTexCoordO : TEXCOORD0;	
 };
 
-struct FrameConstants {
-	float4x4 mV;
-	float4x4 mP;
-};
-ConstantBuffer<FrameConstants> gFrameConstants : register(b1);
+ConstantBuffer<FrameCBuffer> gFrameConstants : register(b1);
 
 struct Output {
 	float4 mPosH : SV_Position;
@@ -38,7 +34,6 @@ Output main(const HullShaderConstantOutput HSConstantOutput, const float3 uvw : 
 	Output output = (Output)0;
 
 	output.mTexCoordO = uvw.x * patch[0].mTexCoordO + uvw.y * patch[1].mTexCoordO + uvw.z * patch[2].mTexCoordO;
-	output.mTexCoordO *= 2.0f;
 
 	const float3 normalV = normalize(uvw.x * patch[0].mNormalV + uvw.y * patch[1].mNormalV + uvw.z * patch[2].mNormalV);
 	output.mNormalV = normalize(normalV);
