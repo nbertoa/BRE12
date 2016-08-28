@@ -38,6 +38,7 @@ private:
 	std::vector<GeometryData> mGeometryDataVec;
 
 	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
+	UploadBuffer* mImmutableCBuffer{ nullptr };
 
 	UploadBuffer* mObjectCBuffer{ nullptr };
 	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescHandleBegin;

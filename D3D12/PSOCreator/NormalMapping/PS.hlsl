@@ -1,7 +1,6 @@
+#include "../ShaderUtils/CBuffers.hlsli"
 #include "../ShaderUtils/Material.hlsli"
 #include "../ShaderUtils/Utils.hlsli"
-
-#define FAR_PLANE_DISTANCE 5000.0f
 
 struct Input {
 	float4 mPosH : SV_POSITION;
@@ -13,6 +12,7 @@ struct Input {
 };
 
 ConstantBuffer<Material> gMaterial : register(b0);
+ConstantBuffer<ImmutableCBuffer> gImmutableConstants : register(b1);
 
 SamplerState TexSampler : register (s0);
 Texture2D DiffuseTexture : register (t0);
@@ -37,7 +37,7 @@ Output main(const in Input input) {
 
 	output.mReflectance_Smoothness = gMaterial.mReflectance_Smoothness;
 
-	output.mDepthV = input.mPosV.z / FAR_PLANE_DISTANCE;
+	output.mDepthV = input.mPosV.z / gImmutableConstants.mNearZ_FarZ_ScreenW_ScreenH.y;
 
 	return output;
 }
