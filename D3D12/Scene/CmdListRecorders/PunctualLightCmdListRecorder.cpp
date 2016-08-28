@@ -121,10 +121,13 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 
 	// Set root parameters
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
+	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescHandleBegin);
 	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(3U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
+	mCmdList->SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootConstantBufferView(4U, immutableCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootDescriptorTable(5U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
 	
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	
@@ -147,6 +150,7 @@ bool PunctualLightCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		CmdListRecorder::ValidateData() &&
+		mImmutableCBuffer != nullptr &&
 		mNumLights != 0U &&
 		mLightsBuffer != nullptr &&
 		mLightsBufferGpuDescHandleBegin.ptr != 0UL;
@@ -187,4 +191,10 @@ void PunctualLightCmdListRecorder::BuildBuffers(const PunctualLight* lights, con
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
+
+	// Create immutable cbuffer
+	const std::size_t immutableCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ImmutableCBuffer)) };
+	ResourceManager::Get().CreateUploadBuffer(immutableCBufferElemSize, 1U, mImmutableCBuffer);
+	ImmutableCBuffer immutableCBuffer;
+	mImmutableCBuffer->CopyData(0U, &immutableCBuffer, sizeof(immutableCBuffer));
 }

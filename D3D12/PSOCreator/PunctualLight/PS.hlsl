@@ -1,16 +1,17 @@
+#include "../ShaderUtils/CBuffers.hlsli"
 #include "../ShaderUtils/Lighting.hlsli"
 #include "../ShaderUtils/Utils.hlsli"
 
 #define BRDF_FROSTBITE_ILLUMINANCE 
 #define BRDF_FROSTBITE_LUMINANCE
 
-#define FAR_PLANE_DISTANCE 5000.0f
-
 struct Input {
 	float4 mPosH : SV_POSITION;
 	float3 mPosV : VIEW_RAY;
 	nointerpolation PunctualLight mPunctualLight : PUNCTUAL_LIGHT;
 };
+
+ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b0);
 
 Texture2D<float2> NormalV : register (t0);
 Texture2D<float4> BaseColor_MetalMask : register (t1);
@@ -28,7 +29,8 @@ Output main(const in Input input) {
 	
 	// Reconstruct geometry position in view space
 	const float normalizedDepth = Depth.Load(screenCoord);
-	const float3 viewRay = float3(input.mPosV.xy * (FAR_PLANE_DISTANCE / input.mPosV.z), FAR_PLANE_DISTANCE);
+	const float farZ = gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.y;
+	const float3 viewRay = float3(input.mPosV.xy * (farZ / input.mPosV.z), farZ);
 	const float3 geomPosV = viewRay * normalizedDepth;
 
 	PunctualLight light = input.mPunctualLight;

@@ -33,6 +33,7 @@ private:
 	D3D12_GPU_DESCRIPTOR_HANDLE mGeometryBuffersGpuDescHandleBegin;
 
 	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
+	UploadBuffer* mImmutableCBuffer{ nullptr };
 
 	UploadBuffer* mLightsBuffer{ nullptr };
 	D3D12_GPU_DESCRIPTOR_HANDLE mLightsBufferGpuDescHandleBegin;

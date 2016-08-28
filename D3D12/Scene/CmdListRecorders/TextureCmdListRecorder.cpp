@@ -95,6 +95,10 @@ void TextureCmdListRecorder::RecordCommandLists(
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 
+	// Set immutable constants root parameters
+	D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
+	mCmdList->SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
+
 	// Draw objects
 	const std::size_t geomCount{ mGeometryDataVec.size() };
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
@@ -109,7 +113,7 @@ void TextureCmdListRecorder::RecordCommandLists(
 			mCmdList->SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDescHandle);
 			materialsCBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(3U, texturesBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(4U, texturesBufferGpuDescHandle);
 			texturesBufferGpuDescHandle.ptr += descHandleIncSize;
 
 			mCmdList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
@@ -141,6 +145,7 @@ bool TextureCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		CmdListRecorder::ValidateData() &&
+		mImmutableCBuffer != nullptr &&
 		mObjectCBuffer != nullptr &&
 		mObjectCBufferGpuDescHandleBegin.ptr != 0UL &&
 		numGeomData != 0UL &&
@@ -246,4 +251,10 @@ void TextureCmdListRecorder::BuildBuffers(const Material* materials, ID3D12Resou
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
+
+	// Create immutable cbuffer
+	const std::size_t immutableCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ImmutableCBuffer)) };
+	ResourceManager::Get().CreateUploadBuffer(immutableCBufferElemSize, 1U, mImmutableCBuffer);
+	ImmutableCBuffer immutableCBuffer;
+	mImmutableCBuffer->CopyData(0U, &immutableCBuffer, sizeof(immutableCBuffer));
 }

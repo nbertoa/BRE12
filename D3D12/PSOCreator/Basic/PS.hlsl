@@ -9,7 +9,7 @@ struct Input {
 };
 
 ConstantBuffer<Material> gMaterial : register(b0);
-ConstantBuffer<ImmutableCBuffer> gImmutableConstants : register(b1);
+ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b1);
 
 struct Output {	
 	float2 mNormalV : SV_Target0;	
@@ -24,7 +24,7 @@ Output main(const in Input input) {
 	output.mNormalV = Encode(normal);
 	output.mBaseColor_MetalMask = gMaterial.mBaseColor_MetalMask;
 	output.mReflectance_Smoothness = gMaterial.mReflectance_Smoothness;
-	output.mDepthV = input.mPosV.z / gImmutableConstants.mNearZ_FarZ_ScreenW_ScreenH.y;
+	output.mDepthV = input.mPosV.z / gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.y;
 	
 	return output;
 }

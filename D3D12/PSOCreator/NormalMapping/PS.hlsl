@@ -12,7 +12,7 @@ struct Input {
 };
 
 ConstantBuffer<Material> gMaterial : register(b0);
-ConstantBuffer<ImmutableCBuffer> gImmutableConstants : register(b1);
+ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b1);
 
 SamplerState TexSampler : register (s0);
 Texture2D DiffuseTexture : register (t0);
@@ -37,7 +37,7 @@ Output main(const in Input input) {
 
 	output.mReflectance_Smoothness = gMaterial.mReflectance_Smoothness;
 
-	output.mDepthV = input.mPosV.z / gImmutableConstants.mNearZ_FarZ_ScreenW_ScreenH.y;
+	output.mDepthV = input.mPosV.z / gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.y;
 
 	return output;
 }

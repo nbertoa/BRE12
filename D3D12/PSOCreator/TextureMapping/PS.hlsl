@@ -2,8 +2,6 @@
 #include "../ShaderUtils/Material.hlsli"
 #include "../ShaderUtils/Utils.hlsli"
 
-#define FAR_PLANE_DISTANCE 5000.0f
-
 struct Input {
 	float4 mPosH : SV_POSITION;
 	float3 mPosV : POS_VIEW;
@@ -12,6 +10,7 @@ struct Input {
 };
 
 ConstantBuffer<Material> gMaterial : register(b0);
+ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b1);
 
 SamplerState TexSampler : register (s0);
 Texture2D DiffuseTexture : register (t0);
@@ -28,9 +27,9 @@ Output main(const in Input input) {
 	const float3 normal = normalize(input.mNormalV);
 	output.mNormalV = Encode(normal);
 	const float3 diffuseColor = DiffuseTexture.Sample(TexSampler, input.mTexCoordO).rgb;
-	output.mBaseColor_MetalMask = float4(diffuseColor, gMaterial.mBaseColor_MetalMask.w);//float4(gMaterial.mBaseColor_MetalMask.xyz * diffuseColor, gMaterial.mBaseColor_MetalMask.w);
+	output.mBaseColor_MetalMask = float4(gMaterial.mBaseColor_MetalMask.xyz * diffuseColor, gMaterial.mBaseColor_MetalMask.w);
 	output.mReflectance_Smoothness = gMaterial.mReflectance_Smoothness;
-	output.mDepthV = input.mPosV.z / FAR_PLANE_DISTANCE;
+	output.mDepthV = input.mPosV.z / gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.y;
 
 	return output;
 }

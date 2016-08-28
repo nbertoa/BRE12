@@ -15,7 +15,7 @@ struct Input {
 	float2 mTexCoordO : TEXCOORD0;	
 };
 
-ConstantBuffer<FrameCBuffer> gFrameConstants : register(b1);
+ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
 
 struct Output {
 	float4 mPosH : SV_Position;
@@ -48,7 +48,7 @@ Output main(const HullShaderConstantOutput HSConstantOutput, const float3 uvw : 
 
 	// Offset vertex along normal
 	posV += output.mNormalV * displacement;
-	output.mPosH = mul(float4(posV, 1.0f), gFrameConstants.mP);
+	output.mPosH = mul(float4(posV, 1.0f), gFrameCBuffer.mP);
 
 	// Compute tangent and binormal
 	output.mTangentV = normalize(uvw.x * patch[0].mTangentV + uvw.y * patch[1].mTangentV + uvw.z * patch[2].mTangentV);
