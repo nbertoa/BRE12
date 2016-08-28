@@ -1,4 +1,5 @@
 #define NUM_PATCH_POINTS 3
+#define HEIGHT_SCALE 0.2f
 
 struct HullShaderConstantOutput {
 	float mEdgeFactors[3] : SV_TessFactor;
@@ -6,16 +7,11 @@ struct HullShaderConstantOutput {
 };
 
 struct Input {
-	float3 mPosO : POSITION;
-	float3 mNormalO : NORMAL;
-	float3 mTangentO : TANGENT;
+	float3 mPosV : POSITION;
+	float3 mNormalV : NORMAL;
+	float3 mTangentV : TANGENT;
 	float2 mTexCoordO : TEXCOORD0;	
 };
-
-struct ObjConstants {
-	float4x4 mW;
-};
-ConstantBuffer<ObjConstants> gObjConstants : register(b0);
 
 struct FrameConstants {
 	float4x4 mV;
@@ -36,33 +32,31 @@ SamplerState TexSampler : register (s0);
 Texture2D HeightTexture : register (t0);
 
 [domain("tri")]
-Output main(const HullShaderConstantOutput IN, const float3 uvw : SV_DomainLocation, const OutputPatch <Input, NUM_PATCH_POINTS> patch) {
-	const float4x4 wv = mul(gObjConstants.mW, gFrameConstants.mV);
-
+Output main(const HullShaderConstantOutput HSConstantOutput, const float3 uvw : SV_DomainLocation, const OutputPatch <Input, NUM_PATCH_POINTS> patch) {
 	Output output = (Output)0;
 
 	output.mTexCoordO = uvw.x * patch[0].mTexCoordO + uvw.y * patch[1].mTexCoordO + uvw.z * patch[2].mTexCoordO;
 	output.mTexCoordO *= 2.0f;
 
-	const float3 normalO = normalize(uvw.x * patch[0].mNormalO + uvw.y * patch[1].mNormalO + uvw.z * patch[2].mNormalO);
-	output.mNormalV = normalize(mul(float4(normalO, 0.0f), wv).xyz);
+	const float3 normalV = normalize(uvw.x * patch[0].mNormalV + uvw.y * patch[1].mNormalV + uvw.z * patch[2].mNormalV);
+	output.mNormalV = normalize(normalV);
 
-	// Compute SV_Position by displacing object position in y coordinate
-	float4 posV = mul(float4(uvw.x * patch[0].mPosO + uvw.y * patch[1].mPosO + uvw.z * patch[2].mPosO, 1.0f), wv);
+	float3 posV = uvw.x * patch[0].mPosV + uvw.y * patch[1].mPosV + uvw.z * patch[2].mPosV;
+
 	// Choose the mipmap level based on distance to the eye; specifically, choose the next miplevel every MipInterval units, and clamp the miplevel in [0,6].
 	const float MipInterval = 20.0f;
 	const float mipLevel = clamp((length(posV) - MipInterval) / MipInterval, 0.0f, 6.0f);
-	const float DisplacementScale = 0.2f;
-	const float displacement = (2.0f * HeightTexture.SampleLevel(TexSampler, output.mTexCoordO, 0).x - 1.0f) * DisplacementScale;
-	// Offset vertex along normal
-	posV += float4(output.mNormalV * displacement, 0.0f);
-	output.mPosH = mul(posV, gFrameConstants.mP);
+	const float height = HeightTexture.SampleLevel(TexSampler, output.mTexCoordO, mipLevel).x;
+	const float displacement = (HEIGHT_SCALE * (height - 1));
 
-	// Compute world tangent and binormal
-	output.mTangentV = normalize(uvw.x * patch[0].mTangentO + uvw.y * patch[1].mTangentO + uvw.z * patch[2].mTangentO);
-	output.mTangentV = normalize(mul(float4(output.mTangentV, 0.0f), wv).xyz);
+	// Offset vertex along normal
+	posV += output.mNormalV * displacement;
+	output.mPosH = mul(float4(posV, 1.0f), gFrameConstants.mP);
+
+	// Compute tangent and binormal
+	output.mTangentV = normalize(uvw.x * patch[0].mTangentV + uvw.y * patch[1].mTangentV + uvw.z * patch[2].mTangentV);
 	output.mBinormalV = normalize(cross(output.mNormalV, output.mTangentV));
-	output.mPosV = posV.xyz;
+	output.mPosV = posV;
 
 	return output;
 }

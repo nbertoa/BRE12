@@ -99,7 +99,8 @@ void HeightCmdListRecorder::RecordCommandLists(
 	// Set frame constants root parameters
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(frameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootConstantBufferView(4U, frameCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootConstantBufferView(5U, frameCBufferGpuVAddress);
 
 	// Draw objects
 	const std::size_t geomCount{ mGeometryDataVec.size() };
@@ -112,16 +113,16 @@ void HeightCmdListRecorder::RecordCommandLists(
 			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDescHandle);
 			objectCBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(2U, heightsBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(3U, heightsBufferGpuDescHandle);
 			heightsBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(3U, materialsCBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(4U, materialsCBufferGpuDescHandle);
 			materialsCBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(5U, texturesBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(6U, texturesBufferGpuDescHandle);
 			texturesBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(6U, normalsBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(7U, normalsBufferGpuDescHandle);
 			normalsBufferGpuDescHandle.ptr += descHandleIncSize;
 			
 			mCmdList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
