@@ -22,8 +22,8 @@ namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
 	void UpdateCamera(Camera& camera, XMFLOAT4X4& view, XMFLOAT4X4& proj, const float deltaTime) noexcept {
 		static std::int32_t lastXY[]{ 0UL, 0UL };
-		static const float sCameraOffset{ 5.0f };
-		static const float sCameraMultiplier{ 20.0f };
+		static const float sCameraOffset{ 7.5f };
+		static const float sCameraMultiplier{ 10.0f };
 
 		if (camera.UpdateViewMatrix()) {
 			proj = camera.GetProj4x4f();
