@@ -14,7 +14,7 @@ ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b1);
 struct Output {	
 	float2 mNormalV : SV_Target0;	
 	float4 mBaseColor_MetalMask : SV_Target1;
-	float4 mReflectance_Smoothness : SV_Target2;
+	float2 mReflectance_Smoothness : SV_Target2;
 	float mDepthV : SV_Target3;
 };
 

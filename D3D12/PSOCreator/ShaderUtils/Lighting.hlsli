@@ -92,7 +92,7 @@ float D_GGX_TR(const float dotNH, const float alpha) {
 	return alphaSqr / (f * f);
 }
 
-float3 brdf_FrostBite(const float3 N, const float3 V, const float3 L, const float3 baseColor, const float smoothness, const float3 reflectance, const float metalMask) {
+float3 brdf_FrostBite(const float3 N, const float3 V, const float3 L, const float3 baseColor, const float smoothness, const float reflectance, const float metalMask) {
 	const float roughness = 1.0f - smoothness;
 	const float linearRoughness = roughness * roughness;
 
@@ -103,7 +103,7 @@ float3 brdf_FrostBite(const float3 N, const float3 V, const float3 L, const floa
 	const float dotLH = saturate(dot(L, H));
 
 	// Specular BRDF
-	const float3 f0 = (1.0f - metalMask) * reflectance + baseColor * metalMask;
+	const float3 f0 = (1.0f - metalMask) * float3(reflectance, reflectance, reflectance) + baseColor * metalMask;
 	const float f90 = saturate(50.0f * dot(f0, 0.33f));
 	const float3 F = F_Schlick(f0, 1.0f, dotLH);
 	const float Vis = V_SmithGGXCorrelated(dotNV, dotNL, roughness);
@@ -121,7 +121,7 @@ float GlV(const float dotNV, const float k) {
 	return 1.0f / (dotNV * (1.0f - k) + k);
 }
 
-float3 brdf_CookTorrance(const float3 N, const float3 V, const float3 L, const float3 baseColor, const float smoothness, const float3 reflectance, const float metalMask) {	
+float3 brdf_CookTorrance(const float3 N, const float3 V, const float3 L, const float3 baseColor, const float smoothness, const float reflectance, const float metalMask) {	
 	const float roughness = 1.0f - smoothness;
 	const float alpha = roughness * roughness;
 
@@ -137,7 +137,7 @@ float3 brdf_CookTorrance(const float3 N, const float3 V, const float3 L, const f
 	const float D = alphaSqr / (PI * denom * denom);
 
 	// F Schlick
-	const float3 f0 = (1.0f - metalMask) * reflectance + baseColor * metalMask;
+	const float3 f0 = (1.0f - metalMask) * float3(reflectance, reflectance, reflectance) + baseColor * metalMask;
 	const float dotLH5 = pow(1.0f - dotLH, 5.0f);
 	const float3 F = f0 + (1.0f - f0) * (dotLH5);
 

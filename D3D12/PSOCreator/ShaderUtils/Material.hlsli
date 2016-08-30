@@ -3,7 +3,7 @@
 
 struct Material {
 	float4 mBaseColor_MetalMask;
-	float4 mReflectance_Smoothness;
+	float2 mReflectance_Smoothness;
 };
 
 #endif 
