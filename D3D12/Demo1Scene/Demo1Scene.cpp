@@ -153,12 +153,11 @@ void Demo1Scene::GenerateGeomPassRecorders(
 	Material materials[numResources];
 	for (std::uint32_t i = 0UL; i < numResources; ++i) {
 		materials[i].mBaseColor_MetalMask[3U] = 0.0f;
-		materials[i].mReflectance_Smoothness[0U] = 0.4f;
-		materials[i].mReflectance_Smoothness[1U] = 0.9f;
+		materials[i].mSmoothness = 0.9f;
 	}
 
-	materials[4].mReflectance_Smoothness[0U] = 0.2f;
-	materials[5].mReflectance_Smoothness[0U] = 0.2f;
+	materials[4].mSmoothness = 0.2f;
+	materials[5].mSmoothness = 0.2f;
 
 	ID3D12Resource* tex[numResources];
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex[numResources];

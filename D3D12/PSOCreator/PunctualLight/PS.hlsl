@@ -2,7 +2,7 @@
 #include "../ShaderUtils/Lighting.hlsli"
 #include "../ShaderUtils/Utils.hlsli"
 
-#define BRDF_FROSTBITE_ILLUMINANCE 
+//#define BRDF_FROSTBITE_ILLUMINANCE 
 #define BRDF_FROSTBITE_LUMINANCE
 
 struct Input {
@@ -15,7 +15,7 @@ ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b0);
 
 Texture2D<float2> NormalV : register (t0);
 Texture2D<float4> BaseColor_MetalMask : register (t1);
-Texture2D<float2> Reflectance_Smoothness : register (t2);
+Texture2D<float> Smoothness : register (t2);
 Texture2D<float> Depth : register (t3);
 
 struct Output {
@@ -38,7 +38,7 @@ Output main(const in Input input) {
 	const float3 normalV = normalize(Decode(NormalV.Load(screenCoord)));
 
 	const float4 baseColor_metalmask = BaseColor_MetalMask.Load(screenCoord);
-	const float2 reflectance_smoothness = Reflectance_Smoothness.Load(screenCoord);
+	const float smoothness = Smoothness.Load(screenCoord);
 	const float3 lightDirV = normalize(light.mLightPosVAndRange.xyz - geomPosV);
 	// As we are working at view space, we do not need camera position to 
 	// compute vector from geometry position to camera.
@@ -57,9 +57,9 @@ Output main(const in Input input) {
 
 	float3 illuminance;
 #ifdef BRDF_FROSTBITE_ILLUMINANCE
-	illuminance = brdf_FrostBite(normalV, viewV, lightDirV, baseColor_metalmask.xyz, reflectance_smoothness.y, reflectance_smoothness.x, baseColor_metalmask.w);
+	illuminance = brdf_FrostBite(normalV, viewV, lightDirV, baseColor_metalmask.xyz, smoothness, baseColor_metalmask.w);
 #else
-	illuminance = brdf_CookTorrance(normalV, viewV, lightDirV, baseColor_metalmask.xyz, reflectance_smoothness.y, reflectance_smoothness.x, baseColor_metalmask.w);
+	illuminance = brdf_CookTorrance(normalV, viewV, lightDirV, baseColor_metalmask.xyz, smoothness, baseColor_metalmask.w);
 #endif
 
 	// Discard if illuminance does not contribute any light.

@@ -78,10 +78,7 @@ void TextureScene::GenerateGeomPassRecorders(
 				material.mBaseColor_MetalMask[1] = 1.0f;
 				material.mBaseColor_MetalMask[2] = 1.0f;
 				material.mBaseColor_MetalMask[3] = (float)MathUtils::Rand(0U, 1U);
-				material.mReflectance_Smoothness[0] = 0.7f;
-				material.mReflectance_Smoothness[1] = 0.7f;
-				material.mReflectance_Smoothness[2] = 0.7f;
-				material.mReflectance_Smoothness[3] = MathUtils::RandF(0.0f, 1.0f);
+				material.mSmoothness = MathUtils::RandF(0.0f, 1.0f);
 				materials.push_back(material);
 			}
 

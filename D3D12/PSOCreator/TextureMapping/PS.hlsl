@@ -18,7 +18,7 @@ Texture2D DiffuseTexture : register (t0);
 struct Output {
 	float2 mNormalV : SV_Target0;
 	float4 mBaseColor_MetalMask : SV_Target1;
-	float2 mReflectance_Smoothness : SV_Target2;
+	float2 mSmoothness : SV_Target2;
 	float mDepthV : SV_Target3;
 };
 
@@ -28,7 +28,7 @@ Output main(const in Input input) {
 	output.mNormalV = Encode(normal);
 	const float3 diffuseColor = DiffuseTexture.Sample(TexSampler, input.mTexCoordO).rgb;
 	output.mBaseColor_MetalMask = float4(gMaterial.mBaseColor_MetalMask.xyz * diffuseColor, gMaterial.mBaseColor_MetalMask.w);
-	output.mReflectance_Smoothness = gMaterial.mReflectance_Smoothness;
+	output.mSmoothness = gMaterial.mSmoothness;
 	output.mDepthV = input.mPosV.z / gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.y;
 
 	return output;
