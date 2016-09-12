@@ -1,5 +1,5 @@
 #include "../ShaderUtils/CBuffers.hlsli"
-#include "../ShaderUtils/Lighting.hlsli"
+#include "../ShaderUtils/Lights.hlsli"
 
 #define QUAD_VERTICES (4)
 

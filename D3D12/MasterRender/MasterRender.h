@@ -66,7 +66,7 @@ private:
 	static const DXGI_FORMAT sBackBufferRTFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
 	static const DXGI_FORMAT sBackBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
 	static const DXGI_FORMAT sGeomPassBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
-	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D32_FLOAT };
+	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
 
 	HWND mHwnd{ 0 };
 	ID3D12Device& mDevice;
@@ -102,10 +102,8 @@ private:
 	// - BaseColor_MetalMask
 	// - Reflectance_Smoothness
 	enum GeomBuffers {
-		NORMAL = 0U,		
+		NORMAL_SMOOTHNESS_DEPTH = 0U,		
 		BASECOLOR_METALMASK,
-		REFLECTANCE_SMOOTHNESS,
-		DEPTH,
 		GEOMBUFFERS_COUNT
 	};
 	Microsoft::WRL::ComPtr<ID3D12Resource> mGeomPassBuffers[GEOMBUFFERS_COUNT];

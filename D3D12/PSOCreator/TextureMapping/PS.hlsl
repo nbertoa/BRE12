@@ -16,20 +16,18 @@ SamplerState TexSampler : register (s0);
 Texture2D DiffuseTexture : register (t0);
 
 struct Output {
-	float2 mNormalV : SV_Target0;
+	float4 mNormalV_Smoothness_Depth : SV_Target0;
 	float4 mBaseColor_MetalMask : SV_Target1;
-	float2 mSmoothness : SV_Target2;
-	float mDepthV : SV_Target3;
 };
 
 Output main(const in Input input) {
 	Output output = (Output)0;
 	const float3 normal = normalize(input.mNormalV);
-	output.mNormalV = Encode(normal);
+	output.mNormalV_Smoothness_Depth.xy = Encode(normal);
 	const float3 diffuseColor = DiffuseTexture.Sample(TexSampler, input.mTexCoordO).rgb;
 	output.mBaseColor_MetalMask = float4(gMaterial.mBaseColor_MetalMask.xyz * diffuseColor, gMaterial.mBaseColor_MetalMask.w);
-	output.mSmoothness = gMaterial.mSmoothness;
-	output.mDepthV = input.mPosV.z / gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.y;
+	output.mNormalV_Smoothness_Depth.z = gMaterial.mSmoothness;
+	output.mNormalV_Smoothness_Depth.w = input.mPosV.z / gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.y;
 
 	return output;
 }
