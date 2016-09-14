@@ -90,7 +90,7 @@ namespace {
 		desc.PrimitiveTopologyType = psoParams.mTopology;
 		desc.pRootSignature = psoData.mRootSign;
 		desc.PS = pixelShader;
-		desc.RasterizerState = D3DFactory::DefaultRasterizerDesc();
+		desc.RasterizerState = psoParams.mRasterizerDesc;
 		memcpy(desc.RTVFormats, psoParams.mRtFormats, sizeof(psoParams.mRtFormats));
 		desc.SampleDesc = psoParams.mSampleDesc;
 		desc.SampleMask = psoParams.mSampleMask;
@@ -175,12 +175,32 @@ namespace PSOCreator {
 		psoParams.mNumRenderTargets = 1U;
 		psoParams.mRtFormats[0U] = MasterRender::BackBufferRTFormat();
 		const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
-		for (std::size_t i = 1UL; i < rtCount; ++i) {
+		for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
 			psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 		}
 		psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 		ASSERT(mPSOData[Technique::PUNCTUAL_LIGHT].mPSO == nullptr && mPSOData[Technique::PUNCTUAL_LIGHT].mRootSign == nullptr);
 		CreatePSO(psoParams, mPSOData[Technique::PUNCTUAL_LIGHT]);
+
+		psoParams = PSOParams{};
+		// The camera is inside the sky sphere, so just turn off culling.
+		psoParams.mRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+		// Make sure the depth function is LESS_EQUAL and not just LESS.  
+		// Otherwise, the normalized depth values at z = 1 (NDC) will 
+		// fail the depth test if the depth buffer was cleared to 1.
+		psoParams.mDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+		psoParams.mPSFilename = "PSOCreator/SkyBox/PS.cso";
+		psoParams.mRootSignFilename = "PSOCreator/SkyBox/RS.cso";
+		psoParams.mVSFilename = "PSOCreator/SkyBox/VS.cso";
+		psoParams.mNumRenderTargets = 1U;
+		psoParams.mRtFormats[0U] = MasterRender::BackBufferRTFormat();
+		for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
+			psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
+		}
+		psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		ASSERT(mPSOData[Technique::SKY_BOX].mPSO == nullptr && mPSOData[Technique::SKY_BOX].mRootSign == nullptr);
+		CreatePSO(psoParams, mPSOData[Technique::SKY_BOX]);
 	}
 
 	const PSOData& CommonPSOData::GetData(const CommonPSOData::Technique tech) noexcept {

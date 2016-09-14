@@ -19,6 +19,7 @@ public:
 	const CmdListHelper& operator=(const CmdListHelper&) = delete;
 
 	__forceinline ID3D12GraphicsCommandList& CmdList() noexcept { return mCmdList; }
+	void Reset(ID3D12CommandAllocator& cmdAlloc) noexcept;
 	void ExecuteCmdList() noexcept;
 private:
 	ID3D12CommandQueue& mCmdQueue;
@@ -47,6 +48,11 @@ public:
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
 		std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept = 0;
+
+	virtual void GenerateSkyBoxRecorder(
+		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+		CmdListHelper& cmdListHelper,
+		std::unique_ptr<CmdListRecorder>& task) const noexcept = 0;
 
 	virtual void GeneratePostProcessingPassRecorders(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept = 0;
 };

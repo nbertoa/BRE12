@@ -80,7 +80,10 @@ public:
 		const float tz,
 		const float sx = 1.0f,
 		const float sy = 1.0f,
-		const float sz = 1.0f) noexcept;
+		const float sz = 1.0f,
+		const float rx = 0.0f,
+		const float ry = 0.0f,
+		const float rz = 0.0f) noexcept;
 
     static DirectX::XMFLOAT4X4 Identity4x4() noexcept {
         static DirectX::XMFLOAT4X4 I(

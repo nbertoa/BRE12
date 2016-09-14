@@ -83,7 +83,15 @@ void MathUtils::ComputeMatrix(
 	const float tz,
 	const float sx,
 	const float sy,
-	const float sz) noexcept
+	const float sz,
+	const float rx,
+	const float ry,
+	const float rz) noexcept
 {
-	DirectX::XMStoreFloat4x4(&m, DirectX::XMMatrixScaling(sx, sy, sz) * DirectX::XMMatrixTranslation(tx, ty, tz));
+	DirectX::XMStoreFloat4x4(&m, 
+		DirectX::XMMatrixScaling(sx, sy, sz) *  
+		DirectX::XMMatrixRotationX(rx) * 
+		DirectX::XMMatrixRotationY(ry) * 
+		DirectX::XMMatrixRotationZ(rz) *
+		DirectX::XMMatrixTranslation(tx, ty, tz));
 }

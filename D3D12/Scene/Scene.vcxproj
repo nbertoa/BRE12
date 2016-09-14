@@ -124,6 +124,7 @@
     <ClInclude Include="CmdListRecorders\HeightCmdListRecorder.h" />
     <ClInclude Include="CmdListRecorders\NormalCmdListRecorder.h" />
     <ClInclude Include="cmdListRecorders\PunctualLightCmdListRecorder.h" />
+    <ClInclude Include="CmdListRecorders\SkyBoxCmdListRecorder.h" />
     <ClInclude Include="CmdListRecorders\TextureCmdListRecorder.h" />
     <ClInclude Include="Scene.h" />
   </ItemGroup>
@@ -133,6 +134,7 @@
     <ClCompile Include="CmdListRecorders\HeightCmdListRecorder.cpp" />
     <ClCompile Include="CmdListRecorders\NormalCmdListRecorder.cpp" />
     <ClCompile Include="cmdListRecorders\PunctualLightCmdListRecorder.cpp" />
+    <ClCompile Include="CmdListRecorders\SkyBoxCmdListRecorder.cpp" />
     <ClCompile Include="CmdListRecorders\TextureCmdListRecorder.cpp" />
     <ClCompile Include="Scene.cpp" />
   </ItemGroup>

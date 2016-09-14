@@ -25,6 +25,9 @@
     <Filter Include="HeightMapping">
       <UniqueIdentifier>{93a6c746-6d3f-435f-8e05-adba5f781538}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SkyBox">
+      <UniqueIdentifier>{de4c2da4-73ed-44a3-bb02-208be26317a3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Basic\PS.hlsl">
@@ -80,6 +83,15 @@
     </FxCompile>
     <FxCompile Include="HeightMapping\RS.hlsl">
       <Filter>HeightMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="SkyBox\PS.hlsl">
+      <Filter>SkyBox</Filter>
+    </FxCompile>
+    <FxCompile Include="SkyBox\RS.hlsl">
+      <Filter>SkyBox</Filter>
+    </FxCompile>
+    <FxCompile Include="SkyBox\VS.hlsl">
+      <Filter>SkyBox</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

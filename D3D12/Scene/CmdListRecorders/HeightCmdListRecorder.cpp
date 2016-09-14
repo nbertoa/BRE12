@@ -61,6 +61,7 @@ void HeightCmdListRecorder::Init(
 void HeightCmdListRecorder::RecordCommandLists(
 	const DirectX::XMFLOAT4X4& view,
 	const DirectX::XMFLOAT4X4& proj,
+	const DirectX::XMFLOAT3& eyePosW,
 	const D3D12_CPU_DESCRIPTOR_HANDLE* geomPassRtvCpuDescHandles,
 	const std::uint32_t geomPassRtvCpuDescHandlesCount,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
@@ -75,6 +76,7 @@ void HeightCmdListRecorder::RecordCommandLists(
 	FrameCBuffer frameCBuffer;
 	DirectX::XMStoreFloat4x4(&frameCBuffer.mView, MathUtils::GetTranspose(view));
 	DirectX::XMStoreFloat4x4(&frameCBuffer.mProj, MathUtils::GetTranspose(proj));
+	frameCBuffer.mEyePosW = eyePosW;
 	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrFrameIndex]);
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 

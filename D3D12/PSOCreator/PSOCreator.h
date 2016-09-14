@@ -31,6 +31,7 @@ namespace PSOCreator {
 			HEIGHT_MAPPING,
 			TONE_MAPPING,
 			PUNCTUAL_LIGHT,
+			SKY_BOX,
 			NUM_TECHNIQUES
 		};
 

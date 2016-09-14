@@ -18,6 +18,9 @@
     <ClInclude Include="CmdListRecorders\HeightCmdListRecorder.h">
       <Filter>CmdListRecorders</Filter>
     </ClInclude>
+    <ClInclude Include="CmdListRecorders\SkyBoxCmdListRecorder.h">
+      <Filter>CmdListRecorders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="CmdListRecorders">
@@ -40,6 +43,9 @@
       <Filter>CmdListRecorders</Filter>
     </ClCompile>
     <ClCompile Include="CmdListRecorders\HeightCmdListRecorder.cpp">
+      <Filter>CmdListRecorders</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdListRecorders\SkyBoxCmdListRecorder.cpp">
       <Filter>CmdListRecorders</Filter>
     </ClCompile>
   </ItemGroup>

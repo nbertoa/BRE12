@@ -20,7 +20,7 @@ using namespace DirectX;
 
 namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
-	void UpdateCamera(Camera& camera, XMFLOAT4X4& view, XMFLOAT4X4& proj, const float deltaTime) noexcept {
+	void UpdateCamera(Camera& camera, XMFLOAT4X4& view, XMFLOAT4X4& proj, XMFLOAT3& eyePosW, const float deltaTime) noexcept {
 		static std::int32_t lastXY[]{ 0UL, 0UL };
 		static const float sCameraOffset{ 7.5f };
 		static const float sCameraMultiplier{ 10.0f };
@@ -28,6 +28,7 @@ namespace {
 		if (camera.UpdateViewMatrix()) {
 			proj = camera.GetProj4x4f();
 			view = camera.GetView4x4f();
+			eyePosW = camera.GetPosition3f();
 		}
 
 		// Update camera based on keyboard
@@ -139,10 +140,12 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 void MasterRender::InitCmdListRecorders(Scene* scene) noexcept {
 	ASSERT(scene != nullptr);
 
-	CHECK_HR(mCmdListFrameBegin->Reset(mCmdAllocFrameBegin[0U], nullptr));
 	CmdListHelper cmdListHelper(*mCmdQueue, *mFence, mCurrentFence, *mCmdListFrameBegin);
+	cmdListHelper.Reset(*mCmdAllocFrameBegin[0U]);
 	scene->GenerateGeomPassRecorders(mCmdListProcessor->CmdListQueue(), cmdListHelper, mGeomPassCmdListRecorders);
 	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeomPassBuffers, GEOMBUFFERS_COUNT, mLightPassCmdListRecorders);
+	cmdListHelper.Reset(*mCmdAllocFrameBegin[0U]);
+	scene->GenerateSkyBoxRecorder(mCmdListProcessor->CmdListQueue(), cmdListHelper, mSkyBoxCmdListRecorder);
 
 	const std::uint64_t count{ _countof(mFenceByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {
@@ -159,7 +162,7 @@ tbb::task* MasterRender::execute() {
 	while (!mTerminate) {
 		mTimer.Tick();
 
-		UpdateCamera(mCamera, mView, mProj, mTimer.DeltaTime());
+		UpdateCamera(mCamera, mView, mProj, mEyePosW, mTimer.DeltaTime());
 		ASSERT(mCmdListProcessor->IsIdle());
 
 		BeginFrameTask();
@@ -219,7 +222,7 @@ void MasterRender::BeginFrameTask() {
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mGeomPassCmdListRecorders[i]->RecordCommandLists(mView, mProj, rtvCpuDescHandles, _countof(rtvCpuDescHandles), dsvHandle);
+			mGeomPassCmdListRecorders[i]->RecordCommandLists(mView, mProj, mEyePosW, rtvCpuDescHandles, _countof(rtvCpuDescHandles), dsvHandle);
 	}
 	);
 
@@ -243,8 +246,10 @@ void MasterRender::MiddleFrameTask() {
 
 	CHECK_HR(mCmdListFrameMiddle->Close());
 
-	// Middle Frame task + # light pass cmd list recorders
-	const std::uint32_t taskCount((std::uint32_t)mLightPassCmdListRecorders.size());
+	// Middle Frame task + # light pass cmd list recorders + sky box command list (if any)
+	const std::uint32_t skyBoxMask{ mSkyBoxCmdListRecorder.get() != nullptr };
+	const std::uint32_t lightPassTaskCount{ (std::uint32_t)mLightPassCmdListRecorders.size() };
+	const std::uint32_t taskCount(lightPassTaskCount + skyBoxMask);
 	mCmdListProcessor->ResetExecutedTasksCounter();
 
 	// Execute middle frame task
@@ -255,12 +260,17 @@ void MasterRender::MiddleFrameTask() {
 	const std::uint32_t grainSize(max(1U, taskCount / Settings::sCpuProcessors));
 	D3D12_CPU_DESCRIPTOR_HANDLE currBackBuffer(CurrentBackBufferView());
 	const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
-	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, lightPassTaskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mLightPassCmdListRecorders[i]->RecordCommandLists(mView, mProj, &currBackBuffer, 1U, dsvHandle);
+			mLightPassCmdListRecorders[i]->RecordCommandLists(mView, mProj, mEyePosW, &currBackBuffer, 1U, dsvHandle);
 	}
 	);
+
+	// Record and execute sky box command list (if any)
+	if (skyBoxMask == 1U) {
+		mSkyBoxCmdListRecorder->RecordCommandLists(mView, mProj, mEyePosW, &currBackBuffer, 1U, dsvHandle);
+	}
 
 	// Wait until all previous tasks command lists are executed
 	while (mCmdListProcessor->ExecutedTasksCounter() < taskCount) {

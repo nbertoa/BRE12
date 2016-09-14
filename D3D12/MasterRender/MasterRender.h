@@ -117,6 +117,9 @@ private:
 
 	std::vector<std::unique_ptr<CmdListRecorder>> mLightPassCmdListRecorders;
 
+	std::unique_ptr<CmdListRecorder> mSkyBoxCmdListRecorder;
+
+	DirectX::XMFLOAT3 mEyePosW{ 0.0f, 0.0f, 0.0f };
 	DirectX::XMFLOAT4X4 mView{ MathUtils::Identity4x4() };
 	DirectX::XMFLOAT4X4 mProj{ MathUtils::Identity4x4() };
 	

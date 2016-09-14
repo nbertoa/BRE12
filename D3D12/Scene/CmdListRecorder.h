@@ -34,6 +34,7 @@ public:
 	virtual void RecordCommandLists(
 		const DirectX::XMFLOAT4X4& view,
 		const DirectX::XMFLOAT4X4& proj,
+		const DirectX::XMFLOAT3& eyePosW,
 		const D3D12_CPU_DESCRIPTOR_HANDLE* rtvCpuDescHandles,
 		const std::uint32_t rtvCpuDescHandlesCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept = 0;

@@ -2,13 +2,18 @@
 
 #include <d3d12.h>
 
+#include <Utils\DebugUtils.h>
+
 CmdListHelper::CmdListHelper(ID3D12CommandQueue& cmdQueue, ID3D12Fence& fence, std::uint64_t& currentFence, ID3D12GraphicsCommandList& cmdList)
 	: mCmdQueue(cmdQueue)
 	, mFence(fence)
 	, mCurrentFence(currentFence)
 	, mCmdList(cmdList)
-{
+{	
+}
 
+void CmdListHelper::Reset(ID3D12CommandAllocator& cmdAlloc) noexcept {
+	CHECK_HR(mCmdList.Reset(&cmdAlloc, nullptr));
 }
 
 void CmdListHelper::ExecuteCmdList() noexcept {
