@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <Camera/Camera.h>
+#include <DXUtils\CBuffers.h>
 #include <GlobalData\Settings.h>
 #include <MasterRender/CommandListProcessor.h>
 #include <Timer/Timer.h>
@@ -31,11 +32,7 @@ public:
 	__forceinline static const DXGI_FORMAT BackBufferFormat() noexcept { return sBackBufferFormat; }
 	__forceinline static const DXGI_FORMAT* GeomPassBuffersFormats() noexcept { return sGeomPassBufferFormats; }
 
-
-	//
-	// TODO
-	//
-	__forceinline static const std::uint32_t NumRenderTargets() noexcept { return GEOMBUFFERS_COUNT + 1U; }
+	__forceinline static const std::uint32_t NumRenderTargets() noexcept { return GEOMBUFFERS_COUNT; }
 	__forceinline static const DXGI_FORMAT DepthStencilFormat() noexcept { return sDepthStencilFormat; }
 
 private:
@@ -119,9 +116,7 @@ private:
 
 	std::unique_ptr<CmdListRecorder> mSkyBoxCmdListRecorder;
 
-	DirectX::XMFLOAT3 mEyePosW{ 0.0f, 0.0f, 0.0f };
-	DirectX::XMFLOAT4X4 mView{ MathUtils::Identity4x4() };
-	DirectX::XMFLOAT4X4 mProj{ MathUtils::Identity4x4() };
+	FrameCBuffer mFrameCBuffer;
 	
 	bool mTerminate{ false };
 };

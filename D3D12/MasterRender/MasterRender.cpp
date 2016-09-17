@@ -20,14 +20,14 @@ using namespace DirectX;
 
 namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
-	void UpdateCamera(Camera& camera, XMFLOAT4X4& view, XMFLOAT4X4& proj, XMFLOAT3& eyePosW, const float deltaTime) noexcept {
+	void UpdateCamera(Camera& camera, XMFLOAT4X4& viewTranspose, XMFLOAT4X4& projTranpose, XMFLOAT3& eyePosW, const float deltaTime) noexcept {
 		static std::int32_t lastXY[]{ 0UL, 0UL };
 		static const float sCameraOffset{ 7.5f };
 		static const float sCameraMultiplier{ 10.0f };
 
 		if (camera.UpdateViewMatrix()) {
-			proj = camera.GetProj4x4f();
-			view = camera.GetView4x4f();
+			DirectX::XMStoreFloat4x4(&viewTranspose, MathUtils::GetTranspose(camera.GetView4x4f()));
+			DirectX::XMStoreFloat4x4(&projTranpose, MathUtils::GetTranspose(camera.GetProj4x4f()));
 			eyePosW = camera.GetPosition3f();
 		}
 
@@ -162,7 +162,7 @@ tbb::task* MasterRender::execute() {
 	while (!mTerminate) {
 		mTimer.Tick();
 
-		UpdateCamera(mCamera, mView, mProj, mEyePosW, mTimer.DeltaTime());
+		UpdateCamera(mCamera, mFrameCBuffer.mView, mFrameCBuffer.mProj, mFrameCBuffer.mEyePosW, mTimer.DeltaTime());
 		ASSERT(mCmdListProcessor->IsIdle());
 
 		BeginFrameTask();
@@ -222,7 +222,7 @@ void MasterRender::BeginFrameTask() {
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mGeomPassCmdListRecorders[i]->RecordCommandLists(mView, mProj, mEyePosW, rtvCpuDescHandles, _countof(rtvCpuDescHandles), dsvHandle);
+			mGeomPassCmdListRecorders[i]->RecordCommandLists(mFrameCBuffer, rtvCpuDescHandles, _countof(rtvCpuDescHandles), dsvHandle);
 	}
 	);
 
@@ -263,13 +263,13 @@ void MasterRender::MiddleFrameTask() {
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, lightPassTaskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mLightPassCmdListRecorders[i]->RecordCommandLists(mView, mProj, mEyePosW, &currBackBuffer, 1U, dsvHandle);
+			mLightPassCmdListRecorders[i]->RecordCommandLists(mFrameCBuffer, &currBackBuffer, 1U, dsvHandle);
 	}
 	);
 
 	// Record and execute sky box command list (if any)
 	if (skyBoxMask == 1U) {
-		mSkyBoxCmdListRecorder->RecordCommandLists(mView, mProj, mEyePosW, &currBackBuffer, 1U, dsvHandle);
+		mSkyBoxCmdListRecorder->RecordCommandLists(mFrameCBuffer, &currBackBuffer, 1U, dsvHandle);
 	}
 
 	// Wait until all previous tasks command lists are executed

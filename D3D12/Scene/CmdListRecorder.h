@@ -6,6 +6,7 @@
 #include <tbb/concurrent_queue.h>
 #include <wrl.h>
 
+#include <DXUtils\CBuffers.h>
 #include <DXUtils/D3DFactory.h>
 #include <GlobalData/Settings.h>
 #include <MathUtils/MathUtils.h>
@@ -32,9 +33,7 @@ public:
 			
 	// Build command lists and push them to the queue.
 	virtual void RecordCommandLists(
-		const DirectX::XMFLOAT4X4& view,
-		const DirectX::XMFLOAT4X4& proj,
-		const DirectX::XMFLOAT3& eyePosW,
+		const FrameCBuffer& frameCBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE* rtvCpuDescHandles,
 		const std::uint32_t rtvCpuDescHandlesCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept = 0;
