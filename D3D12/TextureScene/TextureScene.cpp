@@ -6,16 +6,17 @@
 #include <DXUtils/Material.h>
 #include <DXUtils/PunctualLight.h>
 #include <GlobalData/D3dData.h>
+#include <MathUtils/MathUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
-#include <Scene/CmdListRecorders/TextureCmdListRecorder.h>
-#include <Scene/CmdListRecorders/PunctualLightCmdListRecorder.h>
+#include <Scene/GeometryPass/TextureCmdListRecorder.h>
+#include <Scene/LightPass/PunctualLightCmdListRecorder.h>
 
 void TextureScene::GenerateGeomPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	CmdListHelper& cmdListHelper, 
-	std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
+	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
 
 	const std::size_t numGeometry{ 100UL };
@@ -41,9 +42,9 @@ void TextureScene::GenerateGeomPassRecorders(
 	ASSERT(model->HasMeshes());	
 	const Mesh& mesh{ model->Meshes()[0U] };
 
-	std::vector<CmdListRecorder::GeometryData> geomDataVec;
+	std::vector<GeometryPassCmdListRecorder::GeometryData> geomDataVec;
 	geomDataVec.resize(Settings::sCpuProcessors);
-	for (CmdListRecorder::GeometryData& geomData : geomDataVec) {
+	for (GeometryPassCmdListRecorder::GeometryData& geomData : geomDataVec) {
 		geomData.mVertexBufferData = mesh.VertexBufferData();
 		geomData.mIndexBufferData = mesh.IndexBufferData();
 		geomData.mWorldMatrices.reserve(numGeometry);
@@ -57,7 +58,7 @@ void TextureScene::GenerateGeomPassRecorders(
 			TextureCmdListRecorder& task{ *new TextureCmdListRecorder(D3dData::Device(), cmdListQueue) };
 			tasks[k].reset(&task);
 						
-			CmdListRecorder::GeometryData& currGeomData{ geomDataVec[k] };
+			GeometryPassCmdListRecorder::GeometryData& currGeomData{ geomDataVec[k] };
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
 				const float tx{ MathUtils::RandF(-meshSpaceOffset, meshSpaceOffset) };
 				const float ty{ MathUtils::RandF(-meshSpaceOffset, meshSpaceOffset) };
@@ -98,7 +99,7 @@ void TextureScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
-	std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept
+	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) const noexcept
 {
 	ASSERT(tasks.empty());
 	ASSERT(geometryBuffers != nullptr);

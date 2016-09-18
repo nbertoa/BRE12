@@ -2,11 +2,11 @@
 
 #include <DirectXMath.h>
 
-#include <Scene/CmdListRecorder.h>
+#include <Scene/GeometryPassCmdListRecorder.h>
 
 struct Material;
 
-class HeightCmdListRecorder : public CmdListRecorder {
+class HeightCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
 	explicit HeightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
@@ -35,17 +35,6 @@ private:
 		ID3D12Resource** normals,
 		ID3D12Resource** heights,
 		const std::uint32_t dataCount) noexcept;
-
-	std::vector<GeometryData> mGeometryDataVec;
-
-	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
-	UploadBuffer* mImmutableCBuffer{ nullptr };
-
-	UploadBuffer* mObjectCBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescHandleBegin;
-
-	D3D12_GPU_DESCRIPTOR_HANDLE mMaterialsCBufferGpuDescHandleBegin;
-	UploadBuffer* mMaterialsCBuffer{ nullptr };
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mTexturesBufferGpuDescHandleBegin;
 	D3D12_GPU_DESCRIPTOR_HANDLE mNormalsBufferGpuDescHandleBegin;

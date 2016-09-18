@@ -12,9 +12,11 @@
 #include <MasterRender/CommandListProcessor.h>
 #include <Timer/Timer.h>
 #include <Utils/DebugUtils.h>
-;
+
+class GeometryPassCmdListRecorder;
+class LightPassCmdListRecorder;
 class Scene;
-class CmdListRecorder;
+class SkyBoxCmdListRecorder;
 
 // It has the responsibility to build CmdListRecorder's and also execute them 
 // (to record command lists and push to the queue provided by CommandListProcessor)
@@ -110,11 +112,11 @@ private:
 	ID3D12DescriptorHeap* mRtvHeap{ nullptr };
 	ID3D12DescriptorHeap* mDsvHeap{ nullptr };
 
-	std::vector<std::unique_ptr<CmdListRecorder>> mGeomPassCmdListRecorders;
+	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>> mGeomPassCmdListRecorders;
 
-	std::vector<std::unique_ptr<CmdListRecorder>> mLightPassCmdListRecorders;
+	std::vector<std::unique_ptr<LightPassCmdListRecorder>> mLightPassCmdListRecorders;
 
-	std::unique_ptr<CmdListRecorder> mSkyBoxCmdListRecorder;
+	std::unique_ptr<SkyBoxCmdListRecorder> mSkyBoxCmdListRecorder;
 
 	FrameCBuffer mFrameCBuffer;
 	

@@ -10,11 +10,10 @@
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <ResourceManager\ResourceManager.h>
-#include <Scene/CmdListRecorder.h>
+#include <Scene/GeometryPassCmdListRecorder.h>
+#include <Scene/LightPassCmdListRecorder.h>
+#include <Scene/SkyBoxCmdListRecorder.h>
 #include <Scene/Scene.h>
-
-// Uncomment to use Vsync. We do not use a boolean to avoid branches
-//#define V_SYNC
 
 using namespace DirectX;
 

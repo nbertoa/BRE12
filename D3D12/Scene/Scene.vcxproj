@@ -119,24 +119,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CmdListRecorder.h" />
-    <ClInclude Include="cmdListRecorders\BasicCmdListRecorder.h" />
-    <ClInclude Include="CmdListRecorders\HeightCmdListRecorder.h" />
-    <ClInclude Include="CmdListRecorders\NormalCmdListRecorder.h" />
-    <ClInclude Include="cmdListRecorders\PunctualLightCmdListRecorder.h" />
-    <ClInclude Include="CmdListRecorders\SkyBoxCmdListRecorder.h" />
-    <ClInclude Include="CmdListRecorders\TextureCmdListRecorder.h" />
+    <ClInclude Include="GeometryPassCmdListRecorder.h" />
+    <ClInclude Include="GeometryPass\BasicCmdListRecorder.h" />
+    <ClInclude Include="GeometryPass\HeightCmdListRecorder.h" />
+    <ClInclude Include="GeometryPass\NormalCmdListRecorder.h" />
+    <ClInclude Include="GeometryPass\TextureCmdListRecorder.h" />
+    <ClInclude Include="LightPassCmdListRecorder.h" />
+    <ClInclude Include="LightPass\PunctualLightCmdListRecorder.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SkyBoxCmdListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CmdListRecorder.cpp" />
-    <ClCompile Include="cmdListRecorders\BasicCmdListRecorder.cpp" />
-    <ClCompile Include="CmdListRecorders\HeightCmdListRecorder.cpp" />
-    <ClCompile Include="CmdListRecorders\NormalCmdListRecorder.cpp" />
-    <ClCompile Include="cmdListRecorders\PunctualLightCmdListRecorder.cpp" />
-    <ClCompile Include="CmdListRecorders\SkyBoxCmdListRecorder.cpp" />
-    <ClCompile Include="CmdListRecorders\TextureCmdListRecorder.cpp" />
+    <ClCompile Include="GeometryPassCmdListRecorder.cpp" />
+    <ClCompile Include="GeometryPass\BasicCmdListRecorder.cpp" />
+    <ClCompile Include="GeometryPass\HeightCmdListRecorder.cpp" />
+    <ClCompile Include="GeometryPass\NormalCmdListRecorder.cpp" />
+    <ClCompile Include="GeometryPass\TextureCmdListRecorder.cpp" />
+    <ClCompile Include="LightPassCmdListRecorder.cpp" />
+    <ClCompile Include="LightPass\PunctualLightCmdListRecorder.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SkyBoxCmdListRecorder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

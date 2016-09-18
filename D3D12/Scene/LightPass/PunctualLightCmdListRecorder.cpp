@@ -51,7 +51,7 @@ namespace {
 }
 
 PunctualLightCmdListRecorder::PunctualLightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
-	: CmdListRecorder(device, cmdListQueue)
+	: LightPassCmdListRecorder(device, cmdListQueue)
 {
 }
 
@@ -135,23 +135,6 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 
 	// Next frame
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % _countof(mCmdAlloc);
-}
-
-bool PunctualLightCmdListRecorder::ValidateData() const noexcept {
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
-		if (mFrameCBuffer[i] == nullptr) {
-			return false;
-		}
-	}
-
-	const bool result =
-		CmdListRecorder::ValidateData() &&
-		mImmutableCBuffer != nullptr &&
-		mNumLights != 0U &&
-		mLightsBuffer != nullptr &&
-		mLightsBufferGpuDescHandleBegin.ptr != 0UL;
-
-	return result;
 }
 
 void PunctualLightCmdListRecorder::BuildBuffers(const PunctualLight* lights, const std::uint32_t descHeapOffset) noexcept {

@@ -1,4 +1,4 @@
-#include "NormalCmdListRecorder.h"
+#include "HeightCmdListRecorder.h"
 
 #include <DirectXMath.h>
 
@@ -10,26 +10,28 @@
 #include <ResourceManager/UploadBuffer.h>
 #include <Utils/DebugUtils.h>
 
-NormalCmdListRecorder::NormalCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
-	: CmdListRecorder(device, cmdListQueue)
+HeightCmdListRecorder::HeightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
+	: GeometryPassCmdListRecorder(device, cmdListQueue)
 {
 }
 
-void NormalCmdListRecorder::Init(
+void HeightCmdListRecorder::Init(
 	const GeometryData* geometryDataVec,
 	const std::uint32_t numGeomData,
 	const Material* materials,
 	ID3D12Resource** textures,
 	ID3D12Resource** normals,
+	ID3D12Resource** heights,
 	const std::uint32_t numResources) noexcept
 {
 	ASSERT(ValidateData() == false);
 	ASSERT(geometryDataVec != nullptr);
 	ASSERT(numGeomData != 0U);
-	ASSERT(materials != nullptr);	
+	ASSERT(materials != nullptr);
+	ASSERT(numResources > 0UL);
 	ASSERT(textures != nullptr);
 	ASSERT(normals != nullptr);
-	ASSERT(numResources > 0UL);
+	ASSERT(heights != nullptr);
 
 	// Check that the total number of matrices (geometry to be drawn) will be equal to available materials
 #ifdef _DEBUG
@@ -46,17 +48,17 @@ void NormalCmdListRecorder::Init(
 		mGeometryDataVec.push_back(geometryDataVec[i]);
 	}
 
-	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::NORMAL_MAPPING));
+	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::HEIGHT_MAPPING));
 
 	mPSO = psoData.mPSO;
 	mRootSign = psoData.mRootSign;
 
-	BuildBuffers(materials, textures, normals, numResources);
+	BuildBuffers(materials, textures, normals, heights, numResources);
 
 	ASSERT(ValidateData());
 }
 
-void NormalCmdListRecorder::RecordCommandLists(
+void HeightCmdListRecorder::RecordCommandLists(
 	const FrameCBuffer& frameCBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE* geomPassRtvCpuDescHandles,
 	const std::uint32_t geomPassRtvCpuDescHandlesCount,
@@ -87,16 +89,18 @@ void NormalCmdListRecorder::RecordCommandLists(
 	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDescHandle(mMaterialsCBufferGpuDescHandleBegin);
 	D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDescHandle(mTexturesBufferGpuDescHandleBegin);
 	D3D12_GPU_DESCRIPTOR_HANDLE normalsBufferGpuDescHandle(mNormalsBufferGpuDescHandleBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE heightsBufferGpuDescHandle(mHeightsBufferGpuDescHandleBegin);
 
-	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
 	// Set frame constants root parameters
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
 
 	// Set immutable constants root parameters
 	D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootConstantBufferView(5U, immutableCBufferGpuVAddress);
 
 	// Draw objects
 	const std::size_t geomCount{ mGeometryDataVec.size() };
@@ -109,15 +113,18 @@ void NormalCmdListRecorder::RecordCommandLists(
 			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDescHandle);
 			objectCBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(3U, heightsBufferGpuDescHandle);
+			heightsBufferGpuDescHandle.ptr += descHandleIncSize;
+
+			mCmdList->SetGraphicsRootDescriptorTable(4U, materialsCBufferGpuDescHandle);
 			materialsCBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(4U, texturesBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(6U, texturesBufferGpuDescHandle);
 			texturesBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(5U, normalsBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(7U, normalsBufferGpuDescHandle);
 			normalsBufferGpuDescHandle.ptr += descHandleIncSize;
-
+			
 			mCmdList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
 		}
 	}
@@ -130,43 +137,26 @@ void NormalCmdListRecorder::RecordCommandLists(
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;
 }
 
-bool NormalCmdListRecorder::ValidateData() const noexcept {
-	const std::size_t numGeomData{ mGeometryDataVec.size() };
-	for (std::size_t i = 0UL; i < numGeomData; ++i) {
-		const std::size_t numMatrices{ mGeometryDataVec[i].mWorldMatrices.size() };
-		if (numMatrices == 0UL) {
-			return false;
-		}
-	}
-
-	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
-		if (mFrameCBuffer[i] == nullptr) {
-			return false;
-		}
-	}
-
+bool HeightCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
-		CmdListRecorder::ValidateData() &&
-		mImmutableCBuffer != nullptr &&
-		mObjectCBuffer != nullptr &&
-		mObjectCBufferGpuDescHandleBegin.ptr != 0UL &&
-		numGeomData != 0UL &&
-		mMaterialsCBuffer != nullptr &&
-		mMaterialsCBufferGpuDescHandleBegin.ptr != 0UL &&
-		mTexturesBufferGpuDescHandleBegin.ptr != 0UL && 
-		mNormalsBufferGpuDescHandleBegin.ptr != 0UL;
+		GeometryPassCmdListRecorder::ValidateData() &&
+		mTexturesBufferGpuDescHandleBegin.ptr != 0UL &&
+		mNormalsBufferGpuDescHandleBegin.ptr != 0UL &&
+		mHeightsBufferGpuDescHandleBegin.ptr != 0UL;
 
 	return result;
 }
 
-void NormalCmdListRecorder::BuildBuffers(
-	const Material* materials, 
-	ID3D12Resource** textures, 
+void HeightCmdListRecorder::BuildBuffers(
+	const Material* materials,
+	ID3D12Resource** textures,
 	ID3D12Resource** normals,
+	ID3D12Resource** heights,
 	const std::uint32_t dataCount) noexcept {
 	ASSERT(materials != nullptr);
 	ASSERT(textures != nullptr);
 	ASSERT(normals != nullptr);
+	ASSERT(heights != nullptr);
 	ASSERT(dataCount != 0UL);
 
 	ASSERT(mCbvSrvUavDescHeap == nullptr);
@@ -182,8 +172,8 @@ void NormalCmdListRecorder::BuildBuffers(
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	descHeapDesc.NodeMask = 0U;
-	// 1 obj cbuffer + 1 material cbuffer per geometry + 1 texture per geometry + 1 normal texture per geometry
-	descHeapDesc.NumDescriptors = dataCount * 4U; 
+	// 1 obj cbuffer + 1 material cbuffer per geometry + 1 texture per geometry + 1 normal texture per geometry + 1 height texture per geometry
+	descHeapDesc.NumDescriptors = dataCount * 5U;
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
 
@@ -218,6 +208,9 @@ void NormalCmdListRecorder::BuildBuffers(
 	// Set begin for normals in GPU
 	mNormalsBufferGpuDescHandleBegin.ptr = mObjectCBufferGpuDescHandleBegin.ptr + dataCount * 3U * descHandleIncSize;
 
+	// Set begin for heights in GPU
+	mHeightsBufferGpuDescHandleBegin.ptr = mObjectCBufferGpuDescHandleBegin.ptr + dataCount * 4U * descHandleIncSize;
+
 	// Create object cbuffer descriptors
 	// Create material cbuffer descriptors
 	// Fill materials cbuffers data
@@ -227,6 +220,7 @@ void NormalCmdListRecorder::BuildBuffers(
 	D3D12_CPU_DESCRIPTOR_HANDLE currMaterialCBufferDescHandle{ mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + dataCount * descHandleIncSize };
 	D3D12_CPU_DESCRIPTOR_HANDLE currTextureBufferDescHandle{ mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + dataCount * 2U * descHandleIncSize };
 	D3D12_CPU_DESCRIPTOR_HANDLE currNormalsBufferDescHandle{ mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + dataCount * 3U * descHandleIncSize };
+	D3D12_CPU_DESCRIPTOR_HANDLE currHeightsBufferDescHandle{ mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + dataCount * 4U * descHandleIncSize };
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -258,12 +252,19 @@ void NormalCmdListRecorder::BuildBuffers(
 		srvDesc.Texture2D.MipLevels = res->GetDesc().MipLevels;
 		ResourceManager::Get().CreateShaderResourceView(*res, srvDesc, currNormalsBufferDescHandle);
 
+		// Create height texture descriptor
+		res = heights[i];
+		srvDesc.Format = res->GetDesc().Format;
+		srvDesc.Texture2D.MipLevels = res->GetDesc().MipLevels;
+		ResourceManager::Get().CreateShaderResourceView(*res, srvDesc, currHeightsBufferDescHandle);
+
 		mMaterialsCBuffer->CopyData((std::uint32_t)i, &materials[i], sizeof(Material));
 
 		currMaterialCBufferDescHandle.ptr += descHandleIncSize;
 		currObjCBufferDescHandle.ptr += descHandleIncSize;
 		currTextureBufferDescHandle.ptr += descHandleIncSize;
 		currNormalsBufferDescHandle.ptr += descHandleIncSize;
+		currHeightsBufferDescHandle.ptr += descHandleIncSize;
 	}
 
 	// Create frame cbuffers

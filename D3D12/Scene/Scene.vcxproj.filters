@@ -2,51 +2,52 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="cmdListRecorders\BasicCmdListRecorder.h">
-      <Filter>CmdListRecorders</Filter>
+    <ClInclude Include="GeometryPassCmdListRecorder.h" />
+    <ClInclude Include="LightPassCmdListRecorder.h" />
+    <ClInclude Include="SkyBoxCmdListRecorder.h" />
+    <ClInclude Include="GeometryPass\BasicCmdListRecorder.h">
+      <Filter>GeometryPass</Filter>
     </ClInclude>
-    <ClInclude Include="cmdListRecorders\PunctualLightCmdListRecorder.h">
-      <Filter>CmdListRecorders</Filter>
+    <ClInclude Include="GeometryPass\HeightCmdListRecorder.h">
+      <Filter>GeometryPass</Filter>
     </ClInclude>
-    <ClInclude Include="CmdListRecorder.h" />
-    <ClInclude Include="CmdListRecorders\TextureCmdListRecorder.h">
-      <Filter>CmdListRecorders</Filter>
+    <ClInclude Include="GeometryPass\NormalCmdListRecorder.h">
+      <Filter>GeometryPass</Filter>
     </ClInclude>
-    <ClInclude Include="CmdListRecorders\NormalCmdListRecorder.h">
-      <Filter>CmdListRecorders</Filter>
+    <ClInclude Include="GeometryPass\TextureCmdListRecorder.h">
+      <Filter>GeometryPass</Filter>
     </ClInclude>
-    <ClInclude Include="CmdListRecorders\HeightCmdListRecorder.h">
-      <Filter>CmdListRecorders</Filter>
-    </ClInclude>
-    <ClInclude Include="CmdListRecorders\SkyBoxCmdListRecorder.h">
-      <Filter>CmdListRecorders</Filter>
+    <ClInclude Include="LightPass\PunctualLightCmdListRecorder.h">
+      <Filter>LightPass</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="CmdListRecorders">
-      <UniqueIdentifier>{433002e3-920a-4663-89b4-b64190285145}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="cmdListRecorders\BasicCmdListRecorder.cpp">
-      <Filter>CmdListRecorders</Filter>
-    </ClCompile>
-    <ClCompile Include="cmdListRecorders\PunctualLightCmdListRecorder.cpp">
-      <Filter>CmdListRecorders</Filter>
-    </ClCompile>
-    <ClCompile Include="CmdListRecorder.cpp" />
-    <ClCompile Include="CmdListRecorders\TextureCmdListRecorder.cpp">
-      <Filter>CmdListRecorders</Filter>
-    </ClCompile>
     <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="CmdListRecorders\NormalCmdListRecorder.cpp">
-      <Filter>CmdListRecorders</Filter>
+    <ClCompile Include="GeometryPassCmdListRecorder.cpp" />
+    <ClCompile Include="LightPassCmdListRecorder.cpp" />
+    <ClCompile Include="SkyBoxCmdListRecorder.cpp" />
+    <ClCompile Include="GeometryPass\BasicCmdListRecorder.cpp">
+      <Filter>GeometryPass</Filter>
     </ClCompile>
-    <ClCompile Include="CmdListRecorders\HeightCmdListRecorder.cpp">
-      <Filter>CmdListRecorders</Filter>
+    <ClCompile Include="GeometryPass\HeightCmdListRecorder.cpp">
+      <Filter>GeometryPass</Filter>
     </ClCompile>
-    <ClCompile Include="CmdListRecorders\SkyBoxCmdListRecorder.cpp">
-      <Filter>CmdListRecorders</Filter>
+    <ClCompile Include="GeometryPass\NormalCmdListRecorder.cpp">
+      <Filter>GeometryPass</Filter>
     </ClCompile>
+    <ClCompile Include="GeometryPass\TextureCmdListRecorder.cpp">
+      <Filter>GeometryPass</Filter>
+    </ClCompile>
+    <ClCompile Include="LightPass\PunctualLightCmdListRecorder.cpp">
+      <Filter>LightPass</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="GeometryPass">
+      <UniqueIdentifier>{01d89073-c9d2-48a4-ab16-085c8af7f402}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LightPass">
+      <UniqueIdentifier>{b14b6e78-15c3-4296-aa18-e87510b181ec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

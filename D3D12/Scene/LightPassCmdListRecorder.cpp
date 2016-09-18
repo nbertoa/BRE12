@@ -1,4 +1,4 @@
-#include "CmdListRecorder.h"
+#include "LightPassCmdListRecorder.h"
 
 #include <CommandManager/CommandManager.h>
 #include <Utils/DebugUtils.h>
@@ -19,23 +19,26 @@ namespace {
 
 		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
 
-		// Start off in a closed state.  This is because the first time we refer 
-		// to the command list we will Reset it, and it needs to be closed before
-		// calling Reset.
 		cmdList->Close();
 	}
 }
 
-CmdListRecorder::CmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
+LightPassCmdListRecorder::LightPassCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
 	: mDevice(device)
 	, mCmdListQueue(cmdListQueue)
 {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 
-bool CmdListRecorder::ValidateData() const noexcept {
-	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i ) {
+bool LightPassCmdListRecorder::ValidateData() const noexcept {
+	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {
+			return false;
+		}
+	}
+
+	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
+		if (mFrameCBuffer[i] == nullptr) {
 			return false;
 		}
 	}
@@ -43,7 +46,10 @@ bool CmdListRecorder::ValidateData() const noexcept {
 	return
 		mCmdList != nullptr &&
 		mCbvSrvUavDescHeap != nullptr &&
-		mTopology != D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED &&
 		mRootSign != nullptr &&
-		mPSO != nullptr;
+		mPSO != nullptr &&
+		mNumLights != 0UL && 
+		mImmutableCBuffer != nullptr &&
+		mLightsBuffer != nullptr &&
+		mLightsBufferGpuDescHandleBegin.ptr != 0UL;
 }

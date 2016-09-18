@@ -11,7 +11,7 @@
 #include <Utils/DebugUtils.h>
 
 BasicCmdListRecorder::BasicCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
-	: CmdListRecorder(device, cmdListQueue)
+	: GeometryPassCmdListRecorder(device, cmdListQueue)
 {
 }
 
@@ -116,33 +116,6 @@ void BasicCmdListRecorder::RecordCommandLists(
 
 	// Next frame
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;
-}
-
-bool BasicCmdListRecorder::ValidateData() const noexcept {
-	const std::size_t numGeomData{ mGeometryDataVec.size() };
-	for (std::size_t i = 0UL; i < numGeomData; ++i) {
-		const std::size_t numMatrices{ mGeometryDataVec[i].mWorldMatrices.size() };
-		if (numMatrices == 0UL) {
-			return false;
-		}
-	}
-
-	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
-		if (mFrameCBuffer[i] == nullptr) {
-			return false;
-		}
-	}
-
-	const bool result = 
-		CmdListRecorder::ValidateData() &&
-		mImmutableCBuffer != nullptr &&
-		mObjectCBuffer != nullptr &&
-		mObjectCBufferGpuDescHandleBegin.ptr != 0UL &&
-		numGeomData != 0UL &&
-		mMaterialsCBuffer != nullptr && 
-		mMaterialsCBufferGpuDescHandleBegin.ptr != 0UL;
-
-	return result;
 }
 
 void BasicCmdListRecorder::BuildBuffers(const Material* materials, const std::uint32_t numMaterials) noexcept {

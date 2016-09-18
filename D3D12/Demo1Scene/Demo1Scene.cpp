@@ -11,8 +11,8 @@
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
-#include <Scene/CmdListRecorders/HeightCmdListRecorder.h>
-#include <Scene/CmdListRecorders/PunctualLightCmdListRecorder.h>
+#include <Scene/GeometryPass/HeightCmdListRecorder.h>
+#include <Scene/LightPass/PunctualLightCmdListRecorder.h>
 
 namespace {
 	static const float sS{ 2.0f };
@@ -81,10 +81,10 @@ namespace {
 		const std::size_t numMeshes{ meshes.size() };
 		ASSERT(numMeshes > 0UL);
 
-		std::vector<CmdListRecorder::GeometryData> geomDataVec;
+		std::vector<GeometryPassCmdListRecorder::GeometryData> geomDataVec;
 		geomDataVec.resize(numMeshes);
 		for (std::size_t i = 0UL; i < numMeshes; ++i) {
-			CmdListRecorder::GeometryData& geomData{ geomDataVec[i] };
+			GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[i] };
 			const Mesh& mesh{ meshes[i] };
 			geomData.mVertexBufferData = mesh.VertexBufferData();
 			geomData.mIndexBufferData = mesh.IndexBufferData();
@@ -117,7 +117,7 @@ namespace {
 				texturesVec[index] = texture;
 				normalsVec[index] = normal;
 				heightsVec[index] = height;
-				CmdListRecorder::GeometryData& geomData{ geomDataVec[j] };
+				GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[j] };
 				geomData.mWorldMatrices.push_back(w);
 			}
 
@@ -133,7 +133,7 @@ namespace {
 void Demo1Scene::GenerateGeomPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	CmdListHelper& cmdListHelper,
-	std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept {
+	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) const noexcept {
 	ASSERT(tasks.empty());
 	
 	Model* model;
@@ -223,7 +223,7 @@ void Demo1Scene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
-	std::vector<std::unique_ptr<CmdListRecorder>>& tasks) const noexcept
+	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) const noexcept
 {
 	ASSERT(tasks.empty());
 	ASSERT(geometryBuffers != nullptr);
