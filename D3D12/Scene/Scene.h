@@ -17,6 +17,7 @@ struct ID3D12GraphicsCommandList;
 class CmdListHelper {
 public:
 	CmdListHelper(ID3D12CommandQueue& cmdQueue, ID3D12Fence& fence, std::uint64_t& currentFence, ID3D12GraphicsCommandList& cmdList);
+	~CmdListHelper();
 	CmdListHelper(const CmdListHelper&) = delete;
 	const CmdListHelper& operator=(const CmdListHelper&) = delete;
 
@@ -49,6 +50,7 @@ public:
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, 
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
+		CmdListHelper& cmdListHelper,
 		std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) const noexcept = 0;
 
 	virtual void GenerateSkyBoxRecorder(

@@ -75,7 +75,7 @@ float D_TR(const float m, const float dotNH) {
 #define FD_DISNEY
 #define V_SMITH
 
-float3 brdf(const float3 N, const float3 V, const float3 L, const float3 baseColor, const float smoothness, const float metalMask) {
+float3 brdf(const float3 N, const float3 V, const float3 L, const float3 baseColor, const float smoothness, const float metalMask, const float3 reflectionColor) {
 	const float roughness = 1.0f - smoothness;
 	const float alpha = roughness * roughness;
 
@@ -97,7 +97,7 @@ float3 brdf(const float3 N, const float3 V, const float3 L, const float3 baseCol
 	const float G = G_SmithGGX(dotNL, dotNV, alpha);
 #endif
 
-	const float3 Fs = D * F * G;
+	const float3 Fs = D * F * G * reflectionColor;
 
 	// Diffuse term
 	const float3 diffuseColor = (1.0f - metalMask) * baseColor;

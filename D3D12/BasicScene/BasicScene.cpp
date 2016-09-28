@@ -55,6 +55,7 @@ namespace {
 		const float offsetZ,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		const std::vector<Mesh>& meshes,
+		ID3D12Resource& cubeMap,
 		BasicCmdListRecorder* &recorder) {
 		recorder = new BasicCmdListRecorder(D3dData::Device(), cmdListQueue);
 
@@ -94,7 +95,7 @@ namespace {
 			tz += offsetZ;
 		}
 
-		recorder->Init(geomDataVec.data(), (std::uint32_t)geomDataVec.size(), materials.data(), (std::uint32_t)materials.size());
+		recorder->Init(geomDataVec.data(), (std::uint32_t)geomDataVec.size(), materials.data(), (std::uint32_t)materials.size(), cubeMap);
 	}
 }
 
@@ -116,16 +117,22 @@ void BasicScene::GenerateGeomPassRecorders(
 	ModelManager::Get().CreateSphere(1.0f, 50, 50, model2, cmdListHelper.CmdList(), uploadVertexBuffer2, uploadIndexBuffer2);
 	ASSERT(model2 != nullptr);
 
+	// Cube map texture
+	ID3D12Resource* cubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
+	ResourceManager::Get().LoadTextureFromFile("textures/sunset2_cube_map.dds", cubeMap, uploadBufferTex, cmdListHelper.CmdList());
+	ASSERT(cubeMap != nullptr);
+
 	cmdListHelper.ExecuteCmdList();
 
 	tasks.resize(2);
 	BasicCmdListRecorder* basicRecorder{ nullptr };
-	GenerateRecorder(sSphereTx, sSphereTy, sSphereTz, sSphereOffsetX, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), basicRecorder);
+	GenerateRecorder(sSphereTx, sSphereTy, sSphereTz, sSphereOffsetX, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), *cubeMap, basicRecorder);
 	ASSERT(basicRecorder != nullptr);
 	tasks[0].reset(basicRecorder);
 
 	BasicCmdListRecorder* basicRecorder2{ nullptr };
-	GenerateRecorder(sBunnyTx, sBunnyTy, sBunnyTz, sBunnyOffsetX, 0.0f, 0.0f, cmdListQueue, model2->Meshes(), basicRecorder2);
+	GenerateRecorder(sBunnyTx, sBunnyTy, sBunnyTz, sBunnyOffsetX, 0.0f, 0.0f, cmdListQueue, model2->Meshes(), *cubeMap, basicRecorder2);
 	ASSERT(basicRecorder2 != nullptr);
 	tasks[1].reset(basicRecorder2);
 }
@@ -134,6 +141,7 @@ void BasicScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
+	CmdListHelper& /*cmdListHelper*/,
 	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) const noexcept
 {
 	ASSERT(tasks.empty());

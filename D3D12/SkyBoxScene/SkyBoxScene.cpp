@@ -224,11 +224,20 @@ void SkyBoxScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
+	CmdListHelper& cmdListHelper,
 	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) const noexcept
 {
 	ASSERT(tasks.empty());
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(0 < geometryBuffersCount && geometryBuffersCount < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
+
+	// Cube map texture
+	ID3D12Resource* cubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
+	ResourceManager::Get().LoadTextureFromFile("textures/sunset2_cube_map.dds", cubeMap, uploadBufferTex, cmdListHelper.CmdList());
+	ASSERT(cubeMap != nullptr);
+
+	cmdListHelper.ExecuteCmdList();
 
 	tasks.resize(1UL);
 	PunctualLightCmdListRecorder* recorder{ nullptr };
@@ -261,17 +270,13 @@ void SkyBoxScene::GenerateSkyBoxRecorder(
 
 	cmdListHelper.ExecuteCmdList();
 
-	// Build geometry data
-	SkyBoxCmdListRecorder::GeometryData geomData;
+	// Build world matrix
 	const Mesh& mesh{ meshes[0] };
-	geomData.mVertexBufferData = mesh.VertexBufferData();
-	geomData.mIndexBufferData = mesh.IndexBufferData();
 	DirectX::XMFLOAT4X4 w;
 	MathUtils::ComputeMatrix(w, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, DirectX::XM_PI, 0.0f);
-	geomData.mWorldMatrices.push_back(w);
 
 	// Init recorder and store in task
-	recorder->Init(geomData, *cubeMap);
+	recorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), w, *cubeMap);
 	task.reset(recorder);
 }
 

@@ -72,18 +72,19 @@ void PunctualLightCmdListRecorder::Init(
 	mRootSign = psoData.mRootSign;
 	mNumLights = numLights;
 
-	const std::uint32_t descHeapOffset(geometryBuffersCount + 1U);
+	// Geometry buffers SRVS + lights buffer SRV + cube map SRV
+	const std::uint32_t descHeapOffset(geometryBuffersCount + 2U);
 	BuildBuffers(lights, descHeapOffset);
 
 	// Create geometry buffers SRVs
 	D3D12_CPU_DESCRIPTOR_HANDLE cbvSrvUavCpuDescHandle(mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart());
 	CreateGeometryBuffersSRVs(geometryBuffers, geometryBuffersCount, cbvSrvUavCpuDescHandle);
 
-	// Create lights buffer SRV
+	// Create lights buffer SRV	
 	const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	D3D12_CPU_DESCRIPTOR_HANDLE lightsBufferCpuDescHandle{ cbvSrvUavCpuDescHandle.ptr + geometryBuffersCount * descHandleIncSize };
+	D3D12_CPU_DESCRIPTOR_HANDLE lightsBufferCpuDescHandle{ cbvSrvUavCpuDescHandle.ptr + (geometryBuffersCount + 1U) * descHandleIncSize };
 	CreateLightsBufferSRV(*mLightsBuffer->Resource(), mNumLights, lightsBufferCpuDescHandle);
-	mLightsBufferGpuDescHandleBegin.ptr = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart().ptr + geometryBuffersCount * descHandleIncSize;
+	mLightsBufferGpuDescHandleBegin.ptr = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart().ptr + (geometryBuffersCount + 1U) * descHandleIncSize;
 
 	ASSERT(ValidateData());
 

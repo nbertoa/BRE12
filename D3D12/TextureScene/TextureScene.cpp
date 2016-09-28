@@ -27,15 +27,20 @@ void TextureScene::GenerateGeomPassRecorders(
 	ResourceManager::Get().LoadTextureFromFile("textures/rock.dds", tex[0], uploadBufferTex0, cmdListHelper.CmdList());
 	ASSERT(tex[0] != nullptr);
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex1;
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks2.dds", tex[1], uploadBufferTex1, cmdListHelper.CmdList());
+	ResourceManager::Get().LoadTextureFromFile("textures/bricks.dds", tex[1], uploadBufferTex1, cmdListHelper.CmdList());
 	ASSERT(tex[1] != nullptr);
 
 	Model* model;
-	//ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, cmdListHelper.CmdList(), uploadVertexBuffer, uploadIndexBuffer);
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
 	ModelManager::Get().CreateSphere(4.0f, 50, 50, model, cmdListHelper.CmdList(), uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
+
+	// Cube map texture
+	ID3D12Resource* cubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
+	ResourceManager::Get().LoadTextureFromFile("textures/sunset2_cube_map.dds", cubeMap, uploadBufferTex, cmdListHelper.CmdList());
+	ASSERT(cubeMap != nullptr);
 
 	cmdListHelper.ExecuteCmdList();
 
@@ -89,7 +94,7 @@ void TextureScene::GenerateGeomPassRecorders(
 				textures.push_back(tex[i % _countof(tex)]);
 			}
 
-			task.Init(&currGeomData, 1U, materials.data(), textures.data(), (std::uint32_t)textures.size());
+			task.Init(&currGeomData, 1U, materials.data(), textures.data(), (std::uint32_t)textures.size(), *cubeMap);
 		}
 	}
 	);
@@ -99,6 +104,7 @@ void TextureScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
+	CmdListHelper& /*cmdListHelper*/,
 	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) const noexcept
 {
 	ASSERT(tasks.empty());

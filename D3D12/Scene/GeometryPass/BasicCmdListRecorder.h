@@ -14,7 +14,8 @@ public:
 		const GeometryData* geometryDataVec,
 		const std::uint32_t numGeomData,
 		const Material* materials,
-		const std::uint32_t numMaterials
+		const std::uint32_t numMaterials,
+		ID3D12Resource& cubeMap
 		) noexcept;
 
 	void RecordCommandLists(
@@ -23,6 +24,10 @@ public:
 		const std::uint32_t rtvCpuDescHandlesCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept override;	
 
+	bool ValidateData() const noexcept;
+
 private:
-	void BuildBuffers(const Material* materials, const std::uint32_t numMaterials) noexcept;
+	void BuildBuffers(const Material* materials, const std::uint32_t numMaterials, ID3D12Resource& cubeMap) noexcept;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapBufferGpuDescHandleBegin;
 };

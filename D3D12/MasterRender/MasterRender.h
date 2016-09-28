@@ -95,14 +95,11 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[Settings::sSwapChainBufferCount];
 	ID3D12Resource* mDepthStencilBuffer{ nullptr };
 
-	// Buffers used for geometry pass in deferred shading. They are:
-	// - Normals
-	// - Positions
-	// - BaseColor_MetalMask
-	// - Reflectance_Smoothness
+	// Buffers used for geometry pass in deferred shading.
 	enum GeomBuffers {
 		NORMAL_SMOOTHNESS_DEPTH = 0U,		
 		BASECOLOR_METALMASK,
+		SPECULARREFLECTION_OCCLUSSION,
 		GEOMBUFFERS_COUNT
 	};
 	Microsoft::WRL::ComPtr<ID3D12Resource> mGeomPassBuffers[GEOMBUFFERS_COUNT];

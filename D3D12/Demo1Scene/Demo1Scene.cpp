@@ -223,12 +223,13 @@ void Demo1Scene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
+	CmdListHelper& /*cmdListHelper*/,
 	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) const noexcept
 {
 	ASSERT(tasks.empty());
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(0 < geometryBuffersCount && geometryBuffersCount < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
-
+	
 	tasks.resize(1UL);
 	PunctualLightCmdListRecorder* recorder{ nullptr };
 	GenerateRecorder(cmdListQueue, geometryBuffers, geometryBuffersCount, recorder);

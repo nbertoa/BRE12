@@ -12,16 +12,18 @@ ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
 
 struct Output {	
 	float4 mPosH : SV_POSITION;
+	float3 mPosW : POS_WORLD;
 	float3 mPosV : POS_VIEW;
+	float3 mNormalW : NORMAL_WORLD;
 	float3 mNormalV : NORMAL_VIEW;
 };
 
 Output main(in const Input input) {
-	const float4x4 wv = mul(gObjCBuffer.mW, gFrameCBuffer.mV);
-
 	Output output;
-	output.mPosV = mul(float4(input.mPosO, 1.0f), wv).xyz;
-	output.mNormalV = mul(float4(input.mNormalO, 0.0f), wv).xyz;
+	output.mPosW = mul(float4(input.mPosO, 1.0f), gObjCBuffer.mW).xyz;
+	output.mPosV = mul(float4(output.mPosW, 1.0f), gFrameCBuffer.mV).xyz;
+	output.mNormalW = mul(float4(input.mNormalO, 0.0f), gObjCBuffer.mW).xyz;
+	output.mNormalV = mul(float4(input.mNormalO, 0.0f), gFrameCBuffer.mV).xyz;
 	output.mPosH = mul(float4(output.mPosV, 1.0f), gFrameCBuffer.mP);
 
 	return output;

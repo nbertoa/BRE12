@@ -3,6 +3,8 @@
 #include "../ShaderUtils/Lights.hlsli"
 #include "../ShaderUtils/Utils.hlsli"
 
+#define AMBIENT_FACTOR float3(0.005, 0.005, 0.005)
+
 struct Input {
 	float4 mPosH : SV_POSITION;
 	float3 mPosV : VIEW_RAY;
@@ -13,6 +15,7 @@ ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b0);
 
 Texture2D<float4> NormalV_Smoothness_Depth : register (t0);
 Texture2D<float4> BaseColor_MetalMask : register (t1);
+Texture2D<float4> SpecularReflection_Occlussion : register (t2);
 
 struct Output {
 	float4 mColor : SV_Target0;
@@ -49,14 +52,17 @@ Output main(const in Input input) {
 	const float3 lightContrib = computePunctualLightFrostbiteLightContribution(light, geomPosV, normalV);
 
 	// Discard if light does not contribute any light.
-	clip(any(dot(lightContrib, 1.0f)) ? 1 : -1);
+	//clip(any(dot(lightContrib, 1.0f)) ? 1 : -1);
 
-	const float3 fLV = brdf(normalV, viewV, lightDirV, baseColor_metalmask.xyz, smoothness, baseColor_metalmask.w);
+	// Reflection color
+	const float3 reflectionColor = SpecularReflection_Occlussion.Load(screenCoord).rgb;
+
+	const float3 fLV = brdf(normalV, viewV, lightDirV, baseColor_metalmask.xyz, smoothness, baseColor_metalmask.w, reflectionColor);
 
 	// Discard if brdf does not contribute any light.
-	clip(dot(fLV, 1.0f) ? 1 : -1);
+	//clip(dot(fLV, 1.0f) ? 1 : -1);
 
-	output.mColor = float4(lightContrib * fLV, 1.0f);
+	output.mColor = float4(AMBIENT_FACTOR * baseColor_metalmask.xyz + lightContrib * fLV, 1.0f);
 
 	return output;
 }

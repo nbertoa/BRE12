@@ -39,11 +39,17 @@ SkyBoxCmdListRecorder::SkyBoxCmdListRecorder(ID3D12Device& device, tbb::concurre
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 
-void SkyBoxCmdListRecorder::Init(const GeometryData& geometryData, ID3D12Resource& cubeMap) noexcept
+void SkyBoxCmdListRecorder::Init(
+	const BufferCreator::VertexBufferData& vertexBufferData,
+	const BufferCreator::IndexBufferData indexBufferData, 
+	const DirectX::XMFLOAT4X4& worldMatrix,
+	ID3D12Resource& cubeMap) noexcept
 {
 	ASSERT(ValidateData() == false);
 
-	mGeometryData = geometryData;
+	mVertexBufferData = vertexBufferData;
+	mIndexBufferData = indexBufferData;
+	mWorldMatrix = worldMatrix;
 
 	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::SKY_BOX));
 
@@ -92,13 +98,12 @@ void SkyBoxCmdListRecorder::RecordCommandLists(
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	
 	// Draw object
-	mCmdList->IASetVertexBuffers(0U, 1U, &mGeometryData.mVertexBufferData.mBufferView);
-	mCmdList->IASetIndexBuffer(&mGeometryData.mIndexBufferData.mBufferView);
-	ASSERT(mGeometryData.mWorldMatrices.size() == 1UL);
+	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
+	mCmdList->IASetIndexBuffer(&mIndexBufferData.mBufferView);
 	mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDescHandle);
 	mCmdList->SetGraphicsRootDescriptorTable(2U, cubeMapBufferGpuDescHandle);
 
-	mCmdList->DrawIndexedInstanced(mGeometryData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
+	mCmdList->DrawIndexedInstanced(mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
 
 	mCmdList->Close();
 
@@ -125,10 +130,8 @@ bool SkyBoxCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		mCmdList != nullptr &&
 		mCbvSrvUavDescHeap != nullptr &&
-		mTopology != D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED &&
 		mRootSign != nullptr &&
 		mPSO != nullptr &&
-		mGeometryData.mWorldMatrices.size() == 1UL && 
 		mObjectCBuffer != nullptr &&
 		mObjectCBufferGpuDescHandleBegin.ptr != 0UL &&
 		mCubeMapBufferGpuDescHandleBegin.ptr != 0UL;
@@ -159,8 +162,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
 	ResourceManager::Get().CreateUploadBuffer(objCBufferElemSize, 1U, mObjectCBuffer);
 	mObjectCBufferGpuDescHandleBegin = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart();
 	ObjectCBuffer objCBuffer;
-	ASSERT(mGeometryData.mWorldMatrices.size() == 1UL);
-	const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&mGeometryData.mWorldMatrices[0]));
+	const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&mWorldMatrix));
 	DirectX::XMStoreFloat4x4(&objCBuffer.mWorld, wMatrix);
 	mObjectCBuffer->CopyData(0U, &objCBuffer, sizeof(objCBuffer));
 	
