@@ -15,7 +15,7 @@ ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b0);
 
 Texture2D<float4> NormalV_Smoothness_Depth : register (t0);
 Texture2D<float4> BaseColor_MetalMask : register (t1);
-Texture2D<float4> SpecularReflection_Occlussion : register (t2);
+Texture2D<float3> SpecularReflection : register (t2);
 
 struct Output {
 	float4 mColor : SV_Target0;
@@ -55,7 +55,7 @@ Output main(const in Input input) {
 	//clip(any(dot(lightContrib, 1.0f)) ? 1 : -1);
 
 	// Reflection color
-	const float3 reflectionColor = SpecularReflection_Occlussion.Load(screenCoord).rgb;
+	const float3 reflectionColor = SpecularReflection.Load(screenCoord);
 
 	const float3 fLV = brdf(normalV, viewV, lightDirV, baseColor_metalmask.xyz, smoothness, baseColor_metalmask.w, reflectionColor);
 

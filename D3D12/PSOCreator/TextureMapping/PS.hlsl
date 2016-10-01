@@ -22,7 +22,7 @@ TextureCube CubeMap : register(t1);
 struct Output {
 	float4 mNormalV_Smoothness_Depth : SV_Target0;
 	float4 mBaseColor_MetalMask : SV_Target1;
-	float4 mSpecularReflection_Occlussion : SV_Target2;
+	float3 mSpecularReflection : SV_Target2;
 };
 
 Output main(const in Input input) {
@@ -38,7 +38,7 @@ Output main(const in Input input) {
 
 	const float3 toEyeW = gFrameCBuffer.mEyePosW - input.mPosW;
 	const float3 r = reflect(-toEyeW, input.mNormalW);
-	output.mSpecularReflection_Occlussion.rgb = CubeMap.Sample(TexSampler, r).rgb;
+	output.mSpecularReflection = CubeMap.Sample(TexSampler, r).rgb;
 
 	return output;
 }
