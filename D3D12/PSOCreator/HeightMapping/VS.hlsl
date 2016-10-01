@@ -16,23 +16,25 @@ ConstantBuffer<ObjectCBuffer> gObjCBuffer : register(b0);
 ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
 
 struct Output {
-	float3 mPosV : POSITION;
-	float3 mNormalV : NORMAL;
-	float3 mTangentV : TANGENT;
+	float3 mPosW : POS_WORLD;	
+	float3 mNormalW : NORMAL_WORLD;
+	float3 mTangentW : TANGENT_WORLD;
 	float2 mTexCoordO : TEXCOORD0;
 	float mTessFactor : TESS;
 };
 
 Output main(in const Input input) {
-	const float4x4 wv = mul(gObjCBuffer.mW, gFrameCBuffer.mV);
-
 	Output output;
-	output.mPosV = mul(float4(input.mPosO, 1.0f), wv).xyz;
-	output.mNormalV = mul(input.mNormalO, (float3x3)wv);
-	output.mTangentV = mul(input.mTangentO, (float3x3)wv);
+
+	output.mPosW = mul(float4(input.mPosO, 1.0f), gObjCBuffer.mW).xyz;
+
+	output.mNormalW = mul(float4(input.mNormalO, 0.0f), gObjCBuffer.mW).xyz;
+
+	output.mTangentW = mul(float4(input.mTangentO, 0.0f), gObjCBuffer.mW).xyz;
+
 	output.mTexCoordO = gObjCBuffer.mTexTransform * input.mTexCoordO;
 
-	const float d = length(output.mPosV);
+	const float d = length(output.mPosW - gFrameCBuffer.mEyePosW);
 
 	// Normalized tessellation factor. 
 	// The tessellation is 

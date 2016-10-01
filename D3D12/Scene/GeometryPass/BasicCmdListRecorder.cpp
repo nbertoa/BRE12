@@ -146,7 +146,7 @@ void BasicCmdListRecorder::BuildBuffers(const Material* materials, const std::ui
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = numMaterials * 2 + 1 ; // (1 obj cbuffer + 1 material cbuffer per geometry to draw) + 1 cube map
+	descHeapDesc.NumDescriptors = numMaterials * 2U + 1U ; // (1 obj cbuffer + 1 material cbuffer) per geometry + 1 cube map
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
 
@@ -223,6 +223,6 @@ void BasicCmdListRecorder::BuildBuffers(const Material* materials, const std::ui
 	srvDesc.TextureCube.MipLevels = cubeMap.GetDesc().MipLevels;
 	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
 	srvDesc.Format = cubeMap.GetDesc().Format;
-	const D3D12_CPU_DESCRIPTOR_HANDLE cubeMapBufferDescHandle{ mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + numMaterials * 3U * descHandleIncSize };
+	const D3D12_CPU_DESCRIPTOR_HANDLE cubeMapBufferDescHandle{ mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + numMaterials * 2U * descHandleIncSize };
 	ResourceManager::Get().CreateShaderResourceView(cubeMap, srvDesc, cubeMapBufferDescHandle);
 }

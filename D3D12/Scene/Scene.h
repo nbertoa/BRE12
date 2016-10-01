@@ -23,6 +23,7 @@ public:
 
 	__forceinline ID3D12GraphicsCommandList& CmdList() noexcept { return mCmdList; }
 	void Reset(ID3D12CommandAllocator& cmdAlloc) noexcept;
+	void CloseCmdList() noexcept;
 	void ExecuteCmdList() noexcept;
 private:
 	ID3D12CommandQueue& mCmdQueue;

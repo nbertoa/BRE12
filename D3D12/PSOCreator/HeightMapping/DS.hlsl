@@ -9,20 +9,24 @@ struct HullShaderConstantOutput {
 };
 
 struct Input {
-	float3 mPosV : POSITION;
-	float3 mNormalV : NORMAL;
-	float3 mTangentV : TANGENT;
-	float2 mTexCoordO : TEXCOORD0;	
+	float3 mPosW : POS_WORLD;
+	float3 mNormalW : NORMAL_WORLD;
+	float3 mTangentW : TANGENT_WORLD;
+	float2 mTexCoordO : TEXCOORD0;
 };
 
-ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
+ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b0);
 
 struct Output {
 	float4 mPosH : SV_Position;
+	float3 mPosW : POS_WORLD;
 	float3 mPosV : POS_VIEW;
-	float3 mNormalV : NORMAL;	
-	float3 mTangentV : TANGENT;
-	float3 mBinormalV : BINORMAL;
+	float3 mNormalW : NORMAL_WORLD;	
+	float3 mNormalV : NORMAL_VIEW;
+	float3 mTangentW : TANGENT_WORLD;
+	float3 mTangentV : TANGENT_VIEW;
+	float3 mBinormalW : BINORMAL_WORLD;
+	float3 mBinormalV : BINORMAL_VIEW;
 	float2 mTexCoordO : TEXCOORD0;
 };
 
@@ -35,10 +39,12 @@ Output main(const HullShaderConstantOutput HSConstantOutput, const float3 uvw : 
 
 	output.mTexCoordO = uvw.x * patch[0].mTexCoordO + uvw.y * patch[1].mTexCoordO + uvw.z * patch[2].mTexCoordO;
 
-	const float3 normalV = normalize(uvw.x * patch[0].mNormalV + uvw.y * patch[1].mNormalV + uvw.z * patch[2].mNormalV);
-	output.mNormalV = normalize(normalV);
+	const float3 normalW = normalize(uvw.x * patch[0].mNormalW + uvw.y * patch[1].mNormalW + uvw.z * patch[2].mNormalW);
+	output.mNormalW = normalize(normalW);
+	output.mNormalV = normalize(mul(float4(output.mNormalW, 0.0f), gFrameCBuffer.mV).xyz);
 
-	float3 posV = uvw.x * patch[0].mPosV + uvw.y * patch[1].mPosV + uvw.z * patch[2].mPosV;
+	float3 posW = uvw.x * patch[0].mPosW + uvw.y * patch[1].mPosW + uvw.z * patch[2].mPosW;
+	float3 posV = mul(float4(posW, 1.0f), gFrameCBuffer.mV).xyz;
 
 	// Choose the mipmap level based on distance to the eye; specifically, choose the next miplevel every MipInterval units, and clamp the miplevel in [0,6].
 	const float MipInterval = 20.0f;
@@ -47,13 +53,18 @@ Output main(const HullShaderConstantOutput HSConstantOutput, const float3 uvw : 
 	const float displacement = (HEIGHT_SCALE * (height - 1));
 
 	// Offset vertex along normal
+	posW += output.mNormalW * displacement;
 	posV += output.mNormalV * displacement;
-	output.mPosH = mul(float4(posV, 1.0f), gFrameCBuffer.mP);
+	
+	output.mTangentW = normalize(uvw.x * patch[0].mTangentW + uvw.y * patch[1].mTangentW + uvw.z * patch[2].mTangentW);
+	output.mTangentV = normalize(mul(float4(output.mTangentW, 0.0f), gFrameCBuffer.mV)).xyz;
 
-	// Compute tangent and binormal
-	output.mTangentV = normalize(uvw.x * patch[0].mTangentV + uvw.y * patch[1].mTangentV + uvw.z * patch[2].mTangentV);
+	output.mBinormalW = normalize(cross(output.mNormalW, output.mTangentW));
 	output.mBinormalV = normalize(cross(output.mNormalV, output.mTangentV));
+	
+	output.mPosW = posW;
 	output.mPosV = posV;
+	output.mPosH = mul(float4(posV, 1.0f), gFrameCBuffer.mP);
 
 	return output;
 }

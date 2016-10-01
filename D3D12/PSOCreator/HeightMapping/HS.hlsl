@@ -1,10 +1,10 @@
 #define NUM_PATCH_POINTS 3
 
 struct Input {
-	float3 mPosV : POSITION;
-	float3 mNormalV : NORMAL;
-	float3 mTangentV : TANGENT;
-	float2 mTexCoordO : TEXCOORD0;	
+	float3 mPosW : POS_WORLD;
+	float3 mNormalW : NORMAL_WORLD;
+	float3 mTangentW : TANGENT_WORLD;
+	float2 mTexCoordO : TEXCOORD0;
 	float mTessFactor : TESS;
 };
 
@@ -14,9 +14,9 @@ struct HullShaderConstantOutput {
 };
 
 struct Output {
-	float3 mPosV : POSITION;
-	float3 mNormalV : NORMAL;	
-	float3 mTangentV : TANGENT;
+	float3 mPosW : POS_WORLD;
+	float3 mNormalW : NORMAL_WORLD;
+	float3 mTangentW : TANGENT_WORLD;
 	float2 mTexCoordO : TEXCOORD0;
 };
 
@@ -42,9 +42,10 @@ HullShaderConstantOutput constant_hull_shader(const InputPatch<Input, NUM_PATCH_
 [patchconstantfunc("constant_hull_shader")]
 Output main(const InputPatch <Input, NUM_PATCH_POINTS> patch, const uint controlPointID : SV_OutputControlPointID, const uint patchId : SV_PrimitiveID) {
 	Output output = (Output)0;
-	output.mPosV = patch[controlPointID].mPosV;
-	output.mNormalV = patch[controlPointID].mNormalV;
+	output.mPosW = patch[controlPointID].mPosW;
+	output.mNormalW = patch[controlPointID].mNormalW;
+	output.mTangentW = patch[controlPointID].mTangentW;
 	output.mTexCoordO = patch[controlPointID].mTexCoordO;
-	output.mTangentV = patch[controlPointID].mTangentV;
+	
 	return output;
 }

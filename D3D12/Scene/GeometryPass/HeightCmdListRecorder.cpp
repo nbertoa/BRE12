@@ -22,7 +22,8 @@ void HeightCmdListRecorder::Init(
 	ID3D12Resource** textures,
 	ID3D12Resource** normals,
 	ID3D12Resource** heights,
-	const std::uint32_t numResources) noexcept
+	const std::uint32_t numResources,
+	ID3D12Resource& cubeMap) noexcept
 {
 	ASSERT(ValidateData() == false);
 	ASSERT(geometryDataVec != nullptr);
@@ -53,7 +54,7 @@ void HeightCmdListRecorder::Init(
 	mPSO = psoData.mPSO;
 	mRootSign = psoData.mRootSign;
 
-	BuildBuffers(materials, textures, normals, heights, numResources);
+	BuildBuffers(materials, textures, normals, heights, numResources, cubeMap);
 
 	ASSERT(ValidateData());
 }
@@ -97,10 +98,14 @@ void HeightCmdListRecorder::RecordCommandLists(
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootConstantBufferView(6U, frameCBufferGpuVAddress);
 
 	// Set immutable constants root parameters
 	D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(5U, immutableCBufferGpuVAddress);
+
+	// Set cube map root parameter
+	mCmdList->SetGraphicsRootDescriptorTable(9U, mCubeMapBufferGpuDescHandleBegin);
 
 	// Draw objects
 	const std::size_t geomCount{ mGeometryDataVec.size() };
@@ -119,10 +124,10 @@ void HeightCmdListRecorder::RecordCommandLists(
 			mCmdList->SetGraphicsRootDescriptorTable(4U, materialsCBufferGpuDescHandle);
 			materialsCBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(6U, texturesBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(7U, texturesBufferGpuDescHandle);
 			texturesBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(7U, normalsBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(8U, normalsBufferGpuDescHandle);
 			normalsBufferGpuDescHandle.ptr += descHandleIncSize;
 			
 			mCmdList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
@@ -142,7 +147,8 @@ bool HeightCmdListRecorder::ValidateData() const noexcept {
 		GeometryPassCmdListRecorder::ValidateData() &&
 		mTexturesBufferGpuDescHandleBegin.ptr != 0UL &&
 		mNormalsBufferGpuDescHandleBegin.ptr != 0UL &&
-		mHeightsBufferGpuDescHandleBegin.ptr != 0UL;
+		mHeightsBufferGpuDescHandleBegin.ptr != 0UL &&
+		mCubeMapBufferGpuDescHandleBegin.ptr != 0UL;
 
 	return result;
 }
@@ -152,7 +158,8 @@ void HeightCmdListRecorder::BuildBuffers(
 	ID3D12Resource** textures,
 	ID3D12Resource** normals,
 	ID3D12Resource** heights,
-	const std::uint32_t dataCount) noexcept {
+	const std::uint32_t dataCount,
+	ID3D12Resource& cubeMap) noexcept {
 	ASSERT(materials != nullptr);
 	ASSERT(textures != nullptr);
 	ASSERT(normals != nullptr);
@@ -172,8 +179,8 @@ void HeightCmdListRecorder::BuildBuffers(
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	descHeapDesc.NodeMask = 0U;
-	// 1 obj cbuffer + 1 material cbuffer per geometry + 1 texture per geometry + 1 normal texture per geometry + 1 height texture per geometry
-	descHeapDesc.NumDescriptors = dataCount * 5U;
+	// (1 obj cbuffer + 1 material cbuffer + 1 texture + 1 normal texture+ 1 height texture) per geometry + 1 cube map
+	descHeapDesc.NumDescriptors = dataCount * 5U + 1U;
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
 
@@ -278,4 +285,18 @@ void HeightCmdListRecorder::BuildBuffers(
 	ResourceManager::Get().CreateUploadBuffer(immutableCBufferElemSize, 1U, mImmutableCBuffer);
 	ImmutableCBuffer immutableCBuffer;
 	mImmutableCBuffer->CopyData(0U, &immutableCBuffer, sizeof(immutableCBuffer));
+
+	// Set begin for cube map in GPU	
+	mCubeMapBufferGpuDescHandleBegin.ptr = mObjectCBufferGpuDescHandleBegin.ptr + dataCount * 5U * descHandleIncSize;
+
+	// Create cube map texture descriptor
+	srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+	srvDesc.TextureCube.MostDetailedMip = 0;
+	srvDesc.TextureCube.MipLevels = cubeMap.GetDesc().MipLevels;
+	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+	srvDesc.Format = cubeMap.GetDesc().Format;
+	const D3D12_CPU_DESCRIPTOR_HANDLE cubeMapBufferDescHandle{ mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + dataCount * 5U * descHandleIncSize };
+	ResourceManager::Get().CreateShaderResourceView(cubeMap, srvDesc, cubeMapBufferDescHandle);
 }

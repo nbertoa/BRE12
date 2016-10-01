@@ -12,6 +12,7 @@
 #include <ResourceManager\ResourceManager.h>
 #include <Scene/GeometryPass/NormalCmdListRecorder.h>
 #include <Scene/LightPass/PunctualLightCmdListRecorder.h>
+#include <Scene/SkyBoxCmdListRecorder.h>
 
 void NormalScene::GenerateGeomPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
@@ -26,7 +27,7 @@ void NormalScene::GenerateGeomPassRecorders(
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex[_countof(tex)];
 	ResourceManager::Get().LoadTextureFromFile("textures/bricks.dds", tex[0], uploadBufferTex[0], cmdListHelper.CmdList());
 	ASSERT(tex[0] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks2.dds", tex[1], uploadBufferTex[1], cmdListHelper.CmdList());
+	ResourceManager::Get().LoadTextureFromFile("textures/rock2.dds", tex[1], uploadBufferTex[1], cmdListHelper.CmdList());
 	ASSERT(tex[1] != nullptr);
 	ResourceManager::Get().LoadTextureFromFile("textures/rock.dds", tex[2], uploadBufferTex[2], cmdListHelper.CmdList());
 	ASSERT(tex[2] != nullptr);
@@ -39,7 +40,7 @@ void NormalScene::GenerateGeomPassRecorders(
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferNormal[_countof(normal)];
 	ResourceManager::Get().LoadTextureFromFile("textures/bricks_normal.dds", normal[0], uploadBufferNormal[0], cmdListHelper.CmdList());
 	ASSERT(normal[0] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks2_normal.dds", normal[1], uploadBufferNormal[1], cmdListHelper.CmdList());
+	ResourceManager::Get().LoadTextureFromFile("textures/rock2_normal.dds", normal[1], uploadBufferNormal[1], cmdListHelper.CmdList());
 	ASSERT(normal[1] != nullptr);
 	ResourceManager::Get().LoadTextureFromFile("textures/rock_normal.dds", normal[2], uploadBufferNormal[2], cmdListHelper.CmdList());
 	ASSERT(normal[2] != nullptr);
@@ -51,11 +52,16 @@ void NormalScene::GenerateGeomPassRecorders(
 	Model* model;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	//ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, cmdListHelper.CmdList(), uploadVertexBuffer, uploadIndexBuffer);
-	//ModelManager::Get().LoadModel("models/mitsubaFloor.obj", model, cmdListHelper.CmdList(), uploadVertexBuffer, uploadIndexBuffer);
 	ModelManager::Get().CreateSphere(4.0f, 50, 50, model, cmdListHelper.CmdList(), uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
 
+	// Cube map texture
+	ID3D12Resource* cubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferCubeMap;
+	ResourceManager::Get().LoadTextureFromFile("textures/sunset_cube_map.dds", cubeMap, uploadBufferCubeMap, cmdListHelper.CmdList());
+	ASSERT(cubeMap != nullptr);
+
+	cmdListHelper.CloseCmdList();
 	cmdListHelper.ExecuteCmdList();
 
 	ASSERT(model->HasMeshes());
@@ -114,7 +120,14 @@ void NormalScene::GenerateGeomPassRecorders(
 				normals.push_back(normal[i % _countof(normal)]);
 			}
 
-			task.Init(&currGeomData, 1U, materials.data(), textures.data(), normals.data(), (std::uint32_t)normals.size());
+			task.Init(
+				&currGeomData, 
+				1U, 
+				materials.data(), 
+				textures.data(), 
+				normals.data(), 
+				(std::uint32_t)normals.size(),
+				*cubeMap);
 		}
 	}
 	);
@@ -124,7 +137,7 @@ void NormalScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
-	CmdListHelper& /*cmdListHelper*/,
+	CmdListHelper& cmdListHelper,
 	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) const noexcept
 {
 	ASSERT(tasks.empty());
@@ -162,5 +175,42 @@ void NormalScene::GenerateLightPassRecorders(
 		}
 	}
 	);
+
+	cmdListHelper.CloseCmdList();
+}
+
+void NormalScene::GenerateSkyBoxRecorder(
+	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+	CmdListHelper& cmdListHelper,
+	std::unique_ptr<SkyBoxCmdListRecorder>& task) const noexcept
+{
+	SkyBoxCmdListRecorder* recorder = new SkyBoxCmdListRecorder(D3dData::Device(), cmdListQueue);
+
+	// Sky box sphere
+	Model* model;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
+	ModelManager::Get().CreateSphere(3000, 50, 50, model, cmdListHelper.CmdList(), uploadVertexBuffer, uploadIndexBuffer);
+	ASSERT(model != nullptr);
+	const std::vector<Mesh>& meshes(model->Meshes());
+	ASSERT(meshes.size() == 1UL);
+
+	// Cube map texture
+	ID3D12Resource* cubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
+	ResourceManager::Get().LoadTextureFromFile("textures/sunset2_cube_map.dds", cubeMap, uploadBufferTex, cmdListHelper.CmdList());
+	ASSERT(cubeMap != nullptr);
+
+	cmdListHelper.CloseCmdList();
+	cmdListHelper.ExecuteCmdList();
+
+	// Build world matrix
+	const Mesh& mesh{ meshes[0] };
+	DirectX::XMFLOAT4X4 w;
+	MathUtils::ComputeMatrix(w, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, DirectX::XM_PI, 0.0f);
+
+	// Init recorder and store in task
+	recorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), w, *cubeMap);
+	task.reset(recorder);
 }
 

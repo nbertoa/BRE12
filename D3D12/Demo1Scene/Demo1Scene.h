@@ -17,7 +17,7 @@ public:
 		std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) const noexcept override;
 
 	void GenerateSkyBoxRecorder(
-		tbb::concurrent_queue<ID3D12CommandList*>& /*cmdListQueue*/,
-		CmdListHelper& /*cmdListHelper*/,
-		std::unique_ptr<SkyBoxCmdListRecorder>& /*task*/) const noexcept override {}
+		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+		CmdListHelper& cmdListHelper,
+		std::unique_ptr<SkyBoxCmdListRecorder>& task) const noexcept override;
 };

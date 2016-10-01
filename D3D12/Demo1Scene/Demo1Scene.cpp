@@ -13,29 +13,32 @@
 #include <ResourceManager\ResourceManager.h>
 #include <Scene/GeometryPass/HeightCmdListRecorder.h>
 #include <Scene/LightPass/PunctualLightCmdListRecorder.h>
+#include <Scene/SkyBoxCmdListRecorder.h>
 
 namespace {
-	static const float sS{ 2.0f };
+	const char* sCubeMapFile{ "textures/sunset2_cube_map.dds" };
 
-	static const float sTx{ 0.0f };
-	static const float sTy{ -3.5f };
-	static const float sTz{ 10.0f };	
-	static const float sOffsetX{ 25.0f };
+	const float sS{ 2.0f };
 
-	static const float sTx1{ 0.0f };
-	static const float sTy1{ -3.5f };
-	static const float sTz1{ 30.0f };
-	static const float sOffsetX1{ 25.0f };
+	const float sTx{ 0.0f };
+	const float sTy{ -3.5f };
+	const float sTz{ 10.0f };	
+	const float sOffsetX{ 25.0f };
 
-	static const float sTx2{ 0.0f };
-	static const float sTy2{ -3.5f };
-	static const float sTz2{ 15.0f };
-	static const float sOffsetX2{ 25.0f };
+	const float sTx1{ 0.0f };
+	const float sTy1{ -3.5f };
+	const float sTz1{ 30.0f };
+	const float sOffsetX1{ 25.0f };
 
-	static const float sTx3{ 0.0f };
-	static const float sTy3{ -3.5f };
-	static const float sTz3{ 0.0f };
-	static const float sOffsetX3{ 15.0f };
+	const float sTx2{ 0.0f };
+	const float sTy2{ -3.5f };
+	const float sTz2{ 15.0f };
+	const float sOffsetX2{ 25.0f };
+
+	const float sTx3{ 0.0f };
+	const float sTy3{ -3.5f };
+	const float sTz3{ 0.0f };
+	const float sOffsetX3{ 15.0f };
 
 	void GenerateRecorder(		 
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
@@ -70,6 +73,7 @@ namespace {
 		ID3D12Resource** heights,
 		Material* materials,
 		const std::size_t numMaterials,
+		ID3D12Resource& cubeMap,
 		HeightCmdListRecorder* &recorder) {
 
 		ASSERT(textures != nullptr);
@@ -126,7 +130,15 @@ namespace {
 			tz += offsetZ;
 		}
 
-		recorder->Init(geomDataVec.data(), (std::uint32_t)geomDataVec.size(), materialsVec.data(), texturesVec.data(), normalsVec.data(), heightsVec.data(), (std::uint32_t)materialsVec.size());
+		recorder->Init(
+			geomDataVec.data(), 
+			(std::uint32_t)geomDataVec.size(), 
+			materialsVec.data(), 
+			texturesVec.data(), 
+			normalsVec.data(), 
+			heightsVec.data(), 
+			(std::uint32_t)materialsVec.size(),
+			cubeMap);
 	}
 }
 
@@ -204,17 +216,24 @@ void Demo1Scene::GenerateGeomPassRecorders(
 	ResourceManager::Get().LoadTextureFromFile("textures/concrete_height.dds", height[5], uploadBufferHeight[5], cmdListHelper.CmdList());
 	ASSERT(height[5] != nullptr);
 
+	// Cube map texture
+	ID3D12Resource* cubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferCubeMap;
+	ResourceManager::Get().LoadTextureFromFile(sCubeMapFile, cubeMap, uploadBufferCubeMap, cmdListHelper.CmdList());
+	ASSERT(cubeMap != nullptr);
+
+	cmdListHelper.CloseCmdList();
 	cmdListHelper.ExecuteCmdList();
 
 	tasks.resize(2);
 
 	HeightCmdListRecorder* heightRecorder{ nullptr };
-	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), tex, normal, height, materials, numResources, heightRecorder);
+	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), tex, normal, height, materials, numResources, *cubeMap, heightRecorder);
 	ASSERT(heightRecorder != nullptr);
 	tasks[0].reset(heightRecorder);
 
 	HeightCmdListRecorder* heightRecorder2{ nullptr };
-	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, cmdListQueue, model->Meshes(), tex, normal, height, materials, numResources, heightRecorder2);
+	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, cmdListQueue, model->Meshes(), tex, normal, height, materials, numResources, *cubeMap, heightRecorder2);
 	ASSERT(heightRecorder2 != nullptr);
 	tasks[1].reset(heightRecorder2);
 }
@@ -223,7 +242,7 @@ void Demo1Scene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
-	CmdListHelper& /*cmdListHelper*/,
+	CmdListHelper& cmdListHelper,
 	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) const noexcept
 {
 	ASSERT(tasks.empty());
@@ -235,5 +254,42 @@ void Demo1Scene::GenerateLightPassRecorders(
 	GenerateRecorder(cmdListQueue, geometryBuffers, geometryBuffersCount, recorder);
 	ASSERT(recorder != nullptr);
 	tasks[0].reset(recorder);
+
+	cmdListHelper.CloseCmdList();
+}
+
+void Demo1Scene::GenerateSkyBoxRecorder(
+	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+	CmdListHelper& cmdListHelper,
+	std::unique_ptr<SkyBoxCmdListRecorder>& task) const noexcept
+{
+	SkyBoxCmdListRecorder* recorder = new SkyBoxCmdListRecorder(D3dData::Device(), cmdListQueue);
+
+	// Sky box sphere
+	Model* model;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
+	ModelManager::Get().CreateSphere(3000, 50, 50, model, cmdListHelper.CmdList(), uploadVertexBuffer, uploadIndexBuffer);
+	ASSERT(model != nullptr);
+	const std::vector<Mesh>& meshes(model->Meshes());
+	ASSERT(meshes.size() == 1UL);
+
+	// Cube map texture
+	ID3D12Resource* cubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
+	ResourceManager::Get().LoadTextureFromFile(sCubeMapFile, cubeMap, uploadBufferTex, cmdListHelper.CmdList());
+	ASSERT(cubeMap != nullptr);
+
+	cmdListHelper.CloseCmdList();
+	cmdListHelper.ExecuteCmdList();
+
+	// Build world matrix
+	const Mesh& mesh{ meshes[0] };
+	DirectX::XMFLOAT4X4 w;
+	MathUtils::ComputeMatrix(w, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, DirectX::XM_PI, 0.0f);
+
+	// Init recorder and store in task
+	recorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), w, *cubeMap);
+	task.reset(recorder);
 }
 

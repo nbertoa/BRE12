@@ -17,13 +17,14 @@ CmdListHelper::~CmdListHelper() {
 }
 
 void CmdListHelper::Reset(ID3D12CommandAllocator& cmdAlloc) noexcept {
-	mCmdList.Close();
 	CHECK_HR(mCmdList.Reset(&cmdAlloc, nullptr));
 }
 
-void CmdListHelper::ExecuteCmdList() noexcept {
+void CmdListHelper::CloseCmdList() noexcept {
 	mCmdList.Close();
+}
 
+void CmdListHelper::ExecuteCmdList() noexcept {
 	ID3D12CommandList* cmdLists[1U]{ &mCmdList };
 	mCmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
 
