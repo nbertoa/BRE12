@@ -15,7 +15,7 @@
 #include <Scene/SkyBoxCmdListRecorder.h>
 
 namespace {
-	const char* sCubeMapFile{ "textures/sunset2_cube_map.dds" };
+	const char* sCubeMapFile{ "textures/snow2_cube_map.dds" };
 }
 
 void TextureScene::GenerateGeomPassRecorders(

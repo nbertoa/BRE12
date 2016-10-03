@@ -838,3 +838,9 @@
 /D3D12/SkyBoxScene/x64/Debug/SkyBoxScene.Build.CppClean.log
 /D3D12/SkyBoxScene/x64/Debug/skyboxscene.nativecodeanalysis.xml
 /D3D12/SkyBoxScene/x64/Debug/vc.nativecodeanalysis.all.xml
+/D3D12/x64/Debug/PSOCreator/ToneMapping/PS.cso
+/D3D12/x64/Debug/PSOCreator/ToneMapping/RS.cso
+/D3D12/x64/Debug/PSOCreator/ToneMapping/VS.cso
+/D3D12/x64/Release/PSOCreator/ToneMapping/PS.cso
+/D3D12/x64/Release/PSOCreator/ToneMapping/RS.cso
+/D3D12/x64/Release/PSOCreator/ToneMapping/VS.cso

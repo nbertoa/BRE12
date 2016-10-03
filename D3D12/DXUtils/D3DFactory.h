@@ -17,4 +17,5 @@ namespace D3DFactory {
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> PosInputLayout() noexcept;
 	std::vector<D3D12_INPUT_ELEMENT_DESC> PosNormalTangentTexCoordInputLayout() noexcept;
+	std::vector<D3D12_INPUT_ELEMENT_DESC> PosTexCoordInputLayout() noexcept;
 }

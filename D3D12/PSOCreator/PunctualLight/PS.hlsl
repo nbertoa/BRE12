@@ -51,16 +51,10 @@ Output main(const in Input input) {
 
 	const float3 lightContrib = computePunctualLightFrostbiteLightContribution(light, geomPosV, normalV);
 
-	// Discard if light does not contribute any light.
-	//clip(any(dot(lightContrib, 1.0f)) ? 1 : -1);
-
 	// Reflection color
 	const float3 reflectionColor = SpecularReflection.Load(screenCoord);
 
 	const float3 fLV = brdf(normalV, viewV, lightDirV, baseColor_metalmask.xyz, smoothness, baseColor_metalmask.w, reflectionColor);
-
-	// Discard if brdf does not contribute any light.
-	//clip(dot(fLV, 1.0f) ? 1 : -1);
 
 	output.mColor = float4(AMBIENT_FACTOR * baseColor_metalmask.xyz + lightContrib * fLV, 1.0f);
 

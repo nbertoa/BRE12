@@ -49,6 +49,19 @@ float3 accurateSRGBToLinear(in float3 sRGBCol) {
 	return linearRGB;
 }
 
+float3 HableToneMap(float3 color) {
+	float A = 0.22; //Shoulder Strength
+	float B = 0.30; //Linear Strength
+	float C = 0.10; //Linear Angle
+	float D = 0.20; //Toe Strength
+	float E = 0.01; //Toe Numerator
+	float F = 0.30; //Toe Denominator
+
+	color = max(0, color - 0.004f);
+	color = ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - (E / F);
+	return color;
+}
+
 float3 approximationLinearToSRGB(in float3 linearCol) {
 	return pow(linearCol, 1 / 2.2);
 }

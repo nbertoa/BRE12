@@ -125,4 +125,14 @@ namespace D3DFactory {
 
 		return desc;
 	}
+
+	std::vector<D3D12_INPUT_ELEMENT_DESC> PosTexCoordInputLayout() noexcept {
+		std::vector<D3D12_INPUT_ELEMENT_DESC> desc
+		{
+			{ "POSITION", 0U, DXGI_FORMAT_R32G32B32_FLOAT, 0U, 0U, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA , 0U },
+			{ "TEXCOORD", 0U, DXGI_FORMAT_R32G32_FLOAT, 0U, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA , 0U }
+		};
+
+		return desc;
+	}
 }

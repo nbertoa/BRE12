@@ -16,7 +16,7 @@
 #include <Scene/SkyBoxCmdListRecorder.h>
 
 namespace {
-	const char* sCubeMapFile{ "textures/snow_cube_map.dds" };
+	const char* sCubeMapFile{ "textures/snow2_cube_map.dds" };
 
 	const float sS{ 4.0f };
 

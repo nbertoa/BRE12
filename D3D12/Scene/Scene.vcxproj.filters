@@ -20,6 +20,7 @@
     <ClInclude Include="LightPass\PunctualLightCmdListRecorder.h">
       <Filter>LightPass</Filter>
     </ClInclude>
+    <ClInclude Include="ToneMappingCmdListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp" />
@@ -41,6 +42,7 @@
     <ClCompile Include="LightPass\PunctualLightCmdListRecorder.cpp">
       <Filter>LightPass</Filter>
     </ClCompile>
+    <ClCompile Include="ToneMappingCmdListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="GeometryPass">

@@ -28,6 +28,9 @@
     <Filter Include="SkyBox">
       <UniqueIdentifier>{de4c2da4-73ed-44a3-bb02-208be26317a3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ToneMapping">
+      <UniqueIdentifier>{09286a2a-10d8-40b3-b626-c5801cf45987}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Basic\PS.hlsl">
@@ -92,6 +95,15 @@
     </FxCompile>
     <FxCompile Include="SkyBox\VS.hlsl">
       <Filter>SkyBox</Filter>
+    </FxCompile>
+    <FxCompile Include="ToneMapping\VS.hlsl">
+      <Filter>ToneMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="ToneMapping\PS.hlsl">
+      <Filter>ToneMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="ToneMapping\RS.hlsl">
+      <Filter>ToneMapping</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

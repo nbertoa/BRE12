@@ -14,6 +14,8 @@
 struct FrameCBuffer;
 class UploadBuffer;
 
+// Responsible of command lists recording to be executed by CommandListProcessor.
+// This class has common data and functionality to record command list for sky box pass.
 class SkyBoxCmdListRecorder {
 public:
 	explicit SkyBoxCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);

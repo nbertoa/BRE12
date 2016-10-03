@@ -17,7 +17,6 @@ struct ID3D12GraphicsCommandList;
 class CmdListHelper {
 public:
 	CmdListHelper(ID3D12CommandQueue& cmdQueue, ID3D12Fence& fence, std::uint64_t& currentFence, ID3D12GraphicsCommandList& cmdList);
-	~CmdListHelper();
 	CmdListHelper(const CmdListHelper&) = delete;
 	const CmdListHelper& operator=(const CmdListHelper&) = delete;
 

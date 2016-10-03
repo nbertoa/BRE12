@@ -128,6 +128,7 @@
     <ClInclude Include="LightPass\PunctualLightCmdListRecorder.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SkyBoxCmdListRecorder.h" />
+    <ClInclude Include="ToneMappingCmdListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeometryPassCmdListRecorder.cpp" />
@@ -139,6 +140,7 @@
     <ClCompile Include="LightPass\PunctualLightCmdListRecorder.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SkyBoxCmdListRecorder.cpp" />
+    <ClCompile Include="ToneMappingCmdListRecorder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

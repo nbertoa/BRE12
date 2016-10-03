@@ -123,6 +123,8 @@ namespace PSOCreator {
 
 	void CommonPSOData::Init() noexcept {
 		PSOParams psoParams{};
+		const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
+		
 		psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
 		psoParams.mPSFilename = "PSOCreator/Basic/PS.cso";
 		psoParams.mRootSignFilename = "PSOCreator/Basic/RS.cso";
@@ -166,15 +168,29 @@ namespace PSOCreator {
 		PSOCreator::Execute(psoParams, mPSOData[Technique::HEIGHT_MAPPING]);
 
 		psoParams = PSOParams{};
+		psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
+		psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+		psoParams.mPSFilename = "PSOCreator/ToneMapping/PS.cso";
+		psoParams.mRootSignFilename = "PSOCreator/ToneMapping/RS.cso";
+		psoParams.mVSFilename = "PSOCreator/ToneMapping/VS.cso";
+		psoParams.mNumRenderTargets = 1U;
+		psoParams.mRtFormats[0U] = MasterRender::BackBufferRTFormat();
+		for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
+			psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
+		}
+		psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		ASSERT(mPSOData[Technique::TONE_MAPPING].mPSO == nullptr && mPSOData[Technique::TONE_MAPPING].mRootSign == nullptr);
+		CreatePSO(psoParams, mPSOData[Technique::TONE_MAPPING]);
+
+		psoParams = PSOParams{};
 		psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
 		psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
 		psoParams.mGSFilename = "PSOCreator/PunctualLight/GS.cso";
 		psoParams.mPSFilename = "PSOCreator/PunctualLight/PS.cso";
 		psoParams.mRootSignFilename = "PSOCreator/PunctualLight/RS.cso";
 		psoParams.mVSFilename = "PSOCreator/PunctualLight/VS.cso";
-		psoParams.mNumRenderTargets = 1U;
-		psoParams.mRtFormats[0U] = MasterRender::BackBufferRTFormat();
-		const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
+		psoParams.mNumRenderTargets = 1U; 
+		psoParams.mRtFormats[0U] = MasterRender::ColorBufferFormat();
 		for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
 			psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 		}
@@ -194,7 +210,7 @@ namespace PSOCreator {
 		psoParams.mRootSignFilename = "PSOCreator/SkyBox/RS.cso";
 		psoParams.mVSFilename = "PSOCreator/SkyBox/VS.cso";
 		psoParams.mNumRenderTargets = 1U;
-		psoParams.mRtFormats[0U] = MasterRender::BackBufferRTFormat();
+		psoParams.mRtFormats[0U] = MasterRender::ColorBufferFormat();
 		for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
 			psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 		}

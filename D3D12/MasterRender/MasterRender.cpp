@@ -10,10 +10,13 @@
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <ResourceManager\ResourceManager.h>
+#include <ModelManager\Model.h>
+#include <ModelManager\ModelManager.h>
 #include <Scene/GeometryPassCmdListRecorder.h>
 #include <Scene/LightPassCmdListRecorder.h>
 #include <Scene/SkyBoxCmdListRecorder.h>
 #include <Scene/Scene.h>
+#include <Scene/ToneMappingCmdListRecorder.h>
 
 using namespace DirectX;
 
@@ -101,7 +104,7 @@ using namespace DirectX;
 
 const DXGI_FORMAT MasterRender::sGeomPassBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{	
 	DXGI_FORMAT_R16G16B16A16_FLOAT,	
-	DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+	DXGI_FORMAT_R8G8B8A8_UNORM,
 	DXGI_FORMAT_R8G8B8A8_UNORM,
 	DXGI_FORMAT_UNKNOWN,
 	DXGI_FORMAT_UNKNOWN,
@@ -125,7 +128,7 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 	ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 	CreateCommandObjects();
 	CreateRtvAndDsv();
-	CreateGeometryPassRtvs();
+	CreateExtraBuffersRtvs();
 
 	mCamera.SetLens(Settings::sFieldOfView, Settings::AspectRatio(), Settings::sNearPlaneZ, Settings::sFarPlaneZ);
 
@@ -140,18 +143,48 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 void MasterRender::InitCmdListRecorders(Scene* scene) noexcept {
 	ASSERT(scene != nullptr);
 
-	CmdListHelper cmdListHelper(*mCmdQueue, *mFence, mCurrentFence, *mCmdListFrameBegin);
-	cmdListHelper.Reset(*mCmdAllocFrameBegin[0U]);
+	CmdListHelper cmdListHelper(*mCmdQueue, *mFence, mCurrentFence, *mCmdListGeomPass);
+
+	cmdListHelper.Reset(*mCmdAllocGeomPass[0U]);
 	scene->GenerateGeomPassRecorders(mCmdListProcessor->CmdListQueue(), cmdListHelper, mGeomPassCmdListRecorders);
-	cmdListHelper.Reset(*mCmdAllocFrameBegin[0U]);
+
+	cmdListHelper.Reset(*mCmdAllocGeomPass[0U]);
 	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeomPassBuffers, GEOMBUFFERS_COUNT, cmdListHelper, mLightPassCmdListRecorders);
-	cmdListHelper.Reset(*mCmdAllocFrameBegin[0U]);
+
+	cmdListHelper.Reset(*mCmdAllocGeomPass[0U]);
 	scene->GenerateSkyBoxRecorder(mCmdListProcessor->CmdListQueue(), cmdListHelper, mSkyBoxCmdListRecorder);
+
+	InitToneMappingPass();
 
 	const std::uint64_t count{ _countof(mFenceByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {
 		mFenceByQueuedFrameIndex[i] = mCurrentFence;
 	}
+}
+
+void MasterRender::InitToneMappingPass() noexcept {
+	ASSERT(mToneMappingCmdListRecorder.get() == nullptr);
+	
+	CmdListHelper cmdListHelper(*mCmdQueue, *mFence, mCurrentFence, *mCmdListGeomPass);
+	cmdListHelper.Reset(*mCmdAllocGeomPass[0U]);
+
+	// Create model for a full screen quad geometry. 
+	Model* model;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
+	ModelManager::Get().CreateFullscreenQuad(model, cmdListHelper.CmdList(), uploadVertexBuffer, uploadIndexBuffer);
+	ASSERT(model != nullptr);
+
+	// Get vertex and index buffers data from the only mesh this model must have.
+	ASSERT(model->Meshes().size() == 1UL);
+	const Mesh& mesh = model->Meshes()[0U];
+
+	cmdListHelper.CloseCmdList();
+	cmdListHelper.ExecuteCmdList();
+
+	ASSERT(mColorBuffer.Get() != nullptr);
+	mToneMappingCmdListRecorder.reset(new ToneMappingCmdListRecorder(mDevice, mCmdListProcessor->CmdListQueue()));
+	mToneMappingCmdListRecorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), *mColorBuffer.Get());
 }
 
 void MasterRender::Terminate() noexcept {
@@ -166,9 +199,11 @@ tbb::task* MasterRender::execute() {
 		UpdateCamera(mCamera, mFrameCBuffer.mView, mFrameCBuffer.mProj, mFrameCBuffer.mEyePosW, mTimer.DeltaTime());
 		ASSERT(mCmdListProcessor->IsIdle());
 
-		BeginFrameTask();
-		MiddleFrameTask();
-		EndFrameTask();
+		GeometryPass();
+		LightPass();
+		SkyBoxPass();
+		ToneMappingPass();
+		MergeTask();
 
 		SignalFenceAndPresent();
 	}
@@ -178,50 +213,51 @@ tbb::task* MasterRender::execute() {
 	return nullptr;
 }
 
-void MasterRender::BeginFrameTask() {
+void MasterRender::GeometryPass() {
 	std::uint32_t taskCount{ (std::uint32_t)mGeomPassCmdListRecorders.size() };
 	mCmdListProcessor->ResetExecutedTasksCounter();
 
-	ID3D12CommandAllocator* cmdAllocFrameBegin{ mCmdAllocFrameBegin[mCurrQueuedFrameIndex] };
+	ID3D12CommandAllocator* cmdAllocGeomPass{ mCmdAllocGeomPass[mCurrQueuedFrameIndex] };
 
-	CHECK_HR(cmdAllocFrameBegin->Reset());
-	CHECK_HR(mCmdListFrameBegin->Reset(cmdAllocFrameBegin, nullptr));
+	CHECK_HR(cmdAllocGeomPass->Reset());
+	CHECK_HR(mCmdListGeomPass->Reset(cmdAllocGeomPass, nullptr));
 
-	mCmdListFrameBegin->RSSetViewports(1U, &Settings::sScreenViewport);
-	mCmdListFrameBegin->RSSetScissorRects(1U, &Settings::sScissorRect);
+	mCmdListGeomPass->RSSetViewports(1U, &Settings::sScreenViewport);
+	mCmdListGeomPass->RSSetScissorRects(1U, &Settings::sScissorRect);
 
 	// Set resource barriers and render targets
-	CD3DX12_RESOURCE_BARRIER presentToRtBarriers[GEOMBUFFERS_COUNT + 1U]{
+	CD3DX12_RESOURCE_BARRIER presentToRtBarriers[GEOMBUFFERS_COUNT + 2U]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL_SMOOTHNESS_DEPTH].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
-	mCmdListFrameBegin->ResourceBarrier(_countof(presentToRtBarriers), presentToRtBarriers);
+	mCmdListGeomPass->ResourceBarrier(_countof(presentToRtBarriers), presentToRtBarriers);
+
+	// Clear render targets and depth stencil
+	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	mCmdListGeomPass->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0U, nullptr);
+	mCmdListGeomPass->ClearRenderTargetView(mGeomPassBuffersRTVCpuDescHandles[NORMAL_SMOOTHNESS_DEPTH], DirectX::Colors::Black, 0U, nullptr);
+	mCmdListGeomPass->ClearRenderTargetView(mGeomPassBuffersRTVCpuDescHandles[BASECOLOR_METALMASK], zero, 0U, nullptr);
+	mCmdListGeomPass->ClearRenderTargetView(mGeomPassBuffersRTVCpuDescHandles[SPECULARREFLECTION], zero, 0U, nullptr);
+	mCmdListGeomPass->ClearRenderTargetView(mColorBufferRTVCpuDescHandle, DirectX::Colors::Black, 0U, nullptr);
+	mCmdListGeomPass->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
+	CHECK_HR(mCmdListGeomPass->Close());
+		
+	// Execute preliminary task
+	ID3D12CommandList* cmdLists[] = { mCmdListGeomPass };
+	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+
+	// Build handles for render targets and depth stencil view
 	const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescHandles[GEOMBUFFERS_COUNT]{
 		mGeomPassBuffersRTVCpuDescHandles[NORMAL_SMOOTHNESS_DEPTH],
 		mGeomPassBuffersRTVCpuDescHandles[BASECOLOR_METALMASK],
 		mGeomPassBuffersRTVCpuDescHandles[SPECULARREFLECTION],
 	};
 	const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
-	mCmdListFrameBegin->OMSetRenderTargets(_countof(rtvCpuDescHandles), rtvCpuDescHandles, false, &dsvHandle);
 
-	mCmdListFrameBegin->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0U, nullptr);
-	
-	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	mCmdListFrameBegin->ClearRenderTargetView(mGeomPassBuffersRTVCpuDescHandles[NORMAL_SMOOTHNESS_DEPTH], DirectX::Colors::Black, 0U, nullptr);
-	mCmdListFrameBegin->ClearRenderTargetView(mGeomPassBuffersRTVCpuDescHandles[BASECOLOR_METALMASK], zero, 0U, nullptr);
-	mCmdListFrameBegin->ClearRenderTargetView(mGeomPassBuffersRTVCpuDescHandles[SPECULARREFLECTION], zero, 0U, nullptr);
-
-	mCmdListFrameBegin->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
-	CHECK_HR(mCmdListFrameBegin->Close());
-
-	// Execute begin Frame task + # cmd build tasks		
-	{
-		ID3D12CommandList* cmdLists[] = { mCmdListFrameBegin };
-		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
-	}
-
+	// Execute geometry pass tasks
 	std::uint32_t grainSize{ max(1U, (taskCount) / Settings::sCpuProcessors) };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
@@ -236,46 +272,38 @@ void MasterRender::BeginFrameTask() {
 	}
 }
 
-void MasterRender::MiddleFrameTask() {
-	ID3D12CommandAllocator* cmdAllocFrameMiddle{ mCmdAllocFrameMiddle[mCurrQueuedFrameIndex] };
+void MasterRender::LightPass() {
+	ID3D12CommandAllocator* cmdAllocLightPass{ mCmdAllocLightPass[mCurrQueuedFrameIndex] };
 
-	CHECK_HR(cmdAllocFrameMiddle->Reset());
-	CHECK_HR(mCmdListFrameMiddle->Reset(cmdAllocFrameMiddle, nullptr));
+	CHECK_HR(cmdAllocLightPass->Reset());
+	CHECK_HR(mCmdListLightPass->Reset(cmdAllocLightPass, nullptr));
 
+	// Transition geometry buffers from render target state to pixel shader resource state
 	CD3DX12_RESOURCE_BARRIER rtToSrvBarriers[GEOMBUFFERS_COUNT]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL_SMOOTHNESS_DEPTH].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 	};
-	mCmdListFrameMiddle->ResourceBarrier(_countof(rtToSrvBarriers), rtToSrvBarriers);
+	mCmdListLightPass->ResourceBarrier(_countof(rtToSrvBarriers), rtToSrvBarriers);
 
-	CHECK_HR(mCmdListFrameMiddle->Close());
+	CHECK_HR(mCmdListLightPass->Close());
 
-	// Middle Frame task + # light pass cmd list recorders + sky box command list (if any)
-	const std::uint32_t skyBoxMask{ mSkyBoxCmdListRecorder.get() != nullptr };
-	const std::uint32_t lightPassTaskCount{ (std::uint32_t)mLightPassCmdListRecorders.size() };
-	const std::uint32_t taskCount(lightPassTaskCount + skyBoxMask);
+	// Execute preliminary task
+	ID3D12CommandList* cmdLists[] = { mCmdListLightPass };
+	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+
+	// Execute light pass tasks
+	const std::uint32_t taskCount{ (std::uint32_t)mLightPassCmdListRecorders.size() };
 	mCmdListProcessor->ResetExecutedTasksCounter();
-
-	// Execute middle frame task
-	{
-		ID3D12CommandList* cmdLists[] = { mCmdListFrameMiddle };
-		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
-	}
 	const std::uint32_t grainSize(max(1U, taskCount / Settings::sCpuProcessors));
-	D3D12_CPU_DESCRIPTOR_HANDLE currBackBuffer(CurrentBackBufferView());
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[] = { mColorBufferRTVCpuDescHandle };
 	const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
-	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, lightPassTaskCount, grainSize),
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mLightPassCmdListRecorders[i]->RecordCommandLists(mFrameCBuffer, &currBackBuffer, 1U, dsvHandle);
+			mLightPassCmdListRecorders[i]->RecordCommandLists(mFrameCBuffer, rtvHandles, _countof(rtvHandles), dsvHandle);
 	}
 	);
-
-	// Record and execute sky box command list (if any)
-	if (skyBoxMask == 1U) {
-		mSkyBoxCmdListRecorder->RecordCommandLists(mFrameCBuffer, &currBackBuffer, 1U, dsvHandle);
-	}
 
 	// Wait until all previous tasks command lists are executed
 	while (mCmdListProcessor->ExecutedTasksCounter() < taskCount) {
@@ -283,23 +311,66 @@ void MasterRender::MiddleFrameTask() {
 	}
 }
 
-void MasterRender::EndFrameTask() {
-	ID3D12CommandAllocator* cmdAllocFrameEnd{ mCmdAllocFrameEnd[mCurrQueuedFrameIndex] };
+void MasterRender::SkyBoxPass() {
+	ASSERT(mSkyBoxCmdListRecorder.get() != nullptr);
 
-	CHECK_HR(cmdAllocFrameEnd->Reset());
-	CHECK_HR(mCmdListFrameEnd->Reset(cmdAllocFrameEnd, nullptr));
+	mCmdListProcessor->ResetExecutedTasksCounter();
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[] = { mColorBufferRTVCpuDescHandle };
+	const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
+	mSkyBoxCmdListRecorder->RecordCommandLists(mFrameCBuffer, rtvHandles, _countof(rtvHandles), dsvHandle);
 
-	CD3DX12_RESOURCE_BARRIER rtToPresentBarriers[GEOMBUFFERS_COUNT + 1U]{
+	// Wait until all previous tasks command lists are executed
+	while (mCmdListProcessor->ExecutedTasksCounter() < 1U) {
+		Sleep(0U);
+	}
+}
+
+void MasterRender::ToneMappingPass() {
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocToneMappingPass[mCurrQueuedFrameIndex] };
+
+	CHECK_HR(cmdAlloc->Reset());
+	CHECK_HR(mCmdListToneMappingPass->Reset(cmdAlloc, nullptr));
+
+	// Transition color buffer
+	CD3DX12_RESOURCE_BARRIER rtToSrvBarriers[1U]{
+		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+	};
+	mCmdListToneMappingPass->ResourceBarrier(_countof(rtToSrvBarriers), rtToSrvBarriers);
+
+	CHECK_HR(mCmdListToneMappingPass->Close());
+
+	// Execute preliminary task
+	mCmdListProcessor->ResetExecutedTasksCounter();
+	ID3D12CommandList* cmdLists[] = { mCmdListToneMappingPass };
+	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+
+	// Execute tone mapping task
+	mToneMappingCmdListRecorder->RecordCommandLists(CurrentBackBufferView(), DepthStencilView());
+
+	// Wait until all previous tasks command lists are executed
+	while (mCmdListProcessor->ExecutedTasksCounter() < 1) {
+		Sleep(0U);
+	}
+}
+
+void MasterRender::MergeTask() {
+	ID3D12CommandAllocator* cmdAllocMergeTask{ mCmdAllocMergeTask[mCurrQueuedFrameIndex] };
+
+	CHECK_HR(cmdAllocMergeTask->Reset());
+	CHECK_HR(mCmdListMergeTask->Reset(cmdAllocMergeTask, nullptr));
+
+	CD3DX12_RESOURCE_BARRIER rtToPresentBarriers[GEOMBUFFERS_COUNT + 2U]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL_SMOOTHNESS_DEPTH].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
 		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
+		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
 	};
-	mCmdListFrameEnd->ResourceBarrier(_countof(rtToPresentBarriers), rtToPresentBarriers);
+	mCmdListMergeTask->ResourceBarrier(_countof(rtToPresentBarriers), rtToPresentBarriers);
 
-	CHECK_HR(mCmdListFrameEnd->Close());
+	CHECK_HR(mCmdListMergeTask->Close());
 	{
-		ID3D12CommandList* cmdLists[] = { mCmdListFrameEnd };
+		ID3D12CommandList* cmdLists[] = { mCmdListMergeTask };
 		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 	}
 }
@@ -364,14 +435,14 @@ void MasterRender::CreateRtvAndDsvDescriptorHeaps() noexcept {
 	ResourceManager::Get().CreateDescriptorHeap(dsvHeapDesc, mDsvHeap);
 }
 
-void MasterRender::CreateGeometryPassRtvs() noexcept {
+void MasterRender::CreateExtraBuffersRtvs() noexcept {
 	// Create geometry pass buffers desc heap
 	D3D12_DESCRIPTOR_HEAP_DESC descHeap = {};
-	descHeap.NumDescriptors = _countof(mGeomPassBuffers);
+	descHeap.NumDescriptors = _countof(mGeomPassBuffers) + 1U; // Geometry buffers + color buffers
 	descHeap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	descHeap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	descHeap.NodeMask = 0;
-	ResourceManager::Get().CreateDescriptorHeap(descHeap, mGeomPassBuffersRTVDescHeap);
+	ResourceManager::Get().CreateDescriptorHeap(descHeap, mBuffersRTVDescHeap);
 
 	// Set shared geometry pass buffers properties
 	D3D12_RESOURCE_DESC resDesc = {};
@@ -386,23 +457,29 @@ void MasterRender::CreateGeometryPassRtvs() noexcept {
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
-	D3D12_CLEAR_VALUE clearValue[GEOMBUFFERS_COUNT]{
+	D3D12_CLEAR_VALUE clearValue[GEOMBUFFERS_COUNT + 1U]{
 		{ DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 1.0f },
-		{ DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 0.0f }
+		{ DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 0.0f },
+		{ DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 0.0f },
+		{ DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 1.0f },
 	};
 	mGeomPassBuffers[NORMAL_SMOOTHNESS_DEPTH].Reset();
+	mGeomPassBuffers[BASECOLOR_METALMASK].Reset();
+	mGeomPassBuffers[SPECULARREFLECTION].Reset();
+	mColorBuffer.Reset();
 		
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 	
 	ID3D12Resource* res{ nullptr };
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvDescHeapBeginDescHandle(mGeomPassBuffersRTVDescHeap->GetCPUDescriptorHandleForHeapStart());
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvDescHeapBeginDescHandle(mBuffersRTVDescHeap->GetCPUDescriptorHandleForHeapStart());
 	const std::size_t rtvDescHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
-	// Create RTV's descriptors
-	for (std::uint32_t i = 0U; i < GEOMBUFFERS_COUNT; ++i) {
+	// Create RTV's descriptors for geometry buffers
+	std::uint32_t i;
+	for (i = 0U; i < GEOMBUFFERS_COUNT; ++i) {
 		resDesc.Format = sGeomPassBufferFormats[i];
 		clearValue[i].Format = resDesc.Format;
 		rtvDesc.Format = resDesc.Format;
@@ -412,6 +489,15 @@ void MasterRender::CreateGeometryPassRtvs() noexcept {
 		mGeomPassBuffersRTVCpuDescHandles[i] = rtvDescHeapBeginDescHandle;
 		rtvDescHeapBeginDescHandle.ptr += rtvDescHandleIncSize;
 	}
+
+	// Create RTV's descriptor for color buffer
+	resDesc.Format = sColorBufferFormat;
+	clearValue[i].Format = resDesc.Format;
+	rtvDesc.Format = resDesc.Format;
+	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_COMMON, clearValue[i], res);
+	mColorBuffer = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
+	mDevice.CreateRenderTargetView(mColorBuffer.Get(), &rtvDesc, rtvDescHeapBeginDescHandle);
+	mColorBufferRTVCpuDescHandle = rtvDescHeapBeginDescHandle;
 }
 
 void MasterRender::CreateCommandObjects() noexcept {
@@ -423,20 +509,23 @@ void MasterRender::CreateCommandObjects() noexcept {
 	CommandManager::Get().CreateCmdQueue(queueDesc, mCmdQueue);
 
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
-		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameBegin[i]);
-		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameMiddle[i]);
-		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocFrameEnd[i]);
+		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocGeomPass[i]);
+		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocLightPass[i]);
+		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocToneMappingPass[i]);
+		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocMergeTask[i]);
 	}
-	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameBegin[0], mCmdListFrameBegin);
-	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameMiddle[0], mCmdListFrameMiddle);
-	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocFrameEnd[0], mCmdListFrameEnd);
+	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocGeomPass[0], mCmdListGeomPass);
+	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocLightPass[0], mCmdListLightPass);
+	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocToneMappingPass[0], mCmdListToneMappingPass);
+	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocMergeTask[0], mCmdListMergeTask);
 
 	// Start off in a closed state. This is because the first time we refer 
 	// to the command list we will Reset it, and it needs to be closed before
 	// calling Reset.
-	mCmdListFrameBegin->Close();
-	mCmdListFrameMiddle->Close();
-	mCmdListFrameEnd->Close();
+	mCmdListGeomPass->Close();
+	mCmdListLightPass->Close();
+	mCmdListToneMappingPass->Close();
+	mCmdListMergeTask->Close();
 }
 
 ID3D12Resource* MasterRender::CurrentBackBuffer() const noexcept {

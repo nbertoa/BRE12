@@ -12,10 +12,6 @@ CmdListHelper::CmdListHelper(ID3D12CommandQueue& cmdQueue, ID3D12Fence& fence, s
 {	
 }
 
-CmdListHelper::~CmdListHelper() {
-	mCmdList.Close();
-}
-
 void CmdListHelper::Reset(ID3D12CommandAllocator& cmdAlloc) noexcept {
 	CHECK_HR(mCmdList.Reset(&cmdAlloc, nullptr));
 }

@@ -62,5 +62,9 @@ namespace GeometryGenerator {
 
 	// Creates a quad aligned with the screen.  This is useful for post-processing and screen effects.
 	void CreateQuad(const float x, const float y, const float w, const float h, const float depth, MeshData& meshData) noexcept;
+
+	// Creates a fullscreen quad aligned with the screen.  This is useful for post-processing and screen effects.
+	// Positions will be in NDC
+	void CreateFullscreenQuad( MeshData& meshData) noexcept;
 }
 

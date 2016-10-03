@@ -14,6 +14,10 @@
 #include <Scene/LightPass/PunctualLightCmdListRecorder.h>
 #include <Scene/SkyBoxCmdListRecorder.h>
 
+namespace {
+	const char* sCubeMapFile{ "textures/snow2_cube_map.dds" };
+}
+
 void NormalScene::GenerateGeomPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	CmdListHelper& cmdListHelper,
@@ -58,7 +62,7 @@ void NormalScene::GenerateGeomPassRecorders(
 	// Cube map texture
 	ID3D12Resource* cubeMap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferCubeMap;
-	ResourceManager::Get().LoadTextureFromFile("textures/sunset_cube_map.dds", cubeMap, uploadBufferCubeMap, cmdListHelper.CmdList());
+	ResourceManager::Get().LoadTextureFromFile(sCubeMapFile, cubeMap, uploadBufferCubeMap, cmdListHelper.CmdList());
 	ASSERT(cubeMap != nullptr);
 
 	cmdListHelper.CloseCmdList();
@@ -198,7 +202,7 @@ void NormalScene::GenerateSkyBoxRecorder(
 	// Cube map texture
 	ID3D12Resource* cubeMap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile("textures/sunset2_cube_map.dds", cubeMap, uploadBufferTex, cmdListHelper.CmdList());
+	ResourceManager::Get().LoadTextureFromFile(sCubeMapFile, cubeMap, uploadBufferTex, cmdListHelper.CmdList());
 	ASSERT(cubeMap != nullptr);
 
 	cmdListHelper.CloseCmdList();
