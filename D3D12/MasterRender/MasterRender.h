@@ -7,9 +7,9 @@
 #include <vector>
 
 #include <Camera/Camera.h>
+#include <CommandListProcessor/CommandListProcessor.h>
 #include <DXUtils\CBuffers.h>
 #include <GlobalData\Settings.h>
-#include <MasterRender/CommandListProcessor.h>
 #include <Timer/Timer.h>
 #include <Utils/DebugUtils.h>
 

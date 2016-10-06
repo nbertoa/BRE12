@@ -224,24 +224,12 @@ void MasterRender::GeometryPass() {
 
 	mCmdListGeomPass->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdListGeomPass->RSSetScissorRects(1U, &Settings::sScissorRect);
-
-	// Set resource barriers and render targets
-	CD3DX12_RESOURCE_BARRIER presentToRtBarriers[GEOMBUFFERS_COUNT + 2U]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL_SMOOTHNESS_DEPTH].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-	};
-	mCmdListGeomPass->ResourceBarrier(_countof(presentToRtBarriers), presentToRtBarriers);
-
+	
 	// Clear render targets and depth stencil
 	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	mCmdListGeomPass->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0U, nullptr);
 	mCmdListGeomPass->ClearRenderTargetView(mGeomPassBuffersRTVCpuDescHandles[NORMAL_SMOOTHNESS_DEPTH], DirectX::Colors::Black, 0U, nullptr);
 	mCmdListGeomPass->ClearRenderTargetView(mGeomPassBuffersRTVCpuDescHandles[BASECOLOR_METALMASK], zero, 0U, nullptr);
 	mCmdListGeomPass->ClearRenderTargetView(mGeomPassBuffersRTVCpuDescHandles[SPECULARREFLECTION], zero, 0U, nullptr);
-	mCmdListGeomPass->ClearRenderTargetView(mColorBufferRTVCpuDescHandle, DirectX::Colors::Black, 0U, nullptr);
 	mCmdListGeomPass->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
 	CHECK_HR(mCmdListGeomPass->Close());
 		
@@ -282,10 +270,12 @@ void MasterRender::LightPass() {
 	CD3DX12_RESOURCE_BARRIER rtToSrvBarriers[GEOMBUFFERS_COUNT]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL_SMOOTHNESS_DEPTH].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),		
 	};
 	mCmdListLightPass->ResourceBarrier(_countof(rtToSrvBarriers), rtToSrvBarriers);
 
+	mCmdListLightPass->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0U, nullptr);
+	mCmdListLightPass->ClearRenderTargetView(mColorBufferRTVCpuDescHandle, DirectX::Colors::Black, 0U, nullptr);
 	CHECK_HR(mCmdListLightPass->Close());
 
 	// Execute preliminary task
@@ -332,8 +322,9 @@ void MasterRender::ToneMappingPass() {
 	CHECK_HR(mCmdListToneMappingPass->Reset(cmdAlloc, nullptr));
 
 	// Transition color buffer
-	CD3DX12_RESOURCE_BARRIER rtToSrvBarriers[1U]{
+	CD3DX12_RESOURCE_BARRIER rtToSrvBarriers[2U]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
 	mCmdListToneMappingPass->ResourceBarrier(_countof(rtToSrvBarriers), rtToSrvBarriers);
 
@@ -360,11 +351,11 @@ void MasterRender::MergeTask() {
 	CHECK_HR(mCmdListMergeTask->Reset(cmdAllocMergeTask, nullptr));
 
 	CD3DX12_RESOURCE_BARRIER rtToPresentBarriers[GEOMBUFFERS_COUNT + 2U]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL_SMOOTHNESS_DEPTH].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[NORMAL_SMOOTHNESS_DEPTH].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeomPassBuffers[SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
-		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PRESENT),
+		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
 	mCmdListMergeTask->ResourceBarrier(_countof(rtToPresentBarriers), rtToPresentBarriers);
 
@@ -483,7 +474,7 @@ void MasterRender::CreateExtraBuffersRtvs() noexcept {
 		resDesc.Format = sGeomPassBufferFormats[i];
 		clearValue[i].Format = resDesc.Format;
 		rtvDesc.Format = resDesc.Format;
-		ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_COMMON, clearValue[i], res);
+		ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, clearValue[i], res);
 		mGeomPassBuffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
 		mDevice.CreateRenderTargetView(mGeomPassBuffers[i].Get(), &rtvDesc, rtvDescHeapBeginDescHandle);
 		mGeomPassBuffersRTVCpuDescHandles[i] = rtvDescHeapBeginDescHandle;
@@ -494,7 +485,7 @@ void MasterRender::CreateExtraBuffersRtvs() noexcept {
 	resDesc.Format = sColorBufferFormat;
 	clearValue[i].Format = resDesc.Format;
 	rtvDesc.Format = resDesc.Format;
-	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_COMMON, clearValue[i], res);
+	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, clearValue[i], res);
 	mColorBuffer = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
 	mDevice.CreateRenderTargetView(mColorBuffer.Get(), &rtvDesc, rtvDescHeapBeginDescHandle);
 	mColorBufferRTVCpuDescHandle = rtvDescHeapBeginDescHandle;
