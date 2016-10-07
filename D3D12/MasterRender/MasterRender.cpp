@@ -136,7 +136,7 @@ void MasterRender::InitCmdListRecorders(Scene* scene) noexcept {
 
 	cmdListHelper.Reset(*mCmdAllocs[0U]);
 	scene->GenerateGeomPassRecorders(mCmdListProcessor->CmdListQueue(), cmdListHelper, mGeometryPass.GetRecorders());
-	mGeometryPass.Init(mDevice);
+	mGeometryPass.Init(mDevice, DepthStencilView());
 
 	cmdListHelper.Reset(*mCmdAllocs[0U]);
 	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeometryPass.GetBuffers(), GeometryPass::BUFFERS_COUNT, cmdListHelper, mRecorders);
@@ -190,7 +190,7 @@ tbb::task* MasterRender::execute() {
 		ASSERT(mCmdListProcessor->IsIdle());
 
 		//GeomPass();
-		mGeometryPass.Execute(*mCmdListProcessor, *mCmdQueue, DepthStencilView(), mFrameCBuffer);
+		mGeometryPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
 		LightPass();
 		SkyBoxPass();
 		ToneMappingPass();

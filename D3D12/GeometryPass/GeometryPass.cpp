@@ -99,7 +99,7 @@ const DXGI_FORMAT GeometryPass::sBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_
 	DXGI_FORMAT_UNKNOWN
 };
 
-void GeometryPass::Init(ID3D12Device& device) noexcept {
+void GeometryPass::Init(ID3D12Device& device, const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
 	ASSERT(ValidateData() == false);
 	
 	ASSERT(mRecorders.empty() == false);
@@ -107,13 +107,14 @@ void GeometryPass::Init(ID3D12Device& device) noexcept {
 	CreateBuffers(device, mBuffers, mRtvCpuDescs, mDescHeap);
 	CreateCommandObjects(mCmdAllocs, mCmdList);
 
+	mDepthBufferCpuDesc = depthBufferCpuDesc;
+
 	ASSERT(ValidateData());
 }
 
 void GeometryPass::Execute(
 	CommandListProcessor& cmdListProcessor, 
 	ID3D12CommandQueue& cmdQueue,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthCpuDesc,
 	const FrameCBuffer& frameCBuffer) noexcept {
 
 	ASSERT(ValidateData());
@@ -138,7 +139,7 @@ void GeometryPass::Execute(
 	mCmdList->ClearRenderTargetView(mRtvCpuDescs[NORMAL_SMOOTHNESS_DEPTH], DirectX::Colors::Black, 0U, nullptr);
 	mCmdList->ClearRenderTargetView(mRtvCpuDescs[BASECOLOR_METALMASK], zero, 0U, nullptr);
 	mCmdList->ClearRenderTargetView(mRtvCpuDescs[SPECULARREFLECTION], zero, 0U, nullptr);
-	mCmdList->ClearDepthStencilView(depthCpuDesc, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
+	mCmdList->ClearDepthStencilView(mDepthBufferCpuDesc, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
 	CHECK_HR(mCmdList->Close());
 
 	// Execute preliminary task
@@ -159,7 +160,7 @@ void GeometryPass::Execute(
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mRecorders[i]->RecordCommandLists(frameCBuffer, rtvCpuDescs, rtvCpuDescsCount, depthCpuDesc);
+			mRecorders[i]->RecordCommandLists(frameCBuffer, rtvCpuDescs, rtvCpuDescsCount, mDepthBufferCpuDesc);
 	}
 	);
 
@@ -191,7 +192,8 @@ bool GeometryPass::ValidateData() const noexcept {
 	const bool b =
 		mCmdList != nullptr &&
 		mRecorders.empty() == false &&
-		mDescHeap != nullptr;
+		mDescHeap != nullptr &&
+		mDepthBufferCpuDesc.ptr != 0UL;
 
 		return b;
 }

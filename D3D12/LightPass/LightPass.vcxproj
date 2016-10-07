@@ -114,10 +114,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LightPass.cpp" />
     <ClCompile Include="LightPassCmdListRecorder.cpp" />
     <ClCompile Include="Recorders\PunctualLightCmdListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LightPass.h" />
     <ClInclude Include="LightPassCmdListRecorder.h" />
     <ClInclude Include="Recorders\PunctualLightCmdListRecorder.h" />
   </ItemGroup>

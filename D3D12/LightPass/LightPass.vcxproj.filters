@@ -10,11 +10,13 @@
       <Filter>Recorders</Filter>
     </ClCompile>
     <ClCompile Include="LightPassCmdListRecorder.cpp" />
+    <ClCompile Include="LightPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Recorders\PunctualLightCmdListRecorder.h">
       <Filter>Recorders</Filter>
     </ClInclude>
     <ClInclude Include="LightPassCmdListRecorder.h" />
+    <ClInclude Include="LightPass.h" />
   </ItemGroup>
 </Project>

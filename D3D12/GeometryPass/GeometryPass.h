@@ -12,6 +12,7 @@ struct FrameCBuffer;
 struct ID3D12CommandAllocator;
 struct ID3D12CommandQueue;
 struct ID3D12DescriptorHeap;
+struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
@@ -34,7 +35,7 @@ public:
 	__forceinline Recorders& GetRecorders() noexcept { return mRecorders; }
 
 	// You should call this method after filling recorders and before Execute()
-	void Init(ID3D12Device& device) noexcept;
+	void Init(ID3D12Device& device, const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
 	// Geometry buffers formats. It has a size of D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT
 	__forceinline static const DXGI_FORMAT* BufferFormats() noexcept { return sBufferFormats; }
@@ -42,12 +43,9 @@ public:
 	// Get geometry buffers
 	__forceinline Microsoft::WRL::ComPtr<ID3D12Resource>* GetBuffers() noexcept { return mBuffers; }
 	
-	// This method expects geometry buffers in PRESENT state.
-	// depthCpuDesc: Cpu descriptor handle of the depth stencil buffer
 	void Execute(
 		CommandListProcessor& cmdListProcessor, 
 		ID3D12CommandQueue& cmdQueue, 
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthCpuDesc,
 		const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
@@ -66,6 +64,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBuffers[BUFFERS_COUNT];
 	D3D12_CPU_DESCRIPTOR_HANDLE mRtvCpuDescs[BUFFERS_COUNT];
 	ID3D12DescriptorHeap* mDescHeap{ nullptr };
+
+	// Depth buffer cpu descriptor
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 	
 	Recorders mRecorders;
 };
