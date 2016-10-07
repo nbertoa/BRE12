@@ -12,6 +12,7 @@
 #include <GeometryPass\GeometryPass.h>
 #include <GlobalData\Settings.h>
 #include <LightPass\LightPass.h>
+#include <SkyBoxPass\SkyBoxPass.h>
 #include <Timer/Timer.h>
 #include <Utils/DebugUtils.h>
 
@@ -55,7 +56,6 @@ private:
 	ID3D12Resource* DepthStencilBuffer() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
 
-	void SkyBoxPass();
 	void ToneMappingPass();
 	void MergeTask();
 
@@ -85,6 +85,7 @@ private:
 
 	GeometryPass mGeometryPass;
 	LightPass mLightPass;
+	SkyBoxPass mSkyBoxPass;
 
 	ID3D12CommandAllocator* mCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
 	ID3D12CommandAllocator* mCmdAllocMergeTask[Settings::sQueuedFrameCount]{ nullptr };
@@ -100,8 +101,6 @@ private:
 
 	ID3D12DescriptorHeap* mRtvHeap{ nullptr };
 	ID3D12DescriptorHeap* mDsvHeap{ nullptr };
-	
-	std::unique_ptr<SkyBoxCmdListRecorder> mSkyBoxCmdListRecorder;
 
 	std::unique_ptr<ToneMappingCmdListRecorder> mToneMappingCmdListRecorder;
 

@@ -14,7 +14,6 @@
 #include <ModelManager\ModelManager.h>
 #include <Scene/Scene.h>
 #include <Scene/ToneMappingCmdListRecorder.h>
-#include <SkyBoxPass/SkyBoxCmdListRecorder.h>
 
 using namespace DirectX;
 
@@ -141,7 +140,8 @@ void MasterRender::InitCmdListRecorders(Scene* scene) noexcept {
 	mLightPass.Init(mGeometryPass.GetBuffers(), mColorBufferRTVCpuDescHandle, DepthStencilView());
 
 	cmdListHelper.Reset(*mCmdAllocs[0U]);
-	scene->GenerateSkyBoxRecorder(mCmdListProcessor->CmdListQueue(), cmdListHelper, mSkyBoxCmdListRecorder);
+	scene->GenerateSkyBoxRecorder(mCmdListProcessor->CmdListQueue(), cmdListHelper, mSkyBoxPass.GetRecorder());
+	mSkyBoxPass.Init(mColorBufferRTVCpuDescHandle, DepthStencilView());
 
 	InitToneMappingPass();
 
@@ -190,7 +190,7 @@ tbb::task* MasterRender::execute() {
 
 		mGeometryPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
 		mLightPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
-		SkyBoxPass();
+		mSkyBoxPass.Execute(*mCmdListProcessor, mFrameCBuffer);
 		ToneMappingPass();
 		MergeTask();
 
@@ -200,20 +200,6 @@ tbb::task* MasterRender::execute() {
 	mCmdListProcessor->Terminate();
 	FlushCommandQueue();
 	return nullptr;
-}
-
-void MasterRender::SkyBoxPass() {
-	ASSERT(mSkyBoxCmdListRecorder.get() != nullptr);
-
-	mCmdListProcessor->ResetExecutedTasksCounter();
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[] = { mColorBufferRTVCpuDescHandle };
-	const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
-	mSkyBoxCmdListRecorder->RecordCommandLists(mFrameCBuffer, rtvHandles, _countof(rtvHandles), dsvHandle);
-
-	// Wait until all previous tasks command lists are executed
-	while (mCmdListProcessor->ExecutedTasksCounter() < 1U) {
-		Sleep(0U);
-	}
 }
 
 void MasterRender::ToneMappingPass() {
