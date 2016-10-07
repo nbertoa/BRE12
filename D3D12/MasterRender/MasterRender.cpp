@@ -5,18 +5,16 @@
 
 #include <CommandManager/CommandManager.h>
 #include <DXUtils/d3dx12.h>
-#include <GeometryPass/GeometryPassCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
 #include <GlobalData/Settings.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
-#include <LightPass/LightPassCmdListRecorder.h>
 #include <ResourceManager\ResourceManager.h>
 #include <ModelManager\Model.h>
 #include <ModelManager\ModelManager.h>
-#include <Scene/SkyBoxCmdListRecorder.h>
 #include <Scene/Scene.h>
 #include <Scene/ToneMappingCmdListRecorder.h>
+#include <SkyBoxPass/SkyBoxCmdListRecorder.h>
 
 using namespace DirectX;
 
@@ -139,7 +137,8 @@ void MasterRender::InitCmdListRecorders(Scene* scene) noexcept {
 	mGeometryPass.Init(mDevice, DepthStencilView());
 
 	cmdListHelper.Reset(*mCmdAllocs[0U]);
-	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeometryPass.GetBuffers(), GeometryPass::BUFFERS_COUNT, cmdListHelper, mRecorders);
+	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeometryPass.GetBuffers(), GeometryPass::BUFFERS_COUNT, cmdListHelper, mLightPass.GetRecorders());
+	mLightPass.Init(mGeometryPass.GetBuffers(), mColorBufferRTVCpuDescHandle, DepthStencilView());
 
 	cmdListHelper.Reset(*mCmdAllocs[0U]);
 	scene->GenerateSkyBoxRecorder(mCmdListProcessor->CmdListQueue(), cmdListHelper, mSkyBoxCmdListRecorder);
@@ -189,9 +188,8 @@ tbb::task* MasterRender::execute() {
 		UpdateCamera(mCamera, mFrameCBuffer.mView, mFrameCBuffer.mProj, mFrameCBuffer.mEyePosW, mTimer.DeltaTime());
 		ASSERT(mCmdListProcessor->IsIdle());
 
-		//GeomPass();
 		mGeometryPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
-		LightPass();
+		mLightPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
 		SkyBoxPass();
 		ToneMappingPass();
 		MergeTask();
@@ -202,50 +200,6 @@ tbb::task* MasterRender::execute() {
 	mCmdListProcessor->Terminate();
 	FlushCommandQueue();
 	return nullptr;
-}
-
-void MasterRender::LightPass() {
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocs[mCurrQueuedFrameIndex] };
-
-	const std::uint32_t taskCount{ (std::uint32_t)mRecorders.size() };
-	mCmdListProcessor->ResetExecutedTasksCounter();
-
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
-
-	// Resource barriers
-	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::NORMAL_SMOOTHNESS_DEPTH].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-	};
-	const std::size_t barriersCount = _countof(barriers);
-	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT);
-	mCmdList->ResourceBarrier(barriersCount, barriers);
-
-	// Clear render targets
-	mCmdList->ClearRenderTargetView(mColorBufferRTVCpuDescHandle, DirectX::Colors::Black, 0U, nullptr);
-	CHECK_HR(mCmdList->Close());
-
-	// Execute preliminary task
-	ID3D12CommandList* cmdLists[] = { mCmdList };
-	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
-
-	// Execute light pass tasks
-	const std::uint32_t grainSize(max(1U, taskCount / Settings::sCpuProcessors));
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescs[] = { mColorBufferRTVCpuDescHandle };
-	const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DepthStencilView();
-	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
-		[&](const tbb::blocked_range<size_t>& r) {
-		for (size_t i = r.begin(); i != r.end(); ++i)
-			mRecorders[i]->RecordCommandLists(mFrameCBuffer, rtvCpuDescs, _countof(rtvCpuDescs), dsvHandle);
-	}
-	);
-
-	// Wait until all previous tasks command lists are executed
-	while (mCmdListProcessor->ExecutedTasksCounter() < taskCount) {
-		Sleep(0U);
-	}
 }
 
 void MasterRender::SkyBoxPass() {
@@ -263,24 +217,24 @@ void MasterRender::SkyBoxPass() {
 }
 
 void MasterRender::ToneMappingPass() {
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocToneMappingPass[mCurrQueuedFrameIndex] };
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocs[mCurrQueuedFrameIndex] };
 
 	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdListToneMappingPass->Reset(cmdAlloc, nullptr));
+	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
 
 	// Transition color buffer
 	CD3DX12_RESOURCE_BARRIER rtToSrvBarriers[2U]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
-	mCmdListToneMappingPass->ResourceBarrier(_countof(rtToSrvBarriers), rtToSrvBarriers);
+	mCmdList->ResourceBarrier(_countof(rtToSrvBarriers), rtToSrvBarriers);
 
-	mCmdListToneMappingPass->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0U, nullptr);
-	CHECK_HR(mCmdListToneMappingPass->Close());
+	mCmdList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0U, nullptr);
+	CHECK_HR(mCmdList->Close());
 
 	// Execute preliminary task
 	mCmdListProcessor->ResetExecutedTasksCounter();
-	ID3D12CommandList* cmdLists[] = { mCmdListToneMappingPass };
+	ID3D12CommandList* cmdLists[] = { mCmdList };
 	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 
 	// Execute tone mapping task
@@ -426,18 +380,15 @@ void MasterRender::CreateCommandObjects() noexcept {
 
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocs[i]);
-		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocToneMappingPass[i]);
 		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocMergeTask[i]);
 	}
 	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocs[0], mCmdList);
-	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocToneMappingPass[0], mCmdListToneMappingPass);
 	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocMergeTask[0], mCmdListMergeTask);
 
 	// Start off in a closed state. This is because the first time we refer 
 	// to the command list we will Reset it, and it needs to be closed before
 	// calling Reset.
 	mCmdList->Close();
-	mCmdListToneMappingPass->Close();
 	mCmdListMergeTask->Close();
 }
 

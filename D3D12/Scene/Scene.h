@@ -5,7 +5,7 @@
 
 #include <GeometryPass/GeometryPassCmdListRecorder.h>
 #include <LightPass/LightPassCmdListRecorder.h>
-#include <Scene/SkyBoxCmdListRecorder.h>
+#include <SkyBoxPass/SkyBoxCmdListRecorder.h>
 
 struct ID3D12CommandQueue;
 struct ID3D12Fence;
