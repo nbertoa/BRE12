@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-#include <Scene/LightPassCmdListRecorder.h>
+#include <LightPass/LightPassCmdListRecorder.h>
 
 struct PunctualLight;
 

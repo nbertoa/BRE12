@@ -9,11 +9,11 @@
 #include <Camera/Camera.h>
 #include <CommandListProcessor/CommandListProcessor.h>
 #include <DXUtils\CBuffers.h>
+#include <GeometryPass\GeometryPass.h>
 #include <GlobalData\Settings.h>
 #include <Timer/Timer.h>
 #include <Utils/DebugUtils.h>
 
-class GeometryPassCmdListRecorder;
 class LightPassCmdListRecorder;
 class Scene;
 class SkyBoxCmdListRecorder;
@@ -33,10 +33,7 @@ public:
 
 	__forceinline static const DXGI_FORMAT BackBufferRTFormat() noexcept { return sBackBufferRTFormat; }
 	__forceinline static const DXGI_FORMAT BackBufferFormat() noexcept { return sBackBufferFormat; }
-	__forceinline static const DXGI_FORMAT* GeomPassBuffersFormats() noexcept { return sGeomPassBufferFormats; }
 	__forceinline static const DXGI_FORMAT ColorBufferFormat() noexcept { return sColorBufferFormat; }
-
-	__forceinline static const std::uint32_t NumRenderTargets() noexcept { return GEOMBUFFERS_COUNT; }
 	__forceinline static const DXGI_FORMAT DepthStencilFormat() noexcept { return sDepthStencilFormat; }
 
 private:
@@ -58,7 +55,6 @@ private:
 	ID3D12Resource* DepthStencilBuffer() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
 
-	void GeometryPass();
 	void LightPass();
 	void SkyBoxPass();
 	void ToneMappingPass();
@@ -69,7 +65,6 @@ private:
 
 	static const DXGI_FORMAT sBackBufferRTFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
 	static const DXGI_FORMAT sBackBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
-	static const DXGI_FORMAT sGeomPassBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
 	static const DXGI_FORMAT sColorBufferFormat{ DXGI_FORMAT_R16G16B16A16_FLOAT };
 	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
 
@@ -89,38 +84,26 @@ private:
 	std::uint64_t mFenceByQueuedFrameIndex[Settings::sQueuedFrameCount]{ 0UL };
 	std::uint64_t mCurrentFence{ 0UL };
 
+	GeometryPass mGeometryPass;
 
-	ID3D12CommandAllocator* mCmdAllocGeomPass[Settings::sQueuedFrameCount]{ nullptr };
-	ID3D12CommandAllocator* mCmdAllocLightPass[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
 	ID3D12CommandAllocator* mCmdAllocToneMappingPass[Settings::sQueuedFrameCount]{ nullptr };
 	ID3D12CommandAllocator* mCmdAllocMergeTask[Settings::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mCmdListGeomPass{ nullptr };
-	ID3D12GraphicsCommandList* mCmdListLightPass{ nullptr };
+	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListToneMappingPass{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListMergeTask{ nullptr };
 	
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[Settings::sSwapChainBufferCount];
 	ID3D12Resource* mDepthStencilBuffer{ nullptr };
 
-	// Buffers used for geometry pass in deferred shading.
-	enum GeomBuffers {
-		NORMAL_SMOOTHNESS_DEPTH = 0U,		
-		BASECOLOR_METALMASK,
-		SPECULARREFLECTION,
-		GEOMBUFFERS_COUNT
-	};
-	Microsoft::WRL::ComPtr<ID3D12Resource> mGeomPassBuffers[GEOMBUFFERS_COUNT];
-	D3D12_CPU_DESCRIPTOR_HANDLE mGeomPassBuffersRTVCpuDescHandles[GEOMBUFFERS_COUNT];
 	Microsoft::WRL::ComPtr<ID3D12Resource> mColorBuffer;
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferRTVCpuDescHandle;
 	ID3D12DescriptorHeap* mBuffersRTVDescHeap{ nullptr };
 
 	ID3D12DescriptorHeap* mRtvHeap{ nullptr };
 	ID3D12DescriptorHeap* mDsvHeap{ nullptr };
-
-	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>> mGeomPassCmdListRecorders;
-
-	std::vector<std::unique_ptr<LightPassCmdListRecorder>> mLightPassCmdListRecorders;
+	
+	std::vector<std::unique_ptr<LightPassCmdListRecorder>> mRecorders;
 
 	std::unique_ptr<SkyBoxCmdListRecorder> mSkyBoxCmdListRecorder;
 

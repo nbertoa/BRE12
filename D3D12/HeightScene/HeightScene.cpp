@@ -5,13 +5,13 @@
 
 #include <DXUtils/Material.h>
 #include <DXUtils/PunctualLight.h>
+#include <GeometryPass/Recorders/HeightCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
+#include <LightPass/Recorders/PunctualLightCmdListRecorder.h>
 #include <MathUtils/MathUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
-#include <Scene/GeometryPass/HeightCmdListRecorder.h>
-#include <Scene/LightPass/PunctualLightCmdListRecorder.h>
 #include <Scene/SkyBoxCmdListRecorder.h>
 
 namespace {

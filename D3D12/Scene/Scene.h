@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include <Scene/GeometryPassCmdListRecorder.h>
-#include <Scene/LightPassCmdListRecorder.h>
+#include <GeometryPass/GeometryPassCmdListRecorder.h>
+#include <LightPass/LightPassCmdListRecorder.h>
 #include <Scene/SkyBoxCmdListRecorder.h>
 
 struct ID3D12CommandQueue;

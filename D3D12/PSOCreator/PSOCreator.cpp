@@ -1,5 +1,6 @@
 #include "PSOCreator.h"
 
+#include <GeometryPass\GeometryPass.h>
 #include <GlobalData/Settings.h>
 #include <MasterRender/MasterRender.h>
 #include <PSOManager/PSOManager.h>
@@ -129,8 +130,8 @@ namespace PSOCreator {
 		psoParams.mPSFilename = "PSOCreator/Basic/PS.cso";
 		psoParams.mRootSignFilename = "PSOCreator/Basic/RS.cso";
 		psoParams.mVSFilename = "PSOCreator/Basic/VS.cso";
-		psoParams.mNumRenderTargets = MasterRender::NumRenderTargets();
-		memcpy(psoParams.mRtFormats, MasterRender::GeomPassBuffersFormats(), sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
+		psoParams.mNumRenderTargets = GeometryPass::BUFFERS_COUNT;
+		memcpy(psoParams.mRtFormats, GeometryPass::BufferFormats(), sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
 		ASSERT(mPSOData[Technique::BASIC].mPSO == nullptr && mPSOData[Technique::BASIC].mRootSign == nullptr);
 		PSOCreator::Execute(psoParams, mPSOData[Technique::BASIC]);
 
@@ -139,8 +140,8 @@ namespace PSOCreator {
 		psoParams.mPSFilename = "PSOCreator/TextureMapping/PS.cso";
 		psoParams.mRootSignFilename = "PSOCreator/TextureMapping/RS.cso";
 		psoParams.mVSFilename = "PSOCreator/TextureMapping/VS.cso";
-		psoParams.mNumRenderTargets = MasterRender::NumRenderTargets();
-		memcpy(psoParams.mRtFormats, MasterRender::GeomPassBuffersFormats(), sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
+		psoParams.mNumRenderTargets = GeometryPass::BUFFERS_COUNT;
+		memcpy(psoParams.mRtFormats, GeometryPass::BufferFormats(), sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
 		ASSERT(mPSOData[Technique::TEXTURE_MAPPING].mPSO == nullptr && mPSOData[Technique::TEXTURE_MAPPING].mRootSign == nullptr);
 		PSOCreator::Execute(psoParams, mPSOData[Technique::TEXTURE_MAPPING]);
 
@@ -149,8 +150,8 @@ namespace PSOCreator {
 		psoParams.mPSFilename = "PSOCreator/NormalMapping/PS.cso";
 		psoParams.mRootSignFilename = "PSOCreator/NormalMapping/RS.cso";
 		psoParams.mVSFilename = "PSOCreator/NormalMapping/VS.cso";
-		psoParams.mNumRenderTargets = MasterRender::NumRenderTargets();
-		memcpy(psoParams.mRtFormats, MasterRender::GeomPassBuffersFormats(), sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
+		psoParams.mNumRenderTargets = GeometryPass::BUFFERS_COUNT;
+		memcpy(psoParams.mRtFormats, GeometryPass::BufferFormats(), sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
 		ASSERT(mPSOData[Technique::NORMAL_MAPPING].mPSO == nullptr && mPSOData[Technique::NORMAL_MAPPING].mRootSign == nullptr);
 		PSOCreator::Execute(psoParams, mPSOData[Technique::NORMAL_MAPPING]);
 
@@ -162,8 +163,8 @@ namespace PSOCreator {
 		psoParams.mRootSignFilename = "PSOCreator/HeightMapping/RS.cso";
 		psoParams.mVSFilename = "PSOCreator/HeightMapping/VS.cso";
 		psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;		
-		psoParams.mNumRenderTargets = MasterRender::NumRenderTargets();
-		memcpy(psoParams.mRtFormats, MasterRender::GeomPassBuffersFormats(), sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
+		psoParams.mNumRenderTargets = GeometryPass::BUFFERS_COUNT;
+		memcpy(psoParams.mRtFormats, GeometryPass::BufferFormats(), sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
 		ASSERT(mPSOData[Technique::HEIGHT_MAPPING].mPSO == nullptr && mPSOData[Technique::HEIGHT_MAPPING].mRootSign == nullptr);
 		PSOCreator::Execute(psoParams, mPSOData[Technique::HEIGHT_MAPPING]);
 

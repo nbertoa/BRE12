@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <GlobalData\Settings.h>
-#include <Scene\GeometryPassCmdListRecorder.h>
+#include <GeometryPass\GeometryPassCmdListRecorder.h>
 
 class CommandListProcessor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
@@ -26,6 +26,7 @@ public:
 
 	using Recorders = std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>;
 
+	GeometryPass() = default;
 	GeometryPass(const GeometryPass&) = delete;
 	const GeometryPass& operator=(const GeometryPass&) = delete;
 
@@ -39,7 +40,7 @@ public:
 	__forceinline static const DXGI_FORMAT* BufferFormats() noexcept { return sBufferFormats; }
 
 	// Get geometry buffers
-	__forceinline const Microsoft::WRL::ComPtr<ID3D12Resource>* GetBuffers() const noexcept { return mBuffers; }
+	__forceinline Microsoft::WRL::ComPtr<ID3D12Resource>* GetBuffers() noexcept { return mBuffers; }
 	
 	// This method expects geometry buffers in PRESENT state.
 	// depthCpuDesc: Cpu descriptor handle of the depth stencil buffer

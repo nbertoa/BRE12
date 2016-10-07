@@ -2,8 +2,39 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="GeometryPass.h" />
+    <ClInclude Include="GeometryPassCmdListRecorder.h" />
+    <ClInclude Include="Recorders\BasicCmdListRecorder.h">
+      <Filter>Recorders</Filter>
+    </ClInclude>
+    <ClInclude Include="Recorders\HeightCmdListRecorder.h">
+      <Filter>Recorders</Filter>
+    </ClInclude>
+    <ClInclude Include="Recorders\NormalCmdListRecorder.h">
+      <Filter>Recorders</Filter>
+    </ClInclude>
+    <ClInclude Include="Recorders\TextureCmdListRecorder.h">
+      <Filter>Recorders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeometryPass.cpp" />
+    <ClCompile Include="GeometryPassCmdListRecorder.cpp" />
+    <ClCompile Include="Recorders\BasicCmdListRecorder.cpp">
+      <Filter>Recorders</Filter>
+    </ClCompile>
+    <ClCompile Include="Recorders\HeightCmdListRecorder.cpp">
+      <Filter>Recorders</Filter>
+    </ClCompile>
+    <ClCompile Include="Recorders\NormalCmdListRecorder.cpp">
+      <Filter>Recorders</Filter>
+    </ClCompile>
+    <ClCompile Include="Recorders\TextureCmdListRecorder.cpp">
+      <Filter>Recorders</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Recorders">
+      <UniqueIdentifier>{144d1563-df1c-47cb-8462-21d465475442}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

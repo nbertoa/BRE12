@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-#include <Scene/GeometryPassCmdListRecorder.h>
+#include <GeometryPass/GeometryPassCmdListRecorder.h>
 
 struct Material;
 

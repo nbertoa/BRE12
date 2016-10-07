@@ -63,7 +63,7 @@ namespace {
 			resDesc.Format = GeometryPass::BufferFormats()[i];
 			clearValue[i].Format = resDesc.Format;
 			rtvDesc.Format = resDesc.Format;
-			ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_COMMON, clearValue[i], res);
+			ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, clearValue[i], res);
 			buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
 			device.CreateRenderTargetView(buffers[i].Get(), &rtvDesc, currRtvCpuDesc);
 			rtvCpuDescs[i] = currRtvCpuDesc;
@@ -133,17 +133,7 @@ void GeometryPass::Execute(
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
 
-	// Set resource barriers
-	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mBuffers[NORMAL_SMOOTHNESS_DEPTH].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(mBuffers[BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(mBuffers[SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-	};
-	const std::size_t barriersCount = _countof(barriers);
-	ASSERT(barriersCount == BUFFERS_COUNT);
-	mCmdList->ResourceBarrier(_countof(barriers), barriers);
-
-	// Clear buffers
+	// Clear render targets and depth stencil
 	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	mCmdList->ClearRenderTargetView(mRtvCpuDescs[NORMAL_SMOOTHNESS_DEPTH], DirectX::Colors::Black, 0U, nullptr);
 	mCmdList->ClearRenderTargetView(mRtvCpuDescs[BASECOLOR_METALMASK], zero, 0U, nullptr);

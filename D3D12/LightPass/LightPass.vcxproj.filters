@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Recorders">
+      <UniqueIdentifier>{e8bf5e0b-3e56-4ae7-a6b1-555ec3420016}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Recorders\PunctualLightCmdListRecorder.cpp">
+      <Filter>Recorders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightPassCmdListRecorder.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Recorders\PunctualLightCmdListRecorder.h">
+      <Filter>Recorders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightPassCmdListRecorder.h" />
+  </ItemGroup>
+</Project>
