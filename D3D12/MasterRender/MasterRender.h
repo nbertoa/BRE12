@@ -32,8 +32,8 @@ public:
 
 	void Terminate() noexcept;
 
-	__forceinline static const DXGI_FORMAT BackBufferRTFormat() noexcept { return sBackBufferRTFormat; }
-	__forceinline static const DXGI_FORMAT BackBufferFormat() noexcept { return sBackBufferFormat; }
+	__forceinline static const DXGI_FORMAT FrameBufferRTFormat() noexcept { return sFrameBufferRTFormat; }
+	__forceinline static const DXGI_FORMAT FrameBufferFormat() noexcept { return sFrameBufferFormat; }
 	__forceinline static const DXGI_FORMAT ColorBufferFormat() noexcept { return sColorBufferFormat; }
 	__forceinline static const DXGI_FORMAT DepthStencilFormat() noexcept { return sDepthStencilFormat; }
 
@@ -44,15 +44,14 @@ private:
 	tbb::task* execute() override;
 
 	void InitCmdListRecorders(Scene* scene) noexcept;
-	void InitToneMappingPass() noexcept;
 
 	void CreateRtvAndDsvDescriptorHeaps() noexcept;
 	void CreateRtvAndDsv() noexcept;
 	void CreateExtraBuffersRtvs() noexcept;
 	void CreateCommandObjects() noexcept;
 	
-	ID3D12Resource* CurrentBackBuffer() const noexcept;
-	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const noexcept;
+	ID3D12Resource* CurrentFrameBuffer() const noexcept;
+	D3D12_CPU_DESCRIPTOR_HANDLE CurrentFrameBufferView() const noexcept;
 	ID3D12Resource* DepthStencilBuffer() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
 
@@ -61,8 +60,8 @@ private:
 	void FlushCommandQueue() noexcept;
 	void SignalFenceAndPresent() noexcept;
 
-	static const DXGI_FORMAT sBackBufferRTFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
-	static const DXGI_FORMAT sBackBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
+	static const DXGI_FORMAT sFrameBufferRTFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
+	static const DXGI_FORMAT sFrameBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
 	static const DXGI_FORMAT sColorBufferFormat{ DXGI_FORMAT_R16G16B16A16_FLOAT };
 	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
 

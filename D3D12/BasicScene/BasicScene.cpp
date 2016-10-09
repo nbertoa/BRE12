@@ -44,7 +44,7 @@ namespace {
 		light[0].mColorAndPower[0] = 1.0f;
 		light[0].mColorAndPower[1] = 1.0f;
 		light[0].mColorAndPower[2] = 1.0f;
-		light[0].mColorAndPower[3] = 1000000.0f;
+		light[0].mColorAndPower[3] = 10000000.0f;
 
 		recorder->Init(geometryBuffers, geometryBuffersCount, light, _countof(light));
 	}

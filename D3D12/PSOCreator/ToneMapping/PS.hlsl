@@ -15,8 +15,10 @@ struct Output {
 Output main(const in Input input){
 	Output output = (Output)0;
 
+	const float linearWhite = 11.2f;
+
 	const float4 color = ColorBufferTexture.Sample(TexSampler, input.mTexCoordO);
-	output.mColor = float4(HableToneMap(color.rgb), color.a);
+	output.mColor = float4(FilmicToneMapping(color.rgb), color.a);
 	
 	return output;
 }

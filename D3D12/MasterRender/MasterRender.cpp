@@ -73,7 +73,7 @@ namespace {
 #else 
 		sd.Flags = 0U;
 #endif
-		sd.Format = MasterRender::BackBufferFormat();
+		sd.Format = MasterRender::FrameBufferFormat();
 		sd.SampleDesc.Count = 1U;
 		sd.Scaling = DXGI_SCALING_NONE;
 		sd.Stereo = false;
@@ -82,7 +82,7 @@ namespace {
 		CHECK_HR(D3dData::Factory().CreateSwapChainForHwnd(&cmdQueue, hwnd, &sd, nullptr, nullptr, &baseSwapChain));
 		CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain3.GetAddressOf())));
 
-		CHECK_HR(swapChain3->ResizeBuffers(Settings::sSwapChainBufferCount, Settings::sWindowWidth, Settings::sWindowHeight, MasterRender::BackBufferFormat(), sd.Flags));
+		CHECK_HR(swapChain3->ResizeBuffers(Settings::sSwapChainBufferCount, Settings::sWindowWidth, Settings::sWindowHeight, MasterRender::FrameBufferFormat(), sd.Flags));
 
 		// Set sRGB color space
 		swapChain3->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709);
@@ -166,7 +166,7 @@ tbb::task* MasterRender::execute() {
 		mGeometryPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
 		mLightPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
 		mSkyBoxPass.Execute(*mCmdListProcessor, mFrameCBuffer);
-		mToneMappingPass.Execute(*mCmdListProcessor, *mCmdQueue, *CurrentBackBuffer(), CurrentBackBufferView());
+		mToneMappingPass.Execute(*mCmdListProcessor, *mCmdQueue, *CurrentFrameBuffer(), CurrentFrameBufferView());
 		MergeTask();
 
 		SignalFenceAndPresent();
@@ -187,7 +187,7 @@ void MasterRender::MergeTask() {
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::NORMAL_SMOOTHNESS_DEPTH].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
+		CD3DX12_RESOURCE_BARRIER::Transition(CurrentFrameBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
 		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
 	mCmdList->ResourceBarrier(_countof(rtToPresentBarriers), rtToPresentBarriers);
@@ -204,7 +204,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 
 	// Setup RTV descriptor to specify sRGB format.
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-	rtvDesc.Format = sBackBufferRTFormat;
+	rtvDesc.Format = sFrameBufferRTFormat;
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	// Create swap chain and render target views
@@ -320,13 +320,13 @@ void MasterRender::CreateCommandObjects() noexcept {
 	mCmdList->Close();
 }
 
-ID3D12Resource* MasterRender::CurrentBackBuffer() const noexcept {
+ID3D12Resource* MasterRender::CurrentFrameBuffer() const noexcept {
 	ASSERT(mSwapChain != nullptr);
 	const std::uint32_t currBackBuffer{ mSwapChain->GetCurrentBackBufferIndex() };
 	return mSwapChainBuffer[currBackBuffer].Get();
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::CurrentBackBufferView() const noexcept {
+D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::CurrentFrameBufferView() const noexcept {
 	const std::uint32_t rtvDescSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	const std::uint32_t currBackBuffer{ mSwapChain->GetCurrentBackBufferIndex() };
 	return D3D12_CPU_DESCRIPTOR_HANDLE{ mRtvHeap->GetCPUDescriptorHandleForHeapStart().ptr + currBackBuffer * rtvDescSize };
