@@ -13,7 +13,7 @@
 #include <ModelManager\Model.h>
 #include <ModelManager\ModelManager.h>
 #include <Scene/Scene.h>
-#include <Scene/ToneMappingCmdListRecorder.h>
+#include <ToneMappingPass/ToneMappingCmdListRecorder.h>
 
 using namespace DirectX;
 
@@ -208,12 +208,12 @@ void MasterRender::ToneMappingPass() {
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
 
-	// Transition color buffer
-	CD3DX12_RESOURCE_BARRIER rtToSrvBarriers[2U]{
+	// Set barriers
+	CD3DX12_RESOURCE_BARRIER barriers[]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
-	mCmdList->ResourceBarrier(_countof(rtToSrvBarriers), rtToSrvBarriers);
+	mCmdList->ResourceBarrier(_countof(barriers), barriers);
 
 	mCmdList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0U, nullptr);
 	CHECK_HR(mCmdList->Close());

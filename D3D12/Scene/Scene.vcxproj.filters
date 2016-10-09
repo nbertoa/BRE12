@@ -2,10 +2,8 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="ToneMappingCmdListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="ToneMappingCmdListRecorder.cpp" />
   </ItemGroup>
 </Project>
