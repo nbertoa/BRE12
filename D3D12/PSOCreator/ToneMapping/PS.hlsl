@@ -16,7 +16,7 @@ Output main(const in Input input){
 	Output output = (Output)0;
 
 	const float4 color = ColorBufferTexture.Sample(TexSampler, input.mTexCoordO);
-	output.mColor = color;//float4(HableToneMap(color.rgb), color.a);
+	output.mColor = float4(HableToneMap(color.rgb), color.a);
 	
 	return output;
 }

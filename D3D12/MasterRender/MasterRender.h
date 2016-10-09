@@ -13,12 +13,12 @@
 #include <GlobalData\Settings.h>
 #include <LightPass\LightPass.h>
 #include <SkyBoxPass\SkyBoxPass.h>
+#include <ToneMappingPass\ToneMappingPass.h>
 #include <Timer/Timer.h>
 #include <Utils/DebugUtils.h>
 
 class Scene;
 class SkyBoxCmdListRecorder;
-class ToneMappingCmdListRecorder;
 
 // It has the responsibility to build CmdListRecorder's and also execute them 
 // (to record command lists and push to the queue provided by CommandListProcessor)
@@ -56,7 +56,6 @@ private:
 	ID3D12Resource* DepthStencilBuffer() const noexcept;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
 
-	void ToneMappingPass();
 	void MergeTask();
 
 	void FlushCommandQueue() noexcept;
@@ -86,11 +85,10 @@ private:
 	GeometryPass mGeometryPass;
 	LightPass mLightPass;
 	SkyBoxPass mSkyBoxPass;
+	ToneMappingPass mToneMappingPass;
 
 	ID3D12CommandAllocator* mCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
-	ID3D12CommandAllocator* mCmdAllocMergeTask[Settings::sQueuedFrameCount]{ nullptr };
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12GraphicsCommandList* mCmdListMergeTask{ nullptr };
 	
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[Settings::sSwapChainBufferCount];
 	ID3D12Resource* mDepthStencilBuffer{ nullptr };
@@ -101,8 +99,6 @@ private:
 
 	ID3D12DescriptorHeap* mRtvHeap{ nullptr };
 	ID3D12DescriptorHeap* mDsvHeap{ nullptr };
-
-	std::unique_ptr<ToneMappingCmdListRecorder> mToneMappingCmdListRecorder;
 
 	FrameCBuffer mFrameCBuffer;
 	

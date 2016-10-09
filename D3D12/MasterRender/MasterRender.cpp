@@ -13,7 +13,6 @@
 #include <ModelManager\Model.h>
 #include <ModelManager\ModelManager.h>
 #include <Scene/Scene.h>
-#include <ToneMappingPass/ToneMappingCmdListRecorder.h>
 
 using namespace DirectX;
 
@@ -143,37 +142,13 @@ void MasterRender::InitCmdListRecorders(Scene* scene) noexcept {
 	scene->GenerateSkyBoxRecorder(mCmdListProcessor->CmdListQueue(), cmdListHelper, mSkyBoxPass.GetRecorder());
 	mSkyBoxPass.Init(mColorBufferRTVCpuDescHandle, DepthStencilView());
 
-	InitToneMappingPass();
+	cmdListHelper.Reset(*mCmdAllocs[0U]);
+	mToneMappingPass.Init(mDevice, cmdListHelper, mCmdListProcessor->CmdListQueue(), *mColorBuffer.Get(), DepthStencilView());
 
 	const std::uint64_t count{ _countof(mFenceByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {
 		mFenceByQueuedFrameIndex[i] = mCurrentFence;
 	}
-}
-
-void MasterRender::InitToneMappingPass() noexcept {
-	ASSERT(mToneMappingCmdListRecorder.get() == nullptr);
-	
-	CmdListHelper cmdListHelper(*mCmdQueue, *mFence, mCurrentFence, *mCmdList);
-	cmdListHelper.Reset(*mCmdAllocs[0U]);
-
-	// Create model for a full screen quad geometry. 
-	Model* model;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	ModelManager::Get().CreateFullscreenQuad(model, cmdListHelper.CmdList(), uploadVertexBuffer, uploadIndexBuffer);
-	ASSERT(model != nullptr);
-
-	// Get vertex and index buffers data from the only mesh this model must have.
-	ASSERT(model->Meshes().size() == 1UL);
-	const Mesh& mesh = model->Meshes()[0U];
-
-	cmdListHelper.CloseCmdList();
-	cmdListHelper.ExecuteCmdList();
-
-	ASSERT(mColorBuffer.Get() != nullptr);
-	mToneMappingCmdListRecorder.reset(new ToneMappingCmdListRecorder(mDevice, mCmdListProcessor->CmdListQueue()));
-	mToneMappingCmdListRecorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), *mColorBuffer.Get());
 }
 
 void MasterRender::Terminate() noexcept {
@@ -191,7 +166,7 @@ tbb::task* MasterRender::execute() {
 		mGeometryPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
 		mLightPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
 		mSkyBoxPass.Execute(*mCmdListProcessor, mFrameCBuffer);
-		ToneMappingPass();
+		mToneMappingPass.Execute(*mCmdListProcessor, *mCmdQueue, *CurrentBackBuffer(), CurrentBackBufferView());
 		MergeTask();
 
 		SignalFenceAndPresent();
@@ -202,41 +177,11 @@ tbb::task* MasterRender::execute() {
 	return nullptr;
 }
 
-void MasterRender::ToneMappingPass() {
+void MasterRender::MergeTask() {
 	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocs[mCurrQueuedFrameIndex] };
 
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
-
-	// Set barriers
-	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-	};
-	mCmdList->ResourceBarrier(_countof(barriers), barriers);
-
-	mCmdList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0U, nullptr);
-	CHECK_HR(mCmdList->Close());
-
-	// Execute preliminary task
-	mCmdListProcessor->ResetExecutedTasksCounter();
-	ID3D12CommandList* cmdLists[] = { mCmdList };
-	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
-
-	// Execute tone mapping task
-	mToneMappingCmdListRecorder->RecordCommandLists(CurrentBackBufferView(), DepthStencilView());
-
-	// Wait until all previous tasks command lists are executed
-	while (mCmdListProcessor->ExecutedTasksCounter() < 1) {
-		Sleep(0U);
-	}
-}
-
-void MasterRender::MergeTask() {
-	ID3D12CommandAllocator* cmdAllocMergeTask{ mCmdAllocMergeTask[mCurrQueuedFrameIndex] };
-
-	CHECK_HR(cmdAllocMergeTask->Reset());
-	CHECK_HR(mCmdListMergeTask->Reset(cmdAllocMergeTask, nullptr));
 
 	CD3DX12_RESOURCE_BARRIER rtToPresentBarriers[GeometryPass::BUFFERS_COUNT + 2U]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::NORMAL_SMOOTHNESS_DEPTH].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
@@ -245,11 +190,11 @@ void MasterRender::MergeTask() {
 		CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
 		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
-	mCmdListMergeTask->ResourceBarrier(_countof(rtToPresentBarriers), rtToPresentBarriers);
+	mCmdList->ResourceBarrier(_countof(rtToPresentBarriers), rtToPresentBarriers);
 
-	CHECK_HR(mCmdListMergeTask->Close());
+	CHECK_HR(mCmdList->Close());
 	{
-		ID3D12CommandList* cmdLists[] = { mCmdListMergeTask };
+		ID3D12CommandList* cmdLists[] = { mCmdList };
 		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 	}
 }
@@ -366,16 +311,13 @@ void MasterRender::CreateCommandObjects() noexcept {
 
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocs[i]);
-		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAllocMergeTask[i]);
 	}
 	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocs[0], mCmdList);
-	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAllocMergeTask[0], mCmdListMergeTask);
 
 	// Start off in a closed state. This is because the first time we refer 
 	// to the command list we will Reset it, and it needs to be closed before
 	// calling Reset.
 	mCmdList->Close();
-	mCmdListMergeTask->Close();
 }
 
 ID3D12Resource* MasterRender::CurrentBackBuffer() const noexcept {
