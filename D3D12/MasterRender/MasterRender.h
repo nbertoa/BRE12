@@ -20,8 +20,7 @@
 class Scene;
 class SkyBoxCmdListRecorder;
 
-// It has the responsibility to build CmdListRecorder's and also execute them 
-// (to record command lists and push to the queue provided by CommandListProcessor)
+// Initializes passes (geometry, light, skybox, etc) based on a Scene.
 // Steps:
 // - Use MasterRender::Create() to create and spawn and instance.
 // - When you spawn it, execute() method is automatically called. 
@@ -38,32 +37,32 @@ public:
 	__forceinline static const DXGI_FORMAT DepthStencilFormat() noexcept { return sDepthStencilFormat; }
 
 private:
+	static const DXGI_FORMAT sFrameBufferRTFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
+	static const DXGI_FORMAT sFrameBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
+	static const DXGI_FORMAT sColorBufferFormat{ DXGI_FORMAT_R16G16B16A16_FLOAT };
+	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
+
 	explicit MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene);
 
 	// Called when tbb::task is spawned
 	tbb::task* execute() override;
 
-	void InitCmdListRecorders(Scene* scene) noexcept;
+	void InitPasses(Scene* scene) noexcept;
 
 	void CreateRtvAndDsvDescriptorHeaps() noexcept;
 	void CreateRtvAndDsv() noexcept;
-	void CreateExtraBuffersRtvs() noexcept;
-	void CreateCommandObjects() noexcept;
+	void CreateColorBuffer() noexcept;
+	void CreateMergePassCommandObjects() noexcept;
 	
 	ID3D12Resource* CurrentFrameBuffer() const noexcept;
-	D3D12_CPU_DESCRIPTOR_HANDLE CurrentFrameBufferView() const noexcept;
+	D3D12_CPU_DESCRIPTOR_HANDLE CurrentFrameBufferCpuDesc() const noexcept;
 	ID3D12Resource* DepthStencilBuffer() const noexcept;
-	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const noexcept;
+	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilCpuDesc() const noexcept;
 
-	void MergeTask();
+	void MergePass();
 
 	void FlushCommandQueue() noexcept;
 	void SignalFenceAndPresent() noexcept;
-
-	static const DXGI_FORMAT sFrameBufferRTFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
-	static const DXGI_FORMAT sFrameBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
-	static const DXGI_FORMAT sColorBufferFormat{ DXGI_FORMAT_R16G16B16A16_FLOAT };
-	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
 
 	HWND mHwnd{ 0 };
 	ID3D12Device& mDevice;
@@ -86,18 +85,22 @@ private:
 	SkyBoxPass mSkyBoxPass;
 	ToneMappingPass mToneMappingPass;
 
-	ID3D12CommandAllocator* mCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+	// Command allocarts and list needed for merge pass
+	ID3D12CommandAllocator* mMergePassCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12GraphicsCommandList* mMergePassCmdList{ nullptr };
 	
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[Settings::sSwapChainBufferCount];
 	ID3D12Resource* mDepthStencilBuffer{ nullptr };
 
+	// Color buffer is a buffer used for intermediate computations.
+	// It is used as render target (light pass) or pixel shader resource (post processing passes)
 	Microsoft::WRL::ComPtr<ID3D12Resource> mColorBuffer;
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferRTVCpuDescHandle;
-	ID3D12DescriptorHeap* mBuffersRTVDescHeap{ nullptr };
+	ID3D12DescriptorHeap* mColorBufferDescHeap{ nullptr };
 
-	ID3D12DescriptorHeap* mRtvHeap{ nullptr };
-	ID3D12DescriptorHeap* mDsvHeap{ nullptr };
+	// Render target and depth stencil descriptor heaps
+	ID3D12DescriptorHeap* mRenderTargetDescHeap{ nullptr };
+	ID3D12DescriptorHeap* mDepthStencilDescHeap{ nullptr };
 
 	FrameCBuffer mFrameCBuffer;
 	

@@ -50,7 +50,7 @@ namespace {
 		light[0].mPosAndRange[0] = 0.0f;
 		light[0].mPosAndRange[1] = 300.0f;
 		light[0].mPosAndRange[2] = -100.0f;
-		light[0].mPosAndRange[3] = 10000.0f;
+		light[0].mPosAndRange[3] = 1000000.0f;
 		light[0].mColorAndPower[0] = 1.0f;
 		light[0].mColorAndPower[1] = 1.0f;
 		light[0].mColorAndPower[2] = 1.0f;
