@@ -2,42 +2,53 @@
 
 #include <d3d12.h>
 
+#include <CommandManager\CommandManager.h>
+#include <ResourceManager\ResourceManager.h>
 #include <Utils\DebugUtils.h>
 
-CmdListHelper::CmdListHelper(ID3D12CommandQueue& cmdQueue, ID3D12Fence& fence, std::uint64_t& currentFence, ID3D12GraphicsCommandList& cmdList)
-	: mCmdQueue(cmdQueue)
-	, mFence(fence)
-	, mCurrentFence(currentFence)
-	, mCmdList(cmdList)
-{	
+void Scene::Init() noexcept {
+	ASSERT(ValidateData() == false);
+
+	CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAlloc);
+	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAlloc, mCmdList);
+	mCmdList->Close();
+	ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
+
+	ASSERT(ValidateData());
 }
 
-void CmdListHelper::Reset(ID3D12CommandAllocator& cmdAlloc) noexcept {
-	CHECK_HR(mCmdList.Reset(&cmdAlloc, nullptr));
-}
+void Scene::ExecuteCommandList(ID3D12CommandQueue& cmdQueue) noexcept {
+	ASSERT(ValidateData());
 
-void CmdListHelper::CloseCmdList() noexcept {
-	mCmdList.Close();
-}
+	mCmdList->Close();
 
-void CmdListHelper::ExecuteCmdList() noexcept {
-	ID3D12CommandList* cmdLists[1U]{ &mCmdList };
-	mCmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	ID3D12CommandList* cmdLists[1U]{ mCmdList };
+	cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
 
-	++mCurrentFence;
+	const std::uint64_t fenceValue = mFence->GetCompletedValue() + 1UL;
 
-	CHECK_HR(mCmdQueue.Signal(&mFence, mCurrentFence));
+	CHECK_HR(cmdQueue.Signal(mFence, fenceValue));
 
 	// Wait until the GPU has completed commands up to this fence point.
-	if (mFence.GetCompletedValue() < mCurrentFence) {
+	if (mFence->GetCompletedValue() < fenceValue) {
 		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
 		ASSERT(eventHandle);
 
 		// Fire event when GPU hits current fence.  
-		CHECK_HR(mFence.SetEventOnCompletion(mCurrentFence, eventHandle));
+		CHECK_HR(mFence->SetEventOnCompletion(fenceValue, eventHandle));
 
 		// Wait until the GPU hits current fence event is fired.
 		WaitForSingleObject(eventHandle, INFINITE);
 		CloseHandle(eventHandle);
 	}
+}
+
+bool 
+Scene::ValidateData() const {
+	const bool b =
+		mCmdAlloc != nullptr &&
+		mCmdList != nullptr &&
+		mFence != nullptr;
+
+	return b;
 }

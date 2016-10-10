@@ -5,19 +5,18 @@
 class TextureScene : public Scene {
 public:	
 	void GenerateGeomPassRecorders(
+		ID3D12CommandQueue& cmdQueue,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
-		CmdListHelper& cmdListHelper, 
-		std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) const noexcept override;
+		std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept override;
 	
 	void GenerateLightPassRecorders(
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
-		CmdListHelper& cmdListHelper,
-		std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) const noexcept override;
+		std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) noexcept override;
 
 	void GenerateSkyBoxRecorder(
+		ID3D12CommandQueue& cmdQueue,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
-		CmdListHelper& cmdListHelper,
-		std::unique_ptr<SkyBoxCmdListRecorder>& task) const noexcept override;
+		std::unique_ptr<SkyBoxCmdListRecorder>& task) noexcept override;
 };

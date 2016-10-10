@@ -28,7 +28,7 @@ public:
 	// You should call this method before Execute()
 	void Init(
 		ID3D12Device& device,
-		CmdListHelper& cmdListHelper,
+		ID3D12CommandQueue& cmdQueue,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		ID3D12Resource& colorBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
@@ -47,6 +47,8 @@ private:
 	ID3D12CommandAllocator* mCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+
+	ID3D12Fence* mFence{ nullptr };
 	
 	ID3D12Resource* mColorBuffer{ nullptr };
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };

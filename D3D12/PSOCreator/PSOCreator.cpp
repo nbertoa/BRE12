@@ -175,7 +175,7 @@ namespace PSOCreator {
 		psoParams.mRootSignFilename = "PSOCreator/ToneMapping/RS.cso";
 		psoParams.mVSFilename = "PSOCreator/ToneMapping/VS.cso";
 		psoParams.mNumRenderTargets = 1U;
-		psoParams.mRtFormats[0U] = MasterRender::FrameBufferRTFormat();
+		psoParams.mRtFormats[0U] = Settings::sFrameBufferRTFormat;
 		for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
 			psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 		}

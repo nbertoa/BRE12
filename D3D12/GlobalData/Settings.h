@@ -18,6 +18,7 @@ public:
 	static const std::uint32_t sQueuedFrameCount{ sSwapChainBufferCount - 1U };
 	static const std::uint32_t sWindowWidth{ 1920U };
 	static const std::uint32_t sWindowHeight{ 1080U };
+	static const DXGI_FORMAT sFrameBufferRTFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
 	static const float sNearPlaneZ;
 	static const float sFarPlaneZ;
 	static const float sFieldOfView;

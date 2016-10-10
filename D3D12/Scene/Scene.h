@@ -7,29 +7,10 @@
 #include <LightPass/LightPassCmdListRecorder.h>
 #include <SkyBoxPass/SkyBoxCmdListRecorder.h>
 
+struct ID3D12CommandAllocator;
 struct ID3D12CommandQueue;
 struct ID3D12Fence;
 struct ID3D12GraphicsCommandList;
-
-// Used when you need to create resources and upload them to the GPU.
-// You need a command list for this, and to flush command queue to 
-// be sure all resources were properly uploaded.
-class CmdListHelper {
-public:
-	CmdListHelper(ID3D12CommandQueue& cmdQueue, ID3D12Fence& fence, std::uint64_t& currentFence, ID3D12GraphicsCommandList& cmdList);
-	CmdListHelper(const CmdListHelper&) = delete;
-	const CmdListHelper& operator=(const CmdListHelper&) = delete;
-
-	__forceinline ID3D12GraphicsCommandList& CmdList() noexcept { return mCmdList; }
-	void Reset(ID3D12CommandAllocator& cmdAlloc) noexcept;
-	void CloseCmdList() noexcept;
-	void ExecuteCmdList() noexcept;
-private:
-	ID3D12CommandQueue& mCmdQueue;
-	ID3D12Fence& mFence;
-	std::uint64_t& mCurrentFence;
-	ID3D12GraphicsCommandList& mCmdList;
-};
 
 // You should inherit from this class and implement needed methods.
 // Its generated CmdListRecorder's are used by MasterRender to 
@@ -41,20 +22,36 @@ public:
 	Scene(const Scene&) = delete;
 	const Scene& operator=(const Scene&) = delete;
 
+	// This method is called internally by the App.
+	// User must not call it.
+	// It must be called before generating recorders
+	void Init() noexcept;
+	
 	virtual void GenerateGeomPassRecorders(
+		ID3D12CommandQueue& cmdQueue,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, 
-		CmdListHelper& cmdListHelper, 
-		std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) const noexcept = 0;
+		std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept = 0;
 
 	virtual void GenerateLightPassRecorders(
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, 
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
-		CmdListHelper& cmdListHelper,
-		std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) const noexcept = 0;
+		std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) noexcept = 0;
 
 	virtual void GenerateSkyBoxRecorder(
+		ID3D12CommandQueue& cmdQueue,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
-		CmdListHelper& cmdListHelper,
-		std::unique_ptr<SkyBoxCmdListRecorder>& task) const noexcept = 0;
+		std::unique_ptr<SkyBoxCmdListRecorder>& task) noexcept = 0;
+
+protected:
+	// Method used when the command list is ready to be closed
+	// and executed. It waits until GPU finishes command list execution.
+	void ExecuteCommandList(ID3D12CommandQueue& cmdQueue) noexcept;
+
+	// Used to validate scene data is properly initialized.
+	bool ValidateData() const;
+
+	ID3D12CommandAllocator* mCmdAlloc{ nullptr };
+	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+	ID3D12Fence* mFence{ nullptr };
 };

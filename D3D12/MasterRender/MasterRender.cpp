@@ -64,7 +64,11 @@ namespace {
 	}
 
 	// Create swap chainm and stores it in swapChain3 parameter.
-	void CreateSwapChain(const HWND hwnd, ID3D12CommandQueue& cmdQueue, Microsoft::WRL::ComPtr<IDXGISwapChain3>& swapChain3) noexcept {
+	void CreateSwapChain(
+		const HWND hwnd, 
+		ID3D12CommandQueue& cmdQueue, 
+		const DXGI_FORMAT frameBufferFormat,
+		Microsoft::WRL::ComPtr<IDXGISwapChain3>& swapChain3) noexcept {
 		IDXGISwapChain1* baseSwapChain{ nullptr };
 
 		DXGI_SWAP_CHAIN_DESC1 sd = {};
@@ -76,7 +80,7 @@ namespace {
 #else 
 		sd.Flags = 0U;
 #endif
-		sd.Format = MasterRender::FrameBufferFormat();
+		sd.Format = frameBufferFormat;
 		sd.SampleDesc.Count = 1U;
 		sd.Scaling = DXGI_SCALING_NONE;
 		sd.Stereo = false;
@@ -85,7 +89,7 @@ namespace {
 		CHECK_HR(D3dData::Factory().CreateSwapChainForHwnd(&cmdQueue, hwnd, &sd, nullptr, nullptr, &baseSwapChain));
 		CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain3.GetAddressOf())));
 
-		CHECK_HR(swapChain3->ResizeBuffers(Settings::sSwapChainBufferCount, Settings::sWindowWidth, Settings::sWindowHeight, MasterRender::FrameBufferFormat(), sd.Flags));
+		CHECK_HR(swapChain3->ResizeBuffers(Settings::sSwapChainBufferCount, Settings::sWindowWidth, Settings::sWindowHeight, frameBufferFormat, sd.Flags));
 
 		// Set sRGB color space
 		swapChain3->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709);
@@ -131,22 +135,20 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 void MasterRender::InitPasses(Scene* scene) noexcept {
 	ASSERT(scene != nullptr);
 
-	CmdListHelper cmdListHelper(*mCmdQueue, *mFence, mCurrentFence, *mMergePassCmdList);
-
-	cmdListHelper.Reset(*mMergePassCmdAllocs[0U]);
-	scene->GenerateGeomPassRecorders(mCmdListProcessor->CmdListQueue(), cmdListHelper, mGeometryPass.GetRecorders());
+	// Initialize scene
+	scene->Init();
+	
+	// Generate recorders
+	scene->GenerateGeomPassRecorders(*mCmdQueue, mCmdListProcessor->CmdListQueue(), mGeometryPass.GetRecorders());
 	mGeometryPass.Init(mDevice, DepthStencilCpuDesc());
 
-	cmdListHelper.Reset(*mMergePassCmdAllocs[0U]);
-	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeometryPass.GetBuffers(), GeometryPass::BUFFERS_COUNT, cmdListHelper, mLightPass.GetRecorders());
+	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeometryPass.GetBuffers(), GeometryPass::BUFFERS_COUNT, mLightPass.GetRecorders());
 	mLightPass.Init(mGeometryPass.GetBuffers(), mColorBufferRTVCpuDescHandle, DepthStencilCpuDesc());
 
-	cmdListHelper.Reset(*mMergePassCmdAllocs[0U]);
-	scene->GenerateSkyBoxRecorder(mCmdListProcessor->CmdListQueue(), cmdListHelper, mSkyBoxPass.GetRecorder());
+	scene->GenerateSkyBoxRecorder(*mCmdQueue, mCmdListProcessor->CmdListQueue(), mSkyBoxPass.GetRecorder());
 	mSkyBoxPass.Init(mColorBufferRTVCpuDescHandle, DepthStencilCpuDesc());
 
-	cmdListHelper.Reset(*mMergePassCmdAllocs[0U]);
-	mToneMappingPass.Init(mDevice, cmdListHelper, mCmdListProcessor->CmdListQueue(), *mColorBuffer.Get(), DepthStencilCpuDesc());
+	mToneMappingPass.Init(mDevice, *mCmdQueue, mCmdListProcessor->CmdListQueue(), *mColorBuffer.Get(), DepthStencilCpuDesc());
 
 	const std::uint64_t count{ _countof(mFenceByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {
@@ -210,12 +212,12 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 
 	// Setup RTV descriptor to specify sRGB format.
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-	rtvDesc.Format = sFrameBufferRTFormat;
+	rtvDesc.Format = Settings::sFrameBufferRTFormat;
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	// Create swap chain and render target views
 	ASSERT(mSwapChain == nullptr);
-	CreateSwapChain(mHwnd, *mCmdQueue, mSwapChain);
+	CreateSwapChain(mHwnd, *mCmdQueue, sFrameBufferFormat, mSwapChain);
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRenderTargetDescHeap->GetCPUDescriptorHandleForHeapStart());
 	const std::uint32_t rtvDescSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {

@@ -31,13 +31,10 @@ public:
 
 	void Terminate() noexcept;
 
-	__forceinline static const DXGI_FORMAT FrameBufferRTFormat() noexcept { return sFrameBufferRTFormat; }
-	__forceinline static const DXGI_FORMAT FrameBufferFormat() noexcept { return sFrameBufferFormat; }
 	__forceinline static const DXGI_FORMAT ColorBufferFormat() noexcept { return sColorBufferFormat; }
 	__forceinline static const DXGI_FORMAT DepthStencilFormat() noexcept { return sDepthStencilFormat; }
 
 private:
-	static const DXGI_FORMAT sFrameBufferRTFormat{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
 	static const DXGI_FORMAT sFrameBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
 	static const DXGI_FORMAT sColorBufferFormat{ DXGI_FORMAT_R16G16B16A16_FLOAT };
 	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
