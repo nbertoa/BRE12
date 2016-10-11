@@ -5,6 +5,7 @@
 #include <GlobalData\Settings.h>
 #include <MathUtils\MathUtils.h>
 
+// Per object constant buffer data
 struct ObjectCBuffer {
 	ObjectCBuffer() = default;
 
@@ -12,6 +13,7 @@ struct ObjectCBuffer {
 	float mTexTransform{ 2.0f };
 };
 
+// Per frame constant buffer data
 struct FrameCBuffer {
 	FrameCBuffer() = default;
 
@@ -20,6 +22,7 @@ struct FrameCBuffer {
 	DirectX::XMFLOAT3 mEyePosW{ 0.0f, 0.0f, 0.0f };
 };
 
+// Immutable constant buffer data (does not change across frames or objects) 
 struct ImmutableCBuffer {
 	ImmutableCBuffer() = default;
 

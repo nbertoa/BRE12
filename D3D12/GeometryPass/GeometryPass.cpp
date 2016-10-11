@@ -7,13 +7,13 @@
 
 #include <CommandListProcessor/CommandListProcessor.h>
 #include <CommandManager\CommandManager.h>
-#include <DXUtils\CBuffers.h>
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\Recorders\BasicCmdListRecorder.h>
 #include <GeometryPass\Recorders\HeightCmdListRecorder.h>
 #include <GeometryPass\Recorders\NormalCmdListRecorder.h>
 #include <GeometryPass\Recorders\TextureCmdListRecorder.h>
 #include <ResourceManager\ResourceManager.h>
+#include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
 namespace {

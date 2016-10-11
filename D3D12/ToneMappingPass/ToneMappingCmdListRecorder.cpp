@@ -3,11 +3,11 @@
 #include <DirectXMath.h>
 
 #include <CommandManager/CommandManager.h>
-#include <DXUtils\CBuffers.h>
 #include <GeometryPass/GeometryPass.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ResourceManager/UploadBuffer.h>
+#include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
 namespace {
@@ -96,8 +96,8 @@ void ToneMappingCmdListRecorder::RecordCommandLists(
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
-	mCmdList->RSSetViewports(1U, &mScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &mScissorRect);
+	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
+	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &rtvCpuDescHandle, false, &depthStencilHandle);
 
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
@@ -111,7 +111,6 @@ void ToneMappingCmdListRecorder::RecordCommandLists(
 	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
 	mCmdList->IASetIndexBuffer(&mIndexBufferData.mBufferView);
 	mCmdList->SetGraphicsRootDescriptorTable(0U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
-
 	mCmdList->DrawIndexedInstanced(mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
 
 	mCmdList->Close();

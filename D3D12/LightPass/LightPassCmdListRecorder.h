@@ -54,8 +54,6 @@ protected:
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
 	ID3D12DescriptorHeap* mCbvSrvUavDescHeap{ nullptr };
-	D3D12_VIEWPORT mScreenViewport{ 0.0f, 0.0f, (float)Settings::sWindowWidth, (float)Settings::sWindowHeight, 0.0f, 1.0f };
-	D3D12_RECT mScissorRect{ 0, 0, Settings::sWindowWidth, Settings::sWindowHeight };
 
 	std::uint32_t mNumLights{ 0U };
 

@@ -3,10 +3,10 @@
 #include <algorithm>
 #include <tbb/parallel_for.h>
 
-#include <DXUtils/Material.h>
-#include <DXUtils/PunctualLight.h>
+#include <GeometryPass/Material.h>
 #include <GeometryPass/Recorders/NormalCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
+#include <LightPass/PunctualLight.h>
 #include <LightPass/Recorders/PunctualLightCmdListRecorder.h>
 #include <MathUtils/MathUtils.h>
 #include <ModelManager\Mesh.h>

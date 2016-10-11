@@ -7,10 +7,10 @@
 
 #include <CommandListProcessor/CommandListProcessor.h>
 #include <CommandManager\CommandManager.h>
-#include <DXUtils\CBuffers.h>
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\GeometryPass.h>
 #include <LightPass\Recorders\PunctualLightCmdListRecorder.h>
+#include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
 namespace {

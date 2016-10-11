@@ -21,7 +21,7 @@ namespace PSOCreator {
 		const char* mHSFilename{ nullptr };
 		const char* mPSFilename{ nullptr };
 
-		D3D12_BLEND_DESC mBlendDesc = D3DFactory::DefaultBlendDesc();
+		D3D12_BLEND_DESC mBlendDesc = D3DFactory::DisabledBlendDesc();
 		D3D12_RASTERIZER_DESC mRasterizerDesc = D3DFactory::DefaultRasterizerDesc();
 		D3D12_DEPTH_STENCIL_DESC mDepthStencilDesc = D3DFactory::DefaultDepthStencilDesc();
 		std::uint32_t mNumRenderTargets{ 0U };

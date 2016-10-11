@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <tbb/concurrent_queue.h>
-#include <vector>
 
 #include <GlobalData\Settings.h>
 #include <ToneMappingPass\ToneMappingCmdListRecorder.h>

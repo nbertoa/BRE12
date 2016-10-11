@@ -4,9 +4,9 @@
 #include <d3d12.h>
 
 #include <CommandListProcessor/CommandListProcessor.h>
-#include <DXUtils\CBuffers.h>
 #include <DXUtils/d3dx12.h>
 #include <SkyBoxPass\SkyBoxCmdListRecorder.h>
+#include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
 void SkyBoxPass::Init(

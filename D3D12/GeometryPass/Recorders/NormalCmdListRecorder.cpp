@@ -2,12 +2,12 @@
 
 #include <DirectXMath.h>
 
-#include <DXUtils\CBuffers.h>
-#include <DXUtils/Material.h>
+#include <GeometryPass/Material.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ResourceManager/UploadBuffer.h>
+#include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
 namespace {
@@ -99,8 +99,8 @@ void NormalCmdListRecorder::RecordCommandLists(
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
-	mCmdList->RSSetViewports(1U, &mScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &mScissorRect);
+	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
+	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
 	mCmdList->OMSetRenderTargets(geomPassRtvCpuDescHandlesCount, geomPassRtvCpuDescHandles, false, &depthStencilHandle);
 
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);

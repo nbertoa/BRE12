@@ -7,4 +7,10 @@
     <None Include="Material.hlsli" />
     <None Include="Utils.hlsli" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CBuffers.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CBuffers.cpp" />
+  </ItemGroup>
 </Project>

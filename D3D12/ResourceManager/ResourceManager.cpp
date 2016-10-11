@@ -72,7 +72,13 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	ASSERT(byteSize > 0);
 	
 	// Create the actual default buffer resource.
-	D3D12_HEAP_PROPERTIES heapProps = D3DFactory::HeapProperties(D3D12_HEAP_TYPE_DEFAULT);
+	D3D12_HEAP_PROPERTIES heapProps{};
+	heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+	heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	heapProps.CreationNodeMask = 1U;
+	heapProps.VisibleNodeMask = 1U;
+
 	CD3DX12_RESOURCE_DESC resDesc{ CD3DX12_RESOURCE_DESC::Buffer(byteSize) };
 	mMutex.lock();
 	CHECK_HR(mDevice.CreateCommittedResource(
@@ -85,7 +91,12 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 
 	// In order to copy CPU memory data into our default buffer, we need to create
 	// an intermediate upload heap. 
-	heapProps = D3DFactory::HeapProperties(D3D12_HEAP_TYPE_UPLOAD);
+	heapProps = D3D12_HEAP_PROPERTIES{};
+	heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+	heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	heapProps.CreationNodeMask = 1U;
+	heapProps.VisibleNodeMask = 1U;
 	resDesc = CD3DX12_RESOURCE_DESC::Buffer(byteSize);
 
 	CHECK_HR(mDevice.CreateCommittedResource(

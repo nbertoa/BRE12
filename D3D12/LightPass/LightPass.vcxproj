@@ -123,6 +123,7 @@
   <ItemGroup>
     <ClInclude Include="LightPass.h" />
     <ClInclude Include="LightPassCmdListRecorder.h" />
+    <ClInclude Include="PunctualLight.h" />
     <ClInclude Include="Recorders\PunctualLightCmdListRecorder.h" />
   </ItemGroup>
   <ItemGroup>

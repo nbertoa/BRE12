@@ -50,8 +50,6 @@ private:
 	std::uint32_t mCurrFrameIndex{ 0U };
 
 	ID3D12DescriptorHeap* mCbvSrvUavDescHeap{ nullptr };
-	D3D12_VIEWPORT mScreenViewport{ 0.0f, 0.0f, (float)Settings::sWindowWidth, (float)Settings::sWindowHeight, 0.0f, 1.0f };
-	D3D12_RECT mScissorRect{ 0, 0, Settings::sWindowWidth, Settings::sWindowHeight };
 
 	BufferCreator::VertexBufferData mVertexBufferData;
 	BufferCreator::IndexBufferData mIndexBufferData;

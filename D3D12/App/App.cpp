@@ -1,7 +1,7 @@
 #include "App.h"
 
 #include <CommandManager/CommandManager.h>
-#include <DXUtils/MaterialFactory.h>
+#include <GeometryPass/MaterialFactory.h>
 #include <GlobalData\D3dData.h>
 #include <GlobalData/Settings.h>
 #include <Input/Keyboard.h>

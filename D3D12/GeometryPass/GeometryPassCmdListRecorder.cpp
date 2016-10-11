@@ -1,8 +1,7 @@
 #include "GeometryPassCmdListRecorder.h"
 
 #include <CommandManager/CommandManager.h>
-
-#include <DXUtils\CBuffers.h>
+#include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
 namespace {

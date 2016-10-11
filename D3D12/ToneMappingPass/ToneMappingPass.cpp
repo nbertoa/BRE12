@@ -3,18 +3,16 @@
 #include <cstdint>
 #include <d3d12.h>
 #include <DirectXColors.h>
-#include <tbb/parallel_for.h>
 
 #include <CommandListProcessor/CommandListProcessor.h>
 #include <CommandManager\CommandManager.h>
-#include <DXUtils\CBuffers.h>
 #include <DXUtils/d3dx12.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
-#include <Scene\Scene.h>
 #include <ToneMappingPass/ToneMappingCmdListRecorder.h>
+#include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
 namespace {

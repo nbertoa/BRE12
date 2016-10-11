@@ -24,6 +24,7 @@
     </ClInclude>
     <ClInclude Include="LightPassCmdListRecorder.h" />
     <ClInclude Include="LightPass.h" />
+    <ClInclude Include="PunctualLight.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PunctualLight\GS.hlsl">

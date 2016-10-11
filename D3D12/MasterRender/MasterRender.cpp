@@ -1,8 +1,8 @@
 #include "MasterRender.h"
 
-#include <DirectXColors.h>
 #include <tbb/parallel_for.h>
 
+#include <CommandListProcessor/CommandListProcessor.h>
 #include <CommandManager/CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GlobalData/D3dData.h>
@@ -10,14 +10,13 @@
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <ResourceManager\ResourceManager.h>
-#include <ModelManager\Model.h>
-#include <ModelManager\ModelManager.h>
 #include <Scene/Scene.h>
 
 using namespace DirectX;
 
 namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
+	static const DXGI_FORMAT sFrameBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
 
 	// Update camera's view matrix and store data in parameters.
 	void UpdateCamera(Camera& camera, const float deltaTime, XMFLOAT4X4& viewTranspose, XMFLOAT4X4& projTranpose, XMFLOAT3& eyePosW) noexcept {
@@ -69,6 +68,7 @@ namespace {
 		ID3D12CommandQueue& cmdQueue, 
 		const DXGI_FORMAT frameBufferFormat,
 		Microsoft::WRL::ComPtr<IDXGISwapChain3>& swapChain3) noexcept {
+
 		IDXGISwapChain1* baseSwapChain{ nullptr };
 
 		DXGI_SWAP_CHAIN_DESC1 sd = {};
@@ -109,6 +109,7 @@ MasterRender* MasterRender::Create(const HWND hwnd, ID3D12Device& device, Scene*
 	ASSERT(scene != nullptr);
 
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
+	// Reference count is 2: 1 parent task + 1 master render task
 	parent->set_ref_count(2);
 	return new (parent->allocate_child()) MasterRender(hwnd, device, scene);
 }
@@ -129,6 +130,8 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 	ASSERT(mCmdListProcessor != nullptr);
 	
 	InitPasses(scene);
+
+	// Spawns master render task
 	parent()->spawn(*this);
 }
 
@@ -138,7 +141,7 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 	// Initialize scene
 	scene->Init();
 	
-	// Generate recorders
+	// Generate recorders for all the passes
 	scene->GenerateGeomPassRecorders(*mCmdQueue, mCmdListProcessor->CmdListQueue(), mGeometryPass.GetRecorders());
 	mGeometryPass.Init(mDevice, DepthStencilCpuDesc());
 
@@ -149,10 +152,11 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 	mSkyBoxPass.Init(mColorBufferRTVCpuDescHandle, DepthStencilCpuDesc());
 
 	mToneMappingPass.Init(mDevice, *mCmdQueue, mCmdListProcessor->CmdListQueue(), *mColorBuffer.Get(), DepthStencilCpuDesc());
-
-	const std::uint64_t count{ _countof(mFenceByQueuedFrameIndex) };
+		
+	// Initialize fence values for all frames to the same number.
+	const std::uint64_t count{ _countof(mFenceValueByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {
-		mFenceByQueuedFrameIndex[i] = mCurrentFence;
+		mFenceValueByQueuedFrameIndex[i] = mCurrFenceValue;
 	}
 }
 
@@ -168,22 +172,25 @@ tbb::task* MasterRender::execute() {
 		UpdateCamera(mCamera, mTimer.DeltaTime(), mFrameCBuffer.mView, mFrameCBuffer.mProj, mFrameCBuffer.mEyePosW);
 		ASSERT(mCmdListProcessor->IsIdle());
 
+		// Execute passes
 		mGeometryPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
 		mLightPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
 		mSkyBoxPass.Execute(*mCmdListProcessor, mFrameCBuffer);
 		mToneMappingPass.Execute(*mCmdListProcessor, *mCmdQueue, *CurrentFrameBuffer(), CurrentFrameBufferCpuDesc());
-		MergePass();
+		ExecuteMergePass();
 
 		SignalFenceAndPresent();
 	}
 
+	// If we need to terminate, then we terminates command list processor
+	// and waits until all GPU command lists are properly executed.
 	mCmdListProcessor->Terminate();
 	FlushCommandQueue();
 
 	return nullptr;
 }
 
-void MasterRender::MergePass() {
+void MasterRender::ExecuteMergePass() {
 	ID3D12CommandAllocator* cmdAlloc{ mMergePassCmdAllocs[mCurrQueuedFrameIndex] };
 
 	CHECK_HR(cmdAlloc->Reset());
@@ -221,8 +228,8 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRenderTargetDescHeap->GetCPUDescriptorHandleForHeapStart());
 	const std::uint32_t rtvDescSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {
-		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mSwapChainBuffer[i].GetAddressOf())));
-		mDevice.CreateRenderTargetView(mSwapChainBuffer[i].Get(), &rtvDesc, rtvHeapHandle);
+		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
+		mDevice.CreateRenderTargetView(mFrameBuffers[i].Get(), &rtvDesc, rtvHeapHandle);
 		rtvHeapHandle.Offset(1U, rtvDescSize);
 	}
 
@@ -244,6 +251,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	clearValue.Format = sDepthStencilFormat;
 	clearValue.DepthStencil.Depth = 1.0f;
 	clearValue.DepthStencil.Stencil = 0U;
+
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, depthStencilDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, clearValue, mDepthStencilBuffer);
 
@@ -252,19 +260,21 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 }
 
 void MasterRender::CreateRtvAndDsvDescriptorHeaps() noexcept {
-	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-	rtvHeapDesc.NumDescriptors = Settings::sSwapChainBufferCount;
-	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	rtvHeapDesc.NodeMask = 0;
-	ResourceManager::Get().CreateDescriptorHeap(rtvHeapDesc, mRenderTargetDescHeap);
+	// Render targets descriptor heap
+	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
+	descHeapDesc.NumDescriptors = Settings::sSwapChainBufferCount;
+	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	descHeapDesc.NodeMask = 0;
+	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mRenderTargetDescHeap);
 
-	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-	dsvHeapDesc.NumDescriptors = 1U;
-	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	dsvHeapDesc.NodeMask = 0U;
-	ResourceManager::Get().CreateDescriptorHeap(dsvHeapDesc, mDepthStencilDescHeap);
+	// Depth stencil buffer descriptor heap
+	descHeapDesc = D3D12_DESCRIPTOR_HEAP_DESC{};
+	descHeapDesc.NumDescriptors = 1U;
+	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	descHeapDesc.NodeMask = 0U;
+	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mDepthStencilDescHeap);
 }
 
 void MasterRender::CreateColorBuffer() noexcept {
@@ -327,8 +337,7 @@ void MasterRender::CreateMergePassCommandObjects() noexcept {
 
 ID3D12Resource* MasterRender::CurrentFrameBuffer() const noexcept {
 	ASSERT(mSwapChain != nullptr);
-	const std::uint32_t currBackBuffer{ mSwapChain->GetCurrentBackBufferIndex() };
-	return mSwapChainBuffer[currBackBuffer].Get();
+	return mFrameBuffers[mSwapChain->GetCurrentBackBufferIndex()].Get();
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::CurrentFrameBufferCpuDesc() const noexcept {
@@ -337,27 +346,22 @@ D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::CurrentFrameBufferCpuDesc() const noex
 	return D3D12_CPU_DESCRIPTOR_HANDLE{ mRenderTargetDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + currBackBuffer * rtvDescSize };
 }
 
-ID3D12Resource* MasterRender::DepthStencilBuffer() const noexcept {
-	ASSERT(mDepthStencilBuffer != nullptr);
-	return mDepthStencilBuffer;
-}
-
 D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::DepthStencilCpuDesc() const noexcept {
 	return mDepthStencilDescHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
 void MasterRender::FlushCommandQueue() noexcept {
-	++mCurrentFence;
-
-	CHECK_HR(mCmdQueue->Signal(mFence, mCurrentFence));
+	// Signal a new fence value
+	++mCurrFenceValue;
+	CHECK_HR(mCmdQueue->Signal(mFence, mCurrFenceValue));
 
 	// Wait until the GPU has completed commands up to this fence point.
-	if (mFence->GetCompletedValue() < mCurrentFence) {
+	if (mFence->GetCompletedValue() < mCurrFenceValue) {
 		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
 		ASSERT(eventHandle);
 
 		// Fire event when GPU hits current fence.  
-		CHECK_HR(mFence->SetEventOnCompletion(mCurrentFence, eventHandle));
+		CHECK_HR(mFence->SetEventOnCompletion(mCurrFenceValue, eventHandle));
 
 		// Wait until the GPU hits current fence event is fired.
 		WaitForSingleObject(eventHandle, INFINITE);
@@ -376,17 +380,16 @@ void MasterRender::SignalFenceAndPresent() noexcept {
 	CHECK_HR(mSwapChain->Present(0U, 0U));
 #endif
 	
-
 	// Add an instruction to the command queue to set a new fence point.  Because we 
 	// are on the GPU time line, the new fence point won't be set until the GPU finishes
 	// processing all the commands prior to this Signal().
-	mFenceByQueuedFrameIndex[mCurrQueuedFrameIndex] = ++mCurrentFence;
-	CHECK_HR(mCmdQueue->Signal(mFence, mCurrentFence));
+	mFenceValueByQueuedFrameIndex[mCurrQueuedFrameIndex] = ++mCurrFenceValue;
+	CHECK_HR(mCmdQueue->Signal(mFence, mCurrFenceValue));
 	mCurrQueuedFrameIndex = (mCurrQueuedFrameIndex + 1U) % Settings::sQueuedFrameCount;	
 
 	// If we executed command lists for all queued frames, then we need to wait
 	// at least 1 of them to be completed, before continue recording command lists. 
-	const std::uint64_t oldestFence{ mFenceByQueuedFrameIndex[mCurrQueuedFrameIndex] };
+	const std::uint64_t oldestFence{ mFenceValueByQueuedFrameIndex[mCurrQueuedFrameIndex] };
 	if (mFence->GetCompletedValue() < oldestFence) {
 		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
 		ASSERT(eventHandle);
