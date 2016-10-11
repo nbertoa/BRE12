@@ -4,6 +4,12 @@
     <Filter Include="Recorders">
       <UniqueIdentifier>{e8bf5e0b-3e56-4ae7-a6b1-555ec3420016}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{b7917330-8a48-45cc-a0ed-019dad0c0550}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PunctualLight">
+      <UniqueIdentifier>{349acff0-6da5-45db-b286-0d523187e0de}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Recorders\PunctualLightCmdListRecorder.cpp">
@@ -18,5 +24,19 @@
     </ClInclude>
     <ClInclude Include="LightPassCmdListRecorder.h" />
     <ClInclude Include="LightPass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\PunctualLight\GS.hlsl">
+      <Filter>Shaders\PunctualLight</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PunctualLight\PS.hlsl">
+      <Filter>Shaders\PunctualLight</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PunctualLight\RS.hlsl">
+      <Filter>Shaders\PunctualLight</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PunctualLight\VS.hlsl">
+      <Filter>Shaders\PunctualLight</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

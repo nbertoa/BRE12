@@ -19,6 +19,11 @@ class ToneMappingCmdListRecorder {
 public:
 	explicit ToneMappingCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
+	// This method is to initialize PSO that is a shared between all this kind
+	// of recorders.
+	// This method is initialized by its corresponding pass.
+	static void InitPSO() noexcept;
+
 	void Init(
 		const BufferCreator::VertexBufferData& vertexBufferData,
 		const BufferCreator::IndexBufferData indexBufferData,
@@ -41,8 +46,6 @@ private:
 	std::uint32_t mCurrFrameIndex{ 0U };
 
 	ID3D12DescriptorHeap* mCbvSrvUavDescHeap{ nullptr };
-	ID3D12RootSignature* mRootSign{ nullptr };
-	ID3D12PipelineState* mPSO{ nullptr };
 	D3D12_VIEWPORT mScreenViewport{ 0.0f, 0.0f, (float)Settings::sWindowWidth, (float)Settings::sWindowHeight, 0.0f, 1.0f };
 	D3D12_RECT mScissorRect{ 0, 0, Settings::sWindowWidth, Settings::sWindowHeight };
 

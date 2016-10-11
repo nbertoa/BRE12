@@ -1,6 +1,6 @@
-#include "../ShaderUtils/CBuffers.hlsli"
-#include "../ShaderUtils/Material.hlsli"
-#include "../ShaderUtils/Utils.hlsli"
+#include <ShaderUtils/CBuffers.hlsli>
+#include <ShaderUtils/Material.hlsli>
+#include <ShaderUtils/Utils.hlsli>
 
 struct Input {
 	float4 mPosH : SV_POSITION;

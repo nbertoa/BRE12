@@ -36,5 +36,64 @@
     <Filter Include="Recorders">
       <UniqueIdentifier>{144d1563-df1c-47cb-8462-21d465475442}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{0d041e02-9eba-4643-8ce7-ed65b4296b44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Basic">
+      <UniqueIdentifier>{38ea52c5-014e-456a-b7b0-cbe0e4cf5767}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\TextureMapping">
+      <UniqueIdentifier>{fc8cf115-443d-47f4-a614-67301adcb16b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\HeightMapping">
+      <UniqueIdentifier>{0186942d-bda9-4c90-8bf5-0c024df49c48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\NormalMapping">
+      <UniqueIdentifier>{747aceb1-adf0-4eab-b917-db1d4dee27db}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\Basic\PS.hlsl">
+      <Filter>Shaders\Basic</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Basic\RS.hlsl">
+      <Filter>Shaders\Basic</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Basic\VS.hlsl">
+      <Filter>Shaders\Basic</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\HeightMapping\DS.hlsl">
+      <Filter>Shaders\HeightMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\HeightMapping\HS.hlsl">
+      <Filter>Shaders\HeightMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\HeightMapping\PS.hlsl">
+      <Filter>Shaders\HeightMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\HeightMapping\RS.hlsl">
+      <Filter>Shaders\HeightMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\HeightMapping\VS.hlsl">
+      <Filter>Shaders\HeightMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\NormalMapping\PS.hlsl">
+      <Filter>Shaders\NormalMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\NormalMapping\RS.hlsl">
+      <Filter>Shaders\NormalMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\NormalMapping\VS.hlsl">
+      <Filter>Shaders\NormalMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TextureMapping\PS.hlsl">
+      <Filter>Shaders\TextureMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TextureMapping\RS.hlsl">
+      <Filter>Shaders\TextureMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TextureMapping\VS.hlsl">
+      <Filter>Shaders\TextureMapping</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

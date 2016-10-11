@@ -46,8 +46,6 @@ bool LightPassCmdListRecorder::ValidateData() const noexcept {
 	return
 		mCmdList != nullptr &&
 		mCbvSrvUavDescHeap != nullptr &&
-		mRootSign != nullptr &&
-		mPSO != nullptr &&
 		mNumLights != 0UL &&
 		mImmutableCBuffer != nullptr &&
 		mLightsBuffer != nullptr &&

@@ -10,6 +10,11 @@ class NormalCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
 	explicit NormalCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
+	// This method is to initialize PSO that is a shared between all this kind
+	// of recorders.
+	// This method is initialized by its corresponding pass.
+	static void InitPSO(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept;
+
 	void Init(
 		const GeometryData* geometryDataVec,
 		const std::uint32_t numGeomData,

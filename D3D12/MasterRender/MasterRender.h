@@ -30,13 +30,10 @@ public:
 	static MasterRender* Create(const HWND hwnd, ID3D12Device& device, Scene* scene) noexcept;
 
 	void Terminate() noexcept;
-
-	__forceinline static const DXGI_FORMAT ColorBufferFormat() noexcept { return sColorBufferFormat; }
 	__forceinline static const DXGI_FORMAT DepthStencilFormat() noexcept { return sDepthStencilFormat; }
 
 private:
 	static const DXGI_FORMAT sFrameBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
-	static const DXGI_FORMAT sColorBufferFormat{ DXGI_FORMAT_R16G16B16A16_FLOAT };
 	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
 
 	explicit MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene);

@@ -1,4 +1,4 @@
-#include "../ShaderUtils/CBuffers.hlsli"
+#include <ShaderUtils/CBuffers.hlsli>
 
 #define NUM_PATCH_POINTS 3
 #define HEIGHT_SCALE 0.07f

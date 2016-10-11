@@ -1,7 +1,7 @@
-#include "../ShaderUtils/CBuffers.hlsli"
-#include "../ShaderUtils/Lighting.hlsli"
-#include "../ShaderUtils/Lights.hlsli"
-#include "../ShaderUtils/Utils.hlsli"
+#include <ShaderUtils/CBuffers.hlsli>
+#include <ShaderUtils/Lighting.hlsli>
+#include <ShaderUtils/Lights.hlsli>
+#include <ShaderUtils/Utils.hlsli>
 
 #define AMBIENT_FACTOR float3(0.005, 0.005, 0.005)
 

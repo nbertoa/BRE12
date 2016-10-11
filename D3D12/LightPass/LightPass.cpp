@@ -10,6 +10,7 @@
 #include <DXUtils\CBuffers.h>
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\GeometryPass.h>
+#include <LightPass\Recorders\PunctualLightCmdListRecorder.h>
 #include <Utils\DebugUtils.h>
 
 namespace {
@@ -43,6 +44,9 @@ void LightPass::Init(
 	mGeometryBuffers = geometryBuffers;
 	mColorBufferCpuDesc = colorBufferCpuDesc;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
+
+	// Initialize recorder's pso
+	PunctualLightCmdListRecorder::InitPSO();
 
 	ASSERT(ValidateData());
 }

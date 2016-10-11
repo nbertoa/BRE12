@@ -33,8 +33,6 @@ void HeightScene::GenerateGeomPassRecorders(
 
 	const std::uint32_t numResources{ 7U };
 
-	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
-
 	ID3D12Resource* tex[numResources];
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex[numResources];
 	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[0], uploadBufferTex[0], *mCmdList);

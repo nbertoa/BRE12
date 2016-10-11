@@ -8,7 +8,6 @@
 #include <Input/Mouse.h>
 #include <MasterRender/MasterRender.h>
 #include <ModelManager\ModelManager.h>
-#include <PSOCreator/PSOCreator.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
@@ -30,8 +29,6 @@ namespace {
 		ResourceManager::Create(device);
 		RootSignatureManager::Create(device);
 		ShaderManager::Create();
-
-		PSOCreator::CommonPSOData::Init();
 	}
 
 	void InitMasterRenderTask(const HWND hwnd, ID3D12Device& device, Scene* scene, MasterRender* &masterRender) noexcept {

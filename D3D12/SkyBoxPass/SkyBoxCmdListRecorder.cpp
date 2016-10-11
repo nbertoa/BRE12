@@ -10,6 +10,9 @@
 #include <Utils/DebugUtils.h>
 
 namespace {
+	ID3D12PipelineState* sPSO{ nullptr };
+	ID3D12RootSignature* sRootSign{ nullptr };
+
 	void BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* cmdAlloc[], const std::size_t cmdAllocCount) noexcept {
 		ASSERT(cmdList == nullptr);
 
@@ -39,6 +42,35 @@ SkyBoxCmdListRecorder::SkyBoxCmdListRecorder(ID3D12Device& device, tbb::concurre
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 
+void SkyBoxCmdListRecorder::InitPSO() noexcept {
+	ASSERT(sPSO == nullptr);
+	ASSERT(sRootSign == nullptr);
+
+	// Build pso and root signature
+	PSOCreator::PSOParams psoParams{};
+	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
+	// The camera is inside the sky sphere, so just turn off culling.
+	psoParams.mRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	// Make sure the depth function is LESS_EQUAL and not just LESS.  
+	// Otherwise, the normalized depth values at z = 1 (NDC) will 
+	// fail the depth test if the depth buffer was cleared to 1.
+	psoParams.mDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+	psoParams.mPSFilename = "SkyBoxPass/Shaders/PS.cso";
+	psoParams.mRootSignFilename = "SkyBoxPass/Shaders/RS.cso";
+	psoParams.mVSFilename = "SkyBoxPass/Shaders/VS.cso";
+	psoParams.mNumRenderTargets = 1U;
+	psoParams.mRtFormats[0U] = Settings::sColorBufferFormat;
+	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
+		psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
+	}
+	psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	PSOCreator::CreatePSO(psoParams, sPSO, sRootSign);
+
+	ASSERT(sPSO != nullptr);
+	ASSERT(sRootSign != nullptr);
+}
+
 void SkyBoxCmdListRecorder::Init(
 	const BufferCreator::VertexBufferData& vertexBufferData,
 	const BufferCreator::IndexBufferData indexBufferData, 
@@ -51,11 +83,6 @@ void SkyBoxCmdListRecorder::Init(
 	mIndexBufferData = indexBufferData;
 	mWorldMatrix = worldMatrix;
 
-	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::SKY_BOX));
-
-	mPSO = psoData.mPSO;
-	mRootSign = psoData.mRootSign;
-
 	BuildBuffers(cubeMap);
 
 	ASSERT(ValidateData());
@@ -66,9 +93,12 @@ void SkyBoxCmdListRecorder::RecordCommandLists(
 	const D3D12_CPU_DESCRIPTOR_HANDLE* rtvCpuDescHandles,
 	const std::uint32_t rtvCpuDescHandlesCount,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
+
 	ASSERT(ValidateData());
 	ASSERT(rtvCpuDescHandles != nullptr);
 	ASSERT(rtvCpuDescHandlesCount > 0);
+	ASSERT(sPSO != nullptr);
+	ASSERT(sRootSign != nullptr);
 
 	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
 	ASSERT(cmdAlloc != nullptr);
@@ -78,14 +108,14 @@ void SkyBoxCmdListRecorder::RecordCommandLists(
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, mPSO));
+	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
 	mCmdList->RSSetViewports(1U, &mScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &mScissorRect);
 	mCmdList->OMSetRenderTargets(rtvCpuDescHandlesCount, rtvCpuDescHandles, false, &depthStencilHandle);
 
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
-	mCmdList->SetGraphicsRootSignature(mRootSign);
+	mCmdList->SetGraphicsRootSignature(sRootSign);
 
 	const std::size_t descHandleIncSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDescHandle(mObjectCBufferGpuDescHandleBegin);
@@ -130,8 +160,6 @@ bool SkyBoxCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		mCmdList != nullptr &&
 		mCbvSrvUavDescHeap != nullptr &&
-		mRootSign != nullptr &&
-		mPSO != nullptr &&
 		mObjectCBuffer != nullptr &&
 		mObjectCBufferGpuDescHandleBegin.ptr != 0UL &&
 		mCubeMapBufferGpuDescHandleBegin.ptr != 0UL;

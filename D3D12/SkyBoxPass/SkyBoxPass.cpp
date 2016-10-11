@@ -6,6 +6,7 @@
 #include <CommandListProcessor/CommandListProcessor.h>
 #include <DXUtils\CBuffers.h>
 #include <DXUtils/d3dx12.h>
+#include <SkyBoxPass\SkyBoxCmdListRecorder.h>
 #include <Utils\DebugUtils.h>
 
 void SkyBoxPass::Init(
@@ -18,6 +19,9 @@ void SkyBoxPass::Init(
 
 	mColorBufferCpuDesc = colorBufferCpuDesc;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
+
+	// Initialize recoders's pso
+	SkyBoxCmdListRecorder::InitPSO();
 
 	ASSERT(ValidateData());
 }

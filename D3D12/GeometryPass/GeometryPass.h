@@ -5,6 +5,7 @@
 
 #include <GlobalData\Settings.h>
 #include <GeometryPass\GeometryPassCmdListRecorder.h>
+#include <PSOCreator\PSOCreator.h>
 
 class CommandListProcessor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
@@ -36,10 +37,7 @@ public:
 
 	// You should call this method after filling recorders and before Execute()
 	void Init(ID3D12Device& device, const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
-
-	// Geometry buffers formats. It has a size of D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT
-	__forceinline static const DXGI_FORMAT* BufferFormats() noexcept { return sBufferFormats; }
-
+	
 	// Get geometry buffers
 	__forceinline Microsoft::WRL::ComPtr<ID3D12Resource>* GetBuffers() noexcept { return mBuffers; }
 	
@@ -49,9 +47,6 @@ public:
 		const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
-	// Buffer formats
-	static const DXGI_FORMAT sBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
-
 	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
 

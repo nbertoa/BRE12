@@ -1,5 +1,5 @@
-#include "../ShaderUtils/CBuffers.hlsli"
-#include "../ShaderUtils/Lights.hlsli"
+#include <ShaderUtils/CBuffers.hlsli>
+#include <ShaderUtils/Lights.hlsli>
 
 struct Input {
 	uint mVertexId : SV_VertexID;

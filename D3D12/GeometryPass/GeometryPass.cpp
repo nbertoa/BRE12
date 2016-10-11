@@ -9,10 +9,26 @@
 #include <CommandManager\CommandManager.h>
 #include <DXUtils\CBuffers.h>
 #include <DXUtils/d3dx12.h>
+#include <GeometryPass\Recorders\BasicCmdListRecorder.h>
+#include <GeometryPass\Recorders\HeightCmdListRecorder.h>
+#include <GeometryPass\Recorders\NormalCmdListRecorder.h>
+#include <GeometryPass\Recorders\TextureCmdListRecorder.h>
 #include <ResourceManager\ResourceManager.h>
 #include <Utils\DebugUtils.h>
 
 namespace {
+	// Geometry buffer formats
+	const DXGI_FORMAT sBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{
+		DXGI_FORMAT_R16G16B16A16_FLOAT,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		DXGI_FORMAT_UNKNOWN,
+		DXGI_FORMAT_UNKNOWN,
+		DXGI_FORMAT_UNKNOWN,
+		DXGI_FORMAT_UNKNOWN,
+		DXGI_FORMAT_UNKNOWN
+	};
+
 	void CreateBuffers(
 		ID3D12Device& device,
 		Microsoft::WRL::ComPtr<ID3D12Resource> buffers[GeometryPass::BUFFERS_COUNT],
@@ -60,7 +76,7 @@ namespace {
 
 		// Create and store RTV's descriptors for buffers
 		for (std::uint32_t i = 0U; i < GeometryPass::BUFFERS_COUNT; ++i) {
-			resDesc.Format = GeometryPass::BufferFormats()[i];
+			resDesc.Format = sBufferFormats[i];
 			clearValue[i].Format = resDesc.Format;
 			rtvDesc.Format = resDesc.Format;
 			ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, clearValue[i], res);
@@ -88,17 +104,6 @@ namespace {
 	}
 }
 
-const DXGI_FORMAT GeometryPass::sBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{
-	DXGI_FORMAT_R16G16B16A16_FLOAT,
-	DXGI_FORMAT_R8G8B8A8_UNORM,
-	DXGI_FORMAT_R8G8B8A8_UNORM,
-	DXGI_FORMAT_UNKNOWN,
-	DXGI_FORMAT_UNKNOWN,
-	DXGI_FORMAT_UNKNOWN,
-	DXGI_FORMAT_UNKNOWN,
-	DXGI_FORMAT_UNKNOWN
-};
-
 void GeometryPass::Init(ID3D12Device& device, const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
 	ASSERT(ValidateData() == false);
 	
@@ -108,6 +113,12 @@ void GeometryPass::Init(ID3D12Device& device, const D3D12_CPU_DESCRIPTOR_HANDLE&
 	CreateCommandObjects(mCmdAllocs, mCmdList);
 
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
+
+	// Initialize recorders PSOs
+	BasicCmdListRecorder::InitPSO(sBufferFormats, BUFFERS_COUNT);
+	HeightCmdListRecorder::InitPSO(sBufferFormats, BUFFERS_COUNT);
+	NormalCmdListRecorder::InitPSO(sBufferFormats, BUFFERS_COUNT);
+	TextureCmdListRecorder::InitPSO(sBufferFormats, BUFFERS_COUNT);
 
 	ASSERT(ValidateData());
 }

@@ -288,7 +288,7 @@ void MasterRender::CreateColorBuffer() noexcept {
 	resDesc.SampleDesc.Quality = 0U;
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-	resDesc.Format = sColorBufferFormat;
+	resDesc.Format = Settings::sColorBufferFormat;
 
 	D3D12_CLEAR_VALUE clearValue = { resDesc.Format, 0.0f, 0.0f, 0.0f, 1.0f };
 

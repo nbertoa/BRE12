@@ -14,6 +14,7 @@
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <Scene\Scene.h>
+#include <ToneMappingPass/ToneMappingCmdListRecorder.h>
 #include <Utils\DebugUtils.h>
 
 namespace {
@@ -90,9 +91,12 @@ void ToneMappingPass::Init(
 	// Get vertex and index buffers data from the only mesh this model must have.
 	ASSERT(model->Meshes().size() == 1UL);
 	const Mesh& mesh = model->Meshes()[0U];
-
 	ExecuteCommandList(cmdQueue, *mCmdList, *mFence);
 
+	// Initialize recorder's PSO
+	ToneMappingCmdListRecorder::InitPSO();
+
+	// Initialize recorder
 	mRecorder.reset(new ToneMappingCmdListRecorder(device, cmdListQueue));
 	mRecorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), colorBuffer);
 

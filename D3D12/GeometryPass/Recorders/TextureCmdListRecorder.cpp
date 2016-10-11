@@ -10,9 +10,34 @@
 #include <ResourceManager/UploadBuffer.h>
 #include <Utils/DebugUtils.h>
 
+namespace {
+	ID3D12PipelineState* sPSO{ nullptr };
+	ID3D12RootSignature* sRootSign{ nullptr };
+}
+
 TextureCmdListRecorder::TextureCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
 	: GeometryPassCmdListRecorder(device, cmdListQueue)
 {
+}
+
+void TextureCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept {
+	ASSERT(geometryBufferFormats != nullptr);
+	ASSERT(geometryBufferCount > 0U);
+	ASSERT(sPSO == nullptr);
+	ASSERT(sRootSign == nullptr);
+
+	// Build pso and root signature
+	PSOCreator::PSOParams psoParams{};
+	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+	psoParams.mPSFilename = "GeometryPass/Shaders/TextureMapping/PS.cso";
+	psoParams.mRootSignFilename = "GeometryPass/Shaders/TextureMapping/RS.cso";
+	psoParams.mVSFilename = "GeometryPass/Shaders/TextureMapping/VS.cso";
+	psoParams.mNumRenderTargets = geometryBufferCount;
+	memcpy(psoParams.mRtFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
+	PSOCreator::CreatePSO(psoParams, sPSO, sRootSign);
+
+	ASSERT(sPSO != nullptr);
+	ASSERT(sRootSign != nullptr);
 }
 
 void TextureCmdListRecorder::Init(
@@ -45,11 +70,6 @@ void TextureCmdListRecorder::Init(
 		mGeometryDataVec.push_back(geometryDataVec[i]);
 	}
 
-	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::TEXTURE_MAPPING));
-
-	mPSO = psoData.mPSO;
-	mRootSign = psoData.mRootSign;
-
 	BuildBuffers(materials, textures, numResources, cubeMap);
 
 	ASSERT(ValidateData());
@@ -60,9 +80,12 @@ void TextureCmdListRecorder::RecordCommandLists(
 	const D3D12_CPU_DESCRIPTOR_HANDLE* geomPassRtvCpuDescHandles,
 	const std::uint32_t geomPassRtvCpuDescHandlesCount,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
+
 	ASSERT(ValidateData());
 	ASSERT(geomPassRtvCpuDescHandles != nullptr);
 	ASSERT(geomPassRtvCpuDescHandlesCount > 0);
+	ASSERT(sPSO != nullptr);
+	ASSERT(sRootSign != nullptr);
 
 	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
 	ASSERT(cmdAlloc != nullptr);
@@ -72,14 +95,14 @@ void TextureCmdListRecorder::RecordCommandLists(
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, mPSO));
+	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
 	mCmdList->RSSetViewports(1U, &mScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &mScissorRect);
 	mCmdList->OMSetRenderTargets(geomPassRtvCpuDescHandlesCount, geomPassRtvCpuDescHandles, false, &depthStencilHandle);
 
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
-	mCmdList->SetGraphicsRootSignature(mRootSign);
+	mCmdList->SetGraphicsRootSignature(sRootSign);
 
 	const std::size_t descHandleIncSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDescHandle(mObjectCBufferGpuDescHandleBegin);

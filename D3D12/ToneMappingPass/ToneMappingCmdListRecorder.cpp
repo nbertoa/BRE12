@@ -4,12 +4,16 @@
 
 #include <CommandManager/CommandManager.h>
 #include <DXUtils\CBuffers.h>
+#include <GeometryPass/GeometryPass.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ResourceManager/UploadBuffer.h>
 #include <Utils/DebugUtils.h>
 
 namespace {
+	ID3D12PipelineState* sPSO{ nullptr };
+	ID3D12RootSignature* sRootSign{ nullptr };
+
 	void BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* cmdAlloc[], const std::size_t cmdAllocCount) noexcept {
 		ASSERT(cmdList == nullptr);
 
@@ -39,6 +43,30 @@ ToneMappingCmdListRecorder::ToneMappingCmdListRecorder(ID3D12Device& device, tbb
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 
+void ToneMappingCmdListRecorder::InitPSO() noexcept {
+	ASSERT(sPSO == nullptr);
+	ASSERT(sRootSign == nullptr);
+
+	// Build pso and root signature
+	PSOCreator::PSOParams psoParams{};
+	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
+	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
+	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+	psoParams.mPSFilename = "ToneMappingPass/Shaders/PS.cso";
+	psoParams.mRootSignFilename = "ToneMappingPass/Shaders/RS.cso";
+	psoParams.mVSFilename = "ToneMappingPass/Shaders/VS.cso";
+	psoParams.mNumRenderTargets = 1U;
+	psoParams.mRtFormats[0U] = Settings::sFrameBufferRTFormat;
+	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
+		psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
+	}
+	psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	PSOCreator::CreatePSO(psoParams, sPSO, sRootSign);
+
+	ASSERT(sPSO != nullptr);
+	ASSERT(sRootSign != nullptr);
+}
+
 void ToneMappingCmdListRecorder::Init(
 	const BufferCreator::VertexBufferData& vertexBufferData,
 	const BufferCreator::IndexBufferData indexBufferData,
@@ -49,11 +77,6 @@ void ToneMappingCmdListRecorder::Init(
 	mVertexBufferData = vertexBufferData;
 	mIndexBufferData = indexBufferData;
 
-	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::TONE_MAPPING));
-
-	mPSO = psoData.mPSO;
-	mRootSign = psoData.mRootSign;
-
 	BuildBuffers(colorBuffer);
 
 	ASSERT(ValidateData());
@@ -62,20 +85,23 @@ void ToneMappingCmdListRecorder::Init(
 void ToneMappingCmdListRecorder::RecordCommandLists(
 	const D3D12_CPU_DESCRIPTOR_HANDLE& rtvCpuDescHandle,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
+
 	ASSERT(ValidateData());
+	ASSERT(sPSO != nullptr);
+	ASSERT(sRootSign != nullptr);
 
 	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
 	ASSERT(cmdAlloc != nullptr);
 	
 	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, mPSO));
+	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
 	mCmdList->RSSetViewports(1U, &mScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &mScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &rtvCpuDescHandle, false, &depthStencilHandle);
 
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
-	mCmdList->SetGraphicsRootSignature(mRootSign);
+	mCmdList->SetGraphicsRootSignature(sRootSign);
 
 	const std::size_t descHandleIncSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 
@@ -106,9 +132,7 @@ bool ToneMappingCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		mCmdList != nullptr &&
-		mCbvSrvUavDescHeap != nullptr &&
-		mRootSign != nullptr &&
-		mPSO != nullptr;
+		mCbvSrvUavDescHeap != nullptr;
 
 	return result;
 }

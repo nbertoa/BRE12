@@ -11,6 +11,9 @@
 #include <Utils/DebugUtils.h>
 
 namespace {
+	ID3D12PipelineState* sPSO{ nullptr };
+	ID3D12RootSignature* sRootSign{ nullptr };
+
 	void CreateGeometryBuffersSRVs(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
@@ -55,6 +58,31 @@ PunctualLightCmdListRecorder::PunctualLightCmdListRecorder(ID3D12Device& device,
 {
 }
 
+void PunctualLightCmdListRecorder::InitPSO() noexcept {
+	ASSERT(sPSO == nullptr);
+	ASSERT(sRootSign == nullptr);
+
+	// Build pso and root signature
+	PSOCreator::PSOParams psoParams{};
+	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
+	psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
+	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
+	psoParams.mGSFilename = "LightPass/Shaders/PunctualLight/GS.cso";
+	psoParams.mPSFilename = "LightPass/Shaders/PunctualLight/PS.cso";
+	psoParams.mRootSignFilename = "LightPass/Shaders/PunctualLight/RS.cso";
+	psoParams.mVSFilename = "LightPass/Shaders/PunctualLight/VS.cso";
+	psoParams.mNumRenderTargets = 1U;
+	psoParams.mRtFormats[0U] = Settings::sColorBufferFormat;
+	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
+		psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
+	}
+	psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+	PSOCreator::CreatePSO(psoParams, sPSO, sRootSign);
+
+	ASSERT(sPSO != nullptr);
+	ASSERT(sRootSign != nullptr);
+}
+
 void PunctualLightCmdListRecorder::Init(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
@@ -67,9 +95,6 @@ void PunctualLightCmdListRecorder::Init(
 	ASSERT(lights != nullptr);
 	ASSERT(numLights > 0U);
 
-	const PSOCreator::PSOData& psoData(PSOCreator::CommonPSOData::GetData(PSOCreator::CommonPSOData::PUNCTUAL_LIGHT));
-	mPSO = psoData.mPSO;
-	mRootSign = psoData.mRootSign;
 	mNumLights = numLights;
 
 	// Geometry buffers SRVS + lights buffer SRV + cube map SRV
@@ -95,9 +120,12 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	const D3D12_CPU_DESCRIPTOR_HANDLE* rtvCpuDescHandles,
 	const std::uint32_t rtvCpuDescHandlesCount,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
+
 	ASSERT(ValidateData());
 	ASSERT(rtvCpuDescHandles != nullptr);
 	ASSERT(rtvCpuDescHandlesCount > 0);
+	ASSERT(sPSO != nullptr);
+	ASSERT(sRootSign != nullptr);
 
 	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
 	ASSERT(cmdAlloc != nullptr);	
@@ -107,14 +135,14 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, mPSO));
+	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
 	mCmdList->RSSetViewports(1U, &mScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &mScissorRect);
 	mCmdList->OMSetRenderTargets(rtvCpuDescHandlesCount, rtvCpuDescHandles, false, &depthStencilHandle);
 
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
-	mCmdList->SetGraphicsRootSignature(mRootSign);
+	mCmdList->SetGraphicsRootSignature(sRootSign);
 
 	// Set root parameters
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());

@@ -1,4 +1,4 @@
-#include "../ShaderUtils/CBuffers.hlsli"
+#include <ShaderUtils/CBuffers.hlsli>
 
 #define MIN_TESS_DISTANCE 25.0f
 #define MAX_TESS_DISTANCE 1.0f
