@@ -12,7 +12,6 @@
 #include <ShaderUtils\CBuffers.h>
 #include <ToneMappingPass\ToneMappingPass.h>
 #include <Timer/Timer.h>
-#include <Utils/DebugUtils.h>
 
 class CommandListProcessor;
 class Scene;

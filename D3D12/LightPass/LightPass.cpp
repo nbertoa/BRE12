@@ -1,6 +1,5 @@
 #include "LightPass.h"
 
-#include <cstdint>
 #include <d3d12.h>
 #include <DirectXColors.h>
 #include <tbb/parallel_for.h>

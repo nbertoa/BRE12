@@ -5,7 +5,6 @@
 
 #include <GlobalData\Settings.h>
 #include <GeometryPass\GeometryPassCmdListRecorder.h>
-#include <PSOCreator\PSOCreator.h>
 
 class CommandListProcessor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;

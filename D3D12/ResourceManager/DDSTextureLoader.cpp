@@ -178,7 +178,7 @@ static HRESULT LoadTextureDataFromFile( _In_z_ const wchar_t* fileName,
     }
 
     // Get the file size
-    LARGE_INTEGER FileSize = { 0 };
+    LARGE_INTEGER FileSize;
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
     FILE_STANDARD_INFO fileInfo;
@@ -428,9 +428,9 @@ static void GetSurfaceInfo( _In_ std::size_t width,
                             _Out_opt_ std::size_t* outRowBytes,
                             _Out_opt_ std::size_t* outNumRows ) noexcept
 {
-    std::size_t numBytes = 0;
-    std::size_t rowBytes = 0;
-    std::size_t numRows = 0;
+    std::size_t numBytes;
+    std::size_t rowBytes;
+    std::size_t numRows;
 
     bool bc = false;
     bool packed = false;
@@ -491,6 +491,9 @@ static void GetSurfaceInfo( _In_ std::size_t width,
         planar = true;
         bpe = 4;
         break;
+	default:
+		assert(false);
+		break;
     }
 
     if (bc)
@@ -630,6 +633,9 @@ static DXGI_FORMAT GetDXGIFormat( const DDS_PIXELFORMAT& ddpf ) noexcept
 
             // No 3:3:2, 3:3:2:8, or paletted DXGI formats aka D3DFMT_A8R3G3B2, D3DFMT_R3G3B2, D3DFMT_P8, D3DFMT_A8P8, etc.
             break;
+		default:
+			assert(false);
+			break;
         }
     }
     else if (ddpf.flags & DDS_LUMINANCE)
@@ -1221,6 +1227,9 @@ static HRESULT CreateD3DResources( _In_ ID3D11Device* d3dDevice,
                 }
             }
             break; 
+		default:
+			assert(false);
+			break;
     }
 
     return hr;
@@ -1317,6 +1326,9 @@ static HRESULT CreateD3DResources12(
 			}
 		}
 	} break;
+	default:
+		assert(false);
+		break;
 	}
 
 	return hr;
@@ -1338,15 +1350,15 @@ static HRESULT CreateTextureFromDDS( _In_ ID3D11Device* d3dDevice,
                                      _Outptr_opt_ ID3D11Resource** texture,
                                      _Outptr_opt_ ID3D11ShaderResourceView** textureView ) noexcept
 {
-    HRESULT hr = S_OK;
+    HRESULT hr;
 
     UINT width = header->width;
     UINT height = header->height;
     UINT depth = header->depth;
 
-    std::uint32_t resDim = D3D11_RESOURCE_DIMENSION_UNKNOWN;
+    std::uint32_t resDim;
     UINT arraySize = 1;
-    DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
+    DXGI_FORMAT format;
     bool isCubeMap = false;
 
     std::size_t mipCount = header->mipMapCount;
@@ -1550,7 +1562,7 @@ static HRESULT CreateTextureFromDDS( _In_ ID3D11Device* d3dDevice,
             D3D11_SHADER_RESOURCE_VIEW_DESC desc;
             (*textureView)->GetDesc( &desc );
 
-            UINT mipLevels = 1;
+            UINT mipLevels;
 
             switch( desc.ViewDimension )
             {
@@ -1684,7 +1696,7 @@ static HRESULT CreateTextureFromDDS12(
 	ComPtr<ID3D12Resource>& texture,
 	ComPtr<ID3D12Resource>& textureUploadHeap) noexcept
 {
-	HRESULT hr = S_OK;
+	HRESULT hr;
 
 	UINT width = header->width;
 	UINT height = header->height;
@@ -1692,7 +1704,7 @@ static HRESULT CreateTextureFromDDS12(
 
 	std::uint32_t resDim = D3D12_RESOURCE_DIMENSION_UNKNOWN;
 	UINT arraySize = 1;
-	DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
+	DXGI_FORMAT format;
 	bool isCubeMap = false;
 
 	std::size_t mipCount = header->mipMapCount;
@@ -1759,6 +1771,9 @@ static HRESULT CreateTextureFromDDS12(
 			break;
 		case D3D11_RESOURCE_DIMENSION_TEXTURE3D:
 			resDim = D3D12_RESOURCE_DIMENSION_TEXTURE3D;
+			break;
+		default:
+			assert(false);
 			break;
 		}
 	}
@@ -1893,6 +1908,8 @@ static DDS_ALPHA_MODE GetAlphaMode( _In_ const DDS_HEADER* header ) noexcept
             case DDS_ALPHA_MODE::DDS_ALPHA_MODE_OPAQUE:
             case DDS_ALPHA_MODE::DDS_ALPHA_MODE_CUSTOM:
                 return mode;
+			default:
+				break;
             }
         }
         else if ( ( MAKEFOURCC( 'D', 'X', 'T', '2' ) == header->ddspf.fourCC )

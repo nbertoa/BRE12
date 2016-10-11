@@ -1,7 +1,6 @@
 #include "D3dData.h"
 
 #include <GlobalData/Settings.h>
-#include <Utils/DebugUtils.h>
 
 namespace {
 	void InitMainWindow(HWND& hwnd, const HINSTANCE hInstance) noexcept {

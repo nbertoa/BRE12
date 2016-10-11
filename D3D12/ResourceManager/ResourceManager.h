@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include <d3d12.h>
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/mutex.h>

@@ -1,7 +1,5 @@
 #include "BufferCreator.h"
 
-#include <tbb/concurrent_queue.h>
-
 #include <ResourceManager/ResourceManager.h>
 #include <Utils/DebugUtils.h>
 

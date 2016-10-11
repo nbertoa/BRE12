@@ -21,6 +21,7 @@ public:
 	Scene() = default;
 	Scene(const Scene&) = delete;
 	const Scene& operator=(const Scene&) = delete;
+	virtual ~Scene() {}
 
 	// This method is called internally by the App.
 	// User must not call it.

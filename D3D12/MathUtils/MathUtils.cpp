@@ -9,7 +9,7 @@ const float MathUtils::Infinity{ FLT_MAX };
 const float MathUtils::Pi{ 3.1415926535f };
 
 float MathUtils::AngleFromXY(const float x, const float y) noexcept {
-	float theta{ 0.0f };
+	float theta;
  
 	// Quadrant I or IV
 	if (x >= 0.0f) {
@@ -31,7 +31,6 @@ float MathUtils::AngleFromXY(const float x, const float y) noexcept {
 
 XMVECTOR MathUtils::RandUnitVec3() noexcept {
 	const XMVECTOR One(XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
-	const XMVECTOR Zero(XMVectorZero());
 
 	// Keep trying until we get a point on/in the hemisphere.
 	while(true) {

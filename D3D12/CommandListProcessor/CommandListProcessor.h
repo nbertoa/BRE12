@@ -4,7 +4,6 @@
 #include <d3d12.h>
 #include <tbb/concurrent_queue.h>
 #include <tbb/task.h>
-#include <wrl.h>
 
 // It has the responsibility to check for new command lists and execute them.
 // Steps:

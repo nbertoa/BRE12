@@ -1,6 +1,5 @@
 #include "ToneMappingPass.h"
 
-#include <cstdint>
 #include <d3d12.h>
 #include <DirectXColors.h>
 

@@ -1,15 +1,12 @@
 #pragma once
 
-#include <cstdint>
 #include <d3d12.h>
 #include <DirectXMath.h>
 #include <tbb/concurrent_queue.h>
-#include <wrl.h>
 
 #include <DXUtils/D3DFactory.h>
 #include <GlobalData/Settings.h>
 #include <ResourceManager/BufferCreator.h>
-#include <Utils/DebugUtils.h>
 
 struct FrameCBuffer;
 class UploadBuffer;

@@ -86,7 +86,7 @@ namespace {
 			DirectX::XMFLOAT4X4 w;
 			MathUtils::ComputeMatrix(w, tx, ty, tz, sS, sS, sS);
 
-			Material mat(MaterialFactory::GetMaterial((MaterialFactory::MaterialType)i));
+			Material mat(MaterialFactory::GetMaterial(static_cast<MaterialFactory::MaterialType>(i)));
 			for (std::size_t j = 0UL; j < numMeshes; ++j) {
 				materials[i + j * numMaterials] = mat;
 				GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[j] };

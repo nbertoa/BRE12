@@ -3,7 +3,6 @@
 #include <CommandManager/CommandManager.h>
 #include <GeometryPass/MaterialFactory.h>
 #include <GlobalData\D3dData.h>
-#include <GlobalData/Settings.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <MasterRender/MasterRender.h>
@@ -17,7 +16,7 @@
 namespace {
 	void InitSystems(const HWND hwnd, const HINSTANCE hInstance) noexcept {
 		LPDIRECTINPUT8 directInput;
-		CHECK_HR(DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID*)&directInput, nullptr));
+		CHECK_HR(DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, reinterpret_cast<LPVOID*>(&directInput), nullptr));
 		Keyboard::Create(*directInput, hwnd);
 		Mouse::Create(*directInput, hwnd);
 
@@ -65,9 +64,9 @@ App::~App() {
 
 std::int32_t App::Run() noexcept {
 	// Message loop
-	MSG msg{0U};
+	MSG msg{ nullptr };
 	while (msg.message != WM_QUIT) 	{
-		if (PeekMessage(&msg, 0U, 0U, 0U, PM_REMOVE)) {
+		if (PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
@@ -76,5 +75,5 @@ std::int32_t App::Run() noexcept {
 		}
 	}
 
-	return (std::int32_t)msg.wParam;
+	return static_cast<std::int32_t>(msg.wParam);
 }

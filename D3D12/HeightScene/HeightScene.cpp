@@ -138,7 +138,6 @@ void HeightScene::GenerateGeomPassRecorders(
 				material.mBaseColor_MetalMask[1] = MathUtils::RandF(0.0f, 1.0f);
 				material.mBaseColor_MetalMask[2] = MathUtils::RandF(0.0f, 1.0f);
 				material.mBaseColor_MetalMask[3] = (float)MathUtils::Rand(0U, 1U);
-				const float f0Color{ MathUtils::RandF(0.0f, 0.4f) };
 				material.mSmoothness = MathUtils::RandF(0.0f, 1.0f);
 				materials.push_back(material);
 			}

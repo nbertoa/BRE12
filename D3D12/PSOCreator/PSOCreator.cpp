@@ -1,7 +1,6 @@
 #include "PSOCreator.h"
 
 #include <GeometryPass\GeometryPass.h>
-#include <GlobalData/Settings.h>
 #include <MasterRender/MasterRender.h>
 #include <PSOManager/PSOManager.h>
 #include <RootSignatureManager/RootSignatureManager.h>

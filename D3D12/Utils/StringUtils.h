@@ -1,7 +1,6 @@
 #pragma once
 
 #include <codecvt>
-#include <string>
 
 namespace StringUtils {
 	inline void ToWideString(const std::string& source, std::wstring& dest) noexcept {

@@ -4,7 +4,6 @@
 #include <tbb/parallel_for.h>
 
 #include <GeometryPass/Material.h>
-#include <GeometryPass/MaterialFactory.h>
 #include <GeometryPass/Recorders/HeightCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
 #include <LightPass/PunctualLight.h>

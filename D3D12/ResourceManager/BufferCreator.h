@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
 #include <d3d12.h>
 #include <tbb/concurrent_queue.h>

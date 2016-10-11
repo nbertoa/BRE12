@@ -1,6 +1,5 @@
 #include "SkyBoxPass.h"
 
-#include <cstdint>
 #include <d3d12.h>
 
 #include <CommandListProcessor/CommandListProcessor.h>

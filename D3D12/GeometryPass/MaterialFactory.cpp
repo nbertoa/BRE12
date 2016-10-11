@@ -3,7 +3,7 @@
 #include <Utils\DebugUtils.h>
 
 namespace {
-	static Material sMaterials[MaterialFactory::NUM_MATERIALS]{};
+	Material sMaterials[MaterialFactory::NUM_MATERIALS]{};
 }
 
 void MaterialFactory::InitMaterials() noexcept {

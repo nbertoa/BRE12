@@ -3,9 +3,6 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <cstdint>
-#include <iostream>
-#include <sstream>
 
 #include <GlobalData/Settings.h>
 #include <ResourceManager/ResourceManager.h>

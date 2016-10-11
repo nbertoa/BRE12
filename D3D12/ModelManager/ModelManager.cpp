@@ -1,7 +1,5 @@
 #include "ModelManager.h"
 
-#include <cstdint>
-
 #include <GeometryGenerator\GeometryGenerator.h>
 #include <Utils/DebugUtils.h>
 #include <Utils\NumberGeneration.h>

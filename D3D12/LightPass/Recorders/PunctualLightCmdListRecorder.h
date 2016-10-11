@@ -1,7 +1,5 @@
 #pragma once
 
-#include <DirectXMath.h>
-
 #include <LightPass/LightPassCmdListRecorder.h>
 
 struct PunctualLight;

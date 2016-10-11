@@ -117,7 +117,6 @@ void SkyBoxCmdListRecorder::RecordCommandLists(
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 
-	const std::size_t descHandleIncSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDescHandle(mObjectCBufferGpuDescHandleBegin);
 	D3D12_GPU_DESCRIPTOR_HANDLE cubeMapBufferGpuDescHandle(mCubeMapBufferGpuDescHandleBegin);
 

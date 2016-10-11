@@ -91,13 +91,12 @@ void Camera::RotateY(const float angle) noexcept {
 bool Camera::UpdateViewMatrix() noexcept {
 	if(mViewDirty) {
 		XMVECTOR R( XMLoadFloat3(&mRight) );
-		XMVECTOR U( XMLoadFloat3(&mUp) );
 		XMVECTOR L( XMLoadFloat3(&mLook) );
 		const XMVECTOR P( XMLoadFloat3(&mPosition) );
 
 		// Keep camera's axes orthogonal to each other and of unit length.
 		L = XMVector3Normalize(L);
-		U = XMVector3Normalize(XMVector3Cross(L, R));
+		XMVECTOR U = XMVector3Normalize(XMVector3Cross(L, R));
 
 		// U, L already orthonormal, so no need to normalize cross product.
 		R = XMVector3Cross(U, L);

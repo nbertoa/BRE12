@@ -16,7 +16,7 @@ using namespace DirectX;
 
 namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
-	static const DXGI_FORMAT sFrameBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
+	const DXGI_FORMAT sFrameBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
 
 	// Update camera's view matrix and store data in parameters.
 	void UpdateCamera(Camera& camera, const float deltaTime, XMFLOAT4X4& viewTranspose, XMFLOAT4X4& projTranpose, XMFLOAT3& eyePosW) noexcept {
@@ -306,7 +306,6 @@ void MasterRender::CreateColorBuffer() noexcept {
 			
 	ID3D12Resource* res{ nullptr };
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvDescHeapBeginDescHandle(mColorBufferDescHeap->GetCPUDescriptorHandleForHeapStart());
-	const std::size_t rtvDescHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	
 	// Create RTV's descriptor
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
