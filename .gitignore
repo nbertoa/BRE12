@@ -1072,3 +1072,5 @@
 /D3D12/GeometryPass/x64/Debug/materialfactory.nativecodeanalysis.xml
 /D3D12/ShaderUtils/x64/Debug/cbuffers.nativecodeanalysis.xml
 /D3D12/ShaderUtils/x64/Debug/vc.nativecodeanalysis.all.xml
+/D3D12/GeometryPass/x64/Debug/GeometryPass.tlog/unsuccessfulbuild
+/D3D12/ToneMappingPass/x64/Debug/ToneMappingPass.tlog/unsuccessfulbuild

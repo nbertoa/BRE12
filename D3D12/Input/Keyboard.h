@@ -16,8 +16,8 @@ public:
 	// You should call update in each frame
 	void Update() noexcept;
 
-	__forceinline const std::uint8_t* const CurrentState() const noexcept { return mCurrentState; }
-	__forceinline const std::uint8_t* const LastState() const noexcept { return mLastState; }
+	__forceinline const std::uint8_t* CurrentState() const noexcept { return mCurrentState; }
+	__forceinline const std::uint8_t* LastState() const noexcept { return mLastState; }
 	__forceinline bool IsKeyUp(const std::uint8_t key) const noexcept { return (mCurrentState[key] & 0x80) == 0U; }
 	__forceinline bool IsKeyDown(const std::uint8_t key) const noexcept { return (mCurrentState[key] & 0x80) != 0U; }
 	__forceinline bool WasKeyUp(const std::uint8_t key) const noexcept { return (mLastState[key] & 0x80) == 0U; }

@@ -5,7 +5,7 @@
 Timer::Timer() {
 	std::int64_t countsPerSec;
 	QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(&countsPerSec));
-	mSecondsPerCount = 1.0 / (double)countsPerSec;
+	mSecondsPerCount = 1.0 / static_cast<double>(countsPerSec);
 	Reset();
 }
 

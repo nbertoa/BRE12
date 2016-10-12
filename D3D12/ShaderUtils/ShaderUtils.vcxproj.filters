@@ -10,7 +10,4 @@
   <ItemGroup>
     <ClInclude Include="CBuffers.h" />
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="CBuffers.cpp" />
-  </ItemGroup>
 </Project>
