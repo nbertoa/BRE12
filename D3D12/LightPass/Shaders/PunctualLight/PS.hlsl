@@ -3,7 +3,7 @@
 #include <ShaderUtils/Lights.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
-#define AMBIENT_FACTOR float3(0.005, 0.005, 0.005)
+#define AMBIENT_FACTOR float3(0.02, 0.02, 0.02)
 
 struct Input {
 	float4 mPosH : SV_POSITION;

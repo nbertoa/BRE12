@@ -7,7 +7,7 @@ namespace {
 }
 
 void MaterialFactory::InitMaterials() noexcept {
-	const float smoothness{ 0.8f };
+	const float smoothness{ 0.95f };
 
 	Material* m = &sMaterials[GOLD];
 	m->mBaseColor_MetalMask[0U] = 1.0f;
