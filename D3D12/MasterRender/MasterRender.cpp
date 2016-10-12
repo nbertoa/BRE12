@@ -51,8 +51,8 @@ namespace {
 		const std::int32_t y{ Mouse::Get().Y() };
 		if (Mouse::Get().IsButtonDown(Mouse::MouseButtonsLeft)) {
 			// Make each pixel correspond to a quarter of a degree.
-			const float dx{ XMConvertToRadians(0.25f * (float)(x - lastXY[0])) };
-			const float dy{ XMConvertToRadians(0.25f * (float)(y - lastXY[1])) };
+			const float dx{ XMConvertToRadians(0.25f * static_cast<float>(x - lastXY[0])) };
+			const float dy{ XMConvertToRadians(0.25f * static_cast<float>(y - lastXY[1])) };
 
 			camera.Pitch(dy);
 			camera.RotateY(dx);
@@ -356,7 +356,7 @@ void MasterRender::FlushCommandQueue() noexcept {
 
 	// Wait until the GPU has completed commands up to this fence point.
 	if (mFence->GetCompletedValue() < mCurrFenceValue) {
-		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
+		const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
 		ASSERT(eventHandle);
 
 		// Fire event when GPU hits current fence.  
@@ -390,7 +390,7 @@ void MasterRender::SignalFenceAndPresent() noexcept {
 	// at least 1 of them to be completed, before continue recording command lists. 
 	const std::uint64_t oldestFence{ mFenceValueByQueuedFrameIndex[mCurrQueuedFrameIndex] };
 	if (mFence->GetCompletedValue() < oldestFence) {
-		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
+		const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
 		ASSERT(eventHandle);
 
 		// Fire event when GPU hits current fence.  

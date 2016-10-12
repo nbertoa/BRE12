@@ -124,7 +124,7 @@ struct DDS_HEADER_DXT10
 namespace
 {
 
-struct handle_closer { void operator()(HANDLE h) { if (h) CloseHandle(h); } };
+struct handle_closer { void operator()(HANDLE h) const { if (h) CloseHandle(h); } };
 
 using ScopedHandle = std::unique_ptr<void, handle_closer>;
 
@@ -228,7 +228,7 @@ static HRESULT LoadTextureDataFromFile( _In_z_ const wchar_t* fileName,
     }
 
     // DDS files always start with the same magic number ("DDS ")
-    std::uint32_t dwMagicNumber = *( const std::uint32_t* )( ddsData.get() );
+    std::uint32_t dwMagicNumber = *reinterpret_cast<const std::uint32_t*>(ddsData.get());
     if (dwMagicNumber != DDS_MAGIC)
     {
         return E_FAIL;
@@ -492,7 +492,6 @@ static void GetSurfaceInfo( _In_ std::size_t width,
         bpe = 4;
         break;
 	default:
-		assert(false);
 		break;
     }
 
@@ -763,6 +762,8 @@ static DXGI_FORMAT GetDXGIFormat( const DDS_PIXELFORMAT& ddpf ) noexcept
 
         case 116: // D3DFMT_A32B32G32R32F
             return DXGI_FORMAT_R32G32B32A32_FLOAT;
+		default:
+			break;
         }
     }
 
@@ -860,9 +861,9 @@ static HRESULT FillInitData( _In_ std::size_t width,
 
                 ASSERT(index < mipCount * arraySize);
                 _Analysis_assume_(index < mipCount * arraySize);
-                initData[index].pSysMem = ( const void* )pSrcBits;
-                initData[index].SysMemPitch = static_cast<UINT>( RowBytes );
-                initData[index].SysMemSlicePitch = static_cast<UINT>( NumBytes );
+                initData[index].pSysMem = reinterpret_cast<const void*>(pSrcBits);
+                initData[index].SysMemPitch = static_cast<UINT>(RowBytes);
+                initData[index].SysMemSlicePitch = static_cast<UINT>(NumBytes);
                 ++index;
             }
             else if ( !j )
@@ -957,7 +958,7 @@ static HRESULT FillInitData12(_In_ std::size_t width,
 
 				ASSERT(index < mipCount * arraySize);
 				_Analysis_assume_(index < mipCount * arraySize);
-				initData[index]./*pSysMem*/pData = (const void*)pSrcBits;
+				initData[index]./*pSysMem*/pData = reinterpret_cast<const void*>(pSrcBits);
 				initData[index]./*SysMemPitch*/RowPitch = static_cast<UINT>(RowBytes);
 				initData[index]./*SysMemSlicePitch*/SlicePitch = static_cast<UINT>(NumBytes);
 				++index;
@@ -1044,9 +1045,9 @@ static HRESULT CreateD3DResources( _In_ ID3D11Device* d3dDevice,
                                                  initData,
                                                  &tex
                                                );
-                if (SUCCEEDED( hr ) && tex != 0)
+                if (SUCCEEDED( hr ) && tex != nullptr)
                 {
-                    if (textureView != 0)
+                    if (textureView != nullptr)
                     {
                         D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
                         memset( &SRVDesc, 0, sizeof( SRVDesc ) );
@@ -1075,7 +1076,7 @@ static HRESULT CreateD3DResources( _In_ ID3D11Device* d3dDevice,
                         }
                     }
 
-                    if (texture != 0)
+					if (texture != nullptr)
                     {
                         *texture = tex;
                     }
@@ -1115,9 +1116,9 @@ static HRESULT CreateD3DResources( _In_ ID3D11Device* d3dDevice,
                                                  initData,
                                                  &tex
                                                );
-                if (SUCCEEDED( hr ) && tex != 0)
+                if (SUCCEEDED( hr ) && tex != nullptr)
                 {
-                    if (textureView != 0)
+                    if (textureView != nullptr)
                     {
                         D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
                         memset( &SRVDesc, 0, sizeof( SRVDesc ) );
@@ -1162,7 +1163,7 @@ static HRESULT CreateD3DResources( _In_ ID3D11Device* d3dDevice,
                         }
                     }
 
-                    if (texture != 0)
+                    if (texture != nullptr)
                     {
                         *texture = tex;
                     }
@@ -1193,9 +1194,9 @@ static HRESULT CreateD3DResources( _In_ ID3D11Device* d3dDevice,
                                                  initData,
                                                  &tex
                                                );
-                if (SUCCEEDED( hr ) && tex != 0)
+                if (SUCCEEDED( hr ) && tex != nullptr)
                 {
-                    if (textureView != 0)
+                    if (textureView != nullptr)
                     {
                         D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
                         memset( &SRVDesc, 0, sizeof( SRVDesc ) );
@@ -1215,7 +1216,7 @@ static HRESULT CreateD3DResources( _In_ ID3D11Device* d3dDevice,
                         }
                     }
 
-                    if (texture != 0)
+                    if (texture != nullptr)
                     {
                         *texture = tex;
                     }
@@ -1270,9 +1271,9 @@ static HRESULT CreateD3DResources12(
 		texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		texDesc.Alignment = 0;
 		texDesc.Width = width;
-		texDesc.Height = (std::uint32_t)height;
-		texDesc.DepthOrArraySize = (depth > 1) ? (uint16_t)depth : (uint16_t)arraySize;
-		texDesc.MipLevels = (uint16_t)mipCount;
+		texDesc.Height = static_cast<std::uint32_t>(height);
+		texDesc.DepthOrArraySize = (depth > 1) ? static_cast<std::uint16_t>(depth) : static_cast<std::uint16_t>(arraySize);
+		texDesc.MipLevels = static_cast<std::uint16_t>(mipCount);
 		texDesc.Format = format;
 		texDesc.SampleDesc.Count = 1;
 		texDesc.SampleDesc.Quality = 0;
@@ -1370,7 +1371,7 @@ static HRESULT CreateTextureFromDDS( _In_ ID3D11Device* d3dDevice,
     if ((header->ddspf.flags & DDS_FOURCC) &&
         (MAKEFOURCC( 'D', 'X', '1', '0' ) == header->ddspf.fourCC ))
     {
-        auto d3d10ext = reinterpret_cast<const DDS_HEADER_DXT10*>( (const char*)header + sizeof(DDS_HEADER) );
+        auto d3d10ext = reinterpret_cast<const DDS_HEADER_DXT10*>( reinterpret_cast<const char*>(header) + sizeof(DDS_HEADER) );
 
         arraySize = d3d10ext->arraySize;
         if (arraySize == 0)
@@ -1519,7 +1520,7 @@ static HRESULT CreateTextureFromDDS( _In_ ID3D11Device* d3dDevice,
     }
 
     bool autogen = false;
-    if ( mipCount == 1 && d3dContext != 0 && textureView != 0 ) // Must have context and shader-view to auto generate mipmaps
+    if ( mipCount == 1 && d3dContext != nullptr && textureView != nullptr ) // Must have context and shader-view to auto generate mipmaps
     {
         // See if format is supported for auto-gen mipmaps (varies by feature level)
         UINT fmtSupport = 0;
@@ -1712,7 +1713,7 @@ static HRESULT CreateTextureFromDDS12(
 
 	if ((header->ddspf.flags & DDS_FOURCC) && (MAKEFOURCC('D', 'X', '1', '0') == header->ddspf.fourCC))
 	{
-		auto d3d10ext = reinterpret_cast<const DDS_HEADER_DXT10*>((const char*)header + sizeof(DDS_HEADER));
+		auto d3d10ext = reinterpret_cast<const DDS_HEADER_DXT10*>(reinterpret_cast<const char*>(header) + sizeof(DDS_HEADER));
 
 		arraySize = d3d10ext->arraySize;
 		if (arraySize == 0)
@@ -1899,7 +1900,7 @@ static DDS_ALPHA_MODE GetAlphaMode( _In_ const DDS_HEADER* header ) noexcept
     {
         if ( MAKEFOURCC( 'D', 'X', '1', '0' ) == header->ddspf.fourCC )
         {
-            auto d3d10ext = reinterpret_cast<const DDS_HEADER_DXT10*>( (const char*)header + sizeof(DDS_HEADER) );
+            auto d3d10ext = reinterpret_cast<const DDS_HEADER_DXT10*>( reinterpret_cast<const char*>(header) + sizeof(DDS_HEADER) );
             auto mode = static_cast<DDS_ALPHA_MODE>( d3d10ext->miscFlags2 & static_cast<uint32_t>(DDS_MISC_FLAGS2::DDS_MISC_FLAGS2_ALPHA_MODE_MASK));
             switch( mode )
             {
@@ -1958,7 +1959,7 @@ HRESULT DirectX::CreateDDSTextureFromMemory12(
 		return E_INVALIDARG;
 	}
 
-	std::uint32_t dwMagicNumber = *(const std::uint32_t*)(ddsData);
+	std::uint32_t dwMagicNumber = *reinterpret_cast<const std::uint32_t*>(ddsData);
 	if (dwMagicNumber != DDS_MAGIC)
 	{
 		return E_FAIL;
@@ -2085,7 +2086,7 @@ HRESULT DirectX::CreateDDSTextureFromMemoryEx( ID3D11Device* d3dDevice,
         return E_FAIL;
     }
 
-    std::uint32_t dwMagicNumber = *( const std::uint32_t* )( ddsData );
+    std::uint32_t dwMagicNumber = *reinterpret_cast<const std::uint32_t*>(ddsData);
     if (dwMagicNumber != DDS_MAGIC)
     {
         return E_FAIL;
@@ -2124,12 +2125,12 @@ HRESULT DirectX::CreateDDSTextureFromMemoryEx( ID3D11Device* d3dDevice,
                                        texture, textureView );
     if ( SUCCEEDED(hr) )
     {
-        if (texture != 0 && *texture != 0)
+        if (texture != nullptr && *texture != nullptr)
         {
             SetDebugObjectName(*texture, "DDSTextureLoader");
         }
 
-        if (textureView != 0 && *textureView != 0)
+        if (textureView != nullptr && *textureView != nullptr)
         {
             SetDebugObjectName(*textureView, "DDSTextureLoader");
         }
@@ -2331,7 +2332,7 @@ HRESULT DirectX::CreateDDSTextureFromFileEx( ID3D11Device* d3dDevice,
     if ( SUCCEEDED(hr) )
     {
 #if !defined(NO_D3D11_DEBUG_NAME) && ( defined(_DEBUG) || defined(PROFILE) )
-        if (texture != 0 || textureView != 0)
+        if (texture != nullptr || textureView != nullptr)
         {
             CHAR strFileA[MAX_PATH];
             int result = WideCharToMultiByte( CP_ACP,
@@ -2341,7 +2342,7 @@ HRESULT DirectX::CreateDDSTextureFromFileEx( ID3D11Device* d3dDevice,
                                               strFileA,
                                               MAX_PATH,
                                               nullptr,
-                                              FALSE
+                                              nullptr
                                );
             if ( result > 0 )
             {
@@ -2355,7 +2356,7 @@ HRESULT DirectX::CreateDDSTextureFromFileEx( ID3D11Device* d3dDevice,
                     pstrName++;
                 }
 
-                if (texture != 0 && *texture != 0)
+                if (texture != nullptr && *texture != nullptr)
                 {
                     (*texture)->SetPrivateData( WKPDID_D3DDebugObjectName,
                                                 static_cast<UINT>( strnlen_s(pstrName, MAX_PATH) ),
@@ -2363,7 +2364,7 @@ HRESULT DirectX::CreateDDSTextureFromFileEx( ID3D11Device* d3dDevice,
                                               );
                 }
 
-                if (textureView != 0 && *textureView != 0 )
+                if (textureView != nullptr && *textureView != nullptr )
                 {
                     (*textureView)->SetPrivateData( WKPDID_D3DDebugObjectName,
                                                     static_cast<UINT>( strnlen_s(pstrName, MAX_PATH) ),

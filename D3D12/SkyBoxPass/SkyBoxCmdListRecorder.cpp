@@ -201,7 +201,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
 	const D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->Resource()->GetGPUVirtualAddress() };
 	cBufferDesc.BufferLocation = objCBufferGpuAddress;
-	cBufferDesc.SizeInBytes = (std::uint32_t)objCBufferElemSize;
+	cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(objCBufferElemSize);
 	const D3D12_CPU_DESCRIPTOR_HANDLE objCBufferDescHandle(mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart());
 	ResourceManager::Get().CreateConstantBufferView(cBufferDesc, objCBufferDescHandle);
 

@@ -15,7 +15,7 @@ public:
 
 	__forceinline ID3D12Resource* Resource() const noexcept { return mBuffer.Get(); }
 
-	void CopyData(const std::uint32_t elemIndex, const void* srcData, const std::size_t srcDataSize) noexcept;
+	void CopyData(const std::uint32_t elemIndex, const void* srcData, const std::size_t srcDataSize) const noexcept;
 
 	static std::size_t CalcConstantBufferByteSize(const std::size_t byteSize);
 

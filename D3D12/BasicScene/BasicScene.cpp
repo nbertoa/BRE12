@@ -1,6 +1,5 @@
 #include "BasicScene.h"
 
-#include <algorithm>
 #include <tbb/parallel_for.h>
 
 #include <GeometryPass/Material.h>
@@ -98,7 +97,7 @@ namespace {
 			tz += offsetZ;
 		}
 
-		recorder->Init(geomDataVec.data(), (std::uint32_t)geomDataVec.size(), materials.data(), (std::uint32_t)materials.size(), cubeMap);
+		recorder->Init(geomDataVec.data(), static_cast<std::uint32_t>(geomDataVec.size()), materials.data(), static_cast<std::uint32_t>(materials.size()), cubeMap);
 	}
 }
 

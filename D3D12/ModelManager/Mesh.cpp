@@ -65,11 +65,11 @@ namespace {
 		ASSERT(indexBufferData.ValidateData() == false);
 
 		// Create vertex buffer
-		BufferCreator::BufferParams vertexBufferParams(meshData.mVertices.data(), (std::uint32_t)meshData.mVertices.size(), sizeof(GeometryGenerator::Vertex));
+		BufferCreator::BufferParams vertexBufferParams(meshData.mVertices.data(), static_cast<std::uint32_t>(meshData.mVertices.size()), sizeof(GeometryGenerator::Vertex));
 		BufferCreator::CreateBuffer(cmdList, vertexBufferParams, vertexBufferData, uploadVertexBuffer);
 
 		// Create index buffer
-		BufferCreator::BufferParams indexBufferParams(meshData.mIndices32.data(), (std::uint32_t)meshData.mIndices32.size(), sizeof(std::uint32_t));
+		BufferCreator::BufferParams indexBufferParams(meshData.mIndices32.data(), static_cast<std::uint32_t>(meshData.mIndices32.size()), sizeof(std::uint32_t));
 		BufferCreator::CreateBuffer(cmdList, indexBufferParams, indexBufferData, uploadIndexBuffer);
 
 		ASSERT(vertexBufferData.ValidateData());
@@ -90,8 +90,8 @@ Mesh::Mesh(
 	ASSERT(mesh.HasNormals());
 	meshData.mVertices.resize(numVertices);
 	for (std::uint32_t i = 0U; i < numVertices; ++i) {
-		meshData.mVertices[i].mPosition = XMFLOAT3((const float*)&mesh.mVertices[i]);
-		meshData.mVertices[i].mNormal = XMFLOAT3((const float*)&mesh.mNormals[i]);
+		meshData.mVertices[i].mPosition = XMFLOAT3(reinterpret_cast<const float*>(&mesh.mVertices[i]));
+		meshData.mVertices[i].mNormal = XMFLOAT3(reinterpret_cast<const float*>(&mesh.mNormals[i]));
 	}
 
 
@@ -101,7 +101,7 @@ Mesh::Mesh(
 		const aiVector3D* aiTextureCoordinates{ mesh.mTextureCoords[0U] };
 		ASSERT(aiTextureCoordinates != nullptr);
 		for (std::uint32_t i = 0U; i < numVertices; i++) {
-			meshData.mVertices[i].mTexC = XMFLOAT2((const float*)&aiTextureCoordinates[i]);
+			meshData.mVertices[i].mTexC = XMFLOAT2(reinterpret_cast<const float*>(&aiTextureCoordinates[i]));
 		}
 	}
 	
@@ -122,7 +122,7 @@ Mesh::Mesh(
 	// Tangents
 	if (mesh.HasTangentsAndBitangents()) {
 		for (std::uint32_t i = 0U; i < numVertices; ++i) {
-			meshData.mVertices[i].mTangentU = XMFLOAT3((const float*)&mesh.mTangents[i]);
+			meshData.mVertices[i].mTangentU = XMFLOAT3(reinterpret_cast<const float*>(&mesh.mTangents[i]));
 		}
 	}
 	else {

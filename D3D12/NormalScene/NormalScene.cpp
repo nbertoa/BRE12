@@ -1,6 +1,5 @@
 #include "NormalScene.h"
 
-#include <algorithm>
 #include <tbb/parallel_for.h>
 
 #include <GeometryPass/Material.h>
@@ -110,7 +109,7 @@ void NormalScene::GenerateGeomPassRecorders(
 				material.mBaseColor_MetalMask[0] = 1.0f;
 				material.mBaseColor_MetalMask[1] = 1.0f;
 				material.mBaseColor_MetalMask[2] = 1.0f;
-				material.mBaseColor_MetalMask[3] = (float)MathUtils::Rand(0U, 1U);
+				material.mBaseColor_MetalMask[3] = static_cast<float>(MathUtils::Rand(0U, 1U));
 				material.mSmoothness = MathUtils::RandF(0.0f, 1.0f);
 				materials.push_back(material);
 			}
@@ -133,7 +132,7 @@ void NormalScene::GenerateGeomPassRecorders(
 				materials.data(), 
 				textures.data(), 
 				normals.data(), 
-				(std::uint32_t)normals.size(),
+				static_cast<std::uint32_t>(normals.size()),
 				*cubeMap);
 		}
 	}

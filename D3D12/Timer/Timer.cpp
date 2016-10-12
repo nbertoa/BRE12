@@ -4,14 +4,14 @@
 
 Timer::Timer() {
 	std::int64_t countsPerSec;
-	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
+	QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(&countsPerSec));
 	mSecondsPerCount = 1.0 / (double)countsPerSec;
 	Reset();
 }
 
 void Timer::Reset() noexcept {
 	std::int64_t currTime;
-	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+	QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&currTime));
 
 	mBaseTime = currTime;
 	mPrevTime = currTime;
@@ -19,7 +19,7 @@ void Timer::Reset() noexcept {
 
 void Timer::Tick() noexcept {
 	std::int64_t currTime;
-	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+	QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&currTime));
 	mCurrTime = currTime;
 
 	// Time difference between this frame and the previous.

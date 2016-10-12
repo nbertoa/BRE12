@@ -1,6 +1,5 @@
 #include "HeightScene.h"
 
-#include <algorithm>
 #include <tbb/parallel_for.h>
 
 #include <GeometryPass/Material.h>
@@ -137,7 +136,7 @@ void HeightScene::GenerateGeomPassRecorders(
 				material.mBaseColor_MetalMask[0] = MathUtils::RandF(0.0f, 1.0f);
 				material.mBaseColor_MetalMask[1] = MathUtils::RandF(0.0f, 1.0f);
 				material.mBaseColor_MetalMask[2] = MathUtils::RandF(0.0f, 1.0f);
-				material.mBaseColor_MetalMask[3] = (float)MathUtils::Rand(0U, 1U);
+				material.mBaseColor_MetalMask[3] = static_cast<float>(MathUtils::Rand(0U, 1U));
 				material.mSmoothness = MathUtils::RandF(0.0f, 1.0f);
 				materials.push_back(material);
 			}
@@ -160,7 +159,7 @@ void HeightScene::GenerateGeomPassRecorders(
 				heights.push_back(height[i % numResources]);
 			}
 
-			task.Init(&currGeomData, 1U, materials.data(), textures.data(), normals.data(), heights.data(), (std::uint32_t)normals.size(), *cubeMap);
+			task.Init(&currGeomData, 1U, materials.data(), textures.data(), normals.data(), heights.data(), static_cast<std::uint32_t>(normals.size()), *cubeMap);
 		}
 	}
 	);

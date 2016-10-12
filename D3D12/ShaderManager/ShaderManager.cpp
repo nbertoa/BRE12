@@ -16,13 +16,13 @@ namespace {
 		ASSERT(fin);
 
 		fin.seekg(0, std::ios_base::end);
-		std::ifstream::pos_type size{ (int)fin.tellg() };
+		std::ifstream::pos_type size{ static_cast<std::int32_t>(fin.tellg()) };
 		fin.seekg(0, std::ios_base::beg);
 
 		ID3DBlob* blob;
 		CHECK_HR(D3DCreateBlob(size, &blob));
 
-		fin.read((char*)blob->GetBufferPointer(), size);
+		fin.read(reinterpret_cast<char*>(blob->GetBufferPointer()), size);
 		fin.close();
 
 		return blob;
@@ -80,7 +80,7 @@ std::size_t ShaderManager::LoadShaderFile(const char* filename, D3D12_SHADER_BYT
 	accessor.release();
 
 	ASSERT(blob.Get());
-	shaderByteCode.pShaderBytecode = (uint8_t*)blob->GetBufferPointer();
+	shaderByteCode.pShaderBytecode = reinterpret_cast<uint8_t*>(blob->GetBufferPointer());
 	shaderByteCode.BytecodeLength = blob->GetBufferSize();
 
 	return id;
@@ -105,7 +105,7 @@ D3D12_SHADER_BYTECODE ShaderManager::GetShaderByteCode(const std::size_t id) noe
 	accessor.release();
 	
 	D3D12_SHADER_BYTECODE shaderByteCode{};
-	shaderByteCode.pShaderBytecode = (uint8_t*)blob->GetBufferPointer();
+	shaderByteCode.pShaderBytecode = reinterpret_cast<uint8_t*>(blob->GetBufferPointer());
 	shaderByteCode.BytecodeLength = blob->GetBufferSize();
 
 	return shaderByteCode;

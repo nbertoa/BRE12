@@ -26,5 +26,5 @@ struct FrameCBuffer {
 struct ImmutableCBuffer {
 	ImmutableCBuffer() = default;
 
-	float mNearZ_FarZ_ScreenW_ScreenH[4U]{ Settings::sNearPlaneZ, Settings::sFarPlaneZ, (float)Settings::sWindowWidth, (float)Settings::sWindowHeight };
+	float mNearZ_FarZ_ScreenW_ScreenH[4U]{ Settings::sNearPlaneZ, Settings::sFarPlaneZ, static_cast<float>(Settings::sWindowWidth), static_cast<float>(Settings::sWindowHeight) };
 };

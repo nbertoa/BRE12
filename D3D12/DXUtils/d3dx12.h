@@ -1024,21 +1024,21 @@ struct CD3DX12_ROOT_SIGNATURE_DESC : public D3D12_ROOT_SIGNATURE_DESC
         UINT numParameters,
         _In_reads_opt_(numParameters) const D3D12_ROOT_PARAMETER* _pParameters,
         UINT numStaticSamplers = 0,
-        _In_reads_opt_(numStaticSamplers) const D3D12_STATIC_SAMPLER_DESC* _pStaticSamplers = NULL,
+        _In_reads_opt_(numStaticSamplers) const D3D12_STATIC_SAMPLER_DESC* _pStaticSamplers = nullptr,
         D3D12_ROOT_SIGNATURE_FLAGS flags = D3D12_ROOT_SIGNATURE_FLAG_NONE)
     {
         Init(numParameters, _pParameters, numStaticSamplers, _pStaticSamplers, flags);
     }
     CD3DX12_ROOT_SIGNATURE_DESC(CD3DX12_DEFAULT)
     {
-        Init(0, NULL, 0, NULL, D3D12_ROOT_SIGNATURE_FLAG_NONE);
+        Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_NONE);
     }
 
     inline void Init(
         UINT numParameters,
         _In_reads_opt_(numParameters) const D3D12_ROOT_PARAMETER* _pParameters,
         UINT numStaticSamplers = 0,
-        _In_reads_opt_(numStaticSamplers) const D3D12_STATIC_SAMPLER_DESC* _pStaticSamplers = NULL,
+        _In_reads_opt_(numStaticSamplers) const D3D12_STATIC_SAMPLER_DESC* _pStaticSamplers = nullptr,
         D3D12_ROOT_SIGNATURE_FLAGS flags = D3D12_ROOT_SIGNATURE_FLAG_NONE)
     {
         Init(*this, numParameters, _pParameters, numStaticSamplers, _pStaticSamplers, flags);
@@ -1049,7 +1049,7 @@ struct CD3DX12_ROOT_SIGNATURE_DESC : public D3D12_ROOT_SIGNATURE_DESC
         UINT numParameters,
         _In_reads_opt_(numParameters) const D3D12_ROOT_PARAMETER* _pParameters,
         UINT numStaticSamplers = 0,
-        _In_reads_opt_(numStaticSamplers) const D3D12_STATIC_SAMPLER_DESC* _pStaticSamplers = NULL,
+        _In_reads_opt_(numStaticSamplers) const D3D12_STATIC_SAMPLER_DESC* _pStaticSamplers = nullptr,
         D3D12_ROOT_SIGNATURE_FLAGS flags = D3D12_ROOT_SIGNATURE_FLAG_NONE)
     {
         desc.NumParameters = numParameters;
@@ -1086,11 +1086,11 @@ struct CD3DX12_CPU_DESCRIPTOR_HANDLE : public D3D12_CPU_DESCRIPTOR_HANDLE
         ptr += offsetScaledByIncrementSize;
         return *this;
     }
-    bool operator==(_In_ const D3D12_CPU_DESCRIPTOR_HANDLE& other)
+    bool operator==(_In_ const D3D12_CPU_DESCRIPTOR_HANDLE& other) const
     {
         return (ptr == other.ptr);
     }
-    bool operator!=(_In_ const D3D12_CPU_DESCRIPTOR_HANDLE& other)
+    bool operator!=(_In_ const D3D12_CPU_DESCRIPTOR_HANDLE& other) const
     {
         return (ptr != other.ptr);
     }
@@ -1147,11 +1147,11 @@ struct CD3DX12_GPU_DESCRIPTOR_HANDLE : public D3D12_GPU_DESCRIPTOR_HANDLE
         ptr += offsetScaledByIncrementSize;
         return *this;
     }
-    inline bool operator==(_In_ const D3D12_GPU_DESCRIPTOR_HANDLE& other)
+    inline bool operator==(_In_ const D3D12_GPU_DESCRIPTOR_HANDLE& other) const
     {
         return (ptr == other.ptr);
     }
-    inline bool operator!=(_In_ const D3D12_GPU_DESCRIPTOR_HANDLE& other)
+    inline bool operator!=(_In_ const D3D12_GPU_DESCRIPTOR_HANDLE& other) const
     {
         return (ptr != other.ptr);
     }
@@ -1307,7 +1307,7 @@ struct CD3DX12_RESOURCE_DESC : public D3D12_RESOURCE_DESC
     { return D3D12GetFormatPlaneCount(pDevice, Format); }
     inline UINT Subresources(_In_ ID3D12Device* pDevice) const
     { return MipLevels * ArraySize() * PlaneCount(pDevice); }
-    inline UINT CalcSubresource(UINT MipSlice, UINT ArraySlice, UINT PlaneSlice)
+    inline UINT CalcSubresource(UINT MipSlice, UINT ArraySlice, UINT PlaneSlice) const
     { return D3D12CalcSubresource(MipSlice, ArraySlice, PlaneSlice, MipLevels, ArraySize()); }
     operator const D3D12_RESOURCE_DESC&() const { return *this; }
 };
@@ -1387,7 +1387,7 @@ inline UINT64 UpdateSubresources(
     D3D12_RESOURCE_DESC DestinationDesc = pDestinationResource->GetDesc();
     if (IntermediateDesc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER || 
         IntermediateDesc.Width < RequiredSize + pLayouts[0].Offset || 
-        RequiredSize > (std::size_t)-1 || 
+        RequiredSize > static_cast<std::size_t>(-1) ||
         (DestinationDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && 
             (FirstSubresource != 0 || NumSubresources != 1)))
     {
@@ -1395,7 +1395,7 @@ inline UINT64 UpdateSubresources(
     }
     
     BYTE* pData;
-    HRESULT hr = pIntermediate->Map(0, NULL, reinterpret_cast<void**>(&pData));
+    HRESULT hr = pIntermediate->Map(0, nullptr, reinterpret_cast<void**>(&pData));
     if (FAILED(hr))
     {
         return 0;
@@ -1403,11 +1403,11 @@ inline UINT64 UpdateSubresources(
     
     for (UINT i = 0; i < NumSubresources; ++i)
     {
-        if (pRowSizesInBytes[i] > (std::size_t)-1) return 0;
+        if (pRowSizesInBytes[i] > static_cast<std::size_t>(-1)) return 0;
         D3D12_MEMCPY_DEST DestData = { pData + pLayouts[i].Offset, pLayouts[i].Footprint.RowPitch, pLayouts[i].Footprint.RowPitch * pNumRows[i] };
-        MemcpySubresource(&DestData, &pSrcData[i], (std::size_t)pRowSizesInBytes[i], pNumRows[i], pLayouts[i].Footprint.Depth);
+        MemcpySubresource(&DestData, &pSrcData[i], static_cast<std::size_t>(pRowSizesInBytes[i]), pNumRows[i], pLayouts[i].Footprint.Depth);
     }
-    pIntermediate->Unmap(0, NULL);
+    pIntermediate->Unmap(0, nullptr);
     
     if (DestinationDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER)
     {
@@ -1445,7 +1445,7 @@ inline UINT64 UpdateSubresources(
        return 0;
     }
     void* pMem = HeapAlloc(GetProcessHeap(), 0, static_cast<std::size_t>(MemToAlloc));
-    if (pMem == NULL)
+    if (pMem == nullptr)
     {
        return 0;
     }

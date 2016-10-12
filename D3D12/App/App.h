@@ -21,7 +21,8 @@ public:
 	App& operator=(const App& rhs) = delete;		
 
 	// Runs program until Escape key is pressed.
-	std::int32_t Run() noexcept;
+	// TODO
+	static std::int32_t Run() noexcept;
 
 private:	
 	// Needed by Intel TBB

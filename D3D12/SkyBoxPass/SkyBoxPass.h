@@ -24,7 +24,7 @@ public:
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
-	void Execute(CommandListProcessor& cmdListProcessor, const FrameCBuffer& frameCBuffer) noexcept;
+	void Execute(CommandListProcessor& cmdListProcessor, const FrameCBuffer& frameCBuffer) const noexcept;
 
 private:
 	// Method used internally for validation purposes

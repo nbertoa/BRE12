@@ -12,14 +12,14 @@ namespace {
 		ASSERT(bufferParams.ValidateData());
 
 		// Create buffer
-		const std::uint32_t byteSize{ bufferParams.mElemCount * (std::uint32_t)bufferParams.mElemSize };
+		const std::uint32_t byteSize{ bufferParams.mElemCount * static_cast<std::uint32_t>(bufferParams.mElemSize) };
 		ResourceManager::Get().CreateDefaultBuffer(cmdList, bufferParams.mData, byteSize, bufferData.mBuffer, uploadBuffer);
 		bufferData.mCount = bufferParams.mElemCount;
 
 		// Fill view
 		bufferData.mBufferView.BufferLocation = bufferData.mBuffer->GetGPUVirtualAddress();
 		bufferData.mBufferView.SizeInBytes = byteSize;
-		bufferData.mBufferView.StrideInBytes = (std::uint32_t)bufferParams.mElemSize;
+		bufferData.mBufferView.StrideInBytes = static_cast<std::uint32_t>(bufferParams.mElemSize);
 
 		ASSERT(bufferData.ValidateData());
 	}
@@ -32,7 +32,7 @@ namespace {
 		ASSERT(bufferParams.ValidateData());
 
 		// Create buffer
-		const std::uint32_t elemSize{ (std::uint32_t)bufferParams.mElemSize };
+		const std::uint32_t elemSize{ static_cast<std::uint32_t>(bufferParams.mElemSize) };
 		const std::uint32_t byteSize{ bufferParams.mElemCount * elemSize };
 		ResourceManager::Get().CreateDefaultBuffer(cmdList, bufferParams.mData, byteSize, bufferData.mBuffer, uploadBuffer);
 		bufferData.mCount = bufferParams.mElemCount;

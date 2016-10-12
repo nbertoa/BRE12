@@ -25,7 +25,7 @@ public:
 	static MasterRender* Create(const HWND hwnd, ID3D12Device& device, Scene* scene) noexcept;
 
 	void Terminate() noexcept;
-	__forceinline static const DXGI_FORMAT DepthStencilFormat() noexcept { return sDepthStencilFormat; }
+	__forceinline static DXGI_FORMAT DepthStencilFormat() noexcept { return sDepthStencilFormat; }
 
 private:
 	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
@@ -51,7 +51,7 @@ private:
 	void FlushCommandQueue() noexcept;
 	void SignalFenceAndPresent() noexcept;
 
-	HWND mHwnd{ 0 };
+	HWND mHwnd{ nullptr };
 	ID3D12Device& mDevice;
 	Microsoft::WRL::ComPtr<IDXGISwapChain3> mSwapChain{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };

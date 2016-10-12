@@ -132,7 +132,7 @@ void GeometryPass::Execute(
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };
 
-	std::uint32_t taskCount{ (std::uint32_t)mRecorders.size() };
+	std::uint32_t taskCount{ static_cast<std::uint32_t>(mRecorders.size()) };
 	cmdListProcessor.ResetExecutedTasksCounter();
 
 	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocs[cmdAllocIndex] };

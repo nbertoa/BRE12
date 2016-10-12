@@ -23,8 +23,8 @@ public:
 	// You should call update in each frame
 	void Update();
 
-	__forceinline const DIMOUSESTATE& CurrentState() { return mCurrentState; }
-	__forceinline const DIMOUSESTATE& LastState() { return mLastState; }
+	__forceinline const DIMOUSESTATE& CurrentState() const { return mCurrentState; }
+	__forceinline const DIMOUSESTATE& LastState() const { return mLastState; }
 	__forceinline std::int32_t X() const { return mX; }
 	__forceinline std::int32_t Y() const { return mY; }
 	__forceinline std::int32_t Wheel() const { return mWheel; }

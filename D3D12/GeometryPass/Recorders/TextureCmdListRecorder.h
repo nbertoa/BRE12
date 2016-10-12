@@ -28,7 +28,7 @@ public:
 		const std::uint32_t rtvCpuDescHandlesCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept override;
 
-	bool ValidateData() const noexcept;
+	bool ValidateData() const noexcept override;
 
 private:
 	void BuildBuffers(const Material* materials, ID3D12Resource** textures, const std::uint32_t dataCount, ID3D12Resource& cubeMap) noexcept;

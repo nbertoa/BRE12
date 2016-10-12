@@ -51,7 +51,7 @@ namespace {
 	// *-----*-----*
 // v0    m2     v2
 
-		const std::uint32_t numTris{ (std::uint32_t)inputCopy.mIndices32.size() / 3U };
+		const std::uint32_t numTris{ static_cast<std::uint32_t>(inputCopy.mIndices32.size()) / 3U };
 		for (std::uint32_t i = 0; i < numTris; ++i) {
 			const std::uint32_t i3{ i * 3U };
 			const GeometryGenerator::Vertex v0{ inputCopy.mVertices[inputCopy.mIndices32[i3 + 0U]] };
@@ -98,7 +98,7 @@ namespace {
 	}
 
 	void BuildCylinderTopCap(const float topRadius, const float height, const std::uint32_t sliceCount, GeometryGenerator::MeshData& meshData) noexcept {
-		const std::uint32_t baseIndex{ (std::uint32_t)meshData.mVertices.size() };
+		const std::uint32_t baseIndex{ static_cast<std::uint32_t>(meshData.mVertices.size()) };
 
 		const float y{ 0.5f * height };
 		const float dTheta{ 2.0f * XM_PI / sliceCount };
@@ -120,7 +120,7 @@ namespace {
 		meshData.mVertices.push_back(GeometryGenerator::Vertex{ XMFLOAT3{0.0f, y, 0.0f}, XMFLOAT3{0.0f, 1.0f, 0.0f}, XMFLOAT3{1.0f, 0.0f, 0.0f}, XMFLOAT2{0.5f, 0.5f} });
 
 		// Index of center vertex.
-		const std::uint32_t centerIndex{ (std::uint32_t)meshData.mVertices.size() - 1U };
+		const std::uint32_t centerIndex{ static_cast<std::uint32_t>(meshData.mVertices.size()) - 1U };
 
 		for (std::uint32_t i = 0U; i < sliceCount; ++i) {
 			meshData.mIndices32.push_back(centerIndex);
@@ -134,7 +134,7 @@ namespace {
 		// Build bottom cap.
 		//
 
-		const std::uint32_t baseIndex{ (std::uint32_t)meshData.mVertices.size() };
+		const std::uint32_t baseIndex{ static_cast<std::uint32_t>(meshData.mVertices.size()) };
 		const float y{ -0.5f * height };
 
 		// mVertices of ring
@@ -155,7 +155,7 @@ namespace {
 		meshData.mVertices.push_back(GeometryGenerator::Vertex{ XMFLOAT3{0.0f, y, 0.0f}, XMFLOAT3{0.0f, -1.0f, 0.0f}, XMFLOAT3{1.0f, 0.0f, 0.0f}, XMFLOAT2{0.5f, 0.5f} });
 
 		// Cache the index of center vertex.
-		const std::uint32_t centerIndex{ (std::uint32_t)meshData.mVertices.size() - 1U };
+		const std::uint32_t centerIndex{ static_cast<std::uint32_t>(meshData.mVertices.size()) - 1U };
 
 		for (std::uint32_t i = 0U; i < sliceCount; ++i) {
 			meshData.mIndices32.push_back(centerIndex);
@@ -178,7 +178,7 @@ namespace GeometryGenerator {
 		if (mIndices16.empty()) {
 			mIndices16.resize(mIndices32.size());
 			for (std::size_t i = 0; i < mIndices32.size(); ++i) {
-				mIndices16[i] = (std::uint16_t) mIndices32[i];
+				mIndices16[i] = static_cast<std::uint16_t>(mIndices32[i]);
 			}
 		}
 
@@ -364,7 +364,7 @@ namespace GeometryGenerator {
 		//
 
 		// South pole vertex was added last.
-		const std::uint32_t southPoleIndex{ (std::uint32_t)meshData.mVertices.size() - 1U };
+		const std::uint32_t southPoleIndex{ static_cast<std::uint32_t>(meshData.mVertices.size()) - 1U };
 
 		// Offset the indices to the index of the first vertex in the last ring.
 		baseIndex = southPoleIndex - ringVertexCount;
@@ -481,8 +481,8 @@ namespace GeometryGenerator {
 
 				vertex.mPosition = XMFLOAT3{ r * c, y, r * s };
 
-				vertex.mTexC.x = (float)j / sliceCount;
-				vertex.mTexC.y = 1.0f - (float)i / stackCount;
+				vertex.mTexC.x = static_cast<float>(j) / sliceCount;
+				vertex.mTexC.y = 1.0f - static_cast<float>(i) / stackCount;
 
 				// Cylinder can be parameterized as follows, where we introduce v
 				// parameter that goes in the same direction as the v tex-coord

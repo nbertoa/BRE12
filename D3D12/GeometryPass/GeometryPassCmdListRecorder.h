@@ -27,6 +27,7 @@ public:
 	};
 
 	explicit GeometryPassCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	virtual ~GeometryPassCmdListRecorder() {}
 
 	// Record command lists and push them to the queue.
 	virtual void RecordCommandLists(

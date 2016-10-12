@@ -12,7 +12,7 @@ UploadBuffer::UploadBuffer(ID3D12Device& device, const std::size_t elemSize, con
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
 	CD3DX12_RESOURCE_DESC resDesc{ CD3DX12_RESOURCE_DESC::Buffer(mElemSize * elemCount) };
 	CHECK_HR(device.CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &resDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mBuffer)));
-	CHECK_HR(mBuffer->Map(0, nullptr, (void**)&mMappedData));
+	CHECK_HR(mBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mMappedData)));
 }
 
 UploadBuffer::~UploadBuffer() {
@@ -22,7 +22,7 @@ UploadBuffer::~UploadBuffer() {
 	mMappedData = nullptr;
 }
 
-void UploadBuffer::CopyData(const std::uint32_t elemIndex, const void* srcData, const std::size_t srcDataSize) noexcept {
+void UploadBuffer::CopyData(const std::uint32_t elemIndex, const void* srcData, const std::size_t srcDataSize) const noexcept {
 	ASSERT(srcData);
 	memcpy(mMappedData + elemIndex * mElemSize, srcData, srcDataSize);
 }

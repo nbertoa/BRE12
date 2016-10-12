@@ -9,8 +9,8 @@ CommandListProcessor* CommandListProcessor::Create(ID3D12CommandQueue* cmdQueue,
 }
 
 CommandListProcessor::CommandListProcessor(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists)
-	: mCmdQueue(cmdQueue)	
-	, mMaxNumCmdLists(maxNumCmdLists)
+	: mMaxNumCmdLists(maxNumCmdLists)
+	, mCmdQueue(cmdQueue)
 {
 	ASSERT(maxNumCmdLists > 0U);
 	parent()->spawn(*this);

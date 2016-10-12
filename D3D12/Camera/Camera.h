@@ -37,7 +37,7 @@ public:
 	__forceinline float GetFovY() const noexcept { return mFovY; }
 	__forceinline float GetFovX() const noexcept {
 		const float halfWidth{ 0.5f * GetNearWindowWidth() };
-		return (float) (2.0 * atan(halfWidth / mNearZ));
+		return static_cast<float>(2.0 * atan(halfWidth / mNearZ));
 	}
 
 	// Get near and far plane dimensions in view space coordinates.

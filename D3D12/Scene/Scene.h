@@ -47,7 +47,7 @@ public:
 protected:
 	// Method used when the command list is ready to be closed
 	// and executed. It waits until GPU finishes command list execution.
-	void ExecuteCommandList(ID3D12CommandQueue& cmdQueue) noexcept;
+	void ExecuteCommandList(ID3D12CommandQueue& cmdQueue) const noexcept;
 
 	// Used to validate scene data is properly initialized.
 	bool ValidateData() const;

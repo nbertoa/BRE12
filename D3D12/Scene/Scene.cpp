@@ -17,7 +17,7 @@ void Scene::Init() noexcept {
 	ASSERT(ValidateData());
 }
 
-void Scene::ExecuteCommandList(ID3D12CommandQueue& cmdQueue) noexcept {
+void Scene::ExecuteCommandList(ID3D12CommandQueue& cmdQueue) const noexcept {
 	ASSERT(ValidateData());
 
 	mCmdList->Close();
@@ -31,7 +31,7 @@ void Scene::ExecuteCommandList(ID3D12CommandQueue& cmdQueue) noexcept {
 
 	// Wait until the GPU has completed commands up to this fence point.
 	if (mFence->GetCompletedValue() < fenceValue) {
-		const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
+		const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
 		ASSERT(eventHandle);
 
 		// Fire event when GPU hits current fence.  

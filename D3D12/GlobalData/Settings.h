@@ -9,7 +9,7 @@ public:
 	Settings(const Settings&) = delete;
 	const Settings& operator=(const Settings&) = delete;
 
-	__forceinline static float AspectRatio() noexcept { return (float)sWindowWidth / sWindowHeight; }
+	__forceinline static float AspectRatio() noexcept { return static_cast<float>(sWindowWidth) / sWindowHeight; }
 
 	static const char* sResourcesPath;
 	static const bool sFullscreen{ true };

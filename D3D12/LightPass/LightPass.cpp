@@ -63,7 +63,7 @@ void LightPass::Execute(
 	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocs[cmdAllocIndex] };
 	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocs);
 
-	const std::uint32_t taskCount{ (std::uint32_t)mRecorders.size() };
+	const std::uint32_t taskCount{ static_cast<std::uint32_t>(mRecorders.size()) };
 	cmdListProcessor.ResetExecutedTasksCounter();
 
 	CHECK_HR(cmdAlloc->Reset());

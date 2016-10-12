@@ -8,7 +8,7 @@ class MathUtils {
 public:
 	// Returns random float in [0, 1).
 	static float RandF() noexcept {
-		return (float)(rand()) / (float)RAND_MAX;
+		return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 	}
 
 	// Returns random float in [a, b).

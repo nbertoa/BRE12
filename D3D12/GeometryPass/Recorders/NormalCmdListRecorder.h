@@ -29,7 +29,7 @@ public:
 		const std::uint32_t rtvCpuDescHandlesCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept override;
 
-	bool ValidateData() const noexcept;
+	bool ValidateData() const noexcept override;
 
 private:
 	void BuildBuffers(

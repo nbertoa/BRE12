@@ -50,7 +50,7 @@ namespace {
 
 		// Wait until the GPU has completed commands up to this fence point.
 		if (fence.GetCompletedValue() < fenceValue) {
-			const HANDLE eventHandle{ CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS) };
+			const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
 			ASSERT(eventHandle);
 
 			// Fire event when GPU hits current fence.  

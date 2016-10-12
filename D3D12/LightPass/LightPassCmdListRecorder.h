@@ -27,6 +27,7 @@ public:
 	};
 
 	explicit LightPassCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	virtual ~LightPassCmdListRecorder() {}
 
 	// Record command lists and push them to the queue.
 	virtual void RecordCommandLists(

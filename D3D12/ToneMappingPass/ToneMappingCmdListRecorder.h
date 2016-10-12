@@ -1,7 +1,6 @@
 #pragma once
 
 #include <d3d12.h>
-#include <DirectXMath.h>
 #include <tbb/concurrent_queue.h>
 
 #include <GlobalData/Settings.h>

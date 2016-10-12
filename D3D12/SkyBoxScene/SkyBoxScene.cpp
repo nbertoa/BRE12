@@ -130,12 +130,12 @@ namespace {
 
 		recorder->Init(
 			geomDataVec.data(), 
-			(std::uint32_t)geomDataVec.size(), 
+			static_cast<std::uint32_t>(geomDataVec.size()),
 			materialsVec.data(), 
 			texturesVec.data(), 
 			normalsVec.data(), 
 			heightsVec.data(), 
-			(std::uint32_t)materialsVec.size(),
+			static_cast<std::uint32_t>(materialsVec.size()),
 			cubeMap);
 	}
 }

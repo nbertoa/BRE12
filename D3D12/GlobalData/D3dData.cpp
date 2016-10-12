@@ -10,10 +10,10 @@ namespace {
 		wc.cbClsExtra = 0;
 		wc.cbWndExtra = 0;
 		wc.hInstance = hInstance;
-		wc.hIcon = LoadIcon(0, IDI_APPLICATION);
-		wc.hCursor = LoadCursor(0, IDC_ARROW);
-		wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
-		wc.lpszMenuName = 0;
+		wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+		wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+		wc.hbrBackground = reinterpret_cast<HBRUSH>(GetStockObject(NULL_BRUSH));
+		wc.lpszMenuName = nullptr;
 		wc.lpszClassName = L"MainWnd";
 
 		ASSERT(RegisterClass(&wc));
@@ -25,7 +25,7 @@ namespace {
 		const int32_t height{ r.bottom - r.top };
 
 		const std::uint32_t dwStyle = Settings::sFullscreen ? WS_POPUP : WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
-		hwnd = CreateWindowEx(WS_EX_APPWINDOW, L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, hInstance, 0);
+		hwnd = CreateWindowEx(WS_EX_APPWINDOW, L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, hInstance, nullptr);
 		ASSERT(hwnd);
 
 		ShowWindow(hwnd, SW_SHOW);

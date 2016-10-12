@@ -23,7 +23,7 @@ Model::Model(
 	if (scene == nullptr) {
 		const std::string errorMsg{ importer.GetErrorString() };
 		const std::wstring msg = StringUtils::AnsiToWString(errorMsg);
-		MessageBox(0, msg.c_str(), 0, 0);
+		MessageBox(nullptr, msg.c_str(), nullptr, 0);
 		ASSERT(scene != nullptr);
 	}
 

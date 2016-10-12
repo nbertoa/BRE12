@@ -47,7 +47,7 @@ namespace {
 		desc.DSVFormat = MasterRender::DepthStencilFormat();
 		desc.GS = geomShader;
 		desc.HS = hullShader;
-		desc.InputLayout = { psoParams.mInputLayout.empty() ? nullptr : psoParams.mInputLayout.data(), (std::uint32_t)psoParams.mInputLayout.size() };
+		desc.InputLayout = { psoParams.mInputLayout.empty() ? nullptr : psoParams.mInputLayout.data(), static_cast<std::uint32_t>(psoParams.mInputLayout.size()) };
 		desc.NumRenderTargets = psoParams.mNumRenderTargets;
 		desc.PrimitiveTopologyType = psoParams.mTopology;
 		desc.pRootSignature = rootSign;

@@ -206,7 +206,7 @@ void NormalCmdListRecorder::BuildBuffers(
 	ObjectCBuffer objCBuffer;
 	for (std::size_t i = 0UL; i < numGeomData; ++i) {
 		GeometryData& geomData{ mGeometryDataVec[i] };
-		const std::uint32_t worldMatsCount{ (std::uint32_t)geomData.mWorldMatrices.size() };
+		const std::uint32_t worldMatsCount{ static_cast<std::uint32_t>(geomData.mWorldMatrices.size()) };
 		for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
 			const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&geomData.mWorldMatrices[j]));
 			DirectX::XMStoreFloat4x4(&objCBuffer.mWorld, wMatrix);
@@ -248,12 +248,12 @@ void NormalCmdListRecorder::BuildBuffers(
 		// Create object cbuffers descriptors
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
 		cBufferDesc.BufferLocation = objCBufferGpuAddress + i * objCBufferElemSize;
-		cBufferDesc.SizeInBytes = (std::uint32_t)objCBufferElemSize;
+		cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(objCBufferElemSize);
 		ResourceManager::Get().CreateConstantBufferView(cBufferDesc, currObjCBufferDescHandle);
 
 		// Create materials CBuffer descriptor
 		cBufferDesc.BufferLocation = materialsGpuAddress + i * matCBufferElemSize;
-		cBufferDesc.SizeInBytes = (std::uint32_t)matCBufferElemSize;
+		cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(matCBufferElemSize);
 		ResourceManager::Get().CreateConstantBufferView(cBufferDesc, currMaterialCBufferDescHandle);
 
 		// Create texture descriptor
@@ -268,7 +268,7 @@ void NormalCmdListRecorder::BuildBuffers(
 		srvDesc.Texture2D.MipLevels = res->GetDesc().MipLevels;
 		ResourceManager::Get().CreateShaderResourceView(*res, srvDesc, currNormalsBufferDescHandle);
 
-		mMaterialsCBuffer->CopyData((std::uint32_t)i, &materials[i], sizeof(Material));
+		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 
 		currMaterialCBufferDescHandle.ptr += descHandleIncSize;
 		currObjCBufferDescHandle.ptr += descHandleIncSize;

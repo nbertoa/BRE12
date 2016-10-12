@@ -25,7 +25,7 @@ void SkyBoxPass::Init(
 	ASSERT(ValidateData());
 }
 
-void SkyBoxPass::Execute(CommandListProcessor& cmdListProcessor, const FrameCBuffer& frameCBuffer) noexcept {
+void SkyBoxPass::Execute(CommandListProcessor& cmdListProcessor, const FrameCBuffer& frameCBuffer) const noexcept {
 	ASSERT(ValidateData());
 
 	cmdListProcessor.ResetExecutedTasksCounter();
