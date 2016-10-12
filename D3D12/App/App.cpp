@@ -43,6 +43,23 @@ namespace {
 			PostQuitMessage(0);
 		}
 	}
+
+	// Runs program until Escape key is pressed.
+	std::int32_t RunMessageLoop() noexcept {
+		// Message loop
+		MSG msg{ nullptr };
+		while (msg.message != WM_QUIT) {
+			if (PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE)) {
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+			else {
+				Update();
+			}
+		}
+
+		return static_cast<std::int32_t>(msg.wParam);
+	}
 }
 
 using namespace DirectX;
@@ -54,26 +71,12 @@ App::App(HINSTANCE hInstance, Scene* scene)
 	D3dData::InitDirect3D(hInstance);
 	InitSystems(D3dData::Hwnd(), hInstance);
 	InitMasterRenderTask(D3dData::Hwnd(), D3dData::Device(), scene, mMasterRender);
+
+	RunMessageLoop();
 }
 
 App::~App() {
 	ASSERT(mMasterRender != nullptr);
 	mMasterRender->Terminate();
 	mTaskSchedulerInit.terminate();
-}
-
-std::int32_t App::Run() noexcept {
-	// Message loop
-	MSG msg{ nullptr };
-	while (msg.message != WM_QUIT) 	{
-		if (PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else {
-			Update();
-		}
-	}
-
-	return static_cast<std::int32_t>(msg.wParam);
 }

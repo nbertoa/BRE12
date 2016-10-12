@@ -19,11 +19,7 @@ public:
 	~App();
 	App(const App& rhs) = delete;
 	App& operator=(const App& rhs) = delete;		
-
-	// Runs program until Escape key is pressed.
-	// TODO
-	static std::int32_t Run() noexcept;
-
+	
 private:	
 	// Needed by Intel TBB
 	tbb::task_scheduler_init mTaskSchedulerInit;

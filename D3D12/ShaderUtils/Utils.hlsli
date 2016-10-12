@@ -2,7 +2,7 @@
 #define UTILS_HEADER
 
 //
-// Octahedron-normal vectors 
+// Octahedron-normal encoding/decoding 
 //
 float2 OctWrap(float2 v) {
 	return (1.0 - abs(v.yx)) * (v.xy >= 0.0 ? 1.0 : -1.0);
@@ -49,6 +49,22 @@ float3 accurateSRGBToLinear(in float3 sRGBCol) {
 	return linearRGB;
 }
 
+float3 approximationLinearToSRGB(in float3 linearCol) {
+	return pow(linearCol, 1 / 2.2);
+}
+
+float3 accurateLinearToSRGB(in float3 linearCol) {
+	const float3 sRGBLo = linearCol * 12.92;
+	const float3 sRGBHi = (pow(abs(linearCol), 1.0 / 2.4) * 1.055) - 0.055;
+	const float3 sRGB = (linearCol <= 0.0031308) ? sRGBLo : sRGBHi;
+	return sRGB;
+}
+
+//
+//  Tone mapping
+//
+
+// Filmic tone mapping
 float3 FilmicToneMapping(float3 color) {
 	const float A = 0.22f; //Shoulder Strength
 	const float B = 0.3f; //Linear Strength
@@ -61,17 +77,6 @@ float3 FilmicToneMapping(float3 color) {
 	color = ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - (E / F);
 	linearWhite = ((linearWhite * (A * linearWhite + C * B) + D * E) / (linearWhite * (A * linearWhite + B) + D * F)) - (E / F);
 	return color / linearWhite;
-}
-
-float3 approximationLinearToSRGB(in float3 linearCol) {
-	return pow(linearCol, 1 / 2.2);
-}
-
-float3 accurateLinearToSRGB(in float3 linearCol) {
-	const float3 sRGBLo = linearCol * 12.92;
-	const float3 sRGBHi = (pow(abs(linearCol), 1.0 / 2.4) * 1.055) - 0.055;
-	const float3 sRGB = (linearCol <= 0.0031308) ? sRGBLo : sRGBHi;
-	return sRGB;
 }
 
 #endif

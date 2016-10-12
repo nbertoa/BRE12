@@ -37,16 +37,19 @@ Texture2D HeightTexture : register (t0);
 Output main(const HullShaderConstantOutput HSConstantOutput, const float3 uvw : SV_DomainLocation, const OutputPatch <Input, NUM_PATCH_POINTS> patch) {
 	Output output = (Output)0;
 
+	// Get texture coordinates
 	output.mTexCoordO = uvw.x * patch[0].mTexCoordO + uvw.y * patch[1].mTexCoordO + uvw.z * patch[2].mTexCoordO;
 
+	// Get normal
 	const float3 normalW = normalize(uvw.x * patch[0].mNormalW + uvw.y * patch[1].mNormalW + uvw.z * patch[2].mNormalW);
 	output.mNormalW = normalize(normalW);
 	output.mNormalV = normalize(mul(float4(output.mNormalW, 0.0f), gFrameCBuffer.mV).xyz);
 
+	// Get position
 	float3 posW = uvw.x * patch[0].mPosW + uvw.y * patch[1].mPosW + uvw.z * patch[2].mPosW;
 	float3 posV = mul(float4(posW, 1.0f), gFrameCBuffer.mV).xyz;
 
-	// Choose the mipmap level based on distance to the eye; specifically, choose the next miplevel every MipInterval units, and clamp the miplevel in [0,6].
+	// Choose the mipmap level based on distance to the eye; specifically, choose the next miplevel every MipInterval units, and clamp the miplevel in [0, 6].
 	const float MipInterval = 20.0f;
 	const float mipLevel = clamp((length(posV) - MipInterval) / MipInterval, 0.0f, 6.0f);
 	const float height = HeightTexture.SampleLevel(TexSampler, output.mTexCoordO, mipLevel).x;
@@ -56,9 +59,11 @@ Output main(const HullShaderConstantOutput HSConstantOutput, const float3 uvw : 
 	posW += output.mNormalW * displacement;
 	posV += output.mNormalV * displacement;
 	
+	// Get tangent
 	output.mTangentW = normalize(uvw.x * patch[0].mTangentW + uvw.y * patch[1].mTangentW + uvw.z * patch[2].mTangentW);
 	output.mTangentV = normalize(mul(float4(output.mTangentW, 0.0f), gFrameCBuffer.mV)).xyz;
 
+	// Get binormal
 	output.mBinormalW = normalize(cross(output.mNormalW, output.mTangentW));
 	output.mBinormalV = normalize(cross(output.mNormalV, output.mTangentV));
 	

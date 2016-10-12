@@ -25,7 +25,7 @@ Texture2D NormalTexture : register (t1);
 TextureCube CubeMap : register(t2);
 
 struct Output {
-	float4 mNormalV_Smoothness_Depth : SV_Target0;
+	float4 mNormalV_Smoothness_DepthV : SV_Target0;
 	float4 mBaseColor_MetalMask : SV_Target1;
 	float4 mSpecularReflection : SV_Target2;
 };
@@ -33,19 +33,24 @@ struct Output {
 Output main(const in Input input) {
 	Output output = (Output)0;
 
+	// Normal (encoded in view space)
 	const float3 sampledNormal = normalize(UnmapNormal(NormalTexture.Sample(TexSampler, input.mTexCoordO).xyz));
 	const float3x3 tbnW = float3x3(normalize(input.mTangentW), normalize(input.mBinormalW), normalize(input.mNormalW));
 	const float3 normalW = normalize(mul(sampledNormal, tbnW));
 	const float3x3 tbnV = float3x3(normalize(input.mTangentV), normalize(input.mBinormalV), normalize(input.mNormalV));
-	output.mNormalV_Smoothness_Depth.xy = Encode(mul(sampledNormal, tbnV));
+	output.mNormalV_Smoothness_DepthV.xy = Encode(mul(sampledNormal, tbnV));
 
+	// Base color and metal mask
 	const float3 diffuseColor = DiffuseTexture.Sample(TexSampler, input.mTexCoordO).rgb;
 	output.mBaseColor_MetalMask = float4(gMaterial.mBaseColor_MetalMask.xyz * diffuseColor, gMaterial.mBaseColor_MetalMask.w);
 
-	output.mNormalV_Smoothness_Depth.z = gMaterial.mSmoothness;
+	// Smoothness
+	output.mNormalV_Smoothness_DepthV.z = gMaterial.mSmoothness;
 
-	output.mNormalV_Smoothness_Depth.w = input.mPosV.z / gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.y;
+	// Depth (view space)
+	output.mNormalV_Smoothness_DepthV.w = input.mPosV.z / gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.y;
 
+	// Specular reflection
 	const float3 toEyeW = gFrameCBuffer.mEyePosW - input.mPosW;
 	const float3 r = reflect(-toEyeW, normalW);
 	output.mSpecularReflection.rgb = CubeMap.Sample(TexSampler, r).rgb;

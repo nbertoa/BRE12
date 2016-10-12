@@ -33,13 +33,13 @@ Output main(in const Input input) {
 	output.mTangentW = mul(float4(input.mTangentO, 0.0f), gObjCBuffer.mW).xyz;
 
 	output.mTexCoordO = gObjCBuffer.mTexTransform * input.mTexCoordO;
-
-	const float d = length(output.mPosW - gFrameCBuffer.mEyePosW);
+		
 
 	// Normalized tessellation factor. 
 	// The tessellation is 
 	//   0 if d >= MIN_TESS_DISTANCE and
 	//   1 if d <= MAX_TESS_DISTANCE.  
+	const float d = length(output.mPosW - gFrameCBuffer.mEyePosW);
 	const float tess = saturate((MIN_TESS_DISTANCE - d) / (MIN_TESS_DISTANCE - MAX_TESS_DISTANCE));
 
 	// Rescale [0,1] --> [MIN_TESS_FACTOR, MAX_TESS_FACTOR].

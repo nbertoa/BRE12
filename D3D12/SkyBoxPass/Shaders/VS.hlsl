@@ -23,8 +23,6 @@ Output main(in const Input input) {
 	// Use local vertex position as cubemap lookup vector.
 	output.mPosO = input.mPosO;
 
-	// Get camera world position.
-
 	// Always center sky about camera.
 	float3 posW = mul(float4(input.mPosO, 1.0f), gObjCBuffer.mW).xyz;
 	posW += gFrameCBuffer.mEyePosW;
