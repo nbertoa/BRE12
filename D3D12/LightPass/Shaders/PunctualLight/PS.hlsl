@@ -3,7 +3,7 @@
 #include <ShaderUtils/Lights.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
-#define AMBIENT_FACTOR float3(0.02, 0.02, 0.02)
+#define AMBIENT_FACTOR 0.02
 
 struct Input {
 	float4 mPosH : SV_POSITION;
@@ -55,10 +55,18 @@ Output main(const in Input input) {
 
 	// Reflection color
 	const float3 reflectionColor = SpecularReflection.Load(screenCoord);
+	const float3 r = normalize(reflect(-geomPosV, normalV));
+		
+	const float3 fDiffuse = DiffuseBrdf(baseColor_metalmask.xyz, baseColor_metalmask.w);
+	const float3 fSpecular = SpecularBrdf(normalV, viewV, lightDirV, baseColor_metalmask.xyz, smoothness, baseColor_metalmask.w);
 
-	const float3 fLV = brdf(normalV, viewV, lightDirV, baseColor_metalmask.xyz, smoothness, baseColor_metalmask.w, reflectionColor);
+	const float3 f0 = (1.0f - baseColor_metalmask.w) * float3(0.04f, 0.04f, 0.04f) + baseColor_metalmask.xyz * baseColor_metalmask.w;
+	const float3 F = F_Schlick(f0, 1.0f, dot(viewV, normalV));
+	const float3 indirectFSpecular = F * reflectionColor;
+	
+	const float3 color = AMBIENT_FACTOR * baseColor_metalmask.xyz + lightContrib * (fDiffuse + fSpecular) + indirectFSpecular;
 
-	output.mColor = float4(AMBIENT_FACTOR * baseColor_metalmask.xyz + lightContrib * fLV, 1.0f);
+	output.mColor = float4(color, 1.0f);
 
 	return output;
 }

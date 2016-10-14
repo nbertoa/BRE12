@@ -84,10 +84,14 @@ float D_TR(const float m, const float dotNH) {
 //
 // BRDF
 //
-#define FD_DISNEY
 #define V_SMITH
 
-float3 brdf(const float3 N, const float3 V, const float3 L, const float3 baseColor, const float smoothness, const float metalMask, const float3 reflectionColor) {
+float3 DiffuseBrdf(const float3 baseColor, const float metalMask) {
+	const float3 diffuseColor = (1.0f - metalMask) * baseColor;
+	return Fd_Lambert(diffuseColor);
+}
+
+float3 SpecularBrdf(const float3 N, const float3 V, const float3 L, const float3 baseColor, const float smoothness, const float metalMask) {
 	const float roughness = 1.0f - smoothness;
 
 	// Disney's reparametrization of roughness
@@ -110,21 +114,12 @@ float3 brdf(const float3 N, const float3 V, const float3 L, const float3 baseCol
 		
 	// G / (4 * dotNL * dotNV)
 #ifdef V_SMITH
-	const float G = V_SmithGGXCorrelated(dotNV, dotNL, alpha);
+	const float G_Correlated = V_SmithGGXCorrelated(dotNV, dotNL, alpha);
 #else
-	const float G = G_SmithGGX(dotNL, dotNV, alpha);
+	const float G_Correlated = G_SmithGGX(dotNL, dotNV, alpha);
 #endif
 
-	const float3 Fs = D * F * G * reflectionColor;
-
-	// Diffuse term
-	const float3 diffuseColor = (1.0f - metalMask) * baseColor;
-	float3 Fd = Fd_Lambert(diffuseColor);
-#ifdef FD_DISNEY
-	Fd *= Fd_Disney(dotNV, dotNL, dotLH, roughness);
-#endif
-
-	return Fd + Fs;
+	return D * F * G_Correlated;
 }
 
 #endif
