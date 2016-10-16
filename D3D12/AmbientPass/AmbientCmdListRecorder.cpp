@@ -1,4 +1,4 @@
-#include "ToneMappingCmdListRecorder.h"
+#include "AmbientCmdListRecorder.h"
 
 #include <DirectXMath.h>
 
@@ -33,27 +33,28 @@ namespace {
 	}
 }
 
-ToneMappingCmdListRecorder::ToneMappingCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
+AmbientCmdListRecorder::AmbientCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
 	: mDevice(device)
 	, mCmdListQueue(cmdListQueue)
 {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 
-void ToneMappingCmdListRecorder::InitPSO() noexcept {
+void AmbientCmdListRecorder::InitPSO() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSign == nullptr);
 
 	// Build pso and root signature
 	PSOCreator::PSOParams psoParams{};
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
+	psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
 	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
 	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
-	psoParams.mPSFilename = "ToneMappingPass/Shaders/PS.cso";
-	psoParams.mRootSignFilename = "ToneMappingPass/Shaders/RS.cso";
-	psoParams.mVSFilename = "ToneMappingPass/Shaders/VS.cso";
+	psoParams.mPSFilename = "AmbientPass/Shaders/PS.cso";
+	psoParams.mRootSignFilename = "AmbientPass/Shaders/RS.cso";
+	psoParams.mVSFilename = "AmbientPass/Shaders/VS.cso";
 	psoParams.mNumRenderTargets = 1U;
-	psoParams.mRtFormats[0U] = Settings::sFrameBufferRTFormat;
+	psoParams.mRtFormats[0U] = Settings::sColorBufferFormat;
 	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
 		psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
@@ -64,7 +65,7 @@ void ToneMappingCmdListRecorder::InitPSO() noexcept {
 	ASSERT(sRootSign != nullptr);
 }
 
-void ToneMappingCmdListRecorder::Init(
+void AmbientCmdListRecorder::Init(
 	const BufferCreator::VertexBufferData& vertexBufferData,
 	const BufferCreator::IndexBufferData indexBufferData,
 	ID3D12Resource& colorBuffer) noexcept
@@ -79,7 +80,7 @@ void ToneMappingCmdListRecorder::Init(
 	ASSERT(ValidateData());
 }
 
-void ToneMappingCmdListRecorder::RecordCommandLists(
+void AmbientCmdListRecorder::RecordCommandLists(
 	const D3D12_CPU_DESCRIPTOR_HANDLE& rtvCpuDescHandle,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
 
@@ -116,7 +117,7 @@ void ToneMappingCmdListRecorder::RecordCommandLists(
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;
 }
 
-bool ToneMappingCmdListRecorder::ValidateData() const noexcept {
+bool AmbientCmdListRecorder::ValidateData() const noexcept {
 
 	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {
@@ -131,24 +132,24 @@ bool ToneMappingCmdListRecorder::ValidateData() const noexcept {
 	return result;
 }
 
-void ToneMappingCmdListRecorder::BuildBuffers(ID3D12Resource& colorBuffer) noexcept {
+void AmbientCmdListRecorder::BuildBuffers(ID3D12Resource& baseColorMetalMaskBuffer) noexcept {
 	ASSERT(mCbvSrvUavDescHeap == nullptr);
 
 	// Create CBV_SRV_UAV cbuffer descriptor heap
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = 1U; // 1 color buffer
+	descHeapDesc.NumDescriptors = 1U; // 1 baseColor_metalMask buffer
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
 	
-	// Create color buffer texture descriptor
+	// Create baseColor_metalMask buffer texture descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc.Format = colorBuffer.GetDesc().Format;
-	srvDesc.Texture2D.MipLevels = colorBuffer.GetDesc().MipLevels;
-	ResourceManager::Get().CreateShaderResourceView(colorBuffer, srvDesc, mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart());
+	srvDesc.Format = baseColorMetalMaskBuffer.GetDesc().Format;
+	srvDesc.Texture2D.MipLevels = baseColorMetalMaskBuffer.GetDesc().MipLevels;
+	ResourceManager::Get().CreateShaderResourceView(baseColorMetalMaskBuffer, srvDesc, mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart());
 }

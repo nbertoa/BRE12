@@ -15,6 +15,6 @@ Output main(in const Input input) {
 	Output output;
 
 	output.mPosH = float4(input.mPosH, 1.0f);
-
+	
 	return output;
 }

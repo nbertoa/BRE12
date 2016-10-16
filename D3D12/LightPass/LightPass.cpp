@@ -31,6 +31,9 @@ namespace {
 }
 
 void LightPass::Init(
+	ID3D12Device& device,
+	ID3D12CommandQueue& cmdQueue,
+	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
@@ -46,6 +49,16 @@ void LightPass::Init(
 
 	// Initialize recorder's pso
 	PunctualLightCmdListRecorder::InitPSO();
+
+	// Initialize ambient pass
+	ASSERT(geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get() != nullptr);
+	mAmbientPass.Init(
+		device,
+		cmdQueue,
+		cmdListQueue,
+		*geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(),
+		colorBufferCpuDesc,
+		depthBufferCpuDesc);
 
 	ASSERT(ValidateData());
 }
@@ -73,6 +86,7 @@ void LightPass::Execute(
 	CD3DX12_RESOURCE_BARRIER barriers[]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::NORMAL_SMOOTHNESS_DEPTH].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::DIFFUSEREFLECTION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 	};
 	const std::size_t barriersCount = _countof(barriers);
@@ -86,6 +100,9 @@ void LightPass::Execute(
 	// Execute preliminary task
 	ID3D12CommandList* cmdLists[] = { mCmdList };
 	cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
+
+	// Execute ambient light pass tasks
+	mAmbientPass.Execute(cmdListProcessor);
 
 	// Execute light pass tasks
 	const std::uint32_t grainSize(max(1U, taskCount / Settings::sCpuProcessors));

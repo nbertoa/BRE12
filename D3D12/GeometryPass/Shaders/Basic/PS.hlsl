@@ -20,7 +20,8 @@ TextureCube CubeMap : register(t0);
 struct Output {	
 	float4 mNormalV_Smoothness_DepthV : SV_Target0;	
 	float4 mBaseColor_MetalMask : SV_Target1;
-	float4 mSpecularReflection : SV_Target2;
+	float4 mDiffuseReflection : SV_Target2;
+	float4 mSpecularReflection : SV_Target3;
 };
 
 Output main(const in Input input) {
@@ -39,10 +40,13 @@ Output main(const in Input input) {
 	// Depth (view space)
 	output.mNormalV_Smoothness_DepthV.w = input.mPosV.z / gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.y;
 
+	// Compute diffuse reflection.
+	output.mDiffuseReflection.rgb = CubeMap.Sample(TexSampler, input.mNormalW).rgb;
+
 	// Compute specular reflection.
-	const float3 toEyeW = gFrameCBuffer.mEyePosW - input.mPosW;
-	const float3 r = reflect(-toEyeW, input.mNormalW);
-	output.mSpecularReflection.rgb = CubeMap.Sample(TexSampler, r).rgb;
+	const float3 incidentVecW = input.mPosW - gFrameCBuffer.mEyePosW;
+	const float3 reflectionVecW = reflect(incidentVecW, input.mNormalW);
+	output.mSpecularReflection.rgb = CubeMap.Sample(TexSampler, reflectionVecW).rgb;
 		
 	return output;
 }

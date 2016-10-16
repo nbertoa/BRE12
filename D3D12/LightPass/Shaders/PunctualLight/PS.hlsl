@@ -3,8 +3,6 @@
 #include <ShaderUtils/Lights.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
-#define AMBIENT_FACTOR 0.02
-
 struct Input {
 	float4 mPosH : SV_POSITION;
 	float3 mPosV : VIEW_RAY;
@@ -15,7 +13,8 @@ ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b0);
 
 Texture2D<float4> NormalV_Smoothness_DepthV : register (t0);
 Texture2D<float4> BaseColor_MetalMask : register (t1);
-Texture2D<float3> SpecularReflection : register (t2);
+Texture2D<float3> DiffuseReflection : register (t2);
+Texture2D<float3> SpecularReflection : register (t3);
 
 struct Output {
 	float4 mColor : SV_Target0;
@@ -52,19 +51,17 @@ Output main(const in Input input) {
 	const float3 viewV = normalize(-geomPosV);
 
 	const float3 lightContrib = computePunctualLightFrostbiteLightContribution(light, geomPosV, normalV);
-
-	// Reflection color
-	const float3 reflectionColor = SpecularReflection.Load(screenCoord);
-	const float3 r = normalize(reflect(-geomPosV, normalV));
-		
+			
 	const float3 fDiffuse = DiffuseBrdf(baseColor_metalmask.xyz, baseColor_metalmask.w);
 	const float3 fSpecular = SpecularBrdf(normalV, viewV, lightDirV, baseColor_metalmask.xyz, smoothness, baseColor_metalmask.w);
 
+	// Specular reflection color
+	const float3 reflectionColor = SpecularReflection.Load(screenCoord);
 	const float3 f0 = (1.0f - baseColor_metalmask.w) * float3(0.04f, 0.04f, 0.04f) + baseColor_metalmask.xyz * baseColor_metalmask.w;
 	const float3 F = F_Schlick(f0, 1.0f, dot(viewV, normalV));
 	const float3 indirectFSpecular = F * reflectionColor;
 	
-	const float3 color = AMBIENT_FACTOR * baseColor_metalmask.xyz + lightContrib * (fDiffuse + fSpecular) + indirectFSpecular;
+	const float3 color = lightContrib * (fDiffuse + fSpecular) + indirectFSpecular;
 
 	output.mColor = float4(color, 1.0f);
 
