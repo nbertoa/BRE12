@@ -11,6 +11,7 @@ struct ObjectCBuffer {
 struct FrameCBuffer {
 	float4x4 mV;
 	float4x4 mP;
+	float4x4 mInvP;
 	float3 mEyePosW;
 };
 

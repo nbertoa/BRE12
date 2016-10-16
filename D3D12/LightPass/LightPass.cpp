@@ -60,6 +60,16 @@ void LightPass::Init(
 		colorBufferCpuDesc,
 		depthBufferCpuDesc);
 
+	// Initialize environment light pass
+	mEnvironmentLightPass.Init(
+		device, 
+		cmdQueue, 
+		cmdListQueue, 
+		geometryBuffers, 
+		GeometryPass::BUFFERS_COUNT, 
+		colorBufferCpuDesc, 
+		depthBufferCpuDesc);
+
 	ASSERT(ValidateData());
 }
 
@@ -76,8 +86,10 @@ void LightPass::Execute(
 	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocs[cmdAllocIndex] };
 	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocs);
 
-	const std::uint32_t taskCount{ static_cast<std::uint32_t>(mRecorders.size()) };
+	// Total tasks = Light tasks + 1 ambient pass task + 1 environment light pass task
 	cmdListProcessor.ResetExecutedTasksCounter();
+	//const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mRecorders.size())};
+	//const std::uint32_t taskCount{ lightTaskCount + 2U };
 
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
@@ -102,20 +114,23 @@ void LightPass::Execute(
 	cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
 
 	// Execute ambient light pass tasks
-	mAmbientPass.Execute(cmdListProcessor);
+	//mAmbientPass.Execute();
+
+	// Execute environment light pass tasks
+	mEnvironmentLightPass.Execute(frameCBuffer);
 
 	// Execute light pass tasks
-	const std::uint32_t grainSize(max(1U, taskCount / Settings::sCpuProcessors));
+	/*const std::uint32_t grainSize(max(1U, lightTaskCount / Settings::sCpuProcessors));
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescs[] = { mColorBufferCpuDesc };
-	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, lightTaskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
 			mRecorders[i]->RecordCommandLists(frameCBuffer, rtvCpuDescs, _countof(rtvCpuDescs), mDepthBufferCpuDesc);
 	}
-	);
+	);*/
 
 	// Wait until all previous tasks command lists are executed
-	while (cmdListProcessor.ExecutedTasksCounter() < taskCount) {
+	while (cmdListProcessor.ExecutedTasksCounter() < 1) {
 		Sleep(0U);
 	}
 }

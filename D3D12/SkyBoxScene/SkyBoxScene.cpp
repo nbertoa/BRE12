@@ -288,7 +288,7 @@ void SkyBoxScene::GenerateSkyBoxRecorder(
 	// Build world matrix
 	const Mesh& mesh{ meshes[0] };
 	DirectX::XMFLOAT4X4 w;
-	MathUtils::ComputeMatrix(w, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, DirectX::XM_PI, 0.0f);
+	MathUtils::ComputeMatrix(w, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 
 	// Init recorder and store in task
 	recorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), w, *cubeMap);

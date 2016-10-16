@@ -642,28 +642,28 @@ namespace GeometryGenerator {
 		// Position coordinates specified in NDC space.
 		// Bottom left vertex
 		meshData.mVertices[0U] = Vertex{
-			XMFLOAT3{ -1.0f, -1.0f, 0.0f },
+			XMFLOAT3{ -1.0f, -1.0f, 1.0f },
 			XMFLOAT3{ 0.0f, 0.0f, -1.0f },
 			XMFLOAT3{ 1.0f, 0.0f, 0.0f },
 			XMFLOAT2{ 0.0f, 1.0f } };
 
 		// Top left vertex
 		meshData.mVertices[1U] = Vertex{
-			XMFLOAT3{ -1.0f, 1.0f, 0.0f },
+			XMFLOAT3{ -1.0f, 1.0f, 1.0f },
 			XMFLOAT3{ 0.0f, 0.0f, -1.0f },
 			XMFLOAT3{ 1.0f, 0.0f, 0.0f },
 			XMFLOAT2{ 0.0f, 0.0f } };
 
 		// Top right vertex
 		meshData.mVertices[2U] = Vertex{
-			XMFLOAT3{ 1.0f, 1.0f, 0.0f },
+			XMFLOAT3{ 1.0f, 1.0f, 1.0f },
 			XMFLOAT3{ 0.0f, 0.0f, -1.0f },
 			XMFLOAT3{ 1.0f, 0.0f, 0.0f },
 			XMFLOAT2{ 1.0f, 0.0f } };
 
 		// Bottom right vertex
 		meshData.mVertices[3U] = Vertex{
-			XMFLOAT3{ 1.0f, -1.0f, 0.0f },
+			XMFLOAT3{ 1.0f, -1.0f, 1.0f },
 			XMFLOAT3{ 0.0f, 0.0f, -1.0f },
 			XMFLOAT3{ 1.0f, 0.0f, 0.0f },
 			XMFLOAT2{ 1.0f, 1.0f } };

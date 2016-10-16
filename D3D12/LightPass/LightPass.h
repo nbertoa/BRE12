@@ -6,6 +6,7 @@
 #include <wrl.h>
 
 #include <AmbientPass\AmbientPass.h>
+#include <EnvironmentLightPass/EnvironmentLightPass.h>
 #include <GlobalData\Settings.h>
 #include <LightPass\LightPassCmdListRecorder.h>
 
@@ -63,4 +64,5 @@ private:
 	Recorders mRecorders;
 
 	AmbientPass mAmbientPass;
+	EnvironmentLightPass mEnvironmentLightPass;
 };

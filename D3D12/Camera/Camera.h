@@ -68,10 +68,11 @@ public:
 	}
 
 	__forceinline const DirectX::XMFLOAT4X4& GetView4x4f() const noexcept { return mView; }
-	__forceinline const DirectX::XMFLOAT4X4& GetProj4x4f() const noexcept { return mProj; }
+	__forceinline const DirectX::XMFLOAT4X4& GetProj4x4f() const noexcept { return mProj; }	
 
 	void GetView4x4f(DirectX::XMFLOAT4X4& m) const noexcept;
 	void GetProj4x4f(DirectX::XMFLOAT4X4& m) const noexcept;
+	void GetInvProj4x4f(DirectX::XMFLOAT4X4& m) const noexcept;
 
 	// Strafe/Walk the camera a distance d.
 	void Strafe(const float d) noexcept;

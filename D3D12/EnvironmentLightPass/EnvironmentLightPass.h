@@ -3,9 +3,10 @@
 #include <memory>
 #include <tbb/concurrent_queue.h>
 
-#include <AmbientPass\AmbientCmdListRecorder.h>
+#include <EnvironmentLightPass\EnvironmentLightCmdListRecorder.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
+struct FrameCBuffer;
 struct ID3D12CommandAllocator;
 struct ID3D12CommandList;
 struct ID3D12CommandQueue;
@@ -13,24 +14,25 @@ struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
-class AmbientPass {
+class EnvironmentLightPass {
 public:
-	using Recorder = std::unique_ptr<AmbientCmdListRecorder>;
+	using Recorder = std::unique_ptr<EnvironmentLightCmdListRecorder>;
 
-	AmbientPass() = default;
-	AmbientPass(const AmbientPass&) = delete;
-	const AmbientPass& operator=(const AmbientPass&) = delete;
+	EnvironmentLightPass() = default;
+	EnvironmentLightPass(const EnvironmentLightPass&) = delete;
+	const EnvironmentLightPass& operator=(const EnvironmentLightPass&) = delete;
 
 	// You should call this method before Execute()
 	void Init(
 		ID3D12Device& device,
 		ID3D12CommandQueue& cmdQueue,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
-		ID3D12Resource& baseColorMetalMaskBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
+		const std::uint32_t geometryBuffersCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
-	void Execute() const noexcept;
+	void Execute(const FrameCBuffer& frameCBuffer) const noexcept;
 
 private:
 	// Method used internally for validation purposes

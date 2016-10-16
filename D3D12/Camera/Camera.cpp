@@ -41,12 +41,19 @@ void Camera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3&
 	mViewDirty = true;
 }
 
+
 void Camera::GetView4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
 	m = mView;
 }
 
 void Camera::GetProj4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
 	m = mProj;
+}
+
+void Camera::GetInvProj4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
+	DirectX::XMMATRIX p = DirectX::XMLoadFloat4x4(&mProj);
+	DirectX::XMMatrixInverse(nullptr, p);
+	XMStoreFloat4x4(&m, DirectX::XMMatrixInverse(nullptr, p));
 }
 
 void Camera::Strafe(const float d) noexcept {

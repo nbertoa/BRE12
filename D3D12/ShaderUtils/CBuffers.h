@@ -19,6 +19,7 @@ struct FrameCBuffer {
 
 	DirectX::XMFLOAT4X4 mView{ MathUtils::Identity4x4() };
 	DirectX::XMFLOAT4X4 mProj{ MathUtils::Identity4x4() };
+	DirectX::XMFLOAT4X4 mInvProj{ MathUtils::Identity4x4() };
 	DirectX::XMFLOAT3 mEyePosW{ 0.0f, 0.0f, 0.0f };
 };
 

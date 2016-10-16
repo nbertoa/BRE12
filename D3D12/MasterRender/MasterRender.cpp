@@ -19,7 +19,14 @@ namespace {
 	const DXGI_FORMAT sFrameBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
 
 	// Update camera's view matrix and store data in parameters.
-	void UpdateCamera(Camera& camera, const float deltaTime, XMFLOAT4X4& viewTranspose, XMFLOAT4X4& projTranpose, XMFLOAT3& eyePosW) noexcept {
+	void UpdateCamera(
+		Camera& camera, 
+		const float deltaTime, 
+		XMFLOAT4X4& viewTranspose, 
+		XMFLOAT4X4& projTranpose,
+		XMFLOAT4X4& invProjTranpose,
+		XMFLOAT3& eyePosW) noexcept {
+
 		static std::int32_t lastXY[]{ 0UL, 0UL };
 		static const float sCameraOffset{ 7.5f };
 		static const float sCameraMultiplier{ 10.0f };
@@ -27,6 +34,9 @@ namespace {
 		if (camera.UpdateViewMatrix()) {
 			DirectX::XMStoreFloat4x4(&viewTranspose, MathUtils::GetTranspose(camera.GetView4x4f()));
 			DirectX::XMStoreFloat4x4(&projTranpose, MathUtils::GetTranspose(camera.GetProj4x4f()));
+			DirectX::XMFLOAT4X4 invProj;
+			camera.GetInvProj4x4f(invProj);
+			DirectX::XMStoreFloat4x4(&invProjTranpose, MathUtils::GetTranspose(invProj));
 			eyePosW = camera.GetPosition3f();
 		}
 
@@ -175,7 +185,7 @@ tbb::task* MasterRender::execute() {
 	while (!mTerminate) {
 		mTimer.Tick();
 
-		UpdateCamera(mCamera, mTimer.DeltaTime(), mFrameCBuffer.mView, mFrameCBuffer.mProj, mFrameCBuffer.mEyePosW);
+		UpdateCamera(mCamera, mTimer.DeltaTime(), mFrameCBuffer.mView, mFrameCBuffer.mProj, mFrameCBuffer.mInvProj, mFrameCBuffer.mEyePosW);
 		ASSERT(mCmdListProcessor->IsIdle());
 
 		// Execute passes

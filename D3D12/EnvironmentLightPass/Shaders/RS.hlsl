@@ -4,4 +4,6 @@
 "DENY_HULL_SHADER_ROOT_ACCESS | " \
 "DENY_DOMAIN_SHADER_ROOT_ACCESS | " \
 "DENY_GEOMETRY_SHADER_ROOT_ACCESS), " \
-"DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)"
+"CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \
+"CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \
+"DescriptorTable(SRV(t0), SRV(t1), SRV(t2), SRV(t3), visibility = SHADER_VISIBILITY_PIXEL)"

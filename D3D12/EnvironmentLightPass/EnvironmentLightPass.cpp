@@ -1,4 +1,4 @@
-#include "AmbientPass.h"
+#include "EnvironmentLightPass.h"
 
 #include <d3d12.h>
 
@@ -56,11 +56,12 @@ namespace {
 	}
 }
 
-void AmbientPass::Init(
+void EnvironmentLightPass::Init(
 	ID3D12Device& device,
 	ID3D12CommandQueue& cmdQueue,
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
-	ID3D12Resource& baseColorMetalMaskBuffer,
+	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
+	const std::uint32_t geometryBuffersCount,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
 
@@ -85,22 +86,22 @@ void AmbientPass::Init(
 	ExecuteCommandList(cmdQueue, *mCmdList, *mFence);
 
 	// Initialize recorder's PSO
-	AmbientCmdListRecorder::InitPSO();
+	EnvironmentLightCmdListRecorder::InitPSO();
 
 	// Initialize recorder
-	mRecorder.reset(new AmbientCmdListRecorder(device, cmdListQueue));
-	mRecorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), baseColorMetalMaskBuffer);
+	mRecorder.reset(new EnvironmentLightCmdListRecorder(device, cmdListQueue));
+	mRecorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), geometryBuffers, geometryBuffersCount);
 
 	ASSERT(ValidateData());
 }
 
-void AmbientPass::Execute() const noexcept {
+void EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 	ASSERT(ValidateData());
 
-	mRecorder->RecordCommandLists(mColorBufferCpuDesc, mDepthBufferCpuDesc);
+	mRecorder->RecordCommandLists(frameCBuffer,mColorBufferCpuDesc, mDepthBufferCpuDesc);
 }
 
-bool AmbientPass::ValidateData() const noexcept {
+bool EnvironmentLightPass::ValidateData() const noexcept {
 	const bool b =
 		mCmdAlloc != nullptr &&
 		mCmdList != nullptr &&
