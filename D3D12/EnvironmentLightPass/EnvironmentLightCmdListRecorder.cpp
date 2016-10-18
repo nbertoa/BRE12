@@ -50,7 +50,7 @@ void EnvironmentLightCmdListRecorder::InitPSO() noexcept {
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
 	psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
 	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
-	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+	psoParams.mGSFilename = "EnvironmentLightPass/Shaders/GS.cso";
 	psoParams.mPSFilename = "EnvironmentLightPass/Shaders/PS.cso";
 	psoParams.mRootSignFilename = "EnvironmentLightPass/Shaders/RS.cso";
 	psoParams.mVSFilename = "EnvironmentLightPass/Shaders/VS.cso";
@@ -59,7 +59,7 @@ void EnvironmentLightCmdListRecorder::InitPSO() noexcept {
 	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
 		psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
-	psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 	PSOCreator::CreatePSO(psoParams, sPSO, sRootSign);
 
 	ASSERT(sPSO != nullptr);
@@ -110,19 +110,17 @@ void EnvironmentLightCmdListRecorder::RecordCommandLists(
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 	
-	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 	// Set root parameters
-	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootConstantBufferView(0U, immutableCBufferGpuVAddress);
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
+	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
+	mCmdList->SetGraphicsRootConstantBufferView(1U, immutableCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootDescriptorTable(2U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
 
 	// Draw object
-	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
-	mCmdList->IASetIndexBuffer(&mIndexBufferData.mBufferView);
-	mCmdList->DrawIndexedInstanced(mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
+	mCmdList->DrawInstanced(1U, 1U, 0U, 0U);
 
 	mCmdList->Close();
 

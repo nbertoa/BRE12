@@ -150,8 +150,7 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	mCmdList->SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescHandleBegin);
 	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootConstantBufferView(4U, immutableCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(5U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
+	mCmdList->SetGraphicsRootDescriptorTable(4U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
 	
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	

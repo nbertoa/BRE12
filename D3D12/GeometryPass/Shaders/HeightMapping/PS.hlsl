@@ -16,8 +16,7 @@ struct Input {
 };
 
 ConstantBuffer<Material> gMaterial : register(b0);
-ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b1);
-ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b2);
+ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
 
 SamplerState TexSampler : register (s0);
 Texture2D DiffuseTexture : register (t0);
@@ -49,7 +48,7 @@ Output main(const in Input input) {
 	output.mNormalV_Smoothness_DepthV.z = gMaterial.mSmoothness;
 
 	// Depth (view space)
-	output.mNormalV_Smoothness_DepthV.w = input.mPosV.z / gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.y;
+	output.mNormalV_Smoothness_DepthV.w = length(input.mPosV);
 
 	// Compute diffuse reflection.
 	output.mDiffuseReflection.rgb = CubeMap.Sample(TexSampler, input.mNormalW).rgb;

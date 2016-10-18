@@ -12,7 +12,7 @@ ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b1);
 
 struct Output {
 	float4 mPosH : SV_POSITION;
-	float3 mPosV : VIEW_RAY;
+	float3 mViewRayV : VIEW_RAY;
 	nointerpolation PunctualLight mPunctualLight : PUNCTUAL_LIGHT;
 };
 
@@ -38,25 +38,25 @@ void main(const in point Input input[1], inout TriangleStream<Output> triangleSt
 
 	posV.xy = lightPosV.xy + float2(-lightRange, lightRange);
 	output.mPosH = mul(float4(posV, 1.0f), gFrameCBuffer.mP);
-	output.mPosV = posV;
+	output.mViewRayV = posV;
 	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
 	posV.xy = lightPosV.xy + float2(lightRange, lightRange);
 	output.mPosH = mul(float4(posV, 1.0f), gFrameCBuffer.mP);
-	output.mPosV = posV;
+	output.mViewRayV = posV;
 	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
 	posV.xy = lightPosV.xy + float2(-lightRange, -lightRange);
 	output.mPosH = mul(float4(posV, 1.0f), gFrameCBuffer.mP);
-	output.mPosV = posV;
+	output.mViewRayV = posV;
 	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
 	posV.xy = lightPosV.xy + float2(lightRange, -lightRange);
 	output.mPosH = mul(float4(posV, 1.0f), gFrameCBuffer.mP);
-	output.mPosV = posV;
+	output.mViewRayV = posV;
 	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 

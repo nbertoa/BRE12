@@ -124,14 +124,10 @@ void HeightCmdListRecorder::RecordCommandLists(
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootConstantBufferView(6U, frameCBufferGpuVAddress);
-
-	// Set immutable constants root parameters
-	D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootConstantBufferView(5U, immutableCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootConstantBufferView(5U, frameCBufferGpuVAddress);
 
 	// Set cube map root parameter
-	mCmdList->SetGraphicsRootDescriptorTable(9U, mCubeMapBufferGpuDescHandleBegin);
+	mCmdList->SetGraphicsRootDescriptorTable(8U, mCubeMapBufferGpuDescHandleBegin);
 
 	// Draw objects
 	const std::size_t geomCount{ mGeometryDataVec.size() };
@@ -150,10 +146,10 @@ void HeightCmdListRecorder::RecordCommandLists(
 			mCmdList->SetGraphicsRootDescriptorTable(4U, materialsCBufferGpuDescHandle);
 			materialsCBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(7U, texturesBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(6U, texturesBufferGpuDescHandle);
 			texturesBufferGpuDescHandle.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(8U, normalsBufferGpuDescHandle);
+			mCmdList->SetGraphicsRootDescriptorTable(7U, normalsBufferGpuDescHandle);
 			normalsBufferGpuDescHandle.ptr += descHandleIncSize;
 			
 			mCmdList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
@@ -305,12 +301,6 @@ void HeightCmdListRecorder::BuildBuffers(
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
-
-	// Create immutable cbuffer
-	const std::size_t immutableCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ImmutableCBuffer)) };
-	ResourceManager::Get().CreateUploadBuffer(immutableCBufferElemSize, 1U, mImmutableCBuffer);
-	ImmutableCBuffer immutableCBuffer;
-	mImmutableCBuffer->CopyData(0U, &immutableCBuffer, sizeof(immutableCBuffer));
 
 	// Set begin for cube map in GPU	
 	mCubeMapBufferGpuDescHandleBegin.ptr = mObjectCBufferGpuDescHandleBegin.ptr + dataCount * 5U * descHandleIncSize;

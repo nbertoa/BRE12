@@ -1165,3 +1165,5 @@
 /D3D12/EnvironmentLightPass/x64/Release/Environm.E1224336.tlog/Lib-link.read.1.tlog
 /D3D12/EnvironmentLightPass/x64/Release/Environm.E1224336.tlog/Lib-link.write.1.tlog
 /D3D12/EnvironmentLightPass/x64/Release/Environm.E1224336.tlog/lib.command.1.tlog
+/D3D12/x64/Debug/EnvironmentLightPass/Shaders/GS.cso
+/D3D12/x64/Release/EnvironmentLightPass/Shaders/GS.cso
