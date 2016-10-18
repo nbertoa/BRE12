@@ -125,6 +125,9 @@
   <ItemGroup>
     <ClInclude Include="CBuffers.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CBuffers.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

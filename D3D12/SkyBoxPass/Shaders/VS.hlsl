@@ -25,7 +25,7 @@ Output main(in const Input input) {
 
 	// Always center sky about camera.
 	float3 posW = mul(float4(input.mPosO, 1.0f), gObjCBuffer.mW).xyz;
-	posW += gFrameCBuffer.mEyePosW;
+	posW += gFrameCBuffer.mEyePosW.xyz;
 
 	// Set z = w so that z/w = 1 (i.e., skydome always on far plane).
 	output.mPosH = mul(float4(posW, 1.0f), vp).xyww;

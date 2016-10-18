@@ -88,8 +88,8 @@ void LightPass::Execute(
 
 	// Total tasks = Light tasks + 1 ambient pass task + 1 environment light pass task
 	cmdListProcessor.ResetExecutedTasksCounter();
-	//const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mRecorders.size())};
-	//const std::uint32_t taskCount{ lightTaskCount + 2U };
+	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mRecorders.size())};
+	const std::uint32_t taskCount{ lightTaskCount + 2U };
 
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
@@ -114,23 +114,23 @@ void LightPass::Execute(
 	cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
 
 	// Execute ambient light pass tasks
-	//mAmbientPass.Execute();
+	mAmbientPass.Execute();
 
 	// Execute environment light pass tasks
 	mEnvironmentLightPass.Execute(frameCBuffer);
 
 	// Execute light pass tasks
-	/*const std::uint32_t grainSize(max(1U, lightTaskCount / Settings::sCpuProcessors));
+	const std::uint32_t grainSize(max(1U, lightTaskCount / Settings::sCpuProcessors));
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescs[] = { mColorBufferCpuDesc };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, lightTaskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
 			mRecorders[i]->RecordCommandLists(frameCBuffer, rtvCpuDescs, _countof(rtvCpuDescs), mDepthBufferCpuDesc);
 	}
-	);*/
+	);
 
 	// Wait until all previous tasks command lists are executed
-	while (cmdListProcessor.ExecutedTasksCounter() < 1) {
+	while (cmdListProcessor.ExecutedTasksCounter() < taskCount) {
 		Sleep(0U);
 	}
 }

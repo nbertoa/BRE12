@@ -31,7 +31,7 @@ Output main(const in Input input){
 	const float normalizedDepth = normalV_Smoothness_DepthV.w;
 	clip(any(normalizedDepth - 1.0f) ? 1 : -1);
 	const float farZ = gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.y;
-	const float3 posV = float3(0, 0, 10 );//mul(input.mPosH, gFrameCBuffer.mInvP).xyz;
+	const float3 posV = mul(input.mPosH, gFrameCBuffer.mInvP).xyz;
 	const float3 viewRay = float3(posV.xy * (farZ / posV.z), farZ);
 	const float3 geomPosV = viewRay * normalizedDepth;
 	
@@ -51,7 +51,7 @@ Output main(const in Input input){
 	const float3 F = F_Schlick(f0, 1.0f, dot(viewV, normalV));
 	const float3 indirectFSpecular = F * reflectionColor;
 
-	const float3 color = reflectionColor;
+	const float3 color = indirectFSpecular;
 
 	output.mColor = float4(color, 1.0f);
 	

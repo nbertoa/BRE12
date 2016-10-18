@@ -16,11 +16,11 @@ struct ObjectCBuffer {
 // Per frame constant buffer data
 struct FrameCBuffer {
 	FrameCBuffer() = default;
-
+	
 	DirectX::XMFLOAT4X4 mView{ MathUtils::Identity4x4() };
 	DirectX::XMFLOAT4X4 mProj{ MathUtils::Identity4x4() };
-	DirectX::XMFLOAT4X4 mInvProj{ MathUtils::Identity4x4() };
-	DirectX::XMFLOAT3 mEyePosW{ 0.0f, 0.0f, 0.0f };
+	DirectX::XMFLOAT4X4 mInvProj{ MathUtils::Identity4x4() };	
+	DirectX::XMFLOAT4 mEyePosW{ 0.0f, 0.0f, 0.0f, 1.0f };
 };
 
 // Immutable constant buffer data (does not change across frames or objects) 

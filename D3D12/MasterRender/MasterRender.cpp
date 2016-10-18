@@ -25,7 +25,7 @@ namespace {
 		XMFLOAT4X4& viewTranspose, 
 		XMFLOAT4X4& projTranpose,
 		XMFLOAT4X4& invProjTranpose,
-		XMFLOAT3& eyePosW) noexcept {
+		XMFLOAT4& eyePosW) noexcept {
 
 		static std::int32_t lastXY[]{ 0UL, 0UL };
 		static const float sCameraOffset{ 7.5f };
@@ -37,7 +37,7 @@ namespace {
 			DirectX::XMFLOAT4X4 invProj;
 			camera.GetInvProj4x4f(invProj);
 			DirectX::XMStoreFloat4x4(&invProjTranpose, MathUtils::GetTranspose(invProj));
-			eyePosW = camera.GetPosition3f();
+			eyePosW = camera.GetPosition4f();
 		}
 
 		// Update camera based on keyboard
@@ -258,14 +258,14 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	depthStencilDesc.Height = Settings::sWindowHeight;
 	depthStencilDesc.DepthOrArraySize = 1U;
 	depthStencilDesc.MipLevels = 1U;
-	depthStencilDesc.Format = sDepthStencilFormat;
+	depthStencilDesc.Format = Settings::sDepthStencilFormat;
 	depthStencilDesc.SampleDesc.Count = 1U;
 	depthStencilDesc.SampleDesc.Quality = 0U;
 	depthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
 	D3D12_CLEAR_VALUE clearValue = {};
-	clearValue.Format = sDepthStencilFormat;
+	clearValue.Format = Settings::sDepthStencilFormat;
 	clearValue.DepthStencil.Depth = 1.0f;
 	clearValue.DepthStencil.Stencil = 0U;
 

@@ -7,4 +7,4 @@
 "CBV(b0, visibility = SHADER_VISIBILITY_GEOMETRY), " \
 "CBV(b1, visibility = SHADER_VISIBILITY_GEOMETRY), " \
 "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \
-"DescriptorTable(SRV(t0), SRV(t1), SRV(t2), SRV(t3), visibility = SHADER_VISIBILITY_PIXEL)"
+"DescriptorTable(SRV(t0), SRV(t1), visibility = SHADER_VISIBILITY_PIXEL)"

@@ -98,7 +98,7 @@ void EnvironmentLightPass::Init(
 void EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 	ASSERT(ValidateData());
 
-	mRecorder->RecordCommandLists(frameCBuffer,mColorBufferCpuDesc, mDepthBufferCpuDesc);
+	mRecorder->RecordCommandLists(frameCBuffer, mColorBufferCpuDesc, mDepthBufferCpuDesc);
 }
 
 bool EnvironmentLightPass::ValidateData() const noexcept {

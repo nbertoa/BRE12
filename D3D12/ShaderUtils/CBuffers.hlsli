@@ -8,11 +8,11 @@ struct ObjectCBuffer {
 };
 
 // Per frame constant buffer data
-struct FrameCBuffer {
+struct FrameCBuffer {	
 	float4x4 mV;
 	float4x4 mP;
-	float4x4 mInvP;
-	float3 mEyePosW;
+	float4x4 mInvP;	
+	float4 mEyePosW;
 };
 
 // Immutable constant buffer data (does not change across frames or objects) 

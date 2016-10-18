@@ -1,5 +1,3 @@
-#include "../../ShaderUtils/CBuffers.hlsli"
-
 struct Input {
 	float3 mPosH : POSITION;
 	float3 mNormalO : NORMAL;

@@ -47,7 +47,7 @@ Output main(const in Input input) {
 	output.mDiffuseReflection.rgb = CubeMap.Sample(TexSampler, input.mNormalW).rgb;
 
 	// Compute specular reflection.
-	const float3 incidentVecW = input.mPosW - gFrameCBuffer.mEyePosW;
+	const float3 incidentVecW = input.mPosW - gFrameCBuffer.mEyePosW.xyz;
 	const float3 reflectionVecW = reflect(incidentVecW, input.mNormalW);
 	output.mSpecularReflection.rgb = CubeMap.Sample(TexSampler, reflectionVecW).rgb;
 

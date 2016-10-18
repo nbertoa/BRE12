@@ -115,7 +115,7 @@ void EnvironmentLightCmdListRecorder::RecordCommandLists(
 	// Set root parameters
 	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(0U, immutableCBufferGpuVAddress);
-	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(mFrameCBuffer[mCurrFrameIndex]->Resource()->GetGPUVirtualAddress());
+	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootDescriptorTable(2U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
 

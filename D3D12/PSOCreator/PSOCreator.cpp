@@ -1,7 +1,6 @@
 #include "PSOCreator.h"
 
-#include <GeometryPass\GeometryPass.h>
-#include <MasterRender/MasterRender.h>
+#include <GlobalData/Settings.h>
 #include <PSOManager/PSOManager.h>
 #include <RootSignatureManager/RootSignatureManager.h>
 #include <ShaderManager/ShaderManager.h>
@@ -44,7 +43,7 @@ namespace {
 		desc.BlendState = psoParams.mBlendDesc;
 		desc.DepthStencilState = psoParams.mDepthStencilDesc;
 		desc.DS = domainShader;
-		desc.DSVFormat = MasterRender::DepthStencilFormat();
+		desc.DSVFormat = Settings::sDepthStencilFormat;
 		desc.GS = geomShader;
 		desc.HS = hullShader;
 		desc.InputLayout = { psoParams.mInputLayout.empty() ? nullptr : psoParams.mInputLayout.data(), static_cast<std::uint32_t>(psoParams.mInputLayout.size()) };
