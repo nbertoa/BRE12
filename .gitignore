@@ -1167,3 +1167,5 @@
 /D3D12/EnvironmentLightPass/x64/Release/Environm.E1224336.tlog/lib.command.1.tlog
 /D3D12/x64/Debug/EnvironmentLightPass/Shaders/GS.cso
 /D3D12/x64/Release/EnvironmentLightPass/Shaders/GS.cso
+/D3D12/AmbientPass/x64/Debug/AmbientPass.Build.CppClean.log
+/D3D12/EnvironmentLightPass/x64/Debug/EnvironmentLightPass.Build.CppClean.log

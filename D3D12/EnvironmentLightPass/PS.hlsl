@@ -7,10 +7,11 @@ struct Input {
 	float3 mViewRayV : VIEW_RAY;
 };
 
-Texture2D<float4> NormalV_Smoothness_DepthV : register (t0);
+Texture2D<float4> Normal_Smoothness : register (t0);
 Texture2D<float4> BaseColor_MetalMask : register (t1);
 Texture2D<float4> DiffuseReflection : register (t2);
 Texture2D<float4> SpecularReflection : register (t3);
+Texture2D<float> Depth : register (t4);
 
 struct Output {
 	float4 mColor : SV_Target0;
@@ -23,13 +24,13 @@ Output main(const in Input input){
 
 	// Reconstruct geometry position in view space.
 	// position = viewRay * depth (view space)
-	const float4 normalV_Smoothness_DepthV = NormalV_Smoothness_DepthV.Load(screenCoord);
-	const float normalizedDepth = normalV_Smoothness_DepthV.w;
+	const float4 normal_smoothness = Normal_Smoothness.Load(screenCoord);
+	const float depth = Depth.Load(screenCoord);
 	const float3 viewRay = normalize(input.mViewRayV);
-	const float3 geomPosV = viewRay * normalizedDepth;
+	const float3 geomPosV = viewRay * depth;
 	
 	// Get normal
-	const float2 normal = normalV_Smoothness_DepthV.xy;
+	const float2 normal = normal_smoothness.xy;
 	const float3 normalV = normalize(Decode(normal));
 
 	const float4 baseColor_metalmask = BaseColor_MetalMask.Load(screenCoord);

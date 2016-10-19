@@ -24,10 +24,11 @@ Texture2D NormalTexture : register (t1);
 TextureCube CubeMap : register(t2);
 
 struct Output {
-	float4 mNormalV_Smoothness_DepthV : SV_Target0;
+	float4 mNormal_Smoothness : SV_Target0;
 	float4 mBaseColor_MetalMask : SV_Target1;
 	float4 mDiffuseReflection : SV_Target2;
 	float4 mSpecularReflection : SV_Target3;
+	float mDepth : SV_Target4;
 };
 
 Output main(const in Input input) {
@@ -38,17 +39,17 @@ Output main(const in Input input) {
 	const float3x3 tbnW = float3x3(normalize(input.mTangentW), normalize(input.mBinormalW), normalize(input.mNormalW));
 	const float3 normalW = normalize(mul(sampledNormal, tbnW));
 	const float3x3 tbnV = float3x3(normalize(input.mTangentV), normalize(input.mBinormalV), normalize(input.mNormalV));
-	output.mNormalV_Smoothness_DepthV.xy = Encode(mul(sampledNormal, tbnV));
+	output.mNormal_Smoothness.xy = Encode(mul(sampledNormal, tbnV));
 
 	// Base color and metal mask
 	const float3 diffuseColor = DiffuseTexture.Sample(TexSampler, input.mTexCoordO).rgb;
 	output.mBaseColor_MetalMask = float4(gMaterial.mBaseColor_MetalMask.xyz * diffuseColor, gMaterial.mBaseColor_MetalMask.w);
 
 	// Smoothness
-	output.mNormalV_Smoothness_DepthV.z = gMaterial.mSmoothness;
+	output.mNormal_Smoothness.z = gMaterial.mSmoothness;
 
 	// Depth (view space)
-	output.mNormalV_Smoothness_DepthV.w = length(input.mPosV);
+	output.mDepth = length(input.mPosV);
 
 	// Compute diffuse reflection.
 	output.mDiffuseReflection.rgb = CubeMap.Sample(TexSampler, input.mNormalW).rgb;

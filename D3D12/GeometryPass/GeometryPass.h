@@ -19,10 +19,11 @@ struct ID3D12Resource;
 class GeometryPass {
 public:
 	enum Buffers {
-		NORMAL_SMOOTHNESS_DEPTH = 0U,
-		BASECOLOR_METALMASK,
-		DIFFUSEREFLECTION,
-		SPECULARREFLECTION,
+		NORMAL_SMOOTHNESS = 0U, // 2 encoded normals based on octahedron encoding + 1 smoothness
+		BASECOLOR_METALMASK, // 3 base color + 1 metal mask
+		DIFFUSEREFLECTION, // 3 diffuse reflection
+		SPECULARREFLECTION, // 3 specular reflection
+		DEPTH, // 1 depth in view space (length)
 		BUFFERS_COUNT
 	};
 
