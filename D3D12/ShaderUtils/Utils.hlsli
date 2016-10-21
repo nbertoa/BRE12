@@ -66,11 +66,11 @@ float3 accurateLinearToSRGB(in float3 linearCol) {
 
 // Filmic tone mapping
 float3 FilmicToneMapping(float3 color) {
-	const float A = 0.22f; //Shoulder Strength
-	const float B = 0.3f; //Linear Strength
+	const float A = 0.15f; //Shoulder Strength
+	const float B = 0.5f; //Linear Strength
 	const float C = 0.1f; //Linear Angle
 	const float D = 0.2f; //Toe Strength
-	const float E = 0.01f; //Toe Numerator
+	const float E = 0.02f; //Toe Numerator
 	const float F = 0.3f; //Toe Denominator
 	float3 linearWhite = float3(11.2f, 11.2f, 11.2f);
 	
