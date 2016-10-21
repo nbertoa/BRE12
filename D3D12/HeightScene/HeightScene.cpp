@@ -14,7 +14,9 @@
 #include <SkyBoxPass/SkyBoxCmdListRecorder.h>
 
 namespace {
-	const char* sCubeMapFile{ "textures/snow2_cube_map.dds" };
+	const char* sSkyBoxFile{ "textures/milkmill_cube_map.dds" };
+	const char* sDiffuseEnvironmentFile{ "textures/milkmill_diffuse_cube_map.dds" };
+	const char* sSpecularEnvironmentFile{ "textures/milkmill_specular_cube_map.dds" };
 }
 
 void HeightScene::GenerateGeomPassRecorders(
@@ -89,11 +91,16 @@ void HeightScene::GenerateGeomPassRecorders(
 	ModelManager::Get().LoadModel("models/mitsubaFloor.obj", model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
 
-	// Cube map texture
-	ID3D12Resource* cubeMap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferCubeMap;
-	ResourceManager::Get().LoadTextureFromFile(sCubeMapFile, cubeMap, uploadBufferCubeMap, *mCmdList);
-	ASSERT(cubeMap != nullptr);
+	// Cube map textures
+	ID3D12Resource* diffuseCubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex1;
+	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseCubeMap, uploadBufferTex1, *mCmdList);
+	ASSERT(diffuseCubeMap != nullptr);
+
+	ID3D12Resource* specularCubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
+	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularCubeMap, uploadBufferTex2, *mCmdList);
+	ASSERT(specularCubeMap != nullptr);
 
 	ExecuteCommandList(cmdQueue);
 
@@ -159,7 +166,7 @@ void HeightScene::GenerateGeomPassRecorders(
 				heights.push_back(height[i % numResources]);
 			}
 
-			task.Init(&currGeomData, 1U, materials.data(), textures.data(), normals.data(), heights.data(), static_cast<std::uint32_t>(normals.size()), *cubeMap);
+			task.Init(&currGeomData, 1U, materials.data(), textures.data(), normals.data(), heights.data(), static_cast<std::uint32_t>(normals.size()), *diffuseCubeMap, *specularCubeMap);
 		}
 	}
 	);
@@ -232,7 +239,7 @@ void HeightScene::GenerateSkyBoxRecorder(
 	// Cube map texture
 	ID3D12Resource* cubeMap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile(sCubeMapFile, cubeMap, uploadBufferTex, *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile(sSkyBoxFile, cubeMap, uploadBufferTex, *mCmdList);
 	ASSERT(cubeMap != nullptr);
 
 	ExecuteCommandList(cmdQueue);

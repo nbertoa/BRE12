@@ -21,7 +21,8 @@ public:
 		ID3D12Resource** normals,
 		ID3D12Resource** heights,
 		const std::uint32_t numResources,
-		ID3D12Resource& cubeMap
+		ID3D12Resource& diffuseCubeMap,
+		ID3D12Resource& specularCubeMap
 	) noexcept;
 
 	void RecordCommandLists(
@@ -39,7 +40,8 @@ private:
 		ID3D12Resource** normals,
 		ID3D12Resource** heights,
 		const std::uint32_t dataCount,
-		ID3D12Resource& cubeMap) noexcept;
+		ID3D12Resource& diffuseCubeMap,
+		ID3D12Resource& specularCubeMap) noexcept;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mTexturesBufferGpuDescHandleBegin;
 	D3D12_GPU_DESCRIPTOR_HANDLE mNormalsBufferGpuDescHandleBegin;

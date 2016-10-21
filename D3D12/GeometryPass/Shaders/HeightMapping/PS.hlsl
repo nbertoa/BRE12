@@ -21,7 +21,8 @@ ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
 SamplerState TexSampler : register (s0);
 Texture2D DiffuseTexture : register (t0);
 Texture2D NormalTexture : register (t1);
-TextureCube CubeMap : register(t2);
+TextureCube DiffuseCubeMap : register(t2);
+TextureCube SpecularCubeMap : register(t3);
 
 struct Output {
 	float4 mNormal_Smoothness : SV_Target0;
@@ -52,12 +53,12 @@ Output main(const in Input input) {
 	output.mDepth = length(input.mPosV);
 
 	// Compute diffuse reflection.
-	output.mDiffuseReflection.rgb = CubeMap.Sample(TexSampler, input.mNormalW).rgb;
+	output.mDiffuseReflection.rgb = DiffuseCubeMap.SampleLevel(TexSampler, input.mNormalW, lerp(9, 0, gMaterial.mSmoothness)).rgb;
 
 	// Compute specular reflection.
 	const float3 incidentVecW = input.mPosW - gFrameCBuffer.mEyePosW.xyz;
 	const float3 reflectionVecW = reflect(incidentVecW, input.mNormalW);
-	output.mSpecularReflection.rgb = CubeMap.Sample(TexSampler, reflectionVecW).rgb;
+	output.mSpecularReflection.rgb = SpecularCubeMap.SampleLevel(TexSampler, reflectionVecW, lerp(9, 0, gMaterial.mSmoothness)).rgb;
 
 	return output;
 }

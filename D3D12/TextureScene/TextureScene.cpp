@@ -14,7 +14,9 @@
 #include <SkyBoxPass/SkyBoxCmdListRecorder.h>
 
 namespace {
-	const char* sCubeMapFile{ "textures/snow2_cube_map.dds" };
+	const char* sSkyBoxFile{ "textures/milkmill_cube_map.dds" };
+	const char* sDiffuseEnvironmentFile{ "textures/milkmill_diffuse_cube_map.dds" };
+	const char* sSpecularEnvironmentFile{ "textures/milkmill_specular_cube_map.dds" };
 }
 
 void TextureScene::GenerateGeomPassRecorders(
@@ -42,12 +44,17 @@ void TextureScene::GenerateGeomPassRecorders(
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
 	ModelManager::Get().CreateSphere(4.0f, 50, 50, model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
-
-	// Cube map texture
-	ID3D12Resource* cubeMap;
+	
+	// Cube map textures
+	ID3D12Resource* diffuseCubeMap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile(sCubeMapFile, cubeMap, uploadBufferTex, *mCmdList);
-	ASSERT(cubeMap != nullptr);
+	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseCubeMap, uploadBufferTex, *mCmdList);
+	ASSERT(diffuseCubeMap != nullptr);
+
+	ID3D12Resource* specularCubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
+	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularCubeMap, uploadBufferTex2, *mCmdList);
+	ASSERT(specularCubeMap != nullptr);
 
 	ExecuteCommandList(cmdQueue);
 
@@ -63,7 +70,7 @@ void TextureScene::GenerateGeomPassRecorders(
 	}
 
 	const float meshSpaceOffset{ 100.0f };
-	const float scaleFactor{ 1.0f };
+	const float scaleFactor{ 1.5f };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, numGeometry),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
@@ -90,8 +97,8 @@ void TextureScene::GenerateGeomPassRecorders(
 				material.mBaseColor_MetalMask[0] = 1.0f;
 				material.mBaseColor_MetalMask[1] = 1.0f;
 				material.mBaseColor_MetalMask[2] = 1.0f;
-				material.mBaseColor_MetalMask[3] = static_cast<float>(MathUtils::Rand(0U, 1U));
-				material.mSmoothness = MathUtils::RandF(0.0f, 1.0f);
+				material.mBaseColor_MetalMask[3] = 1.0f;//static_cast<float>(MathUtils::Rand(0U, 1U));
+				material.mSmoothness = MathUtils::RandF(0.7f, 1.0f);
 				materials.push_back(material);
 			}
 
@@ -101,7 +108,7 @@ void TextureScene::GenerateGeomPassRecorders(
 				textures.push_back(tex[i % _countof(tex)]);
 			}
 
-			task.Init(&currGeomData, 1U, materials.data(), textures.data(), static_cast<std::uint32_t>(textures.size()), *cubeMap);
+			task.Init(&currGeomData, 1U, materials.data(), textures.data(), static_cast<std::uint32_t>(textures.size()), *diffuseCubeMap, *specularCubeMap);
 		}
 	}
 	);
@@ -173,7 +180,7 @@ void TextureScene::GenerateSkyBoxRecorder(
 	// Cube map texture
 	ID3D12Resource* cubeMap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile(sCubeMapFile, cubeMap, uploadBufferTex, *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile(sSkyBoxFile, cubeMap, uploadBufferTex, *mCmdList);
 	ASSERT(cubeMap != nullptr);
 
 	ExecuteCommandList(cmdQueue);

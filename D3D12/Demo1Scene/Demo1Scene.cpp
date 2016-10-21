@@ -14,9 +14,12 @@
 #include <SkyBoxPass/SkyBoxCmdListRecorder.h>
 
 namespace {
-	const char* sCubeMapFile{ "textures/snow2_cube_map.dds" };
+	const char* sSkyBoxFile{ "textures/milkmill_cube_map.dds" };
+	const char* sDiffuseEnvironmentFile{ "textures/milkmill_diffuse_cube_map.dds" };
+	const char* sSpecularEnvironmentFile{ "textures/milkmill_specular_cube_map.dds" };
 
-	const float sS{ 2.0f };
+	const float sS{ 0.2f };
+	const float sS2{ 2.0f };
 
 	const float sTx{ 0.0f };
 	const float sTy{ -3.5f };
@@ -48,11 +51,11 @@ namespace {
 		light[0].mPosAndRange[0] = 0.0f;
 		light[0].mPosAndRange[1] = 300.0f;
 		light[0].mPosAndRange[2] = -100.0f;
-		light[0].mPosAndRange[3] = 1000000.0f;
+		light[0].mPosAndRange[3] = 0;
 		light[0].mColorAndPower[0] = 1.0f;
 		light[0].mColorAndPower[1] = 1.0f;
 		light[0].mColorAndPower[2] = 1.0f;
-		light[0].mColorAndPower[3] = 1000000.0f;
+		light[0].mColorAndPower[3] = 0;
 
 		recorder->Init(geometryBuffers, geometryBuffersCount, light, _countof(light));
 	}
@@ -64,6 +67,7 @@ namespace {
 		const float offsetX,
 		const float offsetY,
 		const float offsetZ,
+		const float scaleFactor,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		const std::vector<Mesh>& meshes,
 		ID3D12Resource** textures,
@@ -71,7 +75,8 @@ namespace {
 		ID3D12Resource** heights,
 		Material* materials,
 		const std::size_t numMaterials,
-		ID3D12Resource& cubeMap,
+		ID3D12Resource& diffuseCubeMap,
+		ID3D12Resource& specularCubeMap,
 		HeightCmdListRecorder* &recorder) {
 
 		ASSERT(textures != nullptr);
@@ -107,7 +112,7 @@ namespace {
 		float tz{ initZ };
 		for (std::size_t i = 0UL; i < numMaterials; ++i) {
 			DirectX::XMFLOAT4X4 w;
-			MathUtils::ComputeMatrix(w, tx, ty, tz, sS, sS, sS);
+			MathUtils::ComputeMatrix(w, tx, ty, tz, scaleFactor, scaleFactor, scaleFactor);
 
 			Material& mat(materials[i]);
 			ID3D12Resource* texture{ textures[i] };
@@ -136,7 +141,8 @@ namespace {
 			normalsVec.data(), 
 			heightsVec.data(), 
 			static_cast<std::uint32_t>(materialsVec.size()),
-			cubeMap);
+			diffuseCubeMap,
+			specularCubeMap);
 	}
 }
 
@@ -159,19 +165,23 @@ void Demo1Scene::GenerateGeomPassRecorders(
 	Model* model1;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer1;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer1;
-	ModelManager::Get().LoadModel("models/mitsubaFloor.obj", model1, *mCmdList, uploadVertexBuffer1, uploadIndexBuffer1);
+	ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model1, *mCmdList, uploadVertexBuffer1, uploadIndexBuffer1);
 	ASSERT(model1 != nullptr);
 
 	const std::uint32_t numResources{ 6U };
 
 	Material materials[numResources];
 	for (std::uint32_t i = 0UL; i < numResources; ++i) {
-		materials[i].mBaseColor_MetalMask[3U] = 0.0f;
-		materials[i].mSmoothness = 0.7f;
+		materials[i].mBaseColor_MetalMask[3U] = 1.0f;
+		materials[i].mSmoothness = 0.9f;
 	}
 
-	materials[4].mSmoothness = 0.2f;
-	materials[5].mSmoothness = 0.2f;
+	materials[0].mSmoothness = 0.95f;
+	materials[1].mSmoothness = 0.85f;
+	materials[2].mSmoothness = 0.75f;
+	materials[3].mSmoothness = 0.65f;
+	materials[4].mSmoothness = 0.55f;
+	materials[5].mSmoothness = 0.45f;
 
 	ID3D12Resource* tex[numResources];
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex[numResources];
@@ -218,23 +228,28 @@ void Demo1Scene::GenerateGeomPassRecorders(
 	ResourceManager::Get().LoadTextureFromFile("textures/concrete_height.dds", height[5], uploadBufferHeight[5], *mCmdList);
 	ASSERT(height[5] != nullptr);
 
-	// Cube map texture
-	ID3D12Resource* cubeMap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferCubeMap;
-	ResourceManager::Get().LoadTextureFromFile(sCubeMapFile, cubeMap, uploadBufferCubeMap, *mCmdList);
-	ASSERT(cubeMap != nullptr);
+	// Cube map textures
+	ID3D12Resource* diffuseCubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex1;
+	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseCubeMap, uploadBufferTex1, *mCmdList);
+	ASSERT(diffuseCubeMap != nullptr);
+
+	ID3D12Resource* specularCubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
+	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularCubeMap, uploadBufferTex2, *mCmdList);
+	ASSERT(specularCubeMap != nullptr);
 
 	ExecuteCommandList(cmdQueue);
 
 	tasks.resize(2);
 
 	HeightCmdListRecorder* heightRecorder{ nullptr };
-	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), tex, normal, height, materials, numResources, *cubeMap, heightRecorder);
+	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, sS, cmdListQueue, model1->Meshes(), tex, normal, height, materials, numResources, *diffuseCubeMap, *specularCubeMap, heightRecorder);
 	ASSERT(heightRecorder != nullptr);
 	tasks[0].reset(heightRecorder);
 
 	HeightCmdListRecorder* heightRecorder2{ nullptr };
-	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, cmdListQueue, model->Meshes(), tex, normal, height, materials, numResources, *cubeMap, heightRecorder2);
+	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, sS2, cmdListQueue, model->Meshes(), tex, normal, height, materials, numResources, *diffuseCubeMap, *specularCubeMap, heightRecorder2);
 	ASSERT(heightRecorder2 != nullptr);
 	tasks[1].reset(heightRecorder2);
 }
@@ -280,7 +295,7 @@ void Demo1Scene::GenerateSkyBoxRecorder(
 	// Cube map texture
 	ID3D12Resource* cubeMap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile(sCubeMapFile, cubeMap, uploadBufferTex, *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile(sSkyBoxFile, cubeMap, uploadBufferTex, *mCmdList);
 	ASSERT(cubeMap != nullptr);
 
 	ExecuteCommandList(cmdQueue);

@@ -14,7 +14,9 @@
 #include <SkyBoxPass/SkyBoxCmdListRecorder.h>
 
 namespace {
-	const char* sCubeMapFile{ "textures/snow2_cube_map.dds" };
+	const char* sSkyBoxFile{ "textures/milkmill_cube_map.dds" };
+	const char* sDiffuseEnvironmentFile{ "textures/milkmill_diffuse_cube_map.dds" };
+	const char* sSpecularEnvironmentFile{ "textures/milkmill_specular_cube_map.dds" };
 
 	const float sS{ 2.0f };
 
@@ -71,7 +73,8 @@ namespace {
 		ID3D12Resource** heights,
 		Material* materials,
 		const std::size_t numMaterials,
-		ID3D12Resource& cubeMap,
+		ID3D12Resource& diffuseCubeMap,
+		ID3D12Resource& specularCubeMap,
 		HeightCmdListRecorder* &recorder) {
 
 		ASSERT(textures != nullptr);
@@ -136,7 +139,8 @@ namespace {
 			normalsVec.data(), 
 			heightsVec.data(), 
 			static_cast<std::uint32_t>(materialsVec.size()),
-			cubeMap);
+			diffuseCubeMap,
+			specularCubeMap);
 	}
 }
 
@@ -218,23 +222,28 @@ void SkyBoxScene::GenerateGeomPassRecorders(
 	ResourceManager::Get().LoadTextureFromFile("textures/concrete_height.dds", height[5], uploadBufferHeight[5], *mCmdList);
 	ASSERT(height[5] != nullptr);
 
-	// Cube map texture
-	ID3D12Resource* cubeMap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferCubeMap;
-	ResourceManager::Get().LoadTextureFromFile(sCubeMapFile, cubeMap, uploadBufferCubeMap, *mCmdList);
-	ASSERT(cubeMap != nullptr);
+	// Cube map textures
+	ID3D12Resource* diffuseCubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex1;
+	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseCubeMap, uploadBufferTex1, *mCmdList);
+	ASSERT(diffuseCubeMap != nullptr);
+
+	ID3D12Resource* specularCubeMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
+	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularCubeMap, uploadBufferTex2, *mCmdList);
+	ASSERT(specularCubeMap != nullptr);
 
 	ExecuteCommandList(cmdQueue);
 
 	tasks.resize(2);
 
 	HeightCmdListRecorder* heightRecorder{ nullptr };
-	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), tex, normal, height, materials, numResources, *cubeMap, heightRecorder);
+	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), tex, normal, height, materials, numResources, *diffuseCubeMap, *specularCubeMap, heightRecorder);
 	ASSERT(heightRecorder != nullptr);
 	tasks[0].reset(heightRecorder);
 
 	HeightCmdListRecorder* heightRecorder2{ nullptr };
-	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, cmdListQueue, model->Meshes(), tex, normal, height, materials, numResources, *cubeMap, heightRecorder2);
+	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, cmdListQueue, model->Meshes(), tex, normal, height, materials, numResources, *diffuseCubeMap, *specularCubeMap, heightRecorder2);
 	ASSERT(heightRecorder2 != nullptr);
 	tasks[1].reset(heightRecorder2);
 }
@@ -280,7 +289,7 @@ void SkyBoxScene::GenerateSkyBoxRecorder(
 	// Cube map texture
 	ID3D12Resource* cubeMap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile(sCubeMapFile, cubeMap, uploadBufferTex, *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile(sSkyBoxFile, cubeMap, uploadBufferTex, *mCmdList);
 	ASSERT(cubeMap != nullptr);
 	
 	ExecuteCommandList(cmdQueue);

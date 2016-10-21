@@ -65,9 +65,6 @@
     <FxCompile Include="Shaders\Basic\VS.hlsl">
       <Filter>Shaders\Basic</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\HeightMapping\DS.hlsl">
-      <Filter>Shaders\HeightMapping</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\HeightMapping\HS.hlsl">
       <Filter>Shaders\HeightMapping</Filter>
     </FxCompile>
@@ -97,6 +94,9 @@
     </FxCompile>
     <FxCompile Include="Shaders\TextureMapping\VS.hlsl">
       <Filter>Shaders\TextureMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\HeightMapping\DS.hlsl">
+      <Filter>Shaders\Basic</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

@@ -19,7 +19,8 @@ public:
 		const Material* materials,
 		ID3D12Resource** textures,
 		const std::uint32_t numResources,
-		ID3D12Resource& cubeMap
+		ID3D12Resource& diffuseCubeMap,
+		ID3D12Resource& specularCubeMap
 	) noexcept;
 
 	void RecordCommandLists(
@@ -31,7 +32,7 @@ public:
 	bool ValidateData() const noexcept override;
 
 private:
-	void BuildBuffers(const Material* materials, ID3D12Resource** textures, const std::uint32_t dataCount, ID3D12Resource& cubeMap) noexcept;
+	void BuildBuffers(const Material* materials, ID3D12Resource** textures, const std::uint32_t dataCount, ID3D12Resource& diffuseCubeMap, ID3D12Resource& specularCubeMap) noexcept;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mTexturesBufferGpuDescHandleBegin;
 
