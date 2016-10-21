@@ -18,7 +18,8 @@ public:
 		const std::uint32_t numGeomData,
 		const Material* materials,
 		const std::uint32_t numMaterials,
-		ID3D12Resource& cubeMap
+		ID3D12Resource& diffuseCubeMap,
+		ID3D12Resource& specularCubeMap
 		) noexcept;
 
 	void RecordCommandLists(
@@ -30,7 +31,7 @@ public:
 	bool ValidateData() const noexcept override;
 
 private:
-	void BuildBuffers(const Material* materials, const std::uint32_t numMaterials, ID3D12Resource& cubeMap) noexcept;
+	void BuildBuffers(const Material* materials, const std::uint32_t numMaterials, ID3D12Resource& diffuseCubeMap, ID3D12Resource& specularCubeMap) noexcept;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapBufferGpuDescHandleBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapsBufferGpuDescHandleBegin;
 };

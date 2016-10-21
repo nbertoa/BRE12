@@ -25,7 +25,8 @@
 // are not shadowed or masked, as a function of the light direction l and the view direction v.
 //
 // Therefore, the product of D(h) and G(l; v; h) gives us the concentration of active surface
-// points, the surface points that actively participate in the reflectance by successfully // reflecting light from l into v.
+// points, the surface points that actively participate in the reflectance by successfully 
+// reflecting light from l into v.
 //
 // F(l; h) is the Fresnel reflectance of the active surface points as a function of the light
 // direction l and the active microgeometry normal m = h.
@@ -40,14 +41,18 @@
 //
 // Fresnel Reflectance:
 //
-// The Fresnel reflectance function computes the fraction of light reflected from an optically// flat surface.
+// The Fresnel reflectance function computes the fraction of light reflected from an optically
+// flat surface.
 //
 // Its value depends on two things : the incoming angle (the angle between the light vector and the surface
 // normal - also referred to as the incident angle or angle of incidence) and the refractive index of the
-// material.//// Since the refractive index may vary over the visible spectrum, the Fresnel reflectance is a
+// material.
+//
+// Since the refractive index may vary over the visible spectrum, the Fresnel reflectance is a
 // spectral quantity - for production purposes, an RGB triple.
 //
-// We also know that each of the RGB values have to lie within the 0 to 1 range, since a surface cannot // reflect less than 0 % or more than 100 % of the incoming light.
+// We also know that each of the RGB values have to lie within the 0 to 1 range, since a surface cannot 
+// reflect less than 0 % or more than 100 % of the incoming light.
 //
 // Since the Fresnel reflectance stays close to the value for 0 over most of the visible parts of a given
 // 3D scene, we can think of this value(which we will denote F0) as the characteristic specular reflectance
@@ -123,7 +128,8 @@ float D_TR(const float m, const float dotNH) {
 // The geometry function is essential for BRDF energy conservation, without such a term the BRDF
 // can reflect arbitrarily more light energy than it receives.
 //
-// A key part of the microfacet BRDF derivation relates to the ratio between the active surface area// (the area covered by surface regions that reflect light energy from l to v) and 
+// A key part of the microfacet BRDF derivation relates to the ratio between the active surface area
+// (the area covered by surface regions that reflect light energy from l to v) and 
 // the total surface area of the macroscopic surface.If shadowing and masking
 // are not accounted for, then the active area may exceed the total area, an obvious impossibility which
 // can lead to the BRDF not conserving energy, in some cases by a huge amount

@@ -39,13 +39,17 @@ Output main(const in Input input){
 	// compute vector from geometry position to camera.
 	const float3 viewV = normalize(-geomPosV);
 
+	// Diffuse reflection color
+	const float3 diffuseColor = (1.0f - baseColor_metalmask.w) * baseColor_metalmask.xyz;
+	const float3 indirectFDiffuse = diffuseColor * DiffuseReflection.Load(screenCoord).xyz;
+
 	// Specular reflection color
 	const float3 reflectionColor = SpecularReflection.Load(screenCoord).xyz;
 	const float3 f0 = (1.0f - baseColor_metalmask.w) * float3(0.04f, 0.04f, 0.04f) + baseColor_metalmask.xyz * baseColor_metalmask.w;
 	const float3 F = F_Schlick(f0, 1.0f, dot(viewV, normalV));
 	const float3 indirectFSpecular = F * reflectionColor;
 
-	const float3 color = indirectFSpecular;
+	const float3 color = indirectFDiffuse + indirectFSpecular;
 
 	output.mColor = float4(color, 1.0f);
 	
