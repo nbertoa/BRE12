@@ -45,7 +45,7 @@ Output main(const in Input input) {
 	output.mDepth = length(input.mPosV);
 
 	// Compute diffuse reflection.
-	output.mDiffuseReflection.rgb = DiffuseCubeMap.SampleLevel(TexSampler, input.mNormalW, lerp(9, 0, gMaterial.mSmoothness)).rgb;
+	output.mDiffuseReflection.rgb = DiffuseCubeMap.Sample(TexSampler, input.mNormalW).rgb;
 
 	// Compute specular reflection.
 	const float3 incidentVecW = input.mPosW - gFrameCBuffer.mEyePosW.xyz;
