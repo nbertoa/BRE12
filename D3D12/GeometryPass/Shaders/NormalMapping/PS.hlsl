@@ -58,7 +58,9 @@ Output main(const in Input input) {
 	// Compute specular reflection.
 	const float3 incidentVecW = input.mPosW - gFrameCBuffer.mEyePosW.xyz;
 	const float3 reflectionVecW = reflect(incidentVecW, input.mNormalW);
-	output.mSpecularReflection.rgb = SpecularCubeMap.SampleLevel(TexSampler, reflectionVecW, lerp(9, 0, gMaterial.mSmoothness)).rgb;
+	// Our cube map has 10 mip map levels (0 - 9) based on smoothness
+	const uint mipmap = (1.0f - gMaterial.mSmoothness) * 9.0f;
+	output.mSpecularReflection.rgb = SpecularCubeMap.SampleLevel(TexSampler, reflectionVecW, mipmap).rgb;
 
 	return output;
 }

@@ -30,7 +30,9 @@ public:
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
+		ID3D12Resource& diffuseIrradianceCubeMap,
+		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
 	void Execute(const FrameCBuffer& frameCBuffer) const noexcept;
 

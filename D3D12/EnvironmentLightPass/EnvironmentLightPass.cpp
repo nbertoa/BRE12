@@ -63,7 +63,9 @@ void EnvironmentLightPass::Init(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
+	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
+	ID3D12Resource& diffuseIrradianceCubeMap,
+	ID3D12Resource& specularPreConvolvedCubeMap) noexcept {
 
 	ASSERT(ValidateData() == false);
 	
@@ -90,7 +92,13 @@ void EnvironmentLightPass::Init(
 
 	// Initialize recorder
 	mRecorder.reset(new EnvironmentLightCmdListRecorder(device, cmdListQueue));
-	mRecorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), geometryBuffers, geometryBuffersCount);
+	mRecorder->Init(
+		mesh.VertexBufferData(), 
+		mesh.IndexBufferData(), 
+		geometryBuffers, 
+		geometryBuffersCount,
+		diffuseIrradianceCubeMap,
+		specularPreConvolvedCubeMap);
 
 	ASSERT(ValidateData());
 }

@@ -70,7 +70,9 @@ void EnvironmentLightCmdListRecorder::Init(
 	const BufferCreator::VertexBufferData& vertexBufferData,
 	const BufferCreator::IndexBufferData indexBufferData,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
-	const std::uint32_t geometryBuffersCount) noexcept
+	const std::uint32_t geometryBuffersCount,
+	ID3D12Resource& diffuseIrradianceCubeMap,
+	ID3D12Resource& specularPreConvolvedCubeMap) noexcept
 {
 	ASSERT(ValidateData() == false);
 	ASSERT(geometryBuffers != nullptr);
@@ -79,7 +81,7 @@ void EnvironmentLightCmdListRecorder::Init(
 	mVertexBufferData = vertexBufferData;
 	mIndexBufferData = indexBufferData;
 
-	BuildBuffers(geometryBuffers, geometryBuffersCount);
+	BuildBuffers(geometryBuffers, geometryBuffersCount, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
 
 	ASSERT(ValidateData());
 }
@@ -115,7 +117,8 @@ void EnvironmentLightCmdListRecorder::RecordCommandLists(
 	// Set root parameters
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(1U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
+	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootDescriptorTable(2U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
 
 	// Draw object
 	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
@@ -142,12 +145,18 @@ bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 		mCmdList != nullptr &&
 		mCbvSrvUavDescHeap != nullptr &&
 		mImmutableCBuffer != nullptr &&
-		mFrameCBuffer != nullptr;
+		mFrameCBuffer != nullptr && 
+		mCubeMapsBufferGpuDescHandleBegin.ptr != 0UL;
 
 	return result;
 }
 
-void EnvironmentLightCmdListRecorder::BuildBuffers(Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, const std::uint32_t geometryBuffersCount) noexcept {
+void EnvironmentLightCmdListRecorder::BuildBuffers(
+	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
+	const std::uint32_t geometryBuffersCount,
+	ID3D12Resource& diffuseIrradianceCubeMap,
+	ID3D12Resource& specularPreConvolvedCubeMap) noexcept
+{
 	ASSERT(mCbvSrvUavDescHeap == nullptr);
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(geometryBuffersCount > 0U);
@@ -156,7 +165,7 @@ void EnvironmentLightCmdListRecorder::BuildBuffers(Microsoft::WRL::ComPtr<ID3D12
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = geometryBuffersCount;
+	descHeapDesc.NumDescriptors = geometryBuffersCount + 2U; // Geometry buffers + 2 cube maps (diffuse + specular)
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
 	
@@ -189,4 +198,23 @@ void EnvironmentLightCmdListRecorder::BuildBuffers(Microsoft::WRL::ComPtr<ID3D12
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
+
+	// Create cube map texture descriptors
+
+	mCubeMapsBufferGpuDescHandleBegin.ptr = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart().ptr + geometryBuffersCount;
+	
+	srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+	srvDesc.TextureCube.MostDetailedMip = 0;
+	srvDesc.TextureCube.MipLevels = diffuseIrradianceCubeMap.GetDesc().MipLevels;
+	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+	srvDesc.Format = diffuseIrradianceCubeMap.GetDesc().Format;
+	D3D12_CPU_DESCRIPTOR_HANDLE cubeMapBufferDescHandle = cpuDesc;
+	ResourceManager::Get().CreateShaderResourceView(diffuseIrradianceCubeMap, srvDesc, cubeMapBufferDescHandle);
+
+	srvDesc.TextureCube.MipLevels = specularPreConvolvedCubeMap.GetDesc().MipLevels;
+	srvDesc.Format = specularPreConvolvedCubeMap.GetDesc().Format;
+	cubeMapBufferDescHandle.ptr += descHandleIncSize;
+	ResourceManager::Get().CreateShaderResourceView(specularPreConvolvedCubeMap, srvDesc, cubeMapBufferDescHandle);
 }

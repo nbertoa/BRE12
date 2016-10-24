@@ -38,7 +38,9 @@ public:
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
+		ID3D12Resource& diffuseIrradianceCubeMap,
+		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
 	void Execute(
 		CommandListProcessor& cmdListProcessor,

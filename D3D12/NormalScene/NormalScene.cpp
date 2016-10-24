@@ -229,3 +229,22 @@ void NormalScene::GenerateSkyBoxRecorder(
 	task.reset(recorder);
 }
 
+void NormalScene::GenerateDiffuseAndSpecularCubeMaps(
+	ID3D12CommandQueue& cmdQueue,
+	ID3D12Resource* &diffuseIrradianceCubeMap,
+	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept
+{
+	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
+
+	// Cube map textures
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
+	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseIrradianceCubeMap, uploadBufferTex, *mCmdList);
+	ASSERT(diffuseIrradianceCubeMap != nullptr);
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
+	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularPreConvolvedCubeMap, uploadBufferTex2, *mCmdList);
+	ASSERT(specularPreConvolvedCubeMap != nullptr);
+
+	ExecuteCommandList(cmdQueue);
+}
+

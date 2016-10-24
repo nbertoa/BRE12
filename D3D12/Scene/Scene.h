@@ -44,6 +44,11 @@ public:
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		std::unique_ptr<SkyBoxCmdListRecorder>& task) noexcept = 0;
 
+	virtual void GenerateDiffuseAndSpecularCubeMaps(
+		ID3D12CommandQueue& cmdQueue,
+		ID3D12Resource* &diffuseIrradianceCubeMap,
+		ID3D12Resource* &specularPreConvolvedCubeMap) noexcept = 0;
+
 protected:
 	// Method used when the command list is ready to be closed
 	// and executed. It waits until GPU finishes command list execution.

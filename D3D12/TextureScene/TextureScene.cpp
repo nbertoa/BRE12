@@ -42,7 +42,7 @@ void TextureScene::GenerateGeomPassRecorders(
 	Model* model;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	ModelManager::Get().CreateSphere(4.0f, 50, 50, model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
+	ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
 	
 	// Cube map textures
@@ -70,7 +70,7 @@ void TextureScene::GenerateGeomPassRecorders(
 	}
 
 	const float meshSpaceOffset{ 100.0f };
-	const float scaleFactor{ 1.5f };
+	const float scaleFactor{ 0.2f };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, numGeometry),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
@@ -195,3 +195,21 @@ void TextureScene::GenerateSkyBoxRecorder(
 	task.reset(recorder);
 }
 
+void TextureScene::GenerateDiffuseAndSpecularCubeMaps(
+	ID3D12CommandQueue& cmdQueue,
+	ID3D12Resource* &diffuseIrradianceCubeMap,
+	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept
+{
+	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
+
+	// Cube map textures
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
+	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseIrradianceCubeMap, uploadBufferTex, *mCmdList);
+	ASSERT(diffuseIrradianceCubeMap != nullptr);
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
+	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularPreConvolvedCubeMap, uploadBufferTex2, *mCmdList);
+	ASSERT(specularPreConvolvedCubeMap != nullptr);
+
+	ExecuteCommandList(cmdQueue);
+}

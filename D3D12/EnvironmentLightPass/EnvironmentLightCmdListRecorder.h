@@ -30,7 +30,9 @@ public:
 		const BufferCreator::VertexBufferData& vertexBufferData,
 		const BufferCreator::IndexBufferData indexBufferData,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
-		const std::uint32_t geometryBuffersCount) noexcept;
+		const std::uint32_t geometryBuffersCount,
+		ID3D12Resource& diffuseIrradianceCubeMap,
+		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
 	void RecordCommandLists(
 		const FrameCBuffer& frameCBuffer,
@@ -40,7 +42,11 @@ public:
 	bool ValidateData() const noexcept;
 
 private:
-	void BuildBuffers(Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, const std::uint32_t geometryBuffersCount) noexcept;
+	void BuildBuffers(
+		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
+		const std::uint32_t geometryBuffersCount,
+		ID3D12Resource& diffuseIrradianceCubeMap,
+		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
 	ID3D12Device& mDevice;
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
@@ -55,4 +61,6 @@ private:
 
 	BufferCreator::VertexBufferData mVertexBufferData;
 	BufferCreator::IndexBufferData mIndexBufferData;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapsBufferGpuDescHandleBegin;
 };

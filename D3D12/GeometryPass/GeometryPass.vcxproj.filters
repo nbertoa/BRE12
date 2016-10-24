@@ -96,7 +96,7 @@
       <Filter>Shaders\TextureMapping</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\HeightMapping\DS.hlsl">
-      <Filter>Shaders\Basic</Filter>
+      <Filter>Shaders\HeightMapping</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

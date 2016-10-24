@@ -46,6 +46,12 @@ void Camera::GetView4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
 	m = mView;
 }
 
+void Camera::GetInvView4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
+	DirectX::XMMATRIX v = DirectX::XMLoadFloat4x4(&mView);
+	DirectX::XMMatrixInverse(nullptr, v);
+	XMStoreFloat4x4(&m, DirectX::XMMatrixInverse(nullptr, v));
+}
+
 void Camera::GetProj4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
 	m = mProj;
 }

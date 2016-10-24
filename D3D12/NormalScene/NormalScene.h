@@ -19,4 +19,9 @@ public:
 		ID3D12CommandQueue& cmdQueue,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		std::unique_ptr<SkyBoxCmdListRecorder>& task) noexcept override;
+
+	void GenerateDiffuseAndSpecularCubeMaps(
+		ID3D12CommandQueue& cmdQueue,
+		ID3D12Resource* &diffuseIrradianceCubeMap,
+		ID3D12Resource* &specularPreConvolvedCubeMap) noexcept override;
 };

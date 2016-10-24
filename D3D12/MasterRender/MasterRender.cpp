@@ -22,22 +22,23 @@ namespace {
 	void UpdateCamera(
 		Camera& camera, 
 		const float deltaTime, 
-		XMFLOAT4X4& viewTranspose, 
-		XMFLOAT4X4& projTranpose,
-		XMFLOAT4X4& invProjTranpose,
-		XMFLOAT4& eyePosW) noexcept {
+		FrameCBuffer& frameCBuffer) noexcept {
 
 		static std::int32_t lastXY[]{ 0UL, 0UL };
 		static const float sCameraOffset{ 7.5f };
 		static const float sCameraMultiplier{ 10.0f };
 
 		if (camera.UpdateViewMatrix()) {
-			DirectX::XMStoreFloat4x4(&viewTranspose, MathUtils::GetTranspose(camera.GetView4x4f()));
-			DirectX::XMStoreFloat4x4(&projTranpose, MathUtils::GetTranspose(camera.GetProj4x4f()));
-			DirectX::XMFLOAT4X4 invProj;
-			camera.GetInvProj4x4f(invProj);
-			DirectX::XMStoreFloat4x4(&invProjTranpose, MathUtils::GetTranspose(invProj));
-			eyePosW = camera.GetPosition4f();
+			DirectX::XMStoreFloat4x4(&frameCBuffer.mView, MathUtils::GetTranspose(camera.GetView4x4f()));
+			DirectX::XMFLOAT4X4 inverse;
+			camera.GetInvView4x4f(inverse);
+			DirectX::XMStoreFloat4x4(&frameCBuffer.mInvView, MathUtils::GetTranspose(inverse));
+
+			DirectX::XMStoreFloat4x4(&frameCBuffer.mProj, MathUtils::GetTranspose(camera.GetProj4x4f()));						
+			camera.GetInvProj4x4f(inverse);
+			DirectX::XMStoreFloat4x4(&frameCBuffer.mInvProj, MathUtils::GetTranspose(inverse));
+
+			frameCBuffer.mEyePosW = camera.GetPosition4f();
 		}
 
 		// Update camera based on keyboard
@@ -155,6 +156,12 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 	scene->GenerateGeomPassRecorders(*mCmdQueue, mCmdListProcessor->CmdListQueue(), mGeometryPass.GetRecorders());
 	mGeometryPass.Init(mDevice, DepthStencilCpuDesc());
 
+	ID3D12Resource* diffuseIrradianceCubeMap;
+	ID3D12Resource* specularPreConvolvedCubeMap;
+	scene->GenerateDiffuseAndSpecularCubeMaps(*mCmdQueue, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
+	ASSERT(diffuseIrradianceCubeMap != nullptr);
+	ASSERT(specularPreConvolvedCubeMap != nullptr);
+
 	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeometryPass.GetBuffers(), GeometryPass::BUFFERS_COUNT, mLightPass.GetRecorders());
 	mLightPass.Init(
 		mDevice, 
@@ -162,7 +169,9 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		mCmdListProcessor->CmdListQueue(),
 		mGeometryPass.GetBuffers(), 
 		mColorBufferRTVCpuDescHandle, 
-		DepthStencilCpuDesc());
+		DepthStencilCpuDesc(),
+		*diffuseIrradianceCubeMap,
+		*specularPreConvolvedCubeMap);
 
 	scene->GenerateSkyBoxRecorder(*mCmdQueue, mCmdListProcessor->CmdListQueue(), mSkyBoxPass.GetRecorder());
 	mSkyBoxPass.Init(mColorBufferRTVCpuDescHandle, DepthStencilCpuDesc());
@@ -185,7 +194,7 @@ tbb::task* MasterRender::execute() {
 	while (!mTerminate) {
 		mTimer.Tick();
 
-		UpdateCamera(mCamera, mTimer.DeltaTime(), mFrameCBuffer.mView, mFrameCBuffer.mProj, mFrameCBuffer.mInvProj, mFrameCBuffer.mEyePosW);
+		UpdateCamera(mCamera, mTimer.DeltaTime(), mFrameCBuffer);
 		ASSERT(mCmdListProcessor->IsIdle());
 
 		// Execute passes
