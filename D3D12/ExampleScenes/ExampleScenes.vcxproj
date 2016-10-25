@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B91B8720-50E7-4D9D-AC23-C698641B5D00}</ProjectGuid>
-    <RootNamespace>TextureScene</RootNamespace>
+    <ProjectGuid>{A532ADD0-F474-4F8B-9E13-652DA59C0A95}</ProjectGuid>
+    <RootNamespace>ExampleScenes</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -68,12 +68,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -119,9 +114,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BasicScene.cpp" />
+    <ClCompile Include="Demo1Scene.cpp" />
+    <ClCompile Include="HeightScene.cpp" />
+    <ClCompile Include="NormalScene.cpp" />
+    <ClCompile Include="SkyBoxScene.cpp" />
     <ClCompile Include="TextureScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BasicScene.h" />
+    <ClInclude Include="Demo1Scene.h" />
+    <ClInclude Include="HeightScene.h" />
+    <ClInclude Include="NormalScene.h" />
+    <ClInclude Include="SkyBoxScene.h" />
     <ClInclude Include="TextureScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

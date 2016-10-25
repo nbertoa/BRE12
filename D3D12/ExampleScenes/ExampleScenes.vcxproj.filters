@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="BasicScene.cpp" />
+    <ClCompile Include="Demo1Scene.cpp" />
+    <ClCompile Include="HeightScene.cpp" />
+    <ClCompile Include="NormalScene.cpp" />
+    <ClCompile Include="SkyBoxScene.cpp" />
+    <ClCompile Include="TextureScene.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BasicScene.h" />
+    <ClInclude Include="Demo1Scene.h" />
+    <ClInclude Include="HeightScene.h" />
+    <ClInclude Include="NormalScene.h" />
+    <ClInclude Include="SkyBoxScene.h" />
+    <ClInclude Include="TextureScene.h" />
+  </ItemGroup>
+</Project>
