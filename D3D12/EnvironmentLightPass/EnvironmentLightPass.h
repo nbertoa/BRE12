@@ -14,6 +14,7 @@ struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
+// Pass responsible to apply diffuse irradiance & specular pre-convolved environment cube maps
 class EnvironmentLightPass {
 public:
 	using Recorder = std::unique_ptr<EnvironmentLightCmdListRecorder>;
@@ -29,6 +30,7 @@ public:
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
+		ID3D12Resource& depthBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
 		ID3D12Resource& diffuseIrradianceCubeMap,

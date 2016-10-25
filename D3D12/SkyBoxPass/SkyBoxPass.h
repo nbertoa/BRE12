@@ -8,6 +8,7 @@ class CommandListProcessor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 
+// Pass that renders the sky box
 class SkyBoxPass {
 public:
 	using Recorder = std::unique_ptr<SkyBoxCmdListRecorder>;

@@ -14,7 +14,8 @@
 
 namespace {
 	void CreateCommandObjects(
-		ID3D12CommandAllocator* cmdAllocs[Settings::sQueuedFrameCount],
+		ID3D12CommandAllocator* cmdAllocsBegin[Settings::sQueuedFrameCount],
+		ID3D12CommandAllocator* cmdAllocsEnd[Settings::sQueuedFrameCount],
 		ID3D12GraphicsCommandList* &cmdList) noexcept {
 
 		ASSERT(Settings::sQueuedFrameCount > 0U);
@@ -22,10 +23,13 @@ namespace {
 
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
-			ASSERT(cmdAllocs[i] == nullptr);
-			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocs[i]);
+			ASSERT(cmdAllocsBegin[i] == nullptr);
+			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsBegin[i]);
+
+			ASSERT(cmdAllocsEnd[i] == nullptr);
+			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsEnd[i]);
 		}
-		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocs[0], cmdList);
+		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocsBegin[0], cmdList);
 		cmdList->Close();
 	}
 }
@@ -35,6 +39,7 @@ void LightPass::Init(
 	ID3D12CommandQueue& cmdQueue,
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
+	ID3D12Resource& depthBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
 	ID3D12Resource& diffuseIrradianceCubeMap,
@@ -44,9 +49,10 @@ void LightPass::Init(
 
 	ASSERT(mRecorders.empty() == false);
 
-	CreateCommandObjects(mCmdAllocs, mCmdList);
+	CreateCommandObjects(mCmdAllocsBegin, mCmdAllocsEnd, mCmdList);
 	mGeometryBuffers = geometryBuffers;
 	mColorBufferCpuDesc = colorBufferCpuDesc;
+	mDepthBuffer = &depthBuffer;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	// Initialize recorder's pso
@@ -68,7 +74,8 @@ void LightPass::Init(
 		cmdQueue, 
 		cmdListQueue, 
 		geometryBuffers, 
-		GeometryPass::BUFFERS_COUNT, 
+		GeometryPass::BUFFERS_COUNT,
+		*mDepthBuffer,
 		colorBufferCpuDesc, 
 		depthBufferCpuDesc,
 		diffuseIrradianceCubeMap,
@@ -87,27 +94,26 @@ void LightPass::Execute(
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocs[cmdAllocIndex] };
-	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocs);
+	ID3D12CommandAllocator* cmdAllocBegin{ mCmdAllocsBegin[cmdAllocIndex] };
+	ID3D12CommandAllocator* cmdAllocEnd{ mCmdAllocsEnd[cmdAllocIndex] };
+	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocsBegin);
 
 	// Total tasks = Light tasks + 1 ambient pass task + 1 environment light pass task
 	cmdListProcessor.ResetExecutedTasksCounter();
 	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mRecorders.size())};
 	const std::uint32_t taskCount{ lightTaskCount + 2U };
 
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
+	CHECK_HR(cmdAllocBegin->Reset());
+	CHECK_HR(mCmdList->Reset(cmdAllocBegin, nullptr));
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::DIFFUSEREFLECTION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::DEPTH].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(mDepthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 	};
-	const std::size_t barriersCount = _countof(barriers);
-	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT);
+	std::uint32_t barriersCount = _countof(barriers);
+	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 1UL);
 	mCmdList->ResourceBarrier(barriersCount, barriers);
 
 	// Clear render targets
@@ -115,8 +121,10 @@ void LightPass::Execute(
 	CHECK_HR(mCmdList->Close());
 
 	// Execute preliminary task
-	ID3D12CommandList* cmdLists[] = { mCmdList };
-	cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	{
+		ID3D12CommandList* cmdLists[] = { mCmdList };
+		cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	}
 
 	// Execute ambient light pass tasks
 	mAmbientPass.Execute();
@@ -134,15 +142,40 @@ void LightPass::Execute(
 	}
 	);
 
+	// Prepare end task
+	CHECK_HR(cmdAllocEnd->Reset());
+	CHECK_HR(mCmdList->Reset(cmdAllocEnd, nullptr));
+
+	// Resource barriers
+	CD3DX12_RESOURCE_BARRIER endBarriers[]{
+		CD3DX12_RESOURCE_BARRIER::Transition(mDepthBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE),
+	};
+	barriersCount = _countof(endBarriers);
+	ASSERT(barriersCount == 1UL);
+	mCmdList->ResourceBarrier(barriersCount, endBarriers);
+	CHECK_HR(mCmdList->Close());
+
 	// Wait until all previous tasks command lists are executed
 	while (cmdListProcessor.ExecutedTasksCounter() < taskCount) {
 		Sleep(0U);
+	}
+	
+	// Execute end task
+	{
+		ID3D12CommandList* cmdLists[] = { mCmdList };
+		cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
 	}
 }
 
 bool LightPass::ValidateData() const noexcept {
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
-		if (mCmdAllocs[i] == nullptr) {
+		if (mCmdAllocsBegin[i] == nullptr) {
+			return false;
+		}
+	}
+
+	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+		if (mCmdAllocsEnd[i] == nullptr) {
 			return false;
 		}
 	}
@@ -157,6 +190,7 @@ bool LightPass::ValidateData() const noexcept {
 		mCmdList != nullptr &&
 		mRecorders.empty() == false &&
 		mColorBufferCpuDesc.ptr != 0UL &&
+		mDepthBuffer != nullptr &&
 		mDepthBufferCpuDesc.ptr != 0UL;
 
 	return b;

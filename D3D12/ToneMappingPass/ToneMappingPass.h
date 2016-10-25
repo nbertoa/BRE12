@@ -15,6 +15,7 @@ struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
+// Pass that applies tone mapping
 class ToneMappingPass {
 public:
 	using Recorder = std::unique_ptr<ToneMappingCmdListRecorder>;

@@ -20,9 +20,9 @@ namespace {
 	const DXGI_FORMAT sBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{
 		DXGI_FORMAT_R16G16B16A16_FLOAT,
 		DXGI_FORMAT_R8G8B8A8_UNORM,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		DXGI_FORMAT_R32_FLOAT,
+		DXGI_FORMAT_UNKNOWN,
+		DXGI_FORMAT_UNKNOWN,
+		DXGI_FORMAT_UNKNOWN,
 		DXGI_FORMAT_UNKNOWN,
 		DXGI_FORMAT_UNKNOWN,
 		DXGI_FORMAT_UNKNOWN
@@ -58,17 +58,11 @@ namespace {
 		D3D12_CLEAR_VALUE clearValue[]{
 			{ DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 1.0f },
 			{ DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 0.0f },
-			{ DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 0.0f },
-			{ DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 0.0f },
-			{ DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 0.0f },
 		};
 		ASSERT(_countof(clearValue) == GeometryPass::BUFFERS_COUNT);
 
 		buffers[GeometryPass::NORMAL_SMOOTHNESS].Reset();
 		buffers[GeometryPass::BASECOLOR_METALMASK].Reset();
-		buffers[GeometryPass::DIFFUSEREFLECTION].Reset();
-		buffers[GeometryPass::SPECULARREFLECTION].Reset();
-		buffers[GeometryPass::DEPTH].Reset();
 
 		CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 
@@ -154,10 +148,8 @@ void GeometryPass::Execute(
 	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	mCmdList->ClearRenderTargetView(mRtvCpuDescs[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
 	mCmdList->ClearRenderTargetView(mRtvCpuDescs[BASECOLOR_METALMASK], zero, 0U, nullptr);
-	mCmdList->ClearRenderTargetView(mRtvCpuDescs[DIFFUSEREFLECTION], zero, 0U, nullptr);
-	mCmdList->ClearRenderTargetView(mRtvCpuDescs[SPECULARREFLECTION], zero, 0U, nullptr);
-	mCmdList->ClearRenderTargetView(mRtvCpuDescs[DEPTH], zero, 0U, nullptr);
 	mCmdList->ClearDepthStencilView(mDepthBufferCpuDesc, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
+
 	CHECK_HR(mCmdList->Close());
 
 	// Execute preliminary task
@@ -168,9 +160,6 @@ void GeometryPass::Execute(
 	const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescs[]{
 		mRtvCpuDescs[NORMAL_SMOOTHNESS],
 		mRtvCpuDescs[BASECOLOR_METALMASK],
-		mRtvCpuDescs[DIFFUSEREFLECTION],
-		mRtvCpuDescs[SPECULARREFLECTION],
-		mRtvCpuDescs[DEPTH],
 	};
 	const std::uint32_t rtvCpuDescsCount = _countof(rtvCpuDescs);
 	ASSERT(rtvCpuDescsCount == BUFFERS_COUNT);

@@ -9,11 +9,11 @@ struct Input {
 	nointerpolation PunctualLight mPunctualLight : PUNCTUAL_LIGHT;
 };
 
+ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b0);
+
 Texture2D<float4> Normal_Smoothness : register (t0);
 Texture2D<float4> BaseColor_MetalMask : register (t1);
-Texture2D<float4> DiffuseReflection : register (t2);
-Texture2D<float4> SpecularReflection : register (t3);
-Texture2D<float> Depth : register (t4);
+Texture2D<float> Depth : register (t2);
 
 struct Output {
 	float4 mColor : SV_Target0;
@@ -24,12 +24,16 @@ Output main(const in Input input) {
 
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
 	
-	// Reconstruct geometry position in view space.
-	// position = viewRay * depth (view space)
 	const float4 normal_smoothness = Normal_Smoothness.Load(screenCoord);
+
+	// Clamp the view space position to the plane at Z = 1
+	const float3 viewRay = float3(input.mViewRayV.xy / input.mViewRayV.z, 1.0f);
+
+	// Sample the depth and convert to linear view space Z (assume it gets sampled as
+	// a floating point value of the range [0,1])
 	const float depth = Depth.Load(screenCoord);
-	const float3 viewRay = normalize(input.mViewRayV);
-	const float3 geomPosV = viewRay * depth;
+	const float linearDepth = gImmutableCBuffer.mProjectionA_ProjectionB.y / (depth - gImmutableCBuffer.mProjectionA_ProjectionB.x);
+	const float3 geomPosV = viewRay * linearDepth;
 
 	PunctualLight light = input.mPunctualLight;
 

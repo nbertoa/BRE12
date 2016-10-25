@@ -9,6 +9,11 @@
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
+// Root Signature:
+// "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Object CBuffers
+// "CBV(b1, visibility = SHADER_VISIBILITY_VERTEX), " \ 1 > Frame CBuffer
+// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Cube Map texture
+
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
 	ID3D12RootSignature* sRootSign{ nullptr };

@@ -16,6 +16,7 @@ public:
 	void Init(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
+		ID3D12Resource& depthBuffer,
 		const PunctualLight* lights,
 		const std::uint32_t numLights) noexcept;
 

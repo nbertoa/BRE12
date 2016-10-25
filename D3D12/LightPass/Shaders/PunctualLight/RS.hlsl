@@ -6,4 +6,5 @@
 "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_VERTEX), " \
 "CBV(b0, visibility = SHADER_VISIBILITY_GEOMETRY), " \
 "CBV(b1, visibility = SHADER_VISIBILITY_GEOMETRY), " \
-"DescriptorTable(SRV(t0), SRV(t1), SRV(t2), SRV(t3), SRV(t4), visibility = SHADER_VISIBILITY_PIXEL)"
+"CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \
+"DescriptorTable(SRV(t0), SRV(t1), SRV(t2), visibility = SHADER_VISIBILITY_PIXEL)"

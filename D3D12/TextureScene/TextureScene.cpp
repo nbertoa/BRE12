@@ -44,17 +44,6 @@ void TextureScene::GenerateGeomPassRecorders(
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
 	ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
-	
-	// Cube map textures
-	ID3D12Resource* diffuseCubeMap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseCubeMap, uploadBufferTex, *mCmdList);
-	ASSERT(diffuseCubeMap != nullptr);
-
-	ID3D12Resource* specularCubeMap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
-	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularCubeMap, uploadBufferTex2, *mCmdList);
-	ASSERT(specularCubeMap != nullptr);
 
 	ExecuteCommandList(cmdQueue);
 
@@ -108,7 +97,7 @@ void TextureScene::GenerateGeomPassRecorders(
 				textures.push_back(tex[i % _countof(tex)]);
 			}
 
-			task.Init(&currGeomData, 1U, materials.data(), textures.data(), static_cast<std::uint32_t>(textures.size()), *diffuseCubeMap, *specularCubeMap);
+			task.Init(&currGeomData, 1U, materials.data(), textures.data(), static_cast<std::uint32_t>(textures.size()));
 		}
 	}
 	);
@@ -118,6 +107,7 @@ void TextureScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
+	ID3D12Resource& depthBuffer,
 	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) noexcept
 {
 	ASSERT(tasks.empty());
@@ -152,7 +142,7 @@ void TextureScene::GenerateLightPassRecorders(
 			light[1].mColorAndPower[2] = 1.0f;
 			light[1].mColorAndPower[3] = 1000000.0f;
 
-			task.Init(geometryBuffers, geometryBuffersCount, light, _countof(light));
+			task.Init(geometryBuffers, geometryBuffersCount, depthBuffer, light, _countof(light));
 		}		
 	}
 	);

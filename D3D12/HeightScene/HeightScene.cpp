@@ -91,17 +91,6 @@ void HeightScene::GenerateGeomPassRecorders(
 	ModelManager::Get().LoadModel("models/mitsubaFloor.obj", model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
 
-	// Cube map textures
-	ID3D12Resource* diffuseCubeMap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex1;
-	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseCubeMap, uploadBufferTex1, *mCmdList);
-	ASSERT(diffuseCubeMap != nullptr);
-
-	ID3D12Resource* specularCubeMap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
-	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularCubeMap, uploadBufferTex2, *mCmdList);
-	ASSERT(specularCubeMap != nullptr);
-
 	ExecuteCommandList(cmdQueue);
 
 	ASSERT(model->HasMeshes());
@@ -166,7 +155,7 @@ void HeightScene::GenerateGeomPassRecorders(
 				heights.push_back(height[i % numResources]);
 			}
 
-			task.Init(&currGeomData, 1U, materials.data(), textures.data(), normals.data(), heights.data(), static_cast<std::uint32_t>(normals.size()), *diffuseCubeMap, *specularCubeMap);
+			task.Init(&currGeomData, 1U, materials.data(), textures.data(), normals.data(), heights.data(), static_cast<std::uint32_t>(normals.size()));
 		}
 	}
 	);
@@ -176,6 +165,7 @@ void HeightScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
+	ID3D12Resource& depthBuffer,
 	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) noexcept
 {
 	ASSERT(tasks.empty());
@@ -210,7 +200,7 @@ void HeightScene::GenerateLightPassRecorders(
 			light[1].mColorAndPower[2] = 1.0f;
 			light[1].mColorAndPower[3] = 1000000.0f;
 
-			task.Init(geometryBuffers, geometryBuffersCount, light, _countof(light));
+			task.Init(geometryBuffers, geometryBuffersCount, depthBuffer, light, _countof(light));
 		}
 	}
 	);

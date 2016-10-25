@@ -19,6 +19,7 @@ struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
+// Pass responsible to execute recorders related with deferred shading lighting pass
 class LightPass {
 public:
 	using Recorders = std::vector<std::unique_ptr<LightPassCmdListRecorder>>;
@@ -37,6 +38,7 @@ public:
 		ID3D12CommandQueue& cmdQueue,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
+		ID3D12Resource& depthBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
 		ID3D12Resource& diffuseIrradianceCubeMap,
@@ -52,12 +54,15 @@ private:
 	bool ValidateData() const noexcept;
 
 	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocsBegin[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocsEnd[Settings::sQueuedFrameCount]{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 
 	// Geometry buffers created by GeometryPass
 	Microsoft::WRL::ComPtr<ID3D12Resource>* mGeometryBuffers;
+
+	ID3D12Resource* mDepthBuffer{ nullptr };
 
 	// Color & Depth buffers cpu descriptors
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };

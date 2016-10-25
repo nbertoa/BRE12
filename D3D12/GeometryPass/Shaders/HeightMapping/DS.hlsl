@@ -17,6 +17,9 @@ struct Input {
 
 ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b0);
 
+SamplerState TexSampler : register (s0);
+Texture2D HeightTexture : register (t0);
+
 struct Output {
 	float4 mPosH : SV_Position;
 	float3 mPosW : POS_WORLD;
@@ -29,9 +32,6 @@ struct Output {
 	float3 mBinormalV : BINORMAL_VIEW;
 	float2 mTexCoordO : TEXCOORD0;
 };
-
-SamplerState TexSampler : register (s0);
-Texture2D HeightTexture : register (t0);
 
 [domain("tri")]
 Output main(const HullShaderConstantOutput HSConstantOutput, const float3 uvw : SV_DomainLocation, const OutputPatch <Input, NUM_PATCH_POINTS> patch) {

@@ -43,7 +43,6 @@ namespace {
 
 		// Update camera based on keyboard
 		const float offset = sCameraOffset * (Keyboard::Get().IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * deltaTime;
-		//const float offset = 0.00005f;
 		if (Keyboard::Get().IsKeyDown(DIK_W)) {
 			camera.Walk(offset);
 		}
@@ -162,12 +161,13 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 	ASSERT(diffuseIrradianceCubeMap != nullptr);
 	ASSERT(specularPreConvolvedCubeMap != nullptr);
 
-	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeometryPass.GetBuffers(), GeometryPass::BUFFERS_COUNT, mLightPass.GetRecorders());
+	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeometryPass.GetBuffers(), GeometryPass::BUFFERS_COUNT, *mDepthStencilBuffer, mLightPass.GetRecorders());
 	mLightPass.Init(
 		mDevice, 
 		*mCmdQueue, 
 		mCmdListProcessor->CmdListQueue(),
 		mGeometryPass.GetBuffers(), 
+		*mDepthStencilBuffer,
 		mColorBufferRTVCpuDescHandle, 
 		DepthStencilCpuDesc(),
 		*diffuseIrradianceCubeMap,
@@ -221,13 +221,10 @@ void MasterRender::ExecuteMergePass() {
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mMergePassCmdList->Reset(cmdAlloc, nullptr));
 
-	// Set barrieres
+	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::DIFFUSEREFLECTION].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::SPECULARREFLECTION].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::DEPTH].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(CurrentFrameBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
 		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
@@ -268,14 +265,14 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	depthStencilDesc.Height = Settings::sWindowHeight;
 	depthStencilDesc.DepthOrArraySize = 1U;
 	depthStencilDesc.MipLevels = 1U;
-	depthStencilDesc.Format = Settings::sDepthStencilFormat;
+	depthStencilDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 	depthStencilDesc.SampleDesc.Count = 1U;
 	depthStencilDesc.SampleDesc.Quality = 0U;
 	depthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
 	D3D12_CLEAR_VALUE clearValue = {};
-	clearValue.Format = Settings::sDepthStencilFormat;
+	clearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	clearValue.DepthStencil.Depth = 1.0f;
 	clearValue.DepthStencil.Stencil = 0U;
 
@@ -283,7 +280,11 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, depthStencilDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, clearValue, mDepthStencilBuffer);
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
-	mDevice.CreateDepthStencilView(mDepthStencilBuffer, nullptr, DepthStencilCpuDesc());
+	D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+	mDevice.CreateDepthStencilView(mDepthStencilBuffer, &depthStencilViewDesc, DepthStencilCpuDesc());
 }
 
 void MasterRender::CreateRtvAndDsvDescriptorHeaps() noexcept {

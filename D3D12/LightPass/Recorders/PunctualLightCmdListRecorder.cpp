@@ -10,6 +10,14 @@
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
+// Root Signature:
+// "CBV(b0, visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Frame CBuffer
+// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_VERTEX), " \ 1 -> Lights Buffer
+// "CBV(b0, visibility = SHADER_VISIBILITY_GEOMETRY), " \ 2 -> Frame CBuffer
+// "CBV(b1, visibility = SHADER_VISIBILITY_GEOMETRY), " \ 3 -> Immutable CBuffer
+// "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 4 -> Immutable CBuffer
+// "DescriptorTable(SRV(t0), SRV(t1), SRV(t2), visibility = SHADER_VISIBILITY_PIXEL)" 4 -> Textures
+
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
 	ID3D12RootSignature* sRootSign{ nullptr };
@@ -85,6 +93,7 @@ void PunctualLightCmdListRecorder::InitPSO() noexcept {
 void PunctualLightCmdListRecorder::Init(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
+	ID3D12Resource& depthBuffer,
 	const PunctualLight* lights,
 	const std::uint32_t numLights) noexcept
 {
@@ -96,7 +105,7 @@ void PunctualLightCmdListRecorder::Init(
 
 	mNumLights = numLights;
 
-	// Geometry buffers SRVS + lights buffer SRV + cube map SRV
+	// Geometry buffers SRVS + lights buffer SRV + depth buffer
 	const std::uint32_t descHeapOffset(geometryBuffersCount + 2U);
 	BuildBuffers(lights, descHeapOffset);
 
@@ -106,9 +115,21 @@ void PunctualLightCmdListRecorder::Init(
 
 	// Create lights buffer SRV	
 	const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	D3D12_CPU_DESCRIPTOR_HANDLE lightsBufferCpuDescHandle{ cbvSrvUavCpuDescHandle.ptr + (geometryBuffersCount + 1U) * descHandleIncSize };
+	D3D12_CPU_DESCRIPTOR_HANDLE lightsBufferCpuDescHandle{ cbvSrvUavCpuDescHandle.ptr + geometryBuffersCount * descHandleIncSize };
 	CreateLightsBufferSRV(*mLightsBuffer->Resource(), mNumLights, lightsBufferCpuDescHandle);
-	mLightsBufferGpuDescHandleBegin.ptr = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart().ptr + (geometryBuffersCount + 1U) * descHandleIncSize;
+	mLightsBufferGpuDescHandleBegin.ptr = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart().ptr + geometryBuffersCount * descHandleIncSize;
+
+	// Create depth buffer descriptor
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDesc.Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuDesc{ cbvSrvUavCpuDescHandle.ptr + (geometryBuffersCount + 1U) * descHandleIncSize };
+	ResourceManager::Get().CreateShaderResourceView(depthBuffer, srvDesc, cpuDesc);
 
 	ASSERT(ValidateData());
 
@@ -150,7 +171,8 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	mCmdList->SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescHandleBegin);
 	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(4U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
+	mCmdList->SetGraphicsRootConstantBufferView(4U, immutableCBufferGpuVAddress);
+	mCmdList->SetGraphicsRootDescriptorTable(5U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
 	
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	

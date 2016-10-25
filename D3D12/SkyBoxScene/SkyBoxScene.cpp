@@ -44,6 +44,7 @@ namespace {
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
+		ID3D12Resource& depthBuffer,
 		PunctualLightCmdListRecorder* &recorder) {
 		recorder = new PunctualLightCmdListRecorder(D3dData::Device(), cmdListQueue);
 		PunctualLight light[1];
@@ -56,7 +57,7 @@ namespace {
 		light[0].mColorAndPower[2] = 1.0f;
 		light[0].mColorAndPower[3] = 1000000.0f;
 
-		recorder->Init(geometryBuffers, geometryBuffersCount, light, _countof(light));
+		recorder->Init(geometryBuffers, geometryBuffersCount, depthBuffer, light, _countof(light));
 	}
 
 	void GenerateRecorder(
@@ -73,8 +74,6 @@ namespace {
 		ID3D12Resource** heights,
 		Material* materials,
 		const std::size_t numMaterials,
-		ID3D12Resource& diffuseCubeMap,
-		ID3D12Resource& specularCubeMap,
 		HeightCmdListRecorder* &recorder) {
 
 		ASSERT(textures != nullptr);
@@ -138,9 +137,7 @@ namespace {
 			texturesVec.data(), 
 			normalsVec.data(), 
 			heightsVec.data(), 
-			static_cast<std::uint32_t>(materialsVec.size()),
-			diffuseCubeMap,
-			specularCubeMap);
+			static_cast<std::uint32_t>(materialsVec.size()));
 	}
 }
 
@@ -222,28 +219,17 @@ void SkyBoxScene::GenerateGeomPassRecorders(
 	ResourceManager::Get().LoadTextureFromFile("textures/concrete_height.dds", height[5], uploadBufferHeight[5], *mCmdList);
 	ASSERT(height[5] != nullptr);
 
-	// Cube map textures
-	ID3D12Resource* diffuseCubeMap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex1;
-	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseCubeMap, uploadBufferTex1, *mCmdList);
-	ASSERT(diffuseCubeMap != nullptr);
-
-	ID3D12Resource* specularCubeMap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
-	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularCubeMap, uploadBufferTex2, *mCmdList);
-	ASSERT(specularCubeMap != nullptr);
-
 	ExecuteCommandList(cmdQueue);
 
 	tasks.resize(2);
 
 	HeightCmdListRecorder* heightRecorder{ nullptr };
-	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), tex, normal, height, materials, numResources, *diffuseCubeMap, *specularCubeMap, heightRecorder);
+	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), tex, normal, height, materials, numResources, heightRecorder);
 	ASSERT(heightRecorder != nullptr);
 	tasks[0].reset(heightRecorder);
 
 	HeightCmdListRecorder* heightRecorder2{ nullptr };
-	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, cmdListQueue, model->Meshes(), tex, normal, height, materials, numResources, *diffuseCubeMap, *specularCubeMap, heightRecorder2);
+	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, cmdListQueue, model->Meshes(), tex, normal, height, materials, numResources, heightRecorder2);
 	ASSERT(heightRecorder2 != nullptr);
 	tasks[1].reset(heightRecorder2);
 }
@@ -252,6 +238,7 @@ void SkyBoxScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
+	ID3D12Resource& depthBuffer,
 	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) noexcept
 {
 	ASSERT(tasks.empty());
@@ -261,7 +248,7 @@ void SkyBoxScene::GenerateLightPassRecorders(
 	
 	tasks.resize(1UL);
 	PunctualLightCmdListRecorder* recorder{ nullptr };
-	GenerateRecorder(cmdListQueue, geometryBuffers, geometryBuffersCount, recorder);
+	GenerateRecorder(cmdListQueue, geometryBuffers, geometryBuffersCount, depthBuffer, recorder);
 	ASSERT(recorder != nullptr);
 	tasks[0].reset(recorder);
 }

@@ -35,6 +35,7 @@ namespace {
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
+		ID3D12Resource& depthBuffer,
 		PunctualLightCmdListRecorder* &recorder) {
 		recorder = new PunctualLightCmdListRecorder(D3dData::Device(), cmdListQueue);
 		PunctualLight light[1];
@@ -47,7 +48,7 @@ namespace {
 		light[0].mColorAndPower[2] = 1.0f;
 		light[0].mColorAndPower[3] = 10000000.0f;
 
-		recorder->Init(geometryBuffers, geometryBuffersCount, light, _countof(light));
+		recorder->Init(geometryBuffers, geometryBuffersCount, depthBuffer, light, _countof(light));
 	}
 
 	void GenerateRecorder(
@@ -59,8 +60,6 @@ namespace {
 		const float offsetZ,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		const std::vector<Mesh>& meshes,
-		ID3D12Resource& diffuseCubeMap,
-		ID3D12Resource& specularCubeMap,
 		BasicCmdListRecorder* &recorder) {
 		recorder = new BasicCmdListRecorder(D3dData::Device(), cmdListQueue);
 
@@ -104,9 +103,7 @@ namespace {
 			geomDataVec.data(), 
 			static_cast<std::uint32_t>(geomDataVec.size()), 
 			materials.data(), 
-			static_cast<std::uint32_t>(materials.size()), 
-			diffuseCubeMap,
-			specularCubeMap);
+			static_cast<std::uint32_t>(materials.size()));
 	}
 }
 
@@ -132,27 +129,16 @@ void BasicScene::GenerateGeomPassRecorders(
 	ModelManager::Get().CreateSphere(1.0f, 50, 50, model2, *mCmdList, uploadVertexBuffer2, uploadIndexBuffer2);
 	ASSERT(model2 != nullptr);
 
-	// Cube map textures
-	ID3D12Resource* diffuseCubeMap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseCubeMap, uploadBufferTex, *mCmdList);
-	ASSERT(diffuseCubeMap != nullptr);
-
-	ID3D12Resource* specularCubeMap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
-	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularCubeMap, uploadBufferTex2, *mCmdList);
-	ASSERT(specularCubeMap != nullptr);
-
 	ExecuteCommandList(cmdQueue);
 
 	tasks.resize(2);
 	BasicCmdListRecorder* basicRecorder{ nullptr };
-	GenerateRecorder(sSphereTx, sSphereTy, sSphereTz, sSphereOffsetX, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), *diffuseCubeMap, *specularCubeMap, basicRecorder);
+	GenerateRecorder(sSphereTx, sSphereTy, sSphereTz, sSphereOffsetX, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), basicRecorder);
 	ASSERT(basicRecorder != nullptr);
 	tasks[0].reset(basicRecorder);
 
 	BasicCmdListRecorder* basicRecorder2{ nullptr };
-	GenerateRecorder(sBunnyTx, sBunnyTy, sBunnyTz, sBunnyOffsetX, 0.0f, 0.0f, cmdListQueue, model2->Meshes(), *diffuseCubeMap, *specularCubeMap, basicRecorder2);
+	GenerateRecorder(sBunnyTx, sBunnyTy, sBunnyTz, sBunnyOffsetX, 0.0f, 0.0f, cmdListQueue, model2->Meshes(), basicRecorder2);
 	ASSERT(basicRecorder2 != nullptr);
 	tasks[1].reset(basicRecorder2);
 }
@@ -161,6 +147,7 @@ void BasicScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
+	ID3D12Resource& depthBuffer,
 	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) noexcept
 {
 	ASSERT(tasks.empty());
@@ -170,7 +157,7 @@ void BasicScene::GenerateLightPassRecorders(
 
 	tasks.resize(1UL);
 	PunctualLightCmdListRecorder* recorder{ nullptr };
-	GenerateRecorder(cmdListQueue, geometryBuffers, geometryBuffersCount, recorder);
+	GenerateRecorder(cmdListQueue, geometryBuffers, geometryBuffersCount, depthBuffer, recorder);
 	ASSERT(recorder != nullptr);
 	tasks[0].reset(recorder);
 }

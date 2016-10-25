@@ -31,6 +31,7 @@ public:
 		const BufferCreator::IndexBufferData indexBufferData,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
+		ID3D12Resource& depthBuffer,
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
@@ -45,6 +46,7 @@ private:
 	void BuildBuffers(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
 		const std::uint32_t geometryBuffersCount,
+		ID3D12Resource& depthBuffer,
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 

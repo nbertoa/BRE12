@@ -7,6 +7,9 @@
 #include <ResourceManager/ResourceManager.h>
 #include <Utils/DebugUtils.h>
 
+// Root Signature:
+// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)" 0 -> BaseColor_MetalMask texture
+
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
 	ID3D12RootSignature* sRootSign{ nullptr };

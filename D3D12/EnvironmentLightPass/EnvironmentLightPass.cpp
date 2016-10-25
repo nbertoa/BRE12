@@ -62,6 +62,7 @@ void EnvironmentLightPass::Init(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
+	ID3D12Resource& depthBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
 	ID3D12Resource& diffuseIrradianceCubeMap,
@@ -97,6 +98,7 @@ void EnvironmentLightPass::Init(
 		mesh.IndexBufferData(), 
 		geometryBuffers, 
 		geometryBuffersCount,
+		depthBuffer,
 		diffuseIrradianceCubeMap,
 		specularPreConvolvedCubeMap);
 

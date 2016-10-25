@@ -10,6 +10,12 @@
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
+// Root signature:
+// "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Object CBuffers
+// "CBV(b1, visibility = SHADER_VISIBILITY_VERTEX), " \ 1 -> Frame CBuffer
+// "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Material CBuffers
+// "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 3 -> Frame CBuffer
+
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
 	ID3D12RootSignature* sRootSign{ nullptr };
@@ -44,9 +50,7 @@ void BasicCmdListRecorder::Init(
 	const GeometryData* geometryDataVec,
 	const std::uint32_t numGeomData,
 	const Material* materials,
-	const std::uint32_t numMaterials,
-	ID3D12Resource& diffuseCubeMap,
-	ID3D12Resource& specularCubeMap) noexcept
+	const std::uint32_t numMaterials) noexcept
 {
 	ASSERT(ValidateData() == false);
 	ASSERT(geometryDataVec != nullptr);
@@ -69,7 +73,7 @@ void BasicCmdListRecorder::Init(
 		mGeometryDataVec.push_back(geometryDataVec[i]);
 	}
 
-	BuildBuffers(materials, numMaterials, diffuseCubeMap, specularCubeMap);
+	BuildBuffers(materials, numMaterials);
 
 	ASSERT(ValidateData());
 }
@@ -113,10 +117,7 @@ void BasicCmdListRecorder::RecordCommandLists(
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(3U, frameCBufferGpuVAddress);
-
-	// Set cube map root parameter
-	mCmdList->SetGraphicsRootDescriptorTable(4U, mCubeMapsBufferGpuDescHandleBegin);
-
+	
 	// Draw objects
 	const std::size_t geomCount{ mGeometryDataVec.size() };
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
@@ -143,13 +144,7 @@ void BasicCmdListRecorder::RecordCommandLists(
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;
 }
 
-bool BasicCmdListRecorder::ValidateData() const noexcept
-{
-	const bool b = GeometryPassCmdListRecorder::ValidateData() && mCubeMapsBufferGpuDescHandleBegin.ptr != 0UL;
-	return b;
-}
-
-void BasicCmdListRecorder::BuildBuffers(const Material* materials, const std::uint32_t numMaterials, ID3D12Resource& diffuseCubeMap, ID3D12Resource& specularCubeMap) noexcept {
+void BasicCmdListRecorder::BuildBuffers(const Material* materials, const std::uint32_t numMaterials) noexcept {
 	ASSERT(materials != nullptr);
 	ASSERT(numMaterials != 0UL);
 
@@ -166,7 +161,7 @@ void BasicCmdListRecorder::BuildBuffers(const Material* materials, const std::ui
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = numMaterials * 2U + 2U ; // (1 obj cbuffer + 1 material cbuffer) per geometry + 2 cube maps (diffuse and specular)
+	descHeapDesc.NumDescriptors = numMaterials * 2U; // (1 obj cbuffer + 1 material cbuffer) per geometry
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
 
@@ -194,10 +189,7 @@ void BasicCmdListRecorder::BuildBuffers(const Material* materials, const std::ui
 	const std::size_t matCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(Material)) };
 	ResourceManager::Get().CreateUploadBuffer(matCBufferElemSize, numMaterials, mMaterialsCBuffer);
 	mMaterialsCBufferGpuDescHandleBegin.ptr = mObjectCBufferGpuDescHandleBegin.ptr + numMaterials * descHandleIncSize;
-
-	// Set begin for cube maps in GPU	
-	mCubeMapsBufferGpuDescHandleBegin.ptr = mObjectCBufferGpuDescHandleBegin.ptr + numMaterials * 2 * descHandleIncSize;
-
+	
 	// Create object cbuffer descriptors
 	// Create material cbuffer descriptors
 	// Fill materials cbuffers data
@@ -228,20 +220,4 @@ void BasicCmdListRecorder::BuildBuffers(const Material* materials, const std::ui
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
-
-	// Create cube map texture descriptors
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-	srvDesc.TextureCube.MostDetailedMip = 0;
-	srvDesc.TextureCube.MipLevels = diffuseCubeMap.GetDesc().MipLevels;
-	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
-	srvDesc.Format = diffuseCubeMap.GetDesc().Format;
-	D3D12_CPU_DESCRIPTOR_HANDLE cubeMapBufferDescHandle{ mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + numMaterials * 2U * descHandleIncSize };
-	ResourceManager::Get().CreateShaderResourceView(diffuseCubeMap, srvDesc, cubeMapBufferDescHandle);
-
-	srvDesc.TextureCube.MipLevels = specularCubeMap.GetDesc().MipLevels;
-	srvDesc.Format = specularCubeMap.GetDesc().Format;
-	cubeMapBufferDescHandle.ptr += descHandleIncSize;
-	ResourceManager::Get().CreateShaderResourceView(specularCubeMap, srvDesc, cubeMapBufferDescHandle);
 }

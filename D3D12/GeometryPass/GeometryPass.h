@@ -16,14 +16,12 @@ struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
+// Pass responsible to execute recorders related with deferred shading geometry pass
 class GeometryPass {
 public:
 	enum Buffers {
 		NORMAL_SMOOTHNESS = 0U, // 2 encoded normals based on octahedron encoding + 1 smoothness
 		BASECOLOR_METALMASK, // 3 base color + 1 metal mask
-		DIFFUSEREFLECTION, // 3 diffuse reflection
-		SPECULARREFLECTION, // 3 specular reflection
-		DEPTH, // 1 depth in view space (length)
 		BUFFERS_COUNT
 	};
 

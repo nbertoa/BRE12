@@ -16,15 +16,10 @@ ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
 
 SamplerState TexSampler : register (s0);
 Texture2D DiffuseTexture : register (t0);
-TextureCube DiffuseCubeMap : register(t1);
-TextureCube SpecularCubeMap : register(t2);
 
 struct Output {
 	float4 mNormal_Smoothness : SV_Target0;
 	float4 mBaseColor_MetalMask : SV_Target1;
-	float4 mDiffuseReflection : SV_Target2;
-	float4 mSpecularReflection : SV_Target3;
-	float mDepth : SV_Target4;
 };
 
 Output main(const in Input input) {
@@ -40,19 +35,6 @@ Output main(const in Input input) {
 
 	// Smoothness
 	output.mNormal_Smoothness.z = gMaterial.mSmoothness;
-
-	// Depth (view space)
-	output.mDepth = length(input.mPosV);
-
-	// Compute diffuse reflection.
-	output.mDiffuseReflection.rgb = DiffuseCubeMap.Sample(TexSampler, input.mNormalW).rgb;
-
-	// Compute specular reflection.
-	const float3 incidentVecW = input.mPosW - gFrameCBuffer.mEyePosW.xyz;
-	const float3 reflectionVecW = reflect(incidentVecW, input.mNormalW);
-	// Our cube map has 10 mip map levels (0 - 9) based on smoothness
-	const uint mipmap = (1.0f - gMaterial.mSmoothness) * 9.0f;
-	output.mSpecularReflection.rgb = SpecularCubeMap.SampleLevel(TexSampler, reflectionVecW, mipmap).rgb;
 
 	return output;
 }

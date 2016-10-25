@@ -13,6 +13,7 @@ struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
+// Pass responsible to apply ambient lighting and ambient occlusion
 class AmbientPass {
 public:
 	using Recorder = std::unique_ptr<AmbientCmdListRecorder>;
