@@ -105,18 +105,18 @@ void PunctualLightCmdListRecorder::Init(
 
 	mNumLights = numLights;
 
-	// Geometry buffers SRVS + lights buffer SRV + depth buffer
-	const std::uint32_t descHeapOffset(geometryBuffersCount + 2U);
-	BuildBuffers(lights, descHeapOffset);
+	// Geometry buffers SRVS + num lights + lights buffer SRV + depth buffer
+	const std::uint32_t numDescriptors(geometryBuffersCount + mNumLights + 2U);
+	BuildLightsBuffers(lights, numDescriptors);
 
 	// Create geometry buffers SRVs
-	D3D12_CPU_DESCRIPTOR_HANDLE cbvSrvUavCpuDescHandle(mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart());
-	CreateGeometryBuffersSRVs(geometryBuffers, geometryBuffersCount, cbvSrvUavCpuDescHandle);
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuDesc(mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart());
+	CreateGeometryBuffersSRVs(geometryBuffers, geometryBuffersCount, cpuDesc);
 
 	// Create lights buffer SRV	
 	const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	D3D12_CPU_DESCRIPTOR_HANDLE lightsBufferCpuDescHandle{ cbvSrvUavCpuDescHandle.ptr + geometryBuffersCount * descHandleIncSize };
-	CreateLightsBufferSRV(*mLightsBuffer->Resource(), mNumLights, lightsBufferCpuDescHandle);
+	cpuDesc.ptr += geometryBuffersCount * descHandleIncSize;
+	CreateLightsBufferSRV(*mLightsBuffer->Resource(), mNumLights, cpuDesc);
 	mLightsBufferGpuDescHandleBegin.ptr = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart().ptr + geometryBuffersCount * descHandleIncSize;
 
 	// Create depth buffer descriptor
@@ -128,7 +128,7 @@ void PunctualLightCmdListRecorder::Init(
 	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 	srvDesc.Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuDesc{ cbvSrvUavCpuDescHandle.ptr + (geometryBuffersCount + 1U) * descHandleIncSize };
+	cpuDesc.ptr += descHandleIncSize;
 	ResourceManager::Get().CreateShaderResourceView(depthBuffer, srvDesc, cpuDesc);
 
 	ASSERT(ValidateData());
@@ -186,7 +186,7 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % _countof(mCmdAlloc);
 }
 
-void PunctualLightCmdListRecorder::BuildBuffers(const PunctualLight* lights, const std::uint32_t descHeapOffset) noexcept {
+void PunctualLightCmdListRecorder::BuildLightsBuffers(const PunctualLight* lights, const std::uint32_t numDescriptors) noexcept {
 	ASSERT(mCbvSrvUavDescHeap == nullptr);
 #ifdef _DEBUG
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
@@ -203,7 +203,7 @@ void PunctualLightCmdListRecorder::BuildBuffers(const PunctualLight* lights, con
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = descHeapOffset + mNumLights;
+	descHeapDesc.NumDescriptors = numDescriptors;
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
 

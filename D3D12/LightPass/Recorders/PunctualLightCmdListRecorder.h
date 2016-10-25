@@ -27,5 +27,5 @@ public:
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept override;
 
 private:
-	void BuildBuffers(const PunctualLight* lights, const std::uint32_t descHeapOffset) noexcept;
+	void BuildLightsBuffers(const PunctualLight* lights, const std::uint32_t numDescriptors) noexcept;
 };
