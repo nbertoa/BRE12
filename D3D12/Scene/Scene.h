@@ -40,13 +40,9 @@ public:
 		ID3D12Resource& depthBuffer,
 		std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) noexcept = 0;
 
-	virtual void GenerateSkyBoxRecorder(
+	virtual void GenerateCubeMaps(
 		ID3D12CommandQueue& cmdQueue,
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
-		std::unique_ptr<SkyBoxCmdListRecorder>& task) noexcept = 0;
-
-	virtual void GenerateDiffuseAndSpecularCubeMaps(
-		ID3D12CommandQueue& cmdQueue,
+		ID3D12Resource* &skyBoxCubeMap,
 		ID3D12Resource* &diffuseIrradianceCubeMap,
 		ID3D12Resource* &specularPreConvolvedCubeMap) noexcept = 0;
 

@@ -21,6 +21,7 @@ namespace {
 
 		ASSERT(Settings::sQueuedFrameCount > 0U);
 		ASSERT(cmdList == nullptr);
+		ASSERT(fence == nullptr);
 
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {

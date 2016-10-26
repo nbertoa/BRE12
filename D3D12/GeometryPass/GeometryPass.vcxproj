@@ -118,8 +118,6 @@
   <ItemGroup>
     <ClInclude Include="GeometryPass.h" />
     <ClInclude Include="GeometryPassCmdListRecorder.h" />
-    <ClInclude Include="Material.h" />
-    <ClInclude Include="MaterialFactory.h" />
     <ClInclude Include="Recorders\BasicCmdListRecorder.h" />
     <ClInclude Include="Recorders\HeightCmdListRecorder.h" />
     <ClInclude Include="Recorders\NormalCmdListRecorder.h" />
@@ -128,7 +126,6 @@
   <ItemGroup>
     <ClCompile Include="GeometryPass.cpp" />
     <ClCompile Include="GeometryPassCmdListRecorder.cpp" />
-    <ClCompile Include="MaterialFactory.cpp" />
     <ClCompile Include="Recorders\BasicCmdListRecorder.cpp" />
     <ClCompile Include="Recorders\HeightCmdListRecorder.cpp" />
     <ClCompile Include="Recorders\NormalCmdListRecorder.cpp" />

@@ -17,11 +17,12 @@ public:
 	SkyBoxPass(const SkyBoxPass&) = delete;
 	const SkyBoxPass& operator=(const SkyBoxPass&) = delete;
 
-	// You should get recorder and fill it, before calling Init()
-	__forceinline Recorder& GetRecorder() noexcept { return mRecorder; }
-
 	// You should call this method after filling recorder and before Execute()
 	void Init(
+		ID3D12Device& device,
+		ID3D12CommandQueue& cmdQueue,
+		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+		ID3D12Resource& skyBoxCubeMap,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
@@ -30,6 +31,11 @@ public:
 private:
 	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
+	
+	ID3D12CommandAllocator* mCmdAlloc{ nullptr };
+	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+
+	ID3D12Fence* mFence{ nullptr };
 
 	// Color & Depth buffers cpu descriptors
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };

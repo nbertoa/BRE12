@@ -15,8 +15,6 @@
     <ClInclude Include="Recorders\TextureCmdListRecorder.h">
       <Filter>Recorders</Filter>
     </ClInclude>
-    <ClInclude Include="Material.h" />
-    <ClInclude Include="MaterialFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeometryPass.cpp" />
@@ -33,7 +31,6 @@
     <ClCompile Include="Recorders\TextureCmdListRecorder.cpp">
       <Filter>Recorders</Filter>
     </ClCompile>
-    <ClCompile Include="MaterialFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Recorders">

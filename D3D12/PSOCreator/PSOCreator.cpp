@@ -43,7 +43,7 @@ namespace {
 		desc.BlendState = psoParams.mBlendDesc;
 		desc.DepthStencilState = psoParams.mDepthStencilDesc;
 		desc.DS = domainShader;
-		desc.DSVFormat = Settings::sDepthStencilFormat;
+		desc.DSVFormat = Settings::sDepthStencilViewFormat;
 		desc.GS = geomShader;
 		desc.HS = hullShader;
 		desc.InputLayout = { psoParams.mInputLayout.empty() ? nullptr : psoParams.mInputLayout.data(), static_cast<std::uint32_t>(psoParams.mInputLayout.size()) };

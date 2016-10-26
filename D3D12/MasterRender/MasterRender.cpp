@@ -155,9 +155,11 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 	scene->GenerateGeomPassRecorders(*mCmdQueue, mCmdListProcessor->CmdListQueue(), mGeometryPass.GetRecorders());
 	mGeometryPass.Init(mDevice, DepthStencilCpuDesc());
 
+	ID3D12Resource* skyBoxCubeMap;
 	ID3D12Resource* diffuseIrradianceCubeMap;
 	ID3D12Resource* specularPreConvolvedCubeMap;
-	scene->GenerateDiffuseAndSpecularCubeMaps(*mCmdQueue, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
+	scene->GenerateCubeMaps(*mCmdQueue, skyBoxCubeMap, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
+	ASSERT(skyBoxCubeMap != nullptr);
 	ASSERT(diffuseIrradianceCubeMap != nullptr);
 	ASSERT(specularPreConvolvedCubeMap != nullptr);
 
@@ -174,8 +176,7 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		*diffuseIrradianceCubeMap,
 		*specularPreConvolvedCubeMap);
 
-	scene->GenerateSkyBoxRecorder(*mCmdQueue, mCmdListProcessor->CmdListQueue(), mSkyBoxPass.GetRecorder());
-	mSkyBoxPass.Init(mColorBufferRTVCpuDescHandle, DepthStencilCpuDesc());
+	mSkyBoxPass.Init(mDevice, *mCmdQueue, mCmdListProcessor->CmdListQueue(), *skyBoxCubeMap, mColorBufferRTVCpuDescHandle, DepthStencilCpuDesc());
 
 	mToneMappingPass.Init(mDevice, *mCmdQueue, mCmdListProcessor->CmdListQueue(), *mColorBuffer.Get(), DepthStencilCpuDesc());
 		
@@ -266,14 +267,14 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	depthStencilDesc.Height = Settings::sWindowHeight;
 	depthStencilDesc.DepthOrArraySize = 1U;
 	depthStencilDesc.MipLevels = 1U;
-	depthStencilDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	depthStencilDesc.Format = Settings::sDepthStencilFormat;
 	depthStencilDesc.SampleDesc.Count = 1U;
 	depthStencilDesc.SampleDesc.Quality = 0U;
 	depthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
 	D3D12_CLEAR_VALUE clearValue = {};
-	clearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	clearValue.Format = DXGI_FORMAT_D32_FLOAT;
 	clearValue.DepthStencil.Depth = 1.0f;
 	clearValue.DepthStencil.Stencil = 0U;
 
@@ -282,7 +283,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
 	D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
-	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.Format = Settings::sDepthStencilViewFormat;
 	depthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 	mDevice.CreateDepthStencilView(mDepthStencilBuffer, &depthStencilViewDesc, DepthStencilCpuDesc());

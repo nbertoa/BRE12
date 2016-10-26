@@ -125,7 +125,7 @@ void PunctualLightCmdListRecorder::Init(
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDesc.Format = Settings::sDepthStencilSRVFormat;
 	srvDesc.Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
 
 	cpuDesc.ptr += descHandleIncSize;

@@ -2,11 +2,11 @@
 
 #include <tbb/parallel_for.h>
 
-#include <GeometryPass/Material.h>
 #include <GeometryPass/Recorders/HeightCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
 #include <LightPass/PunctualLight.h>
 #include <LightPass/Recorders/PunctualLightCmdListRecorder.h>
+#include <Material/Material.h>
 #include <MathUtils\MathUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
@@ -253,46 +253,9 @@ void SkyBoxScene::GenerateLightPassRecorders(
 	tasks[0].reset(recorder);
 }
 
-void SkyBoxScene::GenerateSkyBoxRecorder(
+void SkyBoxScene::GenerateCubeMaps(
 	ID3D12CommandQueue& cmdQueue,
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
-	std::unique_ptr<SkyBoxCmdListRecorder>& task) noexcept {
-
-	ASSERT(ValidateData());
-
-	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
-
-	SkyBoxCmdListRecorder* recorder = new SkyBoxCmdListRecorder(D3dData::Device(), cmdListQueue);
-
-	// Sky box sphere
-	Model* model;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	ModelManager::Get().CreateSphere(3000, 50, 50, model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
-	ASSERT(model != nullptr);
-	const std::vector<Mesh>& meshes(model->Meshes());
-	ASSERT(meshes.size() == 1UL);
-
-	// Cube map texture
-	ID3D12Resource* cubeMap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile(sSkyBoxFile, cubeMap, uploadBufferTex, *mCmdList);
-	ASSERT(cubeMap != nullptr);
-	
-	ExecuteCommandList(cmdQueue);
-
-	// Build world matrix
-	const Mesh& mesh{ meshes[0] };
-	DirectX::XMFLOAT4X4 w;
-	MathUtils::ComputeMatrix(w, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
-
-	// Init recorder and store in task
-	recorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), w, *cubeMap);
-	task.reset(recorder);
-}
-
-void SkyBoxScene::GenerateDiffuseAndSpecularCubeMaps(
-	ID3D12CommandQueue& cmdQueue,
+	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept
 {
@@ -306,6 +269,10 @@ void SkyBoxScene::GenerateDiffuseAndSpecularCubeMaps(
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
 	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularPreConvolvedCubeMap, uploadBufferTex2, *mCmdList);
 	ASSERT(specularPreConvolvedCubeMap != nullptr);
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex3;
+	ResourceManager::Get().LoadTextureFromFile(sSkyBoxFile, skyBoxCubeMap, uploadBufferTex3, *mCmdList);
+	ASSERT(skyBoxCubeMap != nullptr);
 
 	ExecuteCommandList(cmdQueue);
 }

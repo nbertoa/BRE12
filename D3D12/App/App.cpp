@@ -1,11 +1,11 @@
 #include "App.h"
 
 #include <CommandManager/CommandManager.h>
-#include <GeometryPass/MaterialFactory.h>
 #include <GlobalData\D3dData.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <MasterRender/MasterRender.h>
+#include <Material/MaterialFactory.h>
 #include <ModelManager\ModelManager.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>

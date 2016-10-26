@@ -198,7 +198,7 @@ void EnvironmentLightCmdListRecorder::BuildBuffers(
 	}
 
 	// Create depth buffer descriptor
-	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDesc.Format = Settings::sDepthStencilSRVFormat;
 	srvDesc.Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
 	ResourceManager::Get().CreateShaderResourceView(depthBuffer, srvDesc, cpuDesc);
 

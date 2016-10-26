@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-#include <GeometryPass/Material.h>
+#include <Material/Material.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
