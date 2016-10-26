@@ -6,5 +6,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MaterialFactory.cpp" />
+    <ClCompile Include="Material.cpp" />
   </ItemGroup>
 </Project>

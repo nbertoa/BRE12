@@ -17,6 +17,7 @@
     </ClCompile>
     <ClCompile Include="LightPassCmdListRecorder.cpp" />
     <ClCompile Include="LightPass.cpp" />
+    <ClCompile Include="PunctualLight.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Recorders\PunctualLightCmdListRecorder.h">

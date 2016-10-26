@@ -7,6 +7,7 @@
 #include <LightPass/PunctualLight.h>
 #include <LightPass/Recorders/PunctualLightCmdListRecorder.h>
 #include <Material/Material.h>
+#include <Material/MaterialFactory.h>
 #include <MathUtils/MathUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
@@ -102,11 +103,7 @@ void NormalScene::GenerateGeomPassRecorders(
 			materials.reserve(numGeometry);
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
 				Material material;
-				material.mBaseColor_MetalMask[0] = 1.0f;
-				material.mBaseColor_MetalMask[1] = 1.0f;
-				material.mBaseColor_MetalMask[2] = 1.0f;
-				material.mBaseColor_MetalMask[3] = 1.0f;//static_cast<float>(MathUtils::Rand(0U, 1U));
-				material.mSmoothness = MathUtils::RandF(0.6f, 1.0f);
+				material.RandomMaterial();
 				materials.push_back(material);
 			}
 
