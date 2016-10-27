@@ -115,6 +115,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BasicScene.cpp" />
+    <ClCompile Include="ColorHeightScene.cpp" />
+    <ClCompile Include="ColorNormalScene.cpp" />
     <ClCompile Include="Demo1Scene.cpp" />
     <ClCompile Include="HeightScene.cpp" />
     <ClCompile Include="NormalScene.cpp" />
@@ -123,6 +125,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicScene.h" />
+    <ClInclude Include="ColorHeightScene.h" />
+    <ClInclude Include="ColorNormalScene.h" />
     <ClInclude Include="Demo1Scene.h" />
     <ClInclude Include="HeightScene.h" />
     <ClInclude Include="NormalScene.h" />

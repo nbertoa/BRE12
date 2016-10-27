@@ -11,7 +11,6 @@
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
-#include <SkyBoxPass/SkyBoxCmdListRecorder.h>
 
 namespace {
 	const char* sSkyBoxFile{ "textures/milkmill_cube_map.dds" };

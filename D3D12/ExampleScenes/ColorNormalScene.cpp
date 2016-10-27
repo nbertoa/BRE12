@@ -1,8 +1,8 @@
-#include "HeightScene.h"
+#include "ColorNormalScene.h"
 
 #include <tbb/parallel_for.h>
 
-#include <GeometryPass/Recorders/HeightCmdListRecorder.h>
+#include <GeometryPass/Recorders/ColorNormalCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
 #include <LightPass/PunctualLight.h>
 #include <LightPass/Recorders/PunctualLightCmdListRecorder.h>
@@ -18,7 +18,7 @@ namespace {
 	const char* sSpecularEnvironmentFile{ "textures/milkmill_specular_cube_map.dds" };
 }
 
-void HeightScene::GenerateGeomPassRecorders(
+void ColorNormalScene::GenerateGeomPassRecorders(
 	ID3D12CommandQueue& cmdQueue,
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
@@ -31,63 +31,23 @@ void HeightScene::GenerateGeomPassRecorders(
 	const std::size_t numGeometry{ 100UL };
 	tasks.resize(Settings::sCpuProcessors);
 
-	const std::uint32_t numResources{ 7U };
-
-	ID3D12Resource* tex[numResources];
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex[numResources];
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[0], uploadBufferTex[0], *mCmdList);
-	ASSERT(tex[0] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[1], uploadBufferTex[1], *mCmdList);
-	ASSERT(tex[1] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[2], uploadBufferTex[2], *mCmdList);
-	ASSERT(tex[2] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[3], uploadBufferTex[3], *mCmdList);
-	ASSERT(tex[3] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[4], uploadBufferTex[4], *mCmdList);
-	ASSERT(tex[4] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[5], uploadBufferTex[5], *mCmdList);
-	ASSERT(tex[5] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[6], uploadBufferTex[6], *mCmdList);
-	ASSERT(tex[6] != nullptr);
-
-	ID3D12Resource* normal[numResources];
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferNormal[numResources];
-	ResourceManager::Get().LoadTextureFromFile("textures/rock_normal.dds", normal[0], uploadBufferNormal[0], *mCmdList);
+	ID3D12Resource* normal[] = { nullptr, nullptr, nullptr, nullptr, nullptr };
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferNormal[_countof(normal)];
+	ResourceManager::Get().LoadTextureFromFile("textures/bricks_normal.dds", normal[0], uploadBufferNormal[0], *mCmdList);
 	ASSERT(normal[0] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks_normal.dds", normal[1], uploadBufferNormal[1], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/rock2_normal.dds", normal[1], uploadBufferNormal[1], *mCmdList);
 	ASSERT(normal[1] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/concrete_normal.dds", normal[2], uploadBufferNormal[2], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/rock_normal.dds", normal[2], uploadBufferNormal[2], *mCmdList);
 	ASSERT(normal[2] != nullptr);
 	ResourceManager::Get().LoadTextureFromFile("textures/floor_normal.dds", normal[3], uploadBufferNormal[3], *mCmdList);
 	ASSERT(normal[3] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks_normal.dds", normal[4], uploadBufferNormal[4], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/concrete_normal.dds", normal[4], uploadBufferNormal[4], *mCmdList);
 	ASSERT(normal[4] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/rock2_normal.dds", normal[5], uploadBufferNormal[5], *mCmdList);
-	ASSERT(normal[5] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/sand_normal.dds", normal[6], uploadBufferNormal[6], *mCmdList);
-	ASSERT(normal[6] != nullptr);
 
-	ID3D12Resource* height[numResources];
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferHeight[numResources];
-	ResourceManager::Get().LoadTextureFromFile("textures/rock_height.dds", height[0], uploadBufferHeight[0], *mCmdList);
-	ASSERT(height[0] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks_height.dds", height[1], uploadBufferHeight[1], *mCmdList);
-	ASSERT(height[1] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/concrete_height.dds", height[2], uploadBufferHeight[2], *mCmdList);
-	ASSERT(height[2] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/floor_height.dds", height[3], uploadBufferHeight[3], *mCmdList);
-	ASSERT(height[3] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks_height.dds", height[4], uploadBufferHeight[4], *mCmdList);
-	ASSERT(height[4] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/rock2_height.dds", height[5], uploadBufferHeight[5], *mCmdList);
-	ASSERT(height[5] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/sand_height.dds", height[6], uploadBufferHeight[6], *mCmdList);
-	ASSERT(height[6] != nullptr);
-	
 	Model* model;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	ModelManager::Get().LoadModel("models/mitsubaFloor.obj", model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
+	ModelManager::Get().CreateSphere(4.0f, 50, 50, model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
 
 	ExecuteCommandList(cmdQueue);
@@ -103,12 +63,12 @@ void HeightScene::GenerateGeomPassRecorders(
 		geomData.mWorldMatrices.reserve(numGeometry);
 	}
 
-	const float meshSpaceOffset{ 150.0f };
-	const float scaleFactor{ 3.0f };
+	const float meshSpaceOffset{ 100.0f };
+	const float scaleFactor{ 2.0f };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, numGeometry),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
-			HeightCmdListRecorder& task{ *new HeightCmdListRecorder(D3dData::Device(), cmdListQueue) };
+			ColorNormalCmdListRecorder& task{ *new ColorNormalCmdListRecorder(D3dData::Device(), cmdListQueue) };
 			tasks[k].reset(&task);
 
 			GeometryPassCmdListRecorder::GeometryData& currGeomData{ geomDataVec[k] };
@@ -132,31 +92,24 @@ void HeightScene::GenerateGeomPassRecorders(
 				materials.push_back(material);
 			}
 
-			std::vector<ID3D12Resource*> textures;
-			textures.reserve(numGeometry);
-			for (std::size_t i = 0UL; i < numGeometry; ++i) {
-				textures.push_back(tex[i % numResources]);
-			}
-
 			std::vector<ID3D12Resource*> normals;
 			normals.reserve(numGeometry);
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
-				normals.push_back(normal[i % numResources]);
+				normals.push_back(normal[i % _countof(normal)]);
 			}
 
-			std::vector<ID3D12Resource*> heights;
-			heights.reserve(numGeometry);
-			for (std::size_t i = 0UL; i < numGeometry; ++i) {
-				heights.push_back(height[i % numResources]);
-			}
-
-			task.Init(&currGeomData, 1U, materials.data(), textures.data(), normals.data(), heights.data(), static_cast<std::uint32_t>(normals.size()));
+			task.Init(
+				&currGeomData, 
+				1U, 
+				materials.data(), 
+				normals.data(), 
+				static_cast<std::uint32_t>(normals.size()));
 		}
 	}
 	);
 }
 
-void HeightScene::GenerateLightPassRecorders(
+void ColorNormalScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
@@ -167,7 +120,7 @@ void HeightScene::GenerateLightPassRecorders(
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(0 < geometryBuffersCount && geometryBuffersCount < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 	ASSERT(ValidateData());
-
+	
 	const std::uint32_t numTasks{ 1U };
 	tasks.resize(numTasks);
 
@@ -201,7 +154,7 @@ void HeightScene::GenerateLightPassRecorders(
 	);
 }
 
-void HeightScene::GenerateCubeMaps(
+void ColorNormalScene::GenerateCubeMaps(
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,

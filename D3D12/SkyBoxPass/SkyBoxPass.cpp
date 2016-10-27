@@ -4,7 +4,6 @@
 
 #include <CommandListProcessor/CommandListProcessor.h>
 #include <CommandManager\CommandManager.h>
-#include <DXUtils/d3dx12.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
 #include <ModelManager\ModelManager.h>

@@ -2,6 +2,8 @@
 
 #include <App/App.h>
 #include <ExampleScenes/BasicScene.h>
+#include <ExampleScenes\ColorHeightScene.h>
+#include <ExampleScenes\ColorNormalScene.h>
 #include <ExampleScenes\Demo1Scene.h>
 #include <ExampleScenes\HeightScene.h>
 #include <ExampleScenes\NormalScene.h>

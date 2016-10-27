@@ -4,10 +4,10 @@
 
 struct Material;
 
-// Recorder that does texture mapping
-class TextureCmdListRecorder : public GeometryPassCmdListRecorder {
+// Recorder that does color mapping + normal mapping
+class ColorNormalCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
-	explicit TextureCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	explicit ColorNormalCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
 	// This method is to initialize PSO that is a shared between all this kind
 	// of recorders.
@@ -18,7 +18,7 @@ public:
 		const GeometryData* geometryDataVec,
 		const std::uint32_t numGeomData,
 		const Material* materials,
-		ID3D12Resource** textures,
+		ID3D12Resource** normals,
 		const std::uint32_t numResources) noexcept;
 
 	void RecordCommandLists(
@@ -30,7 +30,10 @@ public:
 	bool ValidateData() const noexcept override;
 
 private:
-	void BuildBuffers(const Material* materials, ID3D12Resource** textures, const std::uint32_t dataCount) noexcept;
+	void BuildBuffers(
+		const Material* materials, 
+		ID3D12Resource** normals,
+		const std::uint32_t dataCount) noexcept;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mTexturesBufferGpuDescHandleBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mNormalsBufferGpuDescHandleBegin;
 };

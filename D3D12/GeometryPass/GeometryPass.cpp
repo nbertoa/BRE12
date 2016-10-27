@@ -8,6 +8,8 @@
 #include <CommandManager\CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\Recorders\BasicCmdListRecorder.h>
+#include <GeometryPass\Recorders\ColorHeightCmdListRecorder.h>
+#include <GeometryPass\Recorders\ColorNormalCmdListRecorder.h>
 #include <GeometryPass\Recorders\HeightCmdListRecorder.h>
 #include <GeometryPass\Recorders\NormalCmdListRecorder.h>
 #include <GeometryPass\Recorders\TextureCmdListRecorder.h>
@@ -115,6 +117,8 @@ void GeometryPass::Init(ID3D12Device& device, const D3D12_CPU_DESCRIPTOR_HANDLE&
 
 	// Initialize recorders PSOs
 	BasicCmdListRecorder::InitPSO(sBufferFormats, BUFFERS_COUNT);
+	ColorHeightCmdListRecorder::InitPSO(sBufferFormats, BUFFERS_COUNT);
+	ColorNormalCmdListRecorder::InitPSO(sBufferFormats, BUFFERS_COUNT);
 	HeightCmdListRecorder::InitPSO(sBufferFormats, BUFFERS_COUNT);
 	NormalCmdListRecorder::InitPSO(sBufferFormats, BUFFERS_COUNT);
 	TextureCmdListRecorder::InitPSO(sBufferFormats, BUFFERS_COUNT);

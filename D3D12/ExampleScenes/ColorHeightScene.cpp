@@ -1,8 +1,8 @@
-#include "HeightScene.h"
+#include "ColorHeightScene.h"
 
 #include <tbb/parallel_for.h>
 
-#include <GeometryPass/Recorders/HeightCmdListRecorder.h>
+#include <GeometryPass/Recorders/ColorHeightCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
 #include <LightPass/PunctualLight.h>
 #include <LightPass/Recorders/PunctualLightCmdListRecorder.h>
@@ -18,7 +18,7 @@ namespace {
 	const char* sSpecularEnvironmentFile{ "textures/milkmill_specular_cube_map.dds" };
 }
 
-void HeightScene::GenerateGeomPassRecorders(
+void ColorHeightScene::GenerateGeomPassRecorders(
 	ID3D12CommandQueue& cmdQueue,
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
@@ -32,23 +32,6 @@ void HeightScene::GenerateGeomPassRecorders(
 	tasks.resize(Settings::sCpuProcessors);
 
 	const std::uint32_t numResources{ 7U };
-
-	ID3D12Resource* tex[numResources];
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex[numResources];
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[0], uploadBufferTex[0], *mCmdList);
-	ASSERT(tex[0] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[1], uploadBufferTex[1], *mCmdList);
-	ASSERT(tex[1] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[2], uploadBufferTex[2], *mCmdList);
-	ASSERT(tex[2] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[3], uploadBufferTex[3], *mCmdList);
-	ASSERT(tex[3] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[4], uploadBufferTex[4], *mCmdList);
-	ASSERT(tex[4] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[5], uploadBufferTex[5], *mCmdList);
-	ASSERT(tex[5] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[6], uploadBufferTex[6], *mCmdList);
-	ASSERT(tex[6] != nullptr);
 
 	ID3D12Resource* normal[numResources];
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferNormal[numResources];
@@ -108,7 +91,7 @@ void HeightScene::GenerateGeomPassRecorders(
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, numGeometry),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
-			HeightCmdListRecorder& task{ *new HeightCmdListRecorder(D3dData::Device(), cmdListQueue) };
+			ColorHeightCmdListRecorder& task{ *new ColorHeightCmdListRecorder(D3dData::Device(), cmdListQueue) };
 			tasks[k].reset(&task);
 
 			GeometryPassCmdListRecorder::GeometryData& currGeomData{ geomDataVec[k] };
@@ -132,12 +115,6 @@ void HeightScene::GenerateGeomPassRecorders(
 				materials.push_back(material);
 			}
 
-			std::vector<ID3D12Resource*> textures;
-			textures.reserve(numGeometry);
-			for (std::size_t i = 0UL; i < numGeometry; ++i) {
-				textures.push_back(tex[i % numResources]);
-			}
-
 			std::vector<ID3D12Resource*> normals;
 			normals.reserve(numGeometry);
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
@@ -150,13 +127,19 @@ void HeightScene::GenerateGeomPassRecorders(
 				heights.push_back(height[i % numResources]);
 			}
 
-			task.Init(&currGeomData, 1U, materials.data(), textures.data(), normals.data(), heights.data(), static_cast<std::uint32_t>(normals.size()));
+			task.Init(
+				&currGeomData, 
+				1U, 
+				materials.data(), 
+				normals.data(), 
+				heights.data(), 
+				static_cast<std::uint32_t>(normals.size()));
 		}
 	}
 	);
 }
 
-void HeightScene::GenerateLightPassRecorders(
+void ColorHeightScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
@@ -201,7 +184,7 @@ void HeightScene::GenerateLightPassRecorders(
 	);
 }
 
-void HeightScene::GenerateCubeMaps(
+void ColorHeightScene::GenerateCubeMaps(
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,

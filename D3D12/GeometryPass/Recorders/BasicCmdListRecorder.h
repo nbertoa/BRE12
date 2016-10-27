@@ -4,6 +4,7 @@
 
 struct Material;
 
+// Recorder that does color mapping
 class BasicCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
 	explicit BasicCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
