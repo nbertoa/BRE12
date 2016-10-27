@@ -219,7 +219,7 @@ void Demo1Scene::GenerateGeomPassRecorders(
 	ASSERT(height[2] != nullptr);
 	ResourceManager::Get().LoadTextureFromFile("textures/cobblestone/cobblestone_height.dds", height[3], uploadBufferHeight[3], *mCmdList);
 	ASSERT(height[3] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", height[4], uploadBufferHeight[4], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/black.dds", height[4], uploadBufferHeight[4], *mCmdList);
 	ASSERT(height[4] != nullptr);
 	ResourceManager::Get().LoadTextureFromFile("textures/wood/wood2_height.dds", height[5], uploadBufferHeight[5], *mCmdList);
 	ASSERT(height[5] != nullptr);

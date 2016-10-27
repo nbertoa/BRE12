@@ -35,19 +35,19 @@ void HeightScene::GenerateGeomPassRecorders(
 
 	ID3D12Resource* tex[numResources];
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex[numResources];
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[0], uploadBufferTex[0], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/black.dds", tex[0], uploadBufferTex[0], *mCmdList);
 	ASSERT(tex[0] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[1], uploadBufferTex[1], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/black.dds", tex[1], uploadBufferTex[1], *mCmdList);
 	ASSERT(tex[1] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[2], uploadBufferTex[2], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/black.dds", tex[2], uploadBufferTex[2], *mCmdList);
 	ASSERT(tex[2] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[3], uploadBufferTex[3], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/black.dds", tex[3], uploadBufferTex[3], *mCmdList);
 	ASSERT(tex[3] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[4], uploadBufferTex[4], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/black.dds", tex[4], uploadBufferTex[4], *mCmdList);
 	ASSERT(tex[4] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[5], uploadBufferTex[5], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/black.dds", tex[5], uploadBufferTex[5], *mCmdList);
 	ASSERT(tex[5] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/white.dds", tex[6], uploadBufferTex[6], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/black.dds", tex[6], uploadBufferTex[6], *mCmdList);
 	ASSERT(tex[6] != nullptr);
 
 	ID3D12Resource* normal[numResources];
