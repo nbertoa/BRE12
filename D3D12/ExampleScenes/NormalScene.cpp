@@ -13,9 +13,9 @@
 #include <ResourceManager\ResourceManager.h>
 
 namespace {
-	const char* sSkyBoxFile{ "textures/milkmill_cube_map.dds" };
-	const char* sDiffuseEnvironmentFile{ "textures/milkmill_diffuse_cube_map.dds" };
-	const char* sSpecularEnvironmentFile{ "textures/milkmill_specular_cube_map.dds" };
+	const char* sSkyBoxFile{ "textures/cubeMaps/milkmill_cube_map.dds" };
+	const char* sDiffuseEnvironmentFile{ "textures/cubeMaps/milkmill_diffuse_cube_map.dds" };
+	const char* sSpecularEnvironmentFile{ "textures/cubeMaps/milkmill_specular_cube_map.dds" };
 }
 
 void NormalScene::GenerateGeomPassRecorders(
@@ -33,28 +33,28 @@ void NormalScene::GenerateGeomPassRecorders(
 
 	ID3D12Resource* tex[] = { nullptr, nullptr, nullptr, nullptr, nullptr };
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex[_countof(tex)];
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks.dds", tex[0], uploadBufferTex[0], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/brick/bricks.dds", tex[0], uploadBufferTex[0], *mCmdList);
 	ASSERT(tex[0] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/rock2.dds", tex[1], uploadBufferTex[1], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/rock/rock2.dds", tex[1], uploadBufferTex[1], *mCmdList);
 	ASSERT(tex[1] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/rock.dds", tex[2], uploadBufferTex[2], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/rock/rock.dds", tex[2], uploadBufferTex[2], *mCmdList);
 	ASSERT(tex[2] != nullptr);
 	ResourceManager::Get().LoadTextureFromFile("textures/floor.dds", tex[3], uploadBufferTex[3], *mCmdList);
 	ASSERT(tex[3] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/concrete.dds", tex[4], uploadBufferTex[4], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/concrete/concrete.dds", tex[4], uploadBufferTex[4], *mCmdList);
 	ASSERT(tex[4] != nullptr);
 
 	ID3D12Resource* normal[] = { nullptr, nullptr, nullptr, nullptr, nullptr };
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferNormal[_countof(normal)];
-	ResourceManager::Get().LoadTextureFromFile("textures/bricks_normal.dds", normal[0], uploadBufferNormal[0], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/brick/bricks_normal.dds", normal[0], uploadBufferNormal[0], *mCmdList);
 	ASSERT(normal[0] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/rock2_normal.dds", normal[1], uploadBufferNormal[1], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/rock/rock2_normal.dds", normal[1], uploadBufferNormal[1], *mCmdList);
 	ASSERT(normal[1] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/rock_normal.dds", normal[2], uploadBufferNormal[2], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/rock/rock_normal.dds", normal[2], uploadBufferNormal[2], *mCmdList);
 	ASSERT(normal[2] != nullptr);
 	ResourceManager::Get().LoadTextureFromFile("textures/floor_normal.dds", normal[3], uploadBufferNormal[3], *mCmdList);
 	ASSERT(normal[3] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/concrete_normal.dds", normal[4], uploadBufferNormal[4], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/concrete/concrete_normal.dds", normal[4], uploadBufferNormal[4], *mCmdList);
 	ASSERT(normal[4] != nullptr);
 
 	Model* model;

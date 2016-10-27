@@ -13,9 +13,9 @@
 #include <ResourceManager\ResourceManager.h>
 
 namespace {
-	const char* sSkyBoxFile{ "textures/milkmill_cube_map.dds" };
-	const char* sDiffuseEnvironmentFile{ "textures/milkmill_diffuse_cube_map.dds" };
-	const char* sSpecularEnvironmentFile{ "textures/milkmill_specular_cube_map.dds" };
+	const char* sSkyBoxFile{ "textures/cubeMaps/milkmill_cube_map.dds" };
+	const char* sDiffuseEnvironmentFile{ "textures/cubeMaps/milkmill_diffuse_cube_map.dds" };
+	const char* sSpecularEnvironmentFile{ "textures/cubeMaps/milkmill_specular_cube_map.dds" };
 }
 
 void TextureScene::GenerateGeomPassRecorders(
@@ -32,10 +32,10 @@ void TextureScene::GenerateGeomPassRecorders(
 	
 	ID3D12Resource* tex[2] = { nullptr, nullptr };
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex0;
-	ResourceManager::Get().LoadTextureFromFile("textures/brick.dds", tex[0], uploadBufferTex0, *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/brick/brick.dds", tex[0], uploadBufferTex0, *mCmdList);
 	ASSERT(tex[0] != nullptr);
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex1;
-	ResourceManager::Get().LoadTextureFromFile("textures/brick3.dds", tex[1], uploadBufferTex1, *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/brick/brick3.dds", tex[1], uploadBufferTex1, *mCmdList);
 	ASSERT(tex[1] != nullptr);
 
 	Model* model;
