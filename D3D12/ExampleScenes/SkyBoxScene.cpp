@@ -186,7 +186,7 @@ void SkyBoxScene::GenerateGeomPassRecorders(
 	ASSERT(tex[3] != nullptr);
 	ResourceManager::Get().LoadTextureFromFile("textures/sand.dds", tex[4], uploadBufferTex[4], *mCmdList);
 	ASSERT(tex[4] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/concrete.dds", tex[5], uploadBufferTex[5], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/cobblestone.dds", tex[5], uploadBufferTex[5], *mCmdList);
 	ASSERT(tex[5] != nullptr);
 
 	ID3D12Resource* normal[numResources];
@@ -201,7 +201,7 @@ void SkyBoxScene::GenerateGeomPassRecorders(
 	ASSERT(normal[3] != nullptr);
 	ResourceManager::Get().LoadTextureFromFile("textures/sand_normal.dds", normal[4], uploadBufferNormal[4], *mCmdList);
 	ASSERT(normal[4] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/concrete_normal.dds", normal[5], uploadBufferNormal[5], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/cobblestone_normal.dds", normal[5], uploadBufferNormal[5], *mCmdList);
 	ASSERT(normal[5] != nullptr);
 
 	ID3D12Resource* height[numResources];
@@ -216,7 +216,7 @@ void SkyBoxScene::GenerateGeomPassRecorders(
 	ASSERT(height[3] != nullptr);
 	ResourceManager::Get().LoadTextureFromFile("textures/sand_height.dds", height[4], uploadBufferHeight[4], *mCmdList);
 	ASSERT(height[4] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/concrete_height.dds", height[5], uploadBufferHeight[5], *mCmdList);
+	ResourceManager::Get().LoadTextureFromFile("textures/cobblestone_height.dds", height[5], uploadBufferHeight[5], *mCmdList);
 	ASSERT(height[5] != nullptr);
 
 	ExecuteCommandList(cmdQueue);
