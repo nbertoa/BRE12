@@ -2,7 +2,7 @@
 
 #include <Scene/Scene.h>
 
-class BasicScene : public Scene {
+class ColorMappingScene : public Scene {
 public:
 	void GenerateGeomPassRecorders(
 		ID3D12CommandQueue& cmdQueue,

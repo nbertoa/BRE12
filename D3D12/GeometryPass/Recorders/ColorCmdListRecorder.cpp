@@ -1,4 +1,4 @@
-#include "BasicCmdListRecorder.h"
+#include "ColorCmdListRecorder.h"
 
 #include <DirectXMath.h>
 
@@ -21,12 +21,12 @@ namespace {
 	ID3D12RootSignature* sRootSign{ nullptr };
 }
 
-BasicCmdListRecorder::BasicCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
+ColorCmdListRecorder::ColorCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
 	: GeometryPassCmdListRecorder(device, cmdListQueue)
 {
 }
 
-void BasicCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept {
+void ColorCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept {
 	ASSERT(geometryBufferFormats != nullptr);
 	ASSERT(geometryBufferCount > 0U);
 	ASSERT(sPSO == nullptr);
@@ -35,9 +35,9 @@ void BasicCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, con
 	// Build pso and root signature
 	PSOCreator::PSOParams psoParams{};
 	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
-	psoParams.mPSFilename = "GeometryPass/Shaders/Basic/PS.cso";
-	psoParams.mRootSignFilename = "GeometryPass/Shaders/Basic/RS.cso";
-	psoParams.mVSFilename = "GeometryPass/Shaders/Basic/VS.cso";
+	psoParams.mPSFilename = "GeometryPass/Shaders/ColorMapping/PS.cso";
+	psoParams.mRootSignFilename = "GeometryPass/Shaders/ColorMapping/RS.cso";
+	psoParams.mVSFilename = "GeometryPass/Shaders/ColorMapping/VS.cso";
 	psoParams.mNumRenderTargets = geometryBufferCount;
 	memcpy(psoParams.mRtFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
 	PSOCreator::CreatePSO(psoParams, sPSO, sRootSign);
@@ -46,7 +46,7 @@ void BasicCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, con
 	ASSERT(sRootSign != nullptr);
 }
 
-void BasicCmdListRecorder::Init(
+void ColorCmdListRecorder::Init(
 	const GeometryData* geometryDataVec,
 	const std::uint32_t numGeomData,
 	const Material* materials,
@@ -78,7 +78,7 @@ void BasicCmdListRecorder::Init(
 	ASSERT(ValidateData());
 }
 
-void BasicCmdListRecorder::RecordCommandLists(
+void ColorCmdListRecorder::RecordCommandLists(
 	const FrameCBuffer& frameCBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE* geomPassRtvCpuDescHandles,
 	const std::uint32_t geomPassRtvCpuDescHandlesCount,
@@ -144,7 +144,7 @@ void BasicCmdListRecorder::RecordCommandLists(
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;
 }
 
-void BasicCmdListRecorder::BuildBuffers(const Material* materials, const std::uint32_t numMaterials) noexcept {
+void ColorCmdListRecorder::BuildBuffers(const Material* materials, const std::uint32_t numMaterials) noexcept {
 	ASSERT(materials != nullptr);
 	ASSERT(numMaterials != 0UL);
 

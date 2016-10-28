@@ -114,7 +114,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BasicScene.cpp" />
+    <ClCompile Include="ColorMappingScene.cpp" />
     <ClCompile Include="ColorHeightScene.cpp" />
     <ClCompile Include="ColorNormalScene.cpp" />
     <ClCompile Include="Demo1Scene.cpp" />
@@ -124,7 +124,7 @@
     <ClCompile Include="TextureScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BasicScene.h" />
+    <ClInclude Include="ColorMappingScene.h" />
     <ClInclude Include="ColorHeightScene.h" />
     <ClInclude Include="ColorNormalScene.h" />
     <ClInclude Include="Demo1Scene.h" />

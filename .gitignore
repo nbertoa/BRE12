@@ -1223,3 +1223,9 @@
 /D3D12/x64/Release/GeometryPass/Shaders/ColorNormalMapping/PS.cso
 /D3D12/x64/Release/GeometryPass/Shaders/ColorNormalMapping/RS.cso
 /D3D12/x64/Release/GeometryPass/Shaders/ColorNormalMapping/VS.cso
+/D3D12/x64/Debug/GeometryPass/Shaders/ColorMapping/PS.cso
+/D3D12/x64/Debug/GeometryPass/Shaders/ColorMapping/RS.cso
+/D3D12/x64/Debug/GeometryPass/Shaders/ColorMapping/VS.cso
+/D3D12/x64/Release/GeometryPass/Shaders/ColorMapping/PS.cso
+/D3D12/x64/Release/GeometryPass/Shaders/ColorMapping/RS.cso
+/D3D12/x64/Release/GeometryPass/Shaders/ColorMapping/VS.cso

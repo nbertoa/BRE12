@@ -1,8 +1,8 @@
-#include "BasicScene.h"
+#include "ColorMappingScene.h"
 
 #include <tbb/parallel_for.h>
 
-#include <GeometryPass/Recorders/BasicCmdListRecorder.h>
+#include <GeometryPass/Recorders/ColorCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
 #include <LightPass/PunctualLight.h>
 #include <LightPass/Recorders/PunctualLightCmdListRecorder.h>
@@ -59,8 +59,8 @@ namespace {
 		const float offsetZ,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		const std::vector<Mesh>& meshes,
-		BasicCmdListRecorder* &recorder) {
-		recorder = new BasicCmdListRecorder(D3dData::Device(), cmdListQueue);
+		ColorCmdListRecorder* &recorder) {
+		recorder = new ColorCmdListRecorder(D3dData::Device(), cmdListQueue);
 
 		const std::size_t numMaterials(MaterialFactory::NUM_MATERIALS);
 
@@ -106,7 +106,7 @@ namespace {
 	}
 }
 
-void BasicScene::GenerateGeomPassRecorders(
+void ColorMappingScene::GenerateGeomPassRecorders(
 	ID3D12CommandQueue& cmdQueue,
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
@@ -131,18 +131,18 @@ void BasicScene::GenerateGeomPassRecorders(
 	ExecuteCommandList(cmdQueue);
 
 	tasks.resize(2);
-	BasicCmdListRecorder* basicRecorder{ nullptr };
+	ColorCmdListRecorder* basicRecorder{ nullptr };
 	GenerateRecorder(sSphereTx, sSphereTy, sSphereTz, sSphereOffsetX, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), basicRecorder);
 	ASSERT(basicRecorder != nullptr);
 	tasks[0].reset(basicRecorder);
 
-	BasicCmdListRecorder* basicRecorder2{ nullptr };
+	ColorCmdListRecorder* basicRecorder2{ nullptr };
 	GenerateRecorder(sBunnyTx, sBunnyTy, sBunnyTz, sBunnyOffsetX, 0.0f, 0.0f, cmdListQueue, model2->Meshes(), basicRecorder2);
 	ASSERT(basicRecorder2 != nullptr);
 	tasks[1].reset(basicRecorder2);
 }
 
-void BasicScene::GenerateLightPassRecorders(
+void ColorMappingScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
@@ -161,7 +161,7 @@ void BasicScene::GenerateLightPassRecorders(
 	tasks[0].reset(recorder);
 }
 
-void BasicScene::GenerateCubeMaps(
+void ColorMappingScene::GenerateCubeMaps(
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,

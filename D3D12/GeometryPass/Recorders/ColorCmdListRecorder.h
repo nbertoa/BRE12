@@ -5,9 +5,9 @@
 struct Material;
 
 // Recorder that does color mapping
-class BasicCmdListRecorder : public GeometryPassCmdListRecorder {
+class ColorCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
-	explicit BasicCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	explicit ColorCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
 	// This method is to initialize PSO that is a shared between all this kind
 	// of recorders.
