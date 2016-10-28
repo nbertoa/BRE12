@@ -12,12 +12,11 @@
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
-#include <SkyBoxPass/SkyBoxCmdListRecorder.h>
 
 namespace {
-	const char* sSkyBoxFile{ "textures/milkmill_cube_map.dds" };
-	const char* sDiffuseEnvironmentFile{ "textures/milkmill_diffuse_cube_map.dds" };
-	const char* sSpecularEnvironmentFile{ "textures/milkmill_specular_cube_map.dds" };
+	const char* sSkyBoxFile{ "textures/cubeMaps/milkmill_cube_map.dds" };
+	const char* sDiffuseEnvironmentFile{ "textures/cubeMaps/milkmill_diffuse_cube_map.dds" };
+	const char* sSpecularEnvironmentFile{ "textures/cubeMaps/milkmill_specular_cube_map.dds" };
 
 	const float sS{ 5.0f };
 

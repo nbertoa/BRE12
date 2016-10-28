@@ -1,8 +1,8 @@
-#include "TextureScene.h"
+#include "ColorNormalScene.h"
 
 #include <tbb/parallel_for.h>
 
-#include <GeometryPass/Recorders/TextureCmdListRecorder.h>
+#include <GeometryPass/Recorders/ColorNormalCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
 #include <LightPass/PunctualLight.h>
 #include <LightPass/Recorders/PunctualLightCmdListRecorder.h>
@@ -18,10 +18,11 @@ namespace {
 	const char* sSpecularEnvironmentFile{ "textures/cubeMaps/milkmill_specular_cube_map.dds" };
 }
 
-void TextureScene::GenerateGeomPassRecorders(
+void ColorNormalScene::GenerateGeomPassRecorders(
 	ID3D12CommandQueue& cmdQueue,
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
+
 	ASSERT(tasks.empty());
 	ASSERT(ValidateData());
 
@@ -29,24 +30,29 @@ void TextureScene::GenerateGeomPassRecorders(
 
 	const std::size_t numGeometry{ 100UL };
 	tasks.resize(Settings::sCpuProcessors);
-	
-	ID3D12Resource* tex[2] = { nullptr, nullptr };
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex0;
-	ResourceManager::Get().LoadTextureFromFile("textures/brick/brick.dds", tex[0], uploadBufferTex0, *mCmdList);
-	ASSERT(tex[0] != nullptr);
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex1;
-	ResourceManager::Get().LoadTextureFromFile("textures/brick/brick3.dds", tex[1], uploadBufferTex1, *mCmdList);
-	ASSERT(tex[1] != nullptr);
+
+	ID3D12Resource* normal[] = { nullptr, nullptr, nullptr, nullptr, nullptr };
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferNormal[_countof(normal)];
+	ResourceManager::Get().LoadTextureFromFile("textures/brick/bricks_normal.dds", normal[0], uploadBufferNormal[0], *mCmdList);
+	ASSERT(normal[0] != nullptr);
+	ResourceManager::Get().LoadTextureFromFile("textures/rock/rock2_normal.dds", normal[1], uploadBufferNormal[1], *mCmdList);
+	ASSERT(normal[1] != nullptr);
+	ResourceManager::Get().LoadTextureFromFile("textures/rock/rock_normal.dds", normal[2], uploadBufferNormal[2], *mCmdList);
+	ASSERT(normal[2] != nullptr);
+	ResourceManager::Get().LoadTextureFromFile("textures/floor_normal.dds", normal[3], uploadBufferNormal[3], *mCmdList);
+	ASSERT(normal[3] != nullptr);
+	ResourceManager::Get().LoadTextureFromFile("textures/concrete/concrete_normal.dds", normal[4], uploadBufferNormal[4], *mCmdList);
+	ASSERT(normal[4] != nullptr);
 
 	Model* model;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
+	ModelManager::Get().CreateSphere(4.0f, 50, 50, model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
 
 	ExecuteCommandList(cmdQueue);
 
-	ASSERT(model->HasMeshes());	
+	ASSERT(model->HasMeshes());
 	const Mesh& mesh{ model->Meshes()[0U] };
 
 	std::vector<GeometryPassCmdListRecorder::GeometryData> geomDataVec;
@@ -58,13 +64,13 @@ void TextureScene::GenerateGeomPassRecorders(
 	}
 
 	const float meshSpaceOffset{ 100.0f };
-	const float scaleFactor{ 0.2f };
+	const float scaleFactor{ 2.0f };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, numGeometry),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
-			TextureCmdListRecorder& task{ *new TextureCmdListRecorder(D3dData::Device(), cmdListQueue) };
+			ColorNormalCmdListRecorder& task{ *new ColorNormalCmdListRecorder(D3dData::Device(), cmdListQueue) };
 			tasks[k].reset(&task);
-						
+
 			GeometryPassCmdListRecorder::GeometryData& currGeomData{ geomDataVec[k] };
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
 				const float tx{ MathUtils::RandF(-meshSpaceOffset, meshSpaceOffset) };
@@ -86,19 +92,24 @@ void TextureScene::GenerateGeomPassRecorders(
 				materials.push_back(material);
 			}
 
-			std::vector<ID3D12Resource*> textures;
-			textures.reserve(numGeometry);
+			std::vector<ID3D12Resource*> normals;
+			normals.reserve(numGeometry);
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
-				textures.push_back(tex[i % _countof(tex)]);
+				normals.push_back(normal[i % _countof(normal)]);
 			}
 
-			task.Init(&currGeomData, 1U, materials.data(), textures.data(), static_cast<std::uint32_t>(textures.size()));
+			task.Init(
+				&currGeomData, 
+				1U, 
+				materials.data(), 
+				normals.data(), 
+				static_cast<std::uint32_t>(normals.size()));
 		}
 	}
 	);
 }
 
-void TextureScene::GenerateLightPassRecorders(
+void ColorNormalScene::GenerateLightPassRecorders(
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
@@ -109,7 +120,7 @@ void TextureScene::GenerateLightPassRecorders(
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(0 < geometryBuffersCount && geometryBuffersCount < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 	ASSERT(ValidateData());
-
+	
 	const std::uint32_t numTasks{ 1U };
 	tasks.resize(numTasks);
 
@@ -138,12 +149,12 @@ void TextureScene::GenerateLightPassRecorders(
 			light[1].mColorAndPower[3] = 1000000.0f;
 
 			task.Init(geometryBuffers, geometryBuffersCount, depthBuffer, light, _countof(light));
-		}		
+		}
 	}
 	);
 }
 
-void TextureScene::GenerateCubeMaps(
+void ColorNormalScene::GenerateCubeMaps(
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
@@ -166,3 +177,4 @@ void TextureScene::GenerateCubeMaps(
 
 	ExecuteCommandList(cmdQueue);
 }
+

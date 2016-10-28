@@ -5,7 +5,6 @@
 
 #include <GeometryPass/GeometryPassCmdListRecorder.h>
 #include <LightPass/LightPassCmdListRecorder.h>
-#include <SkyBoxPass/SkyBoxCmdListRecorder.h>
 
 struct ID3D12CommandAllocator;
 struct ID3D12CommandQueue;

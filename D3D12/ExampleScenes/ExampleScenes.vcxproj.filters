@@ -7,6 +7,8 @@
     <ClCompile Include="NormalScene.cpp" />
     <ClCompile Include="SkyBoxScene.cpp" />
     <ClCompile Include="TextureScene.cpp" />
+    <ClCompile Include="ColorHeightScene.cpp" />
+    <ClCompile Include="ColorNormalScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicScene.h" />
@@ -15,5 +17,7 @@
     <ClInclude Include="NormalScene.h" />
     <ClInclude Include="SkyBoxScene.h" />
     <ClInclude Include="TextureScene.h" />
+    <ClInclude Include="ColorHeightScene.h" />
+    <ClInclude Include="ColorNormalScene.h" />
   </ItemGroup>
 </Project>
