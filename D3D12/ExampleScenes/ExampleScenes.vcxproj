@@ -118,9 +118,11 @@
     <ClCompile Include="ColorHeightScene.cpp" />
     <ClCompile Include="ColorNormalScene.cpp" />
     <ClCompile Include="Demo1Scene.cpp" />
+    <ClCompile Include="Demo2Scene.cpp" />
     <ClCompile Include="HeightScene.cpp" />
     <ClCompile Include="NormalScene.cpp" />
     <ClCompile Include="SkyBoxScene.cpp" />
+    <ClCompile Include="SceneUtils.cpp" />
     <ClCompile Include="TextureScene.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -128,9 +130,11 @@
     <ClInclude Include="ColorHeightScene.h" />
     <ClInclude Include="ColorNormalScene.h" />
     <ClInclude Include="Demo1Scene.h" />
+    <ClInclude Include="Demo2Scene.h" />
     <ClInclude Include="HeightScene.h" />
     <ClInclude Include="NormalScene.h" />
     <ClInclude Include="SkyBoxScene.h" />
+    <ClInclude Include="SceneUtils.h" />
     <ClInclude Include="TextureScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

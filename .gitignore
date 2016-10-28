@@ -1229,3 +1229,5 @@
 /D3D12/x64/Release/GeometryPass/Shaders/ColorMapping/PS.cso
 /D3D12/x64/Release/GeometryPass/Shaders/ColorMapping/RS.cso
 /D3D12/x64/Release/GeometryPass/Shaders/ColorMapping/VS.cso
+/D3D12/ExampleScenes/x64/Debug/ExampleScenes.Build.CppClean.log
+/D3D12/Material/x64/Debug/Material.Build.CppClean.log

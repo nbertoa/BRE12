@@ -9,6 +9,8 @@
     <ClCompile Include="ColorHeightScene.cpp" />
     <ClCompile Include="ColorNormalScene.cpp" />
     <ClCompile Include="ColorMappingScene.cpp" />
+    <ClCompile Include="Demo2Scene.cpp" />
+    <ClCompile Include="SceneUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Demo1Scene.h" />
@@ -19,5 +21,7 @@
     <ClInclude Include="ColorHeightScene.h" />
     <ClInclude Include="ColorNormalScene.h" />
     <ClInclude Include="ColorMappingScene.h" />
+    <ClInclude Include="Demo2Scene.h" />
+    <ClInclude Include="SceneUtils.h" />
   </ItemGroup>
 </Project>

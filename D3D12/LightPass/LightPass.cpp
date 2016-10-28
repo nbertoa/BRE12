@@ -48,8 +48,6 @@ void LightPass::Init(
 
 	ASSERT(ValidateData() == false);
 
-	ASSERT(mRecorders.empty() == false);
-
 	CreateCommandObjects(mCmdAllocsBegin, mCmdAllocsEnd, mCmdList);
 	mGeometryBuffers = geometryBuffers;
 	mColorBufferCpuDesc = colorBufferCpuDesc;
@@ -189,7 +187,6 @@ bool LightPass::ValidateData() const noexcept {
 
 	const bool b =
 		mCmdList != nullptr &&
-		mRecorders.empty() == false &&
 		mColorBufferCpuDesc.ptr != 0UL &&
 		mDepthBuffer != nullptr &&
 		mDepthBufferCpuDesc.ptr != 0UL;

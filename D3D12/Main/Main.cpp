@@ -5,13 +5,14 @@
 #include <ExampleScenes/ColorMappingScene.h>
 #include <ExampleScenes\ColorNormalScene.h>
 #include <ExampleScenes\Demo1Scene.h>
+#include <ExampleScenes\Demo2Scene.h>
 #include <ExampleScenes\HeightScene.h>
 #include <ExampleScenes\NormalScene.h>
 #include <ExampleScenes\SkyBoxScene.h>
 #include <ExampleScenes\TextureScene.h>
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPSTR /*lpCmdLine*/, _In_ int /*nShowCmd*/) {
-	ColorMappingScene scene;
+	Demo2Scene scene;
 	App app(hInstance, &scene);
 
 	return 0;
