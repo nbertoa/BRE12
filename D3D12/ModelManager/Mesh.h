@@ -10,6 +10,8 @@ struct aiMesh;
 struct ID3D12GraphicsCommandList;
 class Model;
 
+// Stores model's mesh vertex and buffer data.
+// It used by model class.
 class Mesh {
 	friend class Model;
 
@@ -26,6 +28,7 @@ private:
 		ID3D12GraphicsCommandList& cmdList,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
+
 	explicit Mesh(
 		const GeometryGenerator::MeshData& meshData, 
 		ID3D12GraphicsCommandList& cmdList,

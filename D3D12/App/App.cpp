@@ -5,7 +5,7 @@
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <MasterRender/MasterRender.h>
-#include <Material/MaterialFactory.h>
+#include <Material/Material.h>
 #include <ModelManager\ModelManager.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
@@ -23,7 +23,7 @@ namespace {
 		ID3D12Device& device{ D3dData::Device() };
 		CommandManager::Create(device);
 		ModelManager::Create();
-		MaterialFactory::InitMaterials();
+		Materials::InitMaterials();
 		PSOManager::Create(device);
 		ResourceManager::Create(device);
 		RootSignatureManager::Create(device);

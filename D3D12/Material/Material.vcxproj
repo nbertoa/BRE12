@@ -115,11 +115,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Material.h" />
-    <ClInclude Include="MaterialFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Material.cpp" />
-    <ClCompile Include="MaterialFactory.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

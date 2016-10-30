@@ -9,6 +9,9 @@
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
+// - Load model data from a filepath.
+// - Get meshes 
+// It stores vertex/index data in Mesh class.
 class Model {
 public:
 	// Command lists are used to store buffers creation (vertex and index per mesh)

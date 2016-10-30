@@ -20,3 +20,22 @@ struct Material {
 	void RandomBaseColor() noexcept;
 	void RandomMaterial() noexcept;
 };
+
+namespace Materials {
+	enum MaterialType {
+		GOLD = 0U,
+		SILVER,
+		COPPER,
+		IRON,
+		ALUMINUM,
+		PLASTIC_GLASS_LOW,
+		PLASTIC_HIGH,
+		GLASS_HIGH,
+		NUM_MATERIALS
+	};
+
+	// You must call this method before GetMaterial()
+	void InitMaterials() noexcept;
+
+	const Material& GetMaterial(const MaterialType material) noexcept;
+};
