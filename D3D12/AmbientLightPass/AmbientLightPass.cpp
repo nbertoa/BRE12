@@ -1,4 +1,4 @@
-#include "AmbientPass.h"
+#include "AmbientLightPass.h"
 
 #include <d3d12.h>
 
@@ -56,7 +56,7 @@ namespace {
 	}
 }
 
-void AmbientPass::Init(
+void AmbientLightPass::Init(
 	ID3D12Device& device,
 	ID3D12CommandQueue& cmdQueue,
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
@@ -97,13 +97,13 @@ void AmbientPass::Init(
 	ASSERT(ValidateData());
 }
 
-void AmbientPass::Execute() const noexcept {
+void AmbientLightPass::Execute() const noexcept {
 	ASSERT(ValidateData());
 
 	mRecorder->RecordAndPushCommandLists();
 }
 
-bool AmbientPass::ValidateData() const noexcept {
+bool AmbientLightPass::ValidateData() const noexcept {
 	const bool b =
 		mCmdAlloc != nullptr &&
 		mCmdList != nullptr &&

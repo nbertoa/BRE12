@@ -3,7 +3,7 @@
 #include <memory>
 #include <tbb/concurrent_queue.h>
 
-#include <AmbientPass\AmbientCmdListRecorder.h>
+#include <AmbientLightPass\AmbientCmdListRecorder.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12CommandAllocator;
@@ -14,13 +14,13 @@ struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 // Pass responsible to apply ambient lighting and ambient occlusion
-class AmbientPass {
+class AmbientLightPass {
 public:
 	using Recorder = std::unique_ptr<AmbientCmdListRecorder>;
 
-	AmbientPass() = default;
-	AmbientPass(const AmbientPass&) = delete;
-	const AmbientPass& operator=(const AmbientPass&) = delete;
+	AmbientLightPass() = default;
+	AmbientLightPass(const AmbientLightPass&) = delete;
+	const AmbientLightPass& operator=(const AmbientLightPass&) = delete;
 
 	// You should call this method before Execute()
 	void Init(

@@ -5,7 +5,7 @@
 #include <vector>
 #include <wrl.h>
 
-#include <AmbientPass\AmbientPass.h>
+#include <AmbientLightPass\AmbientLightPass.h>
 #include <EnvironmentLightPass/EnvironmentLightPass.h>
 #include <GlobalData\Settings.h>
 #include <LightingPass\LightingPassCmdListRecorder.h>
@@ -74,6 +74,6 @@ private:
 
 	Recorders mRecorders;
 
-	AmbientPass mAmbientPass;
+	AmbientLightPass mAmbientLightPass;
 	EnvironmentLightPass mEnvironmentLightPass;
 };

@@ -53,9 +53,9 @@ void AmbientCmdListRecorder::InitPSO() noexcept {
 	psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
 	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
 	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
-	psoParams.mPSFilename = "AmbientPass/Shaders/PS.cso";
-	psoParams.mRootSignFilename = "AmbientPass/Shaders/RS.cso";
-	psoParams.mVSFilename = "AmbientPass/Shaders/VS.cso";
+	psoParams.mPSFilename = "AmbientLightPass/Shaders/PS.cso";
+	psoParams.mRootSignFilename = "AmbientLightPass/Shaders/RS.cso";
+	psoParams.mVSFilename = "AmbientLightPass/Shaders/VS.cso";
 	psoParams.mNumRenderTargets = 1U;
 	psoParams.mRtFormats[0U] = Settings::sColorBufferFormat;
 	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {

@@ -2,11 +2,11 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="AmbientCmdListRecorder.cpp" />
-    <ClCompile Include="AmbientPass.cpp" />
+    <ClCompile Include="AmbientLightPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AmbientCmdListRecorder.h" />
-    <ClInclude Include="AmbientPass.h" />
+    <ClInclude Include="AmbientLightPass.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

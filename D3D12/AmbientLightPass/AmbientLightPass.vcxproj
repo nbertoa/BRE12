@@ -22,6 +22,7 @@
     <ProjectGuid>{FCFC08FF-3D32-41DA-9290-EF1B77ADF793}</ProjectGuid>
     <RootNamespace>AmbientPass</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <ProjectName>AmbientLightPass</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -117,11 +118,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AmbientCmdListRecorder.cpp" />
-    <ClCompile Include="AmbientPass.cpp" />
+    <ClCompile Include="AmbientLightPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AmbientCmdListRecorder.h" />
-    <ClInclude Include="AmbientPass.h" />
+    <ClInclude Include="AmbientLightPass.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PS.hlsl">

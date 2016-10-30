@@ -62,7 +62,7 @@ void LightingPass::Init(
 
 	// Initialize ambient pass
 	ASSERT(geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get() != nullptr);
-	mAmbientPass.Init(
+	mAmbientLightPass.Init(
 		device,
 		cmdQueue,
 		cmdListQueue,
@@ -103,7 +103,7 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	const std::uint32_t taskCount{ lightTaskCount + 2U };
 
 	// Execute ambient light pass tasks
-	mAmbientPass.Execute();
+	mAmbientLightPass.Execute();
 
 	// Execute environment light pass tasks
 	mEnvironmentLightPass.Execute(frameCBuffer);
