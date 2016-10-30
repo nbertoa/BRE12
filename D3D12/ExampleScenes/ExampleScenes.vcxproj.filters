@@ -9,6 +9,7 @@
     <ClCompile Include="MaterialShowcaseScene.cpp" />
     <ClCompile Include="HeightScene.cpp" />
     <ClCompile Include="NormalScene.cpp" />
+    <ClCompile Include="AmbientOcclussionScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TextureScene.h" />
@@ -19,5 +20,6 @@
     <ClInclude Include="MaterialShowcaseScene.h" />
     <ClInclude Include="HeightScene.h" />
     <ClInclude Include="NormalScene.h" />
+    <ClInclude Include="AmbientOcclussionScene.h" />
   </ItemGroup>
 </Project>
