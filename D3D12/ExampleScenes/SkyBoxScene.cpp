@@ -4,8 +4,8 @@
 
 #include <GeometryPass/Recorders/HeightCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
-#include <LightPass/PunctualLight.h>
-#include <LightPass/Recorders/PunctualLightCmdListRecorder.h>
+#include <LightingPass/PunctualLight.h>
+#include <LightingPass/Recorders/PunctualLightCmdListRecorder.h>
 #include <Material/Material.h>
 #include <MathUtils\MathUtils.h>
 #include <ModelManager\Mesh.h>
@@ -40,12 +40,11 @@ namespace {
 	const float sOffsetX3{ 15.0f };
 
 	void GenerateRecorder(		
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
 		PunctualLightCmdListRecorder* &recorder) {
-		recorder = new PunctualLightCmdListRecorder(D3dData::Device(), cmdListQueue);
+		recorder = new PunctualLightCmdListRecorder(D3dData::Device());
 		PunctualLight light[1];
 		light[0].mPosAndRange[0] = 0.0f;
 		light[0].mPosAndRange[1] = 300.0f;
@@ -56,7 +55,12 @@ namespace {
 		light[0].mColorAndPower[2] = 1.0f;
 		light[0].mColorAndPower[3] = 1000000.0f;
 
-		recorder->Init(geometryBuffers, geometryBuffersCount, depthBuffer, light, _countof(light));
+		recorder->Init(
+			geometryBuffers, 
+			geometryBuffersCount, 
+			depthBuffer, 
+			light, 
+			_countof(light));
 	}
 
 	void GenerateRecorder(
@@ -66,7 +70,6 @@ namespace {
 		const float offsetX,
 		const float offsetY,
 		const float offsetZ,
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		const std::vector<Mesh>& meshes,
 		ID3D12Resource** textures,
 		ID3D12Resource** normals,
@@ -79,7 +82,7 @@ namespace {
 		ASSERT(normals != nullptr);
 		ASSERT(heights != nullptr);
 
-		recorder = new HeightCmdListRecorder(D3dData::Device(), cmdListQueue);
+		recorder = new HeightCmdListRecorder(D3dData::Device());
 		
 		const std::size_t numMeshes{ meshes.size() };
 		ASSERT(numMeshes > 0UL);
@@ -142,7 +145,6 @@ namespace {
 
 void SkyBoxScene::GenerateGeomPassRecorders(
 	ID3D12CommandQueue& cmdQueue,
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 
 	ASSERT(tasks.empty());
@@ -223,22 +225,21 @@ void SkyBoxScene::GenerateGeomPassRecorders(
 	tasks.resize(2);
 
 	HeightCmdListRecorder* heightRecorder{ nullptr };
-	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), tex, normal, height, materials, numResources, heightRecorder);
+	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, model1->Meshes(), tex, normal, height, materials, numResources, heightRecorder);
 	ASSERT(heightRecorder != nullptr);
 	tasks[0].reset(heightRecorder);
 
 	HeightCmdListRecorder* heightRecorder2{ nullptr };
-	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, cmdListQueue, model->Meshes(), tex, normal, height, materials, numResources, heightRecorder2);
+	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, model->Meshes(), tex, normal, height, materials, numResources, heightRecorder2);
 	ASSERT(heightRecorder2 != nullptr);
 	tasks[1].reset(heightRecorder2);
 }
 
-void SkyBoxScene::GenerateLightPassRecorders(
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+void SkyBoxScene::GenerateLightingPassRecorders(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
-	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) noexcept
+	std::vector<std::unique_ptr<LightingPassCmdListRecorder>>& tasks) noexcept
 {
 	ASSERT(tasks.empty());
 	ASSERT(geometryBuffers != nullptr);
@@ -247,7 +248,11 @@ void SkyBoxScene::GenerateLightPassRecorders(
 	
 	tasks.resize(1UL);
 	PunctualLightCmdListRecorder* recorder{ nullptr };
-	GenerateRecorder(cmdListQueue, geometryBuffers, geometryBuffersCount, depthBuffer, recorder);
+	GenerateRecorder(
+		geometryBuffers, 
+		geometryBuffersCount, 
+		depthBuffer, 
+		recorder);
 	ASSERT(recorder != nullptr);
 	tasks[0].reset(recorder);
 }

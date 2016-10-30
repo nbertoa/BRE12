@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <GeometryPass/GeometryPassCmdListRecorder.h>
-#include <LightPass/LightPassCmdListRecorder.h>
+#include <LightingPass/LightingPassCmdListRecorder.h>
 
 struct ID3D12CommandAllocator;
 struct ID3D12CommandQueue;
@@ -28,16 +28,14 @@ public:
 	void Init() noexcept;
 	
 	virtual void GenerateGeomPassRecorders(
-		ID3D12CommandQueue& cmdQueue,
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, 
+		ID3D12CommandQueue& cmdQueue,		 
 		std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept = 0;
 
-	virtual void GenerateLightPassRecorders(
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue, 
+	virtual void GenerateLightingPassRecorders( 
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
-		std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) noexcept = 0;
+		std::vector<std::unique_ptr<LightingPassCmdListRecorder>>& tasks) noexcept = 0;
 
 	virtual void GenerateCubeMaps(
 		ID3D12CommandQueue& cmdQueue,

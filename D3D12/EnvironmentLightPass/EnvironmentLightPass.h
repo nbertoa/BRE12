@@ -48,8 +48,5 @@ private:
 
 	ID3D12Fence* mFence{ nullptr };
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
-
 	Recorder mRecorder;
 };

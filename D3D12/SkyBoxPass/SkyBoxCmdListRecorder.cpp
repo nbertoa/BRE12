@@ -80,28 +80,25 @@ void SkyBoxCmdListRecorder::Init(
 	const BufferCreator::VertexBufferData& vertexBufferData,
 	const BufferCreator::IndexBufferData indexBufferData, 
 	const DirectX::XMFLOAT4X4& worldMatrix,
-	ID3D12Resource& cubeMap) noexcept
+	ID3D12Resource& cubeMap,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
 {
 	ASSERT(ValidateData() == false);
 
 	mVertexBufferData = vertexBufferData;
 	mIndexBufferData = indexBufferData;
 	mWorldMatrix = worldMatrix;
+	mColorBufferCpuDesc = colorBufferCpuDesc;
+	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	BuildBuffers(cubeMap);
 
 	ASSERT(ValidateData());
 }
 
-void SkyBoxCmdListRecorder::RecordCommandLists(
-	const FrameCBuffer& frameCBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE* rtvCpuDescHandles,
-	const std::uint32_t rtvCpuDescHandlesCount,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
-
+void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(ValidateData());
-	ASSERT(rtvCpuDescHandles != nullptr);
-	ASSERT(rtvCpuDescHandlesCount > 0);
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 
@@ -117,7 +114,7 @@ void SkyBoxCmdListRecorder::RecordCommandLists(
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(rtvCpuDescHandlesCount, rtvCpuDescHandles, false, &depthStencilHandle);
+	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
@@ -166,7 +163,9 @@ bool SkyBoxCmdListRecorder::ValidateData() const noexcept {
 		mCbvSrvUavDescHeap != nullptr &&
 		mObjectCBuffer != nullptr &&
 		mObjectCBufferGpuDescHandleBegin.ptr != 0UL &&
-		mCubeMapBufferGpuDescHandleBegin.ptr != 0UL;
+		mCubeMapBufferGpuDescHandleBegin.ptr != 0UL &&
+		mColorBufferCpuDesc.ptr != 0UL &&
+		mDepthBufferCpuDesc.ptr != 0UL;
 
 	return result;
 }

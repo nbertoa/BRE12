@@ -2,7 +2,7 @@
 
 #include <d3d12.h>
 
-#include <CommandListProcessor/CommandListProcessor.h>
+#include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandManager.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
@@ -71,8 +71,6 @@ void EnvironmentLightPass::Init(
 	ASSERT(ValidateData() == false);
 	
 	CreateCommandObjects(mCmdAlloc, mCmdList, mFence);
-	mColorBufferCpuDesc = colorBufferCpuDesc;
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
 	
@@ -99,6 +97,8 @@ void EnvironmentLightPass::Init(
 		geometryBuffers, 
 		geometryBuffersCount,
 		depthBuffer,
+		colorBufferCpuDesc,
+		depthBufferCpuDesc,
 		diffuseIrradianceCubeMap,
 		specularPreConvolvedCubeMap);
 
@@ -108,7 +108,7 @@ void EnvironmentLightPass::Init(
 void EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 	ASSERT(ValidateData());
 
-	mRecorder->RecordCommandLists(frameCBuffer, mColorBufferCpuDesc, mDepthBufferCpuDesc);
+	mRecorder->RecordAndPushCommandLists(frameCBuffer);
 }
 
 bool EnvironmentLightPass::ValidateData() const noexcept {
@@ -116,9 +116,7 @@ bool EnvironmentLightPass::ValidateData() const noexcept {
 		mCmdAlloc != nullptr &&
 		mCmdList != nullptr &&
 		mFence != nullptr &&
-		mRecorder.get() != nullptr &&
-		mColorBufferCpuDesc.ptr != 0UL &&
-		mDepthBufferCpuDesc.ptr != 0UL;
+		mRecorder.get() != nullptr;
 
 	return b;
 }

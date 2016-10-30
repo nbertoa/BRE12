@@ -14,7 +14,7 @@ struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 class UploadBuffer;
 
-// Responsible of command lists recording to be executed by CommandListProcessor.
+// Responsible of command lists recording to be executed by CommandListExecutor.
 // This class has common data and functionality to record command list for ambient light pass.
 class AmbientCmdListRecorder {
 public:
@@ -28,16 +28,16 @@ public:
 	void Init(
 		const BufferCreator::VertexBufferData& vertexBufferData,
 		const BufferCreator::IndexBufferData indexBufferData,
-		ID3D12Resource& baseColorMetalMaskBuffer) noexcept;
+		ID3D12Resource& baseColorMetalMaskBuffer,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
-	void RecordCommandLists(
-		const D3D12_CPU_DESCRIPTOR_HANDLE& rtvCpuDescHandle,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept;
+	void RecordAndPushCommandLists() noexcept;
 
 	bool ValidateData() const noexcept;
 
 private:
-	void BuildBuffers(ID3D12Resource& colorBuffer) noexcept;
+	void BuildBuffers(ID3D12Resource& baseColorMetalMaskBuffer) noexcept;
 
 	ID3D12Device& mDevice;
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
@@ -50,4 +50,8 @@ private:
 
 	BufferCreator::VertexBufferData mVertexBufferData;
 	BufferCreator::IndexBufferData mIndexBufferData;
+
+	// Color & Depth buffers cpu descriptors
+	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 };

@@ -3,7 +3,7 @@
 #include <d3d12.h>
 #include <DirectXColors.h>
 
-#include <CommandListProcessor/CommandListProcessor.h>
+#include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <ModelManager\Mesh.h>
@@ -65,6 +65,7 @@ namespace {
 
 void ToneMappingPass::Init(
 	ID3D12Device& device,
+	CommandListExecutor& cmdListProcessor,
 	ID3D12CommandQueue& cmdQueue,
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	ID3D12Resource& colorBuffer,
@@ -73,8 +74,9 @@ void ToneMappingPass::Init(
 	ASSERT(ValidateData() == false);
 	
 	CreateCommandObjects(mCmdAllocs, mCmdList, mFence);
+	mCmdListProcessor = &cmdListProcessor;
+	mCmdQueue = &cmdQueue;
 	mColorBuffer = &colorBuffer;
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	CHECK_HR(mCmdList->Reset(mCmdAllocs[0U], nullptr));
 	
@@ -95,14 +97,12 @@ void ToneMappingPass::Init(
 
 	// Initialize recorder
 	mRecorder.reset(new ToneMappingCmdListRecorder(device, cmdListQueue));
-	mRecorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), colorBuffer);
+	mRecorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), colorBuffer, depthBufferCpuDesc);
 
 	ASSERT(ValidateData());
 }
 
 void ToneMappingPass::Execute(
-	CommandListProcessor& cmdListProcessor,
-	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource& frameBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
 
@@ -130,15 +130,15 @@ void ToneMappingPass::Execute(
 	CHECK_HR(mCmdList->Close());
 
 	// Execute preliminary task
-	cmdListProcessor.ResetExecutedTasksCounter();
+	mCmdListProcessor->ResetExecutedCmdListCount();
 	ID3D12CommandList* cmdLists[] = { mCmdList };
-	cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 
 	// Execute task
-	mRecorder->RecordCommandLists(frameBufferCpuDesc, mDepthBufferCpuDesc);
+	mRecorder->RecordAndPushCommandLists(frameBufferCpuDesc);
 
 	// Wait until all previous tasks command lists are executed
-	while (cmdListProcessor.ExecutedTasksCounter() < 1) {
+	while (mCmdListProcessor->ExecutedCmdListCount() < 1) {
 		Sleep(0U);
 	}
 }
@@ -151,11 +151,12 @@ bool ToneMappingPass::ValidateData() const noexcept {
 	}
 
 	const bool b =
+		mCmdListProcessor != nullptr &&
+		mCmdQueue != nullptr &&
 		mCmdList != nullptr &&
 		mFence != nullptr &&
 		mRecorder.get() != nullptr &&
-		mColorBuffer != nullptr &&
-		mDepthBufferCpuDesc.ptr != 0UL;
+		mColorBuffer != nullptr;
 
 	return b;
 }

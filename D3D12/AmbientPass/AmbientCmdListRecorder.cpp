@@ -71,22 +71,23 @@ void AmbientCmdListRecorder::InitPSO() noexcept {
 void AmbientCmdListRecorder::Init(
 	const BufferCreator::VertexBufferData& vertexBufferData,
 	const BufferCreator::IndexBufferData indexBufferData,
-	ID3D12Resource& colorBuffer) noexcept
+	ID3D12Resource& baseColorMetalMaskBuffer,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
 {
 	ASSERT(ValidateData() == false);
 
 	mVertexBufferData = vertexBufferData;
 	mIndexBufferData = indexBufferData;
+	mColorBufferCpuDesc = colorBufferCpuDesc;
+	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
-	BuildBuffers(colorBuffer);
+	BuildBuffers(baseColorMetalMaskBuffer);
 
 	ASSERT(ValidateData());
 }
 
-void AmbientCmdListRecorder::RecordCommandLists(
-	const D3D12_CPU_DESCRIPTOR_HANDLE& rtvCpuDescHandle,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
-
+void AmbientCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	ASSERT(ValidateData());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
@@ -99,7 +100,7 @@ void AmbientCmdListRecorder::RecordCommandLists(
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &rtvCpuDescHandle, false, &depthStencilHandle);
+	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
@@ -130,7 +131,9 @@ bool AmbientCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		mCmdList != nullptr &&
-		mCbvSrvUavDescHeap != nullptr;
+		mCbvSrvUavDescHeap != nullptr &&
+		mColorBufferCpuDesc.ptr != 0UL &&
+		mDepthBufferCpuDesc.ptr != 0UL;
 
 	return result;
 }

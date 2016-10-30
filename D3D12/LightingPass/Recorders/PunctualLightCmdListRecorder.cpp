@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-#include <LightPass/PunctualLight.h>
+#include <LightingPass/PunctualLight.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
@@ -60,8 +60,8 @@ namespace {
 	}
 }
 
-PunctualLightCmdListRecorder::PunctualLightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
-	: LightPassCmdListRecorder(device, cmdListQueue)
+PunctualLightCmdListRecorder::PunctualLightCmdListRecorder(ID3D12Device& device)
+	: LightingPassCmdListRecorder(device)
 {
 }
 
@@ -74,10 +74,10 @@ void PunctualLightCmdListRecorder::InitPSO() noexcept {
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
 	psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
 	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
-	psoParams.mGSFilename = "LightPass/Shaders/PunctualLight/GS.cso";
-	psoParams.mPSFilename = "LightPass/Shaders/PunctualLight/PS.cso";
-	psoParams.mRootSignFilename = "LightPass/Shaders/PunctualLight/RS.cso";
-	psoParams.mVSFilename = "LightPass/Shaders/PunctualLight/VS.cso";
+	psoParams.mGSFilename = "LightingPass/Shaders/PunctualLight/GS.cso";
+	psoParams.mPSFilename = "LightingPass/Shaders/PunctualLight/PS.cso";
+	psoParams.mRootSignFilename = "LightingPass/Shaders/PunctualLight/RS.cso";
+	psoParams.mVSFilename = "LightingPass/Shaders/PunctualLight/VS.cso";
 	psoParams.mNumRenderTargets = 1U;
 	psoParams.mRtFormats[0U] = Settings::sColorBufferFormat;
 	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
@@ -94,7 +94,7 @@ void PunctualLightCmdListRecorder::Init(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
-	const PunctualLight* lights,
+	const void* lights,
 	const std::uint32_t numLights) noexcept
 {
 	ASSERT(ValidateData() == false);
@@ -102,7 +102,7 @@ void PunctualLightCmdListRecorder::Init(
 	ASSERT(0 < geometryBuffersCount && geometryBuffersCount < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 	ASSERT(lights != nullptr);
 	ASSERT(numLights > 0U);
-
+	
 	mNumLights = numLights;
 
 	// Geometry buffers SRVS + num lights + lights buffer SRV + depth buffer
@@ -135,17 +135,13 @@ void PunctualLightCmdListRecorder::Init(
 
 }
 
-void PunctualLightCmdListRecorder::RecordCommandLists(
-	const FrameCBuffer& frameCBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE* rtvCpuDescHandles,
-	const std::uint32_t rtvCpuDescHandlesCount,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
-
+void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(ValidateData());
-	ASSERT(rtvCpuDescHandles != nullptr);
-	ASSERT(rtvCpuDescHandlesCount > 0);
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
+	ASSERT(mCmdListQueue != nullptr);
+	ASSERT(mColorBufferCpuDesc.ptr != 0UL);
+	ASSERT(mDepthBufferCpuDesc.ptr != 0UL);
 
 	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
 	ASSERT(cmdAlloc != nullptr);	
@@ -159,7 +155,7 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(rtvCpuDescHandlesCount, rtvCpuDescHandles, false, &depthStencilHandle);
+	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
@@ -180,13 +176,13 @@ void PunctualLightCmdListRecorder::RecordCommandLists(
 
 	mCmdList->Close();
 
-	mCmdListQueue.push(mCmdList);
+	mCmdListQueue->push(mCmdList);
 
 	// Next frame
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % _countof(mCmdAlloc);
 }
 
-void PunctualLightCmdListRecorder::BuildLightsBuffers(const PunctualLight* lights, const std::uint32_t numDescriptors) noexcept {
+void PunctualLightCmdListRecorder::BuildLightsBuffers(const void* lights, const std::uint32_t numDescriptors) noexcept {
 	ASSERT(mCbvSrvUavDescHeap == nullptr);
 #ifdef _DEBUG
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
@@ -210,8 +206,9 @@ void PunctualLightCmdListRecorder::BuildLightsBuffers(const PunctualLight* light
 	// Create lights buffer and fill it
 	const std::size_t lightBufferElemSize{ sizeof(PunctualLight) };
 	ResourceManager::Get().CreateUploadBuffer(lightBufferElemSize, mNumLights, mLightsBuffer);
+	const std::uint8_t* lightsPtr = reinterpret_cast<const std::uint8_t*>(lights);
 	for (std::uint32_t i = 0UL; i < mNumLights; ++i) {
-		mLightsBuffer->CopyData(i, &lights[i], sizeof(PunctualLight));
+		mLightsBuffer->CopyData(i, lightsPtr + sizeof(PunctualLight) * i, sizeof(PunctualLight));
 	}
 
 	// Create frame cbuffers

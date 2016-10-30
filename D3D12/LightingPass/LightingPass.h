@@ -8,9 +8,9 @@
 #include <AmbientPass\AmbientPass.h>
 #include <EnvironmentLightPass/EnvironmentLightPass.h>
 #include <GlobalData\Settings.h>
-#include <LightPass\LightPassCmdListRecorder.h>
+#include <LightingPass\LightingPassCmdListRecorder.h>
 
-class CommandListProcessor;
+class CommandListExecutor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 struct ID3D12CommandAllocator;
@@ -20,13 +20,13 @@ struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 // Pass responsible to execute recorders related with deferred shading lighting pass
-class LightPass {
+class LightingPass {
 public:
-	using Recorders = std::vector<std::unique_ptr<LightPassCmdListRecorder>>;
+	using Recorders = std::vector<std::unique_ptr<LightingPassCmdListRecorder>>;
 
-	LightPass() = default;
-	LightPass(const LightPass&) = delete;
-	const LightPass& operator=(const LightPass&) = delete;
+	LightingPass() = default;
+	LightingPass(const LightingPass&) = delete;
+	const LightingPass& operator=(const LightingPass&) = delete;
 
 	// You should get recorders and fill them, before calling Init()
 	__forceinline Recorders& GetRecorders() noexcept { return mRecorders; }
@@ -34,6 +34,7 @@ public:
 	// You should call this method after filling recorders and before Execute()
 	void Init(
 		ID3D12Device& device,
+		CommandListExecutor& cmdListProcessor,
 		ID3D12CommandQueue& cmdQueue,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
@@ -44,14 +45,14 @@ public:
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
-	void Execute(
-		CommandListProcessor& cmdListProcessor,
-		ID3D12CommandQueue& cmdQueue,
-		const FrameCBuffer& frameCBuffer) noexcept;
+	void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
 	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
+
+	CommandListExecutor* mCmdListProcessor{ nullptr };
+	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	
 	ID3D12CommandAllocator* mCmdAllocsBegin[Settings::sQueuedFrameCount]{ nullptr };

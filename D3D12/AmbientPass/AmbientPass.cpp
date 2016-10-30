@@ -2,7 +2,7 @@
 
 #include <d3d12.h>
 
-#include <CommandListProcessor/CommandListProcessor.h>
+#include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandManager.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
@@ -67,8 +67,6 @@ void AmbientPass::Init(
 	ASSERT(ValidateData() == false);
 	
 	CreateCommandObjects(mCmdAlloc, mCmdList, mFence);
-	mColorBufferCpuDesc = colorBufferCpuDesc;
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
 	
@@ -89,7 +87,12 @@ void AmbientPass::Init(
 
 	// Initialize recorder
 	mRecorder.reset(new AmbientCmdListRecorder(device, cmdListQueue));
-	mRecorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), baseColorMetalMaskBuffer);
+	mRecorder->Init(
+		mesh.VertexBufferData(), 
+		mesh.IndexBufferData(), 
+		baseColorMetalMaskBuffer,
+		colorBufferCpuDesc,
+		depthBufferCpuDesc);
 
 	ASSERT(ValidateData());
 }
@@ -97,7 +100,7 @@ void AmbientPass::Init(
 void AmbientPass::Execute() const noexcept {
 	ASSERT(ValidateData());
 
-	mRecorder->RecordCommandLists(mColorBufferCpuDesc, mDepthBufferCpuDesc);
+	mRecorder->RecordAndPushCommandLists();
 }
 
 bool AmbientPass::ValidateData() const noexcept {
@@ -105,9 +108,7 @@ bool AmbientPass::ValidateData() const noexcept {
 		mCmdAlloc != nullptr &&
 		mCmdList != nullptr &&
 		mFence != nullptr &&
-		mRecorder.get() != nullptr &&
-		mColorBufferCpuDesc.ptr != 0UL &&
-		mDepthBufferCpuDesc.ptr != 0UL;
+		mRecorder.get() != nullptr;
 
 	return b;
 }

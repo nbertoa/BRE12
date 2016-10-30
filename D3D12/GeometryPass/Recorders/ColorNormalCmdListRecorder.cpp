@@ -23,8 +23,8 @@ namespace {
 	ID3D12RootSignature* sRootSign{ nullptr };
 }
 
-ColorNormalCmdListRecorder::ColorNormalCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
-	: GeometryPassCmdListRecorder(device, cmdListQueue)
+ColorNormalCmdListRecorder::ColorNormalCmdListRecorder(ID3D12Device& device)
+	: GeometryPassCmdListRecorder(device)
 {
 }
 
@@ -82,17 +82,14 @@ void ColorNormalCmdListRecorder::Init(
 	ASSERT(ValidateData());
 }
 
-void ColorNormalCmdListRecorder::RecordCommandLists(
-	const FrameCBuffer& frameCBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE* geomPassRtvCpuDescHandles,
-	const std::uint32_t geomPassRtvCpuDescHandlesCount,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
-
+void ColorNormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(ValidateData());
-	ASSERT(geomPassRtvCpuDescHandles != nullptr);
-	ASSERT(geomPassRtvCpuDescHandlesCount > 0);
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
+	ASSERT(mCmdListQueue != nullptr);
+	ASSERT(mGeometryBuffersCpuDescs != nullptr);
+	ASSERT(mGeometryBuffersCpuDescCount != 0U);
+	ASSERT(mDepthBufferCpuDesc.ptr != 0U);
 
 	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
 	ASSERT(cmdAlloc != nullptr);
@@ -106,7 +103,7 @@ void ColorNormalCmdListRecorder::RecordCommandLists(
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(geomPassRtvCpuDescHandlesCount, geomPassRtvCpuDescHandles, false, &depthStencilHandle);
+	mCmdList->OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
 
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
@@ -146,7 +143,7 @@ void ColorNormalCmdListRecorder::RecordCommandLists(
 
 	mCmdList->Close();
 
-	mCmdListQueue.push(mCmdList);
+	mCmdListQueue->push(mCmdList);
 
 	// Next frame
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;

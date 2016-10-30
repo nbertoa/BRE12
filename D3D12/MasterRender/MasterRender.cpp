@@ -2,7 +2,7 @@
 
 #include <tbb/parallel_for.h>
 
-#include <CommandListProcessor/CommandListProcessor.h>
+#include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager/CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GlobalData/D3dData.h>
@@ -136,7 +136,7 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 	mCamera.SetLens(Settings::sFieldOfView, Settings::AspectRatio(), Settings::sNearPlaneZ, Settings::sFarPlaneZ);
 
 	// Create and spawn command list processor thread.
-	mCmdListProcessor = CommandListProcessor::Create(mCmdQueue, MAX_NUM_CMD_LISTS);
+	mCmdListProcessor = CommandListExecutor::Create(mCmdQueue, MAX_NUM_CMD_LISTS);
 	ASSERT(mCmdListProcessor != nullptr);
 	
 	InitPasses(scene);
@@ -152,8 +152,8 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 	scene->Init();
 	
 	// Generate recorders for all the passes
-	scene->GenerateGeomPassRecorders(*mCmdQueue, mCmdListProcessor->CmdListQueue(), mGeometryPass.GetRecorders());
-	mGeometryPass.Init(mDevice, DepthStencilCpuDesc());
+	scene->GenerateGeomPassRecorders(*mCmdQueue, mGeometryPass.GetRecorders());
+	mGeometryPass.Init(mDevice, DepthStencilCpuDesc(), *mCmdListProcessor, *mCmdQueue);
 
 	ID3D12Resource* skyBoxCubeMap;
 	ID3D12Resource* diffuseIrradianceCubeMap;
@@ -163,9 +163,15 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 	ASSERT(diffuseIrradianceCubeMap != nullptr);
 	ASSERT(specularPreConvolvedCubeMap != nullptr);
 
-	scene->GenerateLightPassRecorders(mCmdListProcessor->CmdListQueue(), mGeometryPass.GetBuffers(), GeometryPass::BUFFERS_COUNT, *mDepthStencilBuffer, mLightPass.GetRecorders());
-	mLightPass.Init(
+	scene->GenerateLightingPassRecorders(
+		mGeometryPass.GetBuffers(), 
+		GeometryPass::BUFFERS_COUNT, 
+		*mDepthStencilBuffer, 
+		mLightingPass.GetRecorders());
+
+	mLightingPass.Init(
 		mDevice, 
+		*mCmdListProcessor,
 		*mCmdQueue, 
 		mCmdListProcessor->CmdListQueue(),
 		mGeometryPass.GetBuffers(),
@@ -176,9 +182,22 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		*diffuseIrradianceCubeMap,
 		*specularPreConvolvedCubeMap);
 
-	mSkyBoxPass.Init(mDevice, *mCmdQueue, mCmdListProcessor->CmdListQueue(), *skyBoxCubeMap, mColorBufferRTVCpuDescHandle, DepthStencilCpuDesc());
+	mSkyBoxPass.Init(
+		mDevice, 
+		*mCmdListProcessor, 
+		*mCmdQueue, 
+		mCmdListProcessor->CmdListQueue(), 
+		*skyBoxCubeMap, 
+		mColorBufferRTVCpuDescHandle, 
+		DepthStencilCpuDesc());
 
-	mToneMappingPass.Init(mDevice, *mCmdQueue, mCmdListProcessor->CmdListQueue(), *mColorBuffer.Get(), DepthStencilCpuDesc());
+	mToneMappingPass.Init(
+		mDevice, 
+		*mCmdListProcessor,
+		*mCmdQueue, 
+		mCmdListProcessor->CmdListQueue(), 
+		*mColorBuffer.Get(), 
+		DepthStencilCpuDesc());
 		
 	// Initialize fence values for all frames to the same number.
 	const std::uint64_t count{ _countof(mFenceValueByQueuedFrameIndex) };
@@ -200,10 +219,10 @@ tbb::task* MasterRender::execute() {
 		ASSERT(mCmdListProcessor->IsIdle());
 
 		// Execute passes
-		mGeometryPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
-		mLightPass.Execute(*mCmdListProcessor, *mCmdQueue, mFrameCBuffer);
-		mSkyBoxPass.Execute(*mCmdListProcessor, mFrameCBuffer);
-		mToneMappingPass.Execute(*mCmdListProcessor, *mCmdQueue, *CurrentFrameBuffer(), CurrentFrameBufferCpuDesc());
+		mGeometryPass.Execute(mFrameCBuffer);
+		mLightingPass.Execute(mFrameCBuffer);
+		mSkyBoxPass.Execute(mFrameCBuffer);
+		mToneMappingPass.Execute(*CurrentFrameBuffer(), CurrentFrameBufferCpuDesc());
 		ExecuteMergePass();
 
 		SignalFenceAndPresent();

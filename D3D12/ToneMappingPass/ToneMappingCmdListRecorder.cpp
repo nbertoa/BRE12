@@ -70,21 +70,21 @@ void ToneMappingCmdListRecorder::InitPSO() noexcept {
 void ToneMappingCmdListRecorder::Init(
 	const BufferCreator::VertexBufferData& vertexBufferData,
 	const BufferCreator::IndexBufferData indexBufferData,
-	ID3D12Resource& colorBuffer) noexcept
+	ID3D12Resource& colorBuffer,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
 {
 	ASSERT(ValidateData() == false);
 
 	mVertexBufferData = vertexBufferData;
 	mIndexBufferData = indexBufferData;
+	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	BuildBuffers(colorBuffer);
 
 	ASSERT(ValidateData());
 }
 
-void ToneMappingCmdListRecorder::RecordCommandLists(
-	const D3D12_CPU_DESCRIPTOR_HANDLE& rtvCpuDescHandle,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
+void ToneMappingCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
 
 	ASSERT(ValidateData());
 	ASSERT(sPSO != nullptr);
@@ -98,7 +98,7 @@ void ToneMappingCmdListRecorder::RecordCommandLists(
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &rtvCpuDescHandle, false, &depthStencilHandle);
+	mCmdList->OMSetRenderTargets(1U, &frameBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
@@ -129,7 +129,8 @@ bool ToneMappingCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		mCmdList != nullptr &&
-		mCbvSrvUavDescHeap != nullptr;
+		mCbvSrvUavDescHeap != nullptr &&
+		mDepthBufferCpuDesc.ptr != 0UL;
 
 	return result;
 }

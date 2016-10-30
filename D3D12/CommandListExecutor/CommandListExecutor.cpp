@@ -1,14 +1,16 @@
-#include "CommandListProcessor.h"
+#include "CommandListExecutor.h"
 
 #include <Utils/DebugUtils.h>
 
-CommandListProcessor* CommandListProcessor::Create(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists) noexcept {
+CommandListExecutor* CommandListExecutor::Create(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists) noexcept {
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
+
+	// 1 reference for the parent + 1 reference for the child
 	parent->set_ref_count(2);
-	return new (parent->allocate_child()) CommandListProcessor(cmdQueue, maxNumCmdLists);
+	return new (parent->allocate_child()) CommandListExecutor(cmdQueue, maxNumCmdLists);
 }
 
-CommandListProcessor::CommandListProcessor(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists)
+CommandListExecutor::CommandListExecutor(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists)
 	: mMaxNumCmdLists(maxNumCmdLists)
 	, mCmdQueue(cmdQueue)
 {
@@ -16,18 +18,20 @@ CommandListProcessor::CommandListProcessor(ID3D12CommandQueue* cmdQueue, const s
 	parent()->spawn(*this);
 }
 
-tbb::task* CommandListProcessor::execute() {
+tbb::task* CommandListExecutor::execute() {
 	ASSERT(mMaxNumCmdLists > 0);
 
 	ID3D12CommandList* *cmdLists{ new ID3D12CommandList*[mMaxNumCmdLists] };
 	while (!mTerminate) {
-		// Pop at most MAX_COMMAND_LISTS from command list queue
+		// Pop at most mMaxNumCmdLists from command list queue
 		while (mPendingCmdLists < mMaxNumCmdLists && mCmdListQueue.try_pop(cmdLists[mPendingCmdLists])) {
 			++mPendingCmdLists;
 		}
+
+		// Execute command lists (if any)
 		if (mPendingCmdLists != 0U) {
 			mCmdQueue->ExecuteCommandLists(mPendingCmdLists, cmdLists);
-			mExecTasksCount += mPendingCmdLists;
+			mExecutedCmdLists += mPendingCmdLists;
 			mPendingCmdLists = 0U;
 		}
 		else {
@@ -40,7 +44,7 @@ tbb::task* CommandListProcessor::execute() {
 	return nullptr;
 }
 
-void CommandListProcessor::Terminate() noexcept {
+void CommandListExecutor::Terminate() noexcept {
 	mTerminate = true;
 	parent()->wait_for_all();
 }

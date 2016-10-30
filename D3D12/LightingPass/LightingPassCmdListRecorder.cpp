@@ -1,4 +1,4 @@
-#include "LightPassCmdListRecorder.h"
+#include "LightingPassCmdListRecorder.h"
 
 #include <CommandManager/CommandManager.h>
 #include <Utils/DebugUtils.h>
@@ -23,14 +23,13 @@ namespace {
 	}
 }
 
-LightPassCmdListRecorder::LightPassCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
+LightingPassCmdListRecorder::LightingPassCmdListRecorder(ID3D12Device& device)
 	: mDevice(device)
-	, mCmdListQueue(cmdListQueue)
 {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 
-bool LightPassCmdListRecorder::ValidateData() const noexcept {
+bool LightingPassCmdListRecorder::ValidateData() const noexcept {
 	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {
 			return false;
@@ -50,4 +49,17 @@ bool LightPassCmdListRecorder::ValidateData() const noexcept {
 		mImmutableCBuffer != nullptr &&
 		mLightsBuffer != nullptr &&
 		mLightsBufferGpuDescHandleBegin.ptr != 0UL;
+}
+
+void LightingPassCmdListRecorder::InitInternal(
+	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+	const D3D12_CPU_DESCRIPTOR_HANDLE colorBufferCpuDesc,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
+{
+	ASSERT(colorBufferCpuDesc.ptr != 0UL);
+	ASSERT(depthBufferCpuDesc.ptr != 0UL);
+
+	mCmdListQueue = &cmdListQueue;
+	mColorBufferCpuDesc = colorBufferCpuDesc;
+	mDepthBufferCpuDesc = depthBufferCpuDesc;
 }

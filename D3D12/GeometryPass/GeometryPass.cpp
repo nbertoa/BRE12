@@ -4,7 +4,7 @@
 #include <DirectXColors.h>
 #include <tbb/parallel_for.h>
 
-#include <CommandListProcessor/CommandListProcessor.h>
+#include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\Recorders\ColorCmdListRecorder.h>
@@ -105,10 +105,18 @@ namespace {
 	}
 }
 
-void GeometryPass::Init(ID3D12Device& device, const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
+void GeometryPass::Init(
+	ID3D12Device& device, 
+	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
+	CommandListExecutor& cmdListProcessor,
+	ID3D12CommandQueue& cmdQueue) noexcept {
+
 	ASSERT(ValidateData() == false);
 	
 	ASSERT(mRecorders.empty() == false);
+
+	mCmdListProcessor = &cmdListProcessor;
+	mCmdQueue = &cmdQueue;
 
 	CreateBuffers(device, mBuffers, mRtvCpuDescs, mDescHeap);
 	CreateCommandObjects(mCmdAllocs, mCmdList);
@@ -123,62 +131,47 @@ void GeometryPass::Init(ID3D12Device& device, const D3D12_CPU_DESCRIPTOR_HANDLE&
 	NormalCmdListRecorder::InitPSO(sBufferFormats, BUFFERS_COUNT);
 	TextureCmdListRecorder::InitPSO(sBufferFormats, BUFFERS_COUNT);
 
-	ASSERT(ValidateData());
-}
-
-void GeometryPass::Execute(
-	CommandListProcessor& cmdListProcessor, 
-	ID3D12CommandQueue& cmdQueue,
-	const FrameCBuffer& frameCBuffer) noexcept {
-
-	ASSERT(ValidateData());
-
-	// Used to choose a different command list allocator each call.
-	static std::uint32_t cmdAllocIndex{ 0U };
-
-	std::uint32_t taskCount{ static_cast<std::uint32_t>(mRecorders.size()) };
-	cmdListProcessor.ResetExecutedTasksCounter();
-
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocs[cmdAllocIndex] };
-	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocs);
-
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
-
-	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-
-	// Clear render targets and depth stencil
-	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	mCmdList->ClearRenderTargetView(mRtvCpuDescs[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
-	mCmdList->ClearRenderTargetView(mRtvCpuDescs[BASECOLOR_METALMASK], zero, 0U, nullptr);
-	mCmdList->ClearDepthStencilView(mDepthBufferCpuDesc, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
-
-	CHECK_HR(mCmdList->Close());
-
-	// Execute preliminary task
-	ID3D12CommandList* cmdLists[] = { mCmdList };
-	cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
-
-	// Build render targets cpu descriptors
-	const D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescs[]{
+	// Build geometry buffers cpu descriptors
+	const D3D12_CPU_DESCRIPTOR_HANDLE geomBuffersCpuDescs[]{
 		mRtvCpuDescs[NORMAL_SMOOTHNESS],
 		mRtvCpuDescs[BASECOLOR_METALMASK],
 	};
-	const std::uint32_t rtvCpuDescsCount = _countof(rtvCpuDescs);
-	ASSERT(rtvCpuDescsCount == BUFFERS_COUNT);
+	ASSERT(_countof(geomBuffersCpuDescs) == BUFFERS_COUNT);
+	memcpy(mGeometryBuffersCpuDescs, &geomBuffersCpuDescs, sizeof(geomBuffersCpuDescs));
 
-	// Execute tasks
+	// Init internal data for all geometry recorders
+	for (Recorders::value_type& recorder : mRecorders) {
+		ASSERT(recorder.get() != nullptr);
+		recorder->InitInternal(
+			mCmdListProcessor->CmdListQueue(),
+			mGeometryBuffersCpuDescs,
+			BUFFERS_COUNT,
+			mDepthBufferCpuDesc);
+	}
+
+	ASSERT(ValidateData());
+}
+
+void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
+
+	ASSERT(ValidateData());
+
+	ExecutePreliminaryTask(*mCmdQueue);
+
+	const std::uint32_t taskCount{ static_cast<std::uint32_t>(mRecorders.size()) };
+	mCmdListProcessor->ResetExecutedCmdListCount();
+
+	// Execute geometry tasks
 	std::uint32_t grainSize{ max(1U, (taskCount) / Settings::sCpuProcessors) };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mRecorders[i]->RecordCommandLists(frameCBuffer, rtvCpuDescs, rtvCpuDescsCount, mDepthBufferCpuDesc);
+			mRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
 	}
 	);
 
 	// Wait until all previous tasks command lists are executed
-	while (cmdListProcessor.ExecutedTasksCounter() < taskCount) {
+	while (mCmdListProcessor->ExecutedCmdListCount() < taskCount) {
 		Sleep(0U);
 	}
 }
@@ -203,10 +196,38 @@ bool GeometryPass::ValidateData() const noexcept {
 	}
 
 	const bool b =
+		mCmdListProcessor != nullptr &&
+		mCmdQueue != nullptr &&
 		mCmdList != nullptr &&
 		mRecorders.empty() == false &&
 		mDescHeap != nullptr &&
 		mDepthBufferCpuDesc.ptr != 0UL;
 
 		return b;
+}
+
+void GeometryPass::ExecutePreliminaryTask(ID3D12CommandQueue& cmdQueue) noexcept {
+	// Used to choose a different command list allocator each call.
+	static std::uint32_t cmdAllocIndex{ 0U };
+
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocs[cmdAllocIndex] };
+	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocs);
+
+	CHECK_HR(cmdAlloc->Reset());
+	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
+
+	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
+	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
+
+	// Clear render targets and depth stencil
+	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	mCmdList->ClearRenderTargetView(mRtvCpuDescs[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
+	mCmdList->ClearRenderTargetView(mRtvCpuDescs[BASECOLOR_METALMASK], zero, 0U, nullptr);
+	mCmdList->ClearDepthStencilView(mDepthBufferCpuDesc, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
+
+	CHECK_HR(mCmdList->Close());
+
+	// Execute preliminary task
+	ID3D12CommandList* cmdLists[] = { mCmdList };
+	cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
 }

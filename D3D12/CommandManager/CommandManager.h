@@ -5,6 +5,10 @@
 #include <tbb/mutex.h>
 #include <wrl.h>
 
+// This class is responsible to create/get/erase:
+// - Command queue
+// - Command list
+// - Command allocator
 class CommandManager {
 public:
 	static CommandManager& Create(ID3D12Device& device) noexcept;
@@ -26,7 +30,7 @@ public:
 	void EraseCmdList(const std::size_t id) noexcept;
 	void EraseCmdAlloc(const std::size_t id) noexcept;
 
-	// This will invalidate all ids.
+	// These will invalidate all ids.
 	__forceinline void ClearCmdQueues() noexcept { mCmdQueueById.clear(); }
 	__forceinline void ClearCmdLists() noexcept { mCmdListById.clear(); }
 	__forceinline void ClearCmdAllocs() noexcept { mCmdAllocById.clear(); }

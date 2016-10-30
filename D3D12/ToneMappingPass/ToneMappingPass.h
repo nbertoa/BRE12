@@ -6,7 +6,7 @@
 #include <GlobalData\Settings.h>
 #include <ToneMappingPass\ToneMappingCmdListRecorder.h>
 
-class CommandListProcessor;
+class CommandListExecutor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12CommandAllocator;
 struct ID3D12CommandList;
@@ -27,20 +27,22 @@ public:
 	// You should call this method before Execute()
 	void Init(
 		ID3D12Device& device,
+		CommandListExecutor& cmdListProcessor,
 		ID3D12CommandQueue& cmdQueue,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		ID3D12Resource& colorBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
 	void Execute(
-		CommandListProcessor& cmdListProcessor,
-		ID3D12CommandQueue& cmdQueue,
 		ID3D12Resource& frameBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
 
 private:
 	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
+
+	CommandListExecutor* mCmdListProcessor{ nullptr };
+	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	
 	ID3D12CommandAllocator* mCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
@@ -50,7 +52,6 @@ private:
 	ID3D12Fence* mFence{ nullptr };
 	
 	ID3D12Resource* mColorBuffer{ nullptr };
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 
 	Recorder mRecorder;
 };

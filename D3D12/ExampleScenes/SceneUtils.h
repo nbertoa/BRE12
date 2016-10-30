@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <vector>
 
 struct ID3D12CommandAllocator;

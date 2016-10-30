@@ -4,8 +4,8 @@
 
 #include <GeometryPass/Recorders/ColorCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
-#include <LightPass/PunctualLight.h>
-#include <LightPass/Recorders/PunctualLightCmdListRecorder.h>
+#include <LightingPass/PunctualLight.h>
+#include <LightingPass/Recorders/PunctualLightCmdListRecorder.h>
 #include <Material/Material.h>
 #include <Material/MaterialFactory.h>
 #include <MathUtils\MathUtils.h>
@@ -31,12 +31,11 @@ namespace {
 	const float sBunnyOffsetX{ 15.0f };
 
 	void GenerateRecorder(
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
 		PunctualLightCmdListRecorder* &recorder) {
-		recorder = new PunctualLightCmdListRecorder(D3dData::Device(), cmdListQueue);
+		recorder = new PunctualLightCmdListRecorder(D3dData::Device());
 		PunctualLight light[1];
 		light[0].mPosAndRange[0] = 0.0f;
 		light[0].mPosAndRange[1] = 300.0f;
@@ -47,7 +46,12 @@ namespace {
 		light[0].mColorAndPower[2] = 1.0f;
 		light[0].mColorAndPower[3] = 10000000.0f;
 
-		recorder->Init(geometryBuffers, geometryBuffersCount, depthBuffer, light, _countof(light));
+		recorder->Init(
+			geometryBuffers, 
+			geometryBuffersCount, 
+			depthBuffer, 
+			light, 
+			_countof(light));
 	}
 
 	void GenerateRecorder(
@@ -57,10 +61,9 @@ namespace {
 		const float offsetX,
 		const float offsetY,
 		const float offsetZ,
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		const std::vector<Mesh>& meshes,
 		ColorCmdListRecorder* &recorder) {
-		recorder = new ColorCmdListRecorder(D3dData::Device(), cmdListQueue);
+		recorder = new ColorCmdListRecorder(D3dData::Device());
 
 		const std::size_t numMaterials(MaterialFactory::NUM_MATERIALS);
 
@@ -108,7 +111,6 @@ namespace {
 
 void ColorMappingScene::GenerateGeomPassRecorders(
 	ID3D12CommandQueue& cmdQueue,
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 
 	ASSERT(tasks.empty());
@@ -132,22 +134,21 @@ void ColorMappingScene::GenerateGeomPassRecorders(
 
 	tasks.resize(2);
 	ColorCmdListRecorder* basicRecorder{ nullptr };
-	GenerateRecorder(sSphereTx, sSphereTy, sSphereTz, sSphereOffsetX, 0.0f, 0.0f, cmdListQueue, model1->Meshes(), basicRecorder);
+	GenerateRecorder(sSphereTx, sSphereTy, sSphereTz, sSphereOffsetX, 0.0f, 0.0f, model1->Meshes(), basicRecorder);
 	ASSERT(basicRecorder != nullptr);
 	tasks[0].reset(basicRecorder);
 
 	ColorCmdListRecorder* basicRecorder2{ nullptr };
-	GenerateRecorder(sBunnyTx, sBunnyTy, sBunnyTz, sBunnyOffsetX, 0.0f, 0.0f, cmdListQueue, model2->Meshes(), basicRecorder2);
+	GenerateRecorder(sBunnyTx, sBunnyTy, sBunnyTz, sBunnyOffsetX, 0.0f, 0.0f, model2->Meshes(), basicRecorder2);
 	ASSERT(basicRecorder2 != nullptr);
 	tasks[1].reset(basicRecorder2);
 }
 
-void ColorMappingScene::GenerateLightPassRecorders(
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+void ColorMappingScene::GenerateLightingPassRecorders(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
-	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) noexcept
+	std::vector<std::unique_ptr<LightingPassCmdListRecorder>>& tasks) noexcept
 {
 	ASSERT(tasks.empty());
 	ASSERT(geometryBuffers != nullptr);
@@ -156,7 +157,11 @@ void ColorMappingScene::GenerateLightPassRecorders(
 
 	tasks.resize(1UL);
 	PunctualLightCmdListRecorder* recorder{ nullptr };
-	GenerateRecorder(cmdListQueue, geometryBuffers, geometryBuffersCount, depthBuffer, recorder);
+	GenerateRecorder(
+		geometryBuffers, 
+		geometryBuffersCount, 
+		depthBuffer, 
+		recorder);
 	ASSERT(recorder != nullptr);
 	tasks[0].reset(recorder);
 }

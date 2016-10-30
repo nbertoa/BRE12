@@ -2,7 +2,7 @@
 
 #include <d3d12.h>
 
-#include <CommandListProcessor/CommandListProcessor.h>
+#include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandManager.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
@@ -61,6 +61,7 @@ namespace {
 
 void SkyBoxPass::Init(
 	ID3D12Device& device,
+	CommandListExecutor& cmdListProcessor,
 	ID3D12CommandQueue& cmdQueue,
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	ID3D12Resource& skyBoxCubeMap,
@@ -70,8 +71,7 @@ void SkyBoxPass::Init(
 	ASSERT(ValidateData() == false);
 
 	CreateCommandObjects(mCmdAlloc, mCmdList, mFence);
-	mColorBufferCpuDesc = colorBufferCpuDesc;
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
+	mCmdListProcessor = &cmdListProcessor;
 
 	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
 
@@ -96,32 +96,36 @@ void SkyBoxPass::Init(
 
 	// Initialize recorder
 	mRecorder.reset(new SkyBoxCmdListRecorder(device, cmdListQueue));
-	mRecorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), w, skyBoxCubeMap);
+	mRecorder->Init(
+		mesh.VertexBufferData(),
+		mesh.IndexBufferData(), 
+		w, 
+		skyBoxCubeMap,
+		colorBufferCpuDesc,
+		depthBufferCpuDesc);
 
 	ASSERT(ValidateData());
 }
 
-void SkyBoxPass::Execute(CommandListProcessor& cmdListProcessor, const FrameCBuffer& frameCBuffer) const noexcept {
+void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 	ASSERT(ValidateData());
 
-	cmdListProcessor.ResetExecutedTasksCounter();
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[] = { mColorBufferCpuDesc };
-	mRecorder->RecordCommandLists(frameCBuffer, rtvHandles, _countof(rtvHandles), mDepthBufferCpuDesc);
+	mCmdListProcessor->ResetExecutedCmdListCount();
+	mRecorder->RecordAndPushCommandLists(frameCBuffer);
 
 	// Wait until all previous tasks command lists are executed
-	while (cmdListProcessor.ExecutedTasksCounter() < 1U) {
+	while (mCmdListProcessor->ExecutedCmdListCount() < 1U) {
 		Sleep(0U);
 	}
 }
 
 bool SkyBoxPass::ValidateData() const noexcept {
 	const bool b =
+		mCmdListProcessor != nullptr &&
 		mRecorder.get() != nullptr &&
 		mCmdAlloc != nullptr &&
 		mCmdList != nullptr &&
-		mFence != nullptr &&
-		mColorBufferCpuDesc.ptr != 0UL &&
-		mDepthBufferCpuDesc.ptr != 0UL;
+		mFence != nullptr;
 
 	return b;
 }

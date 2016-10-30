@@ -4,7 +4,6 @@
 
 #include <ExampleScenes/SceneUtils.h>
 #include <GeometryPass/Recorders/ColorCmdListRecorder.h>
-#include <GeometryPass/Recorders/HeightCmdListRecorder.h>
 #include <GeometryPass/Recorders/NormalCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
 #include <Material/Material.h>
@@ -183,7 +182,6 @@ namespace {
 		const float offsetY,
 		const float offsetZ,
 		const float scaleFactor,
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		const std::vector<Mesh>& meshes,
 		ID3D12Resource** textures,
 		ID3D12Resource** normals,
@@ -240,7 +238,7 @@ namespace {
 		}
 
 		// Create recorder
-		recorder = new NormalCmdListRecorder(D3dData::Device(), cmdListQueue);
+		recorder = new NormalCmdListRecorder(D3dData::Device());
 		recorder->Init(
 			geomDataVec.data(), 
 			static_cast<std::uint32_t>(geomDataVec.size()), 
@@ -258,7 +256,6 @@ namespace {
 		const float offsetY,
 		const float offsetZ,
 		const float scaleFactor,
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		const std::vector<Mesh>& meshes,
 		Material* materials,
 		const std::size_t numMaterials,
@@ -302,7 +299,7 @@ namespace {
 		}
 
 		// Create recorder
-		recorder = new ColorCmdListRecorder(D3dData::Device(), cmdListQueue);
+		recorder = new ColorCmdListRecorder(D3dData::Device());
 		recorder->Init(
 			geomDataVec.data(),
 			static_cast<std::uint32_t>(geomDataVec.size()),
@@ -311,7 +308,6 @@ namespace {
 	}
 
 	void GenerateFloorRecorder(
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		const std::vector<Mesh>& meshes,
 		ID3D12Resource* texture,
 		ID3D12Resource* normal,
@@ -344,7 +340,7 @@ namespace {
 		Material material{ 1.0f, 1.0f, 1.0f, 0.0f, 0.85f };
 
 		// Build recorder
-		recorder = new NormalCmdListRecorder(D3dData::Device(), cmdListQueue);
+		recorder = new NormalCmdListRecorder(D3dData::Device());
 		recorder->Init(
 			geomDataVec.data(),
 			static_cast<std::uint32_t>(geomDataVec.size()),
@@ -357,7 +353,6 @@ namespace {
 
 void Demo2Scene::GenerateGeomPassRecorders(
 	ID3D12CommandQueue& cmdQueue,
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 
 	ASSERT(tasks.empty());
@@ -406,7 +401,6 @@ void Demo2Scene::GenerateGeomPassRecorders(
 	//
 	NormalCmdListRecorder* normalRecorder{ nullptr };
 	GenerateFloorRecorder(
-		cmdListQueue,
 		floor->Meshes(),
 		textures[WOOD],
 		textures[WOOD_NORMAL],
@@ -466,7 +460,6 @@ void Demo2Scene::GenerateGeomPassRecorders(
 		0.0f, 
 		0.0f, 
 		sModel, 
-		cmdListQueue, 
 		model->Meshes(), 
 		diffuses.data(), 
 		normals.data(), 
@@ -512,7 +505,6 @@ void Demo2Scene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		cmdListQueue,
 		model->Meshes(),
 		diffuses.data(),
 		normals.data(),
@@ -582,7 +574,6 @@ void Demo2Scene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		cmdListQueue,
 		model->Meshes(),
 		diffuses.data(),
 		normals.data(),
@@ -652,7 +643,6 @@ void Demo2Scene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		cmdListQueue,
 		model->Meshes(),
 		diffuses.data(),
 		normals.data(),
@@ -682,7 +672,6 @@ void Demo2Scene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		25,
-		cmdListQueue,
 		buddha->Meshes(),
 		materials.data(),
 		materials.size(),
@@ -709,7 +698,6 @@ void Demo2Scene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		8,
-		cmdListQueue,
 		bunny->Meshes(),
 		materials.data(),
 		materials.size(),
@@ -718,12 +706,11 @@ void Demo2Scene::GenerateGeomPassRecorders(
 	tasks.push_back(std::unique_ptr<GeometryPassCmdListRecorder>(colorRecorder));
 }
 
-void Demo2Scene::GenerateLightPassRecorders(
-	tbb::concurrent_queue<ID3D12CommandList*>& /*cmdListQueue*/,
-	Microsoft::WRL::ComPtr<ID3D12Resource>* /*geometryBuffers*/,
-	const std::uint32_t /*geometryBuffersCount*/,
-	ID3D12Resource& /*depthBuffer*/,
-	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& /*tasks*/) noexcept
+void Demo2Scene::GenerateLightingPassRecorders(
+	Microsoft::WRL::ComPtr<ID3D12Resource>*,
+	const std::uint32_t,
+	ID3D12Resource&,
+	std::vector<std::unique_ptr<LightingPassCmdListRecorder>>&) noexcept
 {
 }
 

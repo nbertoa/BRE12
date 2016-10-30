@@ -7,13 +7,13 @@
 #include <Camera/Camera.h>
 #include <GeometryPass\GeometryPass.h>
 #include <GlobalData\Settings.h>
-#include <LightPass\LightPass.h>
+#include <LightingPass\LightingPass.h>
 #include <SkyBoxPass\SkyBoxPass.h>
 #include <ShaderUtils\CBuffers.h>
 #include <ToneMappingPass\ToneMappingPass.h>
 #include <Timer/Timer.h>
 
-class CommandListProcessor;
+class CommandListExecutor;
 class Scene;
 
 // Initializes passes (geometry, light, skybox, etc) based on a Scene.
@@ -53,7 +53,7 @@ private:
 	Microsoft::WRL::ComPtr<IDXGISwapChain3> mSwapChain{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 			
-	CommandListProcessor* mCmdListProcessor{ nullptr };
+	CommandListExecutor* mCmdListProcessor{ nullptr };
 	
 	// Fences data for syncrhonization purposes.
 	ID3D12Fence* mFence{ nullptr };
@@ -63,7 +63,7 @@ private:
 
 	// Passes
 	GeometryPass mGeometryPass;
-	LightPass mLightPass;
+	LightingPass mLightingPass;
 	SkyBoxPass mSkyBoxPass;
 	ToneMappingPass mToneMappingPass;
 

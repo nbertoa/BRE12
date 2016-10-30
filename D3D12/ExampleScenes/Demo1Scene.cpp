@@ -4,8 +4,8 @@
 
 #include <GeometryPass/Recorders/HeightCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
-#include <LightPass/PunctualLight.h>
-#include <LightPass/Recorders/PunctualLightCmdListRecorder.h>
+#include <LightingPass/PunctualLight.h>
+#include <LightingPass/Recorders/PunctualLightCmdListRecorder.h>
 #include <Material/Material.h>
 #include <MathUtils\MathUtils.h>
 #include <ModelManager\Mesh.h>
@@ -40,13 +40,12 @@ namespace {
 	const float sTz3{ 0.0f };
 	const float sOffsetX3{ 15.0f };
 
-	void GenerateRecorder(		 
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+	void GenerateRecorder(	
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
 		PunctualLightCmdListRecorder* &recorder) {
-		recorder = new PunctualLightCmdListRecorder(D3dData::Device(), cmdListQueue);
+		recorder = new PunctualLightCmdListRecorder(D3dData::Device());
 		PunctualLight light[1];
 		light[0].mPosAndRange[0] = 0.0f;
 		light[0].mPosAndRange[1] = 300.0f;
@@ -57,7 +56,12 @@ namespace {
 		light[0].mColorAndPower[2] = 1.0f;
 		light[0].mColorAndPower[3] = 100000;
 
-		recorder->Init(geometryBuffers, geometryBuffersCount, depthBuffer, light, _countof(light));
+		recorder->Init(
+			geometryBuffers, 
+			geometryBuffersCount, 
+			depthBuffer, 
+			light,
+			_countof(light));
 	}
 
 	void GenerateRecorder(
@@ -68,7 +72,6 @@ namespace {
 		const float offsetY,
 		const float offsetZ,
 		const float scaleFactor,
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		const std::vector<Mesh>& meshes,
 		ID3D12Resource** textures,
 		ID3D12Resource** normals,
@@ -81,7 +84,7 @@ namespace {
 		ASSERT(normals != nullptr);
 		ASSERT(heights != nullptr);
 
-		recorder = new HeightCmdListRecorder(D3dData::Device(), cmdListQueue);
+		recorder = new HeightCmdListRecorder(D3dData::Device());
 		
 		const std::size_t numMeshes{ meshes.size() };
 		ASSERT(numMeshes > 0UL);
@@ -144,7 +147,6 @@ namespace {
 
 void Demo1Scene::GenerateGeomPassRecorders(
 	ID3D12CommandQueue& cmdQueue,
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 
 	ASSERT(tasks.empty());
@@ -229,22 +231,21 @@ void Demo1Scene::GenerateGeomPassRecorders(
 	tasks.resize(2);
 
 	HeightCmdListRecorder* heightRecorder{ nullptr };
-	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, sS, cmdListQueue, model1->Meshes(), tex, normal, height, materials, numResources, heightRecorder);
+	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, sS, model1->Meshes(), tex, normal, height, materials, numResources, heightRecorder);
 	ASSERT(heightRecorder != nullptr);
 	tasks[0].reset(heightRecorder);
 
 	HeightCmdListRecorder* heightRecorder2{ nullptr };
-	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, sS2, cmdListQueue, model->Meshes(), tex, normal, height, materials, numResources, heightRecorder2);
+	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, sS2, model->Meshes(), tex, normal, height, materials, numResources, heightRecorder2);
 	ASSERT(heightRecorder2 != nullptr);
 	tasks[1].reset(heightRecorder2);
 }
 
-void Demo1Scene::GenerateLightPassRecorders(
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+void Demo1Scene::GenerateLightingPassRecorders(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
-	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) noexcept
+	std::vector<std::unique_ptr<LightingPassCmdListRecorder>>& tasks) noexcept
 {
 	ASSERT(tasks.empty());
 	ASSERT(geometryBuffers != nullptr);
@@ -253,7 +254,11 @@ void Demo1Scene::GenerateLightPassRecorders(
 	
 	tasks.resize(1UL);
 	PunctualLightCmdListRecorder* recorder{ nullptr };
-	GenerateRecorder(cmdListQueue, geometryBuffers, geometryBuffersCount, depthBuffer, recorder);
+	GenerateRecorder(
+		geometryBuffers, 
+		geometryBuffersCount, 
+		depthBuffer, 
+		recorder);
 	ASSERT(recorder != nullptr);
 	tasks[0].reset(recorder);
 }

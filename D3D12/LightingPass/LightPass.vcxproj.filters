@@ -15,17 +15,17 @@
     <ClCompile Include="Recorders\PunctualLightCmdListRecorder.cpp">
       <Filter>Recorders</Filter>
     </ClCompile>
-    <ClCompile Include="LightPassCmdListRecorder.cpp" />
-    <ClCompile Include="LightPass.cpp" />
     <ClCompile Include="PunctualLight.cpp" />
+    <ClCompile Include="LightingPass.cpp" />
+    <ClCompile Include="LightingPassCmdListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Recorders\PunctualLightCmdListRecorder.h">
       <Filter>Recorders</Filter>
     </ClInclude>
-    <ClInclude Include="LightPassCmdListRecorder.h" />
-    <ClInclude Include="LightPass.h" />
     <ClInclude Include="PunctualLight.h" />
+    <ClInclude Include="LightingPass.h" />
+    <ClInclude Include="LightingPassCmdListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PunctualLight\GS.hlsl">

@@ -78,6 +78,8 @@ void EnvironmentLightCmdListRecorder::Init(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
 	ID3D12Resource& diffuseIrradianceCubeMap,
 	ID3D12Resource& specularPreConvolvedCubeMap) noexcept
 {
@@ -87,17 +89,15 @@ void EnvironmentLightCmdListRecorder::Init(
 
 	mVertexBufferData = vertexBufferData;
 	mIndexBufferData = indexBufferData;
+	mColorBufferCpuDesc = colorBufferCpuDesc;
+	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	BuildBuffers(geometryBuffers, geometryBuffersCount, depthBuffer, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
 
 	ASSERT(ValidateData());
 }
 
-void EnvironmentLightCmdListRecorder::RecordCommandLists(
-	const FrameCBuffer& frameCBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& rtvCpuDescHandle,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept {
-
+void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(ValidateData());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
@@ -114,7 +114,7 @@ void EnvironmentLightCmdListRecorder::RecordCommandLists(
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &rtvCpuDescHandle, false, &depthStencilHandle);
+	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
 	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
@@ -155,7 +155,9 @@ bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 		mCbvSrvUavDescHeap != nullptr &&
 		mImmutableCBuffer != nullptr &&
 		mFrameCBuffer != nullptr && 
-		mCubeMapsBufferGpuDescHandleBegin.ptr != 0UL;
+		mCubeMapsBufferGpuDescHandleBegin.ptr != 0UL &&
+		mColorBufferCpuDesc.ptr != 0UL &&
+		mDepthBufferCpuDesc.ptr != 0UL;
 
 	return result;
 }

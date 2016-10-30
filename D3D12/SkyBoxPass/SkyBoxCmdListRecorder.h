@@ -11,7 +11,7 @@
 struct FrameCBuffer;
 class UploadBuffer;
 
-// Responsible of command lists recording to be executed by CommandListProcessor.
+// Responsible of command lists recording to be executed by CommandListExecutor.
 // This class has common data and functionality to record command list for sky box pass.
 class SkyBoxCmdListRecorder {
 public:
@@ -22,17 +22,16 @@ public:
 	// This method is initialized by its corresponding pass.
 	static void InitPSO() noexcept;
 
+	// This method must be called before RecordAndPushCommandLists()
 	void Init(
 		const BufferCreator::VertexBufferData& vertexBufferData, 
 		const BufferCreator::IndexBufferData indexBufferData,
 		const DirectX::XMFLOAT4X4& worldMatrix,
-		ID3D12Resource& cubeMap) noexcept;
+		ID3D12Resource& cubeMap,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
-	void RecordCommandLists(
-		const FrameCBuffer& frameCBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE* rtvCpuDescHandles,
-		const std::uint32_t rtvCpuDescHandlesCount,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept;
+	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
 
 	bool ValidateData() const noexcept;
 
@@ -58,4 +57,8 @@ private:
 	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescHandleBegin;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapBufferGpuDescHandleBegin;
+
+	// Color & Depth buffers cpu descriptors
+	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 };

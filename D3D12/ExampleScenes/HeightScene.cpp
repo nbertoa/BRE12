@@ -4,8 +4,8 @@
 
 #include <GeometryPass/Recorders/HeightCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
-#include <LightPass/PunctualLight.h>
-#include <LightPass/Recorders/PunctualLightCmdListRecorder.h>
+#include <LightingPass/PunctualLight.h>
+#include <LightingPass/Recorders/PunctualLightCmdListRecorder.h>
 #include <Material/Material.h>
 #include <MathUtils/MathUtils.h>
 #include <ModelManager\Mesh.h>
@@ -20,7 +20,6 @@ namespace {
 
 void HeightScene::GenerateGeomPassRecorders(
 	ID3D12CommandQueue& cmdQueue,
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 
 	ASSERT(tasks.empty());
@@ -108,7 +107,7 @@ void HeightScene::GenerateGeomPassRecorders(
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, numGeometry),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
-			HeightCmdListRecorder& task{ *new HeightCmdListRecorder(D3dData::Device(), cmdListQueue) };
+			HeightCmdListRecorder& task{ *new HeightCmdListRecorder(D3dData::Device()) };
 			tasks[k].reset(&task);
 
 			GeometryPassCmdListRecorder::GeometryData& currGeomData{ geomDataVec[k] };
@@ -156,12 +155,11 @@ void HeightScene::GenerateGeomPassRecorders(
 	);
 }
 
-void HeightScene::GenerateLightPassRecorders(
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+void HeightScene::GenerateLightingPassRecorders(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
-	std::vector<std::unique_ptr<LightPassCmdListRecorder>>& tasks) noexcept
+	std::vector<std::unique_ptr<LightingPassCmdListRecorder>>& tasks) noexcept
 {
 	ASSERT(tasks.empty());
 	ASSERT(geometryBuffers != nullptr);
@@ -174,7 +172,7 @@ void HeightScene::GenerateLightPassRecorders(
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, numTasks, 1U),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
-			PunctualLightCmdListRecorder& task{ *new PunctualLightCmdListRecorder(D3dData::Device(), cmdListQueue) };
+			PunctualLightCmdListRecorder& task{ *new PunctualLightCmdListRecorder(D3dData::Device()) };
 			tasks[k].reset(&task);
 			PunctualLight light[2];
 			light[0].mPosAndRange[0] = 0.0f;
@@ -195,7 +193,12 @@ void HeightScene::GenerateLightPassRecorders(
 			light[1].mColorAndPower[2] = 1.0f;
 			light[1].mColorAndPower[3] = 1000000.0f;
 
-			task.Init(geometryBuffers, geometryBuffersCount, depthBuffer, light, _countof(light));
+			task.Init(
+				geometryBuffers, 
+				geometryBuffersCount, 
+				depthBuffer, 
+				light, 
+				_countof(light));
 		}
 	}
 	);

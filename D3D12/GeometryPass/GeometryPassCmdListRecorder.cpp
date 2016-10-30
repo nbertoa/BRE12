@@ -24,9 +24,8 @@ namespace {
 	}
 }
 
-GeometryPassCmdListRecorder::GeometryPassCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
+GeometryPassCmdListRecorder::GeometryPassCmdListRecorder(ID3D12Device& device)
 	: mDevice(device)
-	, mCmdListQueue(cmdListQueue)
 {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
@@ -60,4 +59,20 @@ bool GeometryPassCmdListRecorder::ValidateData() const noexcept {
 		numGeomData != 0UL &&
 		mMaterialsCBuffer != nullptr &&
 		mMaterialsCBufferGpuDescHandleBegin.ptr != 0UL;
+}
+
+void GeometryPassCmdListRecorder::InitInternal(
+	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
+	const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBuffersCpuDescs,
+	const std::uint32_t geometryBuffersCpuDescCount,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
+{
+	ASSERT(geometryBuffersCpuDescs != nullptr);
+	ASSERT(geometryBuffersCpuDescCount != 0U);
+	ASSERT(depthBufferCpuDesc.ptr != 0UL);
+
+	mCmdListQueue = &cmdListQueue;
+	mGeometryBuffersCpuDescs = geometryBuffersCpuDescs;
+	mGeometryBuffersCpuDescCount = geometryBuffersCpuDescCount;
+	mDepthBufferCpuDesc = depthBufferCpuDesc;
 }

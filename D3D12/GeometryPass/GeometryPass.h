@@ -6,7 +6,7 @@
 #include <GlobalData\Settings.h>
 #include <GeometryPass\GeometryPassCmdListRecorder.h>
 
-class CommandListProcessor;
+class CommandListExecutor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 struct ID3D12CommandAllocator;
@@ -19,6 +19,7 @@ struct ID3D12Resource;
 // Pass responsible to execute recorders related with deferred shading geometry pass
 class GeometryPass {
 public:
+	// Geometry buffers
 	enum Buffers {
 		NORMAL_SMOOTHNESS = 0U, // 2 encoded normals based on octahedron encoding + 1 smoothness
 		BASECOLOR_METALMASK, // 3 base color + 1 metal mask
@@ -35,19 +36,25 @@ public:
 	__forceinline Recorders& GetRecorders() noexcept { return mRecorders; }
 
 	// You should call this method after filling recorders and before Execute()
-	void Init(ID3D12Device& device, const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+	void Init(
+		ID3D12Device& device,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
+		CommandListExecutor& cmdListProcessor,
+		ID3D12CommandQueue& cmdQueue) noexcept;
 	
 	// Get geometry buffers
 	__forceinline Microsoft::WRL::ComPtr<ID3D12Resource>* GetBuffers() noexcept { return mBuffers; }
 	
-	void Execute(
-		CommandListProcessor& cmdListProcessor, 
-		ID3D12CommandQueue& cmdQueue, 
-		const FrameCBuffer& frameCBuffer) noexcept;
+	void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
 	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
+
+	void ExecutePreliminaryTask(ID3D12CommandQueue& cmdQueue) noexcept;
+
+	CommandListExecutor* mCmdListProcessor{ nullptr };
+	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	
 	ID3D12CommandAllocator* mCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
@@ -61,6 +68,9 @@ private:
 
 	// Depth buffer cpu descriptor
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
+
+	// Geometry buffers cpu descriptors
+	D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBuffersCpuDescs[BUFFERS_COUNT]{ 0UL };
 	
 	Recorders mRecorders;
 };

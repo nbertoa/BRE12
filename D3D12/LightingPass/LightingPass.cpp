@@ -1,14 +1,14 @@
-#include "LightPass.h"
+#include "LightingPass.h"
 
 #include <d3d12.h>
 #include <DirectXColors.h>
 #include <tbb/parallel_for.h>
 
-#include <CommandListProcessor/CommandListProcessor.h>
+#include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\GeometryPass.h>
-#include <LightPass\Recorders\PunctualLightCmdListRecorder.h>
+#include <LightingPass\Recorders\PunctualLightCmdListRecorder.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
@@ -34,8 +34,9 @@ namespace {
 	}
 }
 
-void LightPass::Init(
+void LightingPass::Init(
 	ID3D12Device& device,
+	CommandListExecutor& cmdListProcessor,
 	ID3D12CommandQueue& cmdQueue,
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
@@ -49,6 +50,8 @@ void LightPass::Init(
 	ASSERT(ValidateData() == false);
 
 	CreateCommandObjects(mCmdAllocsBegin, mCmdAllocsEnd, mCmdList);
+	mCmdListProcessor = &cmdListProcessor;
+	mCmdQueue = &cmdQueue;
 	mGeometryBuffers = geometryBuffers;
 	mColorBufferCpuDesc = colorBufferCpuDesc;
 	mDepthBuffer = &depthBuffer;
@@ -80,13 +83,16 @@ void LightPass::Init(
 		diffuseIrradianceCubeMap,
 		specularPreConvolvedCubeMap);
 
+	// Init internal data for all lights recorders
+	for (Recorders::value_type& recorder : mRecorders) {
+		ASSERT(recorder.get() != nullptr);
+		recorder->InitInternal(cmdListQueue, colorBufferCpuDesc, depthBufferCpuDesc);
+	}
+
 	ASSERT(ValidateData());
 }
 
-void LightPass::Execute(
-	CommandListProcessor& cmdListProcessor,
-	ID3D12CommandQueue& cmdQueue,
-	const FrameCBuffer& frameCBuffer) noexcept {
+void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 
 	ASSERT(ValidateData());
 
@@ -98,7 +104,7 @@ void LightPass::Execute(
 	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocsBegin);
 
 	// Total tasks = Light tasks + 1 ambient pass task + 1 environment light pass task
-	cmdListProcessor.ResetExecutedTasksCounter();
+	mCmdListProcessor->ResetExecutedCmdListCount();
 	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mRecorders.size())};
 	const std::uint32_t taskCount{ lightTaskCount + 2U };
 
@@ -122,7 +128,7 @@ void LightPass::Execute(
 	// Execute preliminary task
 	{
 		ID3D12CommandList* cmdLists[] = { mCmdList };
-		cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
+		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 	}
 
 	// Execute ambient light pass tasks
@@ -133,11 +139,10 @@ void LightPass::Execute(
 
 	// Execute light pass tasks
 	const std::uint32_t grainSize(max(1U, lightTaskCount / Settings::sCpuProcessors));
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescs[] = { mColorBufferCpuDesc };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, lightTaskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mRecorders[i]->RecordCommandLists(frameCBuffer, rtvCpuDescs, _countof(rtvCpuDescs), mDepthBufferCpuDesc);
+			mRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
 	}
 	);
 
@@ -155,18 +160,18 @@ void LightPass::Execute(
 	CHECK_HR(mCmdList->Close());
 
 	// Wait until all previous tasks command lists are executed
-	while (cmdListProcessor.ExecutedTasksCounter() < taskCount) {
+	while (mCmdListProcessor->ExecutedCmdListCount() < taskCount) {
 		Sleep(0U);
 	}
 	
 	// Execute end task
 	{
 		ID3D12CommandList* cmdLists[] = { mCmdList };
-		cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
+		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 	}
 }
 
-bool LightPass::ValidateData() const noexcept {
+bool LightingPass::ValidateData() const noexcept {
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		if (mCmdAllocsBegin[i] == nullptr) {
 			return false;
@@ -186,6 +191,8 @@ bool LightPass::ValidateData() const noexcept {
 	}
 
 	const bool b =
+		mCmdListProcessor != nullptr &&
+		mCmdQueue != nullptr &&
 		mCmdList != nullptr &&
 		mColorBufferCpuDesc.ptr != 0UL &&
 		mDepthBuffer != nullptr &&

@@ -15,7 +15,7 @@ struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
-// Responsible of command lists recording to be executed by CommandListProcessor.
+// Responsible of command lists recording to be executed by CommandListExecutor.
 // This class has common data and functionality to record command list for environment light pass.
 class EnvironmentLightCmdListRecorder {
 public:
@@ -32,13 +32,12 @@ public:
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
-	void RecordCommandLists(
-		const FrameCBuffer& frameCBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& rtvCpuDescHandle,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilHandle) noexcept;
+	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
 
 	bool ValidateData() const noexcept;
 
@@ -65,4 +64,8 @@ private:
 	BufferCreator::IndexBufferData mIndexBufferData;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapsBufferGpuDescHandleBegin;
+
+	// Color & Depth buffers cpu descriptors
+	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 };
