@@ -41,6 +41,10 @@ private:
 	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
 
+	void ExecuteBeginTask(
+		ID3D12Resource& frameBuffer,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
+
 	CommandListExecutor* mCmdListProcessor{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 

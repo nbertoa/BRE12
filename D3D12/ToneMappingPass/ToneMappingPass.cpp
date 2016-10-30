@@ -109,32 +109,9 @@ void ToneMappingPass::Execute(
 	ASSERT(ValidateData());
 	ASSERT(frameBufferCpuDesc.ptr != 0UL);
 
-	// Used to choose a different command list allocator each call.
-	static std::uint32_t cmdAllocIndex{ 0U };
+	ExecuteBeginTask(frameBuffer, frameBufferCpuDesc);
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocs[cmdAllocIndex] };
-	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocs);
-
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
-
-	// Set barriers
-	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(&frameBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
-	};
-	mCmdList->ResourceBarrier(_countof(barriers), barriers);
-
-	// Clear render targets
-	mCmdList->ClearRenderTargetView(frameBufferCpuDesc, DirectX::Colors::Black, 0U, nullptr);
-	CHECK_HR(mCmdList->Close());
-
-	// Execute preliminary task
 	mCmdListProcessor->ResetExecutedCmdListCount();
-	ID3D12CommandList* cmdLists[] = { mCmdList };
-	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
-
-	// Execute task
 	mRecorder->RecordAndPushCommandLists(frameBufferCpuDesc);
 
 	// Wait until all previous tasks command lists are executed
@@ -159,4 +136,37 @@ bool ToneMappingPass::ValidateData() const noexcept {
 		mColorBuffer != nullptr;
 
 	return b;
+}
+
+void ToneMappingPass::ExecuteBeginTask(
+	ID3D12Resource& frameBuffer,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
+
+	ASSERT(ValidateData());
+	ASSERT(frameBufferCpuDesc.ptr != 0UL);
+
+	// Used to choose a different command list allocator each call.
+	static std::uint32_t cmdAllocIndex{ 0U };
+
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocs[cmdAllocIndex] };
+	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocs);
+
+	CHECK_HR(cmdAlloc->Reset());
+	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
+
+	// Set barriers
+	CD3DX12_RESOURCE_BARRIER barriers[]{
+		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(&frameBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
+	};
+	mCmdList->ResourceBarrier(_countof(barriers), barriers);
+
+	// Clear render targets
+	mCmdList->ClearRenderTargetView(frameBufferCpuDesc, DirectX::Colors::Black, 0U, nullptr);
+	CHECK_HR(mCmdList->Close());
+
+	// Execute preliminary task
+	mCmdListProcessor->ResetExecutedCmdListCount();
+	ID3D12CommandList* cmdLists[] = { mCmdList };
+	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 }

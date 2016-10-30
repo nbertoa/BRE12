@@ -93,43 +93,14 @@ void LightingPass::Init(
 }
 
 void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
-
 	ASSERT(ValidateData());
 
-	// Used to choose a different command list allocator each call.
-	static std::uint32_t cmdAllocIndex{ 0U };
-
-	ID3D12CommandAllocator* cmdAllocBegin{ mCmdAllocsBegin[cmdAllocIndex] };
-	ID3D12CommandAllocator* cmdAllocEnd{ mCmdAllocsEnd[cmdAllocIndex] };
-	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocsBegin);
+	ExecuteBeginTask();
 
 	// Total tasks = Light tasks + 1 ambient pass task + 1 environment light pass task
 	mCmdListProcessor->ResetExecutedCmdListCount();
 	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mRecorders.size())};
 	const std::uint32_t taskCount{ lightTaskCount + 2U };
-
-	CHECK_HR(cmdAllocBegin->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAllocBegin, nullptr));
-
-	// Resource barriers
-	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mDepthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-	};
-	std::uint32_t barriersCount = _countof(barriers);
-	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 1UL);
-	mCmdList->ResourceBarrier(barriersCount, barriers);
-
-	// Clear render targets
-	mCmdList->ClearRenderTargetView(mColorBufferCpuDesc, DirectX::Colors::Black, 0U, nullptr);
-	CHECK_HR(mCmdList->Close());
-
-	// Execute preliminary task
-	{
-		ID3D12CommandList* cmdLists[] = { mCmdList };
-		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
-	}
 
 	// Execute ambient light pass tasks
 	mAmbientPass.Execute();
@@ -145,30 +116,13 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 			mRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
 	}
 	);
-
-	// Prepare end task
-	CHECK_HR(cmdAllocEnd->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAllocEnd, nullptr));
-
-	// Resource barriers
-	CD3DX12_RESOURCE_BARRIER endBarriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mDepthBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE),
-	};
-	barriersCount = _countof(endBarriers);
-	ASSERT(barriersCount == 1UL);
-	mCmdList->ResourceBarrier(barriersCount, endBarriers);
-	CHECK_HR(mCmdList->Close());
-
+	
 	// Wait until all previous tasks command lists are executed
 	while (mCmdListProcessor->ExecutedCmdListCount() < taskCount) {
 		Sleep(0U);
 	}
-	
-	// Execute end task
-	{
-		ID3D12CommandList* cmdLists[] = { mCmdList };
-		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
-	}
+
+	ExecuteEndingTask();
 }
 
 bool LightingPass::ValidateData() const noexcept {
@@ -199,4 +153,66 @@ bool LightingPass::ValidateData() const noexcept {
 		mDepthBufferCpuDesc.ptr != 0UL;
 
 	return b;
+}
+
+void LightingPass::ExecuteBeginTask() noexcept {
+	ASSERT(ValidateData());
+
+	// Used to choose a different command list allocator each call.
+	static std::uint32_t cmdAllocIndex{ 0U };
+
+	ID3D12CommandAllocator* cmdAllocBegin{ mCmdAllocsBegin[cmdAllocIndex] };
+	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocsBegin);
+
+	CHECK_HR(cmdAllocBegin->Reset());
+	CHECK_HR(mCmdList->Reset(cmdAllocBegin, nullptr));
+
+	// Resource barriers
+	CD3DX12_RESOURCE_BARRIER barriers[]{
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(mDepthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+	};
+	const std::uint32_t barriersCount = _countof(barriers);
+	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 1UL);
+	mCmdList->ResourceBarrier(barriersCount, barriers);
+
+	// Clear render targets
+	mCmdList->ClearRenderTargetView(mColorBufferCpuDesc, DirectX::Colors::Black, 0U, nullptr);
+	CHECK_HR(mCmdList->Close());
+
+	// Execute preliminary task
+	{
+		ID3D12CommandList* cmdLists[] = { mCmdList };
+		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	}
+}
+
+void LightingPass::ExecuteEndingTask() noexcept {
+	ASSERT(ValidateData());
+
+	// Used to choose a different command list allocator each call.
+	static std::uint32_t cmdAllocIndex{ 0U };
+
+	ID3D12CommandAllocator* cmdAllocEnd{ mCmdAllocsEnd[cmdAllocIndex] };
+	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocsBegin);
+
+	// Prepare end task
+	CHECK_HR(cmdAllocEnd->Reset());
+	CHECK_HR(mCmdList->Reset(cmdAllocEnd, nullptr));
+
+	// Resource barriers
+	CD3DX12_RESOURCE_BARRIER endBarriers[]{
+		CD3DX12_RESOURCE_BARRIER::Transition(mDepthBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE),
+	};
+	const std::uint32_t barriersCount = _countof(endBarriers);
+	ASSERT(barriersCount == 1UL);
+	mCmdList->ResourceBarrier(barriersCount, endBarriers);
+	CHECK_HR(mCmdList->Close());
+
+	// Execute end task
+	{
+		ID3D12CommandList* cmdLists[] = { mCmdList };
+		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	}
 }

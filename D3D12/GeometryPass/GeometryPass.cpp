@@ -156,7 +156,7 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 
 	ASSERT(ValidateData());
 
-	ExecutePreliminaryTask(*mCmdQueue);
+	ExecuteBeginTask();
 
 	const std::uint32_t taskCount{ static_cast<std::uint32_t>(mRecorders.size()) };
 	mCmdListProcessor->ResetExecutedCmdListCount();
@@ -206,7 +206,9 @@ bool GeometryPass::ValidateData() const noexcept {
 		return b;
 }
 
-void GeometryPass::ExecutePreliminaryTask(ID3D12CommandQueue& cmdQueue) noexcept {
+void GeometryPass::ExecuteBeginTask() noexcept {
+	ASSERT(ValidateData());
+
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };
 
@@ -229,5 +231,6 @@ void GeometryPass::ExecutePreliminaryTask(ID3D12CommandQueue& cmdQueue) noexcept
 
 	// Execute preliminary task
 	ID3D12CommandList* cmdLists[] = { mCmdList };
-	cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	ASSERT(mCmdQueue != nullptr);
+	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 }

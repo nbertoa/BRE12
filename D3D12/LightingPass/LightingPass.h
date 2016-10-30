@@ -51,6 +51,9 @@ private:
 	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
 
+	void ExecuteBeginTask() noexcept;
+	void ExecuteEndingTask() noexcept;
+
 	CommandListExecutor* mCmdListProcessor{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
