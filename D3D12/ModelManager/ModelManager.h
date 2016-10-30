@@ -8,6 +8,9 @@
 
 #include <ModelManager/Model.h>
 
+// This class is responsible to create/get/erase models or geometry
+// - Models
+// - Geometry
 class ModelManager {
 public:
 	static ModelManager& Create() noexcept;

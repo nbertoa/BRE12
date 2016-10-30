@@ -5,6 +5,7 @@
 #include <tbb/mutex.h>
 #include <wrl.h>
 
+// This class is responsible to create/get/erase root signatures
 class RootSignatureManager {
 public:
 	static RootSignatureManager& Create(ID3D12Device& device) noexcept;

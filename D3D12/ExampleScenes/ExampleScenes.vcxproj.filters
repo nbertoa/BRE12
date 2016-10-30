@@ -1,27 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Demo1Scene.cpp" />
-    <ClCompile Include="HeightScene.cpp" />
-    <ClCompile Include="NormalScene.cpp" />
-    <ClCompile Include="SkyBoxScene.cpp" />
     <ClCompile Include="TextureScene.cpp" />
     <ClCompile Include="ColorHeightScene.cpp" />
     <ClCompile Include="ColorNormalScene.cpp" />
     <ClCompile Include="ColorMappingScene.cpp" />
-    <ClCompile Include="Demo2Scene.cpp" />
     <ClCompile Include="SceneUtils.cpp" />
+    <ClCompile Include="MaterialShowcaseScene.cpp" />
+    <ClCompile Include="HeightScene.cpp" />
+    <ClCompile Include="NormalScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Demo1Scene.h" />
-    <ClInclude Include="HeightScene.h" />
-    <ClInclude Include="NormalScene.h" />
-    <ClInclude Include="SkyBoxScene.h" />
     <ClInclude Include="TextureScene.h" />
     <ClInclude Include="ColorHeightScene.h" />
     <ClInclude Include="ColorNormalScene.h" />
     <ClInclude Include="ColorMappingScene.h" />
-    <ClInclude Include="Demo2Scene.h" />
     <ClInclude Include="SceneUtils.h" />
+    <ClInclude Include="MaterialShowcaseScene.h" />
+    <ClInclude Include="HeightScene.h" />
+    <ClInclude Include="NormalScene.h" />
   </ItemGroup>
 </Project>

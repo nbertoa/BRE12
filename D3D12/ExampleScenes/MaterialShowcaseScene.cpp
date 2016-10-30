@@ -1,4 +1,4 @@
-#include "Demo2Scene.h"
+#include "MaterialShowcaseScene.h"
 
 #include <tbb/parallel_for.h>
 
@@ -351,7 +351,7 @@ namespace {
 	}
 }
 
-void Demo2Scene::GenerateGeomPassRecorders(
+void MaterialShowcaseScene::GenerateGeomPassRecorders(
 	ID3D12CommandQueue& cmdQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 
@@ -706,7 +706,7 @@ void Demo2Scene::GenerateGeomPassRecorders(
 	tasks.push_back(std::unique_ptr<GeometryPassCmdListRecorder>(colorRecorder));
 }
 
-void Demo2Scene::GenerateLightingPassRecorders(
+void MaterialShowcaseScene::GenerateLightingPassRecorders(
 	Microsoft::WRL::ComPtr<ID3D12Resource>*,
 	const std::uint32_t,
 	ID3D12Resource&,
@@ -714,7 +714,7 @@ void Demo2Scene::GenerateLightingPassRecorders(
 {
 }
 
-void Demo2Scene::GenerateCubeMaps(
+void MaterialShowcaseScene::GenerateCubeMaps(
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,

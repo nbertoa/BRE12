@@ -6,6 +6,7 @@
 #include <tbb/mutex.h>
 #include <wrl.h>
 
+// This class is responsible to create/get/erase shaders
 class ShaderManager {
 public:
 	static ShaderManager& Create() noexcept;

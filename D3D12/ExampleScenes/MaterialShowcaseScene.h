@@ -2,7 +2,7 @@
 
 #include <Scene/Scene.h>
 
-class Demo1Scene : public Scene {
+class MaterialShowcaseScene : public Scene {
 public:
 	void GenerateGeomPassRecorders(
 		ID3D12CommandQueue& cmdQueue,

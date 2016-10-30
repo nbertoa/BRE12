@@ -7,6 +7,13 @@
 
 #include <ResourceManager/UploadBuffer.h>
 
+// This class is responsible to create/get/erase:
+// - Textures
+// - Buffers
+// - Resources
+// - Descriptor heaps
+// - Fences
+// - Descriptors (Views)
 class ResourceManager {
 public:
 	static ResourceManager& Create(ID3D12Device& device) noexcept;

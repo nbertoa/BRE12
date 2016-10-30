@@ -5,6 +5,7 @@
 #include <tbb/mutex.h>
 #include <wrl.h>
 
+// This class is responsible to create/get/erase pipeline state objects
 class PSOManager {
 public:
 	static PSOManager& Create(ID3D12Device& device) noexcept;
