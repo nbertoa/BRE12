@@ -11,33 +11,78 @@
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
+#include <Scene/SceneUtils.h>
 
 namespace {
-	const char* sSkyBoxFile{ "textures/cubeMaps/milkmill_cube_map.dds" };
-	const char* sDiffuseEnvironmentFile{ "textures/cubeMaps/milkmill_diffuse_cube_map.dds" };
-	const char* sSpecularEnvironmentFile{ "textures/cubeMaps/milkmill_specular_cube_map.dds" };
+	SceneUtils::ResourceContainer sResourceContainer;
+
+	enum Textures {
+		// Diffuse
+		ROCK,		
+		ROCK2,
+		WOOD,
+		FLOOR,
+		SAND,
+		COBBLESTONE,
+
+		// Normal
+		ROCK_NORMAL,
+		ROCK2_NORMAL,
+		WOOD_NORMAL,
+		FLOOR_NORMAL,
+		SAND_NORMAL,
+		COBBLESTONE_NORMAL,
+
+		// Environment
+		SKY_BOX,
+		DIFFUSE_CUBE_MAP,
+		SPECULAR_CUBE_MAP,
+
+		TEXTURES_COUNT
+	};
+
+	// Textures to load
+	std::vector<std::string> sTexFiles =
+	{
+		// Diffuse
+		"textures/rock/rock.dds",
+		"textures/rock/rock2.dds",
+		"textures/wood/wood.dds",
+		"textures/floor.dds",
+		"textures/sand/sand.dds",
+		"textures/cobblestone/cobblestone.dds",
+
+		// Normal
+		"textures/rock/rock_normal.dds",
+		"textures/rock/rock2_normal.dds",
+		"textures/wood/wood_normal.dds",
+		"textures/floor_normal.dds",
+		"textures/sand/sand_normal.dds",
+		"textures/cobblestone/cobblestone_normal.dds",
+
+		// Environment
+		"textures/cubeMaps/milkmill_cube_map.dds",
+		"textures/cubeMaps/milkmill_diffuse_cube_map.dds",
+		"textures/cubeMaps/milkmill_specular_cube_map.dds",
+	};
+
+	enum Models {
+		MITSUBA_FLOOR,
+		MODELS_COUNT
+	};
+
+	// Models to load
+	std::vector<std::string> sModelFiles =
+	{
+		"models/mitsubaFloor.obj",
+	};
 
 	const float sS{ 2.0f };
-
-	const float sTx{ 0.0f };
-	const float sTy{ -3.5f };
-	const float sTz{ 10.0f };	
-	const float sOffsetX{ 25.0f };
 
 	const float sTx1{ 0.0f };
 	const float sTy1{ -3.5f };
 	const float sTz1{ 30.0f };
 	const float sOffsetX1{ 25.0f };
-
-	const float sTx2{ 0.0f };
-	const float sTy2{ -3.5f };
-	const float sTz2{ 15.0f };
-	const float sOffsetX2{ 25.0f };
-
-	const float sTx3{ 0.0f };
-	const float sTy3{ -3.5f };
-	const float sTz3{ 0.0f };
-	const float sOffsetX3{ 15.0f };
 
 	void GenerateRecorder(		
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
@@ -136,26 +181,26 @@ namespace {
 	}
 }
 
+void NormalScene::Init(ID3D12CommandQueue& cmdQueue) noexcept {
+	Scene::Init(cmdQueue);
+
+	// Load textures
+	sResourceContainer.LoadTextures(sTexFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
+
+	// Load models
+	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
+}
+
 void NormalScene::GenerateGeomPassRecorders(
-	ID3D12CommandQueue& cmdQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 
 	ASSERT(tasks.empty());
 	ASSERT(ValidateData());
 
-	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
-	
-	Model* model;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	ModelManager::Get().CreateSphere(2, 50, 50, model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
-	ASSERT(model != nullptr);
+	std::vector<ID3D12Resource*>& textures = sResourceContainer.GetResources();
+	ASSERT(textures.empty() == false);
 
-	Model* model1;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer1;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer1;
-	ModelManager::Get().LoadModel("models/mitsubaFloor.obj", model1, *mCmdList, uploadVertexBuffer1, uploadIndexBuffer1);
-	ASSERT(model1 != nullptr);
+	Model& model = sResourceContainer.GetModel(MITSUBA_FLOOR);
 
 	const std::uint32_t numResources{ 6U };
 
@@ -168,49 +213,32 @@ void NormalScene::GenerateGeomPassRecorders(
 	materials[4].mSmoothness = 0.2f;
 	materials[5].mSmoothness = 0.2f;
 
-	ID3D12Resource* tex[numResources];
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex[numResources];
-	ResourceManager::Get().LoadTextureFromFile("textures/rock/rock.dds", tex[0], uploadBufferTex[0], *mCmdList);
-	ASSERT(tex[0] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/rock/rock2.dds", tex[1], uploadBufferTex[1], *mCmdList);
-	ASSERT(tex[1] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/wood/wood.dds", tex[2], uploadBufferTex[2], *mCmdList);
-	ASSERT(tex[2] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/floor.dds", tex[3], uploadBufferTex[3], *mCmdList);
-	ASSERT(tex[3] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/sand/sand.dds", tex[4], uploadBufferTex[4], *mCmdList);
-	ASSERT(tex[4] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/cobblestone/cobblestone.dds", tex[5], uploadBufferTex[5], *mCmdList);
-	ASSERT(tex[5] != nullptr);
+	ID3D12Resource* tex[] =
+	{
+		textures[ROCK],
+		textures[ROCK2],
+		textures[WOOD],
+		textures[FLOOR],
+		textures[SAND],
+		textures[COBBLESTONE],
+	};
 
-	ID3D12Resource* normal[numResources];
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferNormal[numResources];
-	ResourceManager::Get().LoadTextureFromFile("textures/rock/rock_normal.dds", normal[0], uploadBufferNormal[0], *mCmdList);
-	ASSERT(normal[0] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/rock/rock2_normal.dds", normal[1], uploadBufferNormal[1], *mCmdList);
-	ASSERT(normal[1] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/wood/wood_normal.dds", normal[2], uploadBufferNormal[2], *mCmdList);
-	ASSERT(normal[2] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/floor_normal.dds", normal[3], uploadBufferNormal[3], *mCmdList);
-	ASSERT(normal[3] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/sand/sand_normal.dds", normal[4], uploadBufferNormal[4], *mCmdList);
-	ASSERT(normal[4] != nullptr);
-	ResourceManager::Get().LoadTextureFromFile("textures/cobblestone/cobblestone_normal.dds", normal[5], uploadBufferNormal[5], *mCmdList);
-	ASSERT(normal[5] != nullptr);
-
-	ExecuteCommandList(cmdQueue);
-
-	tasks.resize(2);
+	ID3D12Resource* normal[]
+	{
+		textures[ROCK_NORMAL],
+		textures[ROCK2_NORMAL],
+		textures[WOOD_NORMAL],
+		textures[FLOOR_NORMAL],
+		textures[SAND_NORMAL],
+		textures[COBBLESTONE_NORMAL],
+	};
+	ASSERT(numResources == _countof(tex));
+	ASSERT(numResources == _countof(normal));
 
 	NormalCmdListRecorder* recorder{ nullptr };
-	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, model1->Meshes(), tex, normal, materials, numResources, recorder);
+	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, model.Meshes(), tex, normal, materials, numResources, recorder);
 	ASSERT(recorder != nullptr);
-	tasks[0].reset(recorder);
-
-	NormalCmdListRecorder* recorder2{ nullptr };
-	GenerateRecorder(sTx2, sTy2, sTz2, sOffsetX2, 0.0f, 0.0f, model->Meshes(), tex, normal, materials, numResources, recorder2);
-	ASSERT(recorder2 != nullptr);
-	tasks[1].reset(recorder2);
+	tasks.push_back(std::unique_ptr<GeometryPassCmdListRecorder>(recorder));
 }
 
 void NormalScene::GenerateLightingPassRecorders(
@@ -236,26 +264,12 @@ void NormalScene::GenerateLightingPassRecorders(
 }
 
 void NormalScene::GenerateCubeMaps(
-	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept
 {
-	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
-
-	// Cube map textures
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseIrradianceCubeMap, uploadBufferTex, *mCmdList);
-	ASSERT(diffuseIrradianceCubeMap != nullptr);
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
-	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularPreConvolvedCubeMap, uploadBufferTex2, *mCmdList);
-	ASSERT(specularPreConvolvedCubeMap != nullptr);
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex3;
-	ResourceManager::Get().LoadTextureFromFile(sSkyBoxFile, skyBoxCubeMap, uploadBufferTex3, *mCmdList);
-	ASSERT(skyBoxCubeMap != nullptr);
-
-	ExecuteCommandList(cmdQueue);
+	skyBoxCubeMap = &sResourceContainer.GetResource(SKY_BOX);
+	diffuseIrradianceCubeMap = &sResourceContainer.GetResource(DIFFUSE_CUBE_MAP);
+	specularPreConvolvedCubeMap = &sResourceContainer.GetResource(SPECULAR_CUBE_MAP);
 }
 

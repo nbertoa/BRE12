@@ -11,23 +11,46 @@
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
+#include <Scene/SceneUtils.h>
 
 namespace {
-	const char* sSkyBoxFile{ "textures/cubeMaps/milkmill_cube_map.dds" };
-	const char* sDiffuseEnvironmentFile{ "textures/cubeMaps/milkmill_diffuse_cube_map.dds" };
-	const char* sSpecularEnvironmentFile{ "textures/cubeMaps/milkmill_specular_cube_map.dds" };
+	SceneUtils::ResourceContainer sResourceContainer;
+
+	enum Textures {
+		// Environment
+		SKY_BOX,
+		DIFFUSE_CUBE_MAP,
+		SPECULAR_CUBE_MAP,
+
+		TEXTURES_COUNT
+	};
+
+	// Textures to load
+	std::vector<std::string> sTexFiles =
+	{
+		// Environment
+		"textures/cubeMaps/milkmill_cube_map.dds",
+		"textures/cubeMaps/milkmill_diffuse_cube_map.dds",
+		"textures/cubeMaps/milkmill_specular_cube_map.dds",
+	};
+
+	enum Models {
+		BUNNY,
+		MODELS_COUNT
+	};
+
+	// Models to load
+	std::vector<std::string> sModelFiles =
+	{
+		"models/bunny.obj",
+	};
 
 	const float sS{ 5.0f };
 
-	const float sSphereTx{ 0.0f };
-	const float sSphereTy{ -3.5f };
-	const float sSphereTz{ 10.0f };	
-	const float sSphereOffsetX{ 15.0f };
-
-	const float sBunnyTx{ 0.0f };
-	const float sBunnyTy{ -3.5f };
-	const float sBunnyTz{ -5.0f };
-	const float sBunnyOffsetX{ 15.0f };
+	const float sTx{ 0.0f };
+	const float sTy{ -3.5f };
+	const float sTz{ 25.0f };	
+	const float sOffsetX{ 15.0f };
 
 	void GenerateRecorder(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
@@ -108,39 +131,28 @@ namespace {
 	}
 }
 
+void ColorMappingScene::Init(ID3D12CommandQueue& cmdQueue) noexcept {
+	Scene::Init(cmdQueue);
+
+	// Load textures
+	sResourceContainer.LoadTextures(sTexFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
+
+	// Load models
+	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
+}
+
 void ColorMappingScene::GenerateGeomPassRecorders(
-	ID3D12CommandQueue& cmdQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 
 	ASSERT(tasks.empty());
 	ASSERT(ValidateData());
 
-	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
+	Model& model = sResourceContainer.GetModel(BUNNY);
 
-	Model* model1;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer1;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer1;
-	ModelManager::Get().LoadModel("models/bunny.obj", model1, *mCmdList, uploadVertexBuffer1, uploadIndexBuffer1);
-	ASSERT(model1 != nullptr);
-
-	Model* model2;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer2;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer2;
-	ModelManager::Get().CreateSphere(1.0f, 50, 50, model2, *mCmdList, uploadVertexBuffer2, uploadIndexBuffer2);
-	ASSERT(model2 != nullptr);
-
-	ExecuteCommandList(cmdQueue);
-
-	tasks.resize(2);
-	ColorCmdListRecorder* basicRecorder{ nullptr };
-	GenerateRecorder(sSphereTx, sSphereTy, sSphereTz, sSphereOffsetX, 0.0f, 0.0f, model1->Meshes(), basicRecorder);
-	ASSERT(basicRecorder != nullptr);
-	tasks[0].reset(basicRecorder);
-
-	ColorCmdListRecorder* basicRecorder2{ nullptr };
-	GenerateRecorder(sBunnyTx, sBunnyTy, sBunnyTz, sBunnyOffsetX, 0.0f, 0.0f, model2->Meshes(), basicRecorder2);
-	ASSERT(basicRecorder2 != nullptr);
-	tasks[1].reset(basicRecorder2);
+	ColorCmdListRecorder* recorder{ nullptr };
+	GenerateRecorder(sTx, sTy, sTz, sOffsetX, 0.0f, 0.0f, model.Meshes(), recorder);
+	ASSERT(recorder != nullptr);
+	tasks.push_back(std::unique_ptr<GeometryPassCmdListRecorder>(recorder));
 }
 
 void ColorMappingScene::GenerateLightingPassRecorders(
@@ -166,26 +178,12 @@ void ColorMappingScene::GenerateLightingPassRecorders(
 }
 
 void ColorMappingScene::GenerateCubeMaps(
-	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept 
 {
-	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
-
-	// Cube map textures
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseIrradianceCubeMap, uploadBufferTex, *mCmdList);
-	ASSERT(diffuseIrradianceCubeMap != nullptr);
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
-	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularPreConvolvedCubeMap, uploadBufferTex2, *mCmdList);
-	ASSERT(specularPreConvolvedCubeMap != nullptr);
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex3;
-	ResourceManager::Get().LoadTextureFromFile(sSkyBoxFile, skyBoxCubeMap, uploadBufferTex3, *mCmdList);
-	ASSERT(skyBoxCubeMap != nullptr);
-
-	ExecuteCommandList(cmdQueue);
+	skyBoxCubeMap = &sResourceContainer.GetResource(SKY_BOX);
+	diffuseIrradianceCubeMap = &sResourceContainer.GetResource(DIFFUSE_CUBE_MAP);
+	specularPreConvolvedCubeMap = &sResourceContainer.GetResource(SPECULAR_CUBE_MAP);
 }
 

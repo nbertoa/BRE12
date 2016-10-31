@@ -152,13 +152,13 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 	scene->Init(*mCmdQueue);
 	
 	// Generate recorders for all the passes
-	scene->GenerateGeomPassRecorders(*mCmdQueue, mGeometryPass.GetRecorders());
+	scene->GenerateGeomPassRecorders(mGeometryPass.GetRecorders());
 	mGeometryPass.Init(mDevice, DepthStencilCpuDesc(), *mCmdListProcessor, *mCmdQueue);
 
 	ID3D12Resource* skyBoxCubeMap;
 	ID3D12Resource* diffuseIrradianceCubeMap;
 	ID3D12Resource* specularPreConvolvedCubeMap;
-	scene->GenerateCubeMaps(*mCmdQueue, skyBoxCubeMap, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
+	scene->GenerateCubeMaps(skyBoxCubeMap, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
 	ASSERT(skyBoxCubeMap != nullptr);
 	ASSERT(diffuseIrradianceCubeMap != nullptr);
 	ASSERT(specularPreConvolvedCubeMap != nullptr);

@@ -4,8 +4,9 @@
 
 class ColorNormalScene : public Scene {
 public:
+	void Init(ID3D12CommandQueue& cmdQueue) noexcept override;
+
 	void GenerateGeomPassRecorders(
-		ID3D12CommandQueue& cmdQueue,
 		std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept override;
 
 	void GenerateLightingPassRecorders(
@@ -15,7 +16,6 @@ public:
 		std::vector<std::unique_ptr<LightingPassCmdListRecorder>>& tasks) noexcept override;
 
 	void GenerateCubeMaps(
-		ID3D12CommandQueue& cmdQueue,
 		ID3D12Resource* &skyBoxCubeMap,
 		ID3D12Resource* &diffuseIrradianceCubeMap,
 		ID3D12Resource* &specularPreConvolvedCubeMap) noexcept override;

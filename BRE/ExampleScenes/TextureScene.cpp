@@ -11,42 +11,72 @@
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
+#include <Scene/SceneUtils.h>
 
 namespace {
-	const char* sSkyBoxFile{ "textures/cubeMaps/milkmill_cube_map.dds" };
-	const char* sDiffuseEnvironmentFile{ "textures/cubeMaps/milkmill_diffuse_cube_map.dds" };
-	const char* sSpecularEnvironmentFile{ "textures/cubeMaps/milkmill_specular_cube_map.dds" };
+	SceneUtils::ResourceContainer sResourceContainer;
+
+	enum Textures {		
+		BRICK,
+		BRICK3,
+
+		// Environment
+		SKY_BOX,
+		DIFFUSE_CUBE_MAP,
+		SPECULAR_CUBE_MAP,
+
+		TEXTURES_COUNT
+	};
+
+	// Textures to load
+	std::vector<std::string> sTexFiles =
+	{
+		"textures/brick/brick.dds",
+		"textures/brick/brick3.dds",
+
+		// Environment
+		"textures/cubeMaps/milkmill_cube_map.dds",
+		"textures/cubeMaps/milkmill_diffuse_cube_map.dds",
+		"textures/cubeMaps/milkmill_specular_cube_map.dds",
+	};
+
+	enum Models {
+		MITSUBA,
+		MODELS_COUNT
+	};
+
+	// Models to load
+	std::vector<std::string> sModelFiles =
+	{
+		"models/unreal.obj",
+	};
+}
+
+void TextureScene::Init(ID3D12CommandQueue& cmdQueue) noexcept {
+	Scene::Init(cmdQueue);
+
+	// Load textures
+	sResourceContainer.LoadTextures(sTexFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
+
+	// Load models
+	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
 }
 
 void TextureScene::GenerateGeomPassRecorders(
-	ID3D12CommandQueue& cmdQueue,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 	ASSERT(tasks.empty());
 	ASSERT(ValidateData());
 
-	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
+	std::vector<ID3D12Resource*>& textures = sResourceContainer.GetResources();
+	ASSERT(textures.empty() == false);
+
+	Model& model = sResourceContainer.GetModel(MITSUBA);
 
 	const std::size_t numGeometry{ 100UL };
 	tasks.resize(Settings::sCpuProcessors);
-	
-	ID3D12Resource* tex[2] = { nullptr, nullptr };
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex0;
-	ResourceManager::Get().LoadTextureFromFile("textures/brick/brick.dds", tex[0], uploadBufferTex0, *mCmdList);
-	ASSERT(tex[0] != nullptr);
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex1;
-	ResourceManager::Get().LoadTextureFromFile("textures/brick/brick3.dds", tex[1], uploadBufferTex1, *mCmdList);
-	ASSERT(tex[1] != nullptr);
 
-	Model* model;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	ModelManager::Get().LoadModel("models/mitsubaSphere.obj", model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
-	ASSERT(model != nullptr);
-
-	ExecuteCommandList(cmdQueue);
-
-	ASSERT(model->HasMeshes());	
-	const Mesh& mesh{ model->Meshes()[0U] };
+	ASSERT(model.HasMeshes());	
+	const Mesh& mesh{ model.Meshes()[0U] };
 
 	std::vector<GeometryPassCmdListRecorder::GeometryData> geomDataVec;
 	geomDataVec.resize(Settings::sCpuProcessors);
@@ -57,13 +87,13 @@ void TextureScene::GenerateGeomPassRecorders(
 	}
 
 	const float meshSpaceOffset{ 100.0f };
-	const float scaleFactor{ 0.2f };
+	const float scaleFactor{ 0.02f };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, numGeometry),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
 			TextureCmdListRecorder& task{ *new TextureCmdListRecorder(D3dData::Device()) };
 			tasks[k].reset(&task);
-						
+							
 			GeometryPassCmdListRecorder::GeometryData& currGeomData{ geomDataVec[k] };
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
 				const float tx{ MathUtils::RandF(-meshSpaceOffset, meshSpaceOffset) };
@@ -85,13 +115,13 @@ void TextureScene::GenerateGeomPassRecorders(
 				materials.push_back(material);
 			}
 
-			std::vector<ID3D12Resource*> textures;
-			textures.reserve(numGeometry);
+			std::vector<ID3D12Resource*> tex;
+			tex.reserve(numGeometry);
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
-				textures.push_back(tex[i % _countof(tex)]);
+				tex.push_back(textures[i % 2]);
 			}
 
-			task.Init(&currGeomData, 1U, materials.data(), textures.data(), static_cast<std::uint32_t>(textures.size()));
+			task.Init(&currGeomData, 1U, materials.data(), tex.data(), static_cast<std::uint32_t>(tex.size()));
 		}
 	}
 	);
@@ -147,25 +177,11 @@ void TextureScene::GenerateLightingPassRecorders(
 }
 
 void TextureScene::GenerateCubeMaps(
-	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept
 {
-	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
-
-	// Cube map textures
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseIrradianceCubeMap, uploadBufferTex, *mCmdList);
-	ASSERT(diffuseIrradianceCubeMap != nullptr);
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
-	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularPreConvolvedCubeMap, uploadBufferTex2, *mCmdList);
-	ASSERT(specularPreConvolvedCubeMap != nullptr);
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex3;
-	ResourceManager::Get().LoadTextureFromFile(sSkyBoxFile, skyBoxCubeMap, uploadBufferTex3, *mCmdList);
-	ASSERT(skyBoxCubeMap != nullptr);
-
-	ExecuteCommandList(cmdQueue);
+	skyBoxCubeMap = &sResourceContainer.GetResource(SKY_BOX);
+	diffuseIrradianceCubeMap = &sResourceContainer.GetResource(DIFFUSE_CUBE_MAP);
+	specularPreConvolvedCubeMap = &sResourceContainer.GetResource(SPECULAR_CUBE_MAP);
 }

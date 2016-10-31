@@ -155,7 +155,6 @@ namespace {
 	const float sFloorTz{ 150.0f };
 
 	const float sModel{ 0.05f };
-	const float sSphere{ 3.0f };
 	
 	const float sTx1{ 0.0f };
 	const float sTy1{ sFloorTy };
@@ -375,7 +374,6 @@ void MaterialShowcaseScene::Init(ID3D12CommandQueue& cmdQueue) noexcept {
 }
 
 void MaterialShowcaseScene::GenerateGeomPassRecorders(
-	ID3D12CommandQueue& /*cmdQueue*/,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 
 	ASSERT(tasks.empty());
@@ -707,7 +705,6 @@ void MaterialShowcaseScene::GenerateLightingPassRecorders(
 }
 
 void MaterialShowcaseScene::GenerateCubeMaps(
-	ID3D12CommandQueue& /*cmdQueue*/,
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept

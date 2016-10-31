@@ -27,8 +27,7 @@ public:
 	// It must be called before generating recorders
 	virtual void Init(ID3D12CommandQueue& cmdQueue) noexcept;
 	
-	virtual void GenerateGeomPassRecorders(
-		ID3D12CommandQueue& cmdQueue,		 
+	virtual void GenerateGeomPassRecorders( 
 		std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept = 0;
 
 	virtual void GenerateLightingPassRecorders( 
@@ -38,7 +37,6 @@ public:
 		std::vector<std::unique_ptr<LightingPassCmdListRecorder>>& tasks) noexcept = 0;
 
 	virtual void GenerateCubeMaps(
-		ID3D12CommandQueue& cmdQueue,
 		ID3D12Resource* &skyBoxCubeMap,
 		ID3D12Resource* &diffuseIrradianceCubeMap,
 		ID3D12Resource* &specularPreConvolvedCubeMap) noexcept = 0;
