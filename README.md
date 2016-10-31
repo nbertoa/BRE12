@@ -1,4 +1,4 @@
-## Synopsis
+## BRE (Bertoa Rendering Engine)
 
 This engine is the result of an intent to learn DirectX 12 and apply my knowledge about computer graphics. It is intended for learning purposes only, I do not plan to make a game or a commercial engine. 
 
