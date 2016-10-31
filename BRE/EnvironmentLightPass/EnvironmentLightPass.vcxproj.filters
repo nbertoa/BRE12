@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{cfb032e8-6ee1-4e27-adcb-1bd3b4c2cd4d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="EnvironmentLightCmdListRecorder.cpp" />
+    <ClCompile Include="EnvironmentLightPass.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EnvironmentLightCmdListRecorder.h" />
+    <ClInclude Include="EnvironmentLightPass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\VS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\RS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>

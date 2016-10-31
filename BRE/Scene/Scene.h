@@ -25,7 +25,7 @@ public:
 	// This method is called internally by the App.
 	// User must not call it.
 	// It must be called before generating recorders
-	void Init() noexcept;
+	virtual void Init(ID3D12CommandQueue& cmdQueue) noexcept;
 	
 	virtual void GenerateGeomPassRecorders(
 		ID3D12CommandQueue& cmdQueue,		 

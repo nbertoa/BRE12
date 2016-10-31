@@ -4,6 +4,8 @@
 
 class MaterialShowcaseScene : public Scene {
 public:
+	void Init(ID3D12CommandQueue& cmdQueue) noexcept override;
+
 	void GenerateGeomPassRecorders(
 		ID3D12CommandQueue& cmdQueue,
 		std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept override;

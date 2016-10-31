@@ -149,7 +149,7 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 	ASSERT(scene != nullptr);
 
 	// Initialize scene
-	scene->Init();
+	scene->Init(*mCmdQueue);
 	
 	// Generate recorders for all the passes
 	scene->GenerateGeomPassRecorders(*mCmdQueue, mGeometryPass.GetRecorders());

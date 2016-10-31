@@ -6,7 +6,8 @@
 #include <ResourceManager\ResourceManager.h>
 #include <Utils\DebugUtils.h>
 
-void Scene::Init() noexcept {
+// cmdQueue is used by derived classes
+void Scene::Init(ID3D12CommandQueue& /*cmdQueue*/) noexcept {
 	ASSERT(ValidateData() == false);
 
 	CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAlloc);

@@ -2,7 +2,6 @@
 
 #include <tbb/parallel_for.h>
 
-#include <ExampleScenes/SceneUtils.h>
 #include <GeometryPass/Recorders/ColorCmdListRecorder.h>
 #include <GeometryPass/Recorders/NormalCmdListRecorder.h>
 #include <GlobalData/D3dData.h>
@@ -11,130 +10,58 @@
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
+#include <Scene/SceneUtils.h>
 
 namespace {
+	SceneUtils::ResourceContainer sResourceContainer;
+
 	enum Textures {
 		// Metal
 		METAL = 0U,
 		METAL_NORMAL,
-		METAL2,
-		METAL2_NORMAL,
-		METAL3,
-		METAL3_NORMAL,
-
-		// Brick
-		BRICK,
-		BRICK_HEIGHT,
-		BRICK_NORMAL,
-		BRICK2,
-		BRICK2_HEIGHT,
-		BRICK2_NORMAL,
-		BRICK3,
-		BRICK3_HEIGHT,
-		BRICK3_NORMAL,
 
 		// Wood
 		WOOD,
-		WOOD_HEIGHT,
 		WOOD_NORMAL,
 
-		// Rock
-		ROCK,
-		ROCK_HEIGHT,
-		ROCK_NORMAL,
-		ROCK2,
-		ROCK2_HEIGHT,
-		ROCK2_NORMAL,
-		ROCK3,
-		ROCK3_NORMAL,
-		ROCK4,
-		ROCK4_NORMAL,
-		ROCK5,
-		ROCK5_NORMAL,
-		ROCK6,
-		ROCK6_HEIGHT,
-		ROCK6_NORMAL,
-
-		// Cobblestone
-		COBBLESTONE,
-		COBBLESTONE_HEIGHT,
-		COBBLESTONE_NORMAL,
-		COBBLESTONE2,
-		COBBLESTONE2_HEIGHT,
-		COBBLESTONE2_NORMAL,
+		// Environment
+		SKY_BOX,
+		DIFFUSE_CUBE_MAP,
+		SPECULAR_CUBE_MAP,
 
 		TEXTURES_COUNT
 	};
 
-	void LoadTextures(
-		ID3D12CommandQueue& cmdQueue,
-		ID3D12CommandAllocator& cmdAlloc,
-		ID3D12GraphicsCommandList& cmdList,
-		ID3D12Fence& fence,
-		std::vector<ID3D12Resource*>& textures) noexcept
+	// Textures to load
+	std::vector<std::string> sTexFiles =
 	{
-		std::vector<std::string> texFiles =
-		{
-			// Metal
-			"textures/metal/metal.dds",
-			"textures/metal/metal_normal.dds",
-			"textures/metal/metal2.dds",
-			"textures/metal/metal2_normal.dds",
-			"textures/metal/metal3.dds",
-			"textures/metal/metal3_normal.dds",
+		// Metal
+		"textures/metal/metal.dds",
+		"textures/metal/metal_normal.dds",
 
-			// Brick
-			"textures/brick/brick.dds",
-			"textures/brick/brick_height.dds",
-			"textures/brick/brick_normal.dds",
-			"textures/brick/brick2.dds",
-			"textures/brick/brick2_height.dds",
-			"textures/brick/brick2_normal.dds",
-			"textures/brick/brick3.dds",
-			"textures/brick/brick3_height.dds",
-			"textures/brick/brick3_normal.dds",
+		// Wood
+		"textures/wood/wood.dds",
+		"textures/wood/wood_normal.dds",
 
-			// Wood
-			"textures/wood/wood.dds",
-			"textures/wood/wood_height.dds",
-			"textures/wood/wood_normal.dds",
+		// Environment
+		"textures/cubeMaps/milkmill_cube_map.dds",
+		"textures/cubeMaps/milkmill_diffuse_cube_map.dds",
+		"textures/cubeMaps/milkmill_specular_cube_map.dds",
+	};
 
-			// Rock
-			"textures/rock/rock.dds",
-			"textures/rock/rock_height.dds",
-			"textures/rock/rock_normal.dds",
-			"textures/rock/rock2.dds",
-			"textures/rock/rock2_height.dds",
-			"textures/rock/rock2_normal.dds",
-			"textures/rock/rock3.dds",
-			"textures/rock/rock3_normal.dds",
-			"textures/rock/rock4.dds",
-			"textures/rock/rock4_normal.dds",
-			"textures/rock/rock5.dds",
-			"textures/rock/rock5_normal.dds",
-			"textures/rock/rock6.dds",
-			"textures/rock/rock6_height.dds",
-			"textures/rock/rock6_normal.dds",
+	enum Models {
+		UNREAL,
+		FLOOR,
 
-			// Cobblestone
-			"textures/cobblestone/cobblestone.dds",
-			"textures/cobblestone/cobblestone_height.dds",
-			"textures/cobblestone/cobblestone_normal.dds",
-			"textures/cobblestone/cobblestone2.dds",
-			"textures/cobblestone/cobblestone2_height.dds",
-			"textures/cobblestone/cobblestone2_normal.dds",
-		};
+		MODELS_COUNT
+	};
 
-		ASSERT(texFiles.size() == TEXTURES_COUNT);
-
-		SceneUtils::LoadTextures(texFiles, cmdQueue, cmdAlloc, cmdList, fence, textures);
-
-		ASSERT(textures.size() == texFiles.size());
-	}
-
-	const char* sSkyBoxFile{ "textures/cubeMaps/milkmill_cube_map.dds" };
-	const char* sDiffuseEnvironmentFile{ "textures/cubeMaps/milkmill_diffuse_cube_map.dds" };
-	const char* sSpecularEnvironmentFile{ "textures/cubeMaps/milkmill_specular_cube_map.dds" };
+	// Models to load
+	std::vector<std::string> sModelFiles =
+	{
+		"models/unreal.obj",
+		"models/floor.obj",
+	};
 
 	const float sFloorScale{ 1.0f };
 	const float sFloorTx{ -150.0f };
@@ -336,39 +263,34 @@ namespace {
 	}
 }
 
+void AmbientOcclussionScene::Init(ID3D12CommandQueue& cmdQueue) noexcept {
+	Scene::Init(cmdQueue);
+
+	// Load textures
+	sResourceContainer.LoadTextures(sTexFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
+
+	// Load models
+	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
+}
+
 void AmbientOcclussionScene::GenerateGeomPassRecorders(
-	ID3D12CommandQueue& cmdQueue,
+	ID3D12CommandQueue& /*cmdQueue*/,
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 
 	ASSERT(tasks.empty());
 	ASSERT(ValidateData());
 
-	std::vector<ID3D12Resource*> textures;
-
-	LoadTextures(cmdQueue, *mCmdAlloc, *mCmdList, *mFence, textures);
-
-	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
-	
-	Model* model;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBufferModel;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBufferModel;
-	ModelManager::Get().LoadModel("models/unreal.obj", model, *mCmdList, uploadVertexBufferModel, uploadIndexBufferModel);
-	ASSERT(model != nullptr);
-
-	Model* floor;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBufferFloor;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBufferFloor;
-	ModelManager::Get().LoadModel("models/floor.obj", floor, *mCmdList, uploadVertexBufferFloor, uploadIndexBufferFloor);
-	ASSERT(floor != nullptr);
-
-	ExecuteCommandList(cmdQueue);
+	std::vector<ID3D12Resource*>& textures = sResourceContainer.GetResources();
+	ASSERT(textures.empty() == false);
+	Model& model = sResourceContainer.GetModel(UNREAL);
+	Model& floor = sResourceContainer.GetModel(FLOOR);
 
 	//
 	// Generate floor
 	//
 	NormalCmdListRecorder* recorder{ nullptr };
 	GenerateFloorRecorder(
-		floor->Meshes(),
+		floor.Meshes(),
 		textures[WOOD],
 		textures[WOOD_NORMAL],
 		recorder);
@@ -430,7 +352,7 @@ void AmbientOcclussionScene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model->Meshes(),
+		model.Meshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -447,7 +369,7 @@ void AmbientOcclussionScene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model->Meshes(),
+		model.Meshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -464,7 +386,7 @@ void AmbientOcclussionScene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model->Meshes(),
+		model.Meshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -481,7 +403,7 @@ void AmbientOcclussionScene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model->Meshes(),
+		model.Meshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -498,7 +420,7 @@ void AmbientOcclussionScene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model->Meshes(),
+		model.Meshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -515,7 +437,7 @@ void AmbientOcclussionScene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model->Meshes(),
+		model.Meshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -532,7 +454,7 @@ void AmbientOcclussionScene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model->Meshes(),
+		model.Meshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -549,7 +471,7 @@ void AmbientOcclussionScene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model->Meshes(),
+		model.Meshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -566,7 +488,7 @@ void AmbientOcclussionScene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model->Meshes(),
+		model.Meshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -583,7 +505,7 @@ void AmbientOcclussionScene::GenerateGeomPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model->Meshes(),
+		model.Meshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -602,26 +524,13 @@ void AmbientOcclussionScene::GenerateLightingPassRecorders(
 }
 
 void AmbientOcclussionScene::GenerateCubeMaps(
-	ID3D12CommandQueue& cmdQueue,
+	ID3D12CommandQueue&,
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept
 {
-	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
-
-	// Cube map textures
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex;
-	ResourceManager::Get().LoadTextureFromFile(sDiffuseEnvironmentFile, diffuseIrradianceCubeMap, uploadBufferTex, *mCmdList);
-	ASSERT(diffuseIrradianceCubeMap != nullptr);
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex2;
-	ResourceManager::Get().LoadTextureFromFile(sSpecularEnvironmentFile, specularPreConvolvedCubeMap, uploadBufferTex2, *mCmdList);
-	ASSERT(specularPreConvolvedCubeMap != nullptr);
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferTex3;
-	ResourceManager::Get().LoadTextureFromFile(sSkyBoxFile, skyBoxCubeMap, uploadBufferTex3, *mCmdList);
-	ASSERT(skyBoxCubeMap != nullptr);
-
-	ExecuteCommandList(cmdQueue);
+	skyBoxCubeMap = &sResourceContainer.GetResource(SKY_BOX);
+	diffuseIrradianceCubeMap = &sResourceContainer.GetResource(DIFFUSE_CUBE_MAP);
+	specularPreConvolvedCubeMap = &sResourceContainer.GetResource(SPECULAR_CUBE_MAP);
 }
 

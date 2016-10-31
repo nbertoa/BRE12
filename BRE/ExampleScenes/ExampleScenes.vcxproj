@@ -121,7 +121,6 @@
     <ClCompile Include="HeightScene.cpp" />
     <ClCompile Include="MaterialShowcaseScene.cpp" />
     <ClCompile Include="NormalScene.cpp" />
-    <ClCompile Include="SceneUtils.cpp" />
     <ClCompile Include="TextureScene.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -132,7 +131,6 @@
     <ClInclude Include="HeightScene.h" />
     <ClInclude Include="MaterialShowcaseScene.h" />
     <ClInclude Include="NormalScene.h" />
-    <ClInclude Include="SceneUtils.h" />
     <ClInclude Include="TextureScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
