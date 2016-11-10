@@ -7,8 +7,11 @@
 class Camera {
 public:
 	Camera() = default;
+	~Camera() = default;
 	Camera(const Camera&) = delete;
 	const Camera& operator=(const Camera&) = delete;
+	Camera(Camera&&) = delete;
+	Camera& operator=(Camera&&) = delete;
 
 	// Get/Set world camera position.
 	__forceinline DirectX::XMVECTOR GetPosition() const noexcept { return XMLoadFloat3(&mPosition); }

@@ -70,7 +70,7 @@ void AmbientCmdListRecorder::InitPSO() noexcept {
 
 void AmbientCmdListRecorder::Init(
 	const BufferCreator::VertexBufferData& vertexBufferData,
-	const BufferCreator::IndexBufferData indexBufferData,
+	const BufferCreator::IndexBufferData& indexBufferData,
 	ID3D12Resource& baseColorMetalMaskBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept

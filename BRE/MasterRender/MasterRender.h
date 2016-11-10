@@ -24,13 +24,19 @@ class MasterRender : public tbb::task {
 public:
 	static MasterRender* Create(const HWND hwnd, ID3D12Device& device, Scene* scene) noexcept;
 
+	~MasterRender() = default;
+	MasterRender(const MasterRender&) = delete;
+	const MasterRender& operator=(const MasterRender&) = delete;
+	MasterRender(MasterRender&&) = delete;
+	MasterRender& operator=(MasterRender&&) = delete;
+
 	void Terminate() noexcept;
 
 private:
 	explicit MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene);
 
 	// Called when tbb::task is spawned
-	tbb::task* execute() override;
+	tbb::task* execute() final override;
 
 	void InitPasses(Scene* scene) noexcept;
 

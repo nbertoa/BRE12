@@ -10,8 +10,11 @@
 class D3dData {
 public:
 	D3dData() = delete;
+	~D3dData() = delete;
 	D3dData(const D3dData&) = delete;
 	const D3dData& operator=(const D3dData&) = delete;
+	D3dData(D3dData&&) = delete;
+	D3dData& operator=(D3dData&&) = delete;
 
 	static void InitDirect3D(const HINSTANCE hInstance) noexcept;
 	

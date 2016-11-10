@@ -17,8 +17,10 @@ class App {
 public:
 	explicit App(HINSTANCE hInstance, Scene* scene);
 	~App();
-	App(const App& rhs) = delete;
-	App& operator=(const App& rhs) = delete;		
+	App(const App&) = delete;
+	const App& operator=(const App&) = delete;
+	App(App&&) = delete;
+	App& operator=(App&&) = delete;
 	
 private:	
 	// Needed by Intel TBB

@@ -9,6 +9,12 @@ class ColorNormalCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
 	explicit ColorNormalCmdListRecorder(ID3D12Device& device);
 
+	~ColorNormalCmdListRecorder() = default;
+	ColorNormalCmdListRecorder(const ColorNormalCmdListRecorder&) = delete;
+	const ColorNormalCmdListRecorder& operator=(const ColorNormalCmdListRecorder&) = delete;
+	ColorNormalCmdListRecorder(ColorNormalCmdListRecorder&&) = default;
+	ColorNormalCmdListRecorder& operator=(ColorNormalCmdListRecorder&&) = default;
+
 	// This method is to initialize PSO that is a shared between all this kind
 	// of recorders.
 	// This method is initialized by its corresponding pass.
@@ -22,9 +28,9 @@ public:
 		ID3D12Resource** normals,
 		const std::uint32_t numResources) noexcept;
 
-	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept override;
+	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept final override;
 
-	bool ValidateData() const noexcept override;
+	bool ValidateData() const noexcept final override;
 
 private:
 	void BuildBuffers(

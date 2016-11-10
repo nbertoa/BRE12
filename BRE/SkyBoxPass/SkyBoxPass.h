@@ -14,8 +14,11 @@ public:
 	using Recorder = std::unique_ptr<SkyBoxCmdListRecorder>;
 
 	SkyBoxPass() = default;
+	~SkyBoxPass() = default;
 	SkyBoxPass(const SkyBoxPass&) = delete;
 	const SkyBoxPass& operator=(const SkyBoxPass&) = delete;
+	SkyBoxPass(SkyBoxPass&&) = delete;
+	SkyBoxPass& operator=(SkyBoxPass&&) = delete;
 
 	// You should call this method after filling recorder and before Execute()
 	void Init(

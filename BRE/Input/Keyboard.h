@@ -9,9 +9,11 @@ public:
 	static Keyboard& Create(IDirectInput8& directInput, const HWND windowHandle) noexcept;
 	static Keyboard& Get() noexcept;
 
-	Keyboard(const Keyboard&) = delete;
-	const Keyboard& operator=(const Keyboard& rhs) = delete;
 	~Keyboard();
+	Keyboard(const Keyboard&) = delete;
+	const Keyboard& operator=(const Keyboard&) = delete;
+	Keyboard(Keyboard&&) = delete;
+	Keyboard& operator=(Keyboard&&) = delete;
 
 	// You should call update in each frame
 	void Update() noexcept;

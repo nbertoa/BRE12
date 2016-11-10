@@ -8,6 +8,10 @@
 // Per object constant buffer data
 struct ObjectCBuffer {
 	ObjectCBuffer() = default;
+	~ObjectCBuffer() = default;
+	ObjectCBuffer(const ObjectCBuffer&) = default;
+	ObjectCBuffer(ObjectCBuffer&&) = default;
+	ObjectCBuffer& operator=(ObjectCBuffer&&) = default;
 
 	DirectX::XMFLOAT4X4 mWorld{ MathUtils::Identity4x4() };
 	float mTexTransform{ 2.0f };
@@ -16,6 +20,10 @@ struct ObjectCBuffer {
 // Per frame constant buffer data
 struct FrameCBuffer {
 	FrameCBuffer() = default;
+	~FrameCBuffer() = default;
+	FrameCBuffer(const FrameCBuffer&) = default;
+	FrameCBuffer(FrameCBuffer&&) = default;
+	FrameCBuffer& operator=(FrameCBuffer&&) = default;
 	
 	DirectX::XMFLOAT4X4 mView{ MathUtils::Identity4x4() };
 	DirectX::XMFLOAT4X4 mInvView{ MathUtils::Identity4x4() };
@@ -27,6 +35,10 @@ struct FrameCBuffer {
 // Immutable constant buffer data (does not change across frames or objects) 
 struct ImmutableCBuffer {
 	ImmutableCBuffer() = default;
+	~ImmutableCBuffer() = default;
+	ImmutableCBuffer(const ImmutableCBuffer&) = default;
+	ImmutableCBuffer(ImmutableCBuffer&&) = default;
+	ImmutableCBuffer& operator=(ImmutableCBuffer&&) = default;
 
 	float mNearZ_FarZ_ScreenW_ScreenH[4U] { 
 		Settings::sNearPlaneZ,

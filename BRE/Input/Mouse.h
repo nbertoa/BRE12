@@ -19,6 +19,8 @@ public:
 	~Mouse();
 	Mouse(const Mouse&) = delete;
 	const Mouse& operator=(const Mouse&) = delete;
+	Mouse(Mouse&&) = delete;
+	Mouse& operator=(Mouse&&) = delete;
 
 	// You should call update in each frame
 	void Update();

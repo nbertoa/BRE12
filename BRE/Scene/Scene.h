@@ -18,9 +18,11 @@ struct ID3D12GraphicsCommandList;
 class Scene {
 public:
 	Scene() = default;
+	virtual ~Scene() {}
 	Scene(const Scene&) = delete;
 	const Scene& operator=(const Scene&) = delete;
-	virtual ~Scene() {}
+	Scene(Scene&&) = delete;
+	Scene& operator=(Scene&&) = delete;
 
 	// This method is called internally by the App.
 	// User must not call it.

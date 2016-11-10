@@ -7,11 +7,13 @@
 
 class UploadBuffer {
 public:
-	UploadBuffer(ID3D12Device& device, const std::size_t elemSize, const std::uint32_t elemCount);
+	explicit UploadBuffer(ID3D12Device& device, const std::size_t elemSize, const std::uint32_t elemCount);
 
-	UploadBuffer(const UploadBuffer& rhs) = delete;
-	UploadBuffer& operator=(const UploadBuffer& rhs) = delete;
 	~UploadBuffer();
+	UploadBuffer(const UploadBuffer&) = delete;
+	const UploadBuffer& operator=(const UploadBuffer&) = delete;
+	UploadBuffer(UploadBuffer&&) = delete;
+	UploadBuffer& operator=(UploadBuffer&&) = delete;
 
 	__forceinline ID3D12Resource* Resource() const noexcept { return mBuffer.Get(); }
 

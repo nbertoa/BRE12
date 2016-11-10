@@ -6,6 +6,12 @@ class PunctualLightCmdListRecorder : public LightingPassCmdListRecorder {
 public:
 	explicit PunctualLightCmdListRecorder(ID3D12Device& device);
 
+	~PunctualLightCmdListRecorder() = default;
+	PunctualLightCmdListRecorder(const PunctualLightCmdListRecorder&) = delete;
+	const PunctualLightCmdListRecorder& operator=(const PunctualLightCmdListRecorder&) = delete;
+	PunctualLightCmdListRecorder(PunctualLightCmdListRecorder&&) = default;
+	PunctualLightCmdListRecorder& operator=(PunctualLightCmdListRecorder&&) = default;
+	
 	// This method is to initialize PSO that is a shared between all this kind
 	// of recorders.
 	// This method is initialized by its corresponding pass.
@@ -17,10 +23,10 @@ public:
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
 		const void* lights,
-		const std::uint32_t numLights) noexcept override;
+		const std::uint32_t numLights) noexcept final override;
 
 	// Record command lists and push them to the queue.
-	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept override;
+	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept final override;
 
 private:
 	void BuildLightsBuffers(const void* lights, const std::uint32_t numDescriptors) noexcept;

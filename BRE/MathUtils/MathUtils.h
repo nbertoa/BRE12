@@ -6,6 +6,13 @@
 
 class MathUtils {
 public:
+	MathUtils() = delete;
+	~MathUtils() = delete;
+	MathUtils(const MathUtils&) = delete;
+	const MathUtils& operator=(const MathUtils&) = delete;
+	MathUtils(MathUtils&&) = delete;
+	MathUtils& operator=(MathUtils&&) = delete;
+
 	// Returns random float in [0, 1).
 	static float RandF() noexcept {
 		return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);

@@ -19,8 +19,11 @@ public:
 	using Recorder = std::unique_ptr<AmbientCmdListRecorder>;
 
 	AmbientLightPass() = default;
+	~AmbientLightPass() = default;
 	AmbientLightPass(const AmbientLightPass&) = delete;
 	const AmbientLightPass& operator=(const AmbientLightPass&) = delete;
+	AmbientLightPass(AmbientLightPass&&) = delete;
+	AmbientLightPass& operator=(AmbientLightPass&&) = delete;
 
 	// You should call this method before Execute()
 	void Init(

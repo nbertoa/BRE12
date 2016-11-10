@@ -21,6 +21,12 @@ class EnvironmentLightCmdListRecorder {
 public:
 	explicit EnvironmentLightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
+	~EnvironmentLightCmdListRecorder() = default;
+	EnvironmentLightCmdListRecorder(const EnvironmentLightCmdListRecorder&) = delete;
+	const EnvironmentLightCmdListRecorder& operator=(const EnvironmentLightCmdListRecorder&) = delete;
+	EnvironmentLightCmdListRecorder(EnvironmentLightCmdListRecorder&&) = default;
+	EnvironmentLightCmdListRecorder& operator=(EnvironmentLightCmdListRecorder&&) = default;
+
 	// This method is to initialize PSO that is a shared between all this kind
 	// of recorders.
 	// This method is initialized by its corresponding pass.

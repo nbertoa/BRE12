@@ -6,8 +6,11 @@
 class Settings {
 public:
 	Settings() = delete;
+	~Settings() = delete;
 	Settings(const Settings&) = delete;
 	const Settings& operator=(const Settings&) = delete;
+	Settings(Settings&&) = delete;
+	Settings& operator=(Settings&&) = delete;
 
 	__forceinline static float AspectRatio() noexcept { return static_cast<float>(sWindowWidth) / sWindowHeight; }
 

@@ -29,6 +29,11 @@ public:
 	explicit LightingPassCmdListRecorder(ID3D12Device& device);
 	virtual ~LightingPassCmdListRecorder() {}
 
+	LightingPassCmdListRecorder(const LightingPassCmdListRecorder&) = delete;
+	const LightingPassCmdListRecorder& operator=(const LightingPassCmdListRecorder&) = delete;
+	LightingPassCmdListRecorder(LightingPassCmdListRecorder&&) = default;
+	LightingPassCmdListRecorder& operator=(LightingPassCmdListRecorder&&) = default;
+
 	// This method must be called before RecordAndPushCommandLists()
 	virtual void Init(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,

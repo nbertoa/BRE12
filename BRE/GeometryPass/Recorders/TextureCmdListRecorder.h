@@ -9,6 +9,12 @@ class TextureCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
 	explicit TextureCmdListRecorder(ID3D12Device& device);
 
+	~TextureCmdListRecorder() = default;
+	TextureCmdListRecorder(const TextureCmdListRecorder&) = delete;
+	const TextureCmdListRecorder& operator=(const TextureCmdListRecorder&) = delete;
+	TextureCmdListRecorder(TextureCmdListRecorder&&) = default;
+	TextureCmdListRecorder& operator=(TextureCmdListRecorder&&) = default;
+
 	// This method is to initialize PSO that is a shared between all this kind
 	// of recorders.
 	// This method is initialized by its corresponding pass.
@@ -22,9 +28,9 @@ public:
 		ID3D12Resource** textures,
 		const std::uint32_t numResources) noexcept;
 
-	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept override;
+	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept final override;
 
-	bool ValidateData() const noexcept override;
+	bool ValidateData() const noexcept final override;
 
 private:
 	void BuildBuffers(const Material* materials, ID3D12Resource** textures, const std::uint32_t dataCount) noexcept;

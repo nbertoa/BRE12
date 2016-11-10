@@ -16,8 +16,11 @@ public:
 	static ModelManager& Create() noexcept;
 	static ModelManager& Get() noexcept;
 
+	~ModelManager() = default;
 	ModelManager(const ModelManager&) = delete;
 	const ModelManager& operator=(const ModelManager&) = delete;
+	ModelManager(ModelManager&&) = delete;
+	ModelManager& operator=(ModelManager&&) = delete;
 
 	// Returns id to get model after creation
 	std::size_t LoadModel(

@@ -16,6 +16,11 @@ class UploadBuffer;
 class SkyBoxCmdListRecorder {
 public:
 	explicit SkyBoxCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	~SkyBoxCmdListRecorder() = default;
+	SkyBoxCmdListRecorder(const SkyBoxCmdListRecorder&) = delete;
+	const SkyBoxCmdListRecorder& operator=(const SkyBoxCmdListRecorder&) = delete;
+	SkyBoxCmdListRecorder(SkyBoxCmdListRecorder&&) = delete;
+	SkyBoxCmdListRecorder& operator=(SkyBoxCmdListRecorder&&) = delete;
 
 	// This method is to initialize PSO that is a shared between all this kind
 	// of recorders.

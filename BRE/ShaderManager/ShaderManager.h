@@ -12,8 +12,11 @@ public:
 	static ShaderManager& Create() noexcept;
 	static ShaderManager& Get() noexcept;
 	
+	~ShaderManager() = default;
 	ShaderManager(const ShaderManager&) = delete;
 	const ShaderManager& operator=(const ShaderManager&) = delete;
+	ShaderManager(ShaderManager&&) = delete;
+	ShaderManager& operator=(ShaderManager&&) = delete;
 
 	// Returns id to get blob/shader byte code after creation
 	std::size_t LoadShaderFile(const char* filename, ID3DBlob* &blob) noexcept;

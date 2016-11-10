@@ -14,8 +14,11 @@ public:
 	static CommandManager& Create(ID3D12Device& device) noexcept;
 	static CommandManager& Get() noexcept;
 		
+	~CommandManager() = default;
 	CommandManager(const CommandManager&) = delete;
 	const CommandManager& operator=(const CommandManager&) = delete;
+	CommandManager(CommandManager&&) = delete;
+	CommandManager& operator=(CommandManager&&) = delete;
 
 	std::size_t CreateCmdQueue(const D3D12_COMMAND_QUEUE_DESC& desc, ID3D12CommandQueue* &cmdQueue) noexcept;
 	std::size_t CreateCmdList(const D3D12_COMMAND_LIST_TYPE& type, ID3D12CommandAllocator& cmdAlloc, ID3D12GraphicsCommandList* &cmdList) noexcept;

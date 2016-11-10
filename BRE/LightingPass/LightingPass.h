@@ -25,8 +25,11 @@ public:
 	using Recorders = std::vector<std::unique_ptr<LightingPassCmdListRecorder>>;
 
 	LightingPass() = default;
+	~LightingPass() = default;
 	LightingPass(const LightingPass&) = delete;
 	const LightingPass& operator=(const LightingPass&) = delete;
+	LightingPass(LightingPass&&) = delete;
+	LightingPass& operator=(LightingPass&&) = delete;
 
 	// You should get recorders and fill them, before calling Init()
 	__forceinline Recorders& GetRecorders() noexcept { return mRecorders; }

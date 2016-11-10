@@ -87,8 +87,8 @@ void EnvironmentLightCmdListRecorder::Init(
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(geometryBuffersCount > 0U);
 
-	mVertexBufferData = vertexBufferData;
-	mIndexBufferData = indexBufferData;
+	mVertexBufferData = std::move(vertexBufferData);
+	mIndexBufferData = std::move(indexBufferData);
 	mColorBufferCpuDesc = colorBufferCpuDesc;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 

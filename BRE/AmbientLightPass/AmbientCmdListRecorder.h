@@ -20,6 +20,12 @@ class AmbientCmdListRecorder {
 public:
 	explicit AmbientCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
+	~AmbientCmdListRecorder() = default;
+	AmbientCmdListRecorder(const AmbientCmdListRecorder&) = delete;
+	const AmbientCmdListRecorder& operator=(const AmbientCmdListRecorder&) = delete;
+	AmbientCmdListRecorder(AmbientCmdListRecorder&&) = default;
+	AmbientCmdListRecorder& operator=(AmbientCmdListRecorder&&) = default;
+
 	// This method is to initialize PSO that is a shared between all this kind
 	// of recorders.
 	// This method is initialized by its corresponding pass.
@@ -27,7 +33,7 @@ public:
 
 	void Init(
 		const BufferCreator::VertexBufferData& vertexBufferData,
-		const BufferCreator::IndexBufferData indexBufferData,
+		const BufferCreator::IndexBufferData& indexBufferData,
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;

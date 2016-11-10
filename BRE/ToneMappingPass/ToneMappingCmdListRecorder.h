@@ -13,6 +13,11 @@ class UploadBuffer;
 class ToneMappingCmdListRecorder {
 public:
 	explicit ToneMappingCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	~ToneMappingCmdListRecorder() = default;
+	ToneMappingCmdListRecorder(const ToneMappingCmdListRecorder&) = delete;
+	const ToneMappingCmdListRecorder& operator=(const ToneMappingCmdListRecorder&) = delete;
+	ToneMappingCmdListRecorder(ToneMappingCmdListRecorder&&) = default;
+	ToneMappingCmdListRecorder& operator=(ToneMappingCmdListRecorder&&) = default;
 
 	// This method is to initialize PSO that is a shared between all this kind
 	// of recorders.

@@ -15,7 +15,12 @@
 namespace GeometryGenerator {
 	struct Vertex {
 		Vertex() = default;
-		Vertex(const DirectX::XMFLOAT3& p, const DirectX::XMFLOAT3& n, const DirectX::XMFLOAT3& t, const DirectX::XMFLOAT2& uv);
+		explicit Vertex(const DirectX::XMFLOAT3& p, const DirectX::XMFLOAT3& n, const DirectX::XMFLOAT3& t, const DirectX::XMFLOAT2& uv);
+
+		~Vertex() = default;
+		Vertex(const Vertex&) = default;
+		Vertex(Vertex&&) = default;
+		Vertex& operator=(Vertex&&) = default;
 
 		DirectX::XMFLOAT3 mPosition = {0.0f, 0.0f, 0.0f};
         DirectX::XMFLOAT3 mNormal = { 0.0f, 0.0f, 0.0f };

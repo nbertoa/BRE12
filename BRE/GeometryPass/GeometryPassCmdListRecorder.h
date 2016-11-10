@@ -28,6 +28,11 @@ public:
 	explicit GeometryPassCmdListRecorder(ID3D12Device& device);
 	virtual ~GeometryPassCmdListRecorder() {}
 
+	GeometryPassCmdListRecorder(const GeometryPassCmdListRecorder&) = delete;
+	const GeometryPassCmdListRecorder& operator=(const GeometryPassCmdListRecorder&) = delete;
+	GeometryPassCmdListRecorder(GeometryPassCmdListRecorder&&) = default;
+	GeometryPassCmdListRecorder& operator=(GeometryPassCmdListRecorder&&) = default;
+
 	// This method must be called before calling RecordAndPushCommandLists()
 	void InitInternal(
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,

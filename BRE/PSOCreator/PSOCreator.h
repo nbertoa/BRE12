@@ -9,6 +9,11 @@
 namespace PSOCreator {
 	struct PSOParams {
 		PSOParams() = default;
+		~PSOParams() = default;
+		PSOParams(const PSOParams&) = delete;
+		const PSOParams& operator=(const PSOParams&) = delete;
+		PSOParams(PSOParams&&) = delete;
+		PSOParams& operator=(PSOParams&&) = delete;
 
 		bool ValidateData() const noexcept;
 

@@ -29,8 +29,11 @@ public:
 	using Recorders = std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>;
 
 	GeometryPass() = default;
+	~GeometryPass() = default;
 	GeometryPass(const GeometryPass&) = delete;
 	const GeometryPass& operator=(const GeometryPass&) = delete;
+	GeometryPass(GeometryPass&&) = delete;
+	GeometryPass& operator=(GeometryPass&&) = delete;
 
 	// You should get recorders and fill them, before calling Init()
 	__forceinline Recorders& GetRecorders() noexcept { return mRecorders; }

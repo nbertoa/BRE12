@@ -9,8 +9,11 @@ namespace  BufferCreator {
 	struct BufferParams {
 		BufferParams() = default;
 		explicit BufferParams(const void* data, const std::uint32_t elemCount, const std::size_t elemSize);
+		~BufferParams() = default;
 		BufferParams(const BufferParams&) = delete;
 		const BufferParams& operator=(const BufferParams&) = delete;
+		BufferParams(BufferParams&&) = delete;
+		BufferParams& operator=(BufferParams&&) = delete;
 
 		bool ValidateData() const noexcept;
 
@@ -21,6 +24,23 @@ namespace  BufferCreator {
 
 	struct VertexBufferData {
 		VertexBufferData() = default;
+		~VertexBufferData() = default;
+		VertexBufferData(const VertexBufferData&) = default;
+
+		const VertexBufferData& operator=(const VertexBufferData& instance) {
+			if (this == &instance) {
+				return *this;
+			}
+
+			mBuffer = instance.mBuffer;
+			mBufferView = instance.mBufferView;
+			mCount = instance.mCount;
+
+			return *this;
+		}
+
+		VertexBufferData(VertexBufferData&&) = default;
+		VertexBufferData& operator=(VertexBufferData&&) = default;
 
 		bool ValidateData() const noexcept;
 
@@ -37,6 +57,23 @@ namespace  BufferCreator {
 
 	struct IndexBufferData {
 		IndexBufferData() = default;
+		~IndexBufferData() = default;
+		IndexBufferData(const IndexBufferData&) = default;
+
+		const IndexBufferData& operator=(const IndexBufferData& instance) {
+			if (this == &instance) {
+				return *this;
+			}
+
+			mBuffer = instance.mBuffer;
+			mBufferView = instance.mBufferView;
+			mCount = instance.mCount;
+
+			return *this;
+		}
+
+		IndexBufferData(IndexBufferData&&) = default;
+		IndexBufferData& operator=(IndexBufferData&&) = default;
 
 		bool ValidateData() const noexcept;
 

@@ -2,6 +2,10 @@
 
 struct PunctualLight {
 	PunctualLight() = default;
+	~PunctualLight() = default;
+	PunctualLight(const PunctualLight&) = default;
+	PunctualLight(PunctualLight&&) = default;
+	PunctualLight& operator=(PunctualLight&&) = default;
 
 	float mPosAndRange[4U]{ 0.0f, 0.0f, 0.0f, 0.0f };
 	float mColorAndPower[4U]{ 0.0f, 0.0f, 0.0f, 0.0f };

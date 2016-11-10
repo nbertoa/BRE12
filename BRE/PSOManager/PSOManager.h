@@ -11,8 +11,11 @@ public:
 	static PSOManager& Create(ID3D12Device& device) noexcept;
 	static PSOManager& Get() noexcept;
 		
+	~PSOManager() = default;
 	PSOManager(const PSOManager&) = delete;
 	const PSOManager& operator=(const PSOManager&) = delete;
+	PSOManager(PSOManager&&) = delete;
+	PSOManager& operator=(PSOManager&&) = delete;
 
 	std::size_t CreateGraphicsPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, ID3D12PipelineState* &pso) noexcept;
 

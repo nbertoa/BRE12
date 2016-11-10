@@ -42,10 +42,10 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/bunny.obj",
+		"models/character1.obj",
 	};
 
-	const float sS{ 5.0f };
+	const float sS{ 0.10f };
 
 	const float sTx{ 0.0f };
 	const float sTy{ -3.5f };
@@ -109,7 +109,7 @@ namespace {
 		float tz{ initZ };
 		for (std::size_t i = 0UL; i < numMaterials; ++i) {
 			DirectX::XMFLOAT4X4 w;
-			MathUtils::ComputeMatrix(w, tx, ty, tz, sS, sS, sS);
+			MathUtils::ComputeMatrix(w, tx, ty, tz, sS, sS, sS, DirectX::XM_PIDIV2);
 
 			Material mat(Materials::GetMaterial(static_cast<Materials::MaterialType>(i)));
 			for (std::size_t j = 0UL; j < numMeshes; ++j) {

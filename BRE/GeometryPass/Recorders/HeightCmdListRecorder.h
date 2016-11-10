@@ -9,6 +9,12 @@ class HeightCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
 	explicit HeightCmdListRecorder(ID3D12Device& device);
 
+	~HeightCmdListRecorder() = default;
+	HeightCmdListRecorder(const HeightCmdListRecorder&) = delete;
+	const HeightCmdListRecorder& operator=(const HeightCmdListRecorder&) = delete;
+	HeightCmdListRecorder(HeightCmdListRecorder&&) = default;
+	HeightCmdListRecorder& operator=(HeightCmdListRecorder&&) = default;
+
 	// This method is to initialize PSO that is a shared between all this kind
 	// of recorders.
 	// This method is initialized by its corresponding pass.
@@ -24,9 +30,9 @@ public:
 		ID3D12Resource** heights,
 		const std::uint32_t numResources) noexcept;
 
-	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept override;
+	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept final override;
 
-	bool ValidateData() const noexcept override;
+	bool ValidateData() const noexcept final override;
 
 private:
 	void BuildBuffers(

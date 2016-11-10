@@ -5,8 +5,11 @@
 class Timer {
 public:
 	Timer();
+	~Timer() = default;
 	Timer(const Timer&) = delete;
 	const Timer& operator=(const Timer&) = delete;
+	Timer(Timer&&) = delete;
+	Timer& operator=(Timer&&) = delete;
 
 	// Time in seconds (1.0f is 1 second)
 	float TotalTime() const noexcept { return static_cast<float>((mCurrTime - mBaseTime) * mSecondsPerCount); }

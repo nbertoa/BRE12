@@ -11,8 +11,11 @@ public:
 	static RootSignatureManager& Create(ID3D12Device& device) noexcept;
 	static RootSignatureManager& Get() noexcept;
 	
+	~RootSignatureManager() = default;
 	RootSignatureManager(const RootSignatureManager&) = delete;
 	const RootSignatureManager& operator=(const RootSignatureManager&) = delete;
+	RootSignatureManager(RootSignatureManager&&) = delete;
+	RootSignatureManager& operator=(RootSignatureManager&&) = delete;
 
 	std::size_t CreateRootSignature(const D3D12_ROOT_SIGNATURE_DESC& desc, ID3D12RootSignature* &rootSign) noexcept;
 	std::size_t CreateRootSignature(const D3D12_SHADER_BYTECODE& shaderByteCode, ID3D12RootSignature* &rootSign) noexcept;

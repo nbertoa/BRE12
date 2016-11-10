@@ -15,8 +15,11 @@ namespace SceneUtils {
 	class ResourceContainer {
 	public:
 		ResourceContainer() = default;
+		~ResourceContainer() = default;
 		ResourceContainer(const ResourceContainer&) = delete;
 		const ResourceContainer& operator=(const ResourceContainer&) = delete;
+		ResourceContainer(ResourceContainer&&) = delete;
+		ResourceContainer& operator=(ResourceContainer&&) = delete;
 
 		// Load all textures from texFiles. Texture index will be equal
 		// to its index in texFiles vector.

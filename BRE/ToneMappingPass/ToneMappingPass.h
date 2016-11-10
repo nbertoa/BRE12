@@ -21,8 +21,11 @@ public:
 	using Recorder = std::unique_ptr<ToneMappingCmdListRecorder>;
 
 	ToneMappingPass() = default;
+	~ToneMappingPass() = default; 
 	ToneMappingPass(const ToneMappingPass&) = delete;
 	const ToneMappingPass& operator=(const ToneMappingPass&) = delete;
+	ToneMappingPass(ToneMappingPass&&) = delete;
+	ToneMappingPass& operator=(ToneMappingPass&&) = delete;
 
 	// You should call this method before Execute()
 	void Init(

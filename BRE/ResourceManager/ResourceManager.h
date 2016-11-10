@@ -19,8 +19,11 @@ public:
 	static ResourceManager& Create(ID3D12Device& device) noexcept;
 	static ResourceManager& Get() noexcept;
 	
+	~ResourceManager() = default;
 	ResourceManager(const ResourceManager&) = delete;
 	const ResourceManager& operator=(const ResourceManager&) = delete;
+	ResourceManager(ResourceManager&&) = delete;
+	ResourceManager& operator=(ResourceManager&&) = delete;
 
 	std::size_t LoadTextureFromFile(
 		const char* filename, 

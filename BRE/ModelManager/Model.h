@@ -29,8 +29,11 @@ public:
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
 
-	Model(const Model& rhs) = delete;
-	Model& operator=(const Model& rhs) = delete;
+	~Model() = default;
+	Model(const Model&) = delete;
+	const Model& operator=(const Model&) = delete;
+	Model(Model&&) = delete;
+	Model& operator=(Model&&) = delete;
 
 	__forceinline bool HasMeshes() const noexcept { return (mMeshes.size() > 0UL); }
 	__forceinline const std::vector<Mesh>& Meshes() const noexcept { return mMeshes; }

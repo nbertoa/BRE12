@@ -20,8 +20,11 @@ public:
 	using Recorder = std::unique_ptr<EnvironmentLightCmdListRecorder>;
 
 	EnvironmentLightPass() = default;
+	~EnvironmentLightPass() = default;
 	EnvironmentLightPass(const EnvironmentLightPass&) = delete;
 	const EnvironmentLightPass& operator=(const EnvironmentLightPass&) = delete;
+	EnvironmentLightPass(EnvironmentLightPass&&) = delete;
+	EnvironmentLightPass& operator=(EnvironmentLightPass&&) = delete;
 
 	// You should call this method before Execute()
 	void Init(

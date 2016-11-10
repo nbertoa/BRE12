@@ -17,6 +17,12 @@ public:
 	// by ID3D12CommandQueue::ExecuteCommandLists() operation.
 	static CommandListExecutor* Create(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists) noexcept;
 
+	~CommandListExecutor() = default;
+	CommandListExecutor(const CommandListExecutor&) = delete;
+	const CommandListExecutor& operator=(const CommandListExecutor&) = delete;
+	CommandListExecutor(CommandListExecutor&&) = delete;
+	CommandListExecutor& operator=(CommandListExecutor&&) = delete;
+
 	// This method is used to know if there are no more pending commands lists to execute or to process.
 	// I thought this method was going to be thread safe, but that is not the case.
 	// As I did not discover yet, why it is not thread safe, then I only use it for debugging purposes.
@@ -39,7 +45,7 @@ private:
 	explicit CommandListExecutor(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists);
 
 	// Called when tbb::task is spawned
-	tbb::task* execute() override;
+	tbb::task* execute() final override;
 
 	bool mTerminate{ false };
 	std::uint32_t mExecutedCmdLists{ 0U };

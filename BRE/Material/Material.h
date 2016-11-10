@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstring>
+
 struct Material {
 	Material() = default;
 	Material(const float c0, const float c1, const float c2, const float metalMask, const float smoothness)
@@ -10,6 +12,23 @@ struct Material {
 		mBaseColor_MetalMask[3U] = metalMask;
 		mSmoothness = smoothness;
 	}
+
+	~Material() = default;
+	Material(const Material&) = default;
+
+	const Material& operator=(const Material& instance) {
+		if (this == &instance) {
+			return *this;
+		}
+
+		memcpy(mBaseColor_MetalMask, instance.mBaseColor_MetalMask, sizeof(mBaseColor_MetalMask));
+		mSmoothness = instance.mSmoothness;
+
+		return *this;
+	}
+
+	Material(Material&&) = default;
+	Material& operator=(Material&&) = default;
 
 	float mBaseColor_MetalMask[4U]{ 1.0f, 1.0f, 1.0f, 0.0f };
 	float mSmoothness{ 1.0f };
