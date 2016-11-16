@@ -73,6 +73,8 @@ void AmbientCmdListRecorder::Init(
 	const BufferCreator::IndexBufferData& indexBufferData,
 	ID3D12Resource& baseColorMetalMaskBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+	ID3D12Resource& ambientAccessibilityBuffer,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRTCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
 {
 	ASSERT(ValidateData() == false);
@@ -80,9 +82,10 @@ void AmbientCmdListRecorder::Init(
 	mVertexBufferData = vertexBufferData;
 	mIndexBufferData = indexBufferData;
 	mColorBufferCpuDesc = colorBufferCpuDesc;
+	mAmbientAccessibilityBufferRTCpuDesc = ambientAccessibilityBufferRTCpuDesc;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
-	BuildBuffers(baseColorMetalMaskBuffer);
+	BuildBuffers(baseColorMetalMaskBuffer, ambientAccessibilityBuffer);
 
 	ASSERT(ValidateData());
 }
@@ -133,19 +136,23 @@ bool AmbientCmdListRecorder::ValidateData() const noexcept {
 		mCmdList != nullptr &&
 		mCbvSrvUavDescHeap != nullptr &&
 		mColorBufferCpuDesc.ptr != 0UL &&
+		mAmbientAccessibilityBufferRTCpuDesc.ptr != 0UL &&
 		mDepthBufferCpuDesc.ptr != 0UL;
 
 	return result;
 }
 
-void AmbientCmdListRecorder::BuildBuffers(ID3D12Resource& baseColorMetalMaskBuffer) noexcept {
+void AmbientCmdListRecorder::BuildBuffers(
+	ID3D12Resource& baseColorMetalMaskBuffer, 
+	ID3D12Resource& ambientAccessibilityBuffer) noexcept {
+
 	ASSERT(mCbvSrvUavDescHeap == nullptr);
 
 	// Create CBV_SRV_UAV cbuffer descriptor heap
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = 1U; // 1 baseColor_metalMask buffer
+	descHeapDesc.NumDescriptors = 2U; // 1 baseColor_metalMask buffer + 1 ambient accessibility buffer 
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
 	
@@ -157,5 +164,18 @@ void AmbientCmdListRecorder::BuildBuffers(ID3D12Resource& baseColorMetalMaskBuff
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDesc.Format = baseColorMetalMaskBuffer.GetDesc().Format;
 	srvDesc.Texture2D.MipLevels = baseColorMetalMaskBuffer.GetDesc().MipLevels;
-	ResourceManager::Get().CreateShaderResourceView(baseColorMetalMaskBuffer, srvDesc, mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart());
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle = mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart();
+	ResourceManager::Get().CreateShaderResourceView(baseColorMetalMaskBuffer, srvDesc, cpuDescHandle);
+
+	// Create ambient accessibility buffer texture descriptor
+	srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc.Format = ambientAccessibilityBuffer.GetDesc().Format;
+	srvDesc.Texture2D.MipLevels = ambientAccessibilityBuffer.GetDesc().MipLevels;
+	const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+	cpuDescHandle.ptr += descHandleIncSize;
+	ResourceManager::Get().CreateShaderResourceView(ambientAccessibilityBuffer, srvDesc, cpuDescHandle);
 }

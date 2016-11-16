@@ -4,6 +4,7 @@
 #include <tbb/concurrent_queue.h>
 
 #include <AmbientLightPass\AmbientCmdListRecorder.h>
+#include <AmbientOcclusionPass\AmbientOcclusionPass.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12CommandAllocator;
@@ -31,7 +32,9 @@ public:
 		ID3D12CommandQueue& cmdQueue,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		ID3D12Resource& baseColorMetalMaskBuffer,
+		ID3D12Resource& normalSmoothnessBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+		ID3D12Resource& depthBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
 	void Execute() const noexcept;
@@ -47,4 +50,11 @@ private:
 	ID3D12Fence* mFence{ nullptr };
 
 	Recorder mRecorder;
+
+	// Geometry buffers data
+	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
+	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRTCpuDescHandle{ 0UL };
+	ID3D12DescriptorHeap* mDescHeap{ nullptr };
+
+	AmbientOcclusionPass mAmbientOcclusionPass;
 };

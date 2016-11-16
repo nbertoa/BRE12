@@ -4,6 +4,7 @@
 
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandManager.h>
+#include <DXUtils\d3dx12.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
 #include <ModelManager\ModelManager.h>
@@ -54,6 +55,54 @@ namespace {
 			CloseHandle(eventHandle);
 		}
 	}
+
+	void CreateAmbientAccessibilityBuffer(
+		ID3D12Device& device,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
+		D3D12_CPU_DESCRIPTOR_HANDLE& bufferRTCpuDescHandle,
+		ID3D12DescriptorHeap* &descHeap) noexcept {
+
+		// Create buffer desc heap
+		D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
+		descHeapDesc.NumDescriptors = 1U;
+		descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+		descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		descHeapDesc.NodeMask = 0;
+		ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, descHeap);
+
+		// Set shared buffers properties
+		D3D12_RESOURCE_DESC resDesc = {};
+		resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		resDesc.Alignment = 0U;
+		resDesc.Width = Settings::sWindowWidth;
+		resDesc.Height = Settings::sWindowHeight;
+		resDesc.DepthOrArraySize = 1U;
+		resDesc.MipLevels = 0U;
+		resDesc.SampleDesc.Count = 1U;
+		resDesc.SampleDesc.Quality = 0U;
+		resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+		D3D12_CLEAR_VALUE clearValue { DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 0.0f };
+		buffer.Reset();
+		
+		CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
+
+		ID3D12Resource* res{ nullptr };
+		bufferRTCpuDescHandle = descHeap->GetCPUDescriptorHandleForHeapStart();
+		const std::size_t rtvDescSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
+
+		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
+		// Create and store RTV's descriptor for buffer
+		resDesc.Format = DXGI_FORMAT_R32_FLOAT;
+		clearValue.Format = resDesc.Format;
+		rtvDesc.Format = resDesc.Format;
+		ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, res);
+		buffer = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
+		device.CreateRenderTargetView(buffer.Get(), &rtvDesc, bufferRTCpuDescHandle);
+	}
 }
 
 void AmbientLightPass::Init(
@@ -61,7 +110,9 @@ void AmbientLightPass::Init(
 	ID3D12CommandQueue& cmdQueue,
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	ID3D12Resource& baseColorMetalMaskBuffer,
+	ID3D12Resource& normalSmoothnessBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+	ID3D12Resource& depthBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
 
 	ASSERT(ValidateData() == false);
@@ -85,13 +136,32 @@ void AmbientLightPass::Init(
 	// Initialize recorder's PSO
 	AmbientCmdListRecorder::InitPSO();
 
-	// Initialize recorder
+	// Create ambient accessibility buffer
+	CreateAmbientAccessibilityBuffer(
+		device,
+		mAmbientAccessibilityBuffer,
+		mAmbientAccessibilityBufferRTCpuDescHandle,
+		mDescHeap);
+
+	// Initialize ambient light recorder
 	mRecorder.reset(new AmbientCmdListRecorder(device, cmdListQueue));
 	mRecorder->Init(
 		mesh.VertexBufferData(), 
 		mesh.IndexBufferData(), 
 		baseColorMetalMaskBuffer,
 		colorBufferCpuDesc,
+		*mAmbientAccessibilityBuffer.Get(),
+		mAmbientAccessibilityBufferRTCpuDescHandle,
+		depthBufferCpuDesc);
+
+	// Initialize ambient occlusion pass
+	mAmbientOcclusionPass.Init(
+		device, 
+		cmdQueue, 
+		cmdListQueue, 
+		normalSmoothnessBuffer,
+		mAmbientAccessibilityBufferRTCpuDescHandle,
+		depthBuffer,
 		depthBufferCpuDesc);
 
 	ASSERT(ValidateData());
@@ -108,7 +178,10 @@ bool AmbientLightPass::ValidateData() const noexcept {
 		mCmdAlloc != nullptr &&
 		mCmdList != nullptr &&
 		mFence != nullptr &&
-		mRecorder.get() != nullptr;
+		mRecorder.get() != nullptr &&
+		mAmbientAccessibilityBuffer.Get() != nullptr &&
+		mAmbientAccessibilityBufferRTCpuDescHandle.ptr != 0UL &&
+		mDescHeap != nullptr;
 
 	return b;
 }

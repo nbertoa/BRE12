@@ -80,7 +80,7 @@ namespace {
 			resDesc.Format = sBufferFormats[i];
 			clearValue[i].Format = resDesc.Format;
 			rtvDesc.Format = resDesc.Format;
-			ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, clearValue[i], res);
+			ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue[i], res);
 			buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
 			device.CreateRenderTargetView(buffers[i].Get(), &rtvDesc, currRtvCpuDesc);
 			rtvCpuDescs[i] = currRtvCpuDesc;

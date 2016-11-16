@@ -298,7 +298,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	clearValue.DepthStencil.Stencil = 0U;
 
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, depthStencilDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, clearValue, mDepthStencilBuffer);
+	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, depthStencilDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, &clearValue, mDepthStencilBuffer);
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
 	D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
@@ -361,7 +361,7 @@ void MasterRender::CreateColorBuffer() noexcept {
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;		
 	rtvDesc.Format = resDesc.Format;
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, clearValue, res);
+	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue, res);
 
 	mColorBuffer = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
 	mDevice.CreateRenderTargetView(mColorBuffer.Get(), &rtvDesc, rtvDescHeapBeginDescHandle);

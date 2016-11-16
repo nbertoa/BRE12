@@ -150,11 +150,16 @@ bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 		}
 	}
 
+	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
+		if (mFrameCBuffer[i] == nullptr) {
+			return false;
+		}
+	}
+
 	const bool result =
 		mCmdList != nullptr &&
 		mCbvSrvUavDescHeap != nullptr &&
 		mImmutableCBuffer != nullptr &&
-		mFrameCBuffer != nullptr && 
 		mCubeMapsBufferGpuDescHandleBegin.ptr != 0UL &&
 		mColorBufferCpuDesc.ptr != 0UL &&
 		mDepthBufferCpuDesc.ptr != 0UL;

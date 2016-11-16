@@ -141,11 +141,11 @@ std::size_t ResourceManager::CreateCommittedResource(
 	const D3D12_HEAP_FLAGS& heapFlags,
 	const D3D12_RESOURCE_DESC& resDesc,
 	const D3D12_RESOURCE_STATES& resStates,
-	const D3D12_CLEAR_VALUE& clearValue,
+	const D3D12_CLEAR_VALUE* clearValue,
 	ID3D12Resource* &res) noexcept
 {
 	mMutex.lock();
-	CHECK_HR(mDevice.CreateCommittedResource(&heapProps, heapFlags, &resDesc, resStates, &clearValue, IID_PPV_ARGS(&res)));
+	CHECK_HR(mDevice.CreateCommittedResource(&heapProps, heapFlags, &resDesc, resStates, clearValue, IID_PPV_ARGS(&res)));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };

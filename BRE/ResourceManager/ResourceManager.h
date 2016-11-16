@@ -46,7 +46,7 @@ public:
 		const D3D12_HEAP_FLAGS& heapFlags,
 		const D3D12_RESOURCE_DESC& resDesc,
 		const D3D12_RESOURCE_STATES& resStates,
-		const D3D12_CLEAR_VALUE& clearValue,
+		const D3D12_CLEAR_VALUE* clearValue,
 		ID3D12Resource* &res) noexcept;
 
 	std::size_t CreateUploadBuffer(const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept;

@@ -67,7 +67,9 @@ void LightingPass::Init(
 		cmdQueue,
 		cmdListQueue,
 		*geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(),
+		*geometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(),
 		colorBufferCpuDesc,
+		depthBuffer,
 		depthBufferCpuDesc);
 
 	// Initialize environment light pass

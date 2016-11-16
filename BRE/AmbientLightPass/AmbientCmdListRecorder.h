@@ -36,6 +36,8 @@ public:
 		const BufferCreator::IndexBufferData& indexBufferData,
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+		ID3D12Resource& ambientAccessibilityBuffer,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRTCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
 	void RecordAndPushCommandLists() noexcept;
@@ -43,7 +45,9 @@ public:
 	bool ValidateData() const noexcept;
 
 private:
-	void BuildBuffers(ID3D12Resource& baseColorMetalMaskBuffer) noexcept;
+	void BuildBuffers(
+		ID3D12Resource& baseColorMetalMaskBuffer,
+		ID3D12Resource& ambientAccessibilityBuffer) noexcept;
 
 	ID3D12Device& mDevice;
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
@@ -57,7 +61,8 @@ private:
 	BufferCreator::VertexBufferData mVertexBufferData;
 	BufferCreator::IndexBufferData mIndexBufferData;
 
-	// Color & Depth buffers cpu descriptors
+	// Buffers cpu descriptors
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRTCpuDesc{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 };

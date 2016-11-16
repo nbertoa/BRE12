@@ -132,7 +132,6 @@ void PunctualLightCmdListRecorder::Init(
 	ResourceManager::Get().CreateShaderResourceView(depthBuffer, srvDesc, cpuDesc);
 
 	ASSERT(ValidateData());
-
 }
 
 void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
@@ -191,8 +190,6 @@ void PunctualLightCmdListRecorder::BuildLightsBuffers(const void* lights, const 
 #endif
 	ASSERT(mLightsBuffer == nullptr);
 	ASSERT(lights != nullptr);
-
-	// We assume we have world matrices by geometry index 0 (but we do not have geometry here)
 	ASSERT(mNumLights != 0U);
 
 	// Create CBV_SRV_UAV cbuffer descriptor heap
