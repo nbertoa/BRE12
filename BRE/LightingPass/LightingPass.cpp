@@ -102,14 +102,7 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	// Total tasks = Light tasks + 1 ambient pass task + 1 environment light pass task
 	mCmdListProcessor->ResetExecutedCmdListCount();
 	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mRecorders.size())};
-	const std::uint32_t taskCount{ lightTaskCount + 2U };
-
-	// Execute ambient light pass tasks
-	mAmbientLightPass.Execute();
-
-	// Execute environment light pass tasks
-	mEnvironmentLightPass.Execute(frameCBuffer);
-
+	
 	// Execute light pass tasks
 	const std::uint32_t grainSize(max(1U, lightTaskCount / Settings::sCpuProcessors));
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, lightTaskCount, grainSize),
@@ -120,9 +113,15 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	);
 	
 	// Wait until all previous tasks command lists are executed
-	while (mCmdListProcessor->ExecutedCmdListCount() < taskCount) {
+	while (mCmdListProcessor->ExecutedCmdListCount() < lightTaskCount) {
 		Sleep(0U);
 	}
+
+	// Execute ambient light pass tasks
+	mAmbientLightPass.Execute(frameCBuffer);
+
+	// Execute environment light pass tasks
+	//mEnvironmentLightPass.Execute(frameCBuffer);
 
 	ExecuteEndingTask();
 }

@@ -16,15 +16,15 @@ class UploadBuffer;
 
 // Responsible of command lists recording to be executed by CommandListExecutor.
 // This class has common data and functionality to record command list for ambient light pass.
-class AmbientCmdListRecorder {
+class AmbientLightCmdListRecorder {
 public:
-	explicit AmbientCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	explicit AmbientLightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
-	~AmbientCmdListRecorder() = default;
-	AmbientCmdListRecorder(const AmbientCmdListRecorder&) = delete;
-	const AmbientCmdListRecorder& operator=(const AmbientCmdListRecorder&) = delete;
-	AmbientCmdListRecorder(AmbientCmdListRecorder&&) = default;
-	AmbientCmdListRecorder& operator=(AmbientCmdListRecorder&&) = default;
+	~AmbientLightCmdListRecorder() = default;
+	AmbientLightCmdListRecorder(const AmbientLightCmdListRecorder&) = delete;
+	const AmbientLightCmdListRecorder& operator=(const AmbientLightCmdListRecorder&) = delete;
+	AmbientLightCmdListRecorder(AmbientLightCmdListRecorder&&) = default;
+	AmbientLightCmdListRecorder& operator=(AmbientLightCmdListRecorder&&) = default;
 
 	// This method is to initialize PSO that is a shared between all this kind
 	// of recorders.

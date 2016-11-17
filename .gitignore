@@ -2143,3 +2143,9 @@
 /BRE/AmbientOcclusionPass/x64/Release/AmbientO.28C37B9A.tlog/Lib-link.read.1.tlog
 /BRE/AmbientOcclusionPass/x64/Release/AmbientO.28C37B9A.tlog/Lib-link.write.1.tlog
 /BRE/AmbientOcclusionPass/x64/Release/AmbientO.28C37B9A.tlog/lib.command.1.tlog
+/BRE/x64/Debug/AmbientLightPass/Shaders/AmbientLight/PS.cso
+/BRE/x64/Debug/AmbientLightPass/Shaders/AmbientLight/RS.cso
+/BRE/x64/Debug/AmbientLightPass/Shaders/AmbientLight/VS.cso
+/BRE/x64/Debug/AmbientLightPass/Shaders/AmbientOcclusion/PS.cso
+/BRE/x64/Debug/AmbientLightPass/Shaders/AmbientOcclusion/RS.cso
+/BRE/x64/Debug/AmbientLightPass/Shaders/AmbientOcclusion/VS.cso

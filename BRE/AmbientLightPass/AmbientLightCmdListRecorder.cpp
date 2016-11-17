@@ -1,4 +1,4 @@
-#include "AmbientCmdListRecorder.h"
+#include "AmbientLightCmdListRecorder.h"
 
 #include <DirectXMath.h>
 
@@ -8,7 +8,7 @@
 #include <Utils/DebugUtils.h>
 
 // Root Signature:
-// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)" 0 -> BaseColor_MetalMask texture
+// "DescriptorTable(SRV(t0), SRV(t1), visibility = SHADER_VISIBILITY_PIXEL)" 0 -> BaseColor_MetalMask texture, AmbientAccessibility texture
 
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
@@ -36,14 +36,14 @@ namespace {
 	}
 }
 
-AmbientCmdListRecorder::AmbientCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
+AmbientLightCmdListRecorder::AmbientLightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
 	: mDevice(device)
 	, mCmdListQueue(cmdListQueue)
 {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 
-void AmbientCmdListRecorder::InitPSO() noexcept {
+void AmbientLightCmdListRecorder::InitPSO() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSign == nullptr);
 
@@ -53,9 +53,9 @@ void AmbientCmdListRecorder::InitPSO() noexcept {
 	psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
 	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
 	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
-	psoParams.mPSFilename = "AmbientLightPass/Shaders/PS.cso";
-	psoParams.mRootSignFilename = "AmbientLightPass/Shaders/RS.cso";
-	psoParams.mVSFilename = "AmbientLightPass/Shaders/VS.cso";
+	psoParams.mPSFilename = "AmbientLightPass/Shaders/AmbientLight/PS.cso";
+	psoParams.mRootSignFilename = "AmbientLightPass/Shaders/AmbientLight/RS.cso";
+	psoParams.mVSFilename = "AmbientLightPass/Shaders/AmbientLight/VS.cso";
 	psoParams.mNumRenderTargets = 1U;
 	psoParams.mRtFormats[0U] = Settings::sColorBufferFormat;
 	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
@@ -68,7 +68,7 @@ void AmbientCmdListRecorder::InitPSO() noexcept {
 	ASSERT(sRootSign != nullptr);
 }
 
-void AmbientCmdListRecorder::Init(
+void AmbientLightCmdListRecorder::Init(
 	const BufferCreator::VertexBufferData& vertexBufferData,
 	const BufferCreator::IndexBufferData& indexBufferData,
 	ID3D12Resource& baseColorMetalMaskBuffer,
@@ -90,7 +90,7 @@ void AmbientCmdListRecorder::Init(
 	ASSERT(ValidateData());
 }
 
-void AmbientCmdListRecorder::RecordAndPushCommandLists() noexcept {
+void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	ASSERT(ValidateData());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
@@ -124,7 +124,7 @@ void AmbientCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;
 }
 
-bool AmbientCmdListRecorder::ValidateData() const noexcept {
+bool AmbientLightCmdListRecorder::ValidateData() const noexcept {
 
 	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {
@@ -142,7 +142,7 @@ bool AmbientCmdListRecorder::ValidateData() const noexcept {
 	return result;
 }
 
-void AmbientCmdListRecorder::BuildBuffers(
+void AmbientLightCmdListRecorder::BuildBuffers(
 	ID3D12Resource& baseColorMetalMaskBuffer, 
 	ID3D12Resource& ambientAccessibilityBuffer) noexcept {
 

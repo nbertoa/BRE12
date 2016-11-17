@@ -3,8 +3,8 @@
 #include <memory>
 #include <tbb/concurrent_queue.h>
 
-#include <AmbientLightPass\AmbientCmdListRecorder.h>
-#include <AmbientOcclusionPass\AmbientOcclusionPass.h>
+#include <AmbientLightPass\AmbientLightCmdListRecorder.h>
+#include <AmbientLightPass\AmbientOcclusionCmdListRecorder.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12CommandAllocator;
@@ -17,8 +17,6 @@ struct ID3D12Resource;
 // Pass responsible to apply ambient lighting and ambient occlusion
 class AmbientLightPass {
 public:
-	using Recorder = std::unique_ptr<AmbientCmdListRecorder>;
-
 	AmbientLightPass() = default;
 	~AmbientLightPass() = default;
 	AmbientLightPass(const AmbientLightPass&) = delete;
@@ -37,24 +35,30 @@ public:
 		ID3D12Resource& depthBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
-	void Execute() const noexcept;
+	void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
 	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
+
+	void ExecuteBeginTask() noexcept;
+	void ExecuteEndingTask() noexcept;
+
+	ID3D12CommandQueue* mCmdQueue{ nullptr };
 	
-	ID3D12CommandAllocator* mCmdAlloc{ nullptr };
+	// 1 command allocater per queued frame.	
+	ID3D12CommandAllocator* mCmdAllocsBegin[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocsEnd[Settings::sQueuedFrameCount]{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 
 	ID3D12Fence* mFence{ nullptr };
 
-	Recorder mRecorder;
+	std::unique_ptr<AmbientOcclusionCmdListRecorder> mAmbientOcclusionRecorder;
+	std::unique_ptr<AmbientLightCmdListRecorder> mAmbientLightRecorder;	
 
 	// Geometry buffers data
 	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRTCpuDescHandle{ 0UL };
 	ID3D12DescriptorHeap* mDescHeap{ nullptr };
-
-	AmbientOcclusionPass mAmbientOcclusionPass;
 };

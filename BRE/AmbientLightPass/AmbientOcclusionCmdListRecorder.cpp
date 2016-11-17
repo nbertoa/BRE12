@@ -117,11 +117,11 @@ void AmbientOcclusionCmdListRecorder::InitPSO() noexcept {
 	psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
 	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
 	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
-	psoParams.mPSFilename = "AmbientOcclusionPass/Shaders/PS.cso";
-	psoParams.mRootSignFilename = "AmbientOcclusionPass/Shaders/RS.cso";
-	psoParams.mVSFilename = "AmbientOcclusionPass/Shaders/VS.cso";
+	psoParams.mPSFilename = "AmbientLightPass/Shaders/AmbientOcclusion/PS.cso";
+	psoParams.mRootSignFilename = "AmbientLightPass/Shaders/AmbientOcclusion/RS.cso";
+	psoParams.mVSFilename = "AmbientLightPass/Shaders/AmbientOcclusion/VS.cso";
 	psoParams.mNumRenderTargets = 1U;
-	psoParams.mRtFormats[0U] = DXGI_FORMAT_R32_FLOAT;
+	psoParams.mRtFormats[0U] = DXGI_FORMAT_R16_UNORM;
 	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
 		psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
@@ -147,7 +147,7 @@ void AmbientOcclusionCmdListRecorder::Init(
 	mAmbientAccessBufferCpuDesc = ambientAccessBufferCpuDesc;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
-	mNumSamples = 16U;
+	mNumSamples = 128U;
 	std::vector<DirectX::XMFLOAT3> sampleKernel;
 	GenerateSampleKernel(mNumSamples, sampleKernel);
 	std::vector<DirectX::XMFLOAT3> noises;
