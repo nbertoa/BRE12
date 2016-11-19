@@ -37,9 +37,8 @@ public:
 	// You should call this method after filling recorders and before Execute()
 	void Init(
 		ID3D12Device& device,
-		CommandListExecutor& cmdListProcessor,
+		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
@@ -57,7 +56,7 @@ private:
 	void ExecuteBeginTask() noexcept;
 	void ExecuteEndingTask() noexcept;
 
-	CommandListExecutor* mCmdListProcessor{ nullptr };
+	CommandListExecutor* mCmdListExecutor{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	

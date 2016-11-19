@@ -59,7 +59,7 @@ private:
 	Microsoft::WRL::ComPtr<IDXGISwapChain3> mSwapChain{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 			
-	CommandListExecutor* mCmdListProcessor{ nullptr };
+	CommandListExecutor* mCmdListExecutor{ nullptr };
 	
 	// Fences data for syncrhonization purposes.
 	ID3D12Fence* mFence{ nullptr };

@@ -2,6 +2,17 @@
 #define UTILS_HEADER
 
 //
+// Space transformations
+//
+
+float NdcDepthToViewDepth(const float depthNDC, const float4x4 projection) {
+	// depthNDC = A + B / depthV, where A = projection[2, 2] and B = projection[3,2].
+	const float depthV = projection._m32 / (depthNDC - projection._m22);
+
+	return depthV;
+}
+
+//
 // Octahedron-normal encoding/decoding 
 //
 float2 OctWrap(float2 v) {
@@ -25,13 +36,13 @@ float3 Decode(float2 encN) {
 	return n;
 }
 
-// Map a normal from [-1.0f, 1.0f] to [0.0f, 1.0f]
-float3 MapNormal(const float3 n) {
+// Map vector from [-1.0f, 1.0f] to [0.0f, 1.0f]
+float3 MapF1(const float3 n) {
 	return n * 0.5f + float3(0.5f, 0.5f, 0.5f);
 }
 
-// UnMap a normal from [0.0f, 1.0f] to [-1.0f, 1.0f]
-float3 UnmapNormal(const float3 n) {
+// UnMap vector from [0.0f, 1.0f] to [-1.0f, 1.0f]
+float3 UnmapF1(const float3 n) {
 	return n * 2.0f - float3(1.0f, 1.0f, 1.0f);
 }
 

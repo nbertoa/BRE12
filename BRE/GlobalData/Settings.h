@@ -29,13 +29,13 @@ public:
 	static const DXGI_FORMAT sColorBufferFormat{ DXGI_FORMAT_R16G16B16A16_FLOAT };
 
 	// Depth stencil buffer format, used when creating depth stencil buffer
-	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_R32_TYPELESS };
+	static const DXGI_FORMAT sDepthStencilFormat{ DXGI_FORMAT_R24G8_TYPELESS };
 
 	// Depth stencil view format, used when creating a view to depth stencil buffer
-	static const DXGI_FORMAT sDepthStencilViewFormat{ DXGI_FORMAT_D32_FLOAT };
+	static const DXGI_FORMAT sDepthStencilViewFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
 
 	// Depth stencil shader resource view format, used when creating a srv to the depth stencil buffer
-	static const DXGI_FORMAT sDepthStencilSRVFormat{ DXGI_FORMAT_R32_FLOAT };
+	static const DXGI_FORMAT sDepthStencilSRVFormat{ DXGI_FORMAT_R24_UNORM_X8_TYPELESS };
 
 	static const float sNearPlaneZ;
 	static const float sFarPlaneZ;

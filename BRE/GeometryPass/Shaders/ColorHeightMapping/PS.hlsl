@@ -30,7 +30,7 @@ Output main(const in Input input) {
 	Output output = (Output)0;
 
 	// Normal (encoded in view space) 
-	const float3 sampledNormal = normalize(UnmapNormal(NormalTexture.Sample(TexSampler, input.mTexCoordO).xyz));
+	const float3 sampledNormal = normalize(UnmapF1(NormalTexture.Sample(TexSampler, input.mTexCoordO).xyz));
 	const float3x3 tbnW = float3x3(normalize(input.mTangentW), normalize(input.mBinormalW), normalize(input.mNormalW));
 	const float3 normalW = mul(sampledNormal, tbnW);
 	const float3x3 tbnV = float3x3(normalize(input.mTangentV), normalize(input.mBinormalV), normalize(input.mNormalV));

@@ -65,16 +65,15 @@ namespace {
 
 void ToneMappingPass::Init(
 	ID3D12Device& device,
-	CommandListExecutor& cmdListProcessor,
+	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	ID3D12Resource& colorBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
 
 	ASSERT(ValidateData() == false);
 	
 	CreateCommandObjects(mCmdAllocs, mCmdList, mFence);
-	mCmdListProcessor = &cmdListProcessor;
+	mCmdListExecutor = &cmdListExecutor;
 	mCmdQueue = &cmdQueue;
 	mColorBuffer = &colorBuffer;
 
@@ -96,7 +95,7 @@ void ToneMappingPass::Init(
 	ToneMappingCmdListRecorder::InitPSO();
 
 	// Initialize recorder
-	mRecorder.reset(new ToneMappingCmdListRecorder(device, cmdListQueue));
+	mRecorder.reset(new ToneMappingCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
 	mRecorder->Init(mesh.VertexBufferData(), mesh.IndexBufferData(), colorBuffer, depthBufferCpuDesc);
 
 	ASSERT(ValidateData());
@@ -111,11 +110,11 @@ void ToneMappingPass::Execute(
 
 	ExecuteBeginTask(frameBuffer, frameBufferCpuDesc);
 
-	mCmdListProcessor->ResetExecutedCmdListCount();
+	mCmdListExecutor->ResetExecutedCmdListCount();
 	mRecorder->RecordAndPushCommandLists(frameBufferCpuDesc);
 
 	// Wait until all previous tasks command lists are executed
-	while (mCmdListProcessor->ExecutedCmdListCount() < 1) {
+	while (mCmdListExecutor->ExecutedCmdListCount() < 1) {
 		Sleep(0U);
 	}
 }
@@ -128,7 +127,7 @@ bool ToneMappingPass::ValidateData() const noexcept {
 	}
 
 	const bool b =
-		mCmdListProcessor != nullptr &&
+		mCmdListExecutor != nullptr &&
 		mCmdQueue != nullptr &&
 		mCmdList != nullptr &&
 		mFence != nullptr &&
@@ -166,7 +165,7 @@ void ToneMappingPass::ExecuteBeginTask(
 	CHECK_HR(mCmdList->Close());
 
 	// Execute preliminary task
-	mCmdListProcessor->ResetExecutedCmdListCount();
+	mCmdListExecutor->ResetExecutedCmdListCount();
 	ID3D12CommandList* cmdLists[] = { mCmdList };
 	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 }

@@ -1,9 +1,47 @@
 #include <ShaderUtils/CBuffers.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
-#define SAMPLE_KERNEL_SIZE 16U
+#define SAMPLE_KERNEL_SIZE 128U
 #define NOISE_SCALE float2(1920.0f / 4.0f, 1080.0f / 4.0f)
-#define RADIUS 1.0f
+#define OCCLUSION_RADIUS 10000.5f
+#define SURFACE_EPSILON 0.05f
+#define OCCLUSION_FADE_START 0.2f
+#define OCCLUSION_FADE_END 10000000.0f
+
+// Determines how much the sample point q occludes the point p as a function
+// of distZ.
+float OcclusionFunction(float distZ) {
+	//
+	// If depth(q) is "behind" depth(p), then q cannot occlude p.  Moreover, if 
+	// depth(q) and depth(p) are sufficiently close, then we also assume q cannot
+	// occlude p because q needs to be in front of p by Epsilon to occlude p.
+	//
+	// We use the following function to determine the occlusion.  
+	// 
+	//
+	//       1.0     -------------\
+		//               |           |  \
+	//               |           |    \
+	//               |           |      \ 
+//               |           |        \
+	//               |           |          \
+	//               |           |            \
+	//  ------|------|-----------|-------------|---------|--> zv
+//        0     Eps          z0            z1        
+//
+
+	float occlusion = 0.0f;
+	if (distZ > SURFACE_EPSILON)
+	{
+		float fadeLength = OCCLUSION_FADE_END - OCCLUSION_FADE_START;
+
+		// Linearly decrease occlusion from 1 to 0 as distZ goes 
+		// from gOcclusionFadeStart to gOcclusionFadeEnd.	
+		occlusion = saturate((OCCLUSION_FADE_END - distZ) / fadeLength);
+	}
+
+	return occlusion;
+}
 
 struct Input {
 	float4 mPosH : SV_POSITION;
@@ -12,7 +50,6 @@ struct Input {
 };
 
 ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b0);
-ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b1);
 
 SamplerState TexSampler : register (s0);
 
@@ -68,14 +105,18 @@ Output main(const in Input input) {
 
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
 	
-	// Clamp the view space position to the plane at Z = 1
-	const float3 viewRay = float3(input.mViewRayV.xy / input.mViewRayV.z, 1.0f);
-
 	// Sample the depth and convert to linear view space Z (assume it gets sampled as
 	// a floating point value of the range [0,1])
 	const float depth = Depth.Load(screenCoord);
-	const float linearDepth = gImmutableCBuffer.mProjectionA_ProjectionB.y / (depth - gImmutableCBuffer.mProjectionA_ProjectionB.x);
-	const float3 geomPosV = viewRay * linearDepth;
+	const float depthV = NdcDepthToViewDepth(depth, gFrameCBuffer.mP);
+
+	//
+	// Reconstruct full view space position (x,y,z).
+	// Find t such that p = t * ViewRayV.
+	// p.z = t * ViewRayV.z
+	// t = p.z / ViewRayV.z
+	//
+	const float3 geomPosV = (depthV / input.mViewRayV.z) * input.mViewRayV;
 
 	// Get normal
 	const float2 normal = Normal_Smoothness.Load(screenCoord).xy;
@@ -90,28 +131,49 @@ Output main(const in Input input) {
 	const float3 bitangentV = cross(normalV, tangentV);
 	const float3x3 tbn = float3x3(tangentV, bitangentV, normalV);
 	
-	float occlusion = 0.0f;
+	float occlusionSum = 0.0f;
 	for (uint i = 0U; i < SAMPLE_KERNEL_SIZE; ++i) {
-		// Get sample position:
-		float3 samplePos = kernelArr[i];//mul(SampleKernel[i], tbn);
-		samplePos = samplePos * RADIUS + geomPosV;
+		// Sample a point near geomPosV within the occlusion radius.
+		const float3 sampleV = geomPosV + UnmapF1(SampleKernel[i]) * OCCLUSION_RADIUS;
 
-		// Project sample position:
-		float4 offset = float4(samplePos, 1.0f);
-		offset = mul(offset, gFrameCBuffer.mP);
-		offset.xy /= offset.w;
-		offset.xy = offset.xy * 0.5f + float2(0.5f, 0.5f);
+		// Project sample
+		float4 sampleH = mul(float4(sampleV, 1.0f), gFrameCBuffer.mP);
+		sampleH /= sampleH.w;
 
-		// Get sample depth:
-		float sampleDepth = Depth.Load(float3(offset.xy, 0));
-		sampleDepth = gImmutableCBuffer.mProjectionA_ProjectionB.y / (sampleDepth - gImmutableCBuffer.mProjectionA_ProjectionB.x);
+		// Find the nearest depth value along the ray from the eye to q (this is not
+		// the depth of q, as q is just an arbitrary point near p and might
+		// occupy empty space).  To find the nearest depth we look it up in the depthmap.
 
-		// range check & accumulate:
-		const float rangeCheck = abs(geomPosV.z - sampleDepth) < RADIUS ? 1.0 : 0.0;
-		occlusion += (sampleDepth <= samplePos.z ? 1.0 : 0.0) * rangeCheck;
+		float sampleDepthV = Depth.Load(float3(sampleH.xy, 0));
+		sampleDepthV = NdcDepthToViewDepth(sampleDepthV, gFrameCBuffer.mP);
+
+		// Reconstruct full view space position r = (rx,ry,rz).  We know r
+		// lies on the ray of q, so there exists a t such that r = t*q.
+		// r.z = t*q.z ==> t = r.z / q.z
+
+		float3 r = (sampleDepthV / sampleV.z) * sampleV;
+
+		//
+		// Test whether r occludes p.
+		//   * The product dot(n, normalize(r - p)) measures how much in front
+		//     of the plane(p,n) the occluder point r is.  The more in front it is, the
+		//     more occlusion weight we give it.  This also prevents self shadowing where 
+		//     a point r on an angled plane (p,n) could give a false occlusion since they
+		//     have different depth values with respect to the eye.
+		//   * The weight of the occlusion is scaled based on how far the occluder is from
+		//     the point we are computing the occlusion of.  If the occluder r is far away
+		//     from p, then it does not occlude it.
+		// 
+
+		float distZ = geomPosV.z - r.z;
+		float dp = max(dot(normalV, normalize(r - geomPosV)), 0.0f);
+
+		float occlusion = dp*OcclusionFunction(distZ);
+
+		occlusionSum += occlusion;
 	}
 
-	output.mAccessibility = 1.0f - (occlusion / SAMPLE_KERNEL_SIZE);
+	output.mAccessibility = 1.0f - (occlusionSum / SAMPLE_KERNEL_SIZE);
 
 	return output;
 }

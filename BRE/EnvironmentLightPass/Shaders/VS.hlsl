@@ -18,7 +18,8 @@ Output main(in const Input input) {
 	Output output;
 	 
 	output.mPosH = float4(input.mPosH, 1.0f);
-	output.mViewRayV = mul(output.mPosH, gFrameCBuffer.mInvP).xyz;
+	const float4 ph = mul(output.mPosH, gFrameCBuffer.mInvP);
+	output.mViewRayV = ph.xyz / ph.w;
 	
 	return output;
 }

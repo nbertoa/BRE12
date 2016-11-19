@@ -42,7 +42,7 @@ public:
 	void Init(
 		ID3D12Device& device,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
-		CommandListExecutor& cmdListProcessor,
+		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue) noexcept;
 	
 	// Get geometry buffers
@@ -56,7 +56,7 @@ private:
 
 	void ExecuteBeginTask() noexcept;
 
-	CommandListExecutor* mCmdListProcessor{ nullptr };
+	CommandListExecutor* mCmdListExecutor{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	

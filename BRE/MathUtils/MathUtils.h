@@ -105,6 +105,16 @@ public:
     static DirectX::XMVECTOR RandUnitVec3() noexcept;
     static DirectX::XMVECTOR RandHemisphereUnitVec3(DirectX::XMVECTOR n) noexcept;
 
+	// Map vector from [-1.0f, 1.0f] to [0.0f, 1.0f]
+	static DirectX::XMFLOAT3 MapF1(const DirectX::XMFLOAT3& n) noexcept {
+		return DirectX::XMFLOAT3(n.x * 0.5f + 0.5f, n.y * 0.5f + 0.5f, n.z * 0.5f + 0.5f);
+	}
+
+	// Unmap vector from [0.0f, 1.0f] to [-1.0f, 1.0f]
+	static DirectX::XMFLOAT3 UnmapF1(const DirectX::XMFLOAT3& n) noexcept {
+		return DirectX::XMFLOAT3(n.x * 2.0f - 1.0f, n.y * 2.0f - 1.0f, n.z * 2.0f - 1.0f);
+	}
+
 	static const float Infinity;
 	static const float Pi;
 };

@@ -15,11 +15,13 @@ namespace {
 	void CreateCommandObjects(
 		ID3D12CommandAllocator* cmdAllocsBegin[Settings::sQueuedFrameCount],
 		ID3D12CommandAllocator* cmdAllocsEnd[Settings::sQueuedFrameCount],
-		ID3D12GraphicsCommandList* &cmdList,
+		ID3D12GraphicsCommandList* &cmdListBegin,
+		ID3D12GraphicsCommandList* &cmdListEnd,
 		ID3D12Fence* &fence) noexcept {
 
 		ASSERT(Settings::sQueuedFrameCount > 0U);
-		ASSERT(cmdList == nullptr);
+		ASSERT(cmdListBegin == nullptr);
+		ASSERT(cmdListEnd == nullptr);
 
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
@@ -29,8 +31,12 @@ namespace {
 			ASSERT(cmdAllocsEnd[i] == nullptr);
 			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsEnd[i]);
 		}
-		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocsBegin[0], cmdList);
-		cmdList->Close();
+
+		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocsBegin[0], cmdListBegin);
+		cmdListBegin->Close();
+
+		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocsEnd[0], cmdListEnd);
+		cmdListEnd->Close();
 
 		ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, fence);
 	}
@@ -114,8 +120,8 @@ namespace {
 
 void AmbientLightPass::Init(
 	ID3D12Device& device,
+	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	ID3D12Resource& baseColorMetalMaskBuffer,
 	ID3D12Resource& normalSmoothnessBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
@@ -125,22 +131,23 @@ void AmbientLightPass::Init(
 	ASSERT(ValidateData() == false);
 
 	mCmdQueue = &cmdQueue;
+	mCmdListExecutor = &cmdListExecutor;
 	
-	CreateCommandObjects(mCmdAllocsBegin, mCmdAllocsEnd, mCmdList, mFence);
+	CreateCommandObjects(mCmdAllocsBegin, mCmdAllocsEnd, mCmdListBegin, mCmdListEnd, mFence);
 
-	CHECK_HR(mCmdList->Reset(mCmdAllocsBegin[0U], nullptr));
+	CHECK_HR(mCmdListBegin->Reset(mCmdAllocsBegin[0U], nullptr));
 	
 	// Create model for a full screen quad geometry. 
 	Model* model;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	ModelManager::Get().CreateFullscreenQuad(model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
+	ModelManager::Get().CreateFullscreenQuad(model, *mCmdListBegin, uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
 
 	// Get vertex and index buffers data from the only mesh this model must have.
 	ASSERT(model->Meshes().size() == 1UL);
 	const Mesh& mesh = model->Meshes()[0U];
-	ExecuteCommandList(*mCmdQueue, *mCmdList, *mFence);
+	ExecuteCommandList(*mCmdQueue, *mCmdListBegin, *mFence);
 
 	// Initialize recorder's PSO
 	AmbientLightCmdListRecorder::InitPSO();
@@ -154,7 +161,7 @@ void AmbientLightPass::Init(
 		mDescHeap);
 	
 	// Initialize ambient occlusion recorder
-	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder(device, cmdListQueue));
+	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
 	mAmbientOcclusionRecorder->Init(
 		mesh.VertexBufferData(),
 		mesh.IndexBufferData(),
@@ -164,7 +171,7 @@ void AmbientLightPass::Init(
 		depthBufferCpuDesc);
 
 	// Initialize ambient light recorder
-	mAmbientLightRecorder.reset(new AmbientLightCmdListRecorder(device, cmdListQueue));
+	mAmbientLightRecorder.reset(new AmbientLightCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
 	mAmbientLightRecorder->Init(
 		mesh.VertexBufferData(), 
 		mesh.IndexBufferData(), 
@@ -180,10 +187,18 @@ void AmbientLightPass::Init(
 void AmbientLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(ValidateData());
 
+	const std::uint32_t taskCount{ 4U };
+	mCmdListExecutor->ResetExecutedCmdListCount();
+
 	ExecuteBeginTask();
 	mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
 	ExecuteEndingTask();
-	mAmbientLightRecorder->RecordAndPushCommandLists();		
+	mAmbientLightRecorder->RecordAndPushCommandLists();
+
+	// Wait until all previous tasks command lists are executed
+	while (mCmdListExecutor->ExecutedCmdListCount() < taskCount) {
+		Sleep(0U);
+	}
 }
 
 bool AmbientLightPass::ValidateData() const noexcept {
@@ -201,13 +216,15 @@ bool AmbientLightPass::ValidateData() const noexcept {
 
 	const bool b =
 		mCmdQueue != nullptr &&
-		mCmdList != nullptr &&
+		mCmdListBegin != nullptr &&
+		mCmdListEnd != nullptr &&
 		mFence != nullptr &&
 		mAmbientOcclusionRecorder.get() != nullptr &&
 		mAmbientLightRecorder.get() != nullptr &&
 		mAmbientAccessibilityBuffer.Get() != nullptr &&
 		mAmbientAccessibilityBufferRTCpuDescHandle.ptr != 0UL &&
-		mDescHeap != nullptr;
+		mDescHeap != nullptr &&
+		mCmdListExecutor != nullptr;
 
 	return b;
 }
@@ -218,11 +235,11 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };
 
-	ID3D12CommandAllocator* cmdAllocBegin{ mCmdAllocsBegin[cmdAllocIndex] };
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocsBegin[cmdAllocIndex] };
 	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocsBegin);
 
-	CHECK_HR(cmdAllocBegin->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAllocBegin, nullptr));
+	CHECK_HR(cmdAlloc->Reset());
+	CHECK_HR(mCmdListBegin->Reset(cmdAlloc, nullptr));
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
@@ -230,18 +247,14 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 	};
 	const std::uint32_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == 1UL);
-	mCmdList->ResourceBarrier(barriersCount, barriers);
+	mCmdListBegin->ResourceBarrier(barriersCount, barriers);
 
 	// Clear render targets
 	float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	mCmdList->ClearRenderTargetView(mAmbientAccessibilityBufferRTCpuDescHandle, clearColor, 0U, nullptr);
-	CHECK_HR(mCmdList->Close());
+	mCmdListBegin->ClearRenderTargetView(mAmbientAccessibilityBufferRTCpuDescHandle, clearColor, 0U, nullptr);
+	CHECK_HR(mCmdListBegin->Close());
 
-	// Execute preliminary task
-	{
-		ID3D12CommandList* cmdLists[] = { mCmdList };
-		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
-	}
+	mCmdListExecutor->CmdListQueue().push(mCmdListBegin);
 }
 
 void AmbientLightPass::ExecuteEndingTask() noexcept {
@@ -250,12 +263,12 @@ void AmbientLightPass::ExecuteEndingTask() noexcept {
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };
 
-	ID3D12CommandAllocator* cmdAllocEnd{ mCmdAllocsEnd[cmdAllocIndex] };
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocsEnd[cmdAllocIndex] };
 	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocsBegin);
 
 	// Prepare end task
-	CHECK_HR(cmdAllocEnd->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAllocEnd, nullptr));
+	CHECK_HR(cmdAlloc->Reset());
+	CHECK_HR(mCmdListEnd->Reset(cmdAlloc, nullptr));
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER endBarriers[]{
@@ -263,12 +276,8 @@ void AmbientLightPass::ExecuteEndingTask() noexcept {
 	};
 	const std::uint32_t barriersCount = _countof(endBarriers);
 	ASSERT(barriersCount == 1UL);
-	mCmdList->ResourceBarrier(barriersCount, endBarriers);
-	CHECK_HR(mCmdList->Close());
+	mCmdListEnd->ResourceBarrier(barriersCount, endBarriers);
+	CHECK_HR(mCmdListEnd->Close());
 
-	// Execute end task
-	{
-		ID3D12CommandList* cmdLists[] = { mCmdList };
-		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
-	}
+	mCmdListExecutor->CmdListQueue().push(mCmdListEnd);
 }

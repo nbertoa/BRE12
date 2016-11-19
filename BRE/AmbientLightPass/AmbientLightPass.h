@@ -6,6 +6,7 @@
 #include <AmbientLightPass\AmbientLightCmdListRecorder.h>
 #include <AmbientLightPass\AmbientOcclusionCmdListRecorder.h>
 
+class CommandListExecutor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12CommandAllocator;
 struct ID3D12CommandList;
@@ -27,8 +28,8 @@ public:
 	// You should call this method before Execute()
 	void Init(
 		ID3D12Device& device,
+		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		ID3D12Resource& normalSmoothnessBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
@@ -50,7 +51,8 @@ private:
 	ID3D12CommandAllocator* mCmdAllocsBegin[Settings::sQueuedFrameCount]{ nullptr };
 	ID3D12CommandAllocator* mCmdAllocsEnd[Settings::sQueuedFrameCount]{ nullptr };
 
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+	ID3D12GraphicsCommandList* mCmdListBegin{ nullptr };
+	ID3D12GraphicsCommandList* mCmdListEnd{ nullptr };
 
 	ID3D12Fence* mFence{ nullptr };
 
@@ -61,4 +63,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRTCpuDescHandle{ 0UL };
 	ID3D12DescriptorHeap* mDescHeap{ nullptr };
+
+	CommandListExecutor* mCmdListExecutor{ nullptr };
 };

@@ -63,7 +63,6 @@ private:
 	std::uint32_t mCurrFrameIndex{ 0U };
 
 	ID3D12DescriptorHeap* mCbvSrvUavDescHeap{ nullptr };
-	UploadBuffer* mImmutableCBuffer{ nullptr };
 	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
 
 	BufferCreator::VertexBufferData mVertexBufferData;

@@ -23,9 +23,8 @@ public:
 	// You should call this method after filling recorder and before Execute()
 	void Init(
 		ID3D12Device& device,
-		CommandListExecutor& cmdListProcessor,
+		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		ID3D12Resource& skyBoxCubeMap,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
@@ -36,7 +35,7 @@ private:
 	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
 	
-	CommandListExecutor* mCmdListProcessor{ nullptr };
+	CommandListExecutor* mCmdListExecutor{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc{ nullptr };
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 

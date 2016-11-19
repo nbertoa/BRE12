@@ -66,7 +66,6 @@ private:
 	std::uint32_t mNumSamples{ 0U };
 
 	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
-	UploadBuffer* mImmutableCBuffer{ nullptr };
 
 	UploadBuffer* mSampleKernelBuffer{ nullptr };
 	D3D12_GPU_DESCRIPTOR_HANDLE mSampleKernelBufferGpuDescHandleBegin{ 0UL };

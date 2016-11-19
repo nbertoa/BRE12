@@ -61,9 +61,8 @@ namespace {
 
 void SkyBoxPass::Init(
 	ID3D12Device& device,
-	CommandListExecutor& cmdListProcessor,
+	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	ID3D12Resource& skyBoxCubeMap,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
@@ -71,7 +70,7 @@ void SkyBoxPass::Init(
 	ASSERT(ValidateData() == false);
 
 	CreateCommandObjects(mCmdAlloc, mCmdList, mFence);
-	mCmdListProcessor = &cmdListProcessor;
+	mCmdListExecutor = &cmdListExecutor;
 
 	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
 
@@ -95,7 +94,7 @@ void SkyBoxPass::Init(
 	SkyBoxCmdListRecorder::InitPSO();
 
 	// Initialize recorder
-	mRecorder.reset(new SkyBoxCmdListRecorder(device, cmdListQueue));
+	mRecorder.reset(new SkyBoxCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
 	mRecorder->Init(
 		mesh.VertexBufferData(),
 		mesh.IndexBufferData(), 
@@ -110,18 +109,18 @@ void SkyBoxPass::Init(
 void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 	ASSERT(ValidateData());
 
-	mCmdListProcessor->ResetExecutedCmdListCount();
+	mCmdListExecutor->ResetExecutedCmdListCount();
 	mRecorder->RecordAndPushCommandLists(frameCBuffer);
 
 	// Wait until all previous tasks command lists are executed
-	while (mCmdListProcessor->ExecutedCmdListCount() < 1U) {
+	while (mCmdListExecutor->ExecutedCmdListCount() < 1U) {
 		Sleep(0U);
 	}
 }
 
 bool SkyBoxPass::ValidateData() const noexcept {
 	const bool b =
-		mCmdListProcessor != nullptr &&
+		mCmdListExecutor != nullptr &&
 		mRecorder.get() != nullptr &&
 		mCmdAlloc != nullptr &&
 		mCmdList != nullptr &&

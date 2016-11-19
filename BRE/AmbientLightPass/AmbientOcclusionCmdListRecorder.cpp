@@ -13,8 +13,7 @@
 // Root Signature:
 // "CBV(b0, visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Frame CBuffer
 // "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 1 -> Frame CBuffer
-// "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Immutable CBuffer
-// "DescriptorTable(SRV(t0), SRV(t1), SRV(t2), SRV(t3), visibility = SHADER_VISIBILITY_PIXEL)" 3 -> normal_smoothness + depth + sample kernel + kernel noise
+// "DescriptorTable(SRV(t0), SRV(t1), SRV(t2), SRV(t3), visibility = SHADER_VISIBILITY_PIXEL)" 2 -> normal_smoothness + depth + sample kernel + kernel noise
 
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
@@ -72,6 +71,9 @@ namespace {
 			scale = MathUtils::Lerp(0.1f, 1.0f, scale * scale);
 			vec = DirectX::XMVectorScale(vec, scale);
 			DirectX::XMStoreFloat3(&elem, vec);
+
+			// Map vector from [-1.0f, 1.0f] to [0.0f, 1.0f]
+			elem = MathUtils::MapF1(elem);
 		}
 	}
 
@@ -183,11 +185,9 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 	// Set root parameters
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
-	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootConstantBufferView(2U, immutableCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(3U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
+	mCmdList->SetGraphicsRootDescriptorTable(2U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
 
 	// Draw object
 	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
@@ -219,7 +219,6 @@ bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
 		mCmdList != nullptr &&
 		mCbvSrvUavDescHeap != nullptr &&
 		mNumSamples != 0U &&
-		mImmutableCBuffer != nullptr &&
 		mSampleKernelBuffer != nullptr &&
 		mSampleKernelBufferGpuDescHandleBegin.ptr != 0UL &&
 		mAmbientAccessBufferCpuDesc.ptr != 0UL &&
@@ -273,12 +272,6 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	CHECK_HR(res->Map(0, nullptr, reinterpret_cast<void**>(&data)));
 	memcpy(data, kernelNoise, sizeof(DirectX::XMFLOAT3) * mNumSamples);
 	res->Unmap(0, nullptr);*/
-
-	// Create immutable cbuffer
-	const std::size_t immutableCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ImmutableCBuffer)) };
-	ResourceManager::Get().CreateUploadBuffer(immutableCBufferElemSize, 1U, mImmutableCBuffer);
-	ImmutableCBuffer immutableCBuffer;
-	mImmutableCBuffer->CopyData(0U, &immutableCBuffer, sizeof(immutableCBuffer));
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };

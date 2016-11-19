@@ -30,9 +30,8 @@ public:
 	// You should call this method before Execute()
 	void Init(
 		ID3D12Device& device,
-		CommandListExecutor& cmdListProcessor,
+		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		ID3D12Resource& colorBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
@@ -48,7 +47,7 @@ private:
 		ID3D12Resource& frameBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
 
-	CommandListExecutor* mCmdListProcessor{ nullptr };
+	CommandListExecutor* mCmdListExecutor{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	

@@ -11,7 +11,6 @@
 // Root Signature:
 // "CBV(b0, visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Frame CBuffer
 // "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 1 -> Frame CBuffer
-// "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Immutable CBuffer
 // "DescriptorTable(SRV(t0), SRV(t1), SRV(t2), SRV(t3), SRV(t4), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Textures 
 
 namespace {
@@ -125,9 +124,7 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	const D3D12_GPU_VIRTUAL_ADDRESS immutableBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootConstantBufferView(2U, immutableBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(3U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
+	mCmdList->SetGraphicsRootDescriptorTable(2U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
 
 	// Draw object
 	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
@@ -159,7 +156,6 @@ bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		mCmdList != nullptr &&
 		mCbvSrvUavDescHeap != nullptr &&
-		mImmutableCBuffer != nullptr &&
 		mCubeMapsBufferGpuDescHandleBegin.ptr != 0UL &&
 		mColorBufferCpuDesc.ptr != 0UL &&
 		mDepthBufferCpuDesc.ptr != 0UL;
@@ -208,12 +204,6 @@ void EnvironmentLightCmdListRecorder::BuildBuffers(
 	srvDesc.Format = Settings::sDepthStencilSRVFormat;
 	srvDesc.Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
 	ResourceManager::Get().CreateShaderResourceView(depthBuffer, srvDesc, cpuDesc);
-
-	// Create immutable cbuffer
-	const std::size_t immutableCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ImmutableCBuffer)) };
-	ResourceManager::Get().CreateUploadBuffer(immutableCBufferElemSize, 1U, mImmutableCBuffer);
-	ImmutableCBuffer immutableCBuffer;
-	mImmutableCBuffer->CopyData(0U, &immutableCBuffer, sizeof(immutableCBuffer));
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };

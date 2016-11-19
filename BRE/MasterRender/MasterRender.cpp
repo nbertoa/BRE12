@@ -136,8 +136,8 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 	mCamera.SetLens(Settings::sFieldOfView, Settings::AspectRatio(), Settings::sNearPlaneZ, Settings::sFarPlaneZ);
 
 	// Create and spawn command list processor thread.
-	mCmdListProcessor = CommandListExecutor::Create(mCmdQueue, MAX_NUM_CMD_LISTS);
-	ASSERT(mCmdListProcessor != nullptr);
+	mCmdListExecutor = CommandListExecutor::Create(mCmdQueue, MAX_NUM_CMD_LISTS);
+	ASSERT(mCmdListExecutor != nullptr);
 	
 	InitPasses(scene);
 
@@ -153,7 +153,7 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 	
 	// Generate recorders for all the passes
 	scene->GenerateGeomPassRecorders(mGeometryPass.GetRecorders());
-	mGeometryPass.Init(mDevice, DepthStencilCpuDesc(), *mCmdListProcessor, *mCmdQueue);
+	mGeometryPass.Init(mDevice, DepthStencilCpuDesc(), *mCmdListExecutor, *mCmdQueue);
 
 	ID3D12Resource* skyBoxCubeMap;
 	ID3D12Resource* diffuseIrradianceCubeMap;
@@ -171,9 +171,8 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 
 	mLightingPass.Init(
 		mDevice, 
-		*mCmdListProcessor,
+		*mCmdListExecutor,
 		*mCmdQueue, 
-		mCmdListProcessor->CmdListQueue(),
 		mGeometryPass.GetBuffers(),
 		GeometryPass::BUFFERS_COUNT,
 		*mDepthStencilBuffer,
@@ -184,18 +183,16 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 
 	mSkyBoxPass.Init(
 		mDevice, 
-		*mCmdListProcessor, 
+		*mCmdListExecutor, 
 		*mCmdQueue, 
-		mCmdListProcessor->CmdListQueue(), 
 		*skyBoxCubeMap, 
 		mColorBufferRTVCpuDescHandle, 
 		DepthStencilCpuDesc());
 
 	mToneMappingPass.Init(
 		mDevice, 
-		*mCmdListProcessor,
+		*mCmdListExecutor,
 		*mCmdQueue, 
-		mCmdListProcessor->CmdListQueue(), 
 		*mColorBuffer.Get(), 
 		DepthStencilCpuDesc());
 		
@@ -216,7 +213,7 @@ tbb::task* MasterRender::execute() {
 		mTimer.Tick();
 
 		UpdateCamera(mCamera, mTimer.DeltaTime(), mFrameCBuffer);
-		ASSERT(mCmdListProcessor->IsIdle());
+		ASSERT(mCmdListExecutor->IsIdle());
 
 		// Execute passes
 		mGeometryPass.Execute(mFrameCBuffer);
@@ -230,7 +227,7 @@ tbb::task* MasterRender::execute() {
 
 	// If we need to terminate, then we terminates command list processor
 	// and waits until all GPU command lists are properly executed.
-	mCmdListProcessor->Terminate();
+	mCmdListExecutor->Terminate();
 	FlushCommandQueue();
 
 	return nullptr;
@@ -293,7 +290,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
 	D3D12_CLEAR_VALUE clearValue = {};
-	clearValue.Format = DXGI_FORMAT_D32_FLOAT;
+	clearValue.Format = Settings::sDepthStencilViewFormat;
 	clearValue.DepthStencil.Depth = 1.0f;
 	clearValue.DepthStencil.Stencil = 0U;
 
