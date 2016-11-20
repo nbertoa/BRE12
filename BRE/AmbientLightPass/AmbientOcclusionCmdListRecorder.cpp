@@ -43,9 +43,9 @@ namespace {
 	// Sample kernel for ambient occlusion. The requirements are that:
 	// - Sample positions fall within the unit hemisphere
 	// - Sample positions are more densely clustered towards the origin.
-	//   This effectuvely attenuates the occlusion contribution'
-	//   according to distnace from the kernel centre - samples closer
-	//   to a point occlude it more than samples further away.
+	//   This effectively attenuates the occlusion contribution
+	//   according to distance from the kernel centre (samples closer
+	//   to a point occlude it more than samples further away).
 	void GenerateSampleKernel(const std::uint32_t numSamples, std::vector<DirectX::XMFLOAT3>& kernels) {
 		ASSERT(numSamples > 0U);
 
@@ -60,7 +60,7 @@ namespace {
 			// oriented along the z axis
 			const float x = MathUtils::RandF(-1.0f, 1.0f);
 			const float y = MathUtils::RandF(-1.0f, 1.0f);
-			const float z = MathUtils::RandF(0.0f, 1.0f);
+			const float z = MathUtils::RandF(-1.0f, 1.0f);
 			elem = DirectX::XMFLOAT3(x, y, z);
 			vec = DirectX::XMLoadFloat3(&elem);
 			vec = DirectX::XMVector3Normalize(vec);
@@ -71,9 +71,6 @@ namespace {
 			scale = MathUtils::Lerp(0.1f, 1.0f, scale * scale);
 			vec = DirectX::XMVectorScale(vec, scale);
 			DirectX::XMStoreFloat3(&elem, vec);
-
-			// Map vector from [-1.0f, 1.0f] to [0.0f, 1.0f]
-			elem = MathUtils::MapF1(elem);
 		}
 	}
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <d3d12.h>
+#include <mutex>
 #include <tbb/concurrent_hash_map.h>
-#include <tbb/mutex.h>
 #include <wrl.h>
 
 // This class is responsible to create/get/erase:
@@ -53,5 +53,5 @@ private:
 	using CmdAllocById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12CommandAllocator>>;
 	CmdAllocById mCmdAllocById;
 
-	tbb::mutex mMutex;
+	std::mutex mMutex;
 };

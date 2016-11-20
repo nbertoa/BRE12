@@ -2,8 +2,8 @@
 
 #include <d3d12.h>
 #include <memory>
+#include <mutex>
 #include <tbb\concurrent_hash_map.h>
-#include <tbb/mutex.h>
 #include <wrl.h>
 
 #include <ModelManager/Model.h>
@@ -123,5 +123,5 @@ private:
 	using ModelById = tbb::concurrent_hash_map<std::size_t, std::unique_ptr<Model>>;
 	ModelById mModelById;
 
-	tbb::mutex mMutex;
+	std::mutex mMutex;
 };

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <d3d12.h>
+#include <mutex>
 #include <tbb/concurrent_hash_map.h>
-#include <tbb/mutex.h>
 #include <wrl.h>
 
 #include <ResourceManager/UploadBuffer.h>
@@ -96,5 +96,5 @@ private:
 	using FenceById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12Fence>>;
 	FenceById mFenceById;
 
-	tbb::mutex mMutex;
+	std::mutex mMutex;
 };

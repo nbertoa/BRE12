@@ -1,8 +1,8 @@
 #pragma once
 
 #include <d3d12.h>
+#include <mutex>
 #include <tbb\concurrent_hash_map.h>
-#include <tbb/mutex.h>
 #include <wrl.h>
 
 // This class is responsible to create/get/erase root signatures
@@ -38,5 +38,5 @@ private:
 	using RootSignatureById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12RootSignature>>;
 	RootSignatureById mRootSignatureById;
 
-	tbb::mutex mMutex;
+	std::mutex mMutex;
 };

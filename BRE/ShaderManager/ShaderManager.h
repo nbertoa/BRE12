@@ -2,8 +2,8 @@
 
 #include <d3d12.h>
 #include <D3Dcommon.h>
+#include <mutex>
 #include <tbb\concurrent_hash_map.h>
-#include <tbb/mutex.h>
 #include <wrl.h>
 
 // This class is responsible to create/get/erase shaders
@@ -38,5 +38,5 @@ private:
 	using BlobById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3DBlob>>;
 	BlobById mBlobById;
 
-	tbb::mutex mMutex;
+	std::mutex mMutex;
 };

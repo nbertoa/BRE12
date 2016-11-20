@@ -3,10 +3,10 @@
 
 #define SAMPLE_KERNEL_SIZE 128U
 #define NOISE_SCALE float2(1920.0f / 4.0f, 1080.0f / 4.0f)
-#define OCCLUSION_RADIUS 10000.5f
+#define OCCLUSION_RADIUS 50.5f
 #define SURFACE_EPSILON 0.05f
 #define OCCLUSION_FADE_START 0.2f
-#define OCCLUSION_FADE_END 10000000.0f
+#define OCCLUSION_FADE_END OCCLUSION_RADIUS
 
 // Determines how much the sample point q occludes the point p as a function
 // of distZ.
@@ -103,6 +103,24 @@ Output main(const in Input input) {
 		float3(-0.842130244, -0.0892825574, 0.0),
 	};
 
+	float4 offsetVec[14] = {
+		float4(1, 1, 1, 0),
+		float4(-1, -1, -1, 0),
+		float4(-1, 1, 1, 0),
+		float4(1, -1, -1, 0),
+		float4(1, 1, -1, 0),
+		float4(-1, -1, 1, 0),
+		float4(-1, 1, -1, 0),
+		float4(1, -1, 1, 0),
+		
+		float4(-1, 0, 0, 0),
+		float4(1, 0, 0, 0),
+		float4(0, -1, 0, 0),
+		float4(0, 1, 0, 0),
+		float4(0, 0, -1, 0),
+		float4(0, 0, 1, 0),
+	};
+
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
 	
 	// Sample the depth and convert to linear view space Z (assume it gets sampled as
@@ -133,8 +151,13 @@ Output main(const in Input input) {
 	
 	float occlusionSum = 0.0f;
 	for (uint i = 0U; i < SAMPLE_KERNEL_SIZE; ++i) {
+		const uint offsetIndex = i % 14;
+		float3 offset = reflect(SampleKernel[i], offsetVec[offsetIndex].xyz);
+
+		float flip = sign(dot(offset, normalV));
+
 		// Sample a point near geomPosV within the occlusion radius.
-		const float3 sampleV = geomPosV + UnmapF1(SampleKernel[i]) * OCCLUSION_RADIUS;
+		const float3 sampleV = geomPosV + flip * offset * OCCLUSION_RADIUS;
 
 		// Project sample
 		float4 sampleH = mul(float4(sampleV, 1.0f), gFrameCBuffer.mP);
@@ -170,10 +193,16 @@ Output main(const in Input input) {
 
 		float occlusion = dp*OcclusionFunction(distZ);
 
+		const float rangeCheck = abs(geomPosV.z - sampleDepthV) < OCCLUSION_RADIUS ? 1.0 : 0.0;
+		//occlusionSum += (sampleDepthV <= sampleV.z ? 1.0 : 0.0) * rangeCheck;
+
 		occlusionSum += occlusion;
 	}
 
 	output.mAccessibility = 1.0f - (occlusionSum / SAMPLE_KERNEL_SIZE);
+
+	// Sharpen the contrast of the SSAO map to make the SSAO affect more dramatic.
+	output.mAccessibility =  saturate(pow(output.mAccessibility, 2.0f));
 
 	return output;
 }
