@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 
 #include <CommandManager/CommandManager.h>
+#include <DescriptorManager\DescriptorManager.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ResourceManager/UploadBuffer.h>
@@ -116,7 +117,8 @@ void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
-	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
+	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 
 	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDescHandle(mObjectCBufferGpuDescHandleBegin);
@@ -160,7 +162,6 @@ bool SkyBoxCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		mCmdList != nullptr &&
-		mCbvSrvUavDescHeap != nullptr &&
 		mObjectCBuffer != nullptr &&
 		mObjectCBufferGpuDescHandleBegin.ptr != 0UL &&
 		mCubeMapBufferGpuDescHandleBegin.ptr != 0UL &&
@@ -171,8 +172,6 @@ bool SkyBoxCmdListRecorder::ValidateData() const noexcept {
 }
 
 void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
-
-	ASSERT(mCbvSrvUavDescHeap == nullptr);
 #ifdef _DEBUG
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ASSERT(mFrameCBuffer[i] == nullptr);
@@ -180,18 +179,9 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
 #endif
 	ASSERT(mObjectCBuffer == nullptr);
 
-	// Create CBV_SRV_UAV cbuffer descriptor heap
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = 2; // 1 obj cbuffer + 1 cube map texture
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
-
 	// Create object cbuffer and fill it
 	const std::size_t objCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ObjectCBuffer)) };
 	ResourceManager::Get().CreateUploadBuffer(objCBufferElemSize, 1U, mObjectCBuffer);
-	mObjectCBufferGpuDescHandleBegin = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart();
 	ObjectCBuffer objCBuffer;
 	const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&mWorldMatrix));
 	DirectX::XMStoreFloat4x4(&objCBuffer.mWorld, wMatrix);
@@ -206,8 +196,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
 	const D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->Resource()->GetGPUVirtualAddress() };
 	cBufferDesc.BufferLocation = objCBufferGpuAddress;
 	cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(objCBufferElemSize);
-	const D3D12_CPU_DESCRIPTOR_HANDLE objCBufferDescHandle(mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart());
-	ResourceManager::Get().CreateConstantBufferView(cBufferDesc, objCBufferDescHandle);
+	mObjectCBufferGpuDescHandleBegin = DescriptorManager::Get().CreateConstantBufferView(cBufferDesc);
 
 	// Create cube map texture descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -217,8 +206,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
 	srvDesc.TextureCube.MipLevels = cubeMap.GetDesc().MipLevels;
 	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
 	srvDesc.Format = cubeMap.GetDesc().Format;
-	const D3D12_CPU_DESCRIPTOR_HANDLE cubeMapBufferDescHandle{ mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + descHandleIncSize };
-	ResourceManager::Get().CreateShaderResourceView(cubeMap, srvDesc, cubeMapBufferDescHandle);
+	mCubeMapBufferGpuDescHandleBegin = DescriptorManager::Get().CreateShaderResourceView(cubeMap, srvDesc);
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };

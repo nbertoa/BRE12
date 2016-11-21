@@ -3,8 +3,8 @@
 #include <DirectXMath.h>
 
 #include <CommandManager/CommandManager.h>
+#include <DescriptorManager\DescriptorManager.h>
 #include <PSOCreator/PSOCreator.h>
-#include <ResourceManager/ResourceManager.h>
 #include <Utils/DebugUtils.h>
 
 // Root Signature:
@@ -105,7 +105,8 @@ void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
-	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
+	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 	
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -113,7 +114,7 @@ void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	// Draw object
 	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
 	mCmdList->IASetIndexBuffer(&mIndexBufferData.mBufferView);
-	mCmdList->SetGraphicsRootDescriptorTable(0U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
+	mCmdList->SetGraphicsRootDescriptorTable(0U, mBaseColor_MetalMaskGpuDescHandle);
 	mCmdList->DrawIndexedInstanced(mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
 
 	mCmdList->Close();
@@ -134,10 +135,10 @@ bool AmbientLightCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		mCmdList != nullptr &&
-		mCbvSrvUavDescHeap != nullptr &&
 		mColorBufferCpuDesc.ptr != 0UL &&
 		mAmbientAccessibilityBufferRTCpuDesc.ptr != 0UL &&
-		mDepthBufferCpuDesc.ptr != 0UL;
+		mDepthBufferCpuDesc.ptr != 0UL && 
+		mBaseColor_MetalMaskGpuDescHandle.ptr != 0UL;
 
 	return result;
 }
@@ -146,15 +147,7 @@ void AmbientLightCmdListRecorder::BuildBuffers(
 	ID3D12Resource& baseColorMetalMaskBuffer, 
 	ID3D12Resource& ambientAccessibilityBuffer) noexcept {
 
-	ASSERT(mCbvSrvUavDescHeap == nullptr);
-
-	// Create CBV_SRV_UAV cbuffer descriptor heap
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = 2U; // 1 baseColor_metalMask buffer + 1 ambient accessibility buffer 
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
+	ASSERT(mBaseColor_MetalMaskGpuDescHandle.ptr == 0UL);
 	
 	// Create baseColor_metalMask buffer texture descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -164,8 +157,7 @@ void AmbientLightCmdListRecorder::BuildBuffers(
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDesc.Format = baseColorMetalMaskBuffer.GetDesc().Format;
 	srvDesc.Texture2D.MipLevels = baseColorMetalMaskBuffer.GetDesc().MipLevels;
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle = mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart();
-	ResourceManager::Get().CreateShaderResourceView(baseColorMetalMaskBuffer, srvDesc, cpuDescHandle);
+	mBaseColor_MetalMaskGpuDescHandle = DescriptorManager::Get().CreateShaderResourceView(baseColorMetalMaskBuffer, srvDesc);
 
 	// Create ambient accessibility buffer texture descriptor
 	srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
@@ -175,7 +167,5 @@ void AmbientLightCmdListRecorder::BuildBuffers(
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDesc.Format = ambientAccessibilityBuffer.GetDesc().Format;
 	srvDesc.Texture2D.MipLevels = ambientAccessibilityBuffer.GetDesc().MipLevels;
-	const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	cpuDescHandle.ptr += descHandleIncSize;
-	ResourceManager::Get().CreateShaderResourceView(ambientAccessibilityBuffer, srvDesc, cpuDescHandle);
+	DescriptorManager::Get().CreateShaderResourceView(ambientAccessibilityBuffer, srvDesc);
 }

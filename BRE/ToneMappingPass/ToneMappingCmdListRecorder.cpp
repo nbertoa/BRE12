@@ -3,8 +3,8 @@
 #include <DirectXMath.h>
 
 #include <CommandManager/CommandManager.h>
+#include <DescriptorManager\DescriptorManager.h>
 #include <PSOCreator/PSOCreator.h>
-#include <ResourceManager/ResourceManager.h>
 #include <Utils/DebugUtils.h>
 
 // Root Signature:
@@ -100,7 +100,8 @@ void ToneMappingCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &frameBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
-	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
+	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 	
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -108,7 +109,7 @@ void ToneMappingCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 	// Draw object
 	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
 	mCmdList->IASetIndexBuffer(&mIndexBufferData.mBufferView);
-	mCmdList->SetGraphicsRootDescriptorTable(0U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
+	mCmdList->SetGraphicsRootDescriptorTable(0U, mColorBufferGpuDescHandle);
 	mCmdList->DrawIndexedInstanced(mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
 
 	mCmdList->Close();
@@ -129,23 +130,13 @@ bool ToneMappingCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		mCmdList != nullptr &&
-		mCbvSrvUavDescHeap != nullptr &&
-		mDepthBufferCpuDesc.ptr != 0UL;
+		mDepthBufferCpuDesc.ptr != 0UL &&
+		mColorBufferGpuDescHandle.ptr != 0UL;
 
 	return result;
 }
 
 void ToneMappingCmdListRecorder::BuildBuffers(ID3D12Resource& colorBuffer) noexcept {
-	ASSERT(mCbvSrvUavDescHeap == nullptr);
-
-	// Create CBV_SRV_UAV cbuffer descriptor heap
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = 1U; // 1 color buffer
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
-	
 	// Create color buffer texture descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -154,5 +145,5 @@ void ToneMappingCmdListRecorder::BuildBuffers(ID3D12Resource& colorBuffer) noexc
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDesc.Format = colorBuffer.GetDesc().Format;
 	srvDesc.Texture2D.MipLevels = colorBuffer.GetDesc().MipLevels;
-	ResourceManager::Get().CreateShaderResourceView(colorBuffer, srvDesc, mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart());
+	mColorBufferGpuDescHandle = DescriptorManager::Get().CreateShaderResourceView(colorBuffer, srvDesc);
 }

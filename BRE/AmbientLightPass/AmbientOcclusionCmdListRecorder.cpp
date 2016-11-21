@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 
 #include <CommandManager/CommandManager.h>
+#include <DescriptorManager\DescriptorManager.h>
 #include <DXUtils\d3dx12.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
@@ -175,7 +176,8 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mAmbientAccessBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
-	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
+	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 	
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -184,7 +186,7 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(2U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
+	mCmdList->SetGraphicsRootDescriptorTable(2U, mPixelShaderBuffersGpuDescHandle);
 
 	// Draw object
 	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
@@ -214,12 +216,12 @@ bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		mCmdList != nullptr &&
-		mCbvSrvUavDescHeap != nullptr &&
 		mNumSamples != 0U &&
 		mSampleKernelBuffer != nullptr &&
 		mSampleKernelBufferGpuDescHandleBegin.ptr != 0UL &&
 		mAmbientAccessBufferCpuDesc.ptr != 0UL &&
-		mDepthBufferCpuDesc.ptr != 0UL;
+		mDepthBufferCpuDesc.ptr != 0UL &&
+		mPixelShaderBuffersGpuDescHandle.ptr != 0UL;
 
 	return result;
 }
@@ -230,7 +232,6 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	ID3D12Resource& normalSmoothnessBuffer,
 	ID3D12Resource& depthBuffer) noexcept {
 
-	ASSERT(mCbvSrvUavDescHeap == nullptr);
 #ifdef _DEBUG
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ASSERT(mFrameCBuffer[i] == nullptr);
@@ -262,9 +263,9 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	resDesc.SampleDesc.Quality = 0U;
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	resDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	ID3D12Resource* res{ nullptr };
+	ID3D12Resource* resource{ nullptr };
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, nullptr, res);
+	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, nullptr, resource);
 	/*std::uint8_t* data{ nullptr };
 	CHECK_HR(res->Map(0, nullptr, reinterpret_cast<void**>(&data)));
 	memcpy(data, kernelNoise, sizeof(DirectX::XMFLOAT3) * mNumSamples);
@@ -276,56 +277,46 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 
-	// Create CBV_SRV_UAV cbuffer descriptor heap
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = 4U; // normal_smoothness buffer + depth buffer + sample kernel buffer + kernel noise buffer
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc[4U]{};
+	ID3D12Resource* res[4] = {
+		&normalSmoothnessBuffer,
+		&depthBuffer,
+		mSampleKernelBuffer->Resource(),
+		&normalSmoothnessBuffer,
+	};
 
-	// Create normal_smoothness buffer texture descriptor
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc.Format = normalSmoothnessBuffer.GetDesc().Format;
-	srvDesc.Texture2D.MipLevels = normalSmoothnessBuffer.GetDesc().MipLevels;
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle = mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart();
-	ResourceManager::Get().CreateShaderResourceView(normalSmoothnessBuffer, srvDesc, cpuDescHandle);
+	// Fill normal_smoothness buffer texture descriptor
+	srvDesc[0].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc[0].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc[0].Texture2D.MostDetailedMip = 0;
+	srvDesc[0].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc[0].Format = normalSmoothnessBuffer.GetDesc().Format;
+	srvDesc[0].Texture2D.MipLevels = normalSmoothnessBuffer.GetDesc().MipLevels;
 	
-	// Create depth buffer descriptor
-	srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc.Format = Settings::sDepthStencilSRVFormat;
-	srvDesc.Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
-	const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	cpuDescHandle.ptr += descHandleIncSize;
-	ResourceManager::Get().CreateShaderResourceView(depthBuffer, srvDesc, cpuDescHandle);
+	// Fill depth buffer descriptor
+	srvDesc[1].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc[1].Texture2D.MostDetailedMip = 0;
+	srvDesc[1].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc[1].Format = Settings::sDepthStencilSRVFormat;
+	srvDesc[1].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
 
-	// Create sample kernel buffer descriptor
-	srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = mSampleKernelBuffer->Resource()->GetDesc().Format;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	srvDesc.Buffer.FirstElement = 0UL;
-	srvDesc.Buffer.NumElements = mNumSamples;
-	srvDesc.Buffer.StructureByteStride = sizeof(DirectX::XMFLOAT3);	
-	cpuDescHandle.ptr += descHandleIncSize;
-	ResourceManager::Get().CreateShaderResourceView(*mSampleKernelBuffer->Resource(), srvDesc, cpuDescHandle);
+	// Fill sample kernel buffer descriptor
+	srvDesc[2].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc[2].Format = mSampleKernelBuffer->Resource()->GetDesc().Format;
+	srvDesc[2].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	srvDesc[2].Buffer.FirstElement = 0UL;
+	srvDesc[2].Buffer.NumElements = mNumSamples;
+	srvDesc[2].Buffer.StructureByteStride = sizeof(DirectX::XMFLOAT3);
 
-	// Create kernel noise texture descriptor
-	srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc.Format = normalSmoothnessBuffer.GetDesc().Format;
-	srvDesc.Texture2D.MipLevels = normalSmoothnessBuffer.GetDesc().MipLevels;
-	cpuDescHandle.ptr += descHandleIncSize;
-	ResourceManager::Get().CreateShaderResourceView(normalSmoothnessBuffer, srvDesc, mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart());
+	// Fill kernel noise texture descriptor
+	srvDesc[3].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc[3].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc[3].Texture2D.MostDetailedMip = 0;
+	srvDesc[3].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc[3].Format = normalSmoothnessBuffer.GetDesc().Format;
+	srvDesc[3].Texture2D.MipLevels = normalSmoothnessBuffer.GetDesc().MipLevels;
+
+	// Create SRVs
+	mPixelShaderBuffersGpuDescHandle = DescriptorManager::Get().CreateShaderResourceView(res, srvDesc, _countof(srvDesc));
 }

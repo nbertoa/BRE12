@@ -65,7 +65,6 @@ protected:
 
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
-	ID3D12DescriptorHeap* mCbvSrvUavDescHeap{ nullptr };
 
 	// Where we push recorded command lists
 	tbb::concurrent_queue<ID3D12CommandList*>* mCmdListQueue{ nullptr };

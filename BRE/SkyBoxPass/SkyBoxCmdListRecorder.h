@@ -49,9 +49,7 @@ private:
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
 	std::uint32_t mCurrFrameIndex{ 0U };
-
-	ID3D12DescriptorHeap* mCbvSrvUavDescHeap{ nullptr };
-
+	
 	BufferCreator::VertexBufferData mVertexBufferData;
 	BufferCreator::IndexBufferData mIndexBufferData;
 	DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::Identity4x4() };

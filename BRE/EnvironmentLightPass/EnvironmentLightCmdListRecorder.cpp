@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 
 #include <CommandManager/CommandManager.h>
+#include <DescriptorManager\DescriptorManager.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ShaderUtils\CBuffers.h>
@@ -115,7 +116,8 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
-	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
+	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 	
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -124,7 +126,7 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(2U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
+	mCmdList->SetGraphicsRootDescriptorTable(2U, mTexturesGpuDescHandle);
 
 	// Draw object
 	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
@@ -155,10 +157,9 @@ bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		mCmdList != nullptr &&
-		mCbvSrvUavDescHeap != nullptr &&
-		mCubeMapsBufferGpuDescHandleBegin.ptr != 0UL &&
 		mColorBufferCpuDesc.ptr != 0UL &&
-		mDepthBufferCpuDesc.ptr != 0UL;
+		mDepthBufferCpuDesc.ptr != 0UL && 
+		mTexturesGpuDescHandle.ptr != 0UL;
 
 	return result;
 }
@@ -170,63 +171,62 @@ void EnvironmentLightCmdListRecorder::BuildBuffers(
 	ID3D12Resource& diffuseIrradianceCubeMap,
 	ID3D12Resource& specularPreConvolvedCubeMap) noexcept
 {
-	ASSERT(mCbvSrvUavDescHeap == nullptr);
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(geometryBuffersCount > 0U);
 
-	// Create CBV_SRV_UAV cbuffer descriptor heap
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = geometryBuffersCount + 3U; // Geometry buffers + 1 depth buffer + 2 cube maps (diffuse + specular)
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
-	
-	// Create geometry buffer texture descriptors
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	// Used to create SRV descriptors
+	std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDesc;
+	srvDesc.resize(geometryBuffersCount + 3U); // 3 = depth buffer + 2 cube maps
+	std::vector<ID3D12Resource*> res;
+	res.resize(geometryBuffersCount + 3U);
 
-	const std::size_t descHandleIncSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuDesc = mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart();
+	// Fill geometry buffers SRV descriptors
 	for (std::uint32_t i = 0U; i < geometryBuffersCount; ++i) {
 		ASSERT(geometryBuffers[i].Get() != nullptr);
-		ID3D12Resource& res = *geometryBuffers[i].Get();
-		srvDesc.Format = res.GetDesc().Format;
-		srvDesc.Texture2D.MipLevels = res.GetDesc().MipLevels;
-		ResourceManager::Get().CreateShaderResourceView(res, srvDesc, cpuDesc);
-		cpuDesc.ptr += descHandleIncSize;
+		res[i] = geometryBuffers[i].Get();
+		srvDesc[i].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc[i].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc[i].Texture2D.MostDetailedMip = 0;
+		srvDesc[i].Texture2D.ResourceMinLODClamp = 0.0f;
+		srvDesc[i].Format = res[i]->GetDesc().Format;
+		srvDesc[i].Texture2D.MipLevels = res[i]->GetDesc().MipLevels;
 	}
 
-	// Create depth buffer descriptor
-	srvDesc.Format = Settings::sDepthStencilSRVFormat;
-	srvDesc.Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
-	ResourceManager::Get().CreateShaderResourceView(depthBuffer, srvDesc, cpuDesc);
+	// Fill depth buffer descriptor
+	std::uint32_t descIndex = geometryBuffersCount;
+	srvDesc[descIndex].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc[descIndex].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc[descIndex].Texture2D.MostDetailedMip = 0;
+	srvDesc[descIndex].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc[descIndex].Format = Settings::sDepthStencilSRVFormat;
+	srvDesc[descIndex].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
+	res[descIndex] = &depthBuffer;
+	++descIndex;
+
+	// Fill cube map texture descriptors	
+	srvDesc[descIndex].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc[descIndex].ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+	srvDesc[descIndex].TextureCube.MostDetailedMip = 0;
+	srvDesc[descIndex].TextureCube.MipLevels = diffuseIrradianceCubeMap.GetDesc().MipLevels;
+	srvDesc[descIndex].TextureCube.ResourceMinLODClamp = 0.0f;
+	srvDesc[descIndex].Format = diffuseIrradianceCubeMap.GetDesc().Format;
+	res[descIndex] = &diffuseIrradianceCubeMap;
+	++descIndex;
+
+	srvDesc[descIndex].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc[descIndex].ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+	srvDesc[descIndex].TextureCube.MostDetailedMip = 0;
+	srvDesc[descIndex].TextureCube.MipLevels = specularPreConvolvedCubeMap.GetDesc().MipLevels;
+	srvDesc[descIndex].TextureCube.ResourceMinLODClamp = 0.0f;
+	srvDesc[descIndex].Format = specularPreConvolvedCubeMap.GetDesc().Format;
+	res[descIndex] = &specularPreConvolvedCubeMap;
+	++descIndex;
+
+	mTexturesGpuDescHandle = DescriptorManager::Get().CreateShaderResourceView(res.data(), srvDesc.data(), static_cast<std::uint32_t>(srvDesc.size()));
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
-
-	// Create cube map texture descriptors
-
-	mCubeMapsBufferGpuDescHandleBegin.ptr = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart().ptr + geometryBuffersCount;
-	
-	srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-	srvDesc.TextureCube.MostDetailedMip = 0;
-	srvDesc.TextureCube.MipLevels = diffuseIrradianceCubeMap.GetDesc().MipLevels;
-	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
-	srvDesc.Format = diffuseIrradianceCubeMap.GetDesc().Format;
-	cpuDesc.ptr += descHandleIncSize;
-	ResourceManager::Get().CreateShaderResourceView(diffuseIrradianceCubeMap, srvDesc, cpuDesc);
-
-	srvDesc.TextureCube.MipLevels = specularPreConvolvedCubeMap.GetDesc().MipLevels;
-	srvDesc.Format = specularPreConvolvedCubeMap.GetDesc().Format;
-	cpuDesc.ptr += descHandleIncSize;
-	ResourceManager::Get().CreateShaderResourceView(specularPreConvolvedCubeMap, srvDesc, cpuDesc);
 }

@@ -1,6 +1,7 @@
 #include "App.h"
 
 #include <CommandManager/CommandManager.h>
+#include <DescriptorManager/DescriptorManager.h>
 #include <GlobalData\D3dData.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
@@ -22,6 +23,7 @@ namespace {
 
 		ID3D12Device& device{ D3dData::Device() };
 		CommandManager::Create(device);
+		DescriptorManager::Create(device);
 		ModelManager::Create();
 		Materials::InitMaterials();
 		PSOManager::Create(device);

@@ -28,6 +28,10 @@ public:
 	// Record command lists and push them to the queue.
 	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept final override;
 
+	bool ValidateData() const noexcept override;
+
 private:
-	void BuildLightsBuffers(const void* lights, const std::uint32_t numDescriptors) noexcept;
+	void BuildBuffers(const void* lights) noexcept;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE mTexturesGpuDescHandle{ 0UL };
 };

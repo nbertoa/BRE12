@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 
+#include <DescriptorManager\DescriptorManager.h>
 #include <LightingPass/PunctualLight.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
@@ -16,48 +17,11 @@
 // "CBV(b0, visibility = SHADER_VISIBILITY_GEOMETRY), " \ 2 -> Frame CBuffer
 // "CBV(b1, visibility = SHADER_VISIBILITY_GEOMETRY), " \ 3 -> Immutable CBuffer
 // "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 4 -> Frame CBuffer
-// "DescriptorTable(SRV(t0), SRV(t1), SRV(t2), visibility = SHADER_VISIBILITY_PIXEL)" 4 -> Textures
+// "DescriptorTable(SRV(t0), SRV(t1), SRV(t2), visibility = SHADER_VISIBILITY_PIXEL)" 5 -> Textures
 
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
 	ID3D12RootSignature* sRootSign{ nullptr };
-
-	void CreateGeometryBuffersSRVs(
-		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
-		const std::uint32_t geometryBuffersCount,
-		D3D12_CPU_DESCRIPTOR_HANDLE baseCpuDescHandle) {
-		ASSERT(geometryBuffers != nullptr);
-		ASSERT(baseCpuDescHandle.ptr != 0UL);
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-
-		const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-		for (std::uint32_t i = 0U; i < geometryBuffersCount; ++i) {
-			ID3D12Resource& res{ *geometryBuffers[i].Get() };
-
-			srvDesc.Format = res.GetDesc().Format;
-			srvDesc.Texture2D.MipLevels = res.GetDesc().MipLevels;
-
-			ResourceManager::Get().CreateShaderResourceView(res, srvDesc, baseCpuDescHandle);
-
-			baseCpuDescHandle.ptr += descHandleIncSize;
-		}
-	}
-
-	void CreateLightsBufferSRV(ID3D12Resource& res, const std::uint32_t numLights, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandle) {
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.Format = res.GetDesc().Format;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-		srvDesc.Buffer.FirstElement = 0UL;
-		srvDesc.Buffer.NumElements = numLights;
-		srvDesc.Buffer.StructureByteStride = sizeof(PunctualLight);
-		ResourceManager::Get().CreateShaderResourceView(res, srvDesc, cpuDescHandle);
-	}
 }
 
 PunctualLightCmdListRecorder::PunctualLightCmdListRecorder(ID3D12Device& device)
@@ -105,32 +69,50 @@ void PunctualLightCmdListRecorder::Init(
 	
 	mNumLights = numLights;
 
-	// Geometry buffers SRVS + num lights + lights buffer SRV + depth buffer
-	const std::uint32_t numDescriptors(geometryBuffersCount + mNumLights + 2U);
-	BuildLightsBuffers(lights, numDescriptors);
+	BuildBuffers(lights);
 
-	// Create geometry buffers SRVs
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuDesc(mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart());
-	CreateGeometryBuffersSRVs(geometryBuffers, geometryBuffersCount, cpuDesc);
+	
+	// Used to create SRV descriptors for textures (geometry buffers + depth buffer)
+	std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDescVec;
+	srvDescVec.resize(geometryBuffersCount + 1U); // 1 = depth buffer
+	std::vector<ID3D12Resource*> res;
+	res.resize(geometryBuffersCount + 1U);
 
-	// Create lights buffer SRV	
-	const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	cpuDesc.ptr += geometryBuffersCount * descHandleIncSize;
-	CreateLightsBufferSRV(*mLightsBuffer->Resource(), mNumLights, cpuDesc);
-	mLightsBufferGpuDescHandleBegin.ptr = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart().ptr + geometryBuffersCount * descHandleIncSize;
+	// Fill data for geometry buffers SRV descriptors
+	for (std::uint32_t i = 0U; i < geometryBuffersCount; ++i) {
+		res[i] = geometryBuffers[i].Get();
 
-	// Create depth buffer descriptor
+		srvDescVec[i].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDescVec[i].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDescVec[i].Texture2D.MostDetailedMip = 0;
+		srvDescVec[i].Texture2D.ResourceMinLODClamp = 0.0f;
+		srvDescVec[i].Format = res[i]->GetDesc().Format;
+		srvDescVec[i].Texture2D.MipLevels = res[i]->GetDesc().MipLevels;
+	}
+
+	// Fill depth buffer SRV description
+	const std::uint32_t resIndex = geometryBuffersCount;
+	srvDescVec[resIndex].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescVec[resIndex].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescVec[resIndex].Texture2D.MostDetailedMip = 0;
+	srvDescVec[resIndex].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescVec[resIndex].Format = Settings::sDepthStencilSRVFormat;
+	srvDescVec[resIndex].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
+	res[resIndex] = &depthBuffer;
+	
+	// Create textures SRV descriptors
+	mTexturesGpuDescHandle = DescriptorManager::Get().CreateShaderResourceView(res.data(), srvDescVec.data(), static_cast<uint32_t>(srvDescVec.size()));
+
+	// Create lights buffer SRV	descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc.Format = Settings::sDepthStencilSRVFormat;
-	srvDesc.Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
-
-	cpuDesc.ptr += descHandleIncSize;
-	ResourceManager::Get().CreateShaderResourceView(depthBuffer, srvDesc, cpuDesc);
-
+	srvDesc.Format = mLightsBuffer->Resource()->GetDesc().Format;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.FirstElement = 0UL;
+	srvDesc.Buffer.NumElements = mNumLights;
+	srvDesc.Buffer.StructureByteStride = sizeof(PunctualLight);
+	mLightsBufferGpuDescHandleBegin = DescriptorManager::Get().CreateShaderResourceView(*mLightsBuffer->Resource(), srvDesc);
+	
 	ASSERT(ValidateData());
 }
 
@@ -156,7 +138,8 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
-	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
+	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 
 	// Set root parameters
@@ -167,7 +150,7 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(4U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(5U, mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart());
+	mCmdList->SetGraphicsRootDescriptorTable(5U, mTexturesGpuDescHandle);
 	
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	
@@ -181,8 +164,11 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % _countof(mCmdAlloc);
 }
 
-void PunctualLightCmdListRecorder::BuildLightsBuffers(const void* lights, const std::uint32_t numDescriptors) noexcept {
-	ASSERT(mCbvSrvUavDescHeap == nullptr);
+bool PunctualLightCmdListRecorder::ValidateData() const noexcept {
+	return LightingPassCmdListRecorder::ValidateData() && mTexturesGpuDescHandle.ptr != 0UL;
+}
+
+void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {
 #ifdef _DEBUG
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ASSERT(mFrameCBuffer[i] == nullptr);
@@ -191,14 +177,6 @@ void PunctualLightCmdListRecorder::BuildLightsBuffers(const void* lights, const 
 	ASSERT(mLightsBuffer == nullptr);
 	ASSERT(lights != nullptr);
 	ASSERT(mNumLights != 0U);
-
-	// Create CBV_SRV_UAV cbuffer descriptor heap
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = numDescriptors;
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
 
 	// Create lights buffer and fill it
 	const std::size_t lightBufferElemSize{ sizeof(PunctualLight) };

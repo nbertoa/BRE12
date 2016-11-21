@@ -57,9 +57,7 @@ private:
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
 	std::uint32_t mCurrFrameIndex{ 0U };
-
-	ID3D12DescriptorHeap* mCbvSrvUavDescHeap{ nullptr };
-
+	
 	BufferCreator::VertexBufferData mVertexBufferData;
 	BufferCreator::IndexBufferData mIndexBufferData;
 
@@ -73,4 +71,7 @@ private:
 	// Ambient accessibility & Depth buffers cpu descriptors
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessBufferCpuDesc{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
+
+	// Pixel shader buffers GPU descriptor handle
+	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDescHandle{ 0UL };
 };

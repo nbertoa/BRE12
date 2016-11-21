@@ -62,7 +62,6 @@ private:
 	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
 	std::uint32_t mCurrFrameIndex{ 0U };
 
-	ID3D12DescriptorHeap* mCbvSrvUavDescHeap{ nullptr };
 	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
 
 	BufferCreator::VertexBufferData mVertexBufferData;
@@ -73,4 +72,7 @@ private:
 	// Color & Depth buffers cpu descriptors
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
+
+	// Textures GPU descriptor handle
+	D3D12_GPU_DESCRIPTOR_HANDLE mTexturesGpuDescHandle{ 0UL };
 };
