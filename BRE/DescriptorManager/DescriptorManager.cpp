@@ -25,7 +25,7 @@ DescriptorManager::DescriptorManager(ID3D12Device& device)
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = 100U;
+	descHeapDesc.NumDescriptors = 3000U;
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 
 	mMutex.lock();

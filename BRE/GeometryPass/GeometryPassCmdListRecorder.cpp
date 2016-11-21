@@ -53,7 +53,6 @@ bool GeometryPassCmdListRecorder::ValidateData() const noexcept {
 
 	return
 		mCmdList != nullptr &&
-		mCbvSrvUavDescHeap != nullptr &&
 		mObjectCBuffer != nullptr &&
 		mObjectCBufferGpuDescHandleBegin.ptr != 0UL &&
 		numGeomData != 0UL &&

@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 
+#include <DescriptorManager\DescriptorManager.h>
 #include <Material/Material.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
@@ -104,7 +105,8 @@ void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frame
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
 	mCmdList->OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
 
-	mCmdList->SetDescriptorHeaps(1U, &mCbvSrvUavDescHeap);
+	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 
 	const std::size_t descHandleIncSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
@@ -174,11 +176,10 @@ void TextureCmdListRecorder::BuildBuffers(
 	const Material* materials,
 	ID3D12Resource** textures, 
 	const std::uint32_t dataCount) noexcept {
+
 	ASSERT(materials != nullptr);
 	ASSERT(textures != nullptr);
 	ASSERT(dataCount != 0UL);
-
-	ASSERT(mCbvSrvUavDescHeap == nullptr);
 #ifdef _DEBUG
 	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
 		ASSERT(mFrameCBuffer[i] == nullptr);
@@ -187,18 +188,9 @@ void TextureCmdListRecorder::BuildBuffers(
 	ASSERT(mObjectCBuffer == nullptr);
 	ASSERT(mMaterialsCBuffer == nullptr);
 
-	// Create CBV_SRV_UAV cbuffer descriptor heap
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	descHeapDesc.NodeMask = 0U;
-	descHeapDesc.NumDescriptors = dataCount * 3U; // (1 obj cbuffer + 1 material cbuffer per geometry to draw + 1 texture per geometry to draw)
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mCbvSrvUavDescHeap);
-
 	// Create object cbuffer and fill it
 	const std::size_t objCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ObjectCBuffer)) };
 	ResourceManager::Get().CreateUploadBuffer(objCBufferElemSize, dataCount, mObjectCBuffer);
-	mObjectCBufferGpuDescHandleBegin = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart();
 	std::uint32_t k = 0U;
 	const std::size_t numGeomData{ mGeometryDataVec.size() };
 	ObjectCBuffer objCBuffer;
@@ -217,51 +209,53 @@ void TextureCmdListRecorder::BuildBuffers(
 	// Create materials cbuffer		
 	const std::size_t matCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(Material)) };
 	ResourceManager::Get().CreateUploadBuffer(matCBufferElemSize, dataCount, mMaterialsCBuffer);
-	const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	mMaterialsCBufferGpuDescHandleBegin.ptr = mObjectCBufferGpuDescHandleBegin.ptr + dataCount * descHandleIncSize;
-
-	// Set begin for textures in GPU
-	mTexturesBufferGpuDescHandleBegin.ptr = mObjectCBufferGpuDescHandleBegin.ptr + dataCount * 2U * descHandleIncSize;
 		
-	// Create object cbuffer descriptors
-	// Create material cbuffer descriptors
-	// Fill materials cbuffers data
 	D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialsCBuffer->Resource()->GetGPUVirtualAddress() };
 	D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->Resource()->GetGPUVirtualAddress() };
-	D3D12_CPU_DESCRIPTOR_HANDLE currObjCBufferDescHandle(mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart());
-	D3D12_CPU_DESCRIPTOR_HANDLE currMaterialCBufferDescHandle{ mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + dataCount * descHandleIncSize };
-	D3D12_CPU_DESCRIPTOR_HANDLE currTextureBufferDescHandle{ mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + dataCount * 2U * descHandleIncSize };
+	
+	// Create object / materials cbuffers descriptors
+	// Create textures SRV descriptors
+	std::vector<D3D12_CONSTANT_BUFFER_VIEW_DESC> objectCbufferViewDescVec;
+	objectCbufferViewDescVec.reserve(dataCount);
+	std::vector<D3D12_CONSTANT_BUFFER_VIEW_DESC> materialCbufferViewDescVec;
+	materialCbufferViewDescVec.reserve(dataCount);
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-
+	std::vector<ID3D12Resource*> resVec;
+	resVec.reserve(dataCount);
+	std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDescVec;
+	srvDescVec.reserve(dataCount);
 	for (std::size_t i = 0UL; i < dataCount; ++i) {
-		// Create object cbuffers descriptors
+		// Object cbuffer desc
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
 		cBufferDesc.BufferLocation = objCBufferGpuAddress + i * objCBufferElemSize;
 		cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(objCBufferElemSize);
-		ResourceManager::Get().CreateConstantBufferView(cBufferDesc, currObjCBufferDescHandle);
+		objectCbufferViewDescVec.push_back(cBufferDesc);
 
-		// Create materials CBuffer descriptor
+		// Material cbuffer desc
 		cBufferDesc.BufferLocation = materialsGpuAddress + i * matCBufferElemSize;
 		cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(matCBufferElemSize);
-		ResourceManager::Get().CreateConstantBufferView(cBufferDesc, currMaterialCBufferDescHandle);
+		materialCbufferViewDescVec.push_back(cBufferDesc);
 
-		// Create texture descriptor
-		ID3D12Resource& res{ *textures[i] };
-		srvDesc.Format = res.GetDesc().Format;
-		srvDesc.Texture2D.MipLevels = res.GetDesc().MipLevels;
-		ResourceManager::Get().CreateShaderResourceView(res, srvDesc, currTextureBufferDescHandle);
+		// Texture descriptor
+		resVec.push_back(textures[i]);
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;		
+		srvDesc.Format = resVec.back()->GetDesc().Format;
+		srvDesc.Texture2D.MipLevels = resVec.back()->GetDesc().MipLevels;
+		srvDescVec.push_back(srvDesc);
 
 		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
-
-		currMaterialCBufferDescHandle.ptr += descHandleIncSize;
-		currObjCBufferDescHandle.ptr += descHandleIncSize;
-		currTextureBufferDescHandle.ptr += descHandleIncSize;
 	}
+	mObjectCBufferGpuDescHandleBegin =
+		DescriptorManager::Get().CreateConstantBufferViews(objectCbufferViewDescVec.data(), static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
+	mMaterialsCBufferGpuDescHandleBegin =
+		DescriptorManager::Get().CreateConstantBufferViews(materialCbufferViewDescVec.data(), static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
+	mTexturesBufferGpuDescHandleBegin =
+		DescriptorManager::Get().CreateShaderResourceView(resVec.data(), srvDescVec.data(), static_cast<std::uint32_t>(srvDescVec.size()));
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
