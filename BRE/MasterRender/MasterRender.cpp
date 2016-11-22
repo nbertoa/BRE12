@@ -4,6 +4,7 @@
 
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager/CommandManager.h>
+#include <DescriptorManager\DescriptorManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GlobalData/D3dData.h>
 #include <GlobalData/Settings.h>
@@ -153,7 +154,7 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 	
 	// Generate recorders for all the passes
 	scene->GenerateGeomPassRecorders(mGeometryPass.GetRecorders());
-	mGeometryPass.Init(mDevice, DepthStencilCpuDesc(), *mCmdListExecutor, *mCmdQueue);
+	mGeometryPass.Init(DepthStencilCpuDesc(), *mCmdListExecutor, *mCmdQueue);
 
 	ID3D12Resource* skyBoxCubeMap;
 	ID3D12Resource* diffuseIrradianceCubeMap;
@@ -257,8 +258,6 @@ void MasterRender::ExecuteMergePass() {
 }
 
 void MasterRender::CreateRtvAndDsv() noexcept {
-	CreateRtvAndDsvDescriptorHeaps();
-
 	// Setup RTV descriptor to specify sRGB format.
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.Format = Settings::sFrameBufferRTFormat;
@@ -267,12 +266,10 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	// Create swap chain and render target views
 	ASSERT(mSwapChain == nullptr);
 	CreateSwapChain(mHwnd, *mCmdQueue, sFrameBufferFormat, mSwapChain);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRenderTargetDescHeap->GetCPUDescriptorHandleForHeapStart());
 	const std::uint32_t rtvDescSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
-		mDevice.CreateRenderTargetView(mFrameBuffers[i].Get(), &rtvDesc, rtvHeapHandle);
-		rtvHeapHandle.Offset(1U, rtvDescSize);
+		DescriptorManager::Get().CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDesc, &mFrameBufferRTVs[i]);
 	}
 
 	// Create the depth/stencil buffer and view.
@@ -302,36 +299,10 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	depthStencilViewDesc.Format = Settings::sDepthStencilViewFormat;
 	depthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
-	mDevice.CreateDepthStencilView(mDepthStencilBuffer, &depthStencilViewDesc, DepthStencilCpuDesc());
-}
-
-void MasterRender::CreateRtvAndDsvDescriptorHeaps() noexcept {
-	// Render targets descriptor heap
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
-	descHeapDesc.NumDescriptors = Settings::sSwapChainBufferCount;
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	descHeapDesc.NodeMask = 0;
-	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mRenderTargetDescHeap);
-
-	// Depth stencil buffer descriptor heap
-	descHeapDesc = D3D12_DESCRIPTOR_HEAP_DESC{};
-	descHeapDesc.NumDescriptors = 1U;
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	descHeapDesc.NodeMask = 0U;
-	ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, mDepthStencilDescHeap);
+	DescriptorManager::Get().CreateDepthStencilView(*mDepthStencilBuffer, depthStencilViewDesc, &mDepthStencilBufferRTV);
 }
 
 void MasterRender::CreateColorBuffer() noexcept {
-	// Create desc heap
-	D3D12_DESCRIPTOR_HEAP_DESC descHeap = {};
-	descHeap.NumDescriptors = 1U;
-	descHeap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	descHeap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	descHeap.NodeMask = 0;
-	ResourceManager::Get().CreateDescriptorHeap(descHeap, mColorBufferDescHeap);
-
 	// Fill resource description
 	D3D12_RESOURCE_DESC resDesc = {};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -351,7 +322,6 @@ void MasterRender::CreateColorBuffer() noexcept {
 	mColorBuffer.Reset();
 			
 	ID3D12Resource* res{ nullptr };
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvDescHeapBeginDescHandle(mColorBufferDescHeap->GetCPUDescriptorHandleForHeapStart());
 	
 	// Create RTV's descriptor
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
@@ -361,8 +331,7 @@ void MasterRender::CreateColorBuffer() noexcept {
 	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue, res);
 
 	mColorBuffer = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-	mDevice.CreateRenderTargetView(mColorBuffer.Get(), &rtvDesc, rtvDescHeapBeginDescHandle);
-	mColorBufferRTVCpuDescHandle = rtvDescHeapBeginDescHandle;
+	DescriptorManager::Get().CreateRenderTargetView(*mColorBuffer.Get(), rtvDesc, &mColorBufferRTVCpuDescHandle);
 }
 
 void MasterRender::CreateMergePassCommandObjects() noexcept {
@@ -386,13 +355,11 @@ ID3D12Resource* MasterRender::CurrentFrameBuffer() const noexcept {
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::CurrentFrameBufferCpuDesc() const noexcept {
-	const std::uint32_t rtvDescSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
-	const std::uint32_t currBackBuffer{ mSwapChain->GetCurrentBackBufferIndex() };
-	return D3D12_CPU_DESCRIPTOR_HANDLE{ mRenderTargetDescHeap->GetCPUDescriptorHandleForHeapStart().ptr + currBackBuffer * rtvDescSize };
+	return mFrameBufferRTVs[mSwapChain->GetCurrentBackBufferIndex()];
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::DepthStencilCpuDesc() const noexcept {
-	return mDepthStencilDescHeap->GetCPUDescriptorHandleForHeapStart();
+	return mDepthStencilBufferRTV;
 }
 
 void MasterRender::FlushCommandQueue() noexcept {

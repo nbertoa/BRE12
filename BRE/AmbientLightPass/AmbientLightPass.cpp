@@ -4,6 +4,7 @@
 
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandManager.h>
+#include <DescriptorManager\DescriptorManager.h>
 #include <DXUtils\d3dx12.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
@@ -70,19 +71,9 @@ namespace {
 	}
 
 	void CreateAmbientAccessibilityBuffer(
-		ID3D12Device& device,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
-		D3D12_CPU_DESCRIPTOR_HANDLE& bufferRTCpuDescHandle,
-		ID3D12DescriptorHeap* &descHeap) noexcept {
-
-		// Create buffer desc heap
-		D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
-		descHeapDesc.NumDescriptors = 1U;
-		descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		descHeapDesc.NodeMask = 0;
-		ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, descHeap);
-
+		D3D12_CPU_DESCRIPTOR_HANDLE& bufferRTCpuDescHandle) noexcept {
+		
 		// Set shared buffers properties
 		D3D12_RESOURCE_DESC resDesc = {};
 		resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -101,20 +92,18 @@ namespace {
 		
 		CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 
+		// Create buffer resource
 		ID3D12Resource* res{ nullptr };
-		bufferRTCpuDescHandle = descHeap->GetCPUDescriptorHandleForHeapStart();
-		const std::size_t rtvDescSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
-
+		resDesc.Format = DXGI_FORMAT_R16_UNORM;
+		clearValue.Format = resDesc.Format;		
+		ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, res);
+		
+		// Create RTV's descriptor for buffer
+		buffer = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
 		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-
-		// Create and store RTV's descriptor for buffer
-		resDesc.Format = DXGI_FORMAT_R16_UNORM;
-		clearValue.Format = resDesc.Format;
 		rtvDesc.Format = resDesc.Format;
-		ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, res);
-		buffer = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-		device.CreateRenderTargetView(buffer.Get(), &rtvDesc, bufferRTCpuDescHandle);
+		DescriptorManager::Get().CreateRenderTargetView(*buffer.Get(), rtvDesc, &bufferRTCpuDescHandle);
 	}
 }
 
@@ -154,11 +143,7 @@ void AmbientLightPass::Init(
 	AmbientOcclusionCmdListRecorder::InitPSO();
 
 	// Create ambient accessibility buffer
-	CreateAmbientAccessibilityBuffer(
-		device,
-		mAmbientAccessibilityBuffer,
-		mAmbientAccessibilityBufferRTCpuDescHandle,
-		mDescHeap);
+	CreateAmbientAccessibilityBuffer(mAmbientAccessibilityBuffer, mAmbientAccessibilityBufferRTCpuDescHandle);
 	
 	// Initialize ambient occlusion recorder
 	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
@@ -223,7 +208,6 @@ bool AmbientLightPass::ValidateData() const noexcept {
 		mAmbientLightRecorder.get() != nullptr &&
 		mAmbientAccessibilityBuffer.Get() != nullptr &&
 		mAmbientAccessibilityBufferRTCpuDescHandle.ptr != 0UL &&
-		mDescHeap != nullptr &&
 		mCmdListExecutor != nullptr;
 
 	return b;

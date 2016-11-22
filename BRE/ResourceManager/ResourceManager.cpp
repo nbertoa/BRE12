@@ -179,25 +179,6 @@ std::size_t ResourceManager::CreateFence(const std::uint64_t initValue, const D3
 	return id;
 }
 
-void ResourceManager::CreateConstantBufferView(const D3D12_CONSTANT_BUFFER_VIEW_DESC& cbViewDesc, const D3D12_CPU_DESCRIPTOR_HANDLE& cpuDescHandle) noexcept
-{
-	mMutex.lock();
-	mDevice.CreateConstantBufferView(&cbViewDesc, cpuDescHandle);
-	mMutex.unlock();
-}
-
-void ResourceManager::CreateShaderResourceView(ID3D12Resource& res, const D3D12_SHADER_RESOURCE_VIEW_DESC& desc, const D3D12_CPU_DESCRIPTOR_HANDLE& cpuDescHandle) noexcept {
-	mMutex.lock();
-	mDevice.CreateShaderResourceView(&res, &desc, cpuDescHandle);
-	mMutex.unlock();
-}
-
-void ResourceManager::CreateUnorderedAccessView(ID3D12Resource& res, const D3D12_UNORDERED_ACCESS_VIEW_DESC& desc, const D3D12_CPU_DESCRIPTOR_HANDLE& cpuDescHandle) noexcept {
-	mMutex.lock();
-	mDevice.CreateUnorderedAccessView(&res, nullptr, &desc, cpuDescHandle);
-	mMutex.unlock();
-}
-
 std::size_t ResourceManager::CreateUploadBuffer(const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept {
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
 	UploadBufferById::accessor accessor;
@@ -208,24 +189,6 @@ std::size_t ResourceManager::CreateUploadBuffer(const std::size_t elemSize, cons
 	mUploadBufferById.insert(accessor, id);
 	accessor->second = std::make_unique<UploadBuffer>(mDevice, elemSize, elemCount);
 	buffer = accessor->second.get();
-	accessor.release();
-
-	return id;
-}
-
-std::size_t ResourceManager::CreateDescriptorHeap(const D3D12_DESCRIPTOR_HEAP_DESC& desc, ID3D12DescriptorHeap* &descHeap) noexcept {
-	mMutex.lock();
-	CHECK_HR(mDevice.CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descHeap)));
-	mMutex.unlock();
-
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
-	DescHeapById::accessor accessor;
-#ifdef _DEBUG
-	mDescHeapById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mDescHeapById.insert(accessor, id);
-	accessor->second = Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>(descHeap);
 	accessor.release();
 
 	return id;
@@ -246,16 +209,6 @@ UploadBuffer& ResourceManager::GetUploadBuffer(const size_t id) noexcept {
 	mUploadBufferById.find(accessor, id);
 	ASSERT(!accessor.empty());
 	UploadBuffer* elem{ accessor->second.get() };
-	accessor.release();
-
-	return *elem;
-}
-
-ID3D12DescriptorHeap& ResourceManager::GetDescriptorHeap(const std::size_t id) noexcept {
-	DescHeapById::accessor accessor;
-	mDescHeapById.find(accessor, id);
-	ASSERT(!accessor.empty());
-	ID3D12DescriptorHeap* elem{ accessor->second.Get() };
 	accessor.release();
 
 	return *elem;
@@ -284,14 +237,6 @@ void ResourceManager::EraseUploadBuffer(const std::size_t id) noexcept {
 	mUploadBufferById.find(accessor, id);
 	ASSERT(!accessor.empty());
 	mUploadBufferById.erase(accessor);
-	accessor.release();
-}
-
-void ResourceManager::EraseDescHeap(const std::size_t id) noexcept {
-	DescHeapById::accessor accessor;
-	mDescHeapById.find(accessor, id);
-	ASSERT(!accessor.empty());
-	mDescHeapById.erase(accessor);
 	accessor.release();
 }
 

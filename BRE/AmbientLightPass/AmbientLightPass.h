@@ -62,7 +62,6 @@ private:
 	// Geometry buffers data
 	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRTCpuDescHandle{ 0UL };
-	ID3D12DescriptorHeap* mDescHeap{ nullptr };
 
 	CommandListExecutor* mCmdListExecutor{ nullptr };
 };

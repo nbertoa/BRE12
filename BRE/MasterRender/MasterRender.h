@@ -40,7 +40,6 @@ private:
 
 	void InitPasses(Scene* scene) noexcept;
 
-	void CreateRtvAndDsvDescriptorHeaps() noexcept;
 	void CreateRtvAndDsv() noexcept;
 	void CreateColorBuffer() noexcept;
 	void CreateMergePassCommandObjects() noexcept;
@@ -77,19 +76,18 @@ private:
 	ID3D12CommandAllocator* mMergePassCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
 	ID3D12GraphicsCommandList* mMergePassCmdList{ nullptr };
 	
-	// Frame buffers and depth stencil buffer
+	// Frame buffers
 	Microsoft::WRL::ComPtr<ID3D12Resource> mFrameBuffers[Settings::sSwapChainBufferCount];
+	D3D12_CPU_DESCRIPTOR_HANDLE mFrameBufferRTVs[Settings::sSwapChainBufferCount]{ 0UL };
+
+	// Depth stencil buffer
 	ID3D12Resource* mDepthStencilBuffer{ nullptr };
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthStencilBufferRTV{ 0UL };
 
 	// Color buffer is a buffer used for intermediate computations.
 	// It is used as render target (light pass) or pixel shader resource (post processing passes)
 	Microsoft::WRL::ComPtr<ID3D12Resource> mColorBuffer;
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferRTVCpuDescHandle;
-	ID3D12DescriptorHeap* mColorBufferDescHeap{ nullptr };
-
-	// Render target and depth stencil descriptor heaps
-	ID3D12DescriptorHeap* mRenderTargetDescHeap{ nullptr };
-	ID3D12DescriptorHeap* mDepthStencilDescHeap{ nullptr };
 
 	// Per frame constant buffer.
 	// We cache it here, as is is used by most passes.

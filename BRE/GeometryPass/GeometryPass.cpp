@@ -6,6 +6,7 @@
 
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandManager.h>
+#include <DescriptorManager\DescriptorManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\Recorders\ColorCmdListRecorder.h>
 #include <GeometryPass\Recorders\ColorHeightCmdListRecorder.h>
@@ -31,18 +32,8 @@ namespace {
 	};
 
 	void CreateBuffers(
-		ID3D12Device& device,
 		Microsoft::WRL::ComPtr<ID3D12Resource> buffers[GeometryPass::BUFFERS_COUNT],
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescs[GeometryPass::BUFFERS_COUNT],
-		ID3D12DescriptorHeap* &descHeap) noexcept {
-
-		// Create buffers desc heap
-		D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
-		descHeapDesc.NumDescriptors = GeometryPass::BUFFERS_COUNT;
-		descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		descHeapDesc.NodeMask = 0;
-		ResourceManager::Get().CreateDescriptorHeap(descHeapDesc, descHeap);
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuDescs[GeometryPass::BUFFERS_COUNT]) noexcept {
 
 		// Set shared buffers properties
 		D3D12_RESOURCE_DESC resDesc = {};
@@ -69,22 +60,20 @@ namespace {
 		CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 
 		ID3D12Resource* res{ nullptr };
-		D3D12_CPU_DESCRIPTOR_HANDLE currRtvCpuDesc(descHeap->GetCPUDescriptorHandleForHeapStart());
-		const std::size_t rtvDescSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
-
-		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
-		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 		// Create and store RTV's descriptors for buffers
 		for (std::uint32_t i = 0U; i < GeometryPass::BUFFERS_COUNT; ++i) {
 			resDesc.Format = sBufferFormats[i];
+
 			clearValue[i].Format = resDesc.Format;
+
+			D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+			rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 			rtvDesc.Format = resDesc.Format;
 			ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue[i], res);
+
 			buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-			device.CreateRenderTargetView(buffers[i].Get(), &rtvDesc, currRtvCpuDesc);
-			rtvCpuDescs[i] = currRtvCpuDesc;
-			currRtvCpuDesc.ptr += rtvDescSize;
+			DescriptorManager::Get().CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &rtvCpuDescs[i]);
 		}
 	}
 
@@ -106,7 +95,6 @@ namespace {
 }
 
 void GeometryPass::Init(
-	ID3D12Device& device, 
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
 	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue) noexcept {
@@ -118,7 +106,7 @@ void GeometryPass::Init(
 	mCmdListExecutor = &cmdListExecutor;
 	mCmdQueue = &cmdQueue;
 
-	CreateBuffers(device, mBuffers, mRtvCpuDescs, mDescHeap);
+	CreateBuffers(mBuffers, mRtvCpuDescs);
 	CreateCommandObjects(mCmdAllocs, mCmdList);
 
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
@@ -200,7 +188,6 @@ bool GeometryPass::ValidateData() const noexcept {
 		mCmdQueue != nullptr &&
 		mCmdList != nullptr &&
 		mRecorders.empty() == false &&
-		mDescHeap != nullptr &&
 		mDepthBufferCpuDesc.ptr != 0UL;
 
 		return b;

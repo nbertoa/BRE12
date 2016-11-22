@@ -11,7 +11,6 @@ struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 struct ID3D12CommandAllocator;
 struct ID3D12CommandQueue;
-struct ID3D12DescriptorHeap;
 struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
@@ -40,7 +39,6 @@ public:
 
 	// You should call this method after filling recorders and before Execute()
 	void Init(
-		ID3D12Device& device,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
 		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue) noexcept;
@@ -67,7 +65,6 @@ private:
 	// Geometry buffers data
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBuffers[BUFFERS_COUNT];
 	D3D12_CPU_DESCRIPTOR_HANDLE mRtvCpuDescs[BUFFERS_COUNT];
-	ID3D12DescriptorHeap* mDescHeap{ nullptr };
 
 	// Depth buffer cpu descriptor
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };

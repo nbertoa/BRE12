@@ -50,12 +50,7 @@ public:
 		ID3D12Resource* &res) noexcept;
 
 	std::size_t CreateUploadBuffer(const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept;
-	std::size_t CreateDescriptorHeap(const D3D12_DESCRIPTOR_HEAP_DESC& desc, ID3D12DescriptorHeap* &descHeap) noexcept;
 	std::size_t CreateFence(const std::uint64_t initValue, const D3D12_FENCE_FLAGS& flags, ID3D12Fence* &fence) noexcept;
-
-	void CreateConstantBufferView(const D3D12_CONSTANT_BUFFER_VIEW_DESC& cbViewDesc, const D3D12_CPU_DESCRIPTOR_HANDLE& cpuDescHandle) noexcept;
-	void CreateShaderResourceView(ID3D12Resource& res, const D3D12_SHADER_RESOURCE_VIEW_DESC& desc, const D3D12_CPU_DESCRIPTOR_HANDLE& cpuDescHandle) noexcept;
-	void CreateUnorderedAccessView(ID3D12Resource& res, const D3D12_UNORDERED_ACCESS_VIEW_DESC& uavDesc, const D3D12_CPU_DESCRIPTOR_HANDLE& cpuDescHandle) noexcept;
 
 	// Asserts if resource id is not present
 	ID3D12Resource& GetResource(const std::size_t id) noexcept;
@@ -69,15 +64,13 @@ public:
 
 	void EraseResource(const std::size_t id) noexcept;
 	void EraseUploadBuffer(const std::size_t id) noexcept;
-	void EraseDescHeap(const std::size_t id) noexcept;
 	void EraseFence(const std::size_t id) noexcept;
 
 	// This will invalidate all ids.
 	__forceinline void ClearResources() noexcept { mResourceById.clear(); }
 	__forceinline void ClearUploadBuffers() noexcept { mUploadBufferById.clear(); }
-	__forceinline void ClearDescriptorHeaps() noexcept { mDescHeapById.clear(); }
 	__forceinline void ClearFences() noexcept { mFenceById.clear(); }
-	__forceinline void Clear() noexcept { ClearResources(); ClearUploadBuffers(); ClearDescriptorHeaps(); ClearFences(); }
+	__forceinline void Clear() noexcept { ClearResources(); ClearUploadBuffers(); ClearFences(); }
 
 private:
 	explicit ResourceManager(ID3D12Device& device);
@@ -89,9 +82,6 @@ private:
 
 	using UploadBufferById = tbb::concurrent_hash_map<std::size_t, std::unique_ptr<UploadBuffer>>;
 	UploadBufferById mUploadBufferById;
-
-	using DescHeapById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>>;
-	DescHeapById mDescHeapById;
 
 	using FenceById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12Fence>>;
 	FenceById mFenceById;

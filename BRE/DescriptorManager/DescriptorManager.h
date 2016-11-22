@@ -22,8 +22,14 @@ public:
 	
 	//
 	// The following methods return GPU descriptor handle for the CBV, SRV or UAV.
+	//
 	// In the case of methods that creates several views, it returns the GPU desc handle
 	// to the first element. As we guarantee all the other views are contiguous, then
+	// you can easily build GPU desc handle for other view.
+	//
+	// In the case of render target / depth stencil view methods, you can pass an optional
+	// D3D12_CPU_DESCRIPTOR_HANDLE to the first element. 
+	// As we guarantee all the other views are contiguous, then
 	// you can easily build GPU desc handle for other view.
 	//
 	
@@ -35,6 +41,28 @@ public:
 
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateUnorderedAccessView(ID3D12Resource& res, const D3D12_UNORDERED_ACCESS_VIEW_DESC& desc) noexcept;
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateUnorderedAccessView(ID3D12Resource* *res, const D3D12_UNORDERED_ACCESS_VIEW_DESC* desc, const std::uint32_t count) noexcept;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateRenderTargetView(
+		ID3D12Resource& res, 
+		const D3D12_RENDER_TARGET_VIEW_DESC& desc, 
+		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescHandle = nullptr) noexcept;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateRenderTargetViews(
+		ID3D12Resource* *res, 
+		const D3D12_RENDER_TARGET_VIEW_DESC* desc, 
+		const std::uint32_t count,
+		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescHandle = nullptr) noexcept;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateDepthStencilView(
+		ID3D12Resource& res,
+		const D3D12_DEPTH_STENCIL_VIEW_DESC& desc,
+		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescHandle = nullptr) noexcept;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateDepthStencilViews(
+		ID3D12Resource* *res,
+		const D3D12_DEPTH_STENCIL_VIEW_DESC* desc,
+		const std::uint32_t count,
+		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescHandle = nullptr) noexcept;
 		
 	ID3D12DescriptorHeap& GetCbvSrcUavDescriptorHeap() noexcept {
 		ASSERT(mCbvSrvUavDescHeap.Get() != nullptr);
@@ -50,10 +78,22 @@ private:
 
 	ID3D12Device& mDevice;
 
+	// Descriptor heaps for:
+	// - Constant Buffer View - Shader Resource View - Unordered Access View
+	// - Render Target View
+	// - Depth Stencil View
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvSrvUavDescHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRtvDescHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDsvDescHeap;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCurrGpuDescHandle{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mCurrCpuDescHandle{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mCurrCbvSrvUavGpuDescHandle{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mCurrCbvSrvUavCpuDescHandle{ 0UL };
+
+	D3D12_GPU_DESCRIPTOR_HANDLE mCurrRtvGpuDescHandle{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mCurrRtvCpuDescHandle{ 0UL };
+
+	D3D12_GPU_DESCRIPTOR_HANDLE mCurrDsvGpuDescHandle{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mCurrDsvCpuDescHandle{ 0UL };
 
 	std::mutex mMutex;
 };
