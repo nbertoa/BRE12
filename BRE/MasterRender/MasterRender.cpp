@@ -18,11 +18,11 @@ using namespace DirectX;
 namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
 	const DXGI_FORMAT sFrameBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
-
+	
 	// Update camera's view matrix and store data in parameters.
 	void UpdateCamera(
-		Camera& camera, 
-		const float deltaTime, 
+		Camera& camera,
+		const float deltaTime,
 		FrameCBuffer& frameCBuffer) noexcept {
 
 		static std::int32_t lastXY[]{ 0UL, 0UL };
@@ -35,7 +35,7 @@ namespace {
 			camera.GetInvView4x4f(inverse);
 			DirectX::XMStoreFloat4x4(&frameCBuffer.mInvView, MathUtils::GetTranspose(inverse));
 
-			DirectX::XMStoreFloat4x4(&frameCBuffer.mProj, MathUtils::GetTranspose(camera.GetProj4x4f()));						
+			DirectX::XMStoreFloat4x4(&frameCBuffer.mProj, MathUtils::GetTranspose(camera.GetProj4x4f()));
 			camera.GetInvProj4x4f(inverse);
 			DirectX::XMStoreFloat4x4(&frameCBuffer.mInvProj, MathUtils::GetTranspose(inverse));
 
@@ -135,7 +135,7 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 	CreateColorBuffer();
 
 	mCamera.SetLens(Settings::sFieldOfView, Settings::AspectRatio(), Settings::sNearPlaneZ, Settings::sFarPlaneZ);
-
+	
 	// Create and spawn command list processor thread.
 	mCmdListExecutor = CommandListExecutor::Create(mCmdQueue, MAX_NUM_CMD_LISTS);
 	ASSERT(mCmdListExecutor != nullptr);
@@ -212,8 +212,8 @@ void MasterRender::Terminate() noexcept {
 tbb::task* MasterRender::execute() {
 	while (!mTerminate) {
 		mTimer.Tick();
-
 		UpdateCamera(mCamera, mTimer.DeltaTime(), mFrameCBuffer);
+
 		ASSERT(mCmdListExecutor->IsIdle());
 
 		// Execute passes

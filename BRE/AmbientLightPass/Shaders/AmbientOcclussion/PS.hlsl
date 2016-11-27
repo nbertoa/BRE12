@@ -3,10 +3,10 @@
 
 #define SAMPLE_KERNEL_SIZE 128U
 #define NOISE_SCALE float2(1920.0f / 4.0f, 1080.0f / 4.0f)
-#define OCCLUSION_RADIUS 50.5f
+#define OCCLUSION_RADIUS 5000.5f
 #define SURFACE_EPSILON 0.05f
 #define OCCLUSION_FADE_START 0.2f
-#define OCCLUSION_FADE_END OCCLUSION_RADIUS
+#define OCCLUSION_FADE_END 2000
 
 // Determines how much the sample point q occludes the point p as a function
 // of distZ.

@@ -86,16 +86,16 @@ namespace {
 		resDesc.SampleDesc.Quality = 0U;
 		resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+		resDesc.Format = DXGI_FORMAT_R16_UNORM;
 
-		D3D12_CLEAR_VALUE clearValue { DXGI_FORMAT_R24_UNORM_X8_TYPELESS, 0.0f, 0.0f, 0.0f, 0.0f };
+		//D3D12_CLEAR_VALUE clearValue { DXGI_FORMAT_R24_UNORM_X8_TYPELESS, 0.0f, 0.0f, 0.0f, 0.0f };
+		D3D12_CLEAR_VALUE clearValue{ resDesc.Format, 0.0f, 0.0f, 0.0f, 0.0f };
 		buffer.Reset();
 		
 		CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 
 		// Create buffer resource
-		ID3D12Resource* res{ nullptr };
-		resDesc.Format = DXGI_FORMAT_R16_UNORM;
-		clearValue.Format = resDesc.Format;		
+		ID3D12Resource* res{ nullptr };			
 		ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, res);
 		
 		// Create RTV's descriptor for buffer
@@ -169,14 +169,14 @@ void AmbientLightPass::Init(
 	ASSERT(ValidateData());
 }
 
-void AmbientLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
+void AmbientLightPass::Execute(const FrameCBuffer& /*frameCBuffer*/) noexcept {
 	ASSERT(ValidateData());
 
-	const std::uint32_t taskCount{ 4U };
+	const std::uint32_t taskCount{ 3U };
 	mCmdListExecutor->ResetExecutedCmdListCount();
 
 	ExecuteBeginTask();
-	mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
+	//mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
 	ExecuteEndingTask();
 	mAmbientLightRecorder->RecordAndPushCommandLists();
 

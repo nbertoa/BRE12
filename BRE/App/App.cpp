@@ -12,7 +12,10 @@
 #include <ResourceManager\ResourceManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
+#include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
+
+using namespace DirectX;
 
 namespace {
 	void InitSystems(const HWND hwnd, const HINSTANCE hInstance) noexcept {

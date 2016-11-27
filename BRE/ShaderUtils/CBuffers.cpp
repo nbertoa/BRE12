@@ -1,5 +1,15 @@
 #include "CBuffers.h"
 
-//
-// This cpp was only added to be able to build a ShaderUtils library
-//
+const FrameCBuffer& FrameCBuffer::operator=(const FrameCBuffer& instance) {
+	if (this == &instance) {
+		return *this;
+	}
+	
+	mView = instance.mView;
+	mInvView = instance.mInvView;
+	mProj = instance.mProj;
+	mInvProj = instance.mInvProj;
+	mEyePosW = instance.mEyePosW;
+
+	return *this;
+}

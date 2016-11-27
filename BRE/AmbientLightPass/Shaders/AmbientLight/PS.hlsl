@@ -21,7 +21,7 @@ Output main(const in Input input){
 	// Get ambient accessibility (1.0f - ambient occlussion factor)
 	const float accessibility = AmbientAccessibility.Load(screenCoord);
 
-	output.mColor = float4(baseColor * AMBIENT_FACTOR, 1.0f);
+	output.mColor = float4(baseColor * AMBIENT_FACTOR * accessibility, 1.0f);
 	//output.mColor = float4(accessibility, accessibility, accessibility, 1.0f);
 	
 	return output;

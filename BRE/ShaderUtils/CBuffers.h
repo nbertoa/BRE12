@@ -22,9 +22,10 @@ struct FrameCBuffer {
 	FrameCBuffer() = default;
 	~FrameCBuffer() = default;
 	FrameCBuffer(const FrameCBuffer&) = default;
+	const FrameCBuffer& operator=(const FrameCBuffer&);
 	FrameCBuffer(FrameCBuffer&&) = default;
 	FrameCBuffer& operator=(FrameCBuffer&&) = default;
-	
+		
 	DirectX::XMFLOAT4X4 mView{ MathUtils::Identity4x4() };
 	DirectX::XMFLOAT4X4 mInvView{ MathUtils::Identity4x4() };
 	DirectX::XMFLOAT4X4 mProj{ MathUtils::Identity4x4() };
