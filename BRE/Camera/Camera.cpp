@@ -3,19 +3,9 @@
 using namespace DirectX;
 
 void Camera::SetLens(const float fovY, const float aspect, const float zn, const float zf) noexcept {
-	// cache properties
-	mFovY = fovY;
-	mAspect = aspect;
-	mNearZ = zn;
-	mFarZ = zf;
-
-	mNearWindowHeight = 2.0f * mNearZ * tanf( 0.5f * mFovY );
-	mFarWindowHeight  = 2.0f * mFarZ * tanf( 0.5f * mFovY );
-
-	const XMMATRIX P{ XMMatrixPerspectiveFovLH(mFovY, mAspect, mNearZ, mFarZ) };
-	XMStoreFloat4x4(&mProj, P);
-
-	mViewDirty = true;
+	const XMMATRIX proj{ XMMatrixPerspectiveFovLH(fovY, aspect, zn, zf) };
+	XMStoreFloat4x4(&mProj, proj);
+	XMStoreFloat4x4(&mInvProj, DirectX::XMMatrixInverse(nullptr, proj));
 }
 
 void Camera::LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR worldUp) noexcept {
@@ -27,8 +17,6 @@ void Camera::LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR worldUp) noexcept
 	XMStoreFloat3(&mLook, L);
 	XMStoreFloat3(&mRight, R);
 	XMStoreFloat3(&mUp, U);
-
-	mViewDirty = true;
 }
 
 void Camera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3& up) noexcept {
@@ -37,8 +25,6 @@ void Camera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3&
 	const XMVECTOR U( XMLoadFloat3(&up) );
 
 	LookAt(P, T, U);
-
-	mViewDirty = true;
 }
 
 
@@ -57,29 +43,25 @@ void Camera::GetProj4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
 }
 
 void Camera::GetInvProj4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
-	DirectX::XMMATRIX p = DirectX::XMLoadFloat4x4(&mProj);
-	DirectX::XMMatrixInverse(nullptr, p);
-	XMStoreFloat4x4(&m, DirectX::XMMatrixInverse(nullptr, p));
+	m = mInvProj;
 }
 
 void Camera::Strafe(const float d) noexcept {
-	// mPosition += d * mRight
-	const XMVECTOR s(XMVectorReplicate(d));
-	const XMVECTOR r(XMLoadFloat3(&mRight));
-	const XMVECTOR p(XMLoadFloat3(&mPosition));
-	XMStoreFloat3(&mPosition, XMVectorMultiplyAdd(s, r, p));
-
-	mViewDirty = true;
+	// velocity += right * d 
+	XMVECTOR r(XMLoadFloat3(&mRight));
+	r = DirectX::XMVectorScale(r, d);
+	DirectX::XMVECTOR vel = DirectX::XMLoadFloat3(&mVelocity);
+	vel = DirectX::XMVectorAdd(vel, r);
+	DirectX::XMStoreFloat3(&mVelocity, vel);
 }
 
 void Camera::Walk(const float d) noexcept {
-	// mPosition += d * mLook
-	const XMVECTOR s(XMVectorReplicate(d));
-	const XMVECTOR l(XMLoadFloat3(&mLook));
-	const XMVECTOR p(XMLoadFloat3(&mPosition));
-	XMStoreFloat3(&mPosition, XMVectorMultiplyAdd(s, l, p));
-
-	mViewDirty = true;
+	// velocity += look * d 
+	XMVECTOR l(XMLoadFloat3(&mLook));
+	l = DirectX::XMVectorScale(l, d);
+	DirectX::XMVECTOR vel = DirectX::XMLoadFloat3(&mVelocity);
+	vel = DirectX::XMVectorAdd(vel, l);
+	DirectX::XMStoreFloat3(&mVelocity, vel);
 }
 
 void Camera::Pitch(const float angle) noexcept {
@@ -87,8 +69,6 @@ void Camera::Pitch(const float angle) noexcept {
 	const XMMATRIX R(XMMatrixRotationAxis(XMLoadFloat3(&mRight), angle));
 	XMStoreFloat3(&mUp, XMVector3TransformNormal(XMLoadFloat3(&mUp), R));
 	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
-
-	mViewDirty = true;
 }
 
 void Camera::RotateY(const float angle) noexcept {
@@ -97,33 +77,43 @@ void Camera::RotateY(const float angle) noexcept {
 	XMStoreFloat3(&mRight, XMVector3TransformNormal(XMLoadFloat3(&mRight), R));
 	XMStoreFloat3(&mUp, XMVector3TransformNormal(XMLoadFloat3(&mUp), R));
 	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
-	
-	mViewDirty = true;
 }
 
-bool Camera::UpdateViewMatrix() noexcept {
-	if(mViewDirty) {
-		XMVECTOR R( XMLoadFloat3(&mRight) );
-		XMVECTOR L( XMLoadFloat3(&mLook) );
-		const XMVECTOR P( XMLoadFloat3(&mPosition) );
+void Camera::UpdateViewMatrix(const float deltaTime) noexcept {
+	static float maxVelocitySpeed{ 100.0f }; // speed = velocity magnitude
+	static float velocityDamp{ 0.1f }; // fraction of velocity retained per second
 
-		// Keep camera's axes orthogonal to each other and of unit length.
-		L = XMVector3Normalize(L);
-		XMVECTOR U = XMVector3Normalize(XMVector3Cross(L, R));
-
-		// U, L already orthonormal, so no need to normalize cross product.
-		R = XMVector3Cross(U, L);
-
-		XMStoreFloat3(&mRight, R);
-		XMStoreFloat3(&mUp, U);
-		XMStoreFloat3(&mLook, L);
-
-		XMMATRIX viewMatrix = XMMatrixLookToLH(P, L, U);
-		XMStoreFloat4x4(&mView, viewMatrix);
-
-		mViewDirty = false;
-		return true;
+	// Clamp velocity
+	XMVECTOR vel = XMLoadFloat3(&mVelocity);
+	const float velLen = XMVectorGetX(XMVector3Length(vel));
+	const float velocitySpeed = MathUtils::Clamp(velLen, 0.0f, maxVelocitySpeed);
+	if (velocitySpeed > 0.0f) {
+		vel = XMVector3Normalize(vel) * velocitySpeed;
 	}
 
-	return false;
+	// Apply velocity and pitch-way-roll
+	XMVECTOR pos = XMLoadFloat3(&mPosition);
+	pos = pos + vel * deltaTime;
+	
+	// Damp velocity
+	vel = vel * static_cast<float>(pow(velocityDamp, deltaTime));
+	
+	// Keep camera's axes orthogonal to each other and of unit length.
+	XMVECTOR right(XMLoadFloat3(&mRight));
+	XMVECTOR look(XMLoadFloat3(&mLook));
+	look = XMVector3Normalize(look);
+	XMVECTOR up = XMVector3Normalize(XMVector3Cross(look, right));
+
+	// U, L already orthonormal, so no need to normalize cross product.
+	right = XMVector3Cross(up, look);
+
+	XMStoreFloat3(&mRight, right);
+	XMStoreFloat3(&mUp, up);
+	XMStoreFloat3(&mLook, look);
+
+	XMMATRIX viewMatrix = XMMatrixLookToLH(pos, look, up);
+	XMStoreFloat4x4(&mView, viewMatrix);
+
+	XMStoreFloat3(&mPosition, pos);
+	XMStoreFloat3(&mVelocity, vel);
 }

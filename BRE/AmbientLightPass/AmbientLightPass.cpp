@@ -169,14 +169,14 @@ void AmbientLightPass::Init(
 	ASSERT(ValidateData());
 }
 
-void AmbientLightPass::Execute(const FrameCBuffer& /*frameCBuffer*/) noexcept {
+void AmbientLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(ValidateData());
 
-	const std::uint32_t taskCount{ 3U };
+	const std::uint32_t taskCount{ 4U };
 	mCmdListExecutor->ResetExecutedCmdListCount();
 
 	ExecuteBeginTask();
-	//mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
+	mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
 	ExecuteEndingTask();
 	mAmbientLightRecorder->RecordAndPushCommandLists();
 

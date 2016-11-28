@@ -93,14 +93,40 @@ public:
 		const float rz = 0.0f) noexcept;
 
     static DirectX::XMFLOAT4X4 Identity4x4() noexcept {
-        static DirectX::XMFLOAT4X4 I(
+        DirectX::XMFLOAT4X4 identity(
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f);
 
-        return I;
+        return identity;
     }
+
+	static DirectX::XMFLOAT4 QuatIdentity() noexcept {
+		DirectX::XMFLOAT4 identity(0.0f, 0.0f, 0.0f, 1.0f);
+		return identity;
+	}
+
+	static DirectX::XMVECTOR XAxis() noexcept {
+		DirectX::XMFLOAT3 axis(1.0f, 0.0f, 0.0f);
+		return DirectX::XMLoadFloat3(&axis);
+	}
+
+	static DirectX::XMVECTOR YAxis() noexcept {
+		DirectX::XMFLOAT3 axis(0.0f, 1.0f, 0.0f);
+		return DirectX::XMLoadFloat3(&axis);
+	}
+
+	static DirectX::XMVECTOR ZAxis() noexcept {
+		DirectX::XMFLOAT3 axis(0.0f, 0.0f, 1.0f);
+		return DirectX::XMLoadFloat3(&axis);
+	}
+
+	static bool AreEqual(const DirectX::XMVECTOR v1, const DirectX::XMVECTOR v2) noexcept {
+		std::uint32_t res;
+		DirectX::XMVectorEqualR(&res, v1, v2);
+		return DirectX::XMComparisonAllTrue(res);
+	}
 
     static DirectX::XMVECTOR RandUnitVec3() noexcept;
     static DirectX::XMVECTOR RandHemisphereUnitVec3(DirectX::XMVECTOR n) noexcept;

@@ -25,25 +25,31 @@ namespace {
 		const float deltaTime,
 		FrameCBuffer& frameCBuffer) noexcept {
 
+		static const float translationAcceleration = 100.0f; // rate of acceleration in units/sec
+		const float translationDelta = translationAcceleration * deltaTime;
+
+		static const float rotationAcceleration = 400.0f;
+		const float rotationDelta = rotationAcceleration * deltaTime;
+
 		static std::int32_t lastXY[]{ 0UL, 0UL };
 		static const float sCameraOffset{ 7.5f };
 		static const float sCameraMultiplier{ 10.0f };
 
-		if (camera.UpdateViewMatrix()) {
-			DirectX::XMStoreFloat4x4(&frameCBuffer.mView, MathUtils::GetTranspose(camera.GetView4x4f()));
-			DirectX::XMFLOAT4X4 inverse;
-			camera.GetInvView4x4f(inverse);
-			DirectX::XMStoreFloat4x4(&frameCBuffer.mInvView, MathUtils::GetTranspose(inverse));
+		camera.UpdateViewMatrix(deltaTime);
 
-			DirectX::XMStoreFloat4x4(&frameCBuffer.mProj, MathUtils::GetTranspose(camera.GetProj4x4f()));
-			camera.GetInvProj4x4f(inverse);
-			DirectX::XMStoreFloat4x4(&frameCBuffer.mInvProj, MathUtils::GetTranspose(inverse));
+		frameCBuffer.mEyePosW = camera.GetPosition4f();
 
-			frameCBuffer.mEyePosW = camera.GetPosition4f();
-		}
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mView, MathUtils::GetTranspose(camera.GetView4x4f()));
+		DirectX::XMFLOAT4X4 inverse;
+		camera.GetInvView4x4f(inverse);
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mInvView, MathUtils::GetTranspose(inverse));
 
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mProj, MathUtils::GetTranspose(camera.GetProj4x4f()));
+		camera.GetInvProj4x4f(inverse);
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mInvProj, MathUtils::GetTranspose(inverse));
+		
 		// Update camera based on keyboard
-		const float offset = sCameraOffset * (Keyboard::Get().IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f) * deltaTime;
+		const float offset = translationDelta * (Keyboard::Get().IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f);
 		if (Keyboard::Get().IsKeyDown(DIK_W)) {
 			camera.Walk(offset);
 		}
@@ -61,12 +67,11 @@ namespace {
 		const std::int32_t x{ Mouse::Get().X() };
 		const std::int32_t y{ Mouse::Get().Y() };
 		if (Mouse::Get().IsButtonDown(Mouse::MouseButtonsLeft)) {
-			// Make each pixel correspond to a quarter of a degree.
-			const float dx{ XMConvertToRadians(0.25f * static_cast<float>(x - lastXY[0])) };
-			const float dy{ XMConvertToRadians(0.25f * static_cast<float>(y - lastXY[1])) };
+			const float dx = static_cast<float>(x - lastXY[0]) / Settings::sWindowWidth;
+			const float dy = static_cast<float>(y - lastXY[1]) / Settings::sWindowHeight;
 
-			camera.Pitch(dy);
-			camera.RotateY(dx);
+			camera.Pitch(dy * rotationDelta);
+			camera.RotateY(dx * rotationDelta);
 		}
 
 		lastXY[0] = x;
@@ -135,7 +140,7 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 	CreateColorBuffer();
 
 	mCamera.SetLens(Settings::sFieldOfView, Settings::AspectRatio(), Settings::sNearPlaneZ, Settings::sFarPlaneZ);
-	
+
 	// Create and spawn command list processor thread.
 	mCmdListExecutor = CommandListExecutor::Create(mCmdQueue, MAX_NUM_CMD_LISTS);
 	ASSERT(mCmdListExecutor != nullptr);

@@ -47,14 +47,4 @@ struct ImmutableCBuffer {
 		static_cast<float>(Settings::sWindowWidth), 
 		static_cast<float>(Settings::sWindowHeight) 
 	};
-	
-	// Projection constants to get linear depth in view space from 
-	// depth stored in depth buffer. These are:
-	// Projection A = FarClipDistance / (FarClipDistance - NearClipDistance)
-	// Projection B = (-FarClipDistance * NearClipDistance) / (FarClipDistance - NearClipDistance)
-	float mProjectionA_ProjectionB[2U]{
-		Settings::sFarPlaneZ / (Settings::sFarPlaneZ - Settings::sNearPlaneZ),
-		(-Settings::sFarPlaneZ * Settings::sNearPlaneZ) / (Settings::sFarPlaneZ - Settings::sNearPlaneZ)
-	};
-
 };
