@@ -39,13 +39,12 @@ namespace {
 
 		frameCBuffer.mEyePosW = camera.GetPosition4f();
 
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mView, MathUtils::GetTranspose(camera.GetView4x4f()));
-		DirectX::XMFLOAT4X4 inverse;
-		camera.GetInvView4x4f(inverse);
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mView, MathUtils::GetTranspose(camera.GetView()));
+		DirectX::XMFLOAT4X4 inverse = camera.GetInvView();
 		DirectX::XMStoreFloat4x4(&frameCBuffer.mInvView, MathUtils::GetTranspose(inverse));
 
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mProj, MathUtils::GetTranspose(camera.GetProj4x4f()));
-		camera.GetInvProj4x4f(inverse);
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mProj, MathUtils::GetTranspose(camera.GetProj()));
+		inverse = camera.GetInvProj();
 		DirectX::XMStoreFloat4x4(&frameCBuffer.mInvProj, MathUtils::GetTranspose(inverse));
 		
 		// Update camera based on keyboard

@@ -7,9 +7,6 @@
 #include <Utils/DebugUtils.h>
 
 namespace {
-
-
-
 	void BuildPSO(const PSOCreator::PSOParams& psoParams, ID3D12PipelineState* &pso, ID3D12RootSignature* &rootSign) noexcept {
 		ASSERT(psoParams.ValidateData());
 

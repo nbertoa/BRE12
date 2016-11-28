@@ -8,57 +8,34 @@ void Camera::SetLens(const float fovY, const float aspect, const float zn, const
 	XMStoreFloat4x4(&mInvProj, DirectX::XMMatrixInverse(nullptr, proj));
 }
 
-void Camera::LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR worldUp) noexcept {
-	const XMVECTOR L( XMVector3Normalize(XMVectorSubtract(target, pos)) );
-	const XMVECTOR R( XMVector3Normalize(XMVector3Cross(worldUp, L)) );
-	const XMVECTOR U( XMVector3Cross(L, R) );
-
-	XMStoreFloat3(&mPosition, pos);
-	XMStoreFloat3(&mLook, L);
-	XMStoreFloat3(&mRight, R);
-	XMStoreFloat3(&mUp, U);
-}
-
 void Camera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3& up) noexcept {
-	const XMVECTOR P( XMLoadFloat3(&pos) );
-	const XMVECTOR T( XMLoadFloat3(&target) );
-	const XMVECTOR U( XMLoadFloat3(&up) );
+	const XMVECTOR posVec( XMLoadFloat3(&pos) );
+	const XMVECTOR targetVec( XMLoadFloat3(&target) );
+	XMVECTOR upVec( XMLoadFloat3(&up) );
 
-	LookAt(P, T, U);
+	const XMVECTOR lookVec(XMVector3Normalize(XMVectorSubtract(targetVec, posVec)));
+	const XMVECTOR rightVec(XMVector3Normalize(XMVector3Cross(upVec, lookVec)));
+	upVec = XMVector3Cross(lookVec, rightVec);
+
+	XMStoreFloat3(&mPosition, posVec);
+	XMStoreFloat3(&mLook, lookVec);
+	XMStoreFloat3(&mRight, rightVec);
+	XMStoreFloat3(&mUp, upVec);
 }
 
-
-void Camera::GetView4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
-	m = mView;
-}
-
-void Camera::GetInvView4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
-	DirectX::XMMATRIX v = DirectX::XMLoadFloat4x4(&mView);
-	DirectX::XMMatrixInverse(nullptr, v);
-	XMStoreFloat4x4(&m, DirectX::XMMatrixInverse(nullptr, v));
-}
-
-void Camera::GetProj4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
-	m = mProj;
-}
-
-void Camera::GetInvProj4x4f(DirectX::XMFLOAT4X4& m) const noexcept {
-	m = mInvProj;
-}
-
-void Camera::Strafe(const float d) noexcept {
-	// velocity += right * d 
+void Camera::Strafe(const float dist) noexcept {
+	// velocity += right * dist 
 	XMVECTOR r(XMLoadFloat3(&mRight));
-	r = DirectX::XMVectorScale(r, d);
+	r = DirectX::XMVectorScale(r, dist);
 	DirectX::XMVECTOR vel = DirectX::XMLoadFloat3(&mVelocity);
 	vel = DirectX::XMVectorAdd(vel, r);
 	DirectX::XMStoreFloat3(&mVelocity, vel);
 }
 
-void Camera::Walk(const float d) noexcept {
-	// velocity += look * d 
+void Camera::Walk(const float dist) noexcept {
+	// velocity += look * dist 
 	XMVECTOR l(XMLoadFloat3(&mLook));
-	l = DirectX::XMVectorScale(l, d);
+	l = DirectX::XMVectorScale(l, dist);
 	DirectX::XMVECTOR vel = DirectX::XMLoadFloat3(&mVelocity);
 	vel = DirectX::XMVectorAdd(vel, l);
 	DirectX::XMStoreFloat3(&mVelocity, vel);
@@ -113,6 +90,7 @@ void Camera::UpdateViewMatrix(const float deltaTime) noexcept {
 
 	XMMATRIX viewMatrix = XMMatrixLookToLH(pos, look, up);
 	XMStoreFloat4x4(&mView, viewMatrix);
+	XMStoreFloat4x4(&mInvView, DirectX::XMMatrixInverse(nullptr, viewMatrix));
 
 	XMStoreFloat3(&mPosition, pos);
 	XMStoreFloat3(&mVelocity, vel);
