@@ -11,6 +11,8 @@
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
+using namespace DirectX;
+
 // Root Signature:
 // "CBV(b0, visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Frame CBuffer
 // "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 1 -> Frame CBuffer
@@ -47,55 +49,56 @@ namespace {
 	//   This effectively attenuates the occlusion contribution
 	//   according to distance from the kernel centre (samples closer
 	//   to a point occlude it more than samples further away).
-	void GenerateSampleKernel(const std::uint32_t numSamples, std::vector<DirectX::XMFLOAT3>& kernels) {
+	void GenerateSampleKernel(const std::uint32_t numSamples, std::vector<XMFLOAT3>& kernels) {
 		ASSERT(numSamples > 0U);
 
 		kernels.resize(numSamples);
-		DirectX::XMFLOAT3* data(kernels.data());
-		DirectX::XMVECTOR vec;
+		XMFLOAT3* data(kernels.data());
+		XMVECTOR vec;
 		const float numSamplesF = static_cast<float>(numSamples);
 		for (std::uint32_t i = 0U; i < numSamples; ++i) {
-			DirectX::XMFLOAT3& elem = data[i];
+			XMFLOAT3& elem = data[i];
 
 			// Create sample points on the surface of a hemisphere
 			// oriented along the z axis
 			const float x = MathUtils::RandF(-1.0f, 1.0f);
 			const float y = MathUtils::RandF(-1.0f, 1.0f);
-			const float z = MathUtils::RandF(-1.0f, 1.0f);
-			elem = DirectX::XMFLOAT3(x, y, z);
-			vec = DirectX::XMLoadFloat3(&elem);
-			vec = DirectX::XMVector3Normalize(vec);
+			const float z = MathUtils::RandF(-1.0f, 0.0f);
+			elem = XMFLOAT3(x, y, z);
+			vec = XMLoadFloat3(&elem);
+			vec = XMVector3Normalize(vec);
 
 			// Accelerating interpolation function to falloff 
 			// from the distance from the origin.
 			float scale = i / numSamplesF;
 			scale = MathUtils::Lerp(0.1f, 1.0f, scale * scale);
-			vec = DirectX::XMVectorScale(vec, scale);
-			DirectX::XMStoreFloat3(&elem, vec);
+			vec = XMVectorScale(vec, scale);
+			XMStoreFloat3(&elem, vec);
 		}
 	}
 
 	// Generate a set of random values used to rotate the sample kernel,
 	// which will effectively increase the sample count and minimize 
 	// the 'banding' artifacts.
-	void GenerateNoise(const std::uint32_t numSamples, std::vector<DirectX::XMFLOAT3>& noises) {
+	void GenerateNoise(const std::uint32_t numSamples, std::vector<XMFLOAT4>& noises) {
 		ASSERT(numSamples > 0U);
 
 		noises.resize(numSamples);
-		DirectX::XMFLOAT3* data(noises.data());
-		DirectX::XMVECTOR vec;
+		XMFLOAT4* data(noises.data());
+		XMVECTOR vec;
 		for (std::uint32_t i = 0U; i < numSamples; ++i) {
-			DirectX::XMFLOAT3& elem = data[i];
+			XMFLOAT4& elem = data[i];
 
 			// Create sample points on the surface of a hemisphere
 			// oriented along the z axis
 			const float x = MathUtils::RandF(-1.0f, 1.0f);
 			const float y = MathUtils::RandF(-1.0f, 1.0f);
 			const float z = MathUtils::RandF(0.0f, 1.0f);
-			elem = DirectX::XMFLOAT3(x, y, z);
-			vec = DirectX::XMLoadFloat3(&elem);
-			vec = DirectX::XMVector3Normalize(vec);
-			DirectX::XMStoreFloat3(&elem, vec);
+			XMFLOAT3 mappedVec = MathUtils::MapF1(XMFLOAT3(x, y, z));
+			elem = XMFLOAT4(mappedVec.x, mappedVec.y, mappedVec.z, 1.0f);
+			vec = XMLoadFloat4(&elem);
+			vec = XMVector4Normalize(vec);
+			XMStoreFloat4(&elem, vec);
 		}
 	}
 }
@@ -148,9 +151,9 @@ void AmbientOcclusionCmdListRecorder::Init(
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	mNumSamples = 128U;
-	std::vector<DirectX::XMFLOAT3> sampleKernel;
+	std::vector<XMFLOAT3> sampleKernel;
 	GenerateSampleKernel(mNumSamples, sampleKernel);
-	std::vector<DirectX::XMFLOAT3> noises;
+	std::vector<XMFLOAT4> noises;
 	GenerateNoise(mNumSamples, noises);
 	BuildBuffers(sampleKernel.data(), noises.data(), normalSmoothnessBuffer, depthBuffer);
 
@@ -243,11 +246,11 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	ASSERT(mNumSamples != 0U);
 
 	// Create sample kernel buffer and fill it
-	const std::size_t sampleKernelBufferElemSize{ sizeof(DirectX::XMFLOAT3) };
+	const std::size_t sampleKernelBufferElemSize{ sizeof(XMFLOAT3) };
 	ResourceManager::Get().CreateUploadBuffer(sampleKernelBufferElemSize, mNumSamples, mSampleKernelBuffer);
 	const std::uint8_t* sampleKernelPtr = reinterpret_cast<const std::uint8_t*>(sampleKernel);
 	for (std::uint32_t i = 0UL; i < mNumSamples; ++i) {
-		mSampleKernelBuffer->CopyData(i, sampleKernelPtr + sizeof(DirectX::XMFLOAT3) * i, sizeof(DirectX::XMFLOAT3));
+		mSampleKernelBuffer->CopyData(i, sampleKernelPtr + sizeof(XMFLOAT3) * i, sizeof(XMFLOAT3));
 	}
 	mSampleKernelBufferGpuDescHandleBegin.ptr = mSampleKernelBuffer->Resource()->GetGPUVirtualAddress();
 
@@ -255,21 +258,56 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	D3D12_RESOURCE_DESC resDesc = {};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	resDesc.Alignment = 0U;
-	resDesc.Width = mNumSamples;
-	resDesc.Height = mNumSamples;
+	resDesc.Width = 4;
+	resDesc.Height = 4;
 	resDesc.DepthOrArraySize = 1U;
-	resDesc.MipLevels = 0U;
+	resDesc.MipLevels = 1U;
 	resDesc.SampleDesc.Count = 1U;
 	resDesc.SampleDesc.Quality = 0U;
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	resDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	ID3D12Resource* resource{ nullptr };
+	resDesc.Format = DXGI_FORMAT_R16G16B16A16_UNORM;
+	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+	ID3D12Resource* noiseTexture{ nullptr };
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, nullptr, resource);
-	/*std::uint8_t* data{ nullptr };
-	CHECK_HR(res->Map(0, nullptr, reinterpret_cast<void**>(&data)));
-	memcpy(data, kernelNoise, sizeof(DirectX::XMFLOAT3) * mNumSamples);
-	res->Unmap(0, nullptr);*/
+	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, nullptr, noiseTexture);
+
+	// In order to copy CPU memory data into our default buffer, we need to create
+	// an intermediate upload heap. 
+	const std::uint32_t num2DSubresources = resDesc.DepthOrArraySize * resDesc.MipLevels;
+	const std::size_t uploadBufferSize = GetRequiredIntermediateSize(noiseTexture, 0, num2DSubresources);
+	ID3D12Resource* noiseTextureUploadBuffer{ nullptr };
+	ResourceManager::Get().CreateCommittedResource(
+		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		noiseTextureUploadBuffer);
+
+	D3D12_SUBRESOURCE_DATA subResourceData = {};
+	subResourceData.pData = kernelNoise;
+	subResourceData.RowPitch = 4 * sizeof(XMFLOAT4);
+	subResourceData.SlicePitch = subResourceData.RowPitch * 4;
+	
+	//
+	// Schedule to copy the data to the default resource, and change states.
+	// Note that mCurrSol is put in the GENERIC_READ state so it can be 
+	// read by a shader.
+	//
+
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
+	ASSERT(cmdAlloc != nullptr);
+	CHECK_HR(cmdAlloc->Reset());
+	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
+
+	D3D12_RESOURCE_BARRIER barriers[] = { CD3DX12_RESOURCE_BARRIER::Transition(noiseTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST) };
+	mCmdList->ResourceBarrier(_countof(barriers), barriers);
+	UpdateSubresources(mCmdList, noiseTexture, noiseTextureUploadBuffer, 0U, 0U, num2DSubresources, &subResourceData);
+	barriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(noiseTexture, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	mCmdList->ResourceBarrier(_countof(barriers), barriers);
+
+	mCmdList->Close();
+	mCmdListQueue.push(mCmdList);
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
@@ -282,7 +320,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 		&normalSmoothnessBuffer,
 		&depthBuffer,
 		mSampleKernelBuffer->Resource(),
-		&normalSmoothnessBuffer,
+		noiseTexture,
 	};
 
 	// Fill normal_smoothness buffer texture descriptor
@@ -307,15 +345,15 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	srvDesc[2].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	srvDesc[2].Buffer.FirstElement = 0UL;
 	srvDesc[2].Buffer.NumElements = mNumSamples;
-	srvDesc[2].Buffer.StructureByteStride = sizeof(DirectX::XMFLOAT3);
+	srvDesc[2].Buffer.StructureByteStride = sizeof(XMFLOAT3);
 
 	// Fill kernel noise texture descriptor
 	srvDesc[3].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc[3].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc[3].Texture2D.MostDetailedMip = 0;
 	srvDesc[3].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc[3].Format = normalSmoothnessBuffer.GetDesc().Format;
-	srvDesc[3].Texture2D.MipLevels = normalSmoothnessBuffer.GetDesc().MipLevels;
+	srvDesc[3].Format = noiseTexture->GetDesc().Format;
+	srvDesc[3].Texture2D.MipLevels = noiseTexture->GetDesc().MipLevels;
 
 	// Create SRVs
 	mPixelShaderBuffersGpuDescHandle = DescriptorManager::Get().CreateShaderResourceView(res, srvDesc, _countof(srvDesc));

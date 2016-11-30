@@ -3,7 +3,7 @@
 
 #define SAMPLE_KERNEL_SIZE 128U
 #define NOISE_SCALE float2(1920.0f / 4.0f, 1080.0f / 4.0f)
-#define OCCLUSION_RADIUS 5000.5f
+#define OCCLUSION_RADIUS 5001.5f
 #define SURFACE_EPSILON 0.05f
 #define OCCLUSION_FADE_START 0.2f
 #define OCCLUSION_FADE_END 2000
@@ -56,7 +56,7 @@ SamplerState TexSampler : register (s0);
 Texture2D<float4> Normal_Smoothness : register (t0);
 Texture2D<float> Depth : register (t1);
 StructuredBuffer<float3> SampleKernel : register(t2);
-Texture2D<float3> NoiseTexture : register (t3); 
+Texture2D<float4> NoiseTexture : register (t3); 
 
 struct Output {
 	float mAccessibility : SV_Target0;
@@ -142,22 +142,22 @@ Output main(const in Input input) {
 
 	// Construct a change-of-basis matrix to reorient our sam ple kernel
 	// along the origin's normal.
-	float3 rvec = NoiseTexture.Sample(TexSampler, input.mTexCoordO * NOISE_SCALE).xyz * 2.0 - 1.0;
-	rvec = noises[0];
-	rvec = normalize(rvec);
+	const float3 rvec = NoiseTexture.Sample(TexSampler, input.mTexCoordO * NOISE_SCALE).xyz * 2.0 - 1.0;
 	const float3 tangentV = normalize(rvec - normalV * dot(rvec, normalV));
 	const float3 bitangentV = cross(normalV, tangentV);
 	const float3x3 tbn = float3x3(tangentV, bitangentV, normalV);
+
+	const float3 noise = UnmapF1(NoiseTexture.Sample(TexSampler, NOISE_SCALE * input.mTexCoordO).xyz);
 	
 	float occlusionSum = 0.0f;
 	for (uint i = 0U; i < SAMPLE_KERNEL_SIZE; ++i) {
 		const uint offsetIndex = i % 14;
-		float3 offset = reflect(SampleKernel[i], offsetVec[offsetIndex].xyz);
+		float3 offset = reflect(SampleKernel[i], noise);
 
 		float flip = sign(dot(offset, normalV));
 
 		// Sample a point near geomPosV within the occlusion radius.
-		const float3 sampleV = geomPosV + flip * offset * OCCLUSION_RADIUS;
+		float3 sampleV = geomPosV + flip * offset * OCCLUSION_RADIUS;
 
 		// Project sample
 		float4 sampleH = mul(float4(sampleV, 1.0f), gFrameCBuffer.mP);
@@ -193,16 +193,27 @@ Output main(const in Input input) {
 
 		float occlusion = dp*OcclusionFunction(distZ);
 
-		const float rangeCheck = abs(geomPosV.z - sampleDepthV) < OCCLUSION_RADIUS ? 1.0 : 0.0;
-		//occlusionSum += (sampleDepthV <= sampleV.z ? 1.0 : 0.0) * rangeCheck;
+		sampleV = mul(SampleKernel[i], tbn);
+		sampleV = sampleV * OCCLUSION_RADIUS + geomPosV;
 
-		occlusionSum += occlusion;
+		float4 offset2 = float4(sampleV, 1.0f);
+		offset2 = mul(offset2, gFrameCBuffer.mP);
+		offset2.xy /= offset2.w;
+		offset2.xy = offset2.xy * 0.5 + 0.5;
+
+		sampleDepthV = Depth.Load(float3(offset2.xy, 0));
+		sampleDepthV = NdcDepthToViewDepth(sampleDepthV, gFrameCBuffer.mP);
+
+		const float rangeCheck = abs(geomPosV.z - sampleDepthV) < OCCLUSION_RADIUS ? 1.0 : 0.0;
+		occlusionSum += (sampleDepthV <= sampleV.z ? 1.0 : 0.0) * rangeCheck;
+
+		//occlusionSum += occlusion;
 	}
 
 	output.mAccessibility = 1.0f - (occlusionSum / SAMPLE_KERNEL_SIZE);
 
 	// Sharpen the contrast of the SSAO map to make the SSAO affect more dramatic.
-	output.mAccessibility =  saturate(pow(output.mAccessibility, 2.0f));
+	output.mAccessibility =  saturate(pow(output.mAccessibility, 6.0f));
 
 	return output;
 }
