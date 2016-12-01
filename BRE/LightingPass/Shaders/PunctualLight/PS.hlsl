@@ -37,7 +37,7 @@ Output main(const in Input input) {
 	// p.z = t * ViewRayV.z
 	// t = p.z / ViewRayV.z
 	//
-	const float3 geomPosV = (depthV / input.mViewRayV.z) * input.mViewRayV;
+	const float3 fragPosV = (depthV / input.mViewRayV.z) * input.mViewRayV;
 
 	PunctualLight light = input.mPunctualLight;
 
@@ -47,13 +47,13 @@ Output main(const in Input input) {
 
 	const float4 baseColor_metalmask = BaseColor_MetalMask.Load(screenCoord);
 	const float smoothness = normal_smoothness.z;
-	const float3 lightDirV = normalize(light.mLightPosVAndRange.xyz - geomPosV);
+	const float3 lightDirV = normalize(light.mLightPosVAndRange.xyz - fragPosV);
 
 	// As we are working at view space, we do not need camera position to 
 	// compute vector from geometry position to camera.
-	const float3 viewV = normalize(-geomPosV);
+	const float3 viewV = normalize(-fragPosV);
 
-	const float3 lightContrib = computePunctualLightFrostbiteLightContribution(light, geomPosV, normalV);
+	const float3 lightContrib = computePunctualLightFrostbiteLightContribution(light, fragPosV, normalV);
 			
 	const float3 fDiffuse = DiffuseBrdf(baseColor_metalmask.xyz, baseColor_metalmask.w);
 	const float3 fSpecular = SpecularBrdf(normalV, viewV, lightDirV, baseColor_metalmask.xyz, smoothness, baseColor_metalmask.w);

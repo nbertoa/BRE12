@@ -15,8 +15,8 @@ Output main(const in Input input){
 
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
 	const float4 color = ColorBufferTexture.Load(screenCoord);
-	//output.mColor = float4(FilmicToneMapping(color.rgb), color.a);
-	output.mColor = color;
+	output.mColor = float4(FilmicToneMapping(color.rgb), color.a);
+	//output.mColor = color;
 	
 	return output;
 }

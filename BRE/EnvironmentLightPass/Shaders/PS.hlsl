@@ -39,9 +39,9 @@ Output main(const in Input input){
 	// p.z = t * ViewRayV.z
 	// t = p.z / ViewRayV.z
 	//
-	const float3 geomPosV = (depthV / input.mViewRayV.z) * input.mViewRayV;
+	const float3 fragPosV = (depthV / input.mViewRayV.z) * input.mViewRayV;
 
-	const float3 geomPosW = mul(float4(geomPosV, 1.0f), gFrameCBuffer.mInvV).xyz;
+	const float3 geomPosW = mul(float4(fragPosV, 1.0f), gFrameCBuffer.mInvV).xyz;
 	
 	// Get normal
 	const float2 normal = normal_smoothness.xy;
@@ -52,7 +52,7 @@ Output main(const in Input input){
 
 	// As we are working at view space, we do not need camera position to 
 	// compute vector from geometry position to camera.
-	const float3 viewV = normalize(-geomPosV);
+	const float3 viewV = normalize(-fragPosV);
 
 	// Diffuse reflection color.
 	// When we sample a cube map, we need to use data in world space, not view space.

@@ -21,6 +21,7 @@ using namespace DirectX;
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
 	ID3D12RootSignature* sRootSign{ nullptr };
+	const std::uint32_t sNoiseTextureDimension = 4U;
 
 	void BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* cmdAlloc[], const std::size_t cmdAllocCount) noexcept {
 		ASSERT(cmdList == nullptr);
@@ -63,7 +64,7 @@ namespace {
 			// oriented along the z axis
 			const float x = MathUtils::RandF(-1.0f, 1.0f);
 			const float y = MathUtils::RandF(-1.0f, 1.0f);
-			const float z = MathUtils::RandF(-1.0f, 0.0f);
+			const float z = MathUtils::RandF(0.f, 1.0f);
 			elem = XMFLOAT3(x, y, z);
 			vec = XMLoadFloat3(&elem);
 			vec = XMVector3Normalize(vec);
@@ -93,9 +94,9 @@ namespace {
 			// oriented along the z axis
 			const float x = MathUtils::RandF(-1.0f, 1.0f);
 			const float y = MathUtils::RandF(-1.0f, 1.0f);
-			const float z = MathUtils::RandF(0.0f, 1.0f);
+			const float z = 0.0f;
 			XMFLOAT3 mappedVec = MathUtils::MapF1(XMFLOAT3(x, y, z));
-			elem = XMFLOAT4(mappedVec.x, mappedVec.y, mappedVec.z, 1.0f);
+			elem = XMFLOAT4(mappedVec.x, mappedVec.y, mappedVec.z, 0.0f);
 			vec = XMLoadFloat4(&elem);
 			vec = XMVector4Normalize(vec);
 			XMStoreFloat4(&elem, vec);
@@ -154,7 +155,7 @@ void AmbientOcclusionCmdListRecorder::Init(
 	std::vector<XMFLOAT3> sampleKernel;
 	GenerateSampleKernel(mNumSamples, sampleKernel);
 	std::vector<XMFLOAT4> noises;
-	GenerateNoise(mNumSamples, noises);
+	GenerateNoise(sNoiseTextureDimension * sNoiseTextureDimension, noises);
 	BuildBuffers(sampleKernel.data(), noises.data(), normalSmoothnessBuffer, depthBuffer);
 
 	ASSERT(ValidateData());
@@ -258,8 +259,8 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	D3D12_RESOURCE_DESC resDesc = {};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	resDesc.Alignment = 0U;
-	resDesc.Width = 4;
-	resDesc.Height = 4;
+	resDesc.Width = sNoiseTextureDimension;
+	resDesc.Height = sNoiseTextureDimension;
 	resDesc.DepthOrArraySize = 1U;
 	resDesc.MipLevels = 1U;
 	resDesc.SampleDesc.Count = 1U;
@@ -286,8 +287,8 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 
 	D3D12_SUBRESOURCE_DATA subResourceData = {};
 	subResourceData.pData = kernelNoise;
-	subResourceData.RowPitch = 4 * sizeof(XMFLOAT4);
-	subResourceData.SlicePitch = subResourceData.RowPitch * 4;
+	subResourceData.RowPitch = sNoiseTextureDimension * sizeof(XMFLOAT4);
+	subResourceData.SlicePitch = subResourceData.RowPitch * sNoiseTextureDimension;
 	
 	//
 	// Schedule to copy the data to the default resource, and change states.

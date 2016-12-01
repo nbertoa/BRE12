@@ -6,6 +6,7 @@
     <None Include="Lights.hlsli" />
     <None Include="Material.hlsli" />
     <None Include="Utils.hlsli" />
+    <None Include="AmbientOcclusion.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CBuffers.h" />

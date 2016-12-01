@@ -59,7 +59,7 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/unreal.obj",
+		"models/mitsubaSphere.obj",
 		"models/floor.obj",
 	};
 
@@ -68,7 +68,7 @@ namespace {
 	const float sFloorTy{ -20.5f };
 	const float sFloorTz{ 150.0f };
 
-	const float sModel{ 0.05f };
+	const float sModel{ 0.20f };
 
 	const float sTx{ 0.0f };
 	const float sTy{ sFloorTy };
