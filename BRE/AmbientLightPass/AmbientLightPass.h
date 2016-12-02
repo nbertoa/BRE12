@@ -5,6 +5,7 @@
 
 #include <AmbientLightPass\AmbientLightCmdListRecorder.h>
 #include <AmbientLightPass\AmbientOcclusionCmdListRecorder.h>
+#include <AmbientLightPass\BlurCmdListRecorder.h>
 
 class CommandListExecutor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
@@ -58,10 +59,13 @@ private:
 
 	std::unique_ptr<AmbientOcclusionCmdListRecorder> mAmbientOcclusionRecorder;
 	std::unique_ptr<AmbientLightCmdListRecorder> mAmbientLightRecorder;	
+	std::unique_ptr<BlurCmdListRecorder> mBlurRecorder;
 
-	// Geometry buffers data
 	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRTCpuDescHandle{ 0UL };
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
+	D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRTCpuDescHandle{ 0UL };
 
 	CommandListExecutor* mCmdListExecutor{ nullptr };
 };

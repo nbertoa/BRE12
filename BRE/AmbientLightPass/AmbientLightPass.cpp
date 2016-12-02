@@ -70,7 +70,7 @@ namespace {
 		}
 	}
 
-	void CreateAmbientAccessibilityBuffer(
+	void CreateBuffer(
 		Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
 		D3D12_CPU_DESCRIPTOR_HANDLE& bufferRTCpuDescHandle) noexcept {
 		
@@ -141,9 +141,11 @@ void AmbientLightPass::Init(
 	// Initialize recorder's PSO
 	AmbientLightCmdListRecorder::InitPSO();
 	AmbientOcclusionCmdListRecorder::InitPSO();
+	BlurCmdListRecorder::InitPSO();
 
-	// Create ambient accessibility buffer
-	CreateAmbientAccessibilityBuffer(mAmbientAccessibilityBuffer, mAmbientAccessibilityBufferRTCpuDescHandle);
+	// Create ambient accessibility buffer and blur buffer
+	CreateBuffer(mAmbientAccessibilityBuffer, mAmbientAccessibilityBufferRTCpuDescHandle);
+	CreateBuffer(mBlurBuffer, mBlurBufferRTCpuDescHandle);
 	
 	// Initialize ambient occlusion recorder
 	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
@@ -155,6 +157,15 @@ void AmbientLightPass::Init(
 		depthBuffer,
 		depthBufferCpuDesc);
 
+	// Initialize blur recorder
+	mBlurRecorder.reset(new BlurCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
+	mBlurRecorder->Init(
+		mesh.VertexBufferData(),
+		mesh.IndexBufferData(),
+		*mAmbientAccessibilityBuffer.Get(),
+		mBlurBufferRTCpuDescHandle,
+		depthBufferCpuDesc);
+
 	// Initialize ambient light recorder
 	mAmbientLightRecorder.reset(new AmbientLightCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
 	mAmbientLightRecorder->Init(
@@ -162,8 +173,8 @@ void AmbientLightPass::Init(
 		mesh.IndexBufferData(), 
 		baseColorMetalMaskBuffer,
 		colorBufferCpuDesc,
-		*mAmbientAccessibilityBuffer.Get(),
-		mAmbientAccessibilityBufferRTCpuDescHandle,
+		*mBlurBuffer.Get(),
+		mBlurBufferRTCpuDescHandle,
 		depthBufferCpuDesc);
 
 	ASSERT(ValidateData());
@@ -172,11 +183,12 @@ void AmbientLightPass::Init(
 void AmbientLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(ValidateData());
 
-	const std::uint32_t taskCount{ 4U };
+	const std::uint32_t taskCount{ 5U };
 	mCmdListExecutor->ResetExecutedCmdListCount();
 
 	ExecuteBeginTask();
 	mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
+	mBlurRecorder->RecordAndPushCommandLists();
 	ExecuteEndingTask();
 	mAmbientLightRecorder->RecordAndPushCommandLists();
 
@@ -208,6 +220,8 @@ bool AmbientLightPass::ValidateData() const noexcept {
 		mAmbientLightRecorder.get() != nullptr &&
 		mAmbientAccessibilityBuffer.Get() != nullptr &&
 		mAmbientAccessibilityBufferRTCpuDescHandle.ptr != 0UL &&
+		mBlurBuffer.Get() != nullptr &&
+		mBlurBufferRTCpuDescHandle.ptr != 0UL &&
 		mCmdListExecutor != nullptr;
 
 	return b;
@@ -228,9 +242,10 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
 	const std::uint32_t barriersCount = _countof(barriers);
-	ASSERT(barriersCount == 1UL);
+	ASSERT(barriersCount == 2UL);
 	mCmdListBegin->ResourceBarrier(barriersCount, barriers);
 
 	// Clear render targets
@@ -257,9 +272,10 @@ void AmbientLightPass::ExecuteEndingTask() noexcept {
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER endBarriers[]{
 		CD3DX12_RESOURCE_BARRIER::Transition(mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(mBlurBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 	};
 	const std::uint32_t barriersCount = _countof(endBarriers);
-	ASSERT(barriersCount == 1UL);
+	ASSERT(barriersCount == 2UL);
 	mCmdListEnd->ResourceBarrier(barriersCount, endBarriers);
 	CHECK_HR(mCmdListEnd->Close());
 

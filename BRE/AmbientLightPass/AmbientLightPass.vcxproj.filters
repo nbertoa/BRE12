@@ -4,11 +4,13 @@
     <ClCompile Include="AmbientLightPass.cpp" />
     <ClCompile Include="AmbientOcclusionCmdListRecorder.cpp" />
     <ClCompile Include="AmbientLightCmdListRecorder.cpp" />
+    <ClCompile Include="BlurCmdListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AmbientLightPass.h" />
     <ClInclude Include="AmbientOcclusionCmdListRecorder.h" />
     <ClInclude Include="AmbientLightCmdListRecorder.h" />
+    <ClInclude Include="BlurCmdListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -19,6 +21,9 @@
     </Filter>
     <Filter Include="Shaders\AmbientOcclussion">
       <UniqueIdentifier>{3fc3e9c7-8d6c-4aad-92bf-097fb3be4c0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Blur">
+      <UniqueIdentifier>{d7cb2ea0-7805-46ae-a513-d6569845f4e8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -39,6 +44,15 @@
     </FxCompile>
     <FxCompile Include="Shaders\AmbientOcclussion\VS.hlsl">
       <Filter>Shaders\AmbientOcclussion</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Blur\PS.hlsl">
+      <Filter>Shaders\Blur</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Blur\RS.hlsl">
+      <Filter>Shaders\Blur</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Blur\VS.hlsl">
+      <Filter>Shaders\Blur</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

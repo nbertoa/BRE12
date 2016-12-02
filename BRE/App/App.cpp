@@ -34,7 +34,7 @@ namespace {
 		RootSignatureManager::Create(device);
 		ShaderManager::Create();
 
-		//ShowCursor(false);
+		ShowCursor(false);
 	}
 
 	void InitMasterRenderTask(const HWND hwnd, ID3D12Device& device, Scene* scene, MasterRender* &masterRender) noexcept {
