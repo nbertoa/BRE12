@@ -64,7 +64,7 @@ namespace {
 			// oriented along the z axis
 			const float x = MathUtils::RandF(-1.0f, 1.0f);
 			const float y = MathUtils::RandF(-1.0f, 1.0f);
-			const float z = MathUtils::RandF(0.f, 1.0f);
+			const float z = MathUtils::RandF(0.0f, 1.0f);
 			elem = XMFLOAT3(x, y, z);
 			vec = XMLoadFloat3(&elem);
 			vec = XMVector3Normalize(vec);
@@ -94,12 +94,15 @@ namespace {
 			// oriented along the z axis
 			const float x = MathUtils::RandF(-1.0f, 1.0f);
 			const float y = MathUtils::RandF(-1.0f, 1.0f);
-			const float z = 0.0f;
-			XMFLOAT3 mappedVec = MathUtils::MapF1(XMFLOAT3(x, y, z));
-			elem = XMFLOAT4(mappedVec.x, mappedVec.y, mappedVec.z, 0.0f);
+			const float z = 0.0f;			
+			elem = XMFLOAT4(x, y, z, 0.0f);
 			vec = XMLoadFloat4(&elem);
 			vec = XMVector4Normalize(vec);
 			XMStoreFloat4(&elem, vec);
+			XMFLOAT3 mappedVec = MathUtils::MapF1(XMFLOAT3(elem.x, elem.y, elem.z));
+			elem.x = mappedVec.x;
+			elem.y = mappedVec.y;
+			elem.z = mappedVec.z;
 		}
 	}
 }

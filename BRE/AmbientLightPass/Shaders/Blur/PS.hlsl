@@ -21,7 +21,7 @@ Output main(const in Input input){
 	float h;
 	BufferTexture.GetDimensions(w, h);
 	const float2 texelSize = 1.0 / float2(w, h);
-	float result = 0.0;
+	float result = 0.0; 
 	const float hlimComponent = float(-BLUR_SIZE) * 0.5 + 0.5;
 	const float2 hlim = float2(hlimComponent, hlimComponent);
 	for (uint i = 0; i < BLUR_SIZE; ++i) {
@@ -31,8 +31,8 @@ Output main(const in Input input){
 		}
 	}
 
-	output.mBlur = result / float(BLUR_SIZE * BLUR_SIZE);
-	//output.mBlur = BufferTexture.Load(int3(input.mPosH.xy, 0)).x;
+	//output.mBlur = result / float(BLUR_SIZE * BLUR_SIZE);
+	output.mBlur = BufferTexture.Load(int3(input.mPosH.xy, 0)).x;
 	
 	return output;
 }

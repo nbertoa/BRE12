@@ -45,7 +45,7 @@ float OcclusionFunction(
 // Returns ambient occlusion factor.
 // sampleKernelMatrix: Change-of-basis matrix to reorient our sample kernel
 // along the origin's normal.
-float AmbientOcclusionVersion1(
+float SSAOVersion1(
 	const float3 sampleKernel,
 	const float3x3 sampleKernelMatrix, 
 	const float4x4 projMatrix,
@@ -72,7 +72,7 @@ float AmbientOcclusionVersion1(
 	return (sampleDepthV <= sampleV.z ? 1.0 : 0.0) * rangeCheck;
 }
 
-float AmbientOcclusionVersion2(
+float SSAOVersion2(
 	const float3 sampleKernel, 
 	const float3 noiseVec,
 	const float3 normalV,

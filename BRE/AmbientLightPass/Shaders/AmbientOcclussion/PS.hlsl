@@ -5,7 +5,7 @@
 #define VERSION1
 #define SAMPLE_KERNEL_SIZE 128U
 #define NOISE_SCALE float2(1920.0f / 4.0f, 1080.0f / 4.0f)
-#define OCCLUSION_RADIUS 100000.0f
+#define OCCLUSION_RADIUS 5000.0f
 #define SURFACE_EPSILON 0.05f
 #define OCCLUSION_FADE_START 0.2f
 #define OCCLUSION_FADE_END 2000
@@ -51,9 +51,9 @@ Output main(const in Input input) {
 
 	// Construct a change-of-basis matrix to reorient our sample kernel
 	// along the origin's normal.
-	const float3 noiseVec = UnmapF1(NoiseTexture.Sample(TexSampler, NOISE_SCALE * input.mTexCoordO).xyz);
+	const float3 noiseVec = normalize(NoiseTexture.Sample(TexSampler, input.mTexCoordO).xyz * 2.0f - 1.0f);
 	const float3 tangentV = normalize(noiseVec - normalV * dot(noiseVec, normalV));
-	const float3 bitangentV = cross(normalV, tangentV);
+	const float3 bitangentV = normalize(cross(normalV, tangentV));
 	const float3x3 sampleKernelMatrix = float3x3(tangentV, bitangentV, normalV);
 	
 	float occlusionSum = 0.0f;
@@ -61,7 +61,7 @@ Output main(const in Input input) {
 		float occlusion;
 		
 #ifdef VERSION1
-	occlusion = AmbientOcclusionVersion1(
+	occlusion = SSAOVersion1(
 		SampleKernel[i],
 		sampleKernelMatrix,
 		gFrameCBuffer.mP,
@@ -70,7 +70,7 @@ Output main(const in Input input) {
 		Depth);
 
 #else
-	occlusion = AmbientOcclusionVersion2(
+	occlusion = SSAOVersion2(
 		SampleKernel[i],
 		noiseVec,
 		normalV,
@@ -89,7 +89,7 @@ Output main(const in Input input) {
 	output.mAccessibility = 1.0f - (occlusionSum / SAMPLE_KERNEL_SIZE);
 
 	// Sharpen the contrast of the SSAO map to make the SSAO affect more dramatic.
-	output.mAccessibility =  saturate(pow(output.mAccessibility, 3.0f));
+	//output.mAccessibility =  saturate(pow(output.mAccessibility, 3.0f));
 
 	return output;
 }
