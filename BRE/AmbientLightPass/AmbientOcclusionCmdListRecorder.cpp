@@ -50,31 +50,31 @@ namespace {
 	//   This effectively attenuates the occlusion contribution
 	//   according to distance from the kernel centre (samples closer
 	//   to a point occlude it more than samples further away).
-	void GenerateSampleKernel(const std::uint32_t numSamples, std::vector<XMFLOAT3>& kernels) {
+	void GenerateSampleKernel(const std::uint32_t numSamples, std::vector<XMFLOAT4>& kernels) {
 		ASSERT(numSamples > 0U);
 
 		kernels.resize(numSamples);
-		XMFLOAT3* data(kernels.data());
+		XMFLOAT4* data(kernels.data());
 		XMVECTOR vec;
 		const float numSamplesF = static_cast<float>(numSamples);
 		for (std::uint32_t i = 0U; i < numSamples; ++i) {
-			XMFLOAT3& elem = data[i];
+			XMFLOAT4& elem = data[i];
 
 			// Create sample points on the surface of a hemisphere
 			// oriented along the z axis
 			const float x = MathUtils::RandF(-1.0f, 1.0f);
 			const float y = MathUtils::RandF(-1.0f, 1.0f);
 			const float z = MathUtils::RandF(0.0f, 1.0f);
-			elem = XMFLOAT3(x, y, z);
-			vec = XMLoadFloat3(&elem);
-			vec = XMVector3Normalize(vec);
+			elem = XMFLOAT4(x, y, z, 0.0f);
+			vec = XMLoadFloat4(&elem);
+			vec = XMVector4Normalize(vec);
 
 			// Accelerating interpolation function to falloff 
 			// from the distance from the origin.
 			float scale = i / numSamplesF;
 			scale = MathUtils::Lerp(0.1f, 1.0f, scale * scale);
 			vec = XMVectorScale(vec, scale);
-			XMStoreFloat3(&elem, vec);
+			XMStoreFloat4(&elem, vec);
 		}
 	}
 
@@ -123,7 +123,6 @@ void AmbientOcclusionCmdListRecorder::InitPSO() noexcept {
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
 	psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
 	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
-	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
 	psoParams.mPSFilename = "AmbientLightPass/Shaders/AmbientOcclusion/PS.cso";
 	psoParams.mRootSignFilename = "AmbientLightPass/Shaders/AmbientOcclusion/RS.cso";
 	psoParams.mVSFilename = "AmbientLightPass/Shaders/AmbientOcclusion/VS.cso";
@@ -140,8 +139,6 @@ void AmbientOcclusionCmdListRecorder::InitPSO() noexcept {
 }
 
 void AmbientOcclusionCmdListRecorder::Init(
-	const BufferCreator::VertexBufferData& vertexBufferData,
-	const BufferCreator::IndexBufferData& indexBufferData,
 	ID3D12Resource& normalSmoothnessBuffer,	
 	const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessBufferCpuDesc,
 	ID3D12Resource& depthBuffer,
@@ -149,13 +146,11 @@ void AmbientOcclusionCmdListRecorder::Init(
 {
 	ASSERT(ValidateData() == false);
 
-	mVertexBufferData = vertexBufferData;
-	mIndexBufferData = indexBufferData;
 	mAmbientAccessBufferCpuDesc = ambientAccessBufferCpuDesc;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	mNumSamples = 128U;
-	std::vector<XMFLOAT3> sampleKernel;
+	std::vector<XMFLOAT4> sampleKernel;
 	GenerateSampleKernel(mNumSamples, sampleKernel);
 	std::vector<XMFLOAT4> noises;
 	GenerateNoise(sNoiseTextureDimension * sNoiseTextureDimension, noises);
@@ -185,9 +180,7 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
-	mCmdList->SetGraphicsRootSignature(sRootSign);
-	
-	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCmdList->SetGraphicsRootSignature(sRootSign);	
 
 	// Set root parameters
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
@@ -196,9 +189,8 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCmdList->SetGraphicsRootDescriptorTable(2U, mPixelShaderBuffersGpuDescHandle);
 
 	// Draw object
-	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
-	mCmdList->IASetIndexBuffer(&mIndexBufferData.mBufferView);
-	mCmdList->DrawIndexedInstanced(mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
+	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCmdList->DrawInstanced(6U, 1U, 0U, 0U);
 
 	mCmdList->Close();
 
@@ -250,11 +242,11 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	ASSERT(mNumSamples != 0U);
 
 	// Create sample kernel buffer and fill it
-	const std::size_t sampleKernelBufferElemSize{ sizeof(XMFLOAT3) };
+	const std::size_t sampleKernelBufferElemSize{ sizeof(XMFLOAT4) };
 	ResourceManager::Get().CreateUploadBuffer(sampleKernelBufferElemSize, mNumSamples, mSampleKernelBuffer);
 	const std::uint8_t* sampleKernelPtr = reinterpret_cast<const std::uint8_t*>(sampleKernel);
 	for (std::uint32_t i = 0UL; i < mNumSamples; ++i) {
-		mSampleKernelBuffer->CopyData(i, sampleKernelPtr + sizeof(XMFLOAT3) * i, sizeof(XMFLOAT3));
+		mSampleKernelBuffer->CopyData(i, sampleKernelPtr + sampleKernelBufferElemSize * i, sampleKernelBufferElemSize);
 	}
 	mSampleKernelBufferGpuDescHandleBegin.ptr = mSampleKernelBuffer->Resource()->GetGPUVirtualAddress();
 
@@ -349,7 +341,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	srvDesc[2].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	srvDesc[2].Buffer.FirstElement = 0UL;
 	srvDesc[2].Buffer.NumElements = mNumSamples;
-	srvDesc[2].Buffer.StructureByteStride = sizeof(XMFLOAT3);
+	srvDesc[2].Buffer.StructureByteStride = sizeof(XMFLOAT4);
 
 	// Fill kernel noise texture descriptor
 	srvDesc[3].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;

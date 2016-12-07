@@ -51,7 +51,6 @@ void BlurCmdListRecorder::InitPSO() noexcept {
 	PSOCreator::PSOParams psoParams{};
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
 	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
-	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
 	psoParams.mPSFilename = "AmbientLightPass/Shaders/Blur/PS.cso";
 	psoParams.mRootSignFilename = "AmbientLightPass/Shaders/Blur/RS.cso";
 	psoParams.mVSFilename = "AmbientLightPass/Shaders/Blur/VS.cso";
@@ -68,16 +67,12 @@ void BlurCmdListRecorder::InitPSO() noexcept {
 }
 
 void BlurCmdListRecorder::Init(
-	const BufferCreator::VertexBufferData& vertexBufferData,
-	const BufferCreator::IndexBufferData indexBufferData,
 	ID3D12Resource& ambientAccessibilityBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& blurBufferCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
 {
 	ASSERT(ValidateData() == false);
 
-	mVertexBufferData = vertexBufferData;
-	mIndexBufferData = indexBufferData;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 	mBlurBufferCpuDescHandle = blurBufferCpuDesc;
 
@@ -106,13 +101,12 @@ void BlurCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 
-	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	// Set root parameters
+	mCmdList->SetGraphicsRootDescriptorTable(0U, mColorBufferGpuDescHandle);
 
 	// Draw object
-	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
-	mCmdList->IASetIndexBuffer(&mIndexBufferData.mBufferView);
-	mCmdList->SetGraphicsRootDescriptorTable(0U, mColorBufferGpuDescHandle);
-	mCmdList->DrawIndexedInstanced(mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
+	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCmdList->DrawInstanced(6U, 1U, 0U, 0U);
 
 	mCmdList->Close();
 

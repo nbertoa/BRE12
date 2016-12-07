@@ -56,7 +56,6 @@ void EnvironmentLightCmdListRecorder::InitPSO() noexcept {
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
 	psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
 	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
-	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
 	psoParams.mPSFilename = "EnvironmentLightPass/Shaders/PS.cso";
 	psoParams.mRootSignFilename = "EnvironmentLightPass/Shaders/RS.cso";
 	psoParams.mVSFilename = "EnvironmentLightPass/Shaders/VS.cso";
@@ -73,8 +72,6 @@ void EnvironmentLightCmdListRecorder::InitPSO() noexcept {
 }
 
 void EnvironmentLightCmdListRecorder::Init(
-	const BufferCreator::VertexBufferData& vertexBufferData,
-	const BufferCreator::IndexBufferData indexBufferData,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
@@ -87,8 +84,6 @@ void EnvironmentLightCmdListRecorder::Init(
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(geometryBuffersCount > 0U);
 
-	mVertexBufferData = std::move(vertexBufferData);
-	mIndexBufferData = std::move(indexBufferData);
 	mColorBufferCpuDesc = colorBufferCpuDesc;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
@@ -120,8 +115,6 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 	
-	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 	// Set root parameters
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
@@ -129,9 +122,8 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCmdList->SetGraphicsRootDescriptorTable(2U, mTexturesGpuDescHandle);
 
 	// Draw object
-	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
-	mCmdList->IASetIndexBuffer(&mIndexBufferData.mBufferView);
-	mCmdList->DrawIndexedInstanced(mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
+	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCmdList->DrawInstanced(6U, 1U, 0U, 0U);
 
 	mCmdList->Close();
 

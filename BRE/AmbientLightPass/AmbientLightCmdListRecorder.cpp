@@ -52,7 +52,6 @@ void AmbientLightCmdListRecorder::InitPSO() noexcept {
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
 	psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
 	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
-	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
 	psoParams.mPSFilename = "AmbientLightPass/Shaders/AmbientLight/PS.cso";
 	psoParams.mRootSignFilename = "AmbientLightPass/Shaders/AmbientLight/RS.cso";
 	psoParams.mVSFilename = "AmbientLightPass/Shaders/AmbientLight/VS.cso";
@@ -69,8 +68,6 @@ void AmbientLightCmdListRecorder::InitPSO() noexcept {
 }
 
 void AmbientLightCmdListRecorder::Init(
-	const BufferCreator::VertexBufferData& vertexBufferData,
-	const BufferCreator::IndexBufferData& indexBufferData,
 	ID3D12Resource& baseColorMetalMaskBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 	ID3D12Resource& ambientAccessibilityBuffer,
@@ -79,8 +76,6 @@ void AmbientLightCmdListRecorder::Init(
 {
 	ASSERT(ValidateData() == false);
 
-	mVertexBufferData = vertexBufferData;
-	mIndexBufferData = indexBufferData;
 	mColorBufferCpuDesc = colorBufferCpuDesc;
 	mAmbientAccessibilityBufferRTCpuDesc = ambientAccessibilityBufferRTCpuDesc;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
@@ -109,13 +104,12 @@ void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 	
-	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	// Draw object
-	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
-	mCmdList->IASetIndexBuffer(&mIndexBufferData.mBufferView);
+	// Set root parameters
 	mCmdList->SetGraphicsRootDescriptorTable(0U, mBaseColor_MetalMaskGpuDescHandle);
-	mCmdList->DrawIndexedInstanced(mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
+
+	// Draw
+	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCmdList->DrawInstanced(6U, 1U, 0U, 0U);
 
 	mCmdList->Close();
 

@@ -98,7 +98,7 @@ namespace {
 		ID3D12Resource** normals,
 		Material* materials,
 		const std::size_t numMaterials,
-		NormalCmdListRecorder* &recorder) {
+		ColorCmdListRecorder* &recorder) {
 
 		ASSERT(textures != nullptr);
 		ASSERT(normals != nullptr);
@@ -149,13 +149,11 @@ namespace {
 		}
 
 		// Create recorder
-		recorder = new NormalCmdListRecorder(D3dData::Device());
+		recorder = new ColorCmdListRecorder(D3dData::Device());
 		recorder->Init(
 			geomDataVec.data(),
 			static_cast<std::uint32_t>(geomDataVec.size()),
 			materialsVec.data(),
-			texturesVec.data(),
-			normalsVec.data(),
 			static_cast<std::uint32_t>(materialsVec.size()));
 	}
 
@@ -286,13 +284,14 @@ void AmbientOcclussionScene::GenerateGeomPassRecorders(
 	//
 	// Generate floor
 	//
-	NormalCmdListRecorder* recorder{ nullptr };
+	ColorCmdListRecorder* recorder{ nullptr };
+	NormalCmdListRecorder* recorder2{ nullptr };
 	GenerateFloorRecorder(
 		floor.Meshes(),
 		textures[WOOD],
 		textures[WOOD_NORMAL],
-		recorder);
-	tasks.push_back(std::unique_ptr<GeometryPassCmdListRecorder>(recorder));
+		recorder2);
+	tasks.push_back(std::unique_ptr<GeometryPassCmdListRecorder>(recorder2));
 
 	//
 	// Generate metals

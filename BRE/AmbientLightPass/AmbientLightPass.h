@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <tbb/concurrent_queue.h>
+#include <wrl.h>
 
 #include <AmbientLightPass\AmbientLightCmdListRecorder.h>
 #include <AmbientLightPass\AmbientOcclusionCmdListRecorder.h>
@@ -54,8 +55,6 @@ private:
 
 	ID3D12GraphicsCommandList* mCmdListBegin{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListEnd{ nullptr };
-
-	ID3D12Fence* mFence{ nullptr };
 
 	std::unique_ptr<AmbientOcclusionCmdListRecorder> mAmbientOcclusionRecorder;
 	std::unique_ptr<AmbientLightCmdListRecorder> mAmbientLightRecorder;	

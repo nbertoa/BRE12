@@ -5,10 +5,10 @@
 #define VERSION1
 #define SAMPLE_KERNEL_SIZE 128U
 #define NOISE_SCALE float2(1920.0f / 4.0f, 1080.0f / 4.0f)
-#define OCCLUSION_RADIUS 5000.0f
+#define OCCLUSION_RADIUS 50.0f
 #define SURFACE_EPSILON 0.05f
 #define OCCLUSION_FADE_START 0.2f
-#define OCCLUSION_FADE_END 2000
+#define OCCLUSION_FADE_END 50
 
 struct Input {
 	float4 mPosH : SV_POSITION;
@@ -22,7 +22,7 @@ SamplerState TexSampler : register (s0);
 
 Texture2D<float4> Normal_Smoothness : register (t0);
 Texture2D<float> Depth : register (t1);
-StructuredBuffer<float3> SampleKernel : register(t2);
+StructuredBuffer<float4> SampleKernel : register(t2);
 Texture2D<float4> NoiseTexture : register (t3); 
 
 struct Output {
@@ -33,7 +33,7 @@ Output main(const in Input input) {
 	Output output = (Output)0;
 
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
-	
+
 	// Sample the depth and convert to linear view space Z (assume it gets sampled as
 	// a floating point value of the range [0,1])
 	const float depth = Depth.Load(screenCoord);
@@ -51,7 +51,8 @@ Output main(const in Input input) {
 
 	// Construct a change-of-basis matrix to reorient our sample kernel
 	// along the origin's normal.
-	const float3 noiseVec = normalize(NoiseTexture.Sample(TexSampler, input.mTexCoordO).xyz * 2.0f - 1.0f);
+	float3 noiseVec = normalize(NoiseTexture.Sample(TexSampler, NOISE_SCALE * input.mTexCoordO).xyz * 2.0f - 1.0f);
+	//noiseVec = mul(float4(noiseVec, 0.0f) , gFrameCBuffer.mV).xyz;
 	const float3 tangentV = normalize(noiseVec - normalV * dot(noiseVec, normalV));
 	const float3 bitangentV = normalize(cross(normalV, tangentV));
 	const float3x3 sampleKernelMatrix = float3x3(tangentV, bitangentV, normalV);
@@ -62,7 +63,7 @@ Output main(const in Input input) {
 		
 #ifdef VERSION1
 	occlusion = SSAOVersion1(
-		SampleKernel[i],
+		SampleKernel[i].xyz,
 		sampleKernelMatrix,
 		gFrameCBuffer.mP,
 		OCCLUSION_RADIUS,
@@ -71,7 +72,7 @@ Output main(const in Input input) {
 
 #else
 	occlusion = SSAOVersion2(
-		SampleKernel[i],
+		SampleKernel[i].xyz,
 		noiseVec,
 		normalV,
 		gFrameCBuffer.mP,

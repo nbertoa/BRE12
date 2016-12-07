@@ -1,9 +1,9 @@
 #pragma once
 
 #include <tbb/concurrent_queue.h>
+#include <wrl.h>
 
 #include <GlobalData/Settings.h>
-#include <ResourceManager/BufferCreator.h>
 
 class UploadBuffer;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
@@ -32,8 +32,6 @@ public:
 	static void InitPSO() noexcept;
 
 	void Init(
-		const BufferCreator::VertexBufferData& vertexBufferData,
-		const BufferCreator::IndexBufferData indexBufferData,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
@@ -62,9 +60,6 @@ private:
 	std::uint32_t mCurrFrameIndex{ 0U };
 
 	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
-
-	BufferCreator::VertexBufferData mVertexBufferData;
-	BufferCreator::IndexBufferData mIndexBufferData;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapsBufferGpuDescHandleBegin;
 

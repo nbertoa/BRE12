@@ -4,7 +4,6 @@
 #include <tbb/concurrent_queue.h>
 
 #include <GlobalData/Settings.h>
-#include <ResourceManager/BufferCreator.h>
 
 class UploadBuffer;
 
@@ -25,8 +24,6 @@ public:
 	static void InitPSO() noexcept;
 
 	void Init(
-		const BufferCreator::VertexBufferData& vertexBufferData,
-		const BufferCreator::IndexBufferData indexBufferData,
 		ID3D12Resource& colorBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
@@ -43,9 +40,6 @@ private:
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
 	std::uint32_t mCurrFrameIndex{ 0U };
-
-	BufferCreator::VertexBufferData mVertexBufferData;
-	BufferCreator::IndexBufferData mIndexBufferData;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 

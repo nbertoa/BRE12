@@ -3,7 +3,6 @@
 #include <tbb/concurrent_queue.h>
 
 #include <GlobalData/Settings.h>
-#include <ResourceManager/BufferCreator.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12CommandAllocator;
@@ -31,8 +30,6 @@ public:
 	static void InitPSO() noexcept;
 
 	void Init(
-		const BufferCreator::VertexBufferData& vertexBufferData,
-		const BufferCreator::IndexBufferData& indexBufferData,
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 		ID3D12Resource& ambientAccessibilityBuffer,
@@ -54,9 +51,6 @@ private:
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
 	std::uint32_t mCurrFrameIndex{ 0U };
-	
-	BufferCreator::VertexBufferData mVertexBufferData;
-	BufferCreator::IndexBufferData mIndexBufferData;
 
 	// Buffers cpu descriptors
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };

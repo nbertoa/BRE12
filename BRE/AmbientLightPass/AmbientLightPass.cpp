@@ -6,9 +6,6 @@
 #include <CommandManager\CommandManager.h>
 #include <DescriptorManager\DescriptorManager.h>
 #include <DXUtils\d3dx12.h>
-#include <ModelManager\Mesh.h>
-#include <ModelManager\Model.h>
-#include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <Utils\DebugUtils.h>
 
@@ -17,8 +14,7 @@ namespace {
 		ID3D12CommandAllocator* cmdAllocsBegin[Settings::sQueuedFrameCount],
 		ID3D12CommandAllocator* cmdAllocsEnd[Settings::sQueuedFrameCount],
 		ID3D12GraphicsCommandList* &cmdListBegin,
-		ID3D12GraphicsCommandList* &cmdListEnd,
-		ID3D12Fence* &fence) noexcept {
+		ID3D12GraphicsCommandList* &cmdListEnd) noexcept {
 
 		ASSERT(Settings::sQueuedFrameCount > 0U);
 		ASSERT(cmdListBegin == nullptr);
@@ -38,36 +34,6 @@ namespace {
 
 		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocsEnd[0], cmdListEnd);
 		cmdListEnd->Close();
-
-		ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, fence);
-	}
-
-	void ExecuteCommandList(
-		ID3D12CommandQueue& cmdQueue, 
-		ID3D12GraphicsCommandList& cmdList, 
-		ID3D12Fence& fence) noexcept {
-
-		cmdList.Close();
-
-		ID3D12CommandList* cmdLists[1U]{ &cmdList };
-		cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
-
-		const std::uint64_t fenceValue = fence.GetCompletedValue() + 1UL;
-
-		CHECK_HR(cmdQueue.Signal(&fence, fenceValue));
-
-		// Wait until the GPU has completed commands up to this fence point.
-		if (fence.GetCompletedValue() < fenceValue) {
-			const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
-			ASSERT(eventHandle);
-
-			// Fire event when GPU hits current fence.  
-			CHECK_HR(fence.SetEventOnCompletion(fenceValue, eventHandle));
-
-			// Wait until the GPU hits current fence event is fired.
-			WaitForSingleObject(eventHandle, INFINITE);
-			CloseHandle(eventHandle);
-		}
 	}
 
 	void CreateBuffer(
@@ -122,21 +88,7 @@ void AmbientLightPass::Init(
 	mCmdQueue = &cmdQueue;
 	mCmdListExecutor = &cmdListExecutor;
 	
-	CreateCommandObjects(mCmdAllocsBegin, mCmdAllocsEnd, mCmdListBegin, mCmdListEnd, mFence);
-
-	CHECK_HR(mCmdListBegin->Reset(mCmdAllocsBegin[0U], nullptr));
-	
-	// Create model for a full screen quad geometry. 
-	Model* model;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	ModelManager::Get().CreateFullscreenQuad(model, *mCmdListBegin, uploadVertexBuffer, uploadIndexBuffer);
-	ASSERT(model != nullptr);
-
-	// Get vertex and index buffers data from the only mesh this model must have.
-	ASSERT(model->Meshes().size() == 1UL);
-	const Mesh& mesh = model->Meshes()[0U];
-	ExecuteCommandList(*mCmdQueue, *mCmdListBegin, *mFence);
+	CreateCommandObjects(mCmdAllocsBegin, mCmdAllocsEnd, mCmdListBegin, mCmdListEnd);
 
 	// Initialize recorder's PSO
 	AmbientLightCmdListRecorder::InitPSO();
@@ -150,8 +102,6 @@ void AmbientLightPass::Init(
 	// Initialize ambient occlusion recorder
 	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
 	mAmbientOcclusionRecorder->Init(
-		mesh.VertexBufferData(),
-		mesh.IndexBufferData(),
 		normalSmoothnessBuffer,
 		mAmbientAccessibilityBufferRTCpuDescHandle,
 		depthBuffer,
@@ -160,8 +110,6 @@ void AmbientLightPass::Init(
 	// Initialize blur recorder
 	mBlurRecorder.reset(new BlurCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
 	mBlurRecorder->Init(
-		mesh.VertexBufferData(),
-		mesh.IndexBufferData(),
 		*mAmbientAccessibilityBuffer.Get(),
 		mBlurBufferRTCpuDescHandle,
 		depthBufferCpuDesc);
@@ -169,8 +117,6 @@ void AmbientLightPass::Init(
 	// Initialize ambient light recorder
 	mAmbientLightRecorder.reset(new AmbientLightCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
 	mAmbientLightRecorder->Init(
-		mesh.VertexBufferData(), 
-		mesh.IndexBufferData(), 
 		baseColorMetalMaskBuffer,
 		colorBufferCpuDesc,
 		*mBlurBuffer.Get(),
@@ -215,7 +161,6 @@ bool AmbientLightPass::ValidateData() const noexcept {
 		mCmdQueue != nullptr &&
 		mCmdListBegin != nullptr &&
 		mCmdListEnd != nullptr &&
-		mFence != nullptr &&
 		mAmbientOcclusionRecorder.get() != nullptr &&
 		mAmbientLightRecorder.get() != nullptr &&
 		mAmbientAccessibilityBuffer.Get() != nullptr &&

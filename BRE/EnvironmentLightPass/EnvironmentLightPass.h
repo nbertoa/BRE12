@@ -9,7 +9,6 @@ struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 struct ID3D12CommandAllocator;
 struct ID3D12CommandList;
-struct ID3D12CommandQueue;
 struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
@@ -29,7 +28,6 @@ public:
 	// You should call this method before Execute()
 	void Init(
 		ID3D12Device& device,
-		ID3D12CommandQueue& cmdQueue,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
