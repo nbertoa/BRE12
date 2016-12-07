@@ -2,13 +2,13 @@
 #include <ShaderUtils/CBuffers.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
-#define VERSION1
-#define SAMPLE_KERNEL_SIZE 128U
+//#define VERSION1
+#define SAMPLE_KERNEL_SIZE 14U
 #define NOISE_SCALE float2(1920.0f / 4.0f, 1080.0f / 4.0f)
-#define OCCLUSION_RADIUS 50.0f
+#define OCCLUSION_RADIUS 500.0f
 #define SURFACE_EPSILON 0.05f
 #define OCCLUSION_FADE_START 0.2f
-#define OCCLUSION_FADE_END 50
+#define OCCLUSION_FADE_END 1000.0f
 
 struct Input {
 	float4 mPosH : SV_POSITION;
@@ -51,8 +51,7 @@ Output main(const in Input input) {
 
 	// Construct a change-of-basis matrix to reorient our sample kernel
 	// along the origin's normal.
-	float3 noiseVec = normalize(NoiseTexture.Sample(TexSampler, NOISE_SCALE * input.mTexCoordO).xyz * 2.0f - 1.0f);
-	//noiseVec = mul(float4(noiseVec, 0.0f) , gFrameCBuffer.mV).xyz;
+	const float3 noiseVec = NoiseTexture.SampleLevel(TexSampler, 4.0f * input.mTexCoordO, 0.0f).xyz * 2.0f - 1.0f;
 	const float3 tangentV = normalize(noiseVec - normalV * dot(noiseVec, normalV));
 	const float3 bitangentV = normalize(cross(normalV, tangentV));
 	const float3x3 sampleKernelMatrix = float3x3(tangentV, bitangentV, normalV);
@@ -90,7 +89,7 @@ Output main(const in Input input) {
 	output.mAccessibility = 1.0f - (occlusionSum / SAMPLE_KERNEL_SIZE);
 
 	// Sharpen the contrast of the SSAO map to make the SSAO affect more dramatic.
-	//output.mAccessibility =  saturate(pow(output.mAccessibility, 3.0f));
+	output.mAccessibility =  saturate(pow(output.mAccessibility, 2.0f));
 
 	return output;
 }

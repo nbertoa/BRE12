@@ -1,4 +1,4 @@
-#include "../../ShaderUtils/CBuffers.hlsli"
+#include <ShaderUtils/CBuffers.hlsli>
 
 struct Input {
 	float3 mPosO : POSITION;

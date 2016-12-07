@@ -21,7 +21,7 @@ using namespace DirectX;
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
 	ID3D12RootSignature* sRootSign{ nullptr };
-	const std::uint32_t sNoiseTextureDimension = 4U;
+	const std::uint32_t sNoiseTextureDimension = 256U;
 
 	void BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* cmdAlloc[], const std::size_t cmdAllocCount) noexcept {
 		ASSERT(cmdList == nullptr);
@@ -78,6 +78,47 @@ namespace {
 		}
 	}
 
+	void GenerateSampleKernel(std::vector<XMFLOAT4>& kernels) {
+		kernels.resize(14);
+
+		// Start with 14 uniformly distributed vectors.  We choose the 8 corners of the cube
+		// and the 6 center points along each cube face.  We always alternate the points on 
+		// opposites sides of the cubes.  This way we still get the vectors spread out even
+		// if we choose to use less than 14 samples.
+
+		// 8 cube corners
+		kernels[0] = XMFLOAT4(+1.0f, +1.0f, +1.0f, 0.0f);
+		kernels[1] = XMFLOAT4(-1.0f, -1.0f, -1.0f, 0.0f);
+
+		kernels[2] = XMFLOAT4(-1.0f, +1.0f, +1.0f, 0.0f);
+		kernels[3] = XMFLOAT4(+1.0f, -1.0f, -1.0f, 0.0f);
+
+		kernels[4] = XMFLOAT4(+1.0f, +1.0f, -1.0f, 0.0f);
+		kernels[5] = XMFLOAT4(-1.0f, -1.0f, +1.0f, 0.0f);
+
+		kernels[6] = XMFLOAT4(-1.0f, +1.0f, -1.0f, 0.0f);
+		kernels[7] = XMFLOAT4(+1.0f, -1.0f, +1.0f, 0.0f);
+
+		// 6 centers of cube faces
+		kernels[8] = XMFLOAT4(-1.0f, 0.0f, 0.0f, 0.0f);
+		kernels[9] = XMFLOAT4(+1.0f, 0.0f, 0.0f, 0.0f);
+
+		kernels[10] = XMFLOAT4(0.0f, -1.0f, 0.0f, 0.0f);
+		kernels[11] = XMFLOAT4(0.0f, +1.0f, 0.0f, 0.0f);
+
+		kernels[12] = XMFLOAT4(0.0f, 0.0f, -1.0f, 0.0f);
+		kernels[13] = XMFLOAT4(0.0f, 0.0f, +1.0f, 0.0f);
+
+		for (int i = 0; i < 14; ++i) {
+			// Create random lengths in [0.25, 1.0].
+			float s = MathUtils::RandF(0.25f, 1.0f);
+
+			XMVECTOR v = s * XMVector4Normalize(XMLoadFloat4(&kernels[i]));
+
+			XMStoreFloat4(&kernels[i], v);
+		}
+	}
+
 	// Generate a set of random values used to rotate the sample kernel,
 	// which will effectively increase the sample count and minimize 
 	// the 'banding' artifacts.
@@ -103,6 +144,22 @@ namespace {
 			elem.x = mappedVec.x;
 			elem.y = mappedVec.y;
 			elem.z = mappedVec.z;
+		}
+	}
+
+	void GenerateNoise(std::vector<XMFLOAT4>& noises) {
+		const std::size_t numElems = sNoiseTextureDimension * sNoiseTextureDimension;
+		noises.resize(numElems);
+		XMFLOAT4* data(noises.data());
+		for (std::uint32_t i = 0U; i < numElems; ++i) {
+			XMFLOAT4& elem = data[i];
+
+			// Create sample points on the surface of a hemisphere
+			// oriented along the z axis
+			const float x = MathUtils::RandF(0.0f, 1.0f);
+			const float y = MathUtils::RandF(0.0f, 1.0f);
+			const float z = MathUtils::RandF(0.0f, 1.0f);
+			elem = XMFLOAT4(x, y, z, 0.0f);
 		}
 	}
 }
@@ -149,11 +206,11 @@ void AmbientOcclusionCmdListRecorder::Init(
 	mAmbientAccessBufferCpuDesc = ambientAccessBufferCpuDesc;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
-	mNumSamples = 128U;
+	mNumSamples = 14U;
 	std::vector<XMFLOAT4> sampleKernel;
-	GenerateSampleKernel(mNumSamples, sampleKernel);
+	GenerateSampleKernel(sampleKernel);
 	std::vector<XMFLOAT4> noises;
-	GenerateNoise(sNoiseTextureDimension * sNoiseTextureDimension, noises);
+	GenerateNoise(noises);
 	BuildBuffers(sampleKernel.data(), noises.data(), normalSmoothnessBuffer, depthBuffer);
 
 	ASSERT(ValidateData());

@@ -71,7 +71,7 @@ namespace {
 	const float sModel{ 0.20f };
 
 	const float sTx{ 0.0f };
-	const float sTy{ sFloorTy };
+	const float sTy{ sFloorTy + 0.5f };
 	const float sOffsetX{ 15.0f };
 
 	const float sTz0{ 0.0f };

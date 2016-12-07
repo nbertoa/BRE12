@@ -1,4 +1,4 @@
-#include "../../../ShaderUtils/Utils.hlsli"
+#include <ShaderUtils/Utils.hlsli>
 
 #define BLUR_SIZE 4
 
