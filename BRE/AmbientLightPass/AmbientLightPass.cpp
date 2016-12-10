@@ -126,22 +126,22 @@ void AmbientLightPass::Init(
 	ASSERT(ValidateData());
 }
 
-void AmbientLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
+void AmbientLightPass::Execute(const FrameCBuffer& /*frameCBuffer*/) noexcept {
 	ASSERT(ValidateData());
 
 	const std::uint32_t taskCount{ 5U };
 	mCmdListExecutor->ResetExecutedCmdListCount();
 
 	ExecuteBeginTask();
-	mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
-	mBlurRecorder->RecordAndPushCommandLists();
+	/*mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
+	mBlurRecorder->RecordAndPushCommandLists();*/
 	ExecuteEndingTask();
-	mAmbientLightRecorder->RecordAndPushCommandLists();
+	//mAmbientLightRecorder->RecordAndPushCommandLists();
 
 	// Wait until all previous tasks command lists are executed
-	while (mCmdListExecutor->ExecutedCmdListCount() < taskCount) {
+	/*while (mCmdListExecutor->ExecutedCmdListCount() < taskCount) {
 		Sleep(0U);
-	}
+	}*/
 }
 
 bool AmbientLightPass::ValidateData() const noexcept {

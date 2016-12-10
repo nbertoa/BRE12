@@ -16,8 +16,7 @@
 using namespace DirectX;
 
 namespace {
-	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
-	const DXGI_FORMAT sFrameBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
+	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };	
 	
 	// Update camera's view matrix and store data in parameters.
 	void UpdateCamera(
@@ -105,10 +104,7 @@ namespace {
 		CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain3.GetAddressOf())));
 
 		CHECK_HR(swapChain3->ResizeBuffers(Settings::sSwapChainBufferCount, Settings::sWindowWidth, Settings::sWindowHeight, frameBufferFormat, sd.Flags));
-
-		// Set sRGB color space
-		swapChain3->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709);
-
+		
 		// Make window association
 		CHECK_HR(D3dData::Factory().MakeWindowAssociation(hwnd, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
 
@@ -199,6 +195,7 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		*mCmdListExecutor,
 		*mCmdQueue, 
 		*mColorBuffer.Get(), 
+		*mDepthStencilBuffer,
 		DepthStencilCpuDesc());
 		
 	// Initialize fence values for all frames to the same number.
@@ -262,14 +259,14 @@ void MasterRender::ExecuteMergePass() {
 }
 
 void MasterRender::CreateRtvAndDsv() noexcept {
-	// Setup RTV descriptor to specify sRGB format.
+	// Setup RTV descriptor.
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.Format = Settings::sFrameBufferRTFormat;
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	// Create swap chain and render target views
 	ASSERT(mSwapChain == nullptr);
-	CreateSwapChain(mHwnd, *mCmdQueue, sFrameBufferFormat, mSwapChain);
+	CreateSwapChain(mHwnd, *mCmdQueue, Settings::sFrameBufferFormat, mSwapChain);
 	const std::uint32_t rtvDescSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));

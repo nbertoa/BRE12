@@ -26,18 +26,9 @@ Output main(const in Input input) {
 	
 	const float4 normal_smoothness = Normal_Smoothness.Load(screenCoord);
 	
-	// Sample the depth and convert to linear view space Z (assume it gets sampled as
-	// a floating point value of the range [0,1])
-	const float depth = Depth.Load(screenCoord);
-	const float depthV = NdcDepthToViewDepth(depth, gFrameCBuffer.mP);
-
-	//
-	// Reconstruct full view space position (x,y,z).
-	// Find t such that p = t * ViewRayV.
-	// p.z = t * ViewRayV.z
-	// t = p.z / ViewRayV.z
-	//
-	const float3 fragPosV = (depthV / input.mViewRayV.z) * input.mViewRayV;
+	// Compute fragment position in view space
+	const float depthNDC = Depth.Load(screenCoord);
+	const float3 fragPosV = ViewRayToViewPosition(input.mViewRayV, depthNDC, gFrameCBuffer.mP);
 
 	PunctualLight light = input.mPunctualLight;
 

@@ -2,7 +2,7 @@
 #include <ShaderUtils/CBuffers.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
-//#define VERSION1
+#define VERSION1
 #define SAMPLE_KERNEL_SIZE 14U
 #define NOISE_SCALE float2(1920.0f / 4.0f, 1080.0f / 4.0f)
 #define OCCLUSION_RADIUS 500.0f
@@ -34,16 +34,9 @@ Output main(const in Input input) {
 
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
 
-	// Sample the depth and convert to linear view space Z (assume it gets sampled as
-	// a floating point value of the range [0,1])
-	const float depth = Depth.Load(screenCoord);
-	const float depthV = NdcDepthToViewDepth(depth, gFrameCBuffer.mP);
-
-	// Reconstruct full view space position (x,y,z).
-	// Find t such that p = t * ViewRayV.
-	// p.z = t * ViewRayV.z
-	// t = p.z / ViewRayV.z
-	const float3 fragPosV = (depthV / input.mViewRayV.z) * input.mViewRayV;
+	// Compute fragment position in view space
+	const float depthNDC = Depth.Load(screenCoord);
+	const float3 fragPosV = ViewRayToViewPosition(input.mViewRayV, depthNDC, gFrameCBuffer.mP);
 
 	// Get normal
 	const float2 normal = Normal_Smoothness.Load(screenCoord).xy;

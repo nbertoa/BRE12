@@ -12,6 +12,20 @@ float NdcDepthToViewDepth(const float depthNDC, const float4x4 projection) {
 	return depthV;
 }
 
+float3 ViewRayToViewPosition(const float3 viewRayV, const float depthNDC, const float4x4 projection) {
+	const float depthV = NdcDepthToViewDepth(depthNDC, projection);
+
+	//
+	// Reconstruct full view space position (x,y,z).
+	// Find t such that p = t * ViewRayV.
+	// p.z = t * ViewRayV.z
+	// t = p.z / ViewRayV.z
+	//
+	const float3 fragPosV = (depthV / viewRayV.z) * viewRayV;
+
+	return fragPosV;
+}
+
 //
 // Octahedron-normal encoding/decoding 
 //

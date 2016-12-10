@@ -8,7 +8,7 @@ struct Input {
 };
 
 SamplerState TexSampler : register (s0);
-Texture2D BufferTexture : register(t0);
+Texture2D<float> BufferTexture : register(t0);
 
 struct Output {
 	float mBlur : SV_Target0;
@@ -31,8 +31,8 @@ Output main(const in Input input){
 		}
 	}
 
-	output.mBlur = result / float(BLUR_SIZE * BLUR_SIZE);
-	//output.mBlur = BufferTexture.Load(int3(input.mPosH.xy, 0)).x;
+	//output.mBlur = result / float(BLUR_SIZE * BLUR_SIZE);
+	output.mBlur = BufferTexture.Load(int3(input.mPosH.xy, 0)).x;
 	
 	return output;
 }

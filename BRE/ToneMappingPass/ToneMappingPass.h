@@ -33,6 +33,7 @@ public:
 		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
 		ID3D12Resource& colorBuffer,
+		ID3D12Resource& depthBuffer, //
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
 	void Execute(
@@ -47,17 +48,22 @@ private:
 		ID3D12Resource& frameBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
 
+	void ExecuteEndTask() noexcept;
+
 	CommandListExecutor* mCmdListExecutor{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	
 	ID3D12CommandAllocator* mCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocs2[Settings::sQueuedFrameCount]{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+	ID3D12GraphicsCommandList* mCmdList2{ nullptr };
 
 	ID3D12Fence* mFence{ nullptr };
 	
 	ID3D12Resource* mColorBuffer{ nullptr };
+	ID3D12Resource* mDepthBuffer{ nullptr };
 
 	Recorder mRecorder;
 };

@@ -92,7 +92,7 @@ void LightingPass::Init(
 	ASSERT(ValidateData());
 }
 
-void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
+void LightingPass::Execute(const FrameCBuffer& /*frameCBuffer*/) noexcept {
 	ASSERT(ValidateData());
 
 	ExecuteBeginTask();
@@ -116,7 +116,7 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	}*/
 
 	// Execute ambient light pass tasks
-	mAmbientLightPass.Execute(frameCBuffer);
+	//mAmbientLightPass.Execute(frameCBuffer);
 
 	// Execute environment light pass tasks
 	//mEnvironmentLightPass.Execute(frameCBuffer);

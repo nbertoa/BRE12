@@ -38,8 +38,8 @@ namespace D3DFactory {
 	D3D12_DEPTH_STENCIL_DESC DisableDepthStencilDesc() noexcept {
 		D3D12_DEPTH_STENCIL_DESC desc{};
 		desc.DepthEnable = false;
-		desc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-		desc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+		desc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		desc.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
 		desc.StencilEnable = false;
 		desc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
 		desc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;

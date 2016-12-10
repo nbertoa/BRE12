@@ -12,7 +12,7 @@ struct Output {
 
 Output main(const in Input input) {
 	Output output = (Output)0;
-	output.mColor = float4(0.0f, 0.0f, 0.0f, 1.0f);//CubeMap.Sample(TexSampler, input.mPosO);
+	output.mColor = CubeMap.Sample(TexSampler, input.mPosO);
 
 	return output;
 }
