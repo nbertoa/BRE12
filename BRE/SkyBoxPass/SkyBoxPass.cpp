@@ -106,16 +106,16 @@ void SkyBoxPass::Init(
 	ASSERT(ValidateData());
 }
 
-void SkyBoxPass::Execute(const FrameCBuffer& /*frameCBuffer*/) const noexcept {
+void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 	ASSERT(ValidateData());
 
 	mCmdListExecutor->ResetExecutedCmdListCount();
-	/*mRecorder->RecordAndPushCommandLists(frameCBuffer);
+	mRecorder->RecordAndPushCommandLists(frameCBuffer);
 
 	// Wait until all previous tasks command lists are executed
 	while (mCmdListExecutor->ExecutedCmdListCount() < 1U) {
 		Sleep(0U);
-	}*/
+	}
 }
 
 bool SkyBoxPass::ValidateData() const noexcept {

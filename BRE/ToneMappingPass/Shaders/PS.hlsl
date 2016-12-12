@@ -17,9 +17,9 @@ Output main(const in Input input){
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
 	const float4 color = ColorBufferTexture.Load(screenCoord);
 	output.mColor = float4(FilmicToneMapping(color.rgb), color.a);
-	const float depthNDC = DepthTexture.Load(screenCoord);
-	output.mColor = float4(depthNDC, depthNDC, depthNDC, 1.0f);
+	//const float depthNDC = DepthTexture.Load(screenCoord);
+	//output.mColor = float4(depthNDC, depthNDC, depthNDC, 1.0f);
 	
-	//output.mColor = float4(accurateLinearToSRGB(output.mColor.xyz), 1.0f);
+	output.mColor = float4(accurateLinearToSRGB(output.mColor.xyz), 1.0f);
 	return output;
 }
