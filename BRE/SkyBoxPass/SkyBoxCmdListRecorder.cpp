@@ -57,7 +57,7 @@ void SkyBoxCmdListRecorder::InitPSO() noexcept {
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
 	// The camera is inside the sky sphere, so just turn off culling.
 	psoParams.mRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
-	// Make sure the depth function is LESS_EQUAL and not just LESS.  
+	// Make sure the depth function is LESS_EQUAL and not just GREATER.  
 	// Otherwise, the normalized depth values at z = 1 (NDC) will 
 	// fail the depth test if the depth buffer was cleared to 1.
 	psoParams.mDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;

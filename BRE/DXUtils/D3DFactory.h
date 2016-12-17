@@ -16,6 +16,12 @@ namespace D3DFactory {
 	// StencilEnable = false;
 	D3D12_DEPTH_STENCIL_DESC DefaultDepthStencilDesc() noexcept;
 
+	// DepthEnable = true;
+	// DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	// DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
+	// StencilEnable = false;
+	D3D12_DEPTH_STENCIL_DESC ReverseZDepthStencilDesc() noexcept;
+
 	D3D12_DEPTH_STENCIL_DESC DisableDepthStencilDesc() noexcept;
 
 	// Blend is disabled

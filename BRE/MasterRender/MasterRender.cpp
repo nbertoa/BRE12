@@ -195,7 +195,6 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		*mCmdListExecutor,
 		*mCmdQueue, 
 		*mColorBuffer.Get(), 
-		*mDepthStencilBuffer,
 		DepthStencilCpuDesc());
 		
 	// Initialize fence values for all frames to the same number.

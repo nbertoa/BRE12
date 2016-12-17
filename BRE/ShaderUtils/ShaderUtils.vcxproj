@@ -118,6 +118,7 @@
   <ItemGroup>
     <None Include="AmbientOcclusion.hlsli" />
     <None Include="CBuffers.hlsli" />
+    <None Include="Fxaa.hlsli" />
     <None Include="Lighting.hlsli" />
     <None Include="Lights.hlsli" />
     <None Include="Material.hlsli" />

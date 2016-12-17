@@ -68,14 +68,13 @@ void ToneMappingCmdListRecorder::InitPSO() noexcept {
 
 void ToneMappingCmdListRecorder::Init(
 	ID3D12Resource& colorBuffer,
-	ID3D12Resource& depthBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
 {
 	ASSERT(ValidateData() == false);
 
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
-	BuildBuffers(colorBuffer, depthBuffer);
+	BuildBuffers(colorBuffer);
 
 	ASSERT(ValidateData());
 }
@@ -131,11 +130,10 @@ bool ToneMappingCmdListRecorder::ValidateData() const noexcept {
 	return result;
 }
 
-void ToneMappingCmdListRecorder::BuildBuffers(ID3D12Resource& colorBuffer, ID3D12Resource& depthBuffer) noexcept {
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc[2U]{};
-	ID3D12Resource* res[4] = {
+void ToneMappingCmdListRecorder::BuildBuffers(ID3D12Resource& colorBuffer) noexcept {
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc[1U]{};
+	ID3D12Resource* res[1] = {
 		&colorBuffer,
-		&depthBuffer,
 	};
 
 	// Create color buffer texture descriptor
@@ -145,14 +143,6 @@ void ToneMappingCmdListRecorder::BuildBuffers(ID3D12Resource& colorBuffer, ID3D1
 	srvDesc[0].Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDesc[0].Format = colorBuffer.GetDesc().Format;
 	srvDesc[0].Texture2D.MipLevels = colorBuffer.GetDesc().MipLevels;
-
-	// Create ambient accessibility buffer texture descriptor
-	srvDesc[1].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc[1].Texture2D.MostDetailedMip = 0;
-	srvDesc[1].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc[1].Format = Settings::sDepthStencilSRVFormat;
-	srvDesc[1].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
 
 	mColorBufferGpuDescHandle = DescriptorManager::Get().CreateShaderResourceView(res, srvDesc, _countof(srvDesc));
 }

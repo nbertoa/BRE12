@@ -19,7 +19,7 @@ namespace {
 		ASSERT(RegisterClass(&wc));
 
 		// Compute window rectangle dimensions based on requested client area dimensions.
-		RECT r = { 0, 0, Settings::sWindowWidth, Settings::sWindowHeight };
+		RECT r = { 0, 0, static_cast<long>(Settings::sWindowWidth), static_cast<long>(Settings::sWindowHeight) };
 		AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, false);
 		const int32_t width{ r.right - r.left };
 		const int32_t height{ r.bottom - r.top };

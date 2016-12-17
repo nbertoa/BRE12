@@ -25,7 +25,6 @@ public:
 
 	void Init(
 		ID3D12Resource& colorBuffer,
-		ID3D12Resource& depthBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
 	void RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
@@ -33,7 +32,7 @@ public:
 	bool ValidateData() const noexcept;
 
 private:
-	void BuildBuffers(ID3D12Resource& colorBuffer, ID3D12Resource& depthBuffer) noexcept;
+	void BuildBuffers(ID3D12Resource& colorBuffer) noexcept;
 
 	ID3D12Device& mDevice;
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;

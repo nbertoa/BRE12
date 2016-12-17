@@ -33,24 +33,21 @@ void ToneMappingPass::Init(
 	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource& colorBuffer,
-	ID3D12Resource& depthBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
 
 	ASSERT(ValidateData() == false);
 	
 	CreateCommandObjects(mCmdAllocs, mCmdList);
-	CreateCommandObjects(mCmdAllocs2, mCmdList2);
 	mCmdListExecutor = &cmdListExecutor;
 	mCmdQueue = &cmdQueue;
 	mColorBuffer = &colorBuffer;
-	mDepthBuffer = &depthBuffer;
 
 	// Initialize recorder's PSO
 	ToneMappingCmdListRecorder::InitPSO();
 
 	// Initialize recorder
 	mRecorder.reset(new ToneMappingCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
-	mRecorder->Init(colorBuffer, depthBuffer, depthBufferCpuDesc);
+	mRecorder->Init(colorBuffer, depthBufferCpuDesc);
 
 	ASSERT(ValidateData());
 }
@@ -71,8 +68,6 @@ void ToneMappingPass::Execute(
 	while (mCmdListExecutor->ExecutedCmdListCount() < 1) {
 		Sleep(0U);
 	}
-
-	ExecuteEndTask();
 }
 
 bool ToneMappingPass::ValidateData() const noexcept {
@@ -110,7 +105,6 @@ void ToneMappingPass::ExecuteBeginTask(
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mDepthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(&frameBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
@@ -123,30 +117,5 @@ void ToneMappingPass::ExecuteBeginTask(
 	// Execute preliminary task
 	mCmdListExecutor->ResetExecutedCmdListCount();
 	ID3D12CommandList* cmdLists[] = { mCmdList };
-	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
-}
-
-void ToneMappingPass::ExecuteEndTask() noexcept {
-
-	ASSERT(ValidateData());
-
-	// Used to choose a different command list allocator each call.
-	static std::uint32_t cmdAllocIndex{ 0U };
-
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocs2[cmdAllocIndex] };
-	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocs2);
-
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList2->Reset(cmdAlloc, nullptr));
-
-	// Set barriers
-	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mDepthBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE),
-	};
-	mCmdList2->ResourceBarrier(_countof(barriers), barriers);
-	mCmdList2->Close();
-
-	// Execute preliminary task
-	ID3D12CommandList* cmdLists[] = { mCmdList2 };
 	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 }
