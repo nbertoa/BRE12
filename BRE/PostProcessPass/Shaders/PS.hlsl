@@ -1,11 +1,14 @@
 #include <ShaderUtils/Utils.hlsli>
 
 #define FXAA_PC 1
-#define FXAA_HLSL_5 1
-#define FXAA_QUALITY_PRESET 2
-#define FXAA_GREEN_AS_LUMA 1
+#define FXAA_QUALITY__PRESET 12
 
 #include <ShaderUtils/Fxaa.hlsli>
+
+#define RCP_FRAME float2(1.0f / 1920.0f, 1.0f / 1080.0f)
+#define QUALITY_SUB_PIX 1.0f
+#define QUALITY_EDGE_THRESHOLD 0.125
+#define QUALITY_EDGE_THRESHOLD_MIN 0.0625
 
 struct Input {
 	float4 mPosH : SV_POSITION;
@@ -22,27 +25,17 @@ struct Output {
 Output main(const in Input input){
 	Output output = (Output)0;
 
-	const float4 rcpFrame = {1.0f / 1920.0f, 1.0f / 1080.0f, 0.0f, 0.0f };
-
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
 	FxaaTex tex = { TexSampler, ColorBufferTexture };
-	float4 ssss = { 0,0,0,0 };
+	const float4 unusedFloat4 = { 0.0f, 0.0f, 0.0f, 0.0f };
+	const float unusedFloat = 0.0f;
 	output.mColor = FxaaPixelShader(
 		input.mTexCoordO.xy, 
-		ssss, 
-		tex, 
-		tex, 
-		tex, 
-		rcpFrame.xy,
-		ssss, 
-		ssss, 
-		ssss, 
-		1.0f, 
-		0.063, 
-		0.0312, 
-		0, 
-		0, 
-		0, 
-		ssss);
+		tex,  
+		RCP_FRAME,
+		QUALITY_SUB_PIX,
+		QUALITY_EDGE_THRESHOLD,
+		QUALITY_EDGE_THRESHOLD_MIN);
+	//output.mColor = ColorBufferTexture.Load(screenCoord);
 	return output;
 }

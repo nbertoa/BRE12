@@ -32,7 +32,9 @@ void ToneMappingPass::Init(
 	ID3D12Device& device,
 	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
-	ID3D12Resource& colorBuffer,
+	ID3D12Resource& inputColorBuffer,
+	ID3D12Resource& outputColorBuffer,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
 
 	ASSERT(ValidateData() == false);
@@ -40,29 +42,26 @@ void ToneMappingPass::Init(
 	CreateCommandObjects(mCmdAllocs, mCmdList);
 	mCmdListExecutor = &cmdListExecutor;
 	mCmdQueue = &cmdQueue;
-	mColorBuffer = &colorBuffer;
+	mInputColorBuffer = &inputColorBuffer;
+	mOutputColorBuffer = &outputColorBuffer;
 
 	// Initialize recorder's PSO
 	ToneMappingCmdListRecorder::InitPSO();
 
 	// Initialize recorder
 	mRecorder.reset(new ToneMappingCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
-	mRecorder->Init(colorBuffer, depthBufferCpuDesc);
+	mRecorder->Init(*mInputColorBuffer, outputBufferCpuDesc, depthBufferCpuDesc);
 
 	ASSERT(ValidateData());
 }
 
-void ToneMappingPass::Execute(
-	ID3D12Resource& frameBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
-
+void ToneMappingPass::Execute() noexcept {
 	ASSERT(ValidateData());
-	ASSERT(frameBufferCpuDesc.ptr != 0UL);
 
-	ExecuteBeginTask(frameBuffer, frameBufferCpuDesc);
+	ExecuteBeginTask();
 
 	mCmdListExecutor->ResetExecutedCmdListCount();
-	mRecorder->RecordAndPushCommandLists(frameBufferCpuDesc);
+	mRecorder->RecordAndPushCommandLists();
 	
 	// Wait until all previous tasks command lists are executed
 	while (mCmdListExecutor->ExecutedCmdListCount() < 1) {
@@ -82,17 +81,15 @@ bool ToneMappingPass::ValidateData() const noexcept {
 		mCmdQueue != nullptr &&
 		mCmdList != nullptr &&
 		mRecorder.get() != nullptr &&
-		mColorBuffer != nullptr;
+		mInputColorBuffer != nullptr &&
+		mOutputColorBuffer != nullptr;
 
 	return b;
 }
 
-void ToneMappingPass::ExecuteBeginTask(
-	ID3D12Resource& frameBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
+void ToneMappingPass::ExecuteBeginTask() noexcept {
 
 	ASSERT(ValidateData());
-	ASSERT(frameBufferCpuDesc.ptr != 0UL);
 
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };
@@ -105,13 +102,12 @@ void ToneMappingPass::ExecuteBeginTask(
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(&frameBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(mInputColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(mOutputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
 	mCmdList->ResourceBarrier(_countof(barriers), barriers);
 
 	// Clear render targets
-	mCmdList->ClearRenderTargetView(frameBufferCpuDesc, DirectX::Colors::Black, 0U, nullptr);
 	CHECK_HR(mCmdList->Close());
 
 	// Execute preliminary task

@@ -195,13 +195,15 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		*mCmdListExecutor,
 		*mCmdQueue, 
 		*mColorBuffer1.Get(), 
+		*mColorBuffer2.Get(),
+		mColorBuffer2RTVCpuDescHandle,
 		DepthStencilCpuDesc());
 
 	mPostProcessPass.Init(
 		mDevice,
 		*mCmdListExecutor,
 		*mCmdQueue,
-		*mColorBuffer1.Get(),
+		*mColorBuffer2.Get(),
 		DepthStencilCpuDesc());
 		
 	// Initialize fence values for all frames to the same number.
@@ -227,7 +229,8 @@ tbb::task* MasterRender::execute() {
 		mGeometryPass.Execute(mFrameCBuffer);
 		mLightingPass.Execute(mFrameCBuffer);
 		mSkyBoxPass.Execute(mFrameCBuffer);
-		mToneMappingPass.Execute(*CurrentFrameBuffer(), CurrentFrameBufferCpuDesc());
+		mToneMappingPass.Execute();
+		mPostProcessPass.Execute(*CurrentFrameBuffer(), CurrentFrameBufferCpuDesc());
 		ExecuteMergePass();
 
 		SignalFenceAndPresent();
@@ -252,7 +255,7 @@ void MasterRender::ExecuteMergePass() {
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(CurrentFrameBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
-		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer1.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer1.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),		
 	};
 	const std::size_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 2UL);
@@ -341,7 +344,7 @@ void MasterRender::CreateColorBuffers() noexcept {
 	DescriptorManager::Get().CreateRenderTargetView(*mColorBuffer1.Get(), rtvDesc, &mColorBuffer1RTVCpuDescHandle);
 
 	// Create RTV's descriptor for color buffer 2
-	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue, res);
+	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, res);
 	mColorBuffer2 = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
 	DescriptorManager::Get().CreateRenderTargetView(*mColorBuffer2.Get(), rtvDesc, &mColorBuffer2RTVCpuDescHandle);
 }

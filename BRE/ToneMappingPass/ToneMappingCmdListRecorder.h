@@ -24,10 +24,11 @@ public:
 	static void InitPSO() noexcept;
 
 	void Init(
-		ID3D12Resource& colorBuffer,
+		ID3D12Resource& inputColorBuffer,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
-	void RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
+	void RecordAndPushCommandLists() noexcept;
 
 	bool ValidateData() const noexcept;
 
@@ -40,8 +41,8 @@ private:
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
 	std::uint32_t mCurrFrameIndex{ 0U };
-
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
-
-	D3D12_GPU_DESCRIPTOR_HANDLE mColorBufferGpuDescHandle{ 0UL };
+		
+	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferGpuDescHandle{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDescHandle{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDescHandle{ 0UL };
 };

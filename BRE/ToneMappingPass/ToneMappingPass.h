@@ -32,20 +32,18 @@ public:
 		ID3D12Device& device,
 		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
-		ID3D12Resource& colorBuffer,
+		ID3D12Resource& inputColorBuffer,
+		ID3D12Resource& outputColorBuffer,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
-	void Execute(
-		ID3D12Resource& frameBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
+	void Execute() noexcept;
 
 private:
 	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
 
-	void ExecuteBeginTask(
-		ID3D12Resource& frameBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
+	void ExecuteBeginTask() noexcept;
 
 	CommandListExecutor* mCmdListExecutor{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
@@ -57,7 +55,8 @@ private:
 
 	ID3D12Fence* mFence{ nullptr };
 	
-	ID3D12Resource* mColorBuffer{ nullptr };
+	ID3D12Resource* mInputColorBuffer{ nullptr };
+	ID3D12Resource* mOutputColorBuffer{ nullptr };
 
 	Recorder mRecorder;
 };
