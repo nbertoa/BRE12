@@ -8,6 +8,7 @@
 #include <GeometryPass\GeometryPass.h>
 #include <GlobalData\Settings.h>
 #include <LightingPass\LightingPass.h>
+#include <PostProcesspass\PostProcesspass.h>
 #include <SkyBoxPass\SkyBoxPass.h>
 #include <ShaderUtils\CBuffers.h>
 #include <ToneMappingPass\ToneMappingPass.h>
@@ -41,7 +42,7 @@ private:
 	void InitPasses(Scene* scene) noexcept;
 
 	void CreateRtvAndDsv() noexcept;
-	void CreateColorBuffer() noexcept;
+	void CreateColorBuffers() noexcept;
 	void CreateMergePassCommandObjects() noexcept;
 	
 	ID3D12Resource* CurrentFrameBuffer() const noexcept;
@@ -71,6 +72,7 @@ private:
 	LightingPass mLightingPass;
 	SkyBoxPass mSkyBoxPass;
 	ToneMappingPass mToneMappingPass;
+	PostProcessPass mPostProcessPass;
 
 	// Command allocarts and list needed for merge pass
 	ID3D12CommandAllocator* mMergePassCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
@@ -84,10 +86,12 @@ private:
 	ID3D12Resource* mDepthStencilBuffer{ nullptr };
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthStencilBufferRTV{ 0UL };
 
-	// Color buffer is a buffer used for intermediate computations.
-	// It is used as render target (light pass) or pixel shader resource (post processing passes)
-	Microsoft::WRL::ComPtr<ID3D12Resource> mColorBuffer;
-	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferRTVCpuDescHandle;
+	// Color buffers are buffers used for intermediate computations.
+	// They are used as render targets (light pass) or pixel shader resources (post processing passes)
+	Microsoft::WRL::ComPtr<ID3D12Resource> mColorBuffer1;
+	D3D12_CPU_DESCRIPTOR_HANDLE mColorBuffer1RTVCpuDescHandle;
+	Microsoft::WRL::ComPtr<ID3D12Resource> mColorBuffer2;
+	D3D12_CPU_DESCRIPTOR_HANDLE mColorBuffer2RTVCpuDescHandle;
 
 	// Per frame constant buffer.
 	// We cache it here, as is is used by most passes.

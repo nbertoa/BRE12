@@ -132,7 +132,7 @@ MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
 	ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 	CreateMergePassCommandObjects();
 	CreateRtvAndDsv();
-	CreateColorBuffer();
+	CreateColorBuffers();
 
 	mCamera.SetLens(Settings::sFieldOfView, Settings::AspectRatio(), Settings::sNearPlaneZ, Settings::sFarPlaneZ);
 
@@ -177,7 +177,7 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		mGeometryPass.GetBuffers(),
 		GeometryPass::BUFFERS_COUNT,
 		*mDepthStencilBuffer,
-		mColorBufferRTVCpuDescHandle, 
+		mColorBuffer1RTVCpuDescHandle, 
 		DepthStencilCpuDesc(),
 		*diffuseIrradianceCubeMap,
 		*specularPreConvolvedCubeMap);
@@ -187,14 +187,21 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		*mCmdListExecutor, 
 		*mCmdQueue, 
 		*skyBoxCubeMap, 
-		mColorBufferRTVCpuDescHandle, 
+		mColorBuffer1RTVCpuDescHandle, 
 		DepthStencilCpuDesc());
 
 	mToneMappingPass.Init(
 		mDevice, 
 		*mCmdListExecutor,
 		*mCmdQueue, 
-		*mColorBuffer.Get(), 
+		*mColorBuffer1.Get(), 
+		DepthStencilCpuDesc());
+
+	mPostProcessPass.Init(
+		mDevice,
+		*mCmdListExecutor,
+		*mCmdQueue,
+		*mColorBuffer1.Get(),
 		DepthStencilCpuDesc());
 		
 	// Initialize fence values for all frames to the same number.
@@ -245,7 +252,7 @@ void MasterRender::ExecuteMergePass() {
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 		CD3DX12_RESOURCE_BARRIER::Transition(CurrentFrameBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
-		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer1.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
 	const std::size_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 2UL);
@@ -302,7 +309,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	DescriptorManager::Get().CreateDepthStencilView(*mDepthStencilBuffer, depthStencilViewDesc, &mDepthStencilBufferRTV);
 }
 
-void MasterRender::CreateColorBuffer() noexcept {
+void MasterRender::CreateColorBuffers() noexcept {
 	// Fill resource description
 	D3D12_RESOURCE_DESC resDesc = {};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -319,19 +326,24 @@ void MasterRender::CreateColorBuffer() noexcept {
 
 	D3D12_CLEAR_VALUE clearValue = { resDesc.Format, 0.0f, 0.0f, 0.0f, 1.0f };
 
-	mColorBuffer.Reset();
+	mColorBuffer1.Reset();
+	mColorBuffer2.Reset();
 			
 	ID3D12Resource* res{ nullptr };
 	
-	// Create RTV's descriptor
+	// Create RTV's descriptor for color buffer 1
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;		
 	rtvDesc.Format = resDesc.Format;
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue, res);
+	mColorBuffer1 = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
+	DescriptorManager::Get().CreateRenderTargetView(*mColorBuffer1.Get(), rtvDesc, &mColorBuffer1RTVCpuDescHandle);
 
-	mColorBuffer = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-	DescriptorManager::Get().CreateRenderTargetView(*mColorBuffer.Get(), rtvDesc, &mColorBufferRTVCpuDescHandle);
+	// Create RTV's descriptor for color buffer 2
+	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue, res);
+	mColorBuffer2 = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
+	DescriptorManager::Get().CreateRenderTargetView(*mColorBuffer2.Get(), rtvDesc, &mColorBuffer2RTVCpuDescHandle);
 }
 
 void MasterRender::CreateMergePassCommandObjects() noexcept {
