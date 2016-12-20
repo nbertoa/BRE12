@@ -8,6 +8,7 @@
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
+#include <ResourceStateManager\ResourceStateManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
@@ -353,10 +354,12 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
 
-	D3D12_RESOURCE_BARRIER barriers[] = { CD3DX12_RESOURCE_BARRIER::Transition(noiseTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST) };
+	D3D12_RESOURCE_BARRIER barriers[] = { 
+		ResourceStateManager::Get().TransitionState(*noiseTexture, D3D12_RESOURCE_STATE_COPY_DEST),		
+	};
 	mCmdList->ResourceBarrier(_countof(barriers), barriers);
 	UpdateSubresources(mCmdList, noiseTexture, noiseTextureUploadBuffer, 0U, 0U, num2DSubresources, &subResourceData);
-	barriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(noiseTexture, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	barriers[0] = ResourceStateManager::Get().TransitionState(*noiseTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	mCmdList->ResourceBarrier(_countof(barriers), barriers);
 
 	mCmdList->Close();

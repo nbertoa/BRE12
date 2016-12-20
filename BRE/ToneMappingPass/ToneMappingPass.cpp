@@ -7,6 +7,7 @@
 #include <CommandManager\CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <ResourceManager\ResourceManager.h>
+#include <ResourceStateManager\ResourceStateManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
@@ -102,8 +103,8 @@ void ToneMappingPass::ExecuteBeginTask() noexcept {
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mInputColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mOutputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		ResourceStateManager::Get().TransitionState(*mInputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::Get().TransitionState(*mOutputColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
 	mCmdList->ResourceBarrier(_countof(barriers), barriers);
 

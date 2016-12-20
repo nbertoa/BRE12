@@ -6,6 +6,7 @@
 #include <DXUtils/d3dx12.h>
 #include <GlobalData\Settings.h>
 #include <ResourceManager\DDSTextureLoader.h>
+#include <ResourceStateManager\ResourceStateManager.h>
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 #include <Utils\StringUtils.h>
@@ -157,6 +158,8 @@ std::size_t ResourceManager::CreateCommittedResource(
 	mResourceById.insert(accessor, id);
 	accessor->second = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
 	accessor.release();
+
+	ResourceStateManager::Get().Add(*res, resStates);
 
 	return id;
 }

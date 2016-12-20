@@ -11,6 +11,7 @@
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <ResourceManager\ResourceManager.h>
+#include <ResourceStateManager\ResourceStateManager.h>
 #include <Scene/Scene.h>
 
 using namespace DirectX;
@@ -252,10 +253,10 @@ void MasterRender::ExecuteMergePass() {
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryPass.GetBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(CurrentFrameBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT),
-		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer1.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),		
+		ResourceStateManager::Get().TransitionState(*mGeometryPass.GetBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
+		ResourceStateManager::Get().TransitionState(*mGeometryPass.GetBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
+		ResourceStateManager::Get().TransitionState(*CurrentFrameBuffer(), D3D12_RESOURCE_STATE_PRESENT),
+		ResourceStateManager::Get().TransitionState(*mColorBuffer1.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),	
 	};
 	const std::size_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 2UL);
@@ -280,6 +281,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
 		DescriptorManager::Get().CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDesc, &mFrameBufferRTVs[i]);
+		ResourceStateManager::Get().Add(*mFrameBuffers[i].Get(), D3D12_RESOURCE_STATE_PRESENT);
 	}
 
 	// Create the depth/stencil buffer and view.

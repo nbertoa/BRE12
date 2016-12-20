@@ -7,6 +7,7 @@
 #include <DescriptorManager\DescriptorManager.h>
 #include <DXUtils\d3dx12.h>
 #include <ResourceManager\ResourceManager.h>
+#include <ResourceStateManager\ResourceStateManager.h>
 #include <Utils\DebugUtils.h>
 
 namespace {
@@ -186,8 +187,8 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
-		CD3DX12_RESOURCE_BARRIER::Transition(mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		ResourceStateManager::Get().TransitionState(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
+		ResourceStateManager::Get().TransitionState(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),		
 	};
 	const std::uint32_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == 2UL);
@@ -216,8 +217,8 @@ void AmbientLightPass::ExecuteEndingTask() noexcept {
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER endBarriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mBlurBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::Get().TransitionState(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::Get().TransitionState(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),		
 	};
 	const std::uint32_t barriersCount = _countof(endBarriers);
 	ASSERT(barriersCount == 2UL);

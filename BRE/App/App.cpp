@@ -10,6 +10,7 @@
 #include <ModelManager\ModelManager.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
+#include <ResourceStateManager\ResourceStateManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>
@@ -31,6 +32,7 @@ namespace {
 		Materials::InitMaterials();
 		PSOManager::Create(device);
 		ResourceManager::Create(device);
+		ResourceStateManager::Create();
 		RootSignatureManager::Create(device);
 		ShaderManager::Create();
 

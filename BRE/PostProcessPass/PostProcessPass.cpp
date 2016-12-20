@@ -7,6 +7,7 @@
 #include <CommandManager\CommandManager.h>
 #include <DXUtils/d3dx12.h>
 #include <ResourceManager\ResourceManager.h>
+#include <ResourceStateManager\ResourceStateManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
@@ -105,8 +106,8 @@ void PostProcessPass::ExecuteBeginTask(
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(&frameBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		ResourceStateManager::Get().TransitionState(*mColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::Get().TransitionState(frameBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),		
 	};
 	mCmdList->ResourceBarrier(_countof(barriers), barriers);
 

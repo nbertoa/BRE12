@@ -9,6 +9,7 @@
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\GeometryPass.h>
 #include <LightingPass\Recorders\PunctualLightCmdListRecorder.h>
+#include <ResourceStateManager\ResourceStateManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
@@ -168,9 +169,9 @@ void LightingPass::ExecuteBeginTask() noexcept {
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mGeometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(mDepthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::Get().TransitionState(*mGeometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::Get().TransitionState(*mGeometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::Get().TransitionState(*mDepthBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 	};
 	const std::uint32_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 1UL);
@@ -202,7 +203,7 @@ void LightingPass::ExecuteEndingTask() noexcept {
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER endBarriers[]{
-		CD3DX12_RESOURCE_BARRIER::Transition(mDepthBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE),
+		ResourceStateManager::Get().TransitionState(*mDepthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE),
 	};
 	const std::uint32_t barriersCount = _countof(endBarriers);
 	ASSERT(barriersCount == 1UL);
