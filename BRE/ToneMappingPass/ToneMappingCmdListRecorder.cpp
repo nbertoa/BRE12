@@ -79,12 +79,13 @@ void ToneMappingCmdListRecorder::Init(
 }
 
 void ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
-
 	ASSERT(ValidateData());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
+	static std::uint32_t currFrameIndex = 0U;
+
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[currFrameIndex] };
 	ASSERT(cmdAlloc != nullptr);
 	
 	CHECK_HR(cmdAlloc->Reset());
@@ -110,7 +111,7 @@ void ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	mCmdListQueue.push(mCmdList);
 
 	// Next frame
-	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;
+	currFrameIndex = (currFrameIndex + 1) % Settings::sQueuedFrameCount;
 }
 
 bool ToneMappingCmdListRecorder::ValidateData() const noexcept {

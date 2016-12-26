@@ -94,11 +94,13 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
+	static std::uint32_t currFrameIndex = 0U;
+
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[currFrameIndex] };
 	ASSERT(cmdAlloc != nullptr);
 
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrFrameIndex]);
+	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[currFrameIndex]);
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 	
 	CHECK_HR(cmdAlloc->Reset());
@@ -127,7 +129,7 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCmdListQueue.push(mCmdList);
 
 	// Next frame
-	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;
+	currFrameIndex = (currFrameIndex + 1) % Settings::sQueuedFrameCount;
 }
 
 bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
