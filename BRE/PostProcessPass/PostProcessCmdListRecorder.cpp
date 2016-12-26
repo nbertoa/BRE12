@@ -74,12 +74,13 @@ void PostProcessCmdListRecorder::Init(ID3D12Resource& colorBuffer) noexcept  {
 }
 
 void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
-
 	ASSERT(ValidateData());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
+	static std::uint32_t currFrameIndex = 0U;
+
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[currFrameIndex] };
 	ASSERT(cmdAlloc != nullptr);
 	
 	CHECK_HR(cmdAlloc->Reset());
@@ -105,7 +106,7 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 	mCmdListQueue.push(mCmdList);
 
 	// Next frame
-	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;
+	currFrameIndex = (currFrameIndex + 1) % Settings::sQueuedFrameCount;
 }
 
 bool PostProcessCmdListRecorder::ValidateData() const noexcept {

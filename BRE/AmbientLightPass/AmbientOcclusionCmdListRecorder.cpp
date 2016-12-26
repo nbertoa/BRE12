@@ -219,14 +219,16 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
+	static std::uint32_t currFrameIndex = 0U;
+
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[currFrameIndex] };
 	ASSERT(cmdAlloc != nullptr);
 	
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrFrameIndex]);
+	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[currFrameIndex]);
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
@@ -252,7 +254,7 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCmdListQueue.push(mCmdList);
 
 	// Next frame
-	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;
+	currFrameIndex = (currFrameIndex + 1) % Settings::sQueuedFrameCount;
 }
 
 bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
@@ -345,7 +347,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	// read by a shader.
 	//
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
+	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[0] };
 	ASSERT(cmdAlloc != nullptr);
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));

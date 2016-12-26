@@ -36,7 +36,6 @@ private:
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
-	std::uint32_t mCurrFrameIndex{ 0U };
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mColorBufferGpuDescHandle{ 0UL };
 };

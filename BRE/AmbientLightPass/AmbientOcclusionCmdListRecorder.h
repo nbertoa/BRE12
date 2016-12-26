@@ -50,7 +50,6 @@ private:
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
-	std::uint32_t mCurrFrameIndex{ 0U };
 
 	std::uint32_t mNumSamples{ 0U };
 
