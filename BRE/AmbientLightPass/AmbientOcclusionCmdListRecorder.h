@@ -33,8 +33,7 @@ public:
 	void Init(
 		ID3D12Resource& normalSmoothnessBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessBufferCpuDesc,
-		ID3D12Resource& depthBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+		ID3D12Resource& depthBuffer) noexcept;
 
 	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
 
@@ -61,9 +60,7 @@ private:
 	UploadBuffer* mSampleKernelBuffer{ nullptr };
 	D3D12_GPU_DESCRIPTOR_HANDLE mSampleKernelBufferGpuDescHandleBegin{ 0UL };
 
-	// Ambient accessibility & Depth buffers cpu descriptors
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessBufferCpuDesc{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 
 	// Pixel shader buffers GPU descriptor handle
 	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDescHandle{ 0UL };

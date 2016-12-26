@@ -122,7 +122,6 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	ASSERT(sRootSign != nullptr);
 	ASSERT(mCmdListQueue != nullptr);
 	ASSERT(mColorBufferCpuDesc.ptr != 0UL);
-	ASSERT(mDepthBufferCpuDesc.ptr != 0UL);
 
 	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
 	ASSERT(cmdAlloc != nullptr);	
@@ -136,7 +135,7 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
+	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);

@@ -43,7 +43,6 @@ void LightingPass::Init(
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
 	ID3D12Resource& diffuseIrradianceCubeMap,
 	ID3D12Resource& specularPreConvolvedCubeMap) noexcept {
 
@@ -55,7 +54,6 @@ void LightingPass::Init(
 	mGeometryBuffers = geometryBuffers;
 	mColorBufferCpuDesc = colorBufferCpuDesc;
 	mDepthBuffer = &depthBuffer;
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	// Initialize recorder's pso
 	PunctualLightCmdListRecorder::InitPSO();
@@ -69,8 +67,7 @@ void LightingPass::Init(
 		*geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(),
 		*geometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(),
 		colorBufferCpuDesc,
-		depthBuffer,
-		depthBufferCpuDesc);
+		depthBuffer);
 
 	// Initialize environment light pass
 	mEnvironmentLightPass.Init(
@@ -80,14 +77,13 @@ void LightingPass::Init(
 		geometryBuffersCount,
 		*mDepthBuffer,
 		colorBufferCpuDesc, 
-		depthBufferCpuDesc,
 		diffuseIrradianceCubeMap,
 		specularPreConvolvedCubeMap);
 
 	// Init internal data for all lights recorders
 	for (Recorders::value_type& recorder : mRecorders) {
 		ASSERT(recorder.get() != nullptr);
-		recorder->InitInternal(cmdListExecutor.CmdListQueue(), colorBufferCpuDesc, depthBufferCpuDesc);
+		recorder->InitInternal(cmdListExecutor.CmdListQueue(), colorBufferCpuDesc);
 	}
 
 	ASSERT(ValidateData());
@@ -149,8 +145,7 @@ bool LightingPass::ValidateData() const noexcept {
 		mCmdQueue != nullptr &&
 		mCmdList != nullptr &&
 		mColorBufferCpuDesc.ptr != 0UL &&
-		mDepthBuffer != nullptr &&
-		mDepthBufferCpuDesc.ptr != 0UL;
+		mDepthBuffer != nullptr;
 
 	return b;
 }

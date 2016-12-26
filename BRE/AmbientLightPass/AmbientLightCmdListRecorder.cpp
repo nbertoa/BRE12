@@ -71,14 +71,12 @@ void AmbientLightCmdListRecorder::Init(
 	ID3D12Resource& baseColorMetalMaskBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 	ID3D12Resource& ambientAccessibilityBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRTCpuDesc,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
+	const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRTCpuDesc) noexcept
 {
 	ASSERT(ValidateData() == false);
 
 	mColorBufferCpuDesc = colorBufferCpuDesc;
 	mAmbientAccessibilityBufferRTCpuDesc = ambientAccessibilityBufferRTCpuDesc;
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	BuildBuffers(baseColorMetalMaskBuffer, ambientAccessibilityBuffer);
 
@@ -98,7 +96,7 @@ void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
+	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
@@ -131,7 +129,6 @@ bool AmbientLightCmdListRecorder::ValidateData() const noexcept {
 		mCmdList != nullptr &&
 		mColorBufferCpuDesc.ptr != 0UL &&
 		mAmbientAccessibilityBufferRTCpuDesc.ptr != 0UL &&
-		mDepthBufferCpuDesc.ptr != 0UL && 
 		mBaseColor_MetalMaskGpuDescHandle.ptr != 0UL;
 
 	return result;

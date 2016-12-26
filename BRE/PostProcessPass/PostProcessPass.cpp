@@ -33,8 +33,7 @@ void PostProcessPass::Init(
 	ID3D12Device& device,
 	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
-	ID3D12Resource& colorBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
+	ID3D12Resource& colorBuffer) noexcept {
 
 	ASSERT(ValidateData() == false);
 	
@@ -48,7 +47,7 @@ void PostProcessPass::Init(
 
 	// Initialize recorder
 	mRecorder.reset(new PostProcessCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
-	mRecorder->Init(colorBuffer, depthBufferCpuDesc);
+	mRecorder->Init(colorBuffer);
 
 	ASSERT(ValidateData());
 }

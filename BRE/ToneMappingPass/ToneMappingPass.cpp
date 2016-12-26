@@ -35,8 +35,7 @@ void ToneMappingPass::Init(
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource& inputColorBuffer,
 	ID3D12Resource& outputColorBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
+	const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept {
 
 	ASSERT(ValidateData() == false);
 	
@@ -51,7 +50,7 @@ void ToneMappingPass::Init(
 
 	// Initialize recorder
 	mRecorder.reset(new ToneMappingCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
-	mRecorder->Init(*mInputColorBuffer, outputBufferCpuDesc, depthBufferCpuDesc);
+	mRecorder->Init(*mInputColorBuffer, outputBufferCpuDesc);
 
 	ASSERT(ValidateData());
 }

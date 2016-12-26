@@ -33,7 +33,6 @@ public:
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 

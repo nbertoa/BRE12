@@ -76,7 +76,6 @@ void EnvironmentLightCmdListRecorder::Init(
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
 	ID3D12Resource& diffuseIrradianceCubeMap,
 	ID3D12Resource& specularPreConvolvedCubeMap) noexcept
 {
@@ -85,7 +84,6 @@ void EnvironmentLightCmdListRecorder::Init(
 	ASSERT(geometryBuffersCount > 0U);
 
 	mColorBufferCpuDesc = colorBufferCpuDesc;
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	BuildBuffers(geometryBuffers, geometryBuffersCount, depthBuffer, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
 
@@ -109,7 +107,7 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
+	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
@@ -150,7 +148,6 @@ bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		mCmdList != nullptr &&
 		mColorBufferCpuDesc.ptr != 0UL &&
-		mDepthBufferCpuDesc.ptr != 0UL && 
 		mTexturesGpuDescHandle.ptr != 0UL;
 
 	return result;

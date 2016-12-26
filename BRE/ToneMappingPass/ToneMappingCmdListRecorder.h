@@ -25,8 +25,7 @@ public:
 
 	void Init(
 		ID3D12Resource& inputColorBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept;
 
 	void RecordAndPushCommandLists() noexcept;
 
@@ -44,5 +43,4 @@ private:
 		
 	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferGpuDescHandle{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDescHandle{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDescHandle{ 0UL };
 };

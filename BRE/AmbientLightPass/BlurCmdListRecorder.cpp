@@ -68,12 +68,10 @@ void BlurCmdListRecorder::InitPSO() noexcept {
 
 void BlurCmdListRecorder::Init(
 	ID3D12Resource& ambientAccessibilityBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& blurBufferCpuDesc,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
+	const D3D12_CPU_DESCRIPTOR_HANDLE& blurBufferCpuDesc) noexcept
 {
 	ASSERT(ValidateData() == false);
 
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
 	mBlurBufferCpuDescHandle = blurBufferCpuDesc;
 
 	BuildBuffers(ambientAccessibilityBuffer);
@@ -95,7 +93,7 @@ void BlurCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &mBlurBufferCpuDescHandle, false, &mDepthBufferCpuDesc);
+	mCmdList->OMSetRenderTargets(1U, &mBlurBufferCpuDescHandle, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
@@ -126,7 +124,6 @@ bool BlurCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		mCmdList != nullptr &&
-		mDepthBufferCpuDesc.ptr != 0UL &&
 		mColorBufferGpuDescHandle.ptr != 0UL && 
 		mBlurBufferCpuDescHandle.ptr != 0UL;
 

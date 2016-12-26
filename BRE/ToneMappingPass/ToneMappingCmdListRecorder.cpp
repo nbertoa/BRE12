@@ -68,13 +68,11 @@ void ToneMappingCmdListRecorder::InitPSO() noexcept {
 
 void ToneMappingCmdListRecorder::Init(
 	ID3D12Resource& inputColorBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
+	const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept
 {
 	ASSERT(ValidateData() == false);
 
 	mOutputColorBufferCpuDescHandle = outputBufferCpuDesc;
-	mDepthBufferCpuDescHandle = depthBufferCpuDesc;
 
 	BuildBuffers(inputColorBuffer);
 
@@ -95,7 +93,7 @@ void ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &mOutputColorBufferCpuDescHandle, false, &mDepthBufferCpuDescHandle);
+	mCmdList->OMSetRenderTargets(1U, &mOutputColorBufferCpuDescHandle, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
@@ -127,8 +125,7 @@ bool ToneMappingCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		mCmdList != nullptr &&
 		mInputColorBufferGpuDescHandle.ptr != 0UL &&
-		mOutputColorBufferCpuDescHandle.ptr != 0UL &&
-		mDepthBufferCpuDescHandle.ptr != 0UL;
+		mOutputColorBufferCpuDescHandle.ptr != 0UL;
 
 	return result;
 }

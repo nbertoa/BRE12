@@ -34,8 +34,7 @@ public:
 		ID3D12CommandQueue& cmdQueue,
 		ID3D12Resource& inputColorBuffer,
 		ID3D12Resource& outputColorBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept;
 
 	void Execute() noexcept;
 

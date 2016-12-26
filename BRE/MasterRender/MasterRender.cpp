@@ -179,7 +179,6 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		GeometryPass::BUFFERS_COUNT,
 		*mDepthStencilBuffer,
 		mColorBuffer1RTVCpuDescHandle, 
-		DepthStencilCpuDesc(),
 		*diffuseIrradianceCubeMap,
 		*specularPreConvolvedCubeMap);
 
@@ -188,7 +187,7 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		*mCmdListExecutor, 
 		*mCmdQueue, 
 		*skyBoxCubeMap, 
-		mColorBuffer1RTVCpuDescHandle, 
+		mColorBuffer1RTVCpuDescHandle,
 		DepthStencilCpuDesc());
 
 	mToneMappingPass.Init(
@@ -197,15 +196,13 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		*mCmdQueue, 
 		*mColorBuffer1.Get(), 
 		*mColorBuffer2.Get(),
-		mColorBuffer2RTVCpuDescHandle,
-		DepthStencilCpuDesc());
+		mColorBuffer2RTVCpuDescHandle);
 
 	mPostProcessPass.Init(
 		mDevice,
 		*mCmdListExecutor,
 		*mCmdQueue,
-		*mColorBuffer2.Get(),
-		DepthStencilCpuDesc());
+		*mColorBuffer2.Get());
 		
 	// Initialize fence values for all frames to the same number.
 	const std::uint64_t count{ _countof(mFenceValueByQueuedFrameIndex) };

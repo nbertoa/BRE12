@@ -45,8 +45,7 @@ public:
 	// This method must be called before calling RecordAndPushCommandLists()
 	void InitInternal(
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
-		const D3D12_CPU_DESCRIPTOR_HANDLE colorBufferCpuDesc,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+		const D3D12_CPU_DESCRIPTOR_HANDLE colorBufferCpuDesc) noexcept;
 
 	// Record command lists and push them to the queue.
 	virtual void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept = 0;
@@ -70,7 +69,6 @@ protected:
 	tbb::concurrent_queue<ID3D12CommandList*>* mCmdListQueue{ nullptr };
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 
 	std::uint32_t mNumLights{ 0U };
 

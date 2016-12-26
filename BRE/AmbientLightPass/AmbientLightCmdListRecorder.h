@@ -33,8 +33,7 @@ public:
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 		ID3D12Resource& ambientAccessibilityBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRTCpuDesc,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+		const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRTCpuDesc) noexcept;
 
 	void RecordAndPushCommandLists() noexcept;
 
@@ -55,7 +54,6 @@ private:
 	// Buffers cpu descriptors
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRTCpuDesc{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 
 	// BaseColor_MetalMask GPU descriptor handle
 	D3D12_GPU_DESCRIPTOR_HANDLE mBaseColor_MetalMaskGpuDescHandle{ 0UL };

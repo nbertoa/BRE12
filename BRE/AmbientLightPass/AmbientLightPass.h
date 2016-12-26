@@ -35,8 +35,7 @@ public:
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		ID3D12Resource& normalSmoothnessBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
-		ID3D12Resource& depthBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+		ID3D12Resource& depthBuffer) noexcept;
 
 	void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 

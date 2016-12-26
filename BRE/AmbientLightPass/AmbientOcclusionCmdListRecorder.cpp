@@ -199,13 +199,11 @@ void AmbientOcclusionCmdListRecorder::InitPSO() noexcept {
 void AmbientOcclusionCmdListRecorder::Init(
 	ID3D12Resource& normalSmoothnessBuffer,	
 	const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessBufferCpuDesc,
-	ID3D12Resource& depthBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
+	ID3D12Resource& depthBuffer) noexcept
 {
 	ASSERT(ValidateData() == false);
 
 	mAmbientAccessBufferCpuDesc = ambientAccessBufferCpuDesc;
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	mNumSamples = 14U;
 	std::vector<XMFLOAT4> sampleKernel;
@@ -234,7 +232,7 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &mAmbientAccessBufferCpuDesc, false, &mDepthBufferCpuDesc);
+	mCmdList->OMSetRenderTargets(1U, &mAmbientAccessBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
@@ -277,7 +275,6 @@ bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
 		mSampleKernelBuffer != nullptr &&
 		mSampleKernelBufferGpuDescHandleBegin.ptr != 0UL &&
 		mAmbientAccessBufferCpuDesc.ptr != 0UL &&
-		mDepthBufferCpuDesc.ptr != 0UL &&
 		mPixelShaderBuffersGpuDescHandle.ptr != 0UL;
 
 	return result;

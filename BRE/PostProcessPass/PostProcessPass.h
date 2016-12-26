@@ -32,8 +32,7 @@ public:
 		ID3D12Device& device,
 		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
-		ID3D12Resource& colorBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+		ID3D12Resource& colorBuffer) noexcept;
 
 	void Execute(
 		ID3D12Resource& frameBuffer,

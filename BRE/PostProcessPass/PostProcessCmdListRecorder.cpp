@@ -66,14 +66,9 @@ void PostProcessCmdListRecorder::InitPSO() noexcept {
 	ASSERT(sRootSign != nullptr);
 }
 
-void PostProcessCmdListRecorder::Init(
-	ID3D12Resource& colorBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
-{
+void PostProcessCmdListRecorder::Init(ID3D12Resource& colorBuffer) noexcept  {
 	ASSERT(ValidateData() == false);
-
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
-
+	
 	BuildBuffers(colorBuffer);
 
 	ASSERT(ValidateData());
@@ -93,7 +88,7 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 
 	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
 	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &frameBufferCpuDesc, false, &mDepthBufferCpuDesc);
+	mCmdList->OMSetRenderTargets(1U, &frameBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
@@ -124,7 +119,6 @@ bool PostProcessCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		mCmdList != nullptr &&
-		mDepthBufferCpuDesc.ptr != 0UL &&
 		mColorBufferGpuDescHandle.ptr != 0UL;
 
 	return result;
