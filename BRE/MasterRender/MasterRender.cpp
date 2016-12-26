@@ -117,18 +117,17 @@ namespace {
 
 using namespace DirectX;
 
-MasterRender* MasterRender::Create(const HWND hwnd, ID3D12Device& device, Scene* scene) noexcept {
+MasterRender* MasterRender::Create(const HWND hwnd, Scene* scene) noexcept {
 	ASSERT(scene != nullptr);
 
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
 	// Reference count is 2: 1 parent task + 1 master render task
 	parent->set_ref_count(2);
-	return new (parent->allocate_child()) MasterRender(hwnd, device, scene);
+	return new (parent->allocate_child()) MasterRender(hwnd, scene);
 }
 
-MasterRender::MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene)
+MasterRender::MasterRender(const HWND hwnd, Scene* scene)
 	: mHwnd(hwnd)
-	, mDevice(device)
 {
 	ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 	CreateMergePassCommandObjects();
@@ -172,7 +171,6 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		mLightingPass.GetRecorders());
 
 	mLightingPass.Init(
-		mDevice, 
 		*mCmdListExecutor,
 		*mCmdQueue, 
 		mGeometryPass.GetBuffers(),
@@ -183,7 +181,6 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		*specularPreConvolvedCubeMap);
 
 	mSkyBoxPass.Init(
-		mDevice, 
 		*mCmdListExecutor, 
 		*mCmdQueue, 
 		*skyBoxCubeMap, 
@@ -191,7 +188,6 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		DepthStencilCpuDesc());
 
 	mToneMappingPass.Init(
-		mDevice, 
 		*mCmdListExecutor,
 		*mCmdQueue, 
 		*mColorBuffer1.Get(), 
@@ -199,7 +195,6 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		mColorBuffer2RTVCpuDescHandle);
 
 	mPostProcessPass.Init(
-		mDevice,
 		*mCmdListExecutor,
 		*mCmdQueue,
 		*mColorBuffer2.Get());
@@ -274,7 +269,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	// Create swap chain and render target views
 	ASSERT(mSwapChain == nullptr);
 	CreateSwapChain(mHwnd, *mCmdQueue, Settings::sFrameBufferFormat, mSwapChain);
-	const std::uint32_t rtvDescSize{ mDevice.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
+	const std::size_t rtvDescSize{ D3dData::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
 		DescriptorManager::Get().CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDesc, &mFrameBufferRTVs[i]);

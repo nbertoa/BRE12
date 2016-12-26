@@ -91,7 +91,7 @@ void TextureScene::GenerateGeomPassRecorders(
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, numGeometry),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
-			TextureCmdListRecorder& task{ *new TextureCmdListRecorder(D3dData::Device()) };
+			TextureCmdListRecorder& task{ *new TextureCmdListRecorder() };
 			tasks[k].reset(&task);
 							
 			GeometryPassCmdListRecorder::GeometryData& currGeomData{ geomDataVec[k] };
@@ -144,7 +144,7 @@ void TextureScene::GenerateLightingPassRecorders(
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, numTasks, 1U),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
-			PunctualLightCmdListRecorder& task{ *new PunctualLightCmdListRecorder(D3dData::Device()) };
+			PunctualLightCmdListRecorder& task{ *new PunctualLightCmdListRecorder() };
 			tasks[k].reset(&task);
 			PunctualLight light[2];
 			light[0].mPosAndRange[0] = 0.0f;

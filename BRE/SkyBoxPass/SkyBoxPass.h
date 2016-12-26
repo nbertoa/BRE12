@@ -22,7 +22,6 @@ public:
 
 	// You should call this method after filling recorder and before Execute()
 	void Init(
-		ID3D12Device& device,
 		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
 		ID3D12Resource& skyBoxCubeMap,

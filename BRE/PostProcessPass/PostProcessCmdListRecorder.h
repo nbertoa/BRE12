@@ -11,7 +11,7 @@ class UploadBuffer;
 // This class has common data and functionality to record command list for post processing effects (anti aliasing, color grading, etc).
 class PostProcessCmdListRecorder {
 public:
-	explicit PostProcessCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	explicit PostProcessCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 	~PostProcessCmdListRecorder() = default;
 	PostProcessCmdListRecorder(const PostProcessCmdListRecorder&) = delete;
 	const PostProcessCmdListRecorder& operator=(const PostProcessCmdListRecorder&) = delete;
@@ -32,7 +32,6 @@ public:
 private:
 	void BuildBuffers(ID3D12Resource& colorBuffer) noexcept;
 
-	ID3D12Device& mDevice;
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };

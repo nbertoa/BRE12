@@ -60,7 +60,6 @@ namespace {
 }
 
 void SkyBoxPass::Init(
-	ID3D12Device& device,
 	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource& skyBoxCubeMap,
@@ -94,7 +93,7 @@ void SkyBoxPass::Init(
 	SkyBoxCmdListRecorder::InitPSO();
 
 	// Initialize recorder
-	mRecorder.reset(new SkyBoxCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
+	mRecorder.reset(new SkyBoxCmdListRecorder(cmdListExecutor.CmdListQueue()));
 	mRecorder->Init(
 		mesh.VertexBufferData(),
 		mesh.IndexBufferData(), 

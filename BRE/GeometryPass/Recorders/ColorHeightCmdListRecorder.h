@@ -7,8 +7,7 @@ struct Material;
 // Recorder that does color mapping + normal mapping + height mapping
 class ColorHeightCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
-	explicit ColorHeightCmdListRecorder(ID3D12Device& device);
-
+	ColorHeightCmdListRecorder();
 	~ColorHeightCmdListRecorder() = default;
 	ColorHeightCmdListRecorder(const ColorHeightCmdListRecorder&) = delete;
 	const ColorHeightCmdListRecorder& operator=(const ColorHeightCmdListRecorder&) = delete;

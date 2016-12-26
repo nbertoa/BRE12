@@ -30,7 +30,6 @@ namespace {
 }
 
 void ToneMappingPass::Init(
-	ID3D12Device& device,
 	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource& inputColorBuffer,
@@ -49,7 +48,7 @@ void ToneMappingPass::Init(
 	ToneMappingCmdListRecorder::InitPSO();
 
 	// Initialize recorder
-	mRecorder.reset(new ToneMappingCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
+	mRecorder.reset(new ToneMappingCmdListRecorder(cmdListExecutor.CmdListQueue()));
 	mRecorder->Init(*mInputColorBuffer, outputBufferCpuDesc);
 
 	ASSERT(ValidateData());

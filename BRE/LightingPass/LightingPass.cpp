@@ -36,7 +36,6 @@ namespace {
 }
 
 void LightingPass::Init(
-	ID3D12Device& device,
 	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
@@ -61,7 +60,6 @@ void LightingPass::Init(
 	// Initialize ambient pass
 	ASSERT(geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get() != nullptr);
 	mAmbientLightPass.Init(
-		device,
 		cmdListExecutor,
 		cmdQueue,
 		*geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(),
@@ -71,7 +69,6 @@ void LightingPass::Init(
 
 	// Initialize environment light pass
 	mEnvironmentLightPass.Init(
-		device, 
 		cmdListExecutor.CmdListQueue(),
 		geometryBuffers, 
 		geometryBuffersCount,

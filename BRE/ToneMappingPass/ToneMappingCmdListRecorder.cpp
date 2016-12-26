@@ -36,9 +36,8 @@ namespace {
 	}
 }
 
-ToneMappingCmdListRecorder::ToneMappingCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
-	: mDevice(device)
-	, mCmdListQueue(cmdListQueue)
+ToneMappingCmdListRecorder::ToneMappingCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
+	: mCmdListQueue(cmdListQueue)
 {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }

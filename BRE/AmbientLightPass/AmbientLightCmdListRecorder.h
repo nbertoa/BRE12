@@ -7,7 +7,6 @@
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12CommandAllocator;
 struct ID3D12CommandList;
-struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 class UploadBuffer;
@@ -16,7 +15,7 @@ class UploadBuffer;
 // This class has common data and functionality to record command list for ambient light pass.
 class AmbientLightCmdListRecorder {
 public:
-	explicit AmbientLightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	explicit AmbientLightCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
 	~AmbientLightCmdListRecorder() = default;
 	AmbientLightCmdListRecorder(const AmbientLightCmdListRecorder&) = delete;
@@ -43,8 +42,7 @@ private:
 	void BuildBuffers(
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		ID3D12Resource& ambientAccessibilityBuffer) noexcept;
-
-	ID3D12Device& mDevice;
+	
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };

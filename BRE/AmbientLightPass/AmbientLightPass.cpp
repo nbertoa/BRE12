@@ -75,7 +75,6 @@ namespace {
 }
 
 void AmbientLightPass::Init(
-	ID3D12Device& device,
 	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource& baseColorMetalMaskBuffer,
@@ -100,20 +99,20 @@ void AmbientLightPass::Init(
 	CreateBuffer(mBlurBuffer, mBlurBufferRTCpuDescHandle);
 	
 	// Initialize ambient occlusion recorder
-	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
+	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder(cmdListExecutor.CmdListQueue()));
 	mAmbientOcclusionRecorder->Init(
 		normalSmoothnessBuffer,
 		mAmbientAccessibilityBufferRTCpuDescHandle,
 		depthBuffer);
 
 	// Initialize blur recorder
-	mBlurRecorder.reset(new BlurCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
+	mBlurRecorder.reset(new BlurCmdListRecorder(cmdListExecutor.CmdListQueue()));
 	mBlurRecorder->Init(
 		*mAmbientAccessibilityBuffer.Get(),
 		mBlurBufferRTCpuDescHandle);
 
 	// Initialize ambient light recorder
-	mAmbientLightRecorder.reset(new AmbientLightCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
+	mAmbientLightRecorder.reset(new AmbientLightCmdListRecorder(cmdListExecutor.CmdListQueue()));
 	mAmbientLightRecorder->Init(
 		baseColorMetalMaskBuffer,
 		colorBufferCpuDesc,

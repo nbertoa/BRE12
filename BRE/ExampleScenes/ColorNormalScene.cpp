@@ -74,7 +74,7 @@ namespace {
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
 		PunctualLightCmdListRecorder* &recorder) {
-		recorder = new PunctualLightCmdListRecorder(D3dData::Device());
+		recorder = new PunctualLightCmdListRecorder();
 		PunctualLight light[1];
 		light[0].mPosAndRange[0] = 0.0f;
 		light[0].mPosAndRange[1] = 300.0f;
@@ -108,7 +108,7 @@ namespace {
 
 		ASSERT(normals != nullptr);
 
-		recorder = new ColorNormalCmdListRecorder(D3dData::Device());
+		recorder = new ColorNormalCmdListRecorder();
 
 		const std::size_t numMeshes{ meshes.size() };
 		ASSERT(numMeshes > 0UL);

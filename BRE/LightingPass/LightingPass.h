@@ -36,7 +36,6 @@ public:
 
 	// You should call this method after filling recorders and before Execute()
 	void Init(
-		ID3D12Device& device,
 		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 

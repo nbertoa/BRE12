@@ -24,9 +24,7 @@ namespace {
 	}
 }
 
-GeometryPassCmdListRecorder::GeometryPassCmdListRecorder(ID3D12Device& device)
-	: mDevice(device)
-{
+GeometryPassCmdListRecorder::GeometryPassCmdListRecorder() {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 

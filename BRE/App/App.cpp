@@ -39,10 +39,10 @@ namespace {
 		//ShowCursor(false);
 	}
 
-	void InitMasterRenderTask(const HWND hwnd, ID3D12Device& device, Scene* scene, MasterRender* &masterRender) noexcept {
+	void InitMasterRenderTask(const HWND hwnd, Scene* scene, MasterRender* &masterRender) noexcept {
 		ASSERT(scene != nullptr);
 		ASSERT(masterRender == nullptr);
-		masterRender = MasterRender::Create(hwnd, device, scene);
+		masterRender = MasterRender::Create(hwnd,  scene);
 	}
 
 	void Update() noexcept {
@@ -79,13 +79,12 @@ App::App(HINSTANCE hInstance, Scene* scene)
 	ASSERT(scene != nullptr);
 	D3dData::InitDirect3D(hInstance);
 	InitSystems(D3dData::Hwnd(), hInstance);
-	InitMasterRenderTask(D3dData::Hwnd(), D3dData::Device(), scene, mMasterRender);
+	InitMasterRenderTask(D3dData::Hwnd(), scene, mMasterRender);
 
 	RunMessageLoop();
 }
 
-App::~App() {
-	ASSERT(mMasterRender != nullptr);
+App::~App() {	ASSERT(mMasterRender != nullptr);
 	mMasterRender->Terminate();
 	mTaskSchedulerInit.terminate();
 }

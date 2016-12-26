@@ -29,7 +29,6 @@ public:
 
 	// You should call this method before Execute()
 	void Init(
-		ID3D12Device& device,
 		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
 		ID3D12Resource& baseColorMetalMaskBuffer,

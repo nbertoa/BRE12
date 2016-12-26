@@ -11,7 +11,7 @@ class UploadBuffer;
 // This class has common data and functionality to record command list to blur a color buffer.
 class BlurCmdListRecorder {
 public:
-	explicit BlurCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	explicit BlurCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 	~BlurCmdListRecorder() = default;
 	BlurCmdListRecorder(const BlurCmdListRecorder&) = delete;
 	const BlurCmdListRecorder& operator=(const BlurCmdListRecorder&) = delete;
@@ -34,7 +34,6 @@ public:
 private:
 	void BuildBuffers(ID3D12Resource& colorBuffer) noexcept;
 
-	ID3D12Device& mDevice;
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };

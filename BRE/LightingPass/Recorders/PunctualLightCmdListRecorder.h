@@ -4,8 +4,7 @@
 
 class PunctualLightCmdListRecorder : public LightingPassCmdListRecorder {
 public:
-	explicit PunctualLightCmdListRecorder(ID3D12Device& device);
-
+	PunctualLightCmdListRecorder() = default;
 	~PunctualLightCmdListRecorder() = default;
 	PunctualLightCmdListRecorder(const PunctualLightCmdListRecorder&) = delete;
 	const PunctualLightCmdListRecorder& operator=(const PunctualLightCmdListRecorder&) = delete;

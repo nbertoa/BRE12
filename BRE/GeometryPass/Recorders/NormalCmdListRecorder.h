@@ -7,8 +7,7 @@ struct Material;
 // Recorder that does texture mapping + normal mapping
 class NormalCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
-	explicit NormalCmdListRecorder(ID3D12Device& device);
-
+	NormalCmdListRecorder() = default;
 	~NormalCmdListRecorder() = default;
 	NormalCmdListRecorder(const NormalCmdListRecorder&) = delete;
 	const NormalCmdListRecorder& operator=(const NormalCmdListRecorder&) = delete;

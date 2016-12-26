@@ -7,8 +7,7 @@ struct Material;
 // Recorder that does texture mapping + normal mapping + height mapping
 class HeightCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
-	explicit HeightCmdListRecorder(ID3D12Device& device);
-
+	HeightCmdListRecorder() = default;
 	~HeightCmdListRecorder() = default;
 	HeightCmdListRecorder(const HeightCmdListRecorder&) = delete;
 	const HeightCmdListRecorder& operator=(const HeightCmdListRecorder&) = delete;

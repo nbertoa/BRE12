@@ -18,7 +18,7 @@ struct ID3D12Resource;
 // This class has common data and functionality to record command list for environment light pass.
 class EnvironmentLightCmdListRecorder {
 public:
-	explicit EnvironmentLightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	explicit EnvironmentLightCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
 	~EnvironmentLightCmdListRecorder() = default;
 	EnvironmentLightCmdListRecorder(const EnvironmentLightCmdListRecorder&) = delete;
@@ -51,7 +51,6 @@ private:
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
-	ID3D12Device& mDevice;
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };

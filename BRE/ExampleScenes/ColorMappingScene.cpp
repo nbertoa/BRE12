@@ -57,7 +57,7 @@ namespace {
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
 		PunctualLightCmdListRecorder* &recorder) {
-		recorder = new PunctualLightCmdListRecorder(D3dData::Device());
+		recorder = new PunctualLightCmdListRecorder();
 		PunctualLight light[1];
 		light[0].mPosAndRange[0] = 0.0f;
 		light[0].mPosAndRange[1] = 300.0f;
@@ -85,7 +85,7 @@ namespace {
 		const float offsetZ,
 		const std::vector<Mesh>& meshes,
 		ColorCmdListRecorder* &recorder) {
-		recorder = new ColorCmdListRecorder(D3dData::Device());
+		recorder = new ColorCmdListRecorder();
 
 		const std::size_t numMaterials(Materials::NUM_MATERIALS);
 

@@ -27,7 +27,6 @@ public:
 
 	// You should call this method before Execute()
 	void Init(
-		ID3D12Device& device,
 		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,

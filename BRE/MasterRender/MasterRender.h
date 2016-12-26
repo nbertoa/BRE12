@@ -23,7 +23,7 @@ class Scene;
 // - When you want to terminate this task, you should call MasterRender::Terminate()
 class MasterRender : public tbb::task {
 public:
-	static MasterRender* Create(const HWND hwnd, ID3D12Device& device, Scene* scene) noexcept;
+	static MasterRender* Create(const HWND hwnd, Scene* scene) noexcept;
 
 	~MasterRender() = default;
 	MasterRender(const MasterRender&) = delete;
@@ -34,7 +34,7 @@ public:
 	void Terminate() noexcept;
 
 private:
-	explicit MasterRender(const HWND hwnd, ID3D12Device& device, Scene* scene);
+	explicit MasterRender(const HWND hwnd, Scene* scene);
 
 	// Called when tbb::task is spawned
 	tbb::task* execute() final override;
@@ -55,7 +55,6 @@ private:
 	void SignalFenceAndPresent() noexcept;
 
 	HWND mHwnd{ nullptr };
-	ID3D12Device& mDevice;
 	Microsoft::WRL::ComPtr<IDXGISwapChain3> mSwapChain{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 			

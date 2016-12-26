@@ -15,7 +15,7 @@ class UploadBuffer;
 // This class has common data and functionality to record command list for sky box pass.
 class SkyBoxCmdListRecorder {
 public:
-	explicit SkyBoxCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	explicit SkyBoxCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 	~SkyBoxCmdListRecorder() = default;
 	SkyBoxCmdListRecorder(const SkyBoxCmdListRecorder&) = delete;
 	const SkyBoxCmdListRecorder& operator=(const SkyBoxCmdListRecorder&) = delete;
@@ -43,7 +43,6 @@ public:
 private:
 	void BuildBuffers(ID3D12Resource& cubeMap) noexcept;
 
-	ID3D12Device& mDevice;
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };

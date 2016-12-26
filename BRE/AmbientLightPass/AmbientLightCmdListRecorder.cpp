@@ -36,9 +36,8 @@ namespace {
 	}
 }
 
-AmbientLightCmdListRecorder::AmbientLightCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
-	: mDevice(device)
-	, mCmdListQueue(cmdListQueue)
+AmbientLightCmdListRecorder::AmbientLightCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
+	: mCmdListQueue(cmdListQueue)
 {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }

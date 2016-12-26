@@ -41,9 +41,8 @@ namespace {
 	}
 }
 
-SkyBoxCmdListRecorder::SkyBoxCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
-	: mDevice(device)
-	, mCmdListQueue(cmdListQueue)
+SkyBoxCmdListRecorder::SkyBoxCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
+	: mCmdListQueue(cmdListQueue)
 {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }

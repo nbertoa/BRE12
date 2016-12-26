@@ -25,7 +25,7 @@ public:
 		std::vector<DirectX::XMFLOAT4X4> mWorldMatrices;
 	};
 
-	explicit GeometryPassCmdListRecorder(ID3D12Device& device);
+	GeometryPassCmdListRecorder();
 	virtual ~GeometryPassCmdListRecorder() {}
 
 	GeometryPassCmdListRecorder(const GeometryPassCmdListRecorder&) = delete;
@@ -49,8 +49,6 @@ public:
 	virtual bool ValidateData() const noexcept;
 
 protected:
-	ID3D12Device& mDevice;
-		
 	// 1 command allocater per queued frame.
 	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };

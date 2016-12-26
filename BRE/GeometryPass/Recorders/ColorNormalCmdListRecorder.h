@@ -7,8 +7,7 @@ struct Material;
 // Recorder that does color mapping + normal mapping
 class ColorNormalCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
-	explicit ColorNormalCmdListRecorder(ID3D12Device& device);
-
+	ColorNormalCmdListRecorder() = default;
 	~ColorNormalCmdListRecorder() = default;
 	ColorNormalCmdListRecorder(const ColorNormalCmdListRecorder&) = delete;
 	const ColorNormalCmdListRecorder& operator=(const ColorNormalCmdListRecorder&) = delete;

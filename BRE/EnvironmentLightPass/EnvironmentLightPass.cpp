@@ -23,7 +23,6 @@ namespace {
 }
 
 void EnvironmentLightPass::Init(
-	ID3D12Device& device,
 	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
@@ -40,7 +39,7 @@ void EnvironmentLightPass::Init(
 	EnvironmentLightCmdListRecorder::InitPSO();
 
 	// Initialize recorder
-	mRecorder.reset(new EnvironmentLightCmdListRecorder(device, cmdListQueue));
+	mRecorder.reset(new EnvironmentLightCmdListRecorder(cmdListQueue));
 	mRecorder->Init(
 		geometryBuffers, 
 		geometryBuffersCount,

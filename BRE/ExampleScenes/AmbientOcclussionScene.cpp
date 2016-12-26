@@ -149,7 +149,7 @@ namespace {
 		}
 
 		// Create recorder
-		recorder = new ColorCmdListRecorder(D3dData::Device());
+		recorder = new ColorCmdListRecorder();
 		recorder->Init(
 			geomDataVec.data(),
 			static_cast<std::uint32_t>(geomDataVec.size()),
@@ -208,7 +208,7 @@ namespace {
 		}
 
 		// Create recorder
-		recorder = new ColorCmdListRecorder(D3dData::Device());
+		recorder = new ColorCmdListRecorder();
 		recorder->Init(
 			geomDataVec.data(),
 			static_cast<std::uint32_t>(geomDataVec.size()),
@@ -249,7 +249,7 @@ namespace {
 		Material material{ 1.0f, 1.0f, 1.0f, 0.0f, 0.85f };
 
 		// Build recorder
-		recorder = new NormalCmdListRecorder(D3dData::Device());
+		recorder = new NormalCmdListRecorder();
 		recorder->Init(
 			geomDataVec.data(),
 			static_cast<std::uint32_t>(geomDataVec.size()),

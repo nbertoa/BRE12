@@ -30,7 +30,6 @@ namespace {
 }
 
 void PostProcessPass::Init(
-	ID3D12Device& device,
 	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource& colorBuffer) noexcept {
@@ -46,7 +45,7 @@ void PostProcessPass::Init(
 	PostProcessCmdListRecorder::InitPSO();
 
 	// Initialize recorder
-	mRecorder.reset(new PostProcessCmdListRecorder(device, cmdListExecutor.CmdListQueue()));
+	mRecorder.reset(new PostProcessCmdListRecorder(cmdListExecutor.CmdListQueue()));
 	mRecorder->Init(colorBuffer);
 
 	ASSERT(ValidateData());

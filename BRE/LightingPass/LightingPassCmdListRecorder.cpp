@@ -23,9 +23,7 @@ namespace {
 	}
 }
 
-LightingPassCmdListRecorder::LightingPassCmdListRecorder(ID3D12Device& device)
-	: mDevice(device)
-{
+LightingPassCmdListRecorder::LightingPassCmdListRecorder() {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 

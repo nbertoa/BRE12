@@ -11,7 +11,7 @@ class UploadBuffer;
 // This class has common data and functionality to record command list for tone mapping pass.
 class ToneMappingCmdListRecorder {
 public:
-	explicit ToneMappingCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	explicit ToneMappingCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 	~ToneMappingCmdListRecorder() = default;
 	ToneMappingCmdListRecorder(const ToneMappingCmdListRecorder&) = delete;
 	const ToneMappingCmdListRecorder& operator=(const ToneMappingCmdListRecorder&) = delete;
@@ -34,7 +34,6 @@ public:
 private:
 	void BuildBuffers(ID3D12Resource& colorBuffer) noexcept;
 
-	ID3D12Device& mDevice;
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };

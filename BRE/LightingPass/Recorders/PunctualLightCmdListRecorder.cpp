@@ -24,11 +24,6 @@ namespace {
 	ID3D12RootSignature* sRootSign{ nullptr };
 }
 
-PunctualLightCmdListRecorder::PunctualLightCmdListRecorder(ID3D12Device& device)
-	: LightingPassCmdListRecorder(device)
-{
-}
-
 void PunctualLightCmdListRecorder::InitPSO() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSign == nullptr);

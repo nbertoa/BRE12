@@ -26,7 +26,7 @@ public:
 		std::vector<DirectX::XMFLOAT4X4> mWorldMatrices;
 	};
 
-	explicit LightingPassCmdListRecorder(ID3D12Device& device);
+	LightingPassCmdListRecorder();
 	virtual ~LightingPassCmdListRecorder() {}
 
 	LightingPassCmdListRecorder(const LightingPassCmdListRecorder&) = delete;
@@ -56,8 +56,6 @@ public:
 	virtual bool ValidateData() const noexcept;
 
 protected:
-	ID3D12Device& mDevice;
-
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
 	std::uint32_t mCurrFrameIndex{ 0U };

@@ -17,7 +17,7 @@ class UploadBuffer;
 // This class has common data and functionality to record command list for ambient occlusion pass.
 class AmbientOcclusionCmdListRecorder {
 public:
-	explicit AmbientOcclusionCmdListRecorder(ID3D12Device& device, tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	explicit AmbientOcclusionCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
 
 	~AmbientOcclusionCmdListRecorder() = default;
 	AmbientOcclusionCmdListRecorder(const AmbientOcclusionCmdListRecorder&) = delete;
@@ -46,7 +46,6 @@ private:
 		ID3D12Resource& normalSmoothnessBuffer,
 		ID3D12Resource& depthBuffer) noexcept;
 
-	ID3D12Device& mDevice;
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
