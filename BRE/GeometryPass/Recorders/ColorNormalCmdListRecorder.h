@@ -37,5 +37,5 @@ private:
 		ID3D12Resource** normals,
 		const std::uint32_t dataCount) noexcept;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mNormalsBufferGpuDescHandleBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mNormalsBufferGpuDescBegin;
 };

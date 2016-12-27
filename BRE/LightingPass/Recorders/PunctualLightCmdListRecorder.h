@@ -32,5 +32,5 @@ public:
 private:
 	void BuildBuffers(const void* lights) noexcept;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mTexturesGpuDescHandle{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mTexturesGpuDesc{ 0UL };
 };

@@ -64,10 +64,10 @@ protected:
 
 	// Object CBuffer info
 	UploadBuffer* mObjectCBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescHandleBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescBegin;
 
 	// Material CBuffer info
-	D3D12_GPU_DESCRIPTOR_HANDLE mMaterialsCBufferGpuDescHandleBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mMaterialsCBufferGpuDescBegin;
 	UploadBuffer* mMaterialsCBuffer{ nullptr };
 
 	// Where we push recorded command lists

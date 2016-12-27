@@ -116,11 +116,11 @@ void HeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 
 	const std::size_t descHandleIncSize{ D3dData::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDescHandle(mObjectCBufferGpuDescHandleBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDescHandle(mMaterialsCBufferGpuDescHandleBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDescHandle(mTexturesBufferGpuDescHandleBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE normalsBufferGpuDescHandle(mNormalsBufferGpuDescHandleBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE heightsBufferGpuDescHandle(mHeightsBufferGpuDescHandleBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mMaterialsCBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDesc(mTexturesBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE normalsBufferGpuDesc(mNormalsBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE heightsBufferGpuDesc(mHeightsBufferGpuDescBegin);
 
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
@@ -138,20 +138,20 @@ void HeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 		mCmdList->IASetIndexBuffer(&geomData.mIndexBufferData.mBufferView);
 		const std::size_t worldMatsCount{ geomData.mWorldMatrices.size() };
 		for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
-			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDescHandle);
-			objectCBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
+			objectCBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(3U, heightsBufferGpuDescHandle);
-			heightsBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(3U, heightsBufferGpuDesc);
+			heightsBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(4U, materialsCBufferGpuDescHandle);
-			materialsCBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(4U, materialsCBufferGpuDesc);
+			materialsCBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(6U, texturesBufferGpuDescHandle);
-			texturesBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(6U, texturesBufferGpuDesc);
+			texturesBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(7U, normalsBufferGpuDescHandle);
-			normalsBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(7U, normalsBufferGpuDesc);
+			normalsBufferGpuDesc.ptr += descHandleIncSize;
 			
 			mCmdList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
 		}
@@ -168,9 +168,9 @@ void HeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 bool HeightCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		GeometryPassCmdListRecorder::ValidateData() &&
-		mTexturesBufferGpuDescHandleBegin.ptr != 0UL &&
-		mNormalsBufferGpuDescHandleBegin.ptr != 0UL &&
-		mHeightsBufferGpuDescHandleBegin.ptr != 0UL;
+		mTexturesBufferGpuDescBegin.ptr != 0UL &&
+		mNormalsBufferGpuDescBegin.ptr != 0UL &&
+		mHeightsBufferGpuDescBegin.ptr != 0UL;
 
 	return result;
 }
@@ -293,15 +293,15 @@ void HeightCmdListRecorder::BuildBuffers(
 
 		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 	}
-	mObjectCBufferGpuDescHandleBegin =
+	mObjectCBufferGpuDescBegin =
 		DescriptorManager::Get().CreateConstantBufferViews(objectCbufferViewDescVec.data(), static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-	mMaterialsCBufferGpuDescHandleBegin =
+	mMaterialsCBufferGpuDescBegin =
 		DescriptorManager::Get().CreateConstantBufferViews(materialCbufferViewDescVec.data(), static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
-	mTexturesBufferGpuDescHandleBegin =
+	mTexturesBufferGpuDescBegin =
 		DescriptorManager::Get().CreateShaderResourceView(textureResVec.data(), textureSrvDescVec.data(), static_cast<std::uint32_t>(textureSrvDescVec.size()));
-	mNormalsBufferGpuDescHandleBegin =
+	mNormalsBufferGpuDescBegin =
 		DescriptorManager::Get().CreateShaderResourceView(normalResVec.data(), normalSrvDescVec.data(), static_cast<std::uint32_t>(normalSrvDescVec.size()));
-	mHeightsBufferGpuDescHandleBegin =
+	mHeightsBufferGpuDescBegin =
 		DescriptorManager::Get().CreateShaderResourceView(heightResVec.data(), heightSrvDescVec.data(), static_cast<std::uint32_t>(heightSrvDescVec.size()));
 
 	// Create frame cbuffers

@@ -47,65 +47,65 @@ DescriptorManager::DescriptorManager(ID3D12Device& device)
 	CHECK_HR(mDevice.CreateDescriptorHeap(&dsvDescHeapDesc, IID_PPV_ARGS(mDsvDescHeap.GetAddressOf())));
 	mMutex.unlock();
 
-	mCurrCbvSrvUavGpuDescHandle = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart();
-	mCurrCbvSrvUavCpuDescHandle = mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart();
+	mCurrCbvSrvUavGpuDesc = mCbvSrvUavDescHeap->GetGPUDescriptorHandleForHeapStart();
+	mCurrCbvSrvUavCpuDesc = mCbvSrvUavDescHeap->GetCPUDescriptorHandleForHeapStart();
 
-	mCurrRtvGpuDescHandle = mRtvDescHeap->GetGPUDescriptorHandleForHeapStart();
-	mCurrRtvCpuDescHandle = mRtvDescHeap->GetCPUDescriptorHandleForHeapStart();
+	mCurrRtvGpuDesc = mRtvDescHeap->GetGPUDescriptorHandleForHeapStart();
+	mCurrRtvCpuDesc = mRtvDescHeap->GetCPUDescriptorHandleForHeapStart();
 
-	mCurrDsvGpuDescHandle = mDsvDescHeap->GetGPUDescriptorHandleForHeapStart();
-	mCurrDsvCpuDescHandle = mDsvDescHeap->GetCPUDescriptorHandleForHeapStart();
+	mCurrDsvGpuDesc = mDsvDescHeap->GetGPUDescriptorHandleForHeapStart();
+	mCurrDsvCpuDesc = mDsvDescHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE DescriptorManager::CreateConstantBufferView(const D3D12_CONSTANT_BUFFER_VIEW_DESC& desc) noexcept {
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuDesc{};
 
 	mMutex.lock();	
-	gpuDescHandle = mCurrCbvSrvUavGpuDescHandle;
+	gpuDesc = mCurrCbvSrvUavGpuDesc;
 
-	mDevice.CreateConstantBufferView(&desc, mCurrCbvSrvUavCpuDescHandle);
+	mDevice.CreateConstantBufferView(&desc, mCurrCbvSrvUavCpuDesc);
 
-	mCurrCbvSrvUavGpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	mCurrCbvSrvUavCpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrCbvSrvUavGpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrCbvSrvUavCpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	mMutex.unlock();
 
-	return gpuDescHandle;
+	return gpuDesc;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE DescriptorManager::CreateConstantBufferViews(const D3D12_CONSTANT_BUFFER_VIEW_DESC* desc, const std::uint32_t count) noexcept {
 	ASSERT(desc != nullptr);
 	ASSERT(count > 0U);
 
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuDesc{};
 
 	mMutex.lock();
-	gpuDescHandle = mCurrCbvSrvUavGpuDescHandle;
+	gpuDesc = mCurrCbvSrvUavGpuDesc;
 
 	for (std::uint32_t i = 0U; i < count; ++i) {
-		mDevice.CreateConstantBufferView(&desc[i], mCurrCbvSrvUavCpuDescHandle);		
-		mCurrCbvSrvUavCpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		mDevice.CreateConstantBufferView(&desc[i], mCurrCbvSrvUavCpuDesc);		
+		mCurrCbvSrvUavCpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	}
 
-	mCurrCbvSrvUavGpuDescHandle.ptr += count * GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrCbvSrvUavGpuDesc.ptr += count * GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	mMutex.unlock();
 
-	return gpuDescHandle;
+	return gpuDesc;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE DescriptorManager::CreateShaderResourceView(ID3D12Resource& res, const D3D12_SHADER_RESOURCE_VIEW_DESC& desc) noexcept {
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuDesc{};
 
 	mMutex.lock();	
-	gpuDescHandle = mCurrCbvSrvUavGpuDescHandle;
+	gpuDesc = mCurrCbvSrvUavGpuDesc;
 
-	mDevice.CreateShaderResourceView(&res, &desc, mCurrCbvSrvUavCpuDescHandle);
+	mDevice.CreateShaderResourceView(&res, &desc, mCurrCbvSrvUavCpuDesc);
 
-	mCurrCbvSrvUavGpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	mCurrCbvSrvUavCpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrCbvSrvUavGpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrCbvSrvUavCpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	mMutex.unlock();
 
-	return gpuDescHandle;
+	return gpuDesc;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE DescriptorManager::CreateShaderResourceView(
@@ -117,37 +117,37 @@ D3D12_GPU_DESCRIPTOR_HANDLE DescriptorManager::CreateShaderResourceView(
 	ASSERT(desc != nullptr);
 	ASSERT(count > 0U);
 
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuDesc{};
 
 	mMutex.lock();
-	gpuDescHandle = mCurrCbvSrvUavGpuDescHandle;
+	gpuDesc = mCurrCbvSrvUavGpuDesc;
 
 	for (std::uint32_t i = 0U; i < count; ++i) {
 		ASSERT(res[i] != nullptr);
-		mDevice.CreateShaderResourceView(res[i], &desc[i], mCurrCbvSrvUavCpuDescHandle);
-		mCurrCbvSrvUavCpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		mDevice.CreateShaderResourceView(res[i], &desc[i], mCurrCbvSrvUavCpuDesc);
+		mCurrCbvSrvUavCpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	}
 
-	mCurrCbvSrvUavGpuDescHandle.ptr += count * GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrCbvSrvUavGpuDesc.ptr += count * GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	mMutex.unlock();
 
-	return gpuDescHandle;
+	return gpuDesc;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE DescriptorManager::CreateUnorderedAccessView(ID3D12Resource& res, const D3D12_UNORDERED_ACCESS_VIEW_DESC& desc) noexcept {
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuDesc{};
 
 	mMutex.lock();	
-	gpuDescHandle = mCurrCbvSrvUavGpuDescHandle;
+	gpuDesc = mCurrCbvSrvUavGpuDesc;
 
-	mDevice.CreateUnorderedAccessView(&res, nullptr, &desc, mCurrCbvSrvUavCpuDescHandle);
+	mDevice.CreateUnorderedAccessView(&res, nullptr, &desc, mCurrCbvSrvUavCpuDesc);
 
-	mCurrCbvSrvUavGpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	mCurrCbvSrvUavCpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrCbvSrvUavGpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrCbvSrvUavCpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	mMutex.unlock();
 
-	return gpuDescHandle;
+	return gpuDesc;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE DescriptorManager::CreateUnorderedAccessView(
@@ -159,130 +159,130 @@ D3D12_GPU_DESCRIPTOR_HANDLE DescriptorManager::CreateUnorderedAccessView(
 	ASSERT(desc != nullptr);
 	ASSERT(count > 0U);
 
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuDesc{};
 
 	mMutex.lock();
-	gpuDescHandle = mCurrCbvSrvUavGpuDescHandle;
+	gpuDesc = mCurrCbvSrvUavGpuDesc;
 
 	for (std::uint32_t i = 0U; i < count; ++i) {
 		ASSERT(res[i] != nullptr);
-		mDevice.CreateUnorderedAccessView(res[i], nullptr, &desc[i], mCurrCbvSrvUavCpuDescHandle);
-		mCurrCbvSrvUavCpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		mDevice.CreateUnorderedAccessView(res[i], nullptr, &desc[i], mCurrCbvSrvUavCpuDesc);
+		mCurrCbvSrvUavCpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	}
 
-	mCurrCbvSrvUavGpuDescHandle.ptr += count * GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrCbvSrvUavGpuDesc.ptr += count * GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	mMutex.unlock();
 
-	return gpuDescHandle;
+	return gpuDesc;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE DescriptorManager::CreateRenderTargetView(
 	ID3D12Resource& res, 
 	const D3D12_RENDER_TARGET_VIEW_DESC& desc,
-	D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescHandle) noexcept {
+	D3D12_CPU_DESCRIPTOR_HANDLE* cpuDesc) noexcept {
 
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuDesc{};
 
 	mMutex.lock();	
-	gpuDescHandle = mCurrRtvGpuDescHandle;
+	gpuDesc = mCurrRtvGpuDesc;
 
-	if (cpuDescHandle != nullptr) {
-		*cpuDescHandle = mCurrRtvCpuDescHandle;
+	if (cpuDesc != nullptr) {
+		*cpuDesc = mCurrRtvCpuDesc;
 	}
 
-	mDevice.CreateRenderTargetView(&res, &desc, mCurrRtvCpuDescHandle);
+	mDevice.CreateRenderTargetView(&res, &desc, mCurrRtvCpuDesc);
 
-	mCurrRtvGpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	mCurrRtvCpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrRtvGpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrRtvCpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	mMutex.unlock();
 
-	return gpuDescHandle;
+	return gpuDesc;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE DescriptorManager::CreateRenderTargetViews(
 	ID3D12Resource* *res,
 	const D3D12_RENDER_TARGET_VIEW_DESC* desc,
 	const std::uint32_t count,
-	D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescHandle) noexcept
+	D3D12_CPU_DESCRIPTOR_HANDLE* cpuDesc) noexcept
 {
 	ASSERT(res != nullptr);
 	ASSERT(desc != nullptr);
 	ASSERT(count > 0U);
 
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuDesc{};
 
 	mMutex.lock();
-	gpuDescHandle = mCurrRtvGpuDescHandle;
+	gpuDesc = mCurrRtvGpuDesc;
 
-	if (cpuDescHandle != nullptr) {
-		*cpuDescHandle = mCurrRtvCpuDescHandle;
+	if (cpuDesc != nullptr) {
+		*cpuDesc = mCurrRtvCpuDesc;
 	}
 
 	for (std::uint32_t i = 0U; i < count; ++i) {
 		ASSERT(res[i] != nullptr);
-		mDevice.CreateRenderTargetView(res[i], &desc[i], mCurrRtvCpuDescHandle);
-		mCurrRtvCpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		mDevice.CreateRenderTargetView(res[i], &desc[i], mCurrRtvCpuDesc);
+		mCurrRtvCpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	}
 
-	mCurrRtvGpuDescHandle.ptr += count * GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrRtvGpuDesc.ptr += count * GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	mMutex.unlock();
 
-	return gpuDescHandle;
+	return gpuDesc;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE DescriptorManager::CreateDepthStencilView(
 	ID3D12Resource& res,
 	const D3D12_DEPTH_STENCIL_VIEW_DESC& desc,
-	D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescHandle) noexcept {
+	D3D12_CPU_DESCRIPTOR_HANDLE* cpuDesc) noexcept {
 
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuDesc{};
 
 	mMutex.lock();
-	gpuDescHandle = mCurrDsvGpuDescHandle;
+	gpuDesc = mCurrDsvGpuDesc;
 
-	if (cpuDescHandle != nullptr) {
-		*cpuDescHandle = mCurrDsvCpuDescHandle;
+	if (cpuDesc != nullptr) {
+		*cpuDesc = mCurrDsvCpuDesc;
 	}
 
-	mDevice.CreateDepthStencilView(&res, &desc, mCurrDsvCpuDescHandle);
+	mDevice.CreateDepthStencilView(&res, &desc, mCurrDsvCpuDesc);
 
-	mCurrDsvGpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	mCurrDsvCpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrDsvGpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrDsvCpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	mMutex.unlock();
 
-	return gpuDescHandle;
+	return gpuDesc;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE DescriptorManager::CreateDepthStencilViews(
 	ID3D12Resource* *res,
 	const D3D12_DEPTH_STENCIL_VIEW_DESC* desc,
 	const std::uint32_t count,
-	D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescHandle) noexcept
+	D3D12_CPU_DESCRIPTOR_HANDLE* cpuDesc) noexcept
 {
 	ASSERT(res != nullptr);
 	ASSERT(desc != nullptr);
 	ASSERT(count > 0U);
 
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandle{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuDesc{};
 
 	mMutex.lock();
-	gpuDescHandle = mCurrDsvGpuDescHandle;
+	gpuDesc = mCurrDsvGpuDesc;
 
-	if (cpuDescHandle != nullptr) {
-		*cpuDescHandle = mCurrDsvCpuDescHandle;
+	if (cpuDesc != nullptr) {
+		*cpuDesc = mCurrDsvCpuDesc;
 	}
 
 	for (std::uint32_t i = 0U; i < count; ++i) {
 		ASSERT(res[i] != nullptr);
-		mDevice.CreateDepthStencilView(res[i], &desc[i], mCurrDsvCpuDescHandle);
-		mCurrDsvCpuDescHandle.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		mDevice.CreateDepthStencilView(res[i], &desc[i], mCurrDsvCpuDesc);
+		mCurrDsvCpuDesc.ptr += GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	}
 
-	mCurrDsvGpuDescHandle.ptr += count * GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	mCurrDsvGpuDesc.ptr += count * GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	mMutex.unlock();
 
-	return gpuDescHandle;
+	return gpuDesc;
 }

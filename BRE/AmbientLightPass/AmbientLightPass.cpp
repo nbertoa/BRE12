@@ -39,7 +39,7 @@ namespace {
 
 	void CreateBuffer(
 		Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
-		D3D12_CPU_DESCRIPTOR_HANDLE& bufferRTCpuDescHandle) noexcept {
+		D3D12_CPU_DESCRIPTOR_HANDLE& bufferRTCpuDesc) noexcept {
 		
 		// Set shared buffers properties
 		D3D12_RESOURCE_DESC resDesc = {};
@@ -70,7 +70,7 @@ namespace {
 		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 		rtvDesc.Format = resDesc.Format;
-		DescriptorManager::Get().CreateRenderTargetView(*buffer.Get(), rtvDesc, &bufferRTCpuDescHandle);
+		DescriptorManager::Get().CreateRenderTargetView(*buffer.Get(), rtvDesc, &bufferRTCpuDesc);
 	}
 }
 
@@ -95,21 +95,21 @@ void AmbientLightPass::Init(
 	BlurCmdListRecorder::InitPSO();
 
 	// Create ambient accessibility buffer and blur buffer
-	CreateBuffer(mAmbientAccessibilityBuffer, mAmbientAccessibilityBufferRTCpuDescHandle);
-	CreateBuffer(mBlurBuffer, mBlurBufferRTCpuDescHandle);
+	CreateBuffer(mAmbientAccessibilityBuffer, mAmbientAccessibilityBufferRTCpuDesc);
+	CreateBuffer(mBlurBuffer, mBlurBufferRTCpuDesc);
 	
 	// Initialize ambient occlusion recorder
 	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder(cmdListExecutor.CmdListQueue()));
 	mAmbientOcclusionRecorder->Init(
 		normalSmoothnessBuffer,
-		mAmbientAccessibilityBufferRTCpuDescHandle,
+		mAmbientAccessibilityBufferRTCpuDesc,
 		depthBuffer);
 
 	// Initialize blur recorder
 	mBlurRecorder.reset(new BlurCmdListRecorder(cmdListExecutor.CmdListQueue()));
 	mBlurRecorder->Init(
 		*mAmbientAccessibilityBuffer.Get(),
-		mBlurBufferRTCpuDescHandle);
+		mBlurBufferRTCpuDesc);
 
 	// Initialize ambient light recorder
 	mAmbientLightRecorder.reset(new AmbientLightCmdListRecorder(cmdListExecutor.CmdListQueue()));
@@ -117,7 +117,7 @@ void AmbientLightPass::Init(
 		baseColorMetalMaskBuffer,
 		colorBufferCpuDesc,
 		*mBlurBuffer.Get(),
-		mBlurBufferRTCpuDescHandle);
+		mBlurBufferRTCpuDesc);
 
 	ASSERT(ValidateData());
 }
@@ -160,9 +160,9 @@ bool AmbientLightPass::ValidateData() const noexcept {
 		mAmbientOcclusionRecorder.get() != nullptr &&
 		mAmbientLightRecorder.get() != nullptr &&
 		mAmbientAccessibilityBuffer.Get() != nullptr &&
-		mAmbientAccessibilityBufferRTCpuDescHandle.ptr != 0UL &&
+		mAmbientAccessibilityBufferRTCpuDesc.ptr != 0UL &&
 		mBlurBuffer.Get() != nullptr &&
-		mBlurBufferRTCpuDescHandle.ptr != 0UL &&
+		mBlurBufferRTCpuDesc.ptr != 0UL &&
 		mCmdListExecutor != nullptr;
 
 	return b;
@@ -191,7 +191,7 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 
 	// Clear render targets
 	float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	mCmdListBegin->ClearRenderTargetView(mAmbientAccessibilityBufferRTCpuDescHandle, clearColor, 0U, nullptr);
+	mCmdListBegin->ClearRenderTargetView(mAmbientAccessibilityBufferRTCpuDesc, clearColor, 0U, nullptr);
 	CHECK_HR(mCmdListBegin->Close());
 
 	mCmdListExecutor->CmdListQueue().push(mCmdListBegin);

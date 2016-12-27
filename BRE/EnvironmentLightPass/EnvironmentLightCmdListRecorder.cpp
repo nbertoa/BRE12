@@ -118,7 +118,7 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(2U, mTexturesGpuDescHandle);
+	mCmdList->SetGraphicsRootDescriptorTable(2U, mTexturesGpuDesc);
 
 	// Draw object
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -149,7 +149,7 @@ bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		mCmdList != nullptr &&
 		mColorBufferCpuDesc.ptr != 0UL &&
-		mTexturesGpuDescHandle.ptr != 0UL;
+		mTexturesGpuDesc.ptr != 0UL;
 
 	return result;
 }
@@ -212,7 +212,7 @@ void EnvironmentLightCmdListRecorder::BuildBuffers(
 	res[descIndex] = &specularPreConvolvedCubeMap;
 	++descIndex;
 
-	mTexturesGpuDescHandle = DescriptorManager::Get().CreateShaderResourceView(res.data(), srvDesc.data(), static_cast<std::uint32_t>(srvDesc.size()));
+	mTexturesGpuDesc = DescriptorManager::Get().CreateShaderResourceView(res.data(), srvDesc.data(), static_cast<std::uint32_t>(srvDesc.size()));
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };

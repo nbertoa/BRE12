@@ -55,9 +55,9 @@ private:
 	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
 
 	UploadBuffer* mObjectCBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescHandleBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescBegin;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapBufferGpuDescHandleBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapBufferGpuDescBegin;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };

@@ -107,9 +107,9 @@ void ColorNormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 
 	const std::size_t descHandleIncSize{ D3dData::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDescHandle(mObjectCBufferGpuDescHandleBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDescHandle(mMaterialsCBufferGpuDescHandleBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE normalsBufferGpuDescHandle(mNormalsBufferGpuDescHandleBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mMaterialsCBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE normalsBufferGpuDesc(mNormalsBufferGpuDescBegin);
 
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -126,14 +126,14 @@ void ColorNormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 		mCmdList->IASetIndexBuffer(&geomData.mIndexBufferData.mBufferView);
 		const std::size_t worldMatsCount{ geomData.mWorldMatrices.size() };
 		for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
-			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDescHandle);
-			objectCBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
+			objectCBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDescHandle);
-			materialsCBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDesc);
+			materialsCBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(4U, normalsBufferGpuDescHandle);
-			normalsBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(4U, normalsBufferGpuDesc);
+			normalsBufferGpuDesc.ptr += descHandleIncSize;
 
 			mCmdList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
 		}
@@ -150,7 +150,7 @@ void ColorNormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 bool ColorNormalCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		GeometryPassCmdListRecorder::ValidateData() &&
-		mNormalsBufferGpuDescHandleBegin.ptr != 0UL;
+		mNormalsBufferGpuDescBegin.ptr != 0UL;
 
 	return result;
 }
@@ -234,11 +234,11 @@ void ColorNormalCmdListRecorder::BuildBuffers(
 
 		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 	}
-	mObjectCBufferGpuDescHandleBegin =
+	mObjectCBufferGpuDescBegin =
 		DescriptorManager::Get().CreateConstantBufferViews(objectCbufferViewDescVec.data(), static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-	mMaterialsCBufferGpuDescHandleBegin =
+	mMaterialsCBufferGpuDescBegin =
 		DescriptorManager::Get().CreateConstantBufferViews(materialCbufferViewDescVec.data(), static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
-	mNormalsBufferGpuDescHandleBegin =
+	mNormalsBufferGpuDescBegin =
 		DescriptorManager::Get().CreateShaderResourceView(normalResVec.data(), normalSrvDescVec.data(), static_cast<std::uint32_t>(normalSrvDescVec.size()));
 
 	// Create frame cbuffers

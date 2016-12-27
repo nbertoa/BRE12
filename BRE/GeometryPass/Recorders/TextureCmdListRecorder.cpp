@@ -106,9 +106,9 @@ void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frame
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 
 	const std::size_t descHandleIncSize{ D3dData::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDescHandle(mObjectCBufferGpuDescHandleBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDescHandle(mMaterialsCBufferGpuDescHandleBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDescHandle(mTexturesBufferGpuDescHandleBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mMaterialsCBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDesc(mTexturesBufferGpuDescBegin);
 
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -125,14 +125,14 @@ void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frame
 		mCmdList->IASetIndexBuffer(&geomData.mIndexBufferData.mBufferView);
 		const std::size_t worldMatsCount{ geomData.mWorldMatrices.size() };
 		for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
-			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDescHandle);
-			objectCBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
+			objectCBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDescHandle);
-			materialsCBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDesc);
+			materialsCBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(4U, texturesBufferGpuDescHandle);
-			texturesBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(4U, texturesBufferGpuDesc);
+			texturesBufferGpuDesc.ptr += descHandleIncSize;
 
 			mCmdList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
 		}
@@ -163,7 +163,7 @@ bool TextureCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		GeometryPassCmdListRecorder::ValidateData() &&
-		mTexturesBufferGpuDescHandleBegin.ptr != 0UL;
+		mTexturesBufferGpuDescBegin.ptr != 0UL;
 
 	return result;
 }
@@ -246,11 +246,11 @@ void TextureCmdListRecorder::BuildBuffers(
 
 		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 	}
-	mObjectCBufferGpuDescHandleBegin =
+	mObjectCBufferGpuDescBegin =
 		DescriptorManager::Get().CreateConstantBufferViews(objectCbufferViewDescVec.data(), static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-	mMaterialsCBufferGpuDescHandleBegin =
+	mMaterialsCBufferGpuDescBegin =
 		DescriptorManager::Get().CreateConstantBufferViews(materialCbufferViewDescVec.data(), static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
-	mTexturesBufferGpuDescHandleBegin =
+	mTexturesBufferGpuDescBegin =
 		DescriptorManager::Get().CreateShaderResourceView(resVec.data(), srvDescVec.data(), static_cast<std::uint32_t>(srvDescVec.size()));
 
 	// Create frame cbuffers

@@ -59,10 +59,10 @@ private:
 	std::unique_ptr<BlurCmdListRecorder> mBlurRecorder;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
-	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRTCpuDescHandle{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRTCpuDesc{ 0UL };
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
-	D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRTCpuDescHandle{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRTCpuDesc{ 0UL };
 
 	CommandListExecutor* mCmdListExecutor{ nullptr };
 };

@@ -243,7 +243,7 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(2U, mPixelShaderBuffersGpuDescHandle);
+	mCmdList->SetGraphicsRootDescriptorTable(2U, mPixelShaderBuffersGpuDesc);
 
 	// Draw object
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -274,9 +274,9 @@ bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
 		mCmdList != nullptr &&
 		mNumSamples != 0U &&
 		mSampleKernelBuffer != nullptr &&
-		mSampleKernelBufferGpuDescHandleBegin.ptr != 0UL &&
+		mSampleKernelBufferGpuDescBegin.ptr != 0UL &&
 		mAmbientAccessBufferCpuDesc.ptr != 0UL &&
-		mPixelShaderBuffersGpuDescHandle.ptr != 0UL;
+		mPixelShaderBuffersGpuDesc.ptr != 0UL;
 
 	return result;
 }
@@ -304,7 +304,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	for (std::uint32_t i = 0UL; i < mNumSamples; ++i) {
 		mSampleKernelBuffer->CopyData(i, sampleKernelPtr + sampleKernelBufferElemSize * i, sampleKernelBufferElemSize);
 	}
-	mSampleKernelBufferGpuDescHandleBegin.ptr = mSampleKernelBuffer->Resource()->GetGPUVirtualAddress();
+	mSampleKernelBufferGpuDescBegin.ptr = mSampleKernelBuffer->Resource()->GetGPUVirtualAddress();
 
 	// Kernel noise resource and fill it
 	D3D12_RESOURCE_DESC resDesc = {};
@@ -410,5 +410,5 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	srvDesc[3].Texture2D.MipLevels = noiseTexture->GetDesc().MipLevels;
 
 	// Create SRVs
-	mPixelShaderBuffersGpuDescHandle = DescriptorManager::Get().CreateShaderResourceView(res, srvDesc, _countof(srvDesc));
+	mPixelShaderBuffersGpuDesc = DescriptorManager::Get().CreateShaderResourceView(res, srvDesc, _countof(srvDesc));
 }

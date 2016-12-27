@@ -45,24 +45,24 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateRenderTargetView(
 		ID3D12Resource& res, 
 		const D3D12_RENDER_TARGET_VIEW_DESC& desc, 
-		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescHandle = nullptr) noexcept;
+		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDesc = nullptr) noexcept;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateRenderTargetViews(
 		ID3D12Resource* *res, 
 		const D3D12_RENDER_TARGET_VIEW_DESC* desc, 
 		const std::uint32_t count,
-		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescHandle = nullptr) noexcept;
+		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDesc = nullptr) noexcept;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateDepthStencilView(
 		ID3D12Resource& res,
 		const D3D12_DEPTH_STENCIL_VIEW_DESC& desc,
-		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescHandle = nullptr) noexcept;
+		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDesc = nullptr) noexcept;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateDepthStencilViews(
 		ID3D12Resource* *res,
 		const D3D12_DEPTH_STENCIL_VIEW_DESC* desc,
 		const std::uint32_t count,
-		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescHandle = nullptr) noexcept;
+		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDesc = nullptr) noexcept;
 		
 	ID3D12DescriptorHeap& GetCbvSrcUavDescriptorHeap() noexcept {
 		ASSERT(mCbvSrvUavDescHeap.Get() != nullptr);
@@ -86,14 +86,14 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRtvDescHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDsvDescHeap;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCurrCbvSrvUavGpuDescHandle{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mCurrCbvSrvUavCpuDescHandle{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mCurrCbvSrvUavGpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mCurrCbvSrvUavCpuDesc{ 0UL };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCurrRtvGpuDescHandle{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mCurrRtvCpuDescHandle{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mCurrRtvGpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mCurrRtvCpuDesc{ 0UL };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCurrDsvGpuDescHandle{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mCurrDsvCpuDescHandle{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mCurrDsvGpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mCurrDsvCpuDesc{ 0UL };
 
 	std::mutex mMutex;
 };

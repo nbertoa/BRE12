@@ -103,8 +103,8 @@ void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 
 	const std::size_t descHandleIncSize{ D3dData::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDescHandle(mObjectCBufferGpuDescHandleBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDescHandle(mMaterialsCBufferGpuDescHandleBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mMaterialsCBufferGpuDescBegin);
 		
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -121,11 +121,11 @@ void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 		mCmdList->IASetIndexBuffer(&geomData.mIndexBufferData.mBufferView);
 		const std::size_t worldMatsCount{ geomData.mWorldMatrices.size() };
 		for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
-			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDescHandle);
-			objectCBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
+			objectCBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDescHandle);
-			materialsCBufferGpuDescHandle.ptr += descHandleIncSize;
+			mCmdList->SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDesc);
+			materialsCBufferGpuDesc.ptr += descHandleIncSize;
 
 			mCmdList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
 		}
@@ -197,9 +197,9 @@ void ColorCmdListRecorder::BuildBuffers(const Material* materials, const std::ui
 
 		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 	}
-	mObjectCBufferGpuDescHandleBegin =
+	mObjectCBufferGpuDescBegin =
 		DescriptorManager::Get().CreateConstantBufferViews(objectCbufferViewDescVec.data(), static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-	mMaterialsCBufferGpuDescHandleBegin =
+	mMaterialsCBufferGpuDescBegin =
 		DescriptorManager::Get().CreateConstantBufferViews(materialCbufferViewDescVec.data(), static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
 
 	// Create frame cbuffers

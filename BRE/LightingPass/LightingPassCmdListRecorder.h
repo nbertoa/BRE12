@@ -74,5 +74,5 @@ protected:
 	UploadBuffer* mImmutableCBuffer{ nullptr };
 
 	UploadBuffer* mLightsBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mLightsBufferGpuDescHandleBegin{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mLightsBufferGpuDescBegin{ 0UL };
 };

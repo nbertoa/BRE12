@@ -95,7 +95,7 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 	
 	// Set root parameters
-	mCmdList->SetGraphicsRootDescriptorTable(0U, mColorBufferGpuDescHandle);
+	mCmdList->SetGraphicsRootDescriptorTable(0U, mColorBufferGpuDesc);
 
 	// Draw object	
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -119,7 +119,7 @@ bool PostProcessCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		mCmdList != nullptr &&
-		mColorBufferGpuDescHandle.ptr != 0UL;
+		mColorBufferGpuDesc.ptr != 0UL;
 
 	return result;
 }
@@ -138,5 +138,5 @@ void PostProcessCmdListRecorder::BuildBuffers(ID3D12Resource& colorBuffer) noexc
 	srvDesc[0].Format = colorBuffer.GetDesc().Format;
 	srvDesc[0].Texture2D.MipLevels = colorBuffer.GetDesc().MipLevels;
 
-	mColorBufferGpuDescHandle = DescriptorManager::Get().CreateShaderResourceView(res, srvDesc, _countof(srvDesc));
+	mColorBufferGpuDesc = DescriptorManager::Get().CreateShaderResourceView(res, srvDesc, _countof(srvDesc));
 }

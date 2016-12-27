@@ -104,7 +104,7 @@ void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 	
 	// Set root parameters
-	mCmdList->SetGraphicsRootDescriptorTable(0U, mBaseColor_MetalMaskGpuDescHandle);
+	mCmdList->SetGraphicsRootDescriptorTable(0U, mBaseColor_MetalMaskGpuDesc);
 
 	// Draw
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -130,7 +130,7 @@ bool AmbientLightCmdListRecorder::ValidateData() const noexcept {
 		mCmdList != nullptr &&
 		mColorBufferCpuDesc.ptr != 0UL &&
 		mAmbientAccessibilityBufferRTCpuDesc.ptr != 0UL &&
-		mBaseColor_MetalMaskGpuDescHandle.ptr != 0UL;
+		mBaseColor_MetalMaskGpuDesc.ptr != 0UL;
 
 	return result;
 }
@@ -139,7 +139,7 @@ void AmbientLightCmdListRecorder::BuildBuffers(
 	ID3D12Resource& baseColorMetalMaskBuffer, 
 	ID3D12Resource& ambientAccessibilityBuffer) noexcept {
 
-	ASSERT(mBaseColor_MetalMaskGpuDescHandle.ptr == 0UL);
+	ASSERT(mBaseColor_MetalMaskGpuDesc.ptr == 0UL);
 	
 	// Create baseColor_metalMask buffer texture descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -149,7 +149,7 @@ void AmbientLightCmdListRecorder::BuildBuffers(
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDesc.Format = baseColorMetalMaskBuffer.GetDesc().Format;
 	srvDesc.Texture2D.MipLevels = baseColorMetalMaskBuffer.GetDesc().MipLevels;
-	mBaseColor_MetalMaskGpuDescHandle = DescriptorManager::Get().CreateShaderResourceView(baseColorMetalMaskBuffer, srvDesc);
+	mBaseColor_MetalMaskGpuDesc = DescriptorManager::Get().CreateShaderResourceView(baseColorMetalMaskBuffer, srvDesc);
 
 	// Create ambient accessibility buffer texture descriptor
 	srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};

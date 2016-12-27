@@ -53,5 +53,5 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRTCpuDesc{ 0UL };
 
 	// BaseColor_MetalMask GPU descriptor handle
-	D3D12_GPU_DESCRIPTOR_HANDLE mBaseColor_MetalMaskGpuDescHandle{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mBaseColor_MetalMaskGpuDesc{ 0UL };
 };

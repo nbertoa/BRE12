@@ -56,10 +56,10 @@ private:
 	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
 
 	UploadBuffer* mSampleKernelBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mSampleKernelBufferGpuDescHandleBegin{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mSampleKernelBufferGpuDescBegin{ 0UL };
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessBufferCpuDesc{ 0UL };
 
 	// Pixel shader buffers GPU descriptor handle
-	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDescHandle{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDesc{ 0UL };
 };

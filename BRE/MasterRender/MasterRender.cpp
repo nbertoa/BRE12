@@ -176,7 +176,7 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		mGeometryPass.GetBuffers(),
 		GeometryPass::BUFFERS_COUNT,
 		*mDepthStencilBuffer,
-		mColorBuffer1RTVCpuDescHandle, 
+		mColorBuffer1RTVCpuDesc, 
 		*diffuseIrradianceCubeMap,
 		*specularPreConvolvedCubeMap);
 
@@ -184,7 +184,7 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		*mCmdListExecutor, 
 		*mCmdQueue, 
 		*skyBoxCubeMap, 
-		mColorBuffer1RTVCpuDescHandle,
+		mColorBuffer1RTVCpuDesc,
 		DepthStencilCpuDesc());
 
 	mToneMappingPass.Init(
@@ -192,7 +192,7 @@ void MasterRender::InitPasses(Scene* scene) noexcept {
 		*mCmdQueue, 
 		*mColorBuffer1.Get(), 
 		*mColorBuffer2.Get(),
-		mColorBuffer2RTVCpuDescHandle);
+		mColorBuffer2RTVCpuDesc);
 
 	mPostProcessPass.Init(
 		*mCmdListExecutor,
@@ -335,12 +335,12 @@ void MasterRender::CreateColorBuffers() noexcept {
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue, res);
 	mColorBuffer1 = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-	DescriptorManager::Get().CreateRenderTargetView(*mColorBuffer1.Get(), rtvDesc, &mColorBuffer1RTVCpuDescHandle);
+	DescriptorManager::Get().CreateRenderTargetView(*mColorBuffer1.Get(), rtvDesc, &mColorBuffer1RTVCpuDesc);
 
 	// Create RTV's descriptor for color buffer 2
 	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, res);
 	mColorBuffer2 = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-	DescriptorManager::Get().CreateRenderTargetView(*mColorBuffer2.Get(), rtvDesc, &mColorBuffer2RTVCpuDescHandle);
+	DescriptorManager::Get().CreateRenderTargetView(*mColorBuffer2.Get(), rtvDesc, &mColorBuffer2RTVCpuDesc);
 }
 
 void MasterRender::CreateMergePassCommandObjects() noexcept {

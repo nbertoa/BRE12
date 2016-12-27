@@ -52,10 +52,10 @@ bool GeometryPassCmdListRecorder::ValidateData() const noexcept {
 	return
 		mCmdList != nullptr &&
 		mObjectCBuffer != nullptr &&
-		mObjectCBufferGpuDescHandleBegin.ptr != 0UL &&
+		mObjectCBufferGpuDescBegin.ptr != 0UL &&
 		numGeomData != 0UL &&
 		mMaterialsCBuffer != nullptr &&
-		mMaterialsCBufferGpuDescHandleBegin.ptr != 0UL;
+		mMaterialsCBufferGpuDescBegin.ptr != 0UL;
 }
 
 void GeometryPassCmdListRecorder::InitInternal(

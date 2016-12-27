@@ -88,9 +88,9 @@ private:
 	// Color buffers are buffers used for intermediate computations.
 	// They are used as render targets (light pass) or pixel shader resources (post processing passes)
 	Microsoft::WRL::ComPtr<ID3D12Resource> mColorBuffer1;
-	D3D12_CPU_DESCRIPTOR_HANDLE mColorBuffer1RTVCpuDescHandle;
+	D3D12_CPU_DESCRIPTOR_HANDLE mColorBuffer1RTVCpuDesc;
 	Microsoft::WRL::ComPtr<ID3D12Resource> mColorBuffer2;
-	D3D12_CPU_DESCRIPTOR_HANDLE mColorBuffer2RTVCpuDescHandle;
+	D3D12_CPU_DESCRIPTOR_HANDLE mColorBuffer2RTVCpuDesc;
 
 	// Per frame constant buffer.
 	// We cache it here, as is is used by most passes.

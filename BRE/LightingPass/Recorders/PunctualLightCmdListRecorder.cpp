@@ -96,7 +96,7 @@ void PunctualLightCmdListRecorder::Init(
 	res[resIndex] = &depthBuffer;
 	
 	// Create textures SRV descriptors
-	mTexturesGpuDescHandle = DescriptorManager::Get().CreateShaderResourceView(res.data(), srvDescVec.data(), static_cast<uint32_t>(srvDescVec.size()));
+	mTexturesGpuDesc = DescriptorManager::Get().CreateShaderResourceView(res.data(), srvDescVec.data(), static_cast<uint32_t>(srvDescVec.size()));
 
 	// Create lights buffer SRV	descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -106,7 +106,7 @@ void PunctualLightCmdListRecorder::Init(
 	srvDesc.Buffer.FirstElement = 0UL;
 	srvDesc.Buffer.NumElements = mNumLights;
 	srvDesc.Buffer.StructureByteStride = sizeof(PunctualLight);
-	mLightsBufferGpuDescHandleBegin = DescriptorManager::Get().CreateShaderResourceView(*mLightsBuffer->Resource(), srvDesc);
+	mLightsBufferGpuDescBegin = DescriptorManager::Get().CreateShaderResourceView(*mLightsBuffer->Resource(), srvDesc);
 	
 	ASSERT(ValidateData());
 }
@@ -140,11 +140,11 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
 	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescHandleBegin);
+	mCmdList->SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescBegin);
 	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
 	mCmdList->SetGraphicsRootConstantBufferView(4U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(5U, mTexturesGpuDescHandle);
+	mCmdList->SetGraphicsRootDescriptorTable(5U, mTexturesGpuDesc);
 	
 	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	
@@ -159,7 +159,7 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 }
 
 bool PunctualLightCmdListRecorder::ValidateData() const noexcept {
-	return LightingPassCmdListRecorder::ValidateData() && mTexturesGpuDescHandle.ptr != 0UL;
+	return LightingPassCmdListRecorder::ValidateData() && mTexturesGpuDesc.ptr != 0UL;
 }
 
 void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {

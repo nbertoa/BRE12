@@ -45,7 +45,7 @@ bool LightingPassCmdListRecorder::ValidateData() const noexcept {
 		mNumLights != 0UL &&
 		mImmutableCBuffer != nullptr &&
 		mLightsBuffer != nullptr &&
-		mLightsBufferGpuDescHandleBegin.ptr != 0UL;
+		mLightsBufferGpuDescBegin.ptr != 0UL;
 }
 
 void LightingPassCmdListRecorder::InitInternal(
