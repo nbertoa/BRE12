@@ -2,7 +2,7 @@
 
 #include <tbb/concurrent_queue.h>
 
-#include <GlobalData/Settings.h>
+#include <SettingsManager\SettingsManager.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
@@ -49,11 +49,11 @@ private:
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	std::uint32_t mNumSamples{ 0U };
 
-	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
+	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	UploadBuffer* mSampleKernelBuffer{ nullptr };
 	D3D12_GPU_DESCRIPTOR_HANDLE mSampleKernelBufferGpuDescBegin{ 0UL };

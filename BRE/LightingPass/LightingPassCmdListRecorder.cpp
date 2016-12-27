@@ -28,13 +28,13 @@ LightingPassCmdListRecorder::LightingPassCmdListRecorder() {
 }
 
 bool LightingPassCmdListRecorder::ValidateData() const noexcept {
-	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {
 			return false;
 		}
 	}
 
-	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mFrameCBuffer[i] == nullptr) {
 			return false;
 		}

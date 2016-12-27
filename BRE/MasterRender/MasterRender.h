@@ -6,9 +6,9 @@
 
 #include <Camera/Camera.h>
 #include <GeometryPass\GeometryPass.h>
-#include <GlobalData\Settings.h>
 #include <LightingPass\LightingPass.h>
 #include <PostProcesspass\PostProcesspass.h>
+#include <SettingsManager\SettingsManager.h>
 #include <SkyBoxPass\SkyBoxPass.h>
 #include <ShaderUtils\CBuffers.h>
 #include <ToneMappingPass\ToneMappingPass.h>
@@ -63,7 +63,7 @@ private:
 	// Fences data for syncrhonization purposes.
 	ID3D12Fence* mFence{ nullptr };
 	std::uint32_t mCurrQueuedFrameIndex{ 0U };
-	std::uint64_t mFenceValueByQueuedFrameIndex[Settings::sQueuedFrameCount]{ 0UL };
+	std::uint64_t mFenceValueByQueuedFrameIndex[SettingsManager::sQueuedFrameCount]{ 0UL };
 	std::uint64_t mCurrFenceValue{ 0UL };
 
 	// Passes
@@ -74,12 +74,12 @@ private:
 	PostProcessPass mPostProcessPass;
 
 	// Command allocarts and list needed for merge pass
-	ID3D12CommandAllocator* mMergePassCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mMergePassCmdAllocs[SettingsManager::sQueuedFrameCount]{ nullptr };
 	ID3D12GraphicsCommandList* mMergePassCmdList{ nullptr };
 	
 	// Frame buffers
-	Microsoft::WRL::ComPtr<ID3D12Resource> mFrameBuffers[Settings::sSwapChainBufferCount];
-	D3D12_CPU_DESCRIPTOR_HANDLE mFrameBufferRTVs[Settings::sSwapChainBufferCount]{ 0UL };
+	Microsoft::WRL::ComPtr<ID3D12Resource> mFrameBuffers[SettingsManager::sSwapChainBufferCount];
+	D3D12_CPU_DESCRIPTOR_HANDLE mFrameBufferRTVs[SettingsManager::sSwapChainBufferCount]{ 0UL };
 
 	// Depth stencil buffer
 	ID3D12Resource* mDepthStencilBuffer{ nullptr };

@@ -3,7 +3,7 @@
 #include <memory>
 #include <tbb/concurrent_queue.h>
 
-#include <GlobalData\Settings.h>
+#include <SettingsManager\SettingsManager.h>
 #include <ToneMappingPass\ToneMappingCmdListRecorder.h>
 
 class CommandListExecutor;
@@ -47,7 +47,7 @@ private:
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocs[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 

@@ -59,7 +59,7 @@ void EnvironmentLightCmdListRecorder::InitPSO() noexcept {
 	psoParams.mRootSignFilename = "EnvironmentLightPass/Shaders/RS.cso";
 	psoParams.mVSFilename = "EnvironmentLightPass/Shaders/VS.cso";
 	psoParams.mNumRenderTargets = 1U;
-	psoParams.mRtFormats[0U] = Settings::sColorBufferFormat;
+	psoParams.mRtFormats[0U] = SettingsManager::sColorBufferFormat;
 	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
 		psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
@@ -106,8 +106,8 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
-	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
+	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
@@ -129,18 +129,18 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCmdListQueue.push(mCmdList);
 
 	// Next frame
-	currFrameIndex = (currFrameIndex + 1) % Settings::sQueuedFrameCount;
+	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 
-	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {
 			return false;
 		}
 	}
 
-	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mFrameCBuffer[i] == nullptr) {
 			return false;
 		}
@@ -188,7 +188,7 @@ void EnvironmentLightCmdListRecorder::BuildBuffers(
 	srvDesc[descIndex].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc[descIndex].Texture2D.MostDetailedMip = 0;
 	srvDesc[descIndex].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc[descIndex].Format = Settings::sDepthStencilSRVFormat;
+	srvDesc[descIndex].Format = SettingsManager::sDepthStencilSRVFormat;
 	srvDesc[descIndex].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
 	res[descIndex] = &depthBuffer;
 	++descIndex;
@@ -216,7 +216,7 @@ void EnvironmentLightCmdListRecorder::BuildBuffers(
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 }

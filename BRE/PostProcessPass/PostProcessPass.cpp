@@ -13,14 +13,14 @@
 
 namespace {
 	void CreateCommandObjects(
-		ID3D12CommandAllocator* cmdAllocs[Settings::sQueuedFrameCount],
+		ID3D12CommandAllocator* cmdAllocs[SettingsManager::sQueuedFrameCount],
 		ID3D12GraphicsCommandList* &cmdList) noexcept {
 
-		ASSERT(Settings::sQueuedFrameCount > 0U);
+		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
 		ASSERT(cmdList == nullptr);
 
 		// Create command allocators and command list
-		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 			ASSERT(cmdAllocs[i] == nullptr);
 			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocs[i]);
 		}
@@ -70,7 +70,7 @@ void PostProcessPass::Execute(
 }
 
 bool PostProcessPass::ValidateData() const noexcept {
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAllocs[i] == nullptr) {
 			return false;
 		}

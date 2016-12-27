@@ -4,8 +4,8 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <GlobalData/Settings.h>
 #include <ResourceManager/ResourceManager.h>
+#include <SettingsManager\SettingsManager.h>
 #include <Utils/DebugUtils.h>
 
 Model::Model(
@@ -14,7 +14,7 @@ Model::Model(
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) {
 	ASSERT(filename != nullptr);
-	std::string filePath(Settings::sResourcesPath);
+	std::string filePath(SettingsManager::sResourcesPath);
 	filePath += filename;
 
 	Assimp::Importer importer;

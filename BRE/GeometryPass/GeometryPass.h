@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include <GlobalData\Settings.h>
 #include <GeometryPass\GeometryPassCmdListRecorder.h>
+#include <SettingsManager\SettingsManager.h>
 
 class CommandListExecutor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
@@ -58,7 +58,7 @@ private:
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCmdAllocs[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocs[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 

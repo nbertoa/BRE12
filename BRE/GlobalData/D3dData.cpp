@@ -1,6 +1,6 @@
 #include "D3dData.h"
 
-#include <GlobalData/Settings.h>
+#include <SettingsManager\SettingsManager.h>
 
 namespace {
 	void InitMainWindow(HWND& hwnd, const HINSTANCE hInstance) noexcept {
@@ -19,12 +19,12 @@ namespace {
 		ASSERT(RegisterClass(&wc));
 
 		// Compute window rectangle dimensions based on requested client area dimensions.
-		RECT r = { 0, 0, static_cast<long>(Settings::sWindowWidth), static_cast<long>(Settings::sWindowHeight) };
+		RECT r = { 0, 0, static_cast<long>(SettingsManager::sWindowWidth), static_cast<long>(SettingsManager::sWindowHeight) };
 		AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, false);
 		const int32_t width{ r.right - r.left };
 		const int32_t height{ r.bottom - r.top };
 
-		const std::uint32_t dwStyle = Settings::sFullscreen ? WS_POPUP : WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+		const std::uint32_t dwStyle = SettingsManager::sFullscreen ? WS_POPUP : WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
 		hwnd = CreateWindowEx(WS_EX_APPWINDOW, L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, hInstance, nullptr);
 		ASSERT(hwnd);
 

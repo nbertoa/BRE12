@@ -3,7 +3,7 @@
 #include <d3d12.h>
 #include <tbb/concurrent_queue.h>
 
-#include <GlobalData/Settings.h>
+#include <SettingsManager\SettingsManager.h>
 
 class UploadBuffer;
 
@@ -37,7 +37,7 @@ private:
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mColorBufferGpuDesc{ 0UL };
 

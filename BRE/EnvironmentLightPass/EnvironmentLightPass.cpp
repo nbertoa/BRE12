@@ -12,7 +12,7 @@ namespace {
 		ID3D12CommandAllocator* &cmdAlloc,
 		ID3D12GraphicsCommandList* &cmdList) noexcept {
 
-		ASSERT(Settings::sQueuedFrameCount > 0U);
+		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
 		ASSERT(cmdList == nullptr);
 
 		// Create command allocator and command list

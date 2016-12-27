@@ -15,15 +15,15 @@
 
 namespace {
 	void CreateCommandObjects(
-		ID3D12CommandAllocator* cmdAllocsBegin[Settings::sQueuedFrameCount],
-		ID3D12CommandAllocator* cmdAllocsEnd[Settings::sQueuedFrameCount],
+		ID3D12CommandAllocator* cmdAllocsBegin[SettingsManager::sQueuedFrameCount],
+		ID3D12CommandAllocator* cmdAllocsEnd[SettingsManager::sQueuedFrameCount],
 		ID3D12GraphicsCommandList* &cmdList) noexcept {
 
-		ASSERT(Settings::sQueuedFrameCount > 0U);
+		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
 		ASSERT(cmdList == nullptr);
 
 		// Create command allocators and command list
-		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 			ASSERT(cmdAllocsBegin[i] == nullptr);
 			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsBegin[i]);
 
@@ -96,7 +96,7 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mRecorders.size())};
 	
 	// Execute light pass tasks
-	const std::uint32_t grainSize(max(1U, lightTaskCount / Settings::sCpuProcessors));
+	const std::uint32_t grainSize(max(1U, lightTaskCount / SettingsManager::sCpuProcessors));
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, lightTaskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
@@ -119,13 +119,13 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 }
 
 bool LightingPass::ValidateData() const noexcept {
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAllocsBegin[i] == nullptr) {
 			return false;
 		}
 	}
 
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAllocsEnd[i] == nullptr) {
 			return false;
 		}

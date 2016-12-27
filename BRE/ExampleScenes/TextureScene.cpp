@@ -73,13 +73,13 @@ void TextureScene::GenerateGeomPassRecorders(
 	Model& model = sResourceContainer.GetModel(MITSUBA);
 
 	const std::size_t numGeometry{ 100UL };
-	tasks.resize(Settings::sCpuProcessors);
+	tasks.resize(SettingsManager::sCpuProcessors);
 
 	ASSERT(model.HasMeshes());	
 	const Mesh& mesh{ model.Meshes()[0U] };
 
 	std::vector<GeometryPassCmdListRecorder::GeometryData> geomDataVec;
-	geomDataVec.resize(Settings::sCpuProcessors);
+	geomDataVec.resize(SettingsManager::sCpuProcessors);
 	for (GeometryPassCmdListRecorder::GeometryData& geomData : geomDataVec) {
 		geomData.mVertexBufferData = mesh.VertexBufferData();
 		geomData.mIndexBufferData = mesh.IndexBufferData();
@@ -88,7 +88,7 @@ void TextureScene::GenerateGeomPassRecorders(
 
 	const float meshSpaceOffset{ 100.0f };
 	const float scaleFactor{ 0.02f };
-	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, Settings::sCpuProcessors, numGeometry),
+	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, SettingsManager::sCpuProcessors, numGeometry),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t k = r.begin(); k != r.end(); ++k) {
 			TextureCmdListRecorder& task{ *new TextureCmdListRecorder() };

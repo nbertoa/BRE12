@@ -3,7 +3,7 @@
 #include <memory>
 
 #include <DXUtils/d3dx12.h>
-#include <GlobalData\Settings.h>
+#include <SettingsManager\SettingsManager.h>
 
 namespace {
 	std::unique_ptr<DescriptorManager> gManager{ nullptr };

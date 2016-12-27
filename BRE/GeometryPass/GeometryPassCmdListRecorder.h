@@ -5,8 +5,8 @@
 #include <tbb/concurrent_queue.h>
 
 #include <DXUtils/D3DFactory.h>
-#include <GlobalData/Settings.h>
 #include <ResourceManager/BufferCreator.h>
+#include <SettingsManager\SettingsManager.h>
 
 struct FrameCBuffer;
 class UploadBuffer;
@@ -50,7 +50,7 @@ public:
 
 protected:
 	// 1 command allocater per queued frame.
-	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	std::uint32_t mCurrFrameIndex{ 0U };
 
@@ -60,7 +60,7 @@ protected:
 	std::vector<GeometryData> mGeometryDataVec;
 
 	// Frame CBuffer info per queued frame.
-	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
+	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	// Object CBuffer info
 	UploadBuffer* mObjectCBuffer{ nullptr };

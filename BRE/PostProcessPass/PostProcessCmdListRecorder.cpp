@@ -54,7 +54,7 @@ void PostProcessCmdListRecorder::InitPSO() noexcept {
 	psoParams.mRootSignFilename = "PostProcessPass/Shaders/RS.cso";
 	psoParams.mVSFilename = "PostProcessPass/Shaders/VS.cso";
 	psoParams.mNumRenderTargets = 1U;
-	psoParams.mRtFormats[0U] = Settings::sFrameBufferRTFormat;
+	psoParams.mRtFormats[0U] = SettingsManager::sFrameBufferRTFormat;
 	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
 		psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
@@ -86,8 +86,8 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
-	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
+	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &frameBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
@@ -106,12 +106,12 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 	mCmdListQueue.push(mCmdList);
 
 	// Next frame
-	currFrameIndex = (currFrameIndex + 1) % Settings::sQueuedFrameCount;
+	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 bool PostProcessCmdListRecorder::ValidateData() const noexcept {
 
-	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {
 			return false;
 		}

@@ -4,9 +4,9 @@
 #include <DirectXMath.h>
 #include <tbb/concurrent_queue.h>
 
-#include <GlobalData/Settings.h>
 #include <MathUtils\MathUtils.h>
 #include <ResourceManager/BufferCreator.h>
+#include <SettingsManager\SettingsManager.h>
 
 struct FrameCBuffer;
 class UploadBuffer;
@@ -46,13 +46,13 @@ private:
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
 	
 	BufferCreator::VertexBufferData mVertexBufferData;
 	BufferCreator::IndexBufferData mIndexBufferData;
 	DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::Identity4x4() };
 
-	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
+	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	UploadBuffer* mObjectCBuffer{ nullptr };
 	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescBegin;

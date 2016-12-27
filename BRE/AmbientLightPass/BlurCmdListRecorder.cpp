@@ -91,8 +91,8 @@ void BlurCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
-	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
+	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mBlurBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
@@ -111,12 +111,12 @@ void BlurCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	mCmdListQueue.push(mCmdList);
 
 	// Next frame
-	currFrameIndex = (currFrameIndex + 1) % Settings::sQueuedFrameCount;
+	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 bool BlurCmdListRecorder::ValidateData() const noexcept {
 
-	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {
 			return false;
 		}

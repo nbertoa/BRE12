@@ -7,12 +7,12 @@
 #include <DescriptorManager\DescriptorManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GlobalData/D3dData.h>
-#include <GlobalData/Settings.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <ResourceManager\ResourceManager.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <Scene/Scene.h>
+#include <SettingsManager\SettingsManager.h>
 
 using namespace DirectX;
 
@@ -66,8 +66,8 @@ namespace {
 		const std::int32_t x{ Mouse::Get().X() };
 		const std::int32_t y{ Mouse::Get().Y() };
 		if (Mouse::Get().IsButtonDown(Mouse::MouseButtonsLeft)) {
-			const float dx = static_cast<float>(x - lastXY[0]) / Settings::sWindowWidth;
-			const float dy = static_cast<float>(y - lastXY[1]) / Settings::sWindowHeight;
+			const float dx = static_cast<float>(x - lastXY[0]) / SettingsManager::sWindowWidth;
+			const float dy = static_cast<float>(y - lastXY[1]) / SettingsManager::sWindowHeight;
 
 			camera.Pitch(dy * rotationDelta);
 			camera.RotateY(dx * rotationDelta);
@@ -88,7 +88,7 @@ namespace {
 
 		DXGI_SWAP_CHAIN_DESC1 sd = {};
 		sd.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-		sd.BufferCount = Settings::sSwapChainBufferCount;
+		sd.BufferCount = SettingsManager::sSwapChainBufferCount;
 		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 #ifdef V_SYNC
 		sd.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
@@ -104,13 +104,13 @@ namespace {
 		CHECK_HR(D3dData::Factory().CreateSwapChainForHwnd(&cmdQueue, hwnd, &sd, nullptr, nullptr, &baseSwapChain));
 		CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain3.GetAddressOf())));
 
-		CHECK_HR(swapChain3->ResizeBuffers(Settings::sSwapChainBufferCount, Settings::sWindowWidth, Settings::sWindowHeight, frameBufferFormat, sd.Flags));
+		CHECK_HR(swapChain3->ResizeBuffers(SettingsManager::sSwapChainBufferCount, SettingsManager::sWindowWidth, SettingsManager::sWindowHeight, frameBufferFormat, sd.Flags));
 		
 		// Make window association
 		CHECK_HR(D3dData::Factory().MakeWindowAssociation(hwnd, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
 
 #ifdef V_SYNC
-		CHECK_HR(swapChain3->SetMaximumFrameLatency(Settings::sQueuedFrameCount));
+		CHECK_HR(swapChain3->SetMaximumFrameLatency(SettingsManager::sQueuedFrameCount));
 #endif
 	}
 }
@@ -134,7 +134,7 @@ MasterRender::MasterRender(const HWND hwnd, Scene* scene)
 	CreateRtvAndDsv();
 	CreateColorBuffers();
 
-	mCamera.SetLens(Settings::sFieldOfView, Settings::AspectRatio(), Settings::sNearPlaneZ, Settings::sFarPlaneZ);
+	mCamera.SetLens(SettingsManager::sFieldOfView, SettingsManager::AspectRatio(), SettingsManager::sNearPlaneZ, SettingsManager::sFarPlaneZ);
 
 	// Create and spawn command list processor thread.
 	mCmdListExecutor = CommandListExecutor::Create(mCmdQueue, MAX_NUM_CMD_LISTS);
@@ -263,14 +263,14 @@ void MasterRender::ExecuteMergePass() {
 void MasterRender::CreateRtvAndDsv() noexcept {
 	// Setup RTV descriptor.
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-	rtvDesc.Format = Settings::sFrameBufferRTFormat;
+	rtvDesc.Format = SettingsManager::sFrameBufferRTFormat;
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	// Create swap chain and render target views
 	ASSERT(mSwapChain == nullptr);
-	CreateSwapChain(mHwnd, *mCmdQueue, Settings::sFrameBufferFormat, mSwapChain);
+	CreateSwapChain(mHwnd, *mCmdQueue, SettingsManager::sFrameBufferFormat, mSwapChain);
 	const std::size_t rtvDescSize{ D3dData::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
-	for (std::uint32_t i = 0U; i < Settings::sSwapChainBufferCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
 		DescriptorManager::Get().CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDesc, &mFrameBufferRTVs[i]);
 		ResourceStateManager::Get().Add(*mFrameBuffers[i].Get(), D3D12_RESOURCE_STATE_PRESENT);
@@ -280,18 +280,18 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	D3D12_RESOURCE_DESC depthStencilDesc = {};
 	depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	depthStencilDesc.Alignment = 0U;
-	depthStencilDesc.Width = Settings::sWindowWidth;
-	depthStencilDesc.Height = Settings::sWindowHeight;
+	depthStencilDesc.Width = SettingsManager::sWindowWidth;
+	depthStencilDesc.Height = SettingsManager::sWindowHeight;
 	depthStencilDesc.DepthOrArraySize = 1U;
 	depthStencilDesc.MipLevels = 1U;
-	depthStencilDesc.Format = Settings::sDepthStencilFormat;
+	depthStencilDesc.Format = SettingsManager::sDepthStencilFormat;
 	depthStencilDesc.SampleDesc.Count = 1U;
 	depthStencilDesc.SampleDesc.Quality = 0U;
 	depthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
 	D3D12_CLEAR_VALUE clearValue = {};
-	clearValue.Format = Settings::sDepthStencilViewFormat;
+	clearValue.Format = SettingsManager::sDepthStencilViewFormat;
 	clearValue.DepthStencil.Depth = 1.0f;
 	clearValue.DepthStencil.Stencil = 0U;
 
@@ -300,7 +300,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
 	D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
-	depthStencilViewDesc.Format = Settings::sDepthStencilViewFormat;
+	depthStencilViewDesc.Format = SettingsManager::sDepthStencilViewFormat;
 	depthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 	DescriptorManager::Get().CreateDepthStencilView(*mDepthStencilBuffer, depthStencilViewDesc, &mDepthStencilBufferRTV);
@@ -311,15 +311,15 @@ void MasterRender::CreateColorBuffers() noexcept {
 	D3D12_RESOURCE_DESC resDesc = {};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	resDesc.Alignment = 0U;
-	resDesc.Width = Settings::sWindowWidth;
-	resDesc.Height = Settings::sWindowHeight;
+	resDesc.Width = SettingsManager::sWindowWidth;
+	resDesc.Height = SettingsManager::sWindowHeight;
 	resDesc.DepthOrArraySize = 1U;
 	resDesc.MipLevels = 0U;	
 	resDesc.SampleDesc.Count = 1U;
 	resDesc.SampleDesc.Quality = 0U;
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-	resDesc.Format = Settings::sColorBufferFormat;
+	resDesc.Format = SettingsManager::sColorBufferFormat;
 
 	D3D12_CLEAR_VALUE clearValue = { resDesc.Format, 0.0f, 0.0f, 0.0f, 1.0f };
 
@@ -344,14 +344,14 @@ void MasterRender::CreateColorBuffers() noexcept {
 }
 
 void MasterRender::CreateMergePassCommandObjects() noexcept {
-	ASSERT(Settings::sQueuedFrameCount > 0U);
+	ASSERT(SettingsManager::sQueuedFrameCount > 0U);
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	CommandManager::Get().CreateCmdQueue(queueDesc, mCmdQueue);
 
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mMergePassCmdAllocs[i]);
 	}
 	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mMergePassCmdAllocs[0], mMergePassCmdList);
@@ -406,7 +406,7 @@ void MasterRender::SignalFenceAndPresent() noexcept {
 	// processing all the commands prior to this Signal().
 	mFenceValueByQueuedFrameIndex[mCurrQueuedFrameIndex] = ++mCurrFenceValue;
 	CHECK_HR(mCmdQueue->Signal(mFence, mCurrFenceValue));
-	mCurrQueuedFrameIndex = (mCurrQueuedFrameIndex + 1U) % Settings::sQueuedFrameCount;	
+	mCurrQueuedFrameIndex = (mCurrQueuedFrameIndex + 1U) % SettingsManager::sQueuedFrameCount;	
 
 	// If we executed command lists for all queued frames, then we need to wait
 	// at least 1 of them to be completed, before continue recording command lists. 

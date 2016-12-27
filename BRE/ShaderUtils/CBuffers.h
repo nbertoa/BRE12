@@ -2,8 +2,8 @@
 
 #include <DirectXMath.h>
 
-#include <GlobalData\Settings.h>
 #include <MathUtils\MathUtils.h>
+#include <SettingsManager\SettingsManager.h>
 
 // Per object constant buffer data
 struct ObjectCBuffer {
@@ -42,9 +42,9 @@ struct ImmutableCBuffer {
 	ImmutableCBuffer& operator=(ImmutableCBuffer&&) = default;
 
 	float mNearZ_FarZ_ScreenW_ScreenH[4U] { 
-		Settings::sNearPlaneZ,
-		Settings::sFarPlaneZ, 
-		static_cast<float>(Settings::sWindowWidth), 
-		static_cast<float>(Settings::sWindowHeight) 
+		SettingsManager::sNearPlaneZ,
+		SettingsManager::sFarPlaneZ, 
+		static_cast<float>(SettingsManager::sWindowWidth), 
+		static_cast<float>(SettingsManager::sWindowHeight) 
 	};
 };

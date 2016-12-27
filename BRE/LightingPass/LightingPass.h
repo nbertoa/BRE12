@@ -7,8 +7,8 @@
 
 #include <AmbientLightPass\AmbientLightPass.h>
 #include <EnvironmentLightPass/EnvironmentLightPass.h>
-#include <GlobalData\Settings.h>
 #include <LightingPass\LightingPassCmdListRecorder.h>
+#include <SettingsManager\SettingsManager.h>
 
 class CommandListExecutor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
@@ -58,8 +58,8 @@ private:
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCmdAllocsBegin[Settings::sQueuedFrameCount]{ nullptr };
-	ID3D12CommandAllocator* mCmdAllocsEnd[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocsBegin[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocsEnd[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 

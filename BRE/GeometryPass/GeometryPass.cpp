@@ -39,8 +39,8 @@ namespace {
 		D3D12_RESOURCE_DESC resDesc = {};
 		resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		resDesc.Alignment = 0U;
-		resDesc.Width = Settings::sWindowWidth;
-		resDesc.Height = Settings::sWindowHeight;
+		resDesc.Width = SettingsManager::sWindowWidth;
+		resDesc.Height = SettingsManager::sWindowHeight;
 		resDesc.DepthOrArraySize = 1U;
 		resDesc.MipLevels = 0U;
 		resDesc.SampleDesc.Count = 1U;
@@ -78,14 +78,14 @@ namespace {
 	}
 
 	void CreateCommandObjects(
-		ID3D12CommandAllocator* cmdAllocs[Settings::sQueuedFrameCount],
+		ID3D12CommandAllocator* cmdAllocs[SettingsManager::sQueuedFrameCount],
 		ID3D12GraphicsCommandList* &cmdList) noexcept {
 
-		ASSERT(Settings::sQueuedFrameCount > 0U);
+		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
 		ASSERT(cmdList == nullptr);
 
 		// Create command allocators and command list
-		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 			ASSERT(cmdAllocs[i] == nullptr);
 			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocs[i]);
 		}
@@ -150,7 +150,7 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	mCmdListExecutor->ResetExecutedCmdListCount();
 
 	// Execute geometry tasks
-	std::uint32_t grainSize{ max(1U, (taskCount) / Settings::sCpuProcessors) };
+	std::uint32_t grainSize{ max(1U, (taskCount) / SettingsManager::sCpuProcessors) };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
@@ -165,7 +165,7 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 }
 
 bool GeometryPass::ValidateData() const noexcept {
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAllocs[i] == nullptr) {
 			return false;
 		}
@@ -205,8 +205,8 @@ void GeometryPass::ExecuteBeginTask() noexcept {
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
 
-	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
+	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 
 	// Clear render targets and depth stencil
 	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };

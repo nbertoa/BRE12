@@ -94,8 +94,8 @@ void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
-	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
+	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
@@ -136,7 +136,7 @@ void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 	mCmdListQueue->push(mCmdList);
 
 	// Next frame
-	mCurrFrameIndex = (mCurrFrameIndex + 1) % Settings::sQueuedFrameCount;
+	mCurrFrameIndex = (mCurrFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 void ColorCmdListRecorder::BuildBuffers(const Material* materials, const std::uint32_t numMaterials) noexcept {
@@ -144,7 +144,7 @@ void ColorCmdListRecorder::BuildBuffers(const Material* materials, const std::ui
 	ASSERT(numMaterials != 0UL);
 
 #ifdef _DEBUG
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ASSERT(mFrameCBuffer[i] == nullptr);
 	}
 #endif
@@ -204,7 +204,7 @@ void ColorCmdListRecorder::BuildBuffers(const Material* materials, const std::ui
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 }

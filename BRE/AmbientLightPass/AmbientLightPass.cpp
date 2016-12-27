@@ -12,17 +12,17 @@
 
 namespace {
 	void CreateCommandObjects(
-		ID3D12CommandAllocator* cmdAllocsBegin[Settings::sQueuedFrameCount],
-		ID3D12CommandAllocator* cmdAllocsEnd[Settings::sQueuedFrameCount],
+		ID3D12CommandAllocator* cmdAllocsBegin[SettingsManager::sQueuedFrameCount],
+		ID3D12CommandAllocator* cmdAllocsEnd[SettingsManager::sQueuedFrameCount],
 		ID3D12GraphicsCommandList* &cmdListBegin,
 		ID3D12GraphicsCommandList* &cmdListEnd) noexcept {
 
-		ASSERT(Settings::sQueuedFrameCount > 0U);
+		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
 		ASSERT(cmdListBegin == nullptr);
 		ASSERT(cmdListEnd == nullptr);
 
 		// Create command allocators and command list
-		for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 			ASSERT(cmdAllocsEnd[i] == nullptr);
 			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsBegin[i]);
 
@@ -45,8 +45,8 @@ namespace {
 		D3D12_RESOURCE_DESC resDesc = {};
 		resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		resDesc.Alignment = 0U;
-		resDesc.Width = Settings::sWindowWidth;
-		resDesc.Height = Settings::sWindowHeight;
+		resDesc.Width = SettingsManager::sWindowWidth;
+		resDesc.Height = SettingsManager::sWindowHeight;
 		resDesc.DepthOrArraySize = 1U;
 		resDesc.MipLevels = 0U;
 		resDesc.SampleDesc.Count = 1U;
@@ -141,13 +141,13 @@ void AmbientLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 }
 
 bool AmbientLightPass::ValidateData() const noexcept {
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAllocsBegin[i] == nullptr) {
 			return false;
 		}
 	}
 
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAllocsEnd[i] == nullptr) {
 			return false;
 		}

@@ -231,8 +231,8 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[currFrameIndex]);
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
-	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
+	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mAmbientAccessBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
@@ -254,17 +254,17 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCmdListQueue.push(mCmdList);
 
 	// Next frame
-	currFrameIndex = (currFrameIndex + 1) % Settings::sQueuedFrameCount;
+	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
-	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {
 			return false;
 		}
 	}
 
-	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mFrameCBuffer[i] == nullptr) {
 			return false;
 		}
@@ -288,7 +288,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	ID3D12Resource& depthBuffer) noexcept {
 
 #ifdef _DEBUG
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ASSERT(mFrameCBuffer[i] == nullptr);
 	}
 #endif
@@ -365,7 +365,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 
@@ -390,7 +390,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	srvDesc[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc[1].Texture2D.MostDetailedMip = 0;
 	srvDesc[1].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc[1].Format = Settings::sDepthStencilSRVFormat;
+	srvDesc[1].Format = SettingsManager::sDepthStencilSRVFormat;
 	srvDesc[1].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
 
 	// Fill sample kernel buffer descriptor

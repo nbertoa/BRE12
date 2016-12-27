@@ -5,8 +5,8 @@
 #include <tbb/concurrent_queue.h>
 
 #include <DXUtils/D3DFactory.h>
-#include <GlobalData/Settings.h>
 #include <ResourceManager/BufferCreator.h>
+#include <SettingsManager\SettingsManager.h>
 
 struct FrameCBuffer;
 class UploadBuffer;
@@ -57,7 +57,7 @@ public:
 
 protected:
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
 	std::uint32_t mCurrFrameIndex{ 0U };
 
 	// Base command data. Once you inherits from this class, you should add
@@ -70,7 +70,7 @@ protected:
 
 	std::uint32_t mNumLights{ 0U };
 
-	UploadBuffer* mFrameCBuffer[Settings::sQueuedFrameCount]{ nullptr };
+	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
 	UploadBuffer* mImmutableCBuffer{ nullptr };
 
 	UploadBuffer* mLightsBuffer{ nullptr };

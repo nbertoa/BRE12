@@ -4,9 +4,9 @@
 
 #include <DXUtils/D3DFactory.h>
 #include <DXUtils/d3dx12.h>
-#include <GlobalData\Settings.h>
 #include <ResourceManager\DDSTextureLoader.h>
 #include <ResourceStateManager\ResourceStateManager.h>
+#include <SettingsManager\SettingsManager.h>
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 #include <Utils\StringUtils.h>
@@ -36,7 +36,7 @@ std::size_t ResourceManager::LoadTextureFromFile(
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
 	ID3D12GraphicsCommandList& cmdList) noexcept {
 	ASSERT(filename != nullptr);
-	std::string filePath(Settings::sResourcesPath);
+	std::string filePath(SettingsManager::sResourcesPath);
 	filePath += filename;
 
 	const std::wstring filePathW(StringUtils::ToWideString(filePath));

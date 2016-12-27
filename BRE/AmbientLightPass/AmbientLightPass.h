@@ -48,8 +48,8 @@ private:
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 	
 	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCmdAllocsBegin[Settings::sQueuedFrameCount]{ nullptr };
-	ID3D12CommandAllocator* mCmdAllocsEnd[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocsBegin[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocsEnd[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdListBegin{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListEnd{ nullptr };

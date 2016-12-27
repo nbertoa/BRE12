@@ -55,7 +55,7 @@ void AmbientLightCmdListRecorder::InitPSO() noexcept {
 	psoParams.mRootSignFilename = "AmbientLightPass/Shaders/AmbientLight/RS.cso";
 	psoParams.mVSFilename = "AmbientLightPass/Shaders/AmbientLight/VS.cso";
 	psoParams.mNumRenderTargets = 1U;
-	psoParams.mRtFormats[0U] = Settings::sColorBufferFormat;
+	psoParams.mRtFormats[0U] = SettingsManager::sColorBufferFormat;
 	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
 		psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
@@ -95,8 +95,8 @@ void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
-	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
+	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
@@ -115,12 +115,12 @@ void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	mCmdListQueue.push(mCmdList);
 
 	// Next frame
-	currFrameIndex = (currFrameIndex + 1) % Settings::sQueuedFrameCount;
+	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 bool AmbientLightCmdListRecorder::ValidateData() const noexcept {
 
-	for (std::uint32_t i = 0UL; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {
 			return false;
 		}

@@ -2,7 +2,7 @@
 
 #include <tbb/concurrent_queue.h>
 
-#include <GlobalData/Settings.h>
+#include <SettingsManager\SettingsManager.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12CommandAllocator;
@@ -46,7 +46,7 @@ private:
 	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[Settings::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	// Buffers cpu descriptors
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };

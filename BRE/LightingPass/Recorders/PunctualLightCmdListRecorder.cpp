@@ -38,7 +38,7 @@ void PunctualLightCmdListRecorder::InitPSO() noexcept {
 	psoParams.mRootSignFilename = "LightingPass/Shaders/PunctualLight/RS.cso";
 	psoParams.mVSFilename = "LightingPass/Shaders/PunctualLight/VS.cso";
 	psoParams.mNumRenderTargets = 1U;
-	psoParams.mRtFormats[0U] = Settings::sColorBufferFormat;
+	psoParams.mRtFormats[0U] = SettingsManager::sColorBufferFormat;
 	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
 		psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
@@ -91,7 +91,7 @@ void PunctualLightCmdListRecorder::Init(
 	srvDescVec[resIndex].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDescVec[resIndex].Texture2D.MostDetailedMip = 0;
 	srvDescVec[resIndex].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDescVec[resIndex].Format = Settings::sDepthStencilSRVFormat;
+	srvDescVec[resIndex].Format = SettingsManager::sDepthStencilSRVFormat;
 	srvDescVec[resIndex].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
 	res[resIndex] = &depthBuffer;
 	
@@ -128,8 +128,8 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
 
-	mCmdList->RSSetViewports(1U, &Settings::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &Settings::sScissorRect);
+	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
@@ -164,7 +164,7 @@ bool PunctualLightCmdListRecorder::ValidateData() const noexcept {
 
 void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {
 #ifdef _DEBUG
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ASSERT(mFrameCBuffer[i] == nullptr);
 	}
 #endif
@@ -182,7 +182,7 @@ void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
-	for (std::uint32_t i = 0U; i < Settings::sQueuedFrameCount; ++i) {
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 
