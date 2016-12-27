@@ -8,7 +8,7 @@
 // This class is responsible to create/get/erase root signatures
 class RootSignatureManager {
 public:
-	static RootSignatureManager& Create(ID3D12Device& device) noexcept;
+	static RootSignatureManager& Create() noexcept;
 	static RootSignatureManager& Get() noexcept;
 	
 	~RootSignatureManager() = default;
@@ -31,9 +31,7 @@ public:
 	__forceinline void Clear() noexcept { mRootSignatureById.clear(); }
 
 private:
-	explicit RootSignatureManager(ID3D12Device& device);
-
-	ID3D12Device& mDevice;
+	RootSignatureManager() = default;
 
 	using RootSignatureById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12RootSignature>>;
 	RootSignatureById mRootSignatureById;

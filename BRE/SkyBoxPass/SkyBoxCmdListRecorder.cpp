@@ -4,6 +4,7 @@
 
 #include <CommandManager/CommandManager.h>
 #include <DescriptorManager\DescriptorManager.h>
+#include <DirectXManager\DirectXManager.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ResourceManager/UploadBuffer.h>
@@ -189,7 +190,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
 	mObjectCBuffer->CopyData(0U, &objCBuffer, sizeof(objCBuffer));
 	
 	// Set begin for cube map in GPU
-	const std::size_t descHandleIncSize{ ResourceManager::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+	const std::size_t descHandleIncSize{ DirectXManager::Device().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 	mCubeMapBufferGpuDescBegin.ptr = mObjectCBufferGpuDescBegin.ptr + descHandleIncSize;
 
 	// Create object cbuffer descriptor

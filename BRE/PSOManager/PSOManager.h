@@ -8,7 +8,7 @@
 // This class is responsible to create/get/erase pipeline state objects
 class PSOManager {
 public:
-	static PSOManager& Create(ID3D12Device& device) noexcept;
+	static PSOManager& Create() noexcept;
 	static PSOManager& Get() noexcept;
 		
 	~PSOManager() = default;
@@ -29,9 +29,7 @@ public:
 	__forceinline void Clear() noexcept { mPSOById.clear(); }
 
 private:
-	explicit PSOManager(ID3D12Device& device);
-
-	ID3D12Device& mDevice;
+	PSOManager() = default;
 
 	using PSOById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>>;
 	PSOById mPSOById;

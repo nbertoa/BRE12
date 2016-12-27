@@ -5,8 +5,8 @@
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager/CommandManager.h>
 #include <DescriptorManager\DescriptorManager.h>
+#include <DirectXManager\DirectXManager.h>
 #include <DXUtils/d3dx12.h>
-#include <GlobalData/D3dData.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <ResourceManager\ResourceManager.h>
@@ -101,13 +101,13 @@ namespace {
 		sd.Stereo = false;
 		sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
-		CHECK_HR(D3dData::Factory().CreateSwapChainForHwnd(&cmdQueue, hwnd, &sd, nullptr, nullptr, &baseSwapChain));
+		CHECK_HR(DirectXManager::Factory().CreateSwapChainForHwnd(&cmdQueue, hwnd, &sd, nullptr, nullptr, &baseSwapChain));
 		CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain3.GetAddressOf())));
 
 		CHECK_HR(swapChain3->ResizeBuffers(SettingsManager::sSwapChainBufferCount, SettingsManager::sWindowWidth, SettingsManager::sWindowHeight, frameBufferFormat, sd.Flags));
 		
 		// Make window association
-		CHECK_HR(D3dData::Factory().MakeWindowAssociation(hwnd, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
+		CHECK_HR(DirectXManager::Factory().MakeWindowAssociation(hwnd, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
 
 #ifdef V_SYNC
 		CHECK_HR(swapChain3->SetMaximumFrameLatency(SettingsManager::sQueuedFrameCount));
@@ -269,7 +269,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	// Create swap chain and render target views
 	ASSERT(mSwapChain == nullptr);
 	CreateSwapChain(mHwnd, *mCmdQueue, SettingsManager::sFrameBufferFormat, mSwapChain);
-	const std::size_t rtvDescSize{ D3dData::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
+	const std::size_t rtvDescSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
 		DescriptorManager::Get().CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDesc, &mFrameBufferRTVs[i]);

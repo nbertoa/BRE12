@@ -11,7 +11,7 @@
 // - Command allocator
 class CommandManager {
 public:
-	static CommandManager& Create(ID3D12Device& device) noexcept;
+	static CommandManager& Create() noexcept;
 	static CommandManager& Get() noexcept;
 		
 	~CommandManager() = default;
@@ -40,9 +40,7 @@ public:
 	__forceinline void Clear() noexcept { ClearCmdQueues(); ClearCmdLists(); ClearCmdAllocs(); }
 
 private:
-	explicit CommandManager(ID3D12Device& device);
-
-	ID3D12Device& mDevice;
+	CommandManager() = default;
 
 	using CmdQueueById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12CommandQueue>>;
 	CmdQueueById mCmdQueueById;

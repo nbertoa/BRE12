@@ -11,7 +11,7 @@
 // - Create descriptors
 class DescriptorManager {
 public:
-	static DescriptorManager& Create(ID3D12Device& device) noexcept;
+	static DescriptorManager& Create() noexcept;
 	static DescriptorManager& Get() noexcept;
 
 	~DescriptorManager() = default;
@@ -68,15 +68,9 @@ public:
 		ASSERT(mCbvSrvUavDescHeap.Get() != nullptr);
 		return *mCbvSrvUavDescHeap.Get();
 	}
-	
-	__forceinline std::size_t GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE descHeapType) const noexcept {
-		return mDevice.GetDescriptorHandleIncrementSize(descHeapType);
-	};
 
 private:
-	explicit DescriptorManager(ID3D12Device& device);
-
-	ID3D12Device& mDevice;
+	DescriptorManager();
 
 	// Descriptor heaps for:
 	// - Constant Buffer View - Shader Resource View - Unordered Access View

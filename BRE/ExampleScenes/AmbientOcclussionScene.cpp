@@ -2,9 +2,9 @@
 
 #include <tbb/parallel_for.h>
 
+#include <DirectXManager\DirectXManager.h>
 #include <GeometryPass/Recorders/ColorCmdListRecorder.h>
 #include <GeometryPass/Recorders/NormalCmdListRecorder.h>
-#include <GlobalData/D3dData.h>
 #include <Material/Material.h>
 #include <MathUtils\MathUtils.h>
 #include <ModelManager\Mesh.h>

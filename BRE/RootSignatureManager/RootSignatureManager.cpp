@@ -3,6 +3,7 @@
 #include <D3Dcompiler.h>
 #include <memory>
 
+#include <DirectXManager/DirectXManager.h>
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
@@ -10,19 +11,14 @@ namespace {
 	std::unique_ptr<RootSignatureManager> gManager{ nullptr };
 }
 
-RootSignatureManager& RootSignatureManager::Create(ID3D12Device& device) noexcept {
+RootSignatureManager& RootSignatureManager::Create() noexcept {
 	ASSERT(gManager == nullptr);
-	gManager.reset(new RootSignatureManager(device));
+	gManager.reset(new RootSignatureManager());
 	return *gManager.get();
 }
 RootSignatureManager& RootSignatureManager::Get() noexcept {
 	ASSERT(gManager != nullptr);
 	return *gManager.get();
-}
-
-RootSignatureManager::RootSignatureManager(ID3D12Device& device)
-	: mDevice(device)
-{
 }
 
 std::size_t RootSignatureManager::CreateRootSignature(const D3D12_ROOT_SIGNATURE_DESC& desc, ID3D12RootSignature* &rootSign) noexcept {
@@ -31,7 +27,7 @@ std::size_t RootSignatureManager::CreateRootSignature(const D3D12_ROOT_SIGNATURE
 
 	mMutex.lock();
 	CHECK_HR(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1, serializedRootSig.GetAddressOf(), errorBlob.GetAddressOf()));
-	CHECK_HR(mDevice.CreateRootSignature(0U, serializedRootSig->GetBufferPointer(), serializedRootSig->GetBufferSize(), IID_PPV_ARGS(&rootSign)));
+	CHECK_HR(DirectXManager::Device().CreateRootSignature(0U, serializedRootSig->GetBufferPointer(), serializedRootSig->GetBufferSize(), IID_PPV_ARGS(&rootSign)));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -51,7 +47,7 @@ std::size_t RootSignatureManager::CreateRootSignature(const D3D12_SHADER_BYTECOD
 	Microsoft::WRL::ComPtr<ID3DBlob> rootSignBlob{ nullptr };
 	mMutex.lock();
 	CHECK_HR(D3DGetBlobPart(shaderByteCode.pShaderBytecode, shaderByteCode.BytecodeLength, D3D_BLOB_ROOT_SIGNATURE, 0U, rootSignBlob.GetAddressOf()));
-	mDevice.CreateRootSignature(0U, rootSignBlob->GetBufferPointer(), rootSignBlob->GetBufferSize(), IID_PPV_ARGS(&rootSign));
+	DirectXManager::Device().CreateRootSignature(0U, rootSignBlob->GetBufferPointer(), rootSignBlob->GetBufferSize(), IID_PPV_ARGS(&rootSign));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -69,7 +65,7 @@ std::size_t RootSignatureManager::CreateRootSignature(const D3D12_SHADER_BYTECOD
 
 std::size_t RootSignatureManager::CreateRootSignature(ID3DBlob& rootSignBlob, ID3D12RootSignature* &rootSign) noexcept {
 	mMutex.lock();
-	mDevice.CreateRootSignature(0U, rootSignBlob.GetBufferPointer(), rootSignBlob.GetBufferSize(), IID_PPV_ARGS(&rootSign));
+	DirectXManager::Device().CreateRootSignature(0U, rootSignBlob.GetBufferPointer(), rootSignBlob.GetBufferSize(), IID_PPV_ARGS(&rootSign));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };

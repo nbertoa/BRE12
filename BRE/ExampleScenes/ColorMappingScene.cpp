@@ -2,8 +2,8 @@
 
 #include <tbb/parallel_for.h>
 
+#include <DirectXManager\DirectXManager.h>
 #include <GeometryPass/Recorders/ColorCmdListRecorder.h>
-#include <GlobalData/D3dData.h>
 #include <LightingPass/PunctualLight.h>
 #include <LightingPass/Recorders/PunctualLightCmdListRecorder.h>
 #include <Material/Material.h>

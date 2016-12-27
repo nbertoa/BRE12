@@ -2,7 +2,7 @@
 
 #include <CommandManager/CommandManager.h>
 #include <DescriptorManager/DescriptorManager.h>
-#include <GlobalData\D3dData.h>
+#include <DirectXManager\DirectXManager.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <MasterRender/MasterRender.h>
@@ -25,15 +25,14 @@ namespace {
 		Keyboard::Create(*directInput, hwnd);
 		Mouse::Create(*directInput, hwnd);
 
-		ID3D12Device& device{ D3dData::Device() };
-		CommandManager::Create(device);
-		DescriptorManager::Create(device);
+		CommandManager::Create();
+		DescriptorManager::Create();
 		ModelManager::Create();
 		Materials::InitMaterials();
-		PSOManager::Create(device);
-		ResourceManager::Create(device);
+		PSOManager::Create();
+		ResourceManager::Create();
 		ResourceStateManager::Create();
-		RootSignatureManager::Create(device);
+		RootSignatureManager::Create();
 		ShaderManager::Create();
 
 		//ShowCursor(false);
@@ -77,9 +76,9 @@ App::App(HINSTANCE hInstance, Scene* scene)
 	: mTaskSchedulerInit()
 {	
 	ASSERT(scene != nullptr);
-	D3dData::InitDirect3D(hInstance);
-	InitSystems(D3dData::Hwnd(), hInstance);
-	InitMasterRenderTask(D3dData::Hwnd(), scene, mMasterRender);
+	DirectXManager::InitDirect3D(hInstance);
+	InitSystems(DirectXManager::Hwnd(), hInstance);
+	InitMasterRenderTask(DirectXManager::Hwnd(), scene, mMasterRender);
 
 	RunMessageLoop();
 }

@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <DirectXManager/DirectXManager.h>
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
@@ -9,9 +10,9 @@ namespace {
 	std::unique_ptr<PSOManager> gManager{ nullptr };
 }
 
-PSOManager& PSOManager::Create(ID3D12Device& device) noexcept {
+PSOManager& PSOManager::Create() noexcept {
 	ASSERT(gManager == nullptr);
-	gManager.reset(new PSOManager(device));
+	gManager.reset(new PSOManager());
 	return *gManager.get();
 }
 PSOManager& PSOManager::Get() noexcept {
@@ -19,14 +20,9 @@ PSOManager& PSOManager::Get() noexcept {
 	return *gManager.get();
 }
 
-PSOManager::PSOManager(ID3D12Device& device) 
-	: mDevice(device) 
-{
-}
-
 std::size_t PSOManager::CreateGraphicsPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, ID3D12PipelineState* &pso) noexcept {
 	mMutex.lock();
-	CHECK_HR(mDevice.CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
+	CHECK_HR(DirectXManager::Device().CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
 	mMutex.unlock();
 	
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };

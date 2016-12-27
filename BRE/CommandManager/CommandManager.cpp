@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <DirectXManager/DirectXManager.h>
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
@@ -9,9 +10,9 @@ namespace {
 	std::unique_ptr<CommandManager> gManager{ nullptr };
 }
 
-CommandManager& CommandManager::Create(ID3D12Device& device) noexcept{
+CommandManager& CommandManager::Create() noexcept{
 	ASSERT(gManager == nullptr);
-	gManager.reset(new CommandManager(device));
+	gManager.reset(new CommandManager());
 	return *gManager.get();
 }
 
@@ -20,16 +21,9 @@ CommandManager& CommandManager::Get() noexcept {
 	return *gManager.get();
 }
 
-
-
-CommandManager::CommandManager(ID3D12Device& device)
-	: mDevice(device) 
-{
-}
-
 std::size_t CommandManager::CreateCmdQueue(const D3D12_COMMAND_QUEUE_DESC& desc, ID3D12CommandQueue* &cmdQueue) noexcept {
 	mMutex.lock();
-	CHECK_HR(mDevice.CreateCommandQueue(&desc, IID_PPV_ARGS(&cmdQueue)));
+	CHECK_HR(DirectXManager::Device().CreateCommandQueue(&desc, IID_PPV_ARGS(&cmdQueue)));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -47,7 +41,7 @@ std::size_t CommandManager::CreateCmdQueue(const D3D12_COMMAND_QUEUE_DESC& desc,
 
 std::size_t CommandManager::CreateCmdList(const D3D12_COMMAND_LIST_TYPE& type, ID3D12CommandAllocator& cmdAlloc, ID3D12GraphicsCommandList* &cmdList) noexcept {
 	mMutex.lock();
-	CHECK_HR(mDevice.CreateCommandList(0U, type, &cmdAlloc, nullptr, IID_PPV_ARGS(&cmdList)));
+	CHECK_HR(DirectXManager::Device().CreateCommandList(0U, type, &cmdAlloc, nullptr, IID_PPV_ARGS(&cmdList)));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -65,7 +59,7 @@ std::size_t CommandManager::CreateCmdList(const D3D12_COMMAND_LIST_TYPE& type, I
 
 std::size_t CommandManager::CreateCmdAlloc(const D3D12_COMMAND_LIST_TYPE& type, ID3D12CommandAllocator* &cmdAlloc) noexcept {
 	mMutex.lock();
-	CHECK_HR(mDevice.CreateCommandAllocator(type, IID_PPV_ARGS(&cmdAlloc)));
+	CHECK_HR(DirectXManager::Device().CreateCommandAllocator(type, IID_PPV_ARGS(&cmdAlloc)));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };

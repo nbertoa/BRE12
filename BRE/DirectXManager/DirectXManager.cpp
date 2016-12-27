@@ -1,4 +1,4 @@
-#include "D3dData.h"
+#include "DirectXManager.h"
 
 #include <SettingsManager\SettingsManager.h>
 
@@ -33,11 +33,11 @@ namespace {
 	}
 }
 
-HWND D3dData::mHwnd;
-Microsoft::WRL::ComPtr<IDXGIFactory4> D3dData::mDxgiFactory{ nullptr };
-Microsoft::WRL::ComPtr<ID3D12Device> D3dData::mDevice{ nullptr };
+HWND DirectXManager::mHwnd;
+Microsoft::WRL::ComPtr<IDXGIFactory4> DirectXManager::mDxgiFactory{ nullptr };
+Microsoft::WRL::ComPtr<ID3D12Device> DirectXManager::mDevice{ nullptr };
 
-void D3dData::InitDirect3D(const HINSTANCE hInstance) noexcept {
+void DirectXManager::InitDirect3D(const HINSTANCE hInstance) noexcept {
 	InitMainWindow(mHwnd, hInstance);
 
 #if defined(DEBUG) || defined(_DEBUG) 
@@ -50,6 +50,6 @@ void D3dData::InitDirect3D(const HINSTANCE hInstance) noexcept {
 #endif
 
 	// Create device
-	CHECK_HR(CreateDXGIFactory1(IID_PPV_ARGS(D3dData::mDxgiFactory.GetAddressOf())));
-	CHECK_HR(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(D3dData::mDevice.GetAddressOf())));
+	CHECK_HR(CreateDXGIFactory1(IID_PPV_ARGS(mDxgiFactory.GetAddressOf())));
+	CHECK_HR(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(mDevice.GetAddressOf())));
 }

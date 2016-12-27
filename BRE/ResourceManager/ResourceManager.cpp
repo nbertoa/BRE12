@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <DirectXManager/DirectXManager.h>
 #include <DXUtils/D3DFactory.h>
 #include <DXUtils/d3dx12.h>
 #include <ResourceManager\DDSTextureLoader.h>
@@ -15,19 +16,14 @@ namespace {
 	std::unique_ptr<ResourceManager> gManager{ nullptr };
 }
 
-ResourceManager& ResourceManager::Create(ID3D12Device& device) noexcept {
+ResourceManager& ResourceManager::Create() noexcept {
 	ASSERT(gManager == nullptr);
-	gManager.reset(new ResourceManager(device));
+	gManager.reset(new ResourceManager());
 	return *gManager.get();
 }
 ResourceManager& ResourceManager::Get() noexcept {
 	ASSERT(gManager != nullptr);
 	return *gManager.get();
-}
-
-ResourceManager::ResourceManager(ID3D12Device& device)
-	: mDevice(device)
-{
 }
 
 std::size_t ResourceManager::LoadTextureFromFile(
@@ -44,7 +40,7 @@ std::size_t ResourceManager::LoadTextureFromFile(
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 
 	mMutex.lock();
-	CHECK_HR(DirectX::CreateDDSTextureFromFile12(&mDevice, &cmdList, filePathW.c_str(), resource, uploadBuffer));
+	CHECK_HR(DirectX::CreateDDSTextureFromFile12(&DirectXManager::Device(), &cmdList, filePathW.c_str(), resource, uploadBuffer));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -82,7 +78,7 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 
 	CD3DX12_RESOURCE_DESC resDesc{ CD3DX12_RESOURCE_DESC::Buffer(byteSize) };
 	mMutex.lock();
-	CHECK_HR(mDevice.CreateCommittedResource(
+	CHECK_HR(DirectXManager::Device().CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -100,7 +96,7 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	heapProps.VisibleNodeMask = 1U;
 	resDesc = CD3DX12_RESOURCE_DESC::Buffer(byteSize);
 
-	CHECK_HR(mDevice.CreateCommittedResource(
+	CHECK_HR(DirectXManager::Device().CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -146,7 +142,7 @@ std::size_t ResourceManager::CreateCommittedResource(
 	ID3D12Resource* &res) noexcept
 {
 	mMutex.lock();
-	CHECK_HR(mDevice.CreateCommittedResource(&heapProps, heapFlags, &resDesc, resStates, clearValue, IID_PPV_ARGS(&res)));
+	CHECK_HR(DirectXManager::Device().CreateCommittedResource(&heapProps, heapFlags, &resDesc, resStates, clearValue, IID_PPV_ARGS(&res)));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -166,7 +162,7 @@ std::size_t ResourceManager::CreateCommittedResource(
 
 std::size_t ResourceManager::CreateFence(const std::uint64_t initValue, const D3D12_FENCE_FLAGS& flags, ID3D12Fence* &fence) noexcept {
 	mMutex.lock();
-	CHECK_HR(mDevice.CreateFence(initValue, flags, IID_PPV_ARGS(&fence)));
+	CHECK_HR(DirectXManager::Device().CreateFence(initValue, flags, IID_PPV_ARGS(&fence)));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
@@ -190,7 +186,7 @@ std::size_t ResourceManager::CreateUploadBuffer(const std::size_t elemSize, cons
 	ASSERT(accessor.empty());
 #endif
 	mUploadBufferById.insert(accessor, id);
-	accessor->second = std::make_unique<UploadBuffer>(mDevice, elemSize, elemCount);
+	accessor->second = std::make_unique<UploadBuffer>(DirectXManager::Device(), elemSize, elemCount);
 	buffer = accessor->second.get();
 	accessor.release();
 

@@ -16,7 +16,7 @@
 // - Descriptors (Views)
 class ResourceManager {
 public:
-	static ResourceManager& Create(ID3D12Device& device) noexcept;
+	static ResourceManager& Create() noexcept;
 	static ResourceManager& Get() noexcept;
 	
 	~ResourceManager() = default;
@@ -57,11 +57,7 @@ public:
 	UploadBuffer& GetUploadBuffer(const std::size_t id) noexcept;
 	ID3D12DescriptorHeap& GetDescriptorHeap(const std::size_t id) noexcept;
 	ID3D12Fence& GetFence(const std::size_t id) noexcept;
-
-	__forceinline std::size_t GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE descHeapType) const noexcept {
-		return mDevice.GetDescriptorHandleIncrementSize(descHeapType);
-	};
-
+	
 	void EraseResource(const std::size_t id) noexcept;
 	void EraseUploadBuffer(const std::size_t id) noexcept;
 	void EraseFence(const std::size_t id) noexcept;
@@ -73,9 +69,7 @@ public:
 	__forceinline void Clear() noexcept { ClearResources(); ClearUploadBuffers(); ClearFences(); }
 
 private:
-	explicit ResourceManager(ID3D12Device& device);
-
-	ID3D12Device& mDevice;
+	ResourceManager() = default;
 
 	using ResourceById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12Resource>>;
 	ResourceById mResourceById;
