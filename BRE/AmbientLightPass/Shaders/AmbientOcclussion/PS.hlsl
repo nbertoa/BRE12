@@ -31,8 +31,9 @@ struct Output {
 
 Output main(const in Input input) {
 	Output output = (Output)0;
+	return output;
 
-	const int3 screenCoord = int3(input.mPosH.xy, 0);
+	/*const int3 screenCoord = int3(input.mPosH.xy, 0);
 
 	// Compute fragment position in view space
 	const float depthNDC = Depth.Load(screenCoord);
@@ -84,5 +85,5 @@ Output main(const in Input input) {
 	// Sharpen the contrast of the SSAO map to make the SSAO affect more dramatic.
 	output.mAccessibility =  saturate(pow(output.mAccessibility, 2.0f));
 
-	return output;
+	return output;*/
 }
