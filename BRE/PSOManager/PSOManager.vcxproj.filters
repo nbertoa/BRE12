@@ -6,4 +6,7 @@
   <ItemGroup>
     <ClCompile Include="PSOManager.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

@@ -1,5 +1,7 @@
 #include <ShaderUtils/CBuffers.hlsli>
 
+#include "RS.hlsl"
+
 struct Input {
 	float3 mPosO : POSITION;
 	float3 mNormalO : NORMAL;
@@ -19,6 +21,7 @@ struct Output {
 	float2 mTexCoordO : TEXCOORD;
 };
 
+[RootSignature(RS)]
 Output main(in const Input input) {
 	Output output;
 	output.mPosW = mul(float4(input.mPosO, 1.0f), gObjCBuffer.mW).xyz;

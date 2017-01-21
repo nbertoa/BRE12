@@ -1,3 +1,5 @@
+#include "RS.hlsl"
+
 #define NUM_PATCH_POINTS 3
 
 struct Input {
@@ -35,6 +37,7 @@ HullShaderConstantOutput constant_hull_shader(const InputPatch<Input, NUM_PATCH_
 	return output;
 }
 
+[RootSignature(RS)]
 [domain("tri")]
 [partitioning("fractional_odd")]
 [outputtopology("triangle_cw")]

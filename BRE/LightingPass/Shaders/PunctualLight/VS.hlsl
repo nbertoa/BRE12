@@ -1,6 +1,8 @@
 #include <ShaderUtils/CBuffers.hlsli>
 #include <ShaderUtils/Lights.hlsli>
 
+#include "RS.hlsl"
+
 struct Input {
 	uint mVertexId : SV_VertexID;
 };
@@ -13,6 +15,7 @@ struct Output {
 	nointerpolation PunctualLight mPunctualLight : PUNCTUAL_LIGHT;
 };
 
+[RootSignature(RS)]
 Output main(in const Input input) {
 	PunctualLight l = gPunctualLights[input.mVertexId];
 

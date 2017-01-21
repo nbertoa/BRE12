@@ -8,4 +8,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneUtils.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

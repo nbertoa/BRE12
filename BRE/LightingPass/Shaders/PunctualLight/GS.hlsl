@@ -1,6 +1,8 @@
 #include <ShaderUtils/CBuffers.hlsli>
 #include <ShaderUtils/Lights.hlsli>
 
+#include "RS.hlsl"
+
 #define QUAD_VERTICES (4)
 
 struct Input {
@@ -16,6 +18,7 @@ struct Output {
 	nointerpolation PunctualLight mPunctualLight : PUNCTUAL_LIGHT;
 };
 
+[RootSignature(RS)]
 [maxvertexcount(QUAD_VERTICES)]
 void main(const in point Input input[1], inout TriangleStream<Output> triangleStream) {
 	// Compute quad center position in view space.

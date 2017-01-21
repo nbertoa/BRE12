@@ -1,5 +1,7 @@
 #include <ShaderUtils/CBuffers.hlsli>
 
+#include "RS.hlsl"
+
 #define MIN_TESS_DISTANCE 25.0f
 #define MAX_TESS_DISTANCE 1.0f
 #define MIN_TESS_FACTOR 1.0f
@@ -23,6 +25,7 @@ struct Output {
 	float mTessFactor : TESS;
 };
 
+[RootSignature(RS)]
 Output main(in const Input input) {
 	Output output;
 

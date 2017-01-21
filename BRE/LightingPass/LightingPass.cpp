@@ -92,7 +92,7 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ExecuteBeginTask();
 
 	// Total tasks = Light tasks + 1 ambient pass task + 1 environment light pass task
-	/*mCmdListExecutor->ResetExecutedCmdListCount();
+	mCmdListExecutor->ResetExecutedCmdListCount();
 	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mRecorders.size())};
 	
 	// Execute light pass tasks
@@ -107,7 +107,7 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	// Wait until all previous tasks command lists are executed
 	while (mCmdListExecutor->ExecutedCmdListCount() < lightTaskCount) {
 		Sleep(0U);
-	}*/
+	}
 
 	// Execute ambient light pass tasks
 	mAmbientLightPass.Execute(frameCBuffer);

@@ -12,4 +12,7 @@
     <ClCompile Include="BufferCreator.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

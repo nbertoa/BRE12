@@ -1,5 +1,7 @@
 #include <ShaderUtils/Utils.hlsli>
 
+#include "RS.hlsl"
+
 #define FXAA_PC 1
 #define FXAA_QUALITY__PRESET 12
 
@@ -22,6 +24,7 @@ struct Output {
 	float4 mColor : SV_Target0;
 };
 
+[RootSignature(RS)]
 Output main(const in Input input){
 	Output output = (Output)0;
 

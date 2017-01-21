@@ -7,4 +7,7 @@
   <ItemGroup>
     <ClCompile Include="D3DFactory.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

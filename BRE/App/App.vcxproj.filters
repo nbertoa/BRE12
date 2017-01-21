@@ -6,4 +6,7 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

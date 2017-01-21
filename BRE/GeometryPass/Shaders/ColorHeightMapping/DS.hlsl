@@ -1,5 +1,7 @@
 #include <ShaderUtils/CBuffers.hlsli>
 
+#include "RS.hlsl"
+
 #define NUM_PATCH_POINTS 3
 #define HEIGHT_SCALE 0.05f
 
@@ -33,6 +35,7 @@ struct Output {
 	float2 mTexCoordO : TEXCOORD0;
 };
 
+[RootSignature(RS)]
 [domain("tri")]
 Output main(const HullShaderConstantOutput HSConstantOutput, const float3 uvw : SV_DomainLocation, const OutputPatch <Input, NUM_PATCH_POINTS> patch) {
 	Output output = (Output)0;

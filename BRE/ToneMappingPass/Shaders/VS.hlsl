@@ -1,5 +1,7 @@
 #include <ShaderUtils/CBuffers.hlsli>
 
+#include "RS.hlsl"
+
 struct Input {
 	uint mVertexId : SV_VertexID;
 };
@@ -18,6 +20,7 @@ struct Output {
 	float4 mPosH : SV_POSITION;
 };
 
+[RootSignature(RS)]
 Output main(in const Input input) {
 	Output output;
 

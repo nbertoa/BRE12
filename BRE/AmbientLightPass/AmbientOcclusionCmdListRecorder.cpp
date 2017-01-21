@@ -65,7 +65,7 @@ namespace {
 			// oriented along the z axis
 			const float x = MathUtils::RandF(-1.0f, 1.0f);
 			const float y = MathUtils::RandF(-1.0f, 1.0f);
-			const float z = MathUtils::RandF(0.0f, 1.0f);
+			const float z = MathUtils::RandF(-1.0f, 0.0f);
 			elem = XMFLOAT4(x, y, z, 0.0f);
 			vec = XMLoadFloat4(&elem);
 			vec = XMVector4Normalize(vec);
@@ -73,7 +73,7 @@ namespace {
 			// Accelerating interpolation function to falloff 
 			// from the distance from the origin.
 			float scale = i / numSamplesF;
-			scale = MathUtils::Lerp(0.1f, 1.0f, scale * scale);
+			scale = MathUtils::Lerp(0.5f, 1.0f, scale);
 			vec = XMVectorScale(vec, scale);
 			XMStoreFloat4(&elem, vec);
 		}
@@ -204,11 +204,11 @@ void AmbientOcclusionCmdListRecorder::Init(
 
 	mAmbientAccessBufferCpuDesc = ambientAccessBufferCpuDesc;
 
-	mNumSamples = 14U;
+	mNumSamples = 128U;
 	std::vector<XMFLOAT4> sampleKernel;
-	GenerateSampleKernel(sampleKernel);
+	GenerateSampleKernel(mNumSamples, sampleKernel);
 	std::vector<XMFLOAT4> noises;
-	GenerateNoise(noises);
+	GenerateNoise(mNumSamples, noises);
 	BuildBuffers(sampleKernel.data(), noises.data(), normalSmoothnessBuffer, depthBuffer);
 
 	ASSERT(ValidateData());
@@ -347,7 +347,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	// read by a shader.
 	//
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[0] };
+	/*ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[0] };
 	ASSERT(cmdAlloc != nullptr);
 	CHECK_HR(cmdAlloc->Reset());
 	CHECK_HR(mCmdList->Reset(cmdAlloc, nullptr));
@@ -361,7 +361,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	mCmdList->ResourceBarrier(_countof(barriers), barriers);
 
 	mCmdList->Close();
-	mCmdListQueue.push(mCmdList);
+	mCmdListQueue.push(mCmdList);*/
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };

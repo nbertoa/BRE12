@@ -1,5 +1,7 @@
 #include <ShaderUtils/CBuffers.hlsli>
 
+#include "RS.hlsl"
+
 struct Input {
 	float3 mPosO : POSITION;
 	float3 mNormalO : NORMAL;
@@ -15,6 +17,7 @@ struct Output {
 	float3 mPosO : POS_VIEW;
 };
 
+[RootSignature(RS)]
 Output main(in const Input input) {
 	const float4x4 vp = mul(gFrameCBuffer.mV, gFrameCBuffer.mP);
 

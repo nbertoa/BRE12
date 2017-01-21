@@ -3,6 +3,8 @@
 #include <ShaderUtils/Lights.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
+#include "RS.hlsl"
+
 struct Input {
 	float4 mPosH : SV_POSITION;
 	float3 mViewRayV : VIEW_RAY;
@@ -19,6 +21,7 @@ struct Output {
 	float4 mColor : SV_Target0;
 };
 
+[RootSignature(RS)]
 Output main(const in Input input) {
 	Output output = (Output)0;
 

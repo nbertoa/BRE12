@@ -1,5 +1,7 @@
 #include <ShaderUtils/Utils.hlsli>
 
+#include "RS.hlsl"
+
 #define BLUR_SIZE 4
 
 struct Input {
@@ -14,6 +16,7 @@ struct Output {
 	float mBlur : SV_Target0;
 };
 
+[RootSignature(RS)]
 Output main(const in Input input){
 	Output output = (Output)0;
 

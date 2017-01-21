@@ -2,6 +2,8 @@
 #include <ShaderUtils/Material.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
+#include "RS.hlsl"
+
 struct Input {
 	float4 mPosH : SV_Position;
 	float3 mPosW : POS_WORLD;
@@ -27,6 +29,7 @@ struct Output {
 	float4 mBaseColor_MetalMask : SV_Target1;
 };
 
+[RootSignature(RS)]
 Output main(const in Input input) {
 	Output output = (Output)0;
 

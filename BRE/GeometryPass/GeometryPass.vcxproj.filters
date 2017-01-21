@@ -138,4 +138,7 @@
       <Filter>Shaders\ColorMapping</Filter>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

@@ -8,6 +8,7 @@
     <None Include="Utils.hlsli" />
     <None Include="AmbientOcclusion.hlsli" />
     <None Include="Fxaa.hlsli" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CBuffers.h" />
