@@ -48,7 +48,7 @@ std::size_t ShaderManager::LoadShaderFile(const char* filename, ID3DBlob* &blob)
 	blob = LoadBlob(filename);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	BlobById::accessor accessor;
 #ifdef _DEBUG
 	mBlobById.find(accessor, id);
@@ -69,7 +69,7 @@ std::size_t ShaderManager::LoadShaderFile(const char* filename, D3D12_SHADER_BYT
 	blob = LoadBlob(filename);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	BlobById::accessor accessor;
 #ifdef _DEBUG
 	mBlobById.find(accessor, id);

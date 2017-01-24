@@ -49,7 +49,7 @@ void PostProcessCmdListRecorder::InitPSO() noexcept {
 	// Build pso and root signature
 	PSOCreator::PSOParams psoParams{};
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
-	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
+	psoParams.mDepthStencilDesc = D3DFactory::GetDisabledDepthStencilDesc();
 	psoParams.mPSFilename = "PostProcessPass/Shaders/PS.cso";
 	psoParams.mRootSignFilename = "PostProcessPass/Shaders/RS.cso";
 	psoParams.mVSFilename = "PostProcessPass/Shaders/VS.cso";

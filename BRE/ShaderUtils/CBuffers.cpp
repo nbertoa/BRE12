@@ -5,10 +5,10 @@ const FrameCBuffer& FrameCBuffer::operator=(const FrameCBuffer& instance) {
 		return *this;
 	}
 	
-	mView = instance.mView;
-	mInvView = instance.mInvView;
-	mProj = instance.mProj;
-	mInvProj = instance.mInvProj;
+	mViewMatrix = instance.mViewMatrix;
+	mInverseViewMatrix = instance.mInverseViewMatrix;
+	mProjectionMatrix = instance.mProjectionMatrix;
+	mInverseProjectionMatrix = instance.mInverseProjectionMatrix;
 	mEyePosW = instance.mEyePosW;
 
 	return *this;

@@ -37,7 +37,7 @@ void HeightCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, co
 	PSOCreator::PSOParams psoParams{};
 	psoParams.mDSFilename = "GeometryPass/Shaders/HeightMapping/DS.cso";
 	psoParams.mHSFilename = "GeometryPass/Shaders/HeightMapping/HS.cso";
-	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+	psoParams.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
 	psoParams.mPSFilename = "GeometryPass/Shaders/HeightMapping/PS.cso";
 	psoParams.mRootSignFilename = "GeometryPass/Shaders/HeightMapping/RS.cso";
 	psoParams.mVSFilename = "GeometryPass/Shaders/HeightMapping/VS.cso";

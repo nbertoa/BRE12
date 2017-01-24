@@ -41,7 +41,9 @@ void Mouse::Update() {
 	ASSERT(mDevice != nullptr);
 
 	memcpy(&mLastState, &mCurrentState, sizeof(mCurrentState));
-	if (FAILED(mDevice->GetDeviceState(sizeof(mCurrentState), &mCurrentState)) && SUCCEEDED(mDevice->Acquire()) && FAILED(mDevice->GetDeviceState(sizeof(mCurrentState), &mCurrentState))) {
+	if (FAILED(mDevice->GetDeviceState(sizeof(mCurrentState), &mCurrentState)) && 
+		SUCCEEDED(mDevice->Acquire()) && 
+		FAILED(mDevice->GetDeviceState(sizeof(mCurrentState), &mCurrentState))) {
 		return;
 	}
 

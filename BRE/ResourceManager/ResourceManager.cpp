@@ -43,7 +43,7 @@ std::size_t ResourceManager::LoadTextureFromFile(
 	CHECK_HR(DirectX::CreateDDSTextureFromFile12(&DirectXManager::Device(), &cmdList, filePathW.c_str(), resource, uploadBuffer));
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	ResourceById::accessor accessor;
 #ifdef _DEBUG
 	mResourceById.find(accessor, id);
@@ -120,7 +120,7 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 	cmdList.ResourceBarrier(1, &resBarrier);
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	ResourceById::accessor accessor;
 #ifdef _DEBUG
 	mResourceById.find(accessor, id);
@@ -145,7 +145,7 @@ std::size_t ResourceManager::CreateCommittedResource(
 	CHECK_HR(DirectXManager::Device().CreateCommittedResource(&heapProps, heapFlags, &resDesc, resStates, clearValue, IID_PPV_ARGS(&res)));
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	ResourceById::accessor accessor;
 #ifdef _DEBUG
 	mResourceById.find(accessor, id);
@@ -165,7 +165,7 @@ std::size_t ResourceManager::CreateFence(const std::uint64_t initValue, const D3
 	CHECK_HR(DirectXManager::Device().CreateFence(initValue, flags, IID_PPV_ARGS(&fence)));
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	FenceById::accessor accessor;
 #ifdef _DEBUG
 	mFenceById.find(accessor, id);
@@ -179,7 +179,7 @@ std::size_t ResourceManager::CreateFence(const std::uint64_t initValue, const D3
 }
 
 std::size_t ResourceManager::CreateUploadBuffer(const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept {
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	UploadBufferById::accessor accessor;
 #ifdef _DEBUG
 	mUploadBufferById.find(accessor, id);

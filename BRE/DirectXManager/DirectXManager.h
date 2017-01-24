@@ -18,7 +18,7 @@ public:
 
 	static void InitDirect3D(const HINSTANCE hInstance) noexcept;
 
-	__forceinline static HWND Hwnd() noexcept { return mHwnd; }
+	__forceinline static HWND WindowHandle() noexcept { return mHwnd; }
 	__forceinline static IDXGIFactory4& Factory() noexcept { ASSERT(mDxgiFactory.Get() != nullptr); return *mDxgiFactory.Get(); }
 	__forceinline static ID3D12Device& Device() noexcept { ASSERT(mDevice.Get() != nullptr); return *mDevice.Get(); }
 	__forceinline static std::size_t GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE descHeapType) {

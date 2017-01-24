@@ -31,8 +31,8 @@ void PunctualLightCmdListRecorder::InitPSO() noexcept {
 	// Build pso and root signature
 	PSOCreator::PSOParams psoParams{};
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
-	psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
-	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
+	psoParams.mBlendDesc = D3DFactory::GetAlwaysBlendDesc();
+	psoParams.mDepthStencilDesc = D3DFactory::GetDisabledDepthStencilDesc();
 	psoParams.mGSFilename = "LightingPass/Shaders/PunctualLight/GS.cso";
 	psoParams.mPSFilename = "LightingPass/Shaders/PunctualLight/PS.cso";
 	psoParams.mRootSignFilename = "LightingPass/Shaders/PunctualLight/RS.cso";

@@ -61,7 +61,7 @@ void SkyBoxCmdListRecorder::InitPSO() noexcept {
 	// Otherwise, the normalized depth values at z = 1 (NDC) will 
 	// fail the depth test if the depth buffer was cleared to 1.
 	psoParams.mDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+	psoParams.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
 	psoParams.mPSFilename = "SkyBoxPass/Shaders/PS.cso";
 	psoParams.mRootSignFilename = "SkyBoxPass/Shaders/RS.cso";
 	psoParams.mVSFilename = "SkyBoxPass/Shaders/VS.cso";

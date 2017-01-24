@@ -2,96 +2,102 @@
 
 using namespace DirectX;
 
-void Camera::SetLens(const float fovY, const float aspect, const float zn, const float zf) noexcept {
-	const XMMATRIX proj{ XMMatrixPerspectiveFovLH(fovY, aspect, zn, zf) };
-	XMStoreFloat4x4(&mProj, proj);
-	XMStoreFloat4x4(&mInvProj, DirectX::XMMatrixInverse(nullptr, proj));
+void Camera::SetFrustum(const float verticalFieldOfView,
+						const float aspectRatio,
+						const float nearPlaneZ,
+						const float farPlaneZ) noexcept 
+{
+	const XMMATRIX projectionMatrix{ XMMatrixPerspectiveFovLH(verticalFieldOfView, aspectRatio, nearPlaneZ, farPlaneZ) };
+	XMStoreFloat4x4(&mProjectionMatrix, projectionMatrix);
+	XMStoreFloat4x4(&mInverseProjectionMatrix, DirectX::XMMatrixInverse(nullptr, projectionMatrix));
 }
 
-void Camera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3& up) noexcept {
-	const XMVECTOR posVec( XMLoadFloat3(&pos) );
-	const XMVECTOR targetVec( XMLoadFloat3(&target) );
-	XMVECTOR upVec( XMLoadFloat3(&up) );
+void Camera::SetLookAndUpVectors(const DirectX::XMFLOAT3& cameraPosition,
+								 const DirectX::XMFLOAT3& targetPosition,
+								 const DirectX::XMFLOAT3& upVector) noexcept 
+{
+	const XMVECTOR xmCameraPosition( XMLoadFloat3(&cameraPosition) );
+	const XMVECTOR xmTargetPosition( XMLoadFloat3(&targetPosition) );
+	XMVECTOR xmUpVector( XMLoadFloat3(&upVector) );
 
-	const XMVECTOR lookVec(XMVector3Normalize(XMVectorSubtract(targetVec, posVec)));
-	const XMVECTOR rightVec(XMVector3Normalize(XMVector3Cross(upVec, lookVec)));
-	upVec = XMVector3Cross(lookVec, rightVec);
+	const XMVECTOR lookVector(XMVector3Normalize(XMVectorSubtract(xmTargetPosition, xmCameraPosition)));
+	const XMVECTOR rightVector(XMVector3Normalize(XMVector3Cross(xmUpVector, lookVector)));
+	xmUpVector = XMVector3Cross(lookVector, rightVector);
 
-	XMStoreFloat3(&mPosition, posVec);
-	XMStoreFloat3(&mLook, lookVec);
-	XMStoreFloat3(&mRight, rightVec);
-	XMStoreFloat3(&mUp, upVec);
+	XMStoreFloat3(&mPosition, xmCameraPosition);
+	XMStoreFloat3(&mLookVector, lookVector);
+	XMStoreFloat3(&mRightVector, rightVector);
+	XMStoreFloat3(&mUpVector, xmUpVector);
 }
 
-void Camera::Strafe(const float dist) noexcept {
+void Camera::Strafe(const float distance) noexcept {
 	// velocity += right * dist 
-	XMVECTOR r(XMLoadFloat3(&mRight));
-	r = DirectX::XMVectorScale(r, dist);
-	DirectX::XMVECTOR vel = DirectX::XMLoadFloat3(&mVelocity);
-	vel = DirectX::XMVectorAdd(vel, r);
-	DirectX::XMStoreFloat3(&mVelocity, vel);
+	XMVECTOR rightVector(XMLoadFloat3(&mRightVector));
+	rightVector = DirectX::XMVectorScale(rightVector, distance);
+	DirectX::XMVECTOR velocityVector = DirectX::XMLoadFloat3(&mVelocityVector);
+	velocityVector = DirectX::XMVectorAdd(velocityVector, rightVector);
+	DirectX::XMStoreFloat3(&mVelocityVector, velocityVector);
 }
 
-void Camera::Walk(const float dist) noexcept {
+void Camera::Walk(const float distance) noexcept {
 	// velocity += look * dist 
-	XMVECTOR l(XMLoadFloat3(&mLook));
-	l = DirectX::XMVectorScale(l, dist);
-	DirectX::XMVECTOR vel = DirectX::XMLoadFloat3(&mVelocity);
-	vel = DirectX::XMVectorAdd(vel, l);
-	DirectX::XMStoreFloat3(&mVelocity, vel);
+	XMVECTOR lookVector(XMLoadFloat3(&mLookVector));
+	lookVector = DirectX::XMVectorScale(lookVector, distance);
+	DirectX::XMVECTOR velocityVector = DirectX::XMLoadFloat3(&mVelocityVector);
+	velocityVector = DirectX::XMVectorAdd(velocityVector, lookVector);
+	DirectX::XMStoreFloat3(&mVelocityVector, velocityVector);
 }
 
-void Camera::Pitch(const float angle) noexcept {
+void Camera::Pitch(const float angleInRadians) noexcept {
 	// Rotate up and look vector about the right vector.
-	const XMMATRIX R(XMMatrixRotationAxis(XMLoadFloat3(&mRight), angle));
-	XMStoreFloat3(&mUp, XMVector3TransformNormal(XMLoadFloat3(&mUp), R));
-	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
+	const XMMATRIX rightVector(XMMatrixRotationAxis(XMLoadFloat3(&mRightVector), angleInRadians));
+	XMStoreFloat3(&mUpVector, XMVector3TransformNormal(XMLoadFloat3(&mUpVector), rightVector));
+	XMStoreFloat3(&mLookVector, XMVector3TransformNormal(XMLoadFloat3(&mLookVector), rightVector));
 }
 
-void Camera::RotateY(const float angle) noexcept {
+void Camera::RotateY(const float angleInRadians) noexcept {
 	// Rotate the basis vectors about the world y-axis.
-	const XMMATRIX R(XMMatrixRotationY(angle));
-	XMStoreFloat3(&mRight, XMVector3TransformNormal(XMLoadFloat3(&mRight), R));
-	XMStoreFloat3(&mUp, XMVector3TransformNormal(XMLoadFloat3(&mUp), R));
-	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
+	const XMMATRIX rotationYMatrix(XMMatrixRotationY(angleInRadians));
+	XMStoreFloat3(&mRightVector, XMVector3TransformNormal(XMLoadFloat3(&mRightVector), rotationYMatrix));
+	XMStoreFloat3(&mUpVector, XMVector3TransformNormal(XMLoadFloat3(&mUpVector), rotationYMatrix));
+	XMStoreFloat3(&mLookVector, XMVector3TransformNormal(XMLoadFloat3(&mLookVector), rotationYMatrix));
 }
 
-void Camera::UpdateViewMatrix(const float deltaTime) noexcept {
+void Camera::UpdateViewMatrix(const float elapsedFrameTime) noexcept {
 	static float maxVelocitySpeed{ 100.0f }; // speed = velocity magnitude
 	static float velocityDamp{ 0.1f }; // fraction of velocity retained per second
 
 	// Clamp velocity
-	XMVECTOR vel = XMLoadFloat3(&mVelocity);
-	const float velLen = XMVectorGetX(XMVector3Length(vel));
-	const float velocitySpeed = MathUtils::Clamp(velLen, 0.0f, maxVelocitySpeed);
+	XMVECTOR velocityVector = XMLoadFloat3(&mVelocityVector);
+	const float velocityLength = XMVectorGetX(XMVector3Length(velocityVector));
+	const float velocitySpeed = MathUtils::Clamp(velocityLength, 0.0f, maxVelocitySpeed);
 	if (velocitySpeed > 0.0f) {
-		vel = XMVector3Normalize(vel) * velocitySpeed;
+		velocityVector = XMVector3Normalize(velocityVector) * velocitySpeed;
 	}
 
 	// Apply velocity and pitch-way-roll
-	XMVECTOR pos = XMLoadFloat3(&mPosition);
-	pos = pos + vel * deltaTime;
+	XMVECTOR position = XMLoadFloat3(&mPosition);
+	position = position + velocityVector * elapsedFrameTime;
 	
 	// Damp velocity
-	vel = vel * static_cast<float>(pow(velocityDamp, deltaTime));
+	velocityVector = velocityVector * static_cast<float>(pow(velocityDamp, elapsedFrameTime));
 	
 	// Keep camera's axes orthogonal to each other and of unit length.
-	XMVECTOR right(XMLoadFloat3(&mRight));
-	XMVECTOR look(XMLoadFloat3(&mLook));
-	look = XMVector3Normalize(look);
-	XMVECTOR up = XMVector3Normalize(XMVector3Cross(look, right));
+	XMVECTOR rightVector(XMLoadFloat3(&mRightVector));
+	XMVECTOR lookVector(XMLoadFloat3(&mLookVector));
+	lookVector = XMVector3Normalize(lookVector);
+	XMVECTOR upVector = XMVector3Normalize(XMVector3Cross(lookVector, rightVector));
 
-	// U, L already orthonormal, so no need to normalize cross product.
-	right = XMVector3Cross(up, look);
+	// Up vector and look vector are already orthonormal, so no need to normalize cross product.
+	rightVector = XMVector3Cross(upVector, lookVector);
 
-	XMStoreFloat3(&mRight, right);
-	XMStoreFloat3(&mUp, up);
-	XMStoreFloat3(&mLook, look);
+	XMStoreFloat3(&mRightVector, rightVector);
+	XMStoreFloat3(&mUpVector, upVector);
+	XMStoreFloat3(&mLookVector, lookVector);
+	XMStoreFloat3(&mPosition, position);
+	XMStoreFloat3(&mVelocityVector, velocityVector);
 
-	XMMATRIX viewMatrix = XMMatrixLookToLH(pos, look, up);
-	XMStoreFloat4x4(&mView, viewMatrix);
-	XMStoreFloat4x4(&mInvView, DirectX::XMMatrixInverse(nullptr, viewMatrix));
-
-	XMStoreFloat3(&mPosition, pos);
-	XMStoreFloat3(&mVelocity, vel);
+	XMMATRIX viewMatrix = XMMatrixLookToLH(position, lookVector, upVector);
+	XMStoreFloat4x4(&mViewMatrix, viewMatrix);
+	XMStoreFloat4x4(&mInverseViewMatrix, DirectX::XMMatrixInverse(nullptr, viewMatrix));
 }

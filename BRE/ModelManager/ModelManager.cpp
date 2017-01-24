@@ -31,7 +31,7 @@ std::size_t ModelManager::LoadModel(
 	model = new Model(filename, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	ModelById::accessor accessor;
 #ifdef _DEBUG
 	mModelById.find(accessor, id);
@@ -60,7 +60,7 @@ std::size_t ModelManager::CreateBox(
 	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	ModelById::accessor accessor;
 #ifdef _DEBUG
 	mModelById.find(accessor, id);
@@ -88,7 +88,7 @@ std::size_t ModelManager::CreateSphere(
 	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	ModelById::accessor accessor;
 #ifdef _DEBUG
 	mModelById.find(accessor, id);
@@ -115,7 +115,7 @@ std::size_t ModelManager::CreateGeosphere(
 	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	ModelById::accessor accessor;
 #ifdef _DEBUG
 	mModelById.find(accessor, id);
@@ -145,7 +145,7 @@ std::size_t ModelManager::CreateCylinder(
 	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	ModelById::accessor accessor;
 #ifdef _DEBUG
 	mModelById.find(accessor, id);
@@ -173,7 +173,7 @@ std::size_t ModelManager::CreateGrid(
 	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	ModelById::accessor accessor;
 #ifdef _DEBUG
 	mModelById.find(accessor, id);
@@ -203,7 +203,7 @@ std::size_t ModelManager::CreateQuad(
 	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	ModelById::accessor accessor;
 #ifdef _DEBUG
 	mModelById.find(accessor, id);
@@ -229,7 +229,7 @@ std::size_t ModelManager::CreateFullscreenQuad(
 	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	ModelById::accessor accessor;
 #ifdef _DEBUG
 	mModelById.find(accessor, id);

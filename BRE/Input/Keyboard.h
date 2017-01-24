@@ -7,6 +7,9 @@
 class Keyboard {
 public:
 	static Keyboard& Create(IDirectInput8& directInput, const HWND windowHandle) noexcept;
+
+	// Preconditions:
+	// - Create() method must be called before.
 	static Keyboard& Get() noexcept;
 
 	~Keyboard();
@@ -15,15 +18,14 @@ public:
 	Keyboard(Keyboard&&) = delete;
 	Keyboard& operator=(Keyboard&&) = delete;
 
-	// You should call update in each frame
 	void Update() noexcept;
 
-	__forceinline const std::uint8_t* CurrentState() const noexcept { return mCurrentState; }
-	__forceinline const std::uint8_t* LastState() const noexcept { return mLastState; }
-	__forceinline bool IsKeyUp(const std::uint8_t key) const noexcept { return (mCurrentState[key] & 0x80) == 0U; }
-	__forceinline bool IsKeyDown(const std::uint8_t key) const noexcept { return (mCurrentState[key] & 0x80) != 0U; }
-	__forceinline bool WasKeyUp(const std::uint8_t key) const noexcept { return (mLastState[key] & 0x80) == 0U; }
-	__forceinline bool WasKeyDown(const std::uint8_t key) const noexcept { return (mLastState[key] & 0x80) != 0U; }
+	__forceinline const std::uint8_t* GetKeysCurrentState() const noexcept { return mKeysCurrentState; }
+	__forceinline const std::uint8_t* GetKeysLastState() const noexcept { return mKeysLastState; }
+	__forceinline bool IsKeyUp(const std::uint8_t key) const noexcept { return (mKeysCurrentState[key] & 0x80) == 0U; }
+	__forceinline bool IsKeyDown(const std::uint8_t key) const noexcept { return (mKeysCurrentState[key] & 0x80) != 0U; }
+	__forceinline bool WasKeyUp(const std::uint8_t key) const noexcept { return (mKeysLastState[key] & 0x80) == 0U; }
+	__forceinline bool WasKeyDown(const std::uint8_t key) const noexcept { return (mKeysLastState[key] & 0x80) != 0U; }
 	__forceinline bool WasKeyPressedThisFrame(const std::uint8_t key) const noexcept { return IsKeyDown(key) && WasKeyUp(key); }
 	__forceinline bool WasKeyReleasedThisFrame(const std::uint8_t key) const noexcept { return IsKeyUp(key) && WasKeyDown(key); }
 	__forceinline bool IsKeyHeldDown(const std::uint8_t key) const noexcept { return IsKeyDown(key) && WasKeyDown(key); }
@@ -31,8 +33,10 @@ public:
 private:
 	explicit Keyboard(IDirectInput8& directInput, const HWND windowHandle);
 
+	static const uint32_t sNumKeys = 256U;
+
 	IDirectInput8& mDirectInput;
 	LPDIRECTINPUTDEVICE8 mDevice{ nullptr };
-	std::uint8_t mCurrentState[256U] = {};
-	std::uint8_t mLastState[256U] = {};
+	std::uint8_t mKeysCurrentState[sNumKeys] = {};
+	std::uint8_t mKeysLastState[sNumKeys] = {};
 };

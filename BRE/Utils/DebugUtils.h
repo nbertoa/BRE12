@@ -16,13 +16,14 @@
 #ifndef CHECK_HR
 #define CHECK_HR(x) \
 { \
-    const HRESULT hr__ = (x);                                               \
-	if (FAILED(hr__)) { \
-		const std::wstring wfn = StringUtils::AnsiToWString(__FILE__); \
-		_com_error err(hr__); \
-		const std::wstring msg = err.ErrorMessage(); \
-		const std::wstring outputMsg = L" failed in " + wfn + L"; line " + std::to_wstring(__LINE__) + L"; error: " + msg; \
-		MessageBox(0, outputMsg.c_str(), 0, 0); \
+    const HRESULT __hr__ = (x);                                               \
+	if (FAILED(__hr__)) { \
+		const std::wstring fileName = StringUtils::AnsiToWString(__FILE__); \
+		_com_error err(__hr__); \
+		const std::wstring lineNumberString = std::to_wstring(__LINE__); \
+		const std::wstring errorMessage = err.ErrorMessage(); \
+		const std::wstring outputMessage = L" failed in " + fileName + L"; line " + lineNumberString + L"; error: " + errorMessage; \
+		MessageBox(0, outputMessage.c_str(), 0, 0); \
 		abort(); \
 	} \
 }

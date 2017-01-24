@@ -3,14 +3,14 @@
 #include "DebugUtils.h"
 
 namespace HashUtils {
-	std::size_t HashCString(const char* p) noexcept {
-		ASSERT(p != nullptr);
-		std::size_t hash = 0UL;
-		while (*p != '\0') {
-			hash ^= *p + 0x9e3779b9 + (hash << 6UL) + (hash >> 2UL);
-			++p;
+	std::size_t HashCString(const char* str) noexcept {
+		ASSERT(str != nullptr);
+		std::size_t hashValue = 0UL;
+		while (*str != '\0') {
+			hashValue ^= *str + 0x9e3779b9 + (hashValue << 6UL) + (hashValue >> 2UL);
+			++str;
 		}
 
-		return hash;
+		return hashValue;
 	}
 }

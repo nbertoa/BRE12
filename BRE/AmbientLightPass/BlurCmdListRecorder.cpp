@@ -49,7 +49,7 @@ void BlurCmdListRecorder::InitPSO() noexcept {
 	// Build pso and root signature
 	PSOCreator::PSOParams psoParams{};
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
-	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
+	psoParams.mDepthStencilDesc = D3DFactory::GetDisabledDepthStencilDesc();
 	psoParams.mPSFilename = "AmbientLightPass/Shaders/Blur/PS.cso";
 	psoParams.mRootSignFilename = "AmbientLightPass/Shaders/Blur/RS.cso";
 	psoParams.mVSFilename = "AmbientLightPass/Shaders/Blur/VS.cso";

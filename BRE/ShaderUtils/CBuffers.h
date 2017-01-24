@@ -26,10 +26,10 @@ struct FrameCBuffer {
 	FrameCBuffer(FrameCBuffer&&) = default;
 	FrameCBuffer& operator=(FrameCBuffer&&) = default;
 		
-	DirectX::XMFLOAT4X4 mView{ MathUtils::Identity4x4() };
-	DirectX::XMFLOAT4X4 mInvView{ MathUtils::Identity4x4() };
-	DirectX::XMFLOAT4X4 mProj{ MathUtils::Identity4x4() };
-	DirectX::XMFLOAT4X4 mInvProj{ MathUtils::Identity4x4() };	
+	DirectX::XMFLOAT4X4 mViewMatrix{ MathUtils::Identity4x4() };
+	DirectX::XMFLOAT4X4 mInverseViewMatrix{ MathUtils::Identity4x4() };
+	DirectX::XMFLOAT4X4 mProjectionMatrix{ MathUtils::Identity4x4() };
+	DirectX::XMFLOAT4X4 mInverseProjectionMatrix{ MathUtils::Identity4x4() };	
 	DirectX::XMFLOAT4 mEyePosW{ 0.0f, 0.0f, 0.0f, 1.0f };
 };
 

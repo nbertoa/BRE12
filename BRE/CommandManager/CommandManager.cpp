@@ -26,7 +26,7 @@ std::size_t CommandManager::CreateCmdQueue(const D3D12_COMMAND_QUEUE_DESC& desc,
 	CHECK_HR(DirectXManager::Device().CreateCommandQueue(&desc, IID_PPV_ARGS(&cmdQueue)));
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	CmdQueueById::accessor accessor;
 #ifdef _DEBUG
 	mCmdQueueById.find(accessor, id);
@@ -44,7 +44,7 @@ std::size_t CommandManager::CreateCmdList(const D3D12_COMMAND_LIST_TYPE& type, I
 	CHECK_HR(DirectXManager::Device().CreateCommandList(0U, type, &cmdAlloc, nullptr, IID_PPV_ARGS(&cmdList)));
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	CmdListById::accessor accessor;
 #ifdef _DEBUG
 	mCmdListById.find(accessor, id);
@@ -62,7 +62,7 @@ std::size_t CommandManager::CreateCmdAlloc(const D3D12_COMMAND_LIST_TYPE& type, 
 	CHECK_HR(DirectXManager::Device().CreateCommandAllocator(type, IID_PPV_ARGS(&cmdAlloc)));
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	CmdAllocById::accessor accessor;
 #ifdef _DEBUG
 	mCmdAllocById.find(accessor, id);

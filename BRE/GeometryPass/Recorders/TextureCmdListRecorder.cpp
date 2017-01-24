@@ -32,7 +32,7 @@ void TextureCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, c
 
 	// Build pso and root signature
 	PSOCreator::PSOParams psoParams{};
-	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+	psoParams.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
 	psoParams.mPSFilename = "GeometryPass/Shaders/TextureMapping/PS.cso";
 	psoParams.mRootSignFilename = "GeometryPass/Shaders/TextureMapping/RS.cso";
 	psoParams.mVSFilename = "GeometryPass/Shaders/TextureMapping/VS.cso";

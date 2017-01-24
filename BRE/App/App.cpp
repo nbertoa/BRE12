@@ -19,11 +19,17 @@
 using namespace DirectX;
 
 namespace {
-	void InitSystems(const HWND hwnd, const HINSTANCE hInstance) noexcept {
+	void InitSystems(const HWND windowHandle, 
+					 const HINSTANCE moduleInstanceHandle) noexcept 
+	{
 		LPDIRECTINPUT8 directInput;
-		CHECK_HR(DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, reinterpret_cast<LPVOID*>(&directInput), nullptr));
-		Keyboard::Create(*directInput, hwnd);
-		Mouse::Create(*directInput, hwnd);
+		CHECK_HR(DirectInput8Create(moduleInstanceHandle, 
+									DIRECTINPUT_VERSION, 
+									IID_IDirectInput8, 
+									reinterpret_cast<LPVOID*>(&directInput), 
+									nullptr));
+		Keyboard::Create(*directInput, windowHandle);
+		Mouse::Create(*directInput, windowHandle);
 
 		CommandManager::Create();
 		DescriptorManager::Create();
@@ -38,13 +44,7 @@ namespace {
 		//ShowCursor(false);
 	}
 
-	void InitMasterRenderTask(const HWND hwnd, Scene* scene, MasterRender* &masterRender) noexcept {
-		ASSERT(scene != nullptr);
-		ASSERT(masterRender == nullptr);
-		masterRender = MasterRender::Create(hwnd,  scene);
-	}
-
-	void Update() noexcept {
+	void UpdateKeyboardAndMouse() noexcept {
 		Keyboard::Get().Update();
 		Mouse::Get().Update();
 		if (Keyboard::Get().IsKeyDown(DIK_ESCAPE)) {
@@ -54,19 +54,18 @@ namespace {
 
 	// Runs program until Escape key is pressed.
 	std::int32_t RunMessageLoop() noexcept {
-		// Message loop
-		MSG msg{ nullptr };
-		while (msg.message != WM_QUIT) {
-			if (PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE)) {
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
+		MSG message{ nullptr };
+		while (message.message != WM_QUIT) {
+			if (PeekMessage(&message, nullptr, 0U, 0U, PM_REMOVE)) {
+				TranslateMessage(&message);
+				DispatchMessage(&message);
 			}
 			else {
-				Update();
+				UpdateKeyboardAndMouse();
 			}
 		}
 
-		return static_cast<std::int32_t>(msg.wParam);
+		return static_cast<std::int32_t>(message.wParam);
 	}
 }
 
@@ -77,13 +76,14 @@ App::App(HINSTANCE hInstance, Scene* scene)
 {	
 	ASSERT(scene != nullptr);
 	DirectXManager::InitDirect3D(hInstance);
-	InitSystems(DirectXManager::Hwnd(), hInstance);
-	InitMasterRenderTask(DirectXManager::Hwnd(), scene, mMasterRender);
+	InitSystems(DirectXManager::WindowHandle(), hInstance);
+	mMasterRender = MasterRender::Create(DirectXManager::WindowHandle(), scene);
 
 	RunMessageLoop();
 }
 
-App::~App() {	ASSERT(mMasterRender != nullptr);
+App::~App() {	
+	ASSERT(mMasterRender != nullptr);
 	mMasterRender->Terminate();
 	mTaskSchedulerInit.terminate();
 }

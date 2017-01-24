@@ -25,7 +25,7 @@ std::size_t PSOManager::CreateGraphicsPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DE
 	CHECK_HR(DirectXManager::Device().CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
 	mMutex.unlock();
 	
-	const std::size_t id{ NumberGeneration::IncrementalSizeT() };
+	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
 	PSOById::accessor accessor;
 #ifdef _DEBUG
 	mPSOById.find(accessor, id);

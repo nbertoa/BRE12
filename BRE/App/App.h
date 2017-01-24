@@ -12,10 +12,10 @@
 class MasterRender;
 class Scene;
 
-// Its responsibility is to initialize Direct3D systems, mouse, keyboard, camera, MasterRender, etc
+// To initialize Direct3D systems, mouse, keyboard, camera, MasterRender, etc.
 class App {
 public:
-	explicit App(HINSTANCE hInstance, Scene* scene);
+	explicit App(HINSTANCE moduleInstanceHandle, Scene* scene);
 	~App();
 	App(const App&) = delete;
 	const App& operator=(const App&) = delete;
@@ -23,9 +23,10 @@ public:
 	App& operator=(App&&) = delete;
 	
 private:	
+	void InitMasterRenderTask(Scene* scene) noexcept;
+
 	// Needed by Intel TBB
 	tbb::task_scheduler_init mTaskSchedulerInit;
 
-	// Master render 
 	MasterRender* mMasterRender{ nullptr };
 };

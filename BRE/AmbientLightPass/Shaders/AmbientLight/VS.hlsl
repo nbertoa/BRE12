@@ -23,7 +23,7 @@ Output main(in const Input input) {
 
 	const float2 texCoordO = gTexCoords[input.mVertexId];
 
-	// Quad covering screen in NDC space.
+	// Quad covering screen in NDC space ([-1.0, 1.0] x [-1.0, 1.0] x [0.0, 1.0] x [1.0])
 	output.mPosH = float4(2.0f * texCoordO.x - 1.0f, 1.0f - 2.0f * texCoordO.y, 0.0f, 1.0f);
 	
 	return output;

@@ -40,7 +40,7 @@ public:
 
 	static const float sNearPlaneZ;
 	static const float sFarPlaneZ;
-	static const float sFieldOfView;
+	static const float sVerticalFieldOfView;
 
 	static const D3D12_VIEWPORT sScreenViewport;
 	static const D3D12_RECT sScissorRect;

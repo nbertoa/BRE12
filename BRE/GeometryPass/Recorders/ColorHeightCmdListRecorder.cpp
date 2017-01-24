@@ -36,7 +36,7 @@ void ColorHeightCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormat
 	PSOCreator::PSOParams psoParams{};
 	psoParams.mDSFilename = "GeometryPass/Shaders/ColorHeightMapping/DS.cso";
 	psoParams.mHSFilename = "GeometryPass/Shaders/ColorHeightMapping/HS.cso";
-	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+	psoParams.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
 	psoParams.mPSFilename = "GeometryPass/Shaders/ColorHeightMapping/PS.cso";
 	psoParams.mRootSignFilename = "GeometryPass/Shaders/ColorHeightMapping/RS.cso";
 	psoParams.mVSFilename = "GeometryPass/Shaders/ColorHeightMapping/VS.cso";

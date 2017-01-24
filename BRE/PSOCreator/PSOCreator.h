@@ -26,9 +26,9 @@ namespace PSOCreator {
 		const char* mHSFilename{ nullptr };
 		const char* mPSFilename{ nullptr };
 
-		D3D12_BLEND_DESC mBlendDesc = D3DFactory::DisabledBlendDesc();
-		D3D12_RASTERIZER_DESC mRasterizerDesc = D3DFactory::DefaultRasterizerDesc();
-		D3D12_DEPTH_STENCIL_DESC mDepthStencilDesc = D3DFactory::DefaultDepthStencilDesc();
+		D3D12_BLEND_DESC mBlendDesc = D3DFactory::GetDisabledBlendDesc();
+		D3D12_RASTERIZER_DESC mRasterizerDesc = D3DFactory::GetDefaultRasterizerDesc();
+		D3D12_DEPTH_STENCIL_DESC mDepthStencilDesc = D3DFactory::GetDefaultDepthStencilDesc();
 		std::uint32_t mNumRenderTargets{ 0U };
 		DXGI_FORMAT mRtFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{ DXGI_FORMAT_UNKNOWN };
 		DXGI_SAMPLE_DESC mSampleDesc{ 1U, 0U };

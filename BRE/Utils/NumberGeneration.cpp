@@ -4,15 +4,15 @@
 #include <random>
 
 namespace NumberGeneration {
-	std::size_t SizeTRand() noexcept {
-		static std::uniform_int_distribution<std::size_t> sDistribution{ 0UL, SIZE_MAX };
+	std::size_t GetRandomSizeT() noexcept {
+		static std::uniform_int_distribution<std::size_t> sUniformIntegerDistribution{ 0UL, SIZE_MAX };
 		static std::mt19937 sGenerator;
 
-		return sDistribution(sGenerator);
+		return sUniformIntegerDistribution(sGenerator);
 	}
 
-	std::size_t IncrementalSizeT() noexcept {
-		static std::atomic<std::size_t> n{ 0UL };
-		return n.fetch_add(1UL);
+	std::size_t GetIncrementalSizeT() noexcept {
+		static std::atomic<std::size_t> atomicSizeT{ 0UL };
+		return atomicSizeT.fetch_add(1UL);
 	}
 }

@@ -31,7 +31,7 @@ void ColorCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, con
 
 	// Build pso and root signature
 	PSOCreator::PSOParams psoParams{};
-	psoParams.mInputLayout = D3DFactory::PosNormalTangentTexCoordInputLayout();
+	psoParams.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
 	psoParams.mPSFilename = "GeometryPass/Shaders/ColorMapping/PS.cso";
 	psoParams.mRootSignFilename = "GeometryPass/Shaders/ColorMapping/RS.cso";
 	psoParams.mVSFilename = "GeometryPass/Shaders/ColorMapping/VS.cso";

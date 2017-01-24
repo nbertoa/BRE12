@@ -7,6 +7,9 @@
 class Mouse {
 public:
 	static Mouse& Create(IDirectInput8& directInput, const HWND windowHandle) noexcept;
+
+	// Preconditions:
+	// - Create() method must be called before
 	static Mouse& Get() noexcept;
 
 	enum MouseButton {
@@ -22,21 +25,20 @@ public:
 	Mouse(Mouse&&) = delete;
 	Mouse& operator=(Mouse&&) = delete;
 
-	// You should call update in each frame
 	void Update();
 
-	__forceinline const DIMOUSESTATE& CurrentState() const { return mCurrentState; }
-	__forceinline const DIMOUSESTATE& LastState() const { return mLastState; }
-	__forceinline std::int32_t X() const { return mX; }
-	__forceinline std::int32_t Y() const { return mY; }
-	__forceinline std::int32_t Wheel() const { return mWheel; }
-	__forceinline bool IsButtonUp(const MouseButton b) const { return (mCurrentState.rgbButtons[b] & 0x80) == 0; }
-	__forceinline bool IsButtonDown(const MouseButton b) const { return (mCurrentState.rgbButtons[b] & 0x80) != 0; }
-	__forceinline bool WasButtonUp(const MouseButton b) const { return (mLastState.rgbButtons[b] & 0x80) == 0; }
-	__forceinline bool WasButtonDown(const MouseButton b) const { return (mLastState.rgbButtons[b] & 0x80) != 0; }
-	__forceinline bool WasButtonPressedThisFrame(const MouseButton b) const { return IsButtonDown(b) && WasButtonUp(b); }
-	__forceinline bool WasButtonReleasedThisFrame(const MouseButton b) const { return IsButtonUp(b) && WasButtonDown(b); }
-	__forceinline bool IsButtonHeldDown(const MouseButton b) const { return IsButtonDown(b) && WasButtonDown(b); }
+	__forceinline const DIMOUSESTATE& GetCurrentState() const { return mCurrentState; }
+	__forceinline const DIMOUSESTATE& GetLastState() const { return mLastState; }
+	__forceinline std::int32_t GetX() const { return mX; }
+	__forceinline std::int32_t GetY() const { return mY; }
+	__forceinline std::int32_t GetWheel() const { return mWheel; }
+	__forceinline bool IsButtonUp(const MouseButton button) const { return (mCurrentState.rgbButtons[button] & 0x80) == 0; }
+	__forceinline bool IsButtonDown(const MouseButton button) const { return (mCurrentState.rgbButtons[button] & 0x80) != 0; }
+	__forceinline bool WasButtonUp(const MouseButton button) const { return (mLastState.rgbButtons[button] & 0x80) == 0; }
+	__forceinline bool WasButtonDown(const MouseButton button) const { return (mLastState.rgbButtons[button] & 0x80) != 0; }
+	__forceinline bool WasButtonPressedThisFrame(const MouseButton button) const { return IsButtonDown(button) && WasButtonUp(button); }
+	__forceinline bool WasButtonReleasedThisFrame(const MouseButton button) const { return IsButtonUp(button) && WasButtonDown(button); }
+	__forceinline bool IsButtonHeldDown(const MouseButton button) const { return IsButtonDown(button) && WasButtonDown(button); }
 
 private:
 	explicit Mouse(IDirectInput8& directInput, const HWND windowHandle);

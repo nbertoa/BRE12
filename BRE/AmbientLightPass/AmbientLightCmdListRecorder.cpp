@@ -49,8 +49,8 @@ void AmbientLightCmdListRecorder::InitPSO() noexcept {
 	// Build pso and root signature
 	PSOCreator::PSOParams psoParams{};
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
-	psoParams.mBlendDesc = D3DFactory::AlwaysBlendDesc();
-	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
+	psoParams.mBlendDesc = D3DFactory::GetAlwaysBlendDesc();
+	psoParams.mDepthStencilDesc = D3DFactory::GetDisabledDepthStencilDesc();
 	psoParams.mPSFilename = "AmbientLightPass/Shaders/AmbientLight/PS.cso";
 	psoParams.mRootSignFilename = "AmbientLightPass/Shaders/AmbientLight/RS.cso";
 	psoParams.mVSFilename = "AmbientLightPass/Shaders/AmbientLight/VS.cso";

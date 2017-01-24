@@ -39,13 +39,13 @@ namespace {
 
 		frameCBuffer.mEyePosW = camera.GetPosition4f();
 
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mView, MathUtils::GetTranspose(camera.GetView()));
-		DirectX::XMFLOAT4X4 inverse = camera.GetInvView();
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mInvView, MathUtils::GetTranspose(inverse));
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mViewMatrix, MathUtils::GetTranspose(camera.GetViewMatrix()));
+		DirectX::XMFLOAT4X4 inverse = camera.GetInverseViewMatrix();
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mInverseViewMatrix, MathUtils::GetTranspose(inverse));
 
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mProj, MathUtils::GetTranspose(camera.GetProj()));
-		inverse = camera.GetInvProj();
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mInvProj, MathUtils::GetTranspose(inverse));
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mProjectionMatrix, MathUtils::GetTranspose(camera.GetProjectionMatrix()));
+		inverse = camera.GetInverseProjectionMatrix();
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mInverseProjectionMatrix, MathUtils::GetTranspose(inverse));
 		
 		// Update camera based on keyboard
 		const float offset = translationDelta * (Keyboard::Get().IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f);
@@ -63,8 +63,8 @@ namespace {
 		}
 
 		// Update camera based on mouse
-		const std::int32_t x{ Mouse::Get().X() };
-		const std::int32_t y{ Mouse::Get().Y() };
+		const std::int32_t x{ Mouse::Get().GetX() };
+		const std::int32_t y{ Mouse::Get().GetY() };
 		if (Mouse::Get().IsButtonDown(Mouse::MouseButtonsLeft)) {
 			const float dx = static_cast<float>(x - lastXY[0]) / SettingsManager::sWindowWidth;
 			const float dy = static_cast<float>(y - lastXY[1]) / SettingsManager::sWindowHeight;
@@ -134,7 +134,7 @@ MasterRender::MasterRender(const HWND hwnd, Scene* scene)
 	CreateRtvAndDsv();
 	CreateColorBuffers();
 
-	mCamera.SetLens(SettingsManager::sFieldOfView, SettingsManager::AspectRatio(), SettingsManager::sNearPlaneZ, SettingsManager::sFarPlaneZ);
+	mCamera.SetFrustum(SettingsManager::sVerticalFieldOfView, SettingsManager::AspectRatio(), SettingsManager::sNearPlaneZ, SettingsManager::sFarPlaneZ);
 
 	// Create and spawn command list processor thread.
 	mCmdListExecutor = CommandListExecutor::Create(mCmdQueue, MAX_NUM_CMD_LISTS);

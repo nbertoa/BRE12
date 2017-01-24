@@ -20,7 +20,7 @@ const DXGI_FORMAT SettingsManager::sDepthStencilSRVFormat{ DXGI_FORMAT_R32_FLOAT
 
 const float SettingsManager::sNearPlaneZ{ 0.5f };
 const float SettingsManager::sFarPlaneZ{ FLT_MAX };
-const float SettingsManager::sFieldOfView{ 0.4f * MathUtils::Pi };
+const float SettingsManager::sVerticalFieldOfView{ 0.4f * MathUtils::Pi };
 
 const D3D12_VIEWPORT SettingsManager::sScreenViewport{ 0.0f, 0.0f, SettingsManager::sWindowWidth, SettingsManager::sWindowHeight, 0.0f, 1.0f };
 const D3D12_RECT SettingsManager::sScissorRect{ 0, 0, SettingsManager::sWindowWidth, SettingsManager::sWindowHeight };

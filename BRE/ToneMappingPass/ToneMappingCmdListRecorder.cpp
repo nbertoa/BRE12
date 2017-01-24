@@ -49,7 +49,7 @@ void ToneMappingCmdListRecorder::InitPSO() noexcept {
 	// Build pso and root signature
 	PSOCreator::PSOParams psoParams{};
 	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
-	psoParams.mDepthStencilDesc = D3DFactory::DisableDepthStencilDesc();
+	psoParams.mDepthStencilDesc = D3DFactory::GetDisabledDepthStencilDesc();
 	psoParams.mPSFilename = "ToneMappingPass/Shaders/PS.cso";
 	psoParams.mRootSignFilename = "ToneMappingPass/Shaders/RS.cso";
 	psoParams.mVSFilename = "ToneMappingPass/Shaders/VS.cso";
