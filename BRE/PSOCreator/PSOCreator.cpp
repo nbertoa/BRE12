@@ -12,7 +12,7 @@ namespace {
 
 		ID3DBlob* rootSignBlob{ nullptr };
 		ShaderManager::Get().LoadShaderFile(psoParams.mRootSignFilename, rootSignBlob);
-		RootSignatureManager::Get().CreateRootSignature(*rootSignBlob, rootSign);
+		RootSignatureManager::Get().CreateRootSignatureFromBlob(*rootSignBlob, rootSign);
 
 		D3D12_SHADER_BYTECODE vertexShader{};
 		if (psoParams.mVSFilename != nullptr) {

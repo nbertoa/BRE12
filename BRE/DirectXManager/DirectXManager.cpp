@@ -24,7 +24,7 @@ namespace {
 		const int32_t width{ r.right - r.left };
 		const int32_t height{ r.bottom - r.top };
 
-		const std::uint32_t dwStyle = SettingsManager::sFullscreen ? WS_POPUP : WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+		const std::uint32_t dwStyle = SettingsManager::sIsFullscreenWindow ? WS_POPUP : WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
 		hwnd = CreateWindowEx(WS_EX_APPWINDOW, L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, hInstance, nullptr);
 		ASSERT(hwnd);
 

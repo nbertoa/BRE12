@@ -9,7 +9,7 @@ const FrameCBuffer& FrameCBuffer::operator=(const FrameCBuffer& instance) {
 	mInverseViewMatrix = instance.mInverseViewMatrix;
 	mProjectionMatrix = instance.mProjectionMatrix;
 	mInverseProjectionMatrix = instance.mInverseProjectionMatrix;
-	mEyePosW = instance.mEyePosW;
+	mEyeWorldPosition = instance.mEyeWorldPosition;
 
 	return *this;
 }

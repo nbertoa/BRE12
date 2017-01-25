@@ -35,8 +35,7 @@ namespace SceneUtils {
 				cmdList);
 			ASSERT(mTextures[nextTextureAvailableIndex] != nullptr);
 		}
-		DXUtils::CommandListData cmdListData(cmdQueue, cmdList, fence);
-		DXUtils::ExecuteCommandListAndWaitForCompletion(cmdListData);
+		DXUtils::ExecuteCommandListAndWaitForCompletion(cmdQueue, cmdList, fence);
 	}
 
 	ID3D12Resource& SceneResources::GetTexture(const std::size_t index) noexcept {
@@ -79,8 +78,7 @@ namespace SceneUtils {
 			ASSERT(mTextures[nextModelAvailableIndex] != nullptr);
 		}
 
-		DXUtils::CommandListData cmdListData(cmdQueue, cmdList, fence);
-		DXUtils::ExecuteCommandListAndWaitForCompletion(cmdListData);
+		DXUtils::ExecuteCommandListAndWaitForCompletion(cmdQueue, cmdList, fence);
 	}
 
 	const Model& SceneResources::GetModel(const std::size_t index) const noexcept {

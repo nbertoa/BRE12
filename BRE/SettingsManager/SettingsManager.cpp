@@ -5,8 +5,8 @@
 #include <MathUtils/MathUtils.h>
 
 const char* SettingsManager::sResourcesPath{ "../../../external/resources/" };
-const bool SettingsManager::sFullscreen{ true };
-const std::uint32_t SettingsManager::sCpuProcessors{ 4U }; // This should be changed according your processor
+const bool SettingsManager::sIsFullscreenWindow{ true };
+const std::uint32_t SettingsManager::sCpuProcessorCount{ 4U }; // This should be changed according your processor
 const std::uint32_t SettingsManager::sWindowWidth{ 1920U };
 const std::uint32_t SettingsManager::sWindowHeight{ 1080U };
 

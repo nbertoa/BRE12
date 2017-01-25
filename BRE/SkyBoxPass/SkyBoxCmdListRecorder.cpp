@@ -186,7 +186,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
 	ResourceManager::Get().CreateUploadBuffer(objCBufferElemSize, 1U, mObjectCBuffer);
 	ObjectCBuffer objCBuffer;
 	const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&mWorldMatrix));
-	DirectX::XMStoreFloat4x4(&objCBuffer.mWorld, wMatrix);
+	DirectX::XMStoreFloat4x4(&objCBuffer.mWorldMatrix, wMatrix);
 	mObjectCBuffer->CopyData(0U, &objCBuffer, sizeof(objCBuffer));
 	
 	// Set begin for cube map in GPU

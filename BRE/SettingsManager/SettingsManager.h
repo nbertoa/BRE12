@@ -15,8 +15,8 @@ public:
 	__forceinline static float AspectRatio() noexcept { return static_cast<float>(sWindowWidth) / sWindowHeight; }
 
 	static const char* sResourcesPath;
-	static const bool sFullscreen;
-	static const std::uint32_t sCpuProcessors;
+	static const bool sIsFullscreenWindow;
+	static const std::uint32_t sCpuProcessorCount;
 	static const std::uint32_t sSwapChainBufferCount{ 4U };
 	static const std::uint32_t sQueuedFrameCount{ sSwapChainBufferCount - 1U };
 	static const std::uint32_t sWindowWidth;
@@ -29,13 +29,13 @@ public:
 	// Color buffer used for intermediate computations (light pass, post processing passes, etc)
 	static const DXGI_FORMAT sColorBufferFormat;
 
-	// Depth stencil buffer format, used when creating depth stencil buffer
+	// Used when creating depth stencil buffer
 	static const DXGI_FORMAT sDepthStencilFormat;
 
-	// Depth stencil view format, used when creating a view to depth stencil buffer
+	// Used when creating a view to depth stencil buffer
 	static const DXGI_FORMAT sDepthStencilViewFormat;
 
-	// Depth stencil shader resource view format, used when creating a srv to the depth stencil buffer
+	// Used when creating a shader resource view to the depth stencil buffer
 	static const DXGI_FORMAT sDepthStencilSRVFormat;
 
 	static const float sNearPlaneZ;

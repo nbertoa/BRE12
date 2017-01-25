@@ -150,7 +150,7 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	mCmdListExecutor->ResetExecutedCmdListCount();
 
 	// Execute geometry tasks
-	std::uint32_t grainSize{ max(1U, (taskCount) / SettingsManager::sCpuProcessors) };
+	std::uint32_t grainSize{ max(1U, (taskCount) / SettingsManager::sCpuProcessorCount) };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)

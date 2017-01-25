@@ -60,8 +60,7 @@ void SkyBoxPass::Init(
 	DirectX::XMFLOAT4X4 w;
 	MathUtils::ComputeMatrix(w, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 	
-	DXUtils::CommandListData cmdListData(cmdQueue, *mCmdList, *mFence);
-	DXUtils::ExecuteCommandListAndWaitForCompletion(cmdListData);
+	DXUtils::ExecuteCommandListAndWaitForCompletion(cmdQueue, *mCmdList, *mFence);
 
 	// Initialize recoders's pso
 	SkyBoxCmdListRecorder::InitPSO();

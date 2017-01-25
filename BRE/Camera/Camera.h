@@ -51,8 +51,8 @@ private:
 	DirectX::XMFLOAT3 mLookVector = { 0.0f, 0.0f, 1.0f };
 	DirectX::XMFLOAT3 mVelocityVector{ 0.0f, 0.0f, 0.0f };
 
-	DirectX::XMFLOAT4X4 mViewMatrix{ MathUtils::Identity4x4() };
-	DirectX::XMFLOAT4X4 mInverseViewMatrix{ MathUtils::Identity4x4() };
-	DirectX::XMFLOAT4X4 mProjectionMatrix{ MathUtils::Identity4x4() };
-	DirectX::XMFLOAT4X4 mInverseProjectionMatrix{ MathUtils::Identity4x4() };
+	DirectX::XMFLOAT4X4 mViewMatrix{ MathUtils::GetIdentity4x4Matrix() };
+	DirectX::XMFLOAT4X4 mInverseViewMatrix{ MathUtils::GetIdentity4x4Matrix() };
+	DirectX::XMFLOAT4X4 mProjectionMatrix{ MathUtils::GetIdentity4x4Matrix() };
+	DirectX::XMFLOAT4X4 mInverseProjectionMatrix{ MathUtils::GetIdentity4x4Matrix() };
 };

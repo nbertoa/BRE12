@@ -10,20 +10,18 @@
 
 namespace {
 	ID3DBlob* LoadBlob(const std::string& filename) noexcept {
-		ASSERT(!filename.empty());
+		std::ifstream fileStream{ filename, std::ios::binary };
+		ASSERT(fileStream);
 
-		std::ifstream fin{ filename, std::ios::binary };
-		ASSERT(fin);
-
-		fin.seekg(0, std::ios_base::end);
-		std::ifstream::pos_type size{ static_cast<std::int32_t>(fin.tellg()) };
-		fin.seekg(0, std::ios_base::beg);
+		fileStream.seekg(0, std::ios_base::end);
+		std::ifstream::pos_type size{ static_cast<std::int32_t>(fileStream.tellg()) };
+		fileStream.seekg(0, std::ios_base::beg);
 
 		ID3DBlob* blob;
 		CHECK_HR(D3DCreateBlob(size, &blob));
 
-		fin.read(reinterpret_cast<char*>(blob->GetBufferPointer()), size);
-		fin.close();
+		fileStream.read(reinterpret_cast<char*>(blob->GetBufferPointer()), size);
+		fileStream.close();
 
 		return blob;
 	}
@@ -109,12 +107,4 @@ D3D12_SHADER_BYTECODE ShaderManager::GetShaderByteCode(const std::size_t id) noe
 	shaderByteCode.BytecodeLength = blob->GetBufferSize();
 
 	return shaderByteCode;
-}
-
-void ShaderManager::Erase(const std::size_t id) noexcept {
-	BlobById::accessor accessor;
-	mBlobById.find(accessor, id);
-	ASSERT(!accessor.empty());
-	mBlobById.erase(accessor);
-	accessor.release();
 }

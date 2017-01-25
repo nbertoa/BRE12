@@ -96,7 +96,7 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mRecorders.size())};
 	
 	// Execute light pass tasks
-	const std::uint32_t grainSize(max(1U, lightTaskCount / SettingsManager::sCpuProcessors));
+	const std::uint32_t grainSize(max(1U, lightTaskCount / SettingsManager::sCpuProcessorCount));
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, lightTaskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)

@@ -6,7 +6,7 @@
 #include <tbb\concurrent_hash_map.h>
 #include <wrl.h>
 
-// This class is responsible to create/get/erase shaders
+// Too create/get/erase shaders
 class ShaderManager {
 public:
 	// Preconditions:
@@ -24,18 +24,15 @@ public:
 	ShaderManager& operator=(ShaderManager&&) = delete;
 
 	// Returns id to get blob/shader byte code after creation
+	// Preconditions:
+	// - "filename" must not be nullptr
 	std::size_t LoadShaderFile(const char* filename, ID3DBlob* &blob) noexcept;
 	std::size_t LoadShaderFile(const char* filename, D3D12_SHADER_BYTECODE& shaderByteCode) noexcept;
 	
-	// Asserts if id does not exist
+	// Preconditions:
+	// - "id" must be valid.
 	ID3DBlob& GetBlob(const std::size_t id) noexcept;
 	D3D12_SHADER_BYTECODE GetShaderByteCode(const std::size_t id) noexcept;
-
-	// Asserts if id is not present
-	void Erase(const std::size_t id) noexcept;
-
-	// Invalidate all ids.
-	__forceinline void Clear() noexcept { mBlobById.clear(); }
 
 private:
 	ShaderManager() = default;

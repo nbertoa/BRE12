@@ -37,15 +37,15 @@ namespace {
 
 		camera.UpdateViewMatrix(elapsedFrameTime);
 
-		frameCBuffer.mEyePosW = camera.GetPosition4f();
+		frameCBuffer.mEyeWorldPosition = camera.GetPosition4f();
 
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mViewMatrix, MathUtils::GetTranspose(camera.GetViewMatrix()));
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mViewMatrix, MathUtils::GetTransposeMatrix(camera.GetViewMatrix()));
 		DirectX::XMFLOAT4X4 inverse = camera.GetInverseViewMatrix();
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mInverseViewMatrix, MathUtils::GetTranspose(inverse));
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mInverseViewMatrix, MathUtils::GetTransposeMatrix(inverse));
 
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mProjectionMatrix, MathUtils::GetTranspose(camera.GetProjectionMatrix()));
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mProjectionMatrix, MathUtils::GetTransposeMatrix(camera.GetProjectionMatrix()));
 		inverse = camera.GetInverseProjectionMatrix();
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mInverseProjectionMatrix, MathUtils::GetTranspose(inverse));
+		DirectX::XMStoreFloat4x4(&frameCBuffer.mInverseProjectionMatrix, MathUtils::GetTransposeMatrix(inverse));
 		
 		// Update camera based on keyboard
 		const float offset = translationDelta * (Keyboard::Get().IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f);

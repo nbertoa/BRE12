@@ -50,7 +50,7 @@ private:
 	
 	BufferCreator::VertexBufferData mVertexBufferData;
 	BufferCreator::IndexBufferData mIndexBufferData;
-	DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::Identity4x4() };
+	DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::GetIdentity4x4Matrix() };
 
 	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
 

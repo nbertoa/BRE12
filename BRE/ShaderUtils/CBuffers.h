@@ -13,8 +13,8 @@ struct ObjectCBuffer {
 	ObjectCBuffer(ObjectCBuffer&&) = default;
 	ObjectCBuffer& operator=(ObjectCBuffer&&) = default;
 
-	DirectX::XMFLOAT4X4 mWorld{ MathUtils::Identity4x4() };
-	float mTexTransform{ 2.0f };
+	DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::GetIdentity4x4Matrix() };
+	float mTextureScaleFactor{ 2.0f };
 };
 
 // Per frame constant buffer data
@@ -26,11 +26,11 @@ struct FrameCBuffer {
 	FrameCBuffer(FrameCBuffer&&) = default;
 	FrameCBuffer& operator=(FrameCBuffer&&) = default;
 		
-	DirectX::XMFLOAT4X4 mViewMatrix{ MathUtils::Identity4x4() };
-	DirectX::XMFLOAT4X4 mInverseViewMatrix{ MathUtils::Identity4x4() };
-	DirectX::XMFLOAT4X4 mProjectionMatrix{ MathUtils::Identity4x4() };
-	DirectX::XMFLOAT4X4 mInverseProjectionMatrix{ MathUtils::Identity4x4() };	
-	DirectX::XMFLOAT4 mEyePosW{ 0.0f, 0.0f, 0.0f, 1.0f };
+	DirectX::XMFLOAT4X4 mViewMatrix{ MathUtils::GetIdentity4x4Matrix() };
+	DirectX::XMFLOAT4X4 mInverseViewMatrix{ MathUtils::GetIdentity4x4Matrix() };
+	DirectX::XMFLOAT4X4 mProjectionMatrix{ MathUtils::GetIdentity4x4Matrix() };
+	DirectX::XMFLOAT4X4 mInverseProjectionMatrix{ MathUtils::GetIdentity4x4Matrix() };	
+	DirectX::XMFLOAT4 mEyeWorldPosition{ 0.0f, 0.0f, 0.0f, 1.0f };
 };
 
 // Immutable constant buffer data (does not change across frames or objects) 

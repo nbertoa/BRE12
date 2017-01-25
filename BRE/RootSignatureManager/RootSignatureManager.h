@@ -8,7 +8,12 @@
 // This class is responsible to create/get/erase root signatures
 class RootSignatureManager {
 public:
+	// Preconditions:
+	// - Create() must be called once
 	static RootSignatureManager& Create() noexcept;
+
+	// Preconditions:
+	// - Create() must be called before this method
 	static RootSignatureManager& Get() noexcept;
 	
 	~RootSignatureManager() = default;
@@ -17,18 +22,13 @@ public:
 	RootSignatureManager(RootSignatureManager&&) = delete;
 	RootSignatureManager& operator=(RootSignatureManager&&) = delete;
 
-	std::size_t CreateRootSignature(const D3D12_ROOT_SIGNATURE_DESC& desc, ID3D12RootSignature* &rootSign) noexcept;
-	std::size_t CreateRootSignature(const D3D12_SHADER_BYTECODE& shaderByteCode, ID3D12RootSignature* &rootSign) noexcept;
-	std::size_t CreateRootSignature(ID3DBlob& rootSignBlob, ID3D12RootSignature* &rootSign) noexcept;
+	std::size_t CreateRootSignatureFromBlob(
+		ID3DBlob& blob, 
+		ID3D12RootSignature* &rootSignature) noexcept;
 
-	// Asserts id was not already registered
+	// Preconditions:
+	// "id" must be valid
 	ID3D12RootSignature& GetRootSignature(const std::size_t id) noexcept;
-
-	// Asserts if id is not present
-	void Erase(const std::size_t id) noexcept;
-
-	// This will invalidate all ids.
-	__forceinline void Clear() noexcept { mRootSignatureById.clear(); }
 
 private:
 	RootSignatureManager() = default;

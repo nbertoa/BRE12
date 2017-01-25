@@ -63,9 +63,9 @@ namespace {
 
 			// Create sample points on the surface of a hemisphere
 			// oriented along the z axis
-			const float x = MathUtils::RandF(-1.0f, 1.0f);
-			const float y = MathUtils::RandF(-1.0f, 1.0f);
-			const float z = MathUtils::RandF(-1.0f, 0.0f);
+			const float x = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
+			const float y = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
+			const float z = MathUtils::RandomFloatInInverval(-1.0f, 0.0f);
 			elem = XMFLOAT4(x, y, z, 0.0f);
 			vec = XMLoadFloat4(&elem);
 			vec = XMVector4Normalize(vec);
@@ -112,7 +112,7 @@ namespace {
 
 		for (int i = 0; i < 14; ++i) {
 			// Create random lengths in [0.25, 1.0].
-			float s = MathUtils::RandF(0.25f, 1.0f);
+			float s = MathUtils::RandomFloatInInverval(0.25f, 1.0f);
 
 			XMVECTOR v = s * XMVector4Normalize(XMLoadFloat4(&kernels[i]));
 
@@ -134,17 +134,18 @@ namespace {
 
 			// Create sample points on the surface of a hemisphere
 			// oriented along the z axis
-			const float x = MathUtils::RandF(-1.0f, 1.0f);
-			const float y = MathUtils::RandF(-1.0f, 1.0f);
+			const float x = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
+			const float y = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
 			const float z = 0.0f;			
 			elem = XMFLOAT4(x, y, z, 0.0f);
 			vec = XMLoadFloat4(&elem);
 			vec = XMVector4Normalize(vec);
 			XMStoreFloat4(&elem, vec);
-			XMFLOAT3 mappedVec = MathUtils::MapF1(XMFLOAT3(elem.x, elem.y, elem.z));
-			elem.x = mappedVec.x;
-			elem.y = mappedVec.y;
-			elem.z = mappedVec.z;
+
+			// Map from [-1.0f, 1.0f] to [0.0f, 1.0f]
+			elem.x = elem.x * 0.5f + 0.5f;
+			elem.y = elem.y * 0.5f + 0.5f;
+			elem.z = elem.z * 0.5f + 0.5f;
 		}
 	}
 
@@ -157,9 +158,9 @@ namespace {
 
 			// Create sample points on the surface of a hemisphere
 			// oriented along the z axis
-			const float x = MathUtils::RandF(0.0f, 1.0f);
-			const float y = MathUtils::RandF(0.0f, 1.0f);
-			const float z = MathUtils::RandF(0.0f, 1.0f);
+			const float x = MathUtils::RandomFloatInInverval(0.0f, 1.0f);
+			const float y = MathUtils::RandomFloatInInverval(0.0f, 1.0f);
+			const float z = MathUtils::RandomFloatInInverval(0.0f, 1.0f);
 			elem = XMFLOAT4(x, y, z, 0.0f);
 		}
 	}
