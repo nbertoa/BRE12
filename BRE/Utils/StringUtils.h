@@ -3,8 +3,8 @@
 #include <codecvt>
 
 namespace StringUtils {
-	inline void ToWideString(const std::string& source, std::wstring& dest) noexcept {
-		dest.assign(source.begin(), source.end());
+	inline void ToWideString(const std::string& source, std::wstring& destination) noexcept {
+		destination.assign(source.begin(), source.end());
 	}
 
 	inline std::wstring ToWideString(const std::string& source) noexcept {
@@ -20,8 +20,9 @@ namespace StringUtils {
 	}
 
 	inline std::wstring AnsiToWString(const std::string& str) noexcept {
-		WCHAR buffer[512U];
-		MultiByteToWideChar(CP_ACP, 0U, str.c_str(), -1, buffer, 512);
+		static const std::uint32_t bufferMaxSize = 512U;
+		WCHAR buffer[bufferMaxSize];
+		MultiByteToWideChar(CP_ACP, 0U, str.c_str(), -1, buffer, bufferMaxSize);
 		return std::wstring(buffer);
 	}
 }

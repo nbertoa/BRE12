@@ -14,7 +14,7 @@
 #include <Scene/SceneUtils.h>
 
 namespace {
-	SceneUtils::ResourceContainer sResourceContainer;
+	SceneUtils::SceneResources sResourceContainer;
 
 	enum Textures {
 		// Environment
@@ -141,13 +141,13 @@ void ColorMappingScene::Init(ID3D12CommandQueue& cmdQueue) noexcept {
 	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
 }
 
-void ColorMappingScene::GenerateGeomPassRecorders(
+void ColorMappingScene::CreateGeometryPassRecorders(
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 
 	ASSERT(tasks.empty());
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 
-	Model& model = sResourceContainer.GetModel(BUNNY);
+	const Model& model = sResourceContainer.GetModel(BUNNY);
 
 	ColorCmdListRecorder* recorder{ nullptr };
 	GenerateRecorder(sTx, sTy, sTz, sOffsetX, 0.0f, 0.0f, model.Meshes(), recorder);
@@ -155,7 +155,7 @@ void ColorMappingScene::GenerateGeomPassRecorders(
 	tasks.push_back(std::unique_ptr<GeometryPassCmdListRecorder>(recorder));
 }
 
-void ColorMappingScene::GenerateLightingPassRecorders(
+void ColorMappingScene::CreateLightingPassRecorders(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
@@ -164,7 +164,7 @@ void ColorMappingScene::GenerateLightingPassRecorders(
 	ASSERT(tasks.empty());
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(0 < geometryBuffersCount && geometryBuffersCount < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 
 	tasks.resize(1UL);
 	PunctualLightCmdListRecorder* recorder{ nullptr };
@@ -177,13 +177,13 @@ void ColorMappingScene::GenerateLightingPassRecorders(
 	tasks[0].reset(recorder);
 }
 
-void ColorMappingScene::GenerateCubeMaps(
+void ColorMappingScene::CreateCubeMapResources(
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept 
 {
-	skyBoxCubeMap = &sResourceContainer.GetResource(SKY_BOX);
-	diffuseIrradianceCubeMap = &sResourceContainer.GetResource(DIFFUSE_CUBE_MAP);
-	specularPreConvolvedCubeMap = &sResourceContainer.GetResource(SPECULAR_CUBE_MAP);
+	skyBoxCubeMap = &sResourceContainer.GetTexture(SKY_BOX);
+	diffuseIrradianceCubeMap = &sResourceContainer.GetTexture(DIFFUSE_CUBE_MAP);
+	specularPreConvolvedCubeMap = &sResourceContainer.GetTexture(SPECULAR_CUBE_MAP);
 }
 

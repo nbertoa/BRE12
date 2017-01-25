@@ -31,7 +31,7 @@ public:
 
 	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept final override;
 
-	bool ValidateData() const noexcept final override;
+	bool IsDataValid() const noexcept final override;
 
 private:
 	void BuildBuffers(

@@ -1,5 +1,7 @@
 #include "Camera.h"
 
+#include <Utils\DebugUtils.h>
+
 using namespace DirectX;
 
 void Camera::SetFrustum(const float verticalFieldOfView,
@@ -64,6 +66,8 @@ void Camera::RotateY(const float angleInRadians) noexcept {
 }
 
 void Camera::UpdateViewMatrix(const float elapsedFrameTime) noexcept {
+	ASSERT(elapsedFrameTime > 0.0f);
+
 	static float maxVelocitySpeed{ 100.0f }; // speed = velocity magnitude
 	static float velocityDamp{ 0.1f }; // fraction of velocity retained per second
 

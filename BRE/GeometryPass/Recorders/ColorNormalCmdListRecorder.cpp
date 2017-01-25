@@ -52,7 +52,7 @@ void ColorNormalCmdListRecorder::Init(
 	ID3D12Resource** normals,
 	const std::uint32_t numResources) noexcept
 {
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 	ASSERT(geometryDataVec != nullptr);
 	ASSERT(numGeomData != 0U);
 	ASSERT(materials != nullptr);	
@@ -76,11 +76,11 @@ void ColorNormalCmdListRecorder::Init(
 
 	BuildBuffers(materials, normals, numResources);
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void ColorNormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 	ASSERT(mCmdListQueue != nullptr);
@@ -147,9 +147,9 @@ void ColorNormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
-bool ColorNormalCmdListRecorder::ValidateData() const noexcept {
+bool ColorNormalCmdListRecorder::IsDataValid() const noexcept {
 	const bool result =
-		GeometryPassCmdListRecorder::ValidateData() &&
+		GeometryPassCmdListRecorder::IsDataValid() &&
 		mNormalsBufferGpuDescBegin.ptr != 0UL;
 
 	return result;

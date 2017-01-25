@@ -69,17 +69,17 @@ void ToneMappingCmdListRecorder::Init(
 	ID3D12Resource& inputColorBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept
 {
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 
 	mOutputColorBufferCpuDesc = outputBufferCpuDesc;
 
 	BuildBuffers(inputColorBuffer);
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 
@@ -114,7 +114,7 @@ void ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
-bool ToneMappingCmdListRecorder::ValidateData() const noexcept {
+bool ToneMappingCmdListRecorder::IsDataValid() const noexcept {
 
 	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {

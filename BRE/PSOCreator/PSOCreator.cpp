@@ -8,7 +8,7 @@
 
 namespace {
 	void BuildPSO(const PSOCreator::PSOParams& psoParams, ID3D12PipelineState* &pso, ID3D12RootSignature* &rootSign) noexcept {
-		ASSERT(psoParams.ValidateData());
+		ASSERT(psoParams.IsDataValid());
 
 		ID3DBlob* rootSignBlob{ nullptr };
 		ShaderManager::Get().LoadShaderFile(psoParams.mRootSignFilename, rootSignBlob);
@@ -68,13 +68,13 @@ namespace {
 
 namespace PSOCreator {
 	void CreatePSO(const PSOParams& psoParams, ID3D12PipelineState* &pso, ID3D12RootSignature* &rootSign) noexcept {
-		ASSERT(psoParams.ValidateData());
+		ASSERT(psoParams.IsDataValid());
 		BuildPSO(psoParams, pso, rootSign);
 		ASSERT(pso != nullptr);
 		ASSERT(rootSign != nullptr);
 	}
 
-	bool PSOParams::ValidateData() const noexcept {
+	bool PSOParams::IsDataValid() const noexcept {
 		if (mNumRenderTargets == 0 || mNumRenderTargets > D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT || mRootSignFilename == nullptr) {
 			return false;
 		}

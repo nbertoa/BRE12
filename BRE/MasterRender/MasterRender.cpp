@@ -20,22 +20,22 @@ namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };	
 	
 	// Update camera's view matrix and store data in parameters.
-	void UpdateCamera(
-		Camera& camera,
-		const float deltaTime,
+	void UpdateCameraAndFrameCBuffer(
+		const float elapsedFrameTime,
+		Camera& camera,		
 		FrameCBuffer& frameCBuffer) noexcept {
 
 		static const float translationAcceleration = 100.0f; // rate of acceleration in units/sec
-		const float translationDelta = translationAcceleration * deltaTime;
+		const float translationDelta = translationAcceleration * elapsedFrameTime;
 
 		static const float rotationAcceleration = 400.0f;
-		const float rotationDelta = rotationAcceleration * deltaTime;
+		const float rotationDelta = rotationAcceleration * elapsedFrameTime;
 
 		static std::int32_t lastXY[]{ 0UL, 0UL };
 		static const float sCameraOffset{ 7.5f };
 		static const float sCameraMultiplier{ 10.0f };
 
-		camera.UpdateViewMatrix(deltaTime);
+		camera.UpdateViewMatrix(elapsedFrameTime);
 
 		frameCBuffer.mEyePosW = camera.GetPosition4f();
 
@@ -149,18 +149,18 @@ void MasterRender::InitPasses(Scene& scene) noexcept {
 	scene.Init(*mCmdQueue);
 	
 	// Generate recorders for all the passes
-	scene.GenerateGeomPassRecorders(mGeometryPass.GetRecorders());
+	scene.CreateGeometryPassRecorders(mGeometryPass.GetRecorders());
 	mGeometryPass.Init(DepthStencilCpuDesc(), *mCmdListExecutor, *mCmdQueue);
 
 	ID3D12Resource* skyBoxCubeMap;
 	ID3D12Resource* diffuseIrradianceCubeMap;
 	ID3D12Resource* specularPreConvolvedCubeMap;
-	scene.GenerateCubeMaps(skyBoxCubeMap, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
+	scene.CreateCubeMapResources(skyBoxCubeMap, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
 	ASSERT(skyBoxCubeMap != nullptr);
 	ASSERT(diffuseIrradianceCubeMap != nullptr);
 	ASSERT(specularPreConvolvedCubeMap != nullptr);
 
-	scene.GenerateLightingPassRecorders(
+	scene.CreateLightingPassRecorders(
 		mGeometryPass.GetBuffers(), 
 		GeometryPass::BUFFERS_COUNT, 
 		*mDepthStencilBuffer, 
@@ -210,7 +210,7 @@ void MasterRender::Terminate() noexcept {
 tbb::task* MasterRender::execute() {
 	while (!mTerminate) {
 		mTimer.Tick();
-		UpdateCamera(mCamera, mTimer.DeltaTime(), mFrameCBuffer);
+		UpdateCameraAndFrameCBuffer(mTimer.DeltaTimeInSeconds(), mCamera, mFrameCBuffer);
 
 		ASSERT(mCmdListExecutor->IsIdle());
 

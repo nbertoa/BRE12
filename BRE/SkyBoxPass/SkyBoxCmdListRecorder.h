@@ -38,7 +38,7 @@ public:
 
 	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
 
-	bool ValidateData() const noexcept;
+	bool IsDataValid() const noexcept;
 
 private:
 	void BuildBuffers(ID3D12Resource& cubeMap) noexcept;

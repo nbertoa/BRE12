@@ -29,7 +29,7 @@ public:
 
 	void RecordAndPushCommandLists() noexcept;
 
-	bool ValidateData() const noexcept;
+	bool IsDataValid() const noexcept;
 
 private:
 	void BuildBuffers(ID3D12Resource& colorBuffer) noexcept;

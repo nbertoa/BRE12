@@ -29,7 +29,7 @@ public:
 
 	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept final override;
 
-	bool ValidateData() const noexcept final override;
+	bool IsDataValid() const noexcept final override;
 
 private:
 	void BuildBuffers(const Material* materials, ID3D12Resource** textures, const std::uint32_t dataCount) noexcept;

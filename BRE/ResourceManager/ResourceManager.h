@@ -53,7 +53,7 @@ public:
 	std::size_t CreateFence(const std::uint64_t initValue, const D3D12_FENCE_FLAGS& flags, ID3D12Fence* &fence) noexcept;
 
 	// Asserts if resource id is not present
-	ID3D12Resource& GetResource(const std::size_t id) noexcept;
+	ID3D12Resource& GetTexture(const std::size_t id) noexcept;
 	UploadBuffer& GetUploadBuffer(const std::size_t id) noexcept;
 	ID3D12DescriptorHeap& GetDescriptorHeap(const std::size_t id) noexcept;
 	ID3D12Fence& GetFence(const std::size_t id) noexcept;

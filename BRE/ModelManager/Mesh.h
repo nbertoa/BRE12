@@ -16,8 +16,8 @@ class Mesh {
 	friend class Model;
 
 public:
-	__forceinline const BufferCreator::VertexBufferData& VertexBufferData() const noexcept { ASSERT(mVertexBufferData.ValidateData()); return mVertexBufferData; }
-	__forceinline const BufferCreator::IndexBufferData& IndexBufferData() const noexcept { ASSERT(mIndexBufferData.ValidateData()); return mIndexBufferData; }
+	__forceinline const BufferCreator::VertexBufferData& VertexBufferData() const noexcept { ASSERT(mVertexBufferData.IsDataValid()); return mVertexBufferData; }
+	__forceinline const BufferCreator::IndexBufferData& IndexBufferData() const noexcept { ASSERT(mIndexBufferData.IsDataValid()); return mIndexBufferData; }
 
 	~Mesh() = default;
 	Mesh(const Mesh&) = delete;

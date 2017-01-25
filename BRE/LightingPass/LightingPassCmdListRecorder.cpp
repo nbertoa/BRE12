@@ -27,7 +27,7 @@ LightingPassCmdListRecorder::LightingPassCmdListRecorder() {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 
-bool LightingPassCmdListRecorder::ValidateData() const noexcept {
+bool LightingPassCmdListRecorder::IsDataValid() const noexcept {
 	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {
 			return false;

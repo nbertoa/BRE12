@@ -99,7 +99,7 @@ void GeometryPass::Init(
 	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue) noexcept {
 
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 	
 	ASSERT(mRecorders.empty() == false);
 
@@ -137,12 +137,12 @@ void GeometryPass::Init(
 			mDepthBufferCpuDesc);
 	}
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 
 	ExecuteBeginTask();
 
@@ -164,7 +164,7 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	}
 }
 
-bool GeometryPass::ValidateData() const noexcept {
+bool GeometryPass::IsDataValid() const noexcept {
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAllocs[i] == nullptr) {
 			return false;
@@ -194,7 +194,7 @@ bool GeometryPass::ValidateData() const noexcept {
 }
 
 void GeometryPass::ExecuteBeginTask() noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };

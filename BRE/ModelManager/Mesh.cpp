@@ -61,8 +61,8 @@ namespace {
 		ID3D12GraphicsCommandList& cmdList,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept {
-		ASSERT(vertexBufferData.ValidateData() == false);
-		ASSERT(indexBufferData.ValidateData() == false);
+		ASSERT(vertexBufferData.IsDataValid() == false);
+		ASSERT(indexBufferData.IsDataValid() == false);
 
 		// Create vertex buffer
 		BufferCreator::BufferParams vertexBufferParams(meshData.mVertices.data(), static_cast<std::uint32_t>(meshData.mVertices.size()), sizeof(GeometryGenerator::Vertex));
@@ -72,8 +72,8 @@ namespace {
 		BufferCreator::BufferParams indexBufferParams(meshData.mIndices32.data(), static_cast<std::uint32_t>(meshData.mIndices32.size()), sizeof(std::uint32_t));
 		BufferCreator::CreateBuffer(cmdList, indexBufferParams, indexBufferData, uploadIndexBuffer);
 
-		ASSERT(vertexBufferData.ValidateData());
-		ASSERT(indexBufferData.ValidateData());
+		ASSERT(vertexBufferData.IsDataValid());
+		ASSERT(indexBufferData.IsDataValid());
 	}
 }
 
@@ -131,8 +131,8 @@ Mesh::Mesh(
 
 	CreateData(mVertexBufferData, mIndexBufferData, meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 
-	ASSERT(mVertexBufferData.ValidateData());
-	ASSERT(mIndexBufferData.ValidateData());
+	ASSERT(mVertexBufferData.IsDataValid());
+	ASSERT(mIndexBufferData.IsDataValid());
 }
 
 Mesh::Mesh(
@@ -142,6 +142,6 @@ Mesh::Mesh(
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) {
 	CreateData(mVertexBufferData, mIndexBufferData, meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
 
-	ASSERT(mVertexBufferData.ValidateData());
-	ASSERT(mIndexBufferData.ValidateData());
+	ASSERT(mVertexBufferData.IsDataValid());
+	ASSERT(mIndexBufferData.IsDataValid());
 }

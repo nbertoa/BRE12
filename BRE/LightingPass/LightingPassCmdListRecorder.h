@@ -53,7 +53,7 @@ public:
 	// This method validates all data (nullptr's, etc)
 	// When you inherit from this class, you should reimplement it to include
 	// new members
-	virtual bool ValidateData() const noexcept;
+	virtual bool IsDataValid() const noexcept;
 
 protected:
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };

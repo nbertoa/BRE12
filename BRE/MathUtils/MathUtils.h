@@ -74,12 +74,6 @@ public:
 		return DirectX::XMMatrixTranspose(matrix);
 	}
 
-	static DirectX::XMMATRIX GetTransposeViewProjectionMatrix(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& proj) noexcept {
-		const DirectX::XMMATRIX viewMatrix = XMLoadFloat4x4(&view);
-		const DirectX::XMMATRIX projMatrix = XMLoadFloat4x4(&proj);
-		return DirectX::XMMatrixTranspose(DirectX::XMMatrixMultiply(viewMatrix, projMatrix));
-	}
-
 	static void ComputeMatrix(
 		DirectX::XMFLOAT4X4& m,
 		const float tx,

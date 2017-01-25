@@ -11,9 +11,8 @@ public:
 	Timer(Timer&&) = delete;
 	Timer& operator=(Timer&&) = delete;
 
-	// Time in seconds (1.0f is 1 second)
-	float TotalTime() const noexcept { return static_cast<float>((mCurrTime - mBaseTime) * mSecondsPerCount); }
-	float DeltaTime() const noexcept { return static_cast<float>(mDeltaTime); }
+	float TotalTimeInSeconds() const noexcept { return static_cast<float>((mCurrentTime - mBaseTime) * mSecondsPerCount); }
+	float DeltaTimeInSeconds() const noexcept { return static_cast<float>(mDeltaTimeInSeconds); }
 
 	// Call before message loop.
 	void Reset() noexcept; 
@@ -23,8 +22,8 @@ public:
 
 private:
 	double mSecondsPerCount{ 0.0 };
-	double mDeltaTime{ 0.0 };
+	double mDeltaTimeInSeconds{ 0.0 };
 	std::int64_t mBaseTime{ 0 };
-	std::int64_t mPrevTime{ 0 };
-	std::int64_t mCurrTime{ 0 };
+	std::int64_t mPreviousTime{ 0 };
+	std::int64_t mCurrentTime{ 0 };
 };

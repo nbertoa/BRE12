@@ -57,7 +57,7 @@ void ColorHeightCmdListRecorder::Init(
 	ID3D12Resource** heights,
 	const std::uint32_t numResources) noexcept
 {
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 	ASSERT(geometryDataVec != nullptr);
 	ASSERT(numGeomData != 0U);
 	ASSERT(materials != nullptr);
@@ -82,11 +82,11 @@ void ColorHeightCmdListRecorder::Init(
 
 	BuildBuffers(materials, normals, heights, numResources);
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void ColorHeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 	ASSERT(mCmdListQueue != nullptr);
@@ -158,9 +158,9 @@ void ColorHeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
-bool ColorHeightCmdListRecorder::ValidateData() const noexcept {
+bool ColorHeightCmdListRecorder::IsDataValid() const noexcept {
 	const bool result =
-		GeometryPassCmdListRecorder::ValidateData() &&
+		GeometryPassCmdListRecorder::IsDataValid() &&
 		mNormalsBufferGpuDescBegin.ptr != 0UL &&
 		mHeightsBufferGpuDescBegin.ptr != 0UL;
 

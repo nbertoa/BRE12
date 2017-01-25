@@ -15,7 +15,7 @@ namespace PSOCreator {
 		PSOParams(PSOParams&&) = delete;
 		PSOParams& operator=(PSOParams&&) = delete;
 
-		bool ValidateData() const noexcept;
+		bool IsDataValid() const noexcept;
 
 		// If a shader filename is nullptr, then we do not load it.
 		std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout{};

@@ -53,7 +53,7 @@ void NormalCmdListRecorder::Init(
 	ID3D12Resource** normals,
 	const std::uint32_t numResources) noexcept
 {
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 	ASSERT(geometryDataVec != nullptr);
 	ASSERT(numGeomData != 0U);
 	ASSERT(materials != nullptr);	
@@ -78,11 +78,11 @@ void NormalCmdListRecorder::Init(
 
 	BuildBuffers(materials, textures, normals, numResources);
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void NormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 	ASSERT(mCmdListQueue != nullptr);
@@ -153,9 +153,9 @@ void NormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
-bool NormalCmdListRecorder::ValidateData() const noexcept {
+bool NormalCmdListRecorder::IsDataValid() const noexcept {
 	const bool result =
-		GeometryPassCmdListRecorder::ValidateData() &&
+		GeometryPassCmdListRecorder::IsDataValid() &&
 		mTexturesBufferGpuDescBegin.ptr != 0UL && 
 		mNormalsBufferGpuDescBegin.ptr != 0UL;
 

@@ -28,7 +28,7 @@ GeometryPassCmdListRecorder::GeometryPassCmdListRecorder() {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 
-bool GeometryPassCmdListRecorder::ValidateData() const noexcept {
+bool GeometryPassCmdListRecorder::IsDataValid() const noexcept {
 	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {
 			return false;

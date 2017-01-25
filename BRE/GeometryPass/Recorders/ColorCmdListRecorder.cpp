@@ -49,7 +49,7 @@ void ColorCmdListRecorder::Init(
 	const Material* materials,
 	const std::uint32_t numMaterials) noexcept
 {
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 	ASSERT(geometryDataVec != nullptr);
 	ASSERT(numGeomData != 0U);
 	ASSERT(materials != nullptr);
@@ -72,11 +72,11 @@ void ColorCmdListRecorder::Init(
 
 	BuildBuffers(materials, numMaterials);
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 	ASSERT(mCmdListQueue != nullptr);

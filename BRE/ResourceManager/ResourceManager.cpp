@@ -193,7 +193,7 @@ std::size_t ResourceManager::CreateUploadBuffer(const std::size_t elemSize, cons
 	return id;
 }
 
-ID3D12Resource& ResourceManager::GetResource(const std::size_t id) noexcept {
+ID3D12Resource& ResourceManager::GetTexture(const std::size_t id) noexcept {
 	ResourceById::accessor accessor;
 	mResourceById.find(accessor, id);
 	ASSERT(!accessor.empty());

@@ -51,7 +51,7 @@ void TextureCmdListRecorder::Init(
 	ID3D12Resource** textures,
 	const std::uint32_t numResources) noexcept
 {
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 	ASSERT(geometryDataVec != nullptr);
 	ASSERT(numGeomData != 0U);
 	ASSERT(materials != nullptr);
@@ -75,11 +75,11 @@ void TextureCmdListRecorder::Init(
 
 	BuildBuffers(materials, textures, numResources);
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 	ASSERT(mCmdListQueue != nullptr);
@@ -146,7 +146,7 @@ void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frame
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
-bool TextureCmdListRecorder::ValidateData() const noexcept {
+bool TextureCmdListRecorder::IsDataValid() const noexcept {
 	const std::size_t numGeomData{ mGeometryDataVec.size() };
 	for (std::size_t i = 0UL; i < numGeomData; ++i) {
 		const std::size_t numMatrices{ mGeometryDataVec[i].mWorldMatrices.size() };
@@ -162,7 +162,7 @@ bool TextureCmdListRecorder::ValidateData() const noexcept {
 	}
 
 	const bool result =
-		GeometryPassCmdListRecorder::ValidateData() &&
+		GeometryPassCmdListRecorder::IsDataValid() &&
 		mTexturesBufferGpuDescBegin.ptr != 0UL;
 
 	return result;

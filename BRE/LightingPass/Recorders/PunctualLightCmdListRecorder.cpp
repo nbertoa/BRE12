@@ -56,7 +56,7 @@ void PunctualLightCmdListRecorder::Init(
 	const void* lights,
 	const std::uint32_t numLights) noexcept
 {
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(0 < geometryBuffersCount && geometryBuffersCount < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 	ASSERT(lights != nullptr);
@@ -108,11 +108,11 @@ void PunctualLightCmdListRecorder::Init(
 	srvDesc.Buffer.StructureByteStride = sizeof(PunctualLight);
 	mLightsBufferGpuDescBegin = DescriptorManager::Get().CreateShaderResourceView(*mLightsBuffer->Resource(), srvDesc);
 	
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 	ASSERT(mCmdListQueue != nullptr);
@@ -158,8 +158,8 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % _countof(mCmdAlloc);
 }
 
-bool PunctualLightCmdListRecorder::ValidateData() const noexcept {
-	return LightingPassCmdListRecorder::ValidateData() && mTexturesGpuDesc.ptr != 0UL;
+bool PunctualLightCmdListRecorder::IsDataValid() const noexcept {
+	return LightingPassCmdListRecorder::IsDataValid() && mTexturesGpuDesc.ptr != 0UL;
 }
 
 void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {

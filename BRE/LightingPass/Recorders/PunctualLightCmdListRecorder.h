@@ -27,7 +27,7 @@ public:
 	// Record command lists and push them to the queue.
 	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept final override;
 
-	bool ValidateData() const noexcept override;
+	bool IsDataValid() const noexcept override;
 
 private:
 	void BuildBuffers(const void* lights) noexcept;

@@ -30,17 +30,7 @@ public:
 	__forceinline const DirectX::XMFLOAT4X4& GetInverseViewMatrix() const noexcept { return mInverseViewMatrix; }
 	__forceinline const DirectX::XMFLOAT4X4& GetProjectionMatrix() const noexcept { return mProjectionMatrix; }
 	__forceinline const DirectX::XMFLOAT4X4& GetInverseProjectionMatrix() const noexcept { return mInverseProjectionMatrix; }
-
-	__forceinline DirectX::XMMATRIX GetViewProjectionMatrix() const noexcept {
-		const DirectX::XMMATRIX viewMatrix = XMLoadFloat4x4(&mViewMatrix);
-		const DirectX::XMMATRIX projMatrix = XMLoadFloat4x4(&mProjectionMatrix);
-		return DirectX::XMMatrixMultiply(viewMatrix, projMatrix);
-	}
-
-	__forceinline DirectX::XMMATRIX GetTransposeViewProjectionMatrix() const noexcept {
-		return DirectX::XMMatrixTranspose(GetViewProjectionMatrix());
-	}
-
+	
 	// If distance is positive, then we
 	// will strafe left / walk forward.
 	// Otherwise, we will strafe right / walk backward.
@@ -50,6 +40,8 @@ public:
 	void Pitch(const float angleInRadians) noexcept;
 	void RotateY(const float angleInRadians) noexcept;
 
+	// Preconditions:
+	// - elapsedFrameTime must be positive
 	void UpdateViewMatrix(const float elapsedFrameTime) noexcept;
 
 private:

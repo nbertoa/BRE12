@@ -13,7 +13,7 @@
 #include <Scene/SceneUtils.h>
 
 namespace {
-	SceneUtils::ResourceContainer sResourceContainer;
+	SceneUtils::SceneResources sResourceContainer;
 
 	enum Textures {
 		// Metal
@@ -270,16 +270,16 @@ void AmbientOcclussionScene::Init(ID3D12CommandQueue& cmdQueue) noexcept {
 	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
 }
 
-void AmbientOcclussionScene::GenerateGeomPassRecorders(
+void AmbientOcclussionScene::CreateGeometryPassRecorders(
 	std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept {
 
 	ASSERT(tasks.empty());
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 
-	std::vector<ID3D12Resource*>& textures = sResourceContainer.GetResources();
+	const std::vector<ID3D12Resource*>& textures = sResourceContainer.GetTextures();
 	ASSERT(textures.empty() == false);
-	Model& model = sResourceContainer.GetModel(UNREAL);
-	Model& floor = sResourceContainer.GetModel(FLOOR);
+	const Model& model = sResourceContainer.GetModel(UNREAL);
+	const Model& floor = sResourceContainer.GetModel(FLOOR);
 
 	//
 	// Generate floor
@@ -512,7 +512,7 @@ void AmbientOcclussionScene::GenerateGeomPassRecorders(
 	tasks.push_back(std::unique_ptr<GeometryPassCmdListRecorder>(recorder));
 }
 
-void AmbientOcclussionScene::GenerateLightingPassRecorders(
+void AmbientOcclussionScene::CreateLightingPassRecorders(
 	Microsoft::WRL::ComPtr<ID3D12Resource>*,
 	const std::uint32_t,
 	ID3D12Resource&,
@@ -520,13 +520,13 @@ void AmbientOcclussionScene::GenerateLightingPassRecorders(
 {
 }
 
-void AmbientOcclussionScene::GenerateCubeMaps(
+void AmbientOcclussionScene::CreateCubeMapResources(
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept
 {
-	skyBoxCubeMap = &sResourceContainer.GetResource(SKY_BOX);
-	diffuseIrradianceCubeMap = &sResourceContainer.GetResource(DIFFUSE_CUBE_MAP);
-	specularPreConvolvedCubeMap = &sResourceContainer.GetResource(SPECULAR_CUBE_MAP);
+	skyBoxCubeMap = &sResourceContainer.GetTexture(SKY_BOX);
+	diffuseIrradianceCubeMap = &sResourceContainer.GetTexture(DIFFUSE_CUBE_MAP);
+	specularPreConvolvedCubeMap = &sResourceContainer.GetTexture(SPECULAR_CUBE_MAP);
 }
 

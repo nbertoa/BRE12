@@ -85,7 +85,7 @@ void SkyBoxCmdListRecorder::Init(
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
 {
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 
 	mVertexBufferData = vertexBufferData;
 	mIndexBufferData = indexBufferData;
@@ -95,11 +95,11 @@ void SkyBoxCmdListRecorder::Init(
 
 	BuildBuffers(cubeMap);
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 
@@ -148,7 +148,7 @@ void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
-bool SkyBoxCmdListRecorder::ValidateData() const noexcept {
+bool SkyBoxCmdListRecorder::IsDataValid() const noexcept {
 
 	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {

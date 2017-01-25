@@ -45,7 +45,7 @@ void LightingPass::Init(
 	ID3D12Resource& diffuseIrradianceCubeMap,
 	ID3D12Resource& specularPreConvolvedCubeMap) noexcept {
 
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 
 	CreateCommandObjects(mCmdAllocsBegin, mCmdAllocsEnd, mCmdList);
 	mCmdListExecutor = &cmdListExecutor;
@@ -83,11 +83,11 @@ void LightingPass::Init(
 		recorder->InitInternal(cmdListExecutor.CmdListQueue(), colorBufferCpuDesc);
 	}
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 
 	ExecuteBeginTask();
 
@@ -118,7 +118,7 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ExecuteEndingTask();
 }
 
-bool LightingPass::ValidateData() const noexcept {
+bool LightingPass::IsDataValid() const noexcept {
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAllocsBegin[i] == nullptr) {
 			return false;
@@ -148,7 +148,7 @@ bool LightingPass::ValidateData() const noexcept {
 }
 
 void LightingPass::ExecuteBeginTask() noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };
@@ -181,7 +181,7 @@ void LightingPass::ExecuteBeginTask() noexcept {
 }
 
 void LightingPass::ExecuteEndingTask() noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };

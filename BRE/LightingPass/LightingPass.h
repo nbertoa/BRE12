@@ -49,7 +49,7 @@ public:
 
 private:
 	// Method used internally for validation purposes
-	bool ValidateData() const noexcept;
+	bool IsDataValid() const noexcept;
 
 	void ExecuteBeginTask() noexcept;
 	void ExecuteEndingTask() noexcept;

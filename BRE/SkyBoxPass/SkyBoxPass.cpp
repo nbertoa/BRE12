@@ -4,6 +4,7 @@
 
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandManager.h>
+#include <DXUtils\DXUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
 #include <ModelManager\ModelManager.h>
@@ -29,34 +30,6 @@ namespace {
 
 		ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, fence);
 	}
-
-	void ExecuteCommandList(
-		ID3D12CommandQueue& cmdQueue,
-		ID3D12GraphicsCommandList& cmdList,
-		ID3D12Fence& fence) noexcept {
-
-		cmdList.Close();
-
-		ID3D12CommandList* cmdLists[1U]{ &cmdList };
-		cmdQueue.ExecuteCommandLists(_countof(cmdLists), cmdLists);
-
-		const std::uint64_t fenceValue = fence.GetCompletedValue() + 1UL;
-
-		CHECK_HR(cmdQueue.Signal(&fence, fenceValue));
-
-		// Wait until the GPU has completed commands up to this fence point.
-		if (fence.GetCompletedValue() < fenceValue) {
-			const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
-			ASSERT(eventHandle);
-
-			// Fire event when GPU hits current fence.  
-			CHECK_HR(fence.SetEventOnCompletion(fenceValue, eventHandle));
-
-			// Wait until the GPU hits current fence event is fired.
-			WaitForSingleObject(eventHandle, INFINITE);
-			CloseHandle(eventHandle);
-		}
-	}
 }
 
 void SkyBoxPass::Init(
@@ -66,7 +39,7 @@ void SkyBoxPass::Init(
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
 
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 
 	CreateCommandObjects(mCmdAlloc, mCmdList, mFence);
 	mCmdListExecutor = &cmdListExecutor;
@@ -87,7 +60,8 @@ void SkyBoxPass::Init(
 	DirectX::XMFLOAT4X4 w;
 	MathUtils::ComputeMatrix(w, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 	
-	ExecuteCommandList(cmdQueue, *mCmdList, *mFence);
+	DXUtils::CommandListData cmdListData(cmdQueue, *mCmdList, *mFence);
+	DXUtils::ExecuteCommandListAndWaitForCompletion(cmdListData);
 
 	// Initialize recoders's pso
 	SkyBoxCmdListRecorder::InitPSO();
@@ -102,11 +76,11 @@ void SkyBoxPass::Init(
 		colorBufferCpuDesc,
 		depthBufferCpuDesc);
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 
 	mCmdListExecutor->ResetExecutedCmdListCount();
 	mRecorder->RecordAndPushCommandLists(frameCBuffer);
@@ -117,7 +91,7 @@ void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 	}
 }
 
-bool SkyBoxPass::ValidateData() const noexcept {
+bool SkyBoxPass::IsDataValid() const noexcept {
 	const bool b =
 		mCmdListExecutor != nullptr &&
 		mRecorder.get() != nullptr &&

@@ -66,15 +66,15 @@ void PostProcessCmdListRecorder::InitPSO() noexcept {
 }
 
 void PostProcessCmdListRecorder::Init(ID3D12Resource& colorBuffer) noexcept  {
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 	
 	BuildBuffers(colorBuffer);
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
 
@@ -109,7 +109,7 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
-bool PostProcessCmdListRecorder::ValidateData() const noexcept {
+bool PostProcessCmdListRecorder::IsDataValid() const noexcept {
 
 	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAlloc[i] == nullptr) {

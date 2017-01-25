@@ -12,42 +12,38 @@ class Model;
 
 namespace SceneUtils {
 
-	class ResourceContainer {
+	class SceneResources {
 	public:
-		ResourceContainer() = default;
-		~ResourceContainer() = default;
-		ResourceContainer(const ResourceContainer&) = delete;
-		const ResourceContainer& operator=(const ResourceContainer&) = delete;
-		ResourceContainer(ResourceContainer&&) = delete;
-		ResourceContainer& operator=(ResourceContainer&&) = delete;
+		SceneResources() = default;
+		~SceneResources() = default;
+		SceneResources(const SceneResources&) = delete;
+		const SceneResources& operator=(const SceneResources&) = delete;
+		SceneResources(SceneResources&&) = delete;
+		SceneResources& operator=(SceneResources&&) = delete;
 
-		// Load all textures from texFiles. Texture index will be equal
-		// to its index in texFiles vector.
-		// Precondition: You must call this method at most once.
-		// Subsequent calls will fail.
 		void LoadTextures(
-			const std::vector<std::string>& texFiles,
+			const std::vector<std::string>& sourceTextureFiles,
 			ID3D12CommandQueue& cmdQueue,
 			ID3D12CommandAllocator& cmdAlloc,
 			ID3D12GraphicsCommandList& cmdList,
 			ID3D12Fence& fence) noexcept;
 
-		ID3D12Resource& GetResource(const std::size_t index) noexcept;
-		std::vector<ID3D12Resource*>& GetResources() noexcept { return mTextures; }
+		// Preconditionts:
+		// - There must be a valid texture at "index" 
+		ID3D12Resource& GetTexture(const std::size_t index) noexcept;
+		const std::vector<ID3D12Resource*>& GetTextures() const noexcept { return mTextures; }
 
-		// Load all models from modelFiles. Model index will be equal
-		// to its index in modelFiles vector.
-		// Precondition: You must call this method at most once.
-		// Subsequent calls will fail.
 		void LoadModels(
-			const std::vector<std::string>& modelFiles,
+			const std::vector<std::string>& modelFilenames,
 			ID3D12CommandQueue& cmdQueue,
 			ID3D12CommandAllocator& cmdAlloc,
 			ID3D12GraphicsCommandList& cmdList,
 			ID3D12Fence& fence) noexcept;
 
-		Model& GetModel(const std::size_t index) noexcept;
-		std::vector<Model*>& GetModels() noexcept { return mModels; }
+		// Preconditionts:
+		// - There must be a valid model at "index" 
+		const Model& GetModel(const std::size_t index) const noexcept;		
+		const std::vector<Model*>& GetModels() const noexcept { return mModels; }
 
 	private:
 		std::vector<ID3D12Resource*> mTextures;

@@ -34,7 +34,7 @@ void PostProcessPass::Init(
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource& colorBuffer) noexcept {
 
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 	
 	CreateCommandObjects(mCmdAllocs, mCmdList);
 	mCmdListExecutor = &cmdListExecutor;
@@ -48,14 +48,14 @@ void PostProcessPass::Init(
 	mRecorder.reset(new PostProcessCmdListRecorder(cmdListExecutor.CmdListQueue()));
 	mRecorder->Init(colorBuffer);
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void PostProcessPass::Execute(
 	ID3D12Resource& frameBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 	ASSERT(frameBufferCpuDesc.ptr != 0UL);
 
 	ExecuteBeginTask(frameBuffer, frameBufferCpuDesc);
@@ -69,7 +69,7 @@ void PostProcessPass::Execute(
 	}
 }
 
-bool PostProcessPass::ValidateData() const noexcept {
+bool PostProcessPass::IsDataValid() const noexcept {
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAllocs[i] == nullptr) {
 			return false;
@@ -90,7 +90,7 @@ void PostProcessPass::ExecuteBeginTask(
 	ID3D12Resource& frameBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 	ASSERT(frameBufferCpuDesc.ptr != 0UL);
 
 	// Used to choose a different command list allocator each call.

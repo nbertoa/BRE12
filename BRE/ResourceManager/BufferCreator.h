@@ -15,7 +15,7 @@ namespace  BufferCreator {
 		BufferParams(BufferParams&&) = delete;
 		BufferParams& operator=(BufferParams&&) = delete;
 
-		bool ValidateData() const noexcept;
+		bool IsDataValid() const noexcept;
 
 		const void* mData{ nullptr };
 		std::uint32_t mElemCount{ 0U };
@@ -42,7 +42,7 @@ namespace  BufferCreator {
 		VertexBufferData(VertexBufferData&&) = default;
 		VertexBufferData& operator=(VertexBufferData&&) = default;
 
-		bool ValidateData() const noexcept;
+		bool IsDataValid() const noexcept;
 
 		ID3D12Resource* mBuffer{ nullptr };
 		D3D12_VERTEX_BUFFER_VIEW mBufferView{};
@@ -75,7 +75,7 @@ namespace  BufferCreator {
 		IndexBufferData(IndexBufferData&&) = default;
 		IndexBufferData& operator=(IndexBufferData&&) = default;
 
-		bool ValidateData() const noexcept;
+		bool IsDataValid() const noexcept;
 
 		ID3D12Resource* mBuffer{ nullptr };
 		D3D12_INDEX_BUFFER_VIEW mBufferView{};

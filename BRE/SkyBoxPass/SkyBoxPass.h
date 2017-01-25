@@ -32,7 +32,7 @@ public:
 
 private:
 	// Method used internally for validation purposes
-	bool ValidateData() const noexcept;
+	bool IsDataValid() const noexcept;
 	
 	CommandListExecutor* mCmdListExecutor{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc{ nullptr };

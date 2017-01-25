@@ -9,7 +9,7 @@ namespace {
 		const BufferCreator::BufferParams& bufferParams, 
 		BufferCreator::VertexBufferData& bufferData,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) {
-		ASSERT(bufferParams.ValidateData());
+		ASSERT(bufferParams.IsDataValid());
 
 		// Create buffer
 		const std::uint32_t byteSize{ bufferParams.mElemCount * static_cast<std::uint32_t>(bufferParams.mElemSize) };
@@ -21,7 +21,7 @@ namespace {
 		bufferData.mBufferView.SizeInBytes = byteSize;
 		bufferData.mBufferView.StrideInBytes = static_cast<std::uint32_t>(bufferParams.mElemSize);
 
-		ASSERT(bufferData.ValidateData());
+		ASSERT(bufferData.IsDataValid());
 	}
 
 	void CreateIndexBuffer(
@@ -29,7 +29,7 @@ namespace {
 		const BufferCreator::BufferParams& bufferParams, 
 		BufferCreator::IndexBufferData& bufferData,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) {
-		ASSERT(bufferParams.ValidateData());
+		ASSERT(bufferParams.IsDataValid());
 
 		// Create buffer
 		const std::uint32_t elemSize{ static_cast<std::uint32_t>(bufferParams.mElemSize) };
@@ -60,7 +60,7 @@ namespace {
 		bufferData.mBufferView.Format = format; 
 		bufferData.mBufferView.SizeInBytes = byteSize;
 
-		ASSERT(bufferData.ValidateData());
+		ASSERT(bufferData.IsDataValid());
 	}
 }
 
@@ -72,11 +72,11 @@ namespace BufferCreator {
 	{
 	}
 
-	bool BufferParams::ValidateData() const noexcept {
+	bool BufferParams::IsDataValid() const noexcept {
 		return mData != nullptr && mElemCount != 0U && mElemSize != 0UL;
 	}
 
-	bool VertexBufferData::ValidateData() const noexcept {
+	bool VertexBufferData::IsDataValid() const noexcept {
 		D3D12_VERTEX_BUFFER_VIEW invalidView{};
 
 		return 
@@ -92,12 +92,12 @@ namespace BufferCreator {
 		const BufferParams& bufferParams, 
 		VertexBufferData& bufferData,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept {
-		ASSERT(bufferParams.ValidateData());
+		ASSERT(bufferParams.IsDataValid());
 		CreateVertexBuffer(cmdList, bufferParams, bufferData, uploadBuffer);
-		ASSERT(bufferData.ValidateData());
+		ASSERT(bufferData.IsDataValid());
 	}
 
-	bool IndexBufferData::ValidateData() const noexcept {
+	bool IndexBufferData::IsDataValid() const noexcept {
 		D3D12_INDEX_BUFFER_VIEW invalidView{};
 
 		return
@@ -113,9 +113,9 @@ namespace BufferCreator {
 		const BufferParams& bufferParams, 
 		IndexBufferData& bufferData,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept {
-		ASSERT(bufferParams.ValidateData());
+		ASSERT(bufferParams.IsDataValid());
 		CreateIndexBuffer(cmdList, bufferParams, bufferData, uploadBuffer);
-		ASSERT(bufferData.ValidateData());
+		ASSERT(bufferData.IsDataValid());
 	}
 }
 

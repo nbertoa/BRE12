@@ -36,7 +36,7 @@ void ToneMappingPass::Init(
 	ID3D12Resource& outputColorBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept {
 
-	ASSERT(ValidateData() == false);
+	ASSERT(IsDataValid() == false);
 	
 	CreateCommandObjects(mCmdAllocs, mCmdList);
 	mCmdListExecutor = &cmdListExecutor;
@@ -51,11 +51,11 @@ void ToneMappingPass::Init(
 	mRecorder.reset(new ToneMappingCmdListRecorder(cmdListExecutor.CmdListQueue()));
 	mRecorder->Init(*mInputColorBuffer, outputBufferCpuDesc);
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 }
 
 void ToneMappingPass::Execute() noexcept {
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 
 	ExecuteBeginTask();
 
@@ -68,7 +68,7 @@ void ToneMappingPass::Execute() noexcept {
 	}
 }
 
-bool ToneMappingPass::ValidateData() const noexcept {
+bool ToneMappingPass::IsDataValid() const noexcept {
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAllocs[i] == nullptr) {
 			return false;
@@ -88,7 +88,7 @@ bool ToneMappingPass::ValidateData() const noexcept {
 
 void ToneMappingPass::ExecuteBeginTask() noexcept {
 
-	ASSERT(ValidateData());
+	ASSERT(IsDataValid());
 
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };
