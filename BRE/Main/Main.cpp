@@ -1,6 +1,5 @@
 #include <windows.h>
 
-#include <App/App.h>
 #include <ExampleScenes\AmbientOcclussionScene.h>
 #include <ExampleScenes\ColorHeightScene.h>
 #include <ExampleScenes/ColorMappingScene.h>
@@ -9,13 +8,15 @@
 #include <ExampleScenes\NormalScene.h>
 #include <ExampleScenes\MaterialShowcaseScene.h>
 #include <ExampleScenes\TextureScene.h>
+#include <SceneExecutor/SceneExecutor.h>
 
 int WINAPI WinMain(_In_ HINSTANCE moduleInstanceHandle, 
 				   _In_opt_ HINSTANCE /*previousModuleInstanceHandle*/, 
 				   _In_ LPSTR /*commandLine*/, 
 	               _In_ int /*showCommand*/) {
-	AmbientOcclussionScene scene;
-	App app(moduleInstanceHandle, &scene);
+	SceneExecutor::Create(moduleInstanceHandle, new AmbientOcclussionScene());
+	SceneExecutor::Get().Execute();
+	SceneExecutor::Destroy();
 
 	return 0;
 }

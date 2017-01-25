@@ -117,16 +117,14 @@ namespace {
 
 using namespace DirectX;
 
-MasterRender* MasterRender::Create(const HWND hwnd, Scene* scene) noexcept {
-	ASSERT(scene != nullptr);
-
+MasterRender* MasterRender::Create(const HWND hwnd, Scene& scene) noexcept {
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
 	// Reference count is 2: 1 parent task + 1 master render task
 	parent->set_ref_count(2);
 	return new (parent->allocate_child()) MasterRender(hwnd, scene);
 }
 
-MasterRender::MasterRender(const HWND hwnd, Scene* scene)
+MasterRender::MasterRender(const HWND hwnd, Scene& scene)
 	: mHwnd(hwnd)
 {
 	ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
@@ -146,25 +144,23 @@ MasterRender::MasterRender(const HWND hwnd, Scene* scene)
 	parent()->spawn(*this);
 }
 
-void MasterRender::InitPasses(Scene* scene) noexcept {
-	ASSERT(scene != nullptr);
-
+void MasterRender::InitPasses(Scene& scene) noexcept {
 	// Initialize scene
-	scene->Init(*mCmdQueue);
+	scene.Init(*mCmdQueue);
 	
 	// Generate recorders for all the passes
-	scene->GenerateGeomPassRecorders(mGeometryPass.GetRecorders());
+	scene.GenerateGeomPassRecorders(mGeometryPass.GetRecorders());
 	mGeometryPass.Init(DepthStencilCpuDesc(), *mCmdListExecutor, *mCmdQueue);
 
 	ID3D12Resource* skyBoxCubeMap;
 	ID3D12Resource* diffuseIrradianceCubeMap;
 	ID3D12Resource* specularPreConvolvedCubeMap;
-	scene->GenerateCubeMaps(skyBoxCubeMap, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
+	scene.GenerateCubeMaps(skyBoxCubeMap, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
 	ASSERT(skyBoxCubeMap != nullptr);
 	ASSERT(diffuseIrradianceCubeMap != nullptr);
 	ASSERT(specularPreConvolvedCubeMap != nullptr);
 
-	scene->GenerateLightingPassRecorders(
+	scene.GenerateLightingPassRecorders(
 		mGeometryPass.GetBuffers(), 
 		GeometryPass::BUFFERS_COUNT, 
 		*mDepthStencilBuffer, 

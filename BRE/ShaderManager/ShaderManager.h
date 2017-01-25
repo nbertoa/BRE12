@@ -9,7 +9,12 @@
 // This class is responsible to create/get/erase shaders
 class ShaderManager {
 public:
+	// Preconditions:
+	// - Create() must be called once
 	static ShaderManager& Create() noexcept;
+
+	// Preconditions:
+	// - Create() must be called before this method
 	static ShaderManager& Get() noexcept;
 	
 	~ShaderManager() = default;

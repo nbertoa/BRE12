@@ -1,4 +1,6 @@
-#include "App.h"
+#include "SceneExecutor.h"
+
+#include <memory>
 
 #include <CommandManager/CommandManager.h>
 #include <DescriptorManager/DescriptorManager.h>
@@ -19,9 +21,12 @@
 using namespace DirectX;
 
 namespace {
-	void InitSystems(const HWND windowHandle, 
-					 const HINSTANCE moduleInstanceHandle) noexcept 
+	std::unique_ptr<SceneExecutor> gSceneExecutor{ nullptr };
+
+	void CreateSystems(const HINSTANCE moduleInstanceHandle) noexcept 
 	{
+		const HWND windowHandle = DirectXManager::WindowHandle();
+
 		LPDIRECTINPUT8 directInput;
 		CHECK_HR(DirectInput8Create(moduleInstanceHandle, 
 									DIRECTINPUT_VERSION, 
@@ -71,19 +76,37 @@ namespace {
 
 using namespace DirectX;
 
-App::App(HINSTANCE hInstance, Scene* scene)
-	: mTaskSchedulerInit()
-{	
-	ASSERT(scene != nullptr);
-	DirectXManager::InitDirect3D(hInstance);
-	InitSystems(DirectXManager::WindowHandle(), hInstance);
-	mMasterRender = MasterRender::Create(DirectXManager::WindowHandle(), scene);
-
-	RunMessageLoop();
+SceneExecutor& SceneExecutor::Create(HINSTANCE moduleInstanceHandle, Scene* scene) noexcept {
+	ASSERT(gSceneExecutor == nullptr);
+	gSceneExecutor.reset(new SceneExecutor(moduleInstanceHandle, scene));
+	return *gSceneExecutor.get();
+}
+SceneExecutor& SceneExecutor::Get() noexcept {
+	ASSERT(gSceneExecutor != nullptr);
+	return *gSceneExecutor.get();
 }
 
-App::~App() {	
+void SceneExecutor::Destroy() noexcept {
+	ASSERT(gSceneExecutor != nullptr);
+	gSceneExecutor.reset();
+}
+
+SceneExecutor::~SceneExecutor() {
 	ASSERT(mMasterRender != nullptr);
 	mMasterRender->Terminate();
 	mTaskSchedulerInit.terminate();
+}
+
+void SceneExecutor::Execute() noexcept {
+	RunMessageLoop();
+}
+
+SceneExecutor::SceneExecutor(HINSTANCE moduleInstanceHandle, Scene* scene)
+	: mTaskSchedulerInit()
+	, mScene(scene)
+{
+	ASSERT(scene != nullptr);
+	DirectXManager::InitDirect3D(moduleInstanceHandle);
+	CreateSystems(moduleInstanceHandle);
+	mMasterRender = MasterRender::Create(DirectXManager::WindowHandle(), *mScene.get());	
 }

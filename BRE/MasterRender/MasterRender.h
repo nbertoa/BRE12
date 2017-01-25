@@ -23,7 +23,7 @@ class Scene;
 // - When you want to terminate this task, you should call MasterRender::Terminate()
 class MasterRender : public tbb::task {
 public:
-	static MasterRender* Create(const HWND hwnd, Scene* scene) noexcept;
+	static MasterRender* Create(const HWND hwnd, Scene& scene) noexcept;
 
 	~MasterRender() = default;
 	MasterRender(const MasterRender&) = delete;
@@ -34,12 +34,12 @@ public:
 	void Terminate() noexcept;
 
 private:
-	explicit MasterRender(const HWND hwnd, Scene* scene);
+	explicit MasterRender(const HWND hwnd, Scene& scene);
 
 	// Called when tbb::task is spawned
 	tbb::task* execute() final override;
 
-	void InitPasses(Scene* scene) noexcept;
+	void InitPasses(Scene& scene) noexcept;
 
 	void CreateRtvAndDsv() noexcept;
 	void CreateColorBuffers() noexcept;

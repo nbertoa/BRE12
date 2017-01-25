@@ -16,10 +16,6 @@ public:
 	__forceinline DirectX::XMFLOAT3 GetPosition3f() const noexcept { return mPosition; }
 	__forceinline DirectX::XMFLOAT4 GetPosition4f() const noexcept { return DirectX::XMFLOAT4(mPosition.x, mPosition.y, mPosition.z, 1.0f); }
 	__forceinline void SetPosition(const DirectX::XMFLOAT3& v) noexcept { mPosition = v; }
-	
-	__forceinline DirectX::XMFLOAT3 GetRightVector3f() const noexcept { return mRightVector; }
-	__forceinline DirectX::XMFLOAT3 GetUpVector3f() const noexcept { return mUpVector; }
-	__forceinline DirectX::XMFLOAT3 GetLookVector3f() const noexcept { return mLookVector; }
 		
 	void SetFrustum(const float verticalFieldOfView,
 					const float aspectRatio, 

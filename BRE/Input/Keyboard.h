@@ -6,6 +6,8 @@
 
 class Keyboard {
 public:
+	// Preconditions:
+	// - Create() must be called once
 	static Keyboard& Create(IDirectInput8& directInput, const HWND windowHandle) noexcept;
 
 	// Preconditions:
