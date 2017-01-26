@@ -6,7 +6,7 @@
 #include <DirectXManager\DirectXManager.h>
 #include <MaterialManager/Material.h>
 #include <MathUtils/MathUtils.h>
-#include <PSOCreator/PSOCreator.h>
+#include <PSOManager/PSOManager.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ResourceManager/UploadBuffer.h>
 #include <ShaderUtils\CBuffers.h>
@@ -30,14 +30,14 @@ void ColorCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, con
 	ASSERT(sRootSign == nullptr);
 
 	// Build pso and root signature
-	PSOCreator::PSOParams psoParams{};
-	psoParams.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
-	psoParams.mPSFilename = "GeometryPass/Shaders/ColorMapping/PS.cso";
-	psoParams.mRootSignFilename = "GeometryPass/Shaders/ColorMapping/RS.cso";
-	psoParams.mVSFilename = "GeometryPass/Shaders/ColorMapping/VS.cso";
-	psoParams.mNumRenderTargets = geometryBufferCount;
-	memcpy(psoParams.mRtFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
-	PSOCreator::CreatePSO(psoParams, sPSO, sRootSign);
+	PSOManager::PSOCreationData psoData{};
+	psoData.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
+	psoData.mPSFilename = "GeometryPass/Shaders/ColorMapping/PS.cso";
+	psoData.mRootSignFilename = "GeometryPass/Shaders/ColorMapping/RS.cso";
+	psoData.mVSFilename = "GeometryPass/Shaders/ColorMapping/VS.cso";
+	psoData.mNumRenderTargets = geometryBufferCount;
+	memcpy(psoData.mRtFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSign);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);

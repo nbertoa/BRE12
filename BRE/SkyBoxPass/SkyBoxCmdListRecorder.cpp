@@ -6,7 +6,7 @@
 #include <CommandManager/CommandListManager.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
-#include <PSOCreator/PSOCreator.h>
+#include <PSOManager/PSOManager.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ResourceManager/UploadBuffer.h>
 #include <ShaderUtils\CBuffers.h>
@@ -54,25 +54,25 @@ void SkyBoxCmdListRecorder::InitPSO() noexcept {
 	ASSERT(sRootSign == nullptr);
 
 	// Build pso and root signature
-	PSOCreator::PSOParams psoParams{};
-	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
+	PSOManager::PSOCreationData psoData{};
+	const std::size_t rtCount{ _countof(psoData.mRtFormats) };
 	// The camera is inside the sky sphere, so just turn off culling.
-	psoParams.mRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	psoData.mRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	// Make sure the depth function is LESS_EQUAL and not just GREATER.  
 	// Otherwise, the normalized depth values at z = 1 (NDC) will 
 	// fail the depth test if the depth buffer was cleared to 1.
-	psoParams.mDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	psoParams.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
-	psoParams.mPSFilename = "SkyBoxPass/Shaders/PS.cso";
-	psoParams.mRootSignFilename = "SkyBoxPass/Shaders/RS.cso";
-	psoParams.mVSFilename = "SkyBoxPass/Shaders/VS.cso";
-	psoParams.mNumRenderTargets = 1U;
-	psoParams.mRtFormats[0U] = SettingsManager::sColorBufferFormat;
-	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
-		psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
+	psoData.mDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	psoData.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
+	psoData.mPSFilename = "SkyBoxPass/Shaders/PS.cso";
+	psoData.mRootSignFilename = "SkyBoxPass/Shaders/RS.cso";
+	psoData.mVSFilename = "SkyBoxPass/Shaders/VS.cso";
+	psoData.mNumRenderTargets = 1U;
+	psoData.mRtFormats[0U] = SettingsManager::sColorBufferFormat;
+	for (std::size_t i = psoData.mNumRenderTargets; i < rtCount; ++i) {
+		psoData.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
-	psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	PSOCreator::CreatePSO(psoParams, sPSO, sRootSign);
+	psoData.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSign);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);

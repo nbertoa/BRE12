@@ -155,7 +155,7 @@ std::size_t ResourceManager::CreateCommittedResource(
 	accessor->second = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
 	accessor.release();
 
-	ResourceStateManager::Get().Add(*res, resStates);
+	ResourceStateManager::Get().AddResource(*res, resStates);
 
 	return id;
 }

@@ -88,26 +88,6 @@ public:
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
-	// Creates a quad aligned with the screen.  This is useful for post-processing and screen effects.
-	std::size_t CreateQuad(
-		const float x, 
-		const float y, 
-		const float w, 
-		const float h,
-		const float depth, 
-		Model* &model, 
-		ID3D12GraphicsCommandList& cmdList,
-		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
-
-	// Creates a full screen quad aligned with the screen. This is useful for post-processing and screen effects.
-	// Position coordinates will be in NDC.
-	std::size_t CreateFullscreenQuad(
-		Model* &model,
-		ID3D12GraphicsCommandList& cmdList,
-		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
-
 	// Asserts if id does not exist
 	Model& GetModel(const std::size_t id) noexcept;
 

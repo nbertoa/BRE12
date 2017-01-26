@@ -244,10 +244,10 @@ void MasterRender::ExecuteMergePass() {
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		ResourceStateManager::Get().TransitionState(*mGeometryPass.GetBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
-		ResourceStateManager::Get().TransitionState(*mGeometryPass.GetBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
-		ResourceStateManager::Get().TransitionState(*CurrentFrameBuffer(), D3D12_RESOURCE_STATE_PRESENT),
-		ResourceStateManager::Get().TransitionState(*mColorBuffer1.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),	
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mGeometryPass.GetBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mGeometryPass.GetBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*CurrentFrameBuffer(), D3D12_RESOURCE_STATE_PRESENT),
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mColorBuffer1.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),	
 	};
 	const std::size_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 2UL);
@@ -272,7 +272,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	for (std::uint32_t i = 0U; i < SettingsManager::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
 		RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDesc, &mFrameBufferRTVs[i]);
-		ResourceStateManager::Get().Add(*mFrameBuffers[i].Get(), D3D12_RESOURCE_STATE_PRESENT);
+		ResourceStateManager::Get().AddResource(*mFrameBuffers[i].Get(), D3D12_RESOURCE_STATE_PRESENT);
 	}
 
 	// Create the depth/stencil buffer and view.

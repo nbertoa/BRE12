@@ -5,33 +5,36 @@
 using namespace DirectX;
 
 namespace {
-	GeometryGenerator::Vertex MidPoint(const GeometryGenerator::Vertex& v0, const GeometryGenerator::Vertex& v1) noexcept {
-		const XMVECTOR p0(XMLoadFloat3(&v0.mPosition));
-		const XMVECTOR p1(XMLoadFloat3(&v1.mPosition));
+	GeometryGenerator::Vertex GetMiddlePoint(
+		const GeometryGenerator::Vertex& vertex0, 
+		const GeometryGenerator::Vertex& vertex1) noexcept 
+	{
+		const XMVECTOR point0(XMLoadFloat3(&vertex0.mPosition));
+		const XMVECTOR point1(XMLoadFloat3(&vertex1.mPosition));
 
-		const XMVECTOR n0(XMLoadFloat3(&v0.mNormal));
-		const XMVECTOR n1(XMLoadFloat3(&v1.mNormal));
+		const XMVECTOR normal0(XMLoadFloat3(&vertex0.mNormal));
+		const XMVECTOR normal1(XMLoadFloat3(&vertex1.mNormal));
 
-		const XMVECTOR tan0(XMLoadFloat3(&v0.mTangentU));
-		const XMVECTOR tan1(XMLoadFloat3(&v1.mTangentU));
+		const XMVECTOR tangent0(XMLoadFloat3(&vertex0.mTangent));
+		const XMVECTOR tangent1(XMLoadFloat3(&vertex1.mTangent));
 
-		const XMVECTOR tex0(XMLoadFloat2(&v0.mTexC));
-		const XMVECTOR tex1(XMLoadFloat2(&v1.mTexC));
+		const XMVECTOR uv0(XMLoadFloat2(&vertex0.mTextureCoordinates));
+		const XMVECTOR uv1(XMLoadFloat2(&vertex1.mTextureCoordinates));
 
-		// Compute the midpoints of all the attributes.  Vectors need to be normalized
+		// Compute the midpoints of all the attributes. Vectors need to be normalized
 		// since linear interpolating can make them not unit length.  
-		const XMVECTOR pos(0.5f * (p0 + p1));
-		const XMVECTOR normal(XMVector3Normalize(0.5f * (n0 + n1)));
-		const XMVECTOR tangent(XMVector3Normalize(0.5f * (tan0 + tan1)));
-		const XMVECTOR tex(0.5f * (tex0 + tex1));
+		const XMVECTOR position(0.5f * (point0 + point1));
+		const XMVECTOR normal(XMVector3Normalize(0.5f * (normal0 + normal1)));
+		const XMVECTOR tangent(XMVector3Normalize(0.5f * (tangent0 + tangent1)));
+		const XMVECTOR uv(0.5f * (uv0 + uv1));
 
-		GeometryGenerator::Vertex v;
-		XMStoreFloat3(&v.mPosition, pos);
-		XMStoreFloat3(&v.mNormal, normal);
-		XMStoreFloat3(&v.mTangentU, tangent);
-		XMStoreFloat2(&v.mTexC, tex);
+		GeometryGenerator::Vertex middleVertex;
+		XMStoreFloat3(&middleVertex.mPosition, position);
+		XMStoreFloat3(&middleVertex.mNormal, normal);
+		XMStoreFloat3(&middleVertex.mTangent, tangent);
+		XMStoreFloat2(&middleVertex.mTextureCoordinates, uv);
 
-		return v;
+		return middleVertex;
 	}
 
 	void Subdivide(GeometryGenerator::MeshData& meshData) noexcept {
@@ -44,15 +47,15 @@ namespace {
 		//       v1
 		//       *
 		//      / \
-				//     /   \
-	//  m0*-----*m1
-//   / \   / \
-	//  /   \ /   \
-	// *-----*-----*
-// v0    m2     v2
+		//     /   \
+		//  m0*-----*m1
+		//   / \   / \
+		//  /   \ /   \
+		// *-----*-----*
+		// v0    m2     v2
 
-		const std::uint32_t numTris{ static_cast<std::uint32_t>(inputCopy.mIndices32.size()) / 3U };
-		for (std::uint32_t i = 0; i < numTris; ++i) {
+		const std::uint32_t numTriangles{ static_cast<std::uint32_t>(inputCopy.mIndices32.size()) / 3U };
+		for (std::uint32_t i = 0; i < numTriangles; ++i) {
 			const std::uint32_t i3{ i * 3U };
 			const GeometryGenerator::Vertex v0{ inputCopy.mVertices[inputCopy.mIndices32[i3 + 0U]] };
 			const GeometryGenerator::Vertex v1{ inputCopy.mVertices[inputCopy.mIndices32[i3 + 1U]] };
@@ -62,9 +65,9 @@ namespace {
 			// Generate the midpoints.
 			//
 
-			const GeometryGenerator::Vertex m0{ MidPoint(v0, v1) };
-			const GeometryGenerator::Vertex m1{ MidPoint(v1, v2) };
-			const GeometryGenerator::Vertex m2{ MidPoint(v0, v2) };
+			const GeometryGenerator::Vertex m0{ GetMiddlePoint(v0, v1) };
+			const GeometryGenerator::Vertex m1{ GetMiddlePoint(v1, v2) };
+			const GeometryGenerator::Vertex m2{ GetMiddlePoint(v0, v2) };
 
 			//
 			// Add new geometry.
@@ -97,7 +100,12 @@ namespace {
 		}
 	}
 
-	void BuildCylinderTopCap(const float topRadius, const float height, const std::uint32_t sliceCount, GeometryGenerator::MeshData& meshData) noexcept {
+	void BuildCylinderTopCap(
+		const float topRadius, 
+		const float height, 
+		const std::uint32_t sliceCount, 
+		GeometryGenerator::MeshData& meshData) noexcept 
+	{
 		const std::uint32_t baseIndex{ static_cast<std::uint32_t>(meshData.mVertices.size()) };
 
 		const float y{ 0.5f * height };
@@ -129,7 +137,12 @@ namespace {
 		}
 	}
 
-	void BuildCylinderBottomCap(const float bottomRadius, const float height, const std::uint32_t sliceCount, GeometryGenerator::MeshData& meshData) noexcept {
+	void BuildCylinderBottomCap(
+		const float bottomRadius, 
+		const float height, 
+		const std::uint32_t sliceCount, 
+		GeometryGenerator::MeshData& meshData) noexcept 
+	{
 		// 
 		// Build bottom cap.
 		//
@@ -166,11 +179,15 @@ namespace {
 }
 
 namespace GeometryGenerator {
-	Vertex::Vertex(const XMFLOAT3& p, const XMFLOAT3& n, const XMFLOAT3& t, const XMFLOAT2& uv) 
-		: mPosition(p)
-		, mNormal(n)
-		, mTangentU(t)
-		, mTexC(uv) 
+	Vertex::Vertex(
+		const XMFLOAT3& position, 
+		const XMFLOAT3& normal, 
+		const XMFLOAT3& tangent, 
+		const XMFLOAT2& textureCoordinates) 
+		: mPosition(position)
+		, mNormal(normal)
+		, mTangent(tangent)
+		, mTextureCoordinates(textureCoordinates) 
 	{
 	}
 
@@ -185,7 +202,13 @@ namespace GeometryGenerator {
 		return mIndices16;
 	}
 
-	void CreateBox(const float width, const float height, const float depth, const std::uint32_t numSubdivisions, MeshData& meshData) noexcept {
+	void CreateBox(
+		const float width, 
+		const float height, 
+		const float depth,
+		const std::uint32_t numSubdivisions, 
+		MeshData& meshData) noexcept 
+	{
 		//
 		// Create the vertices.
 		//
@@ -274,7 +297,12 @@ namespace GeometryGenerator {
 		}
 	}
 
-	void GeometryGenerator::CreateSphere(const float radius, const std::uint32_t sliceCount, const std::uint32_t stackCount, MeshData& meshData) noexcept {
+	void GeometryGenerator::CreateSphere(
+		const float radius, 
+		const std::uint32_t sliceCount,
+		const std::uint32_t stackCount, 
+		MeshData& meshData) noexcept 
+	{
 		//
 		// Compute the vertices stating at the top pole and moving down the stacks.
 		//
@@ -307,18 +335,18 @@ namespace GeometryGenerator {
 				v.mPosition.z = radius * sinf(phi) * sinf(theta);
 
 				// Partial derivative of P with respect to theta
-				v.mTangentU.x = -radius * sinf(phi) * sinf(theta);
-				v.mTangentU.y = 0.0f;
-				v.mTangentU.z = +radius * sinf(phi) * cosf(theta);
+				v.mTangent.x = -radius * sinf(phi) * sinf(theta);
+				v.mTangent.y = 0.0f;
+				v.mTangent.z = +radius * sinf(phi) * cosf(theta);
 
-				const XMVECTOR T(XMLoadFloat3(&v.mTangentU));
-				XMStoreFloat3(&v.mTangentU, XMVector3Normalize(T));
+				const XMVECTOR T(XMLoadFloat3(&v.mTangent));
+				XMStoreFloat3(&v.mTangent, XMVector3Normalize(T));
 
 				const XMVECTOR p(XMLoadFloat3(&v.mPosition));
 				XMStoreFloat3(&v.mNormal, XMVector3Normalize(p));
 
-				v.mTexC.x = theta / XM_2PI;
-				v.mTexC.y = phi / XM_PI;
+				v.mTextureCoordinates.x = theta / XM_2PI;
+				v.mTextureCoordinates.y = phi / XM_PI;
 
 				meshData.mVertices.push_back(v);
 			}
@@ -435,16 +463,16 @@ namespace GeometryGenerator {
 
 			const float phi{ acosf(meshData.mVertices[i].mPosition.y / radius) };
 
-			meshData.mVertices[i].mTexC.x = theta / XM_2PI;
-			meshData.mVertices[i].mTexC.y = phi / XM_PI;
+			meshData.mVertices[i].mTextureCoordinates.x = theta / XM_2PI;
+			meshData.mVertices[i].mTextureCoordinates.y = phi / XM_PI;
 
 			// Partial derivative of P with respect to theta
-			meshData.mVertices[i].mTangentU.x = -radius * sinf(phi) * sinf(theta);
-			meshData.mVertices[i].mTangentU.y = 0.0f;
-			meshData.mVertices[i].mTangentU.z = +radius * sinf(phi) * cosf(theta);
+			meshData.mVertices[i].mTangent.x = -radius * sinf(phi) * sinf(theta);
+			meshData.mVertices[i].mTangent.y = 0.0f;
+			meshData.mVertices[i].mTangent.z = +radius * sinf(phi) * cosf(theta);
 
-			const XMVECTOR T(XMLoadFloat3(&meshData.mVertices[i].mTangentU));
-			XMStoreFloat3(&meshData.mVertices[i].mTangentU, XMVector3Normalize(T));
+			const XMVECTOR T(XMLoadFloat3(&meshData.mVertices[i].mTangent));
+			XMStoreFloat3(&meshData.mVertices[i].mTangent, XMVector3Normalize(T));
 		}
 	}
 
@@ -454,7 +482,8 @@ namespace GeometryGenerator {
 		const float height,
 		const std::uint32_t sliceCount, 
 		const std::uint32_t stackCount, 
-		MeshData& meshData) noexcept {
+		MeshData& meshData) noexcept 
+	{
 		//
 		// Build Stacks.
 		// 
@@ -481,8 +510,8 @@ namespace GeometryGenerator {
 
 				vertex.mPosition = XMFLOAT3{ r * c, y, r * s };
 
-				vertex.mTexC.x = static_cast<float>(j) / sliceCount;
-				vertex.mTexC.y = 1.0f - static_cast<float>(i) / stackCount;
+				vertex.mTextureCoordinates.x = static_cast<float>(j) / sliceCount;
+				vertex.mTextureCoordinates.y = 1.0f - static_cast<float>(i) / stackCount;
 
 				// Cylinder can be parameterized as follows, where we introduce v
 				// parameter that goes in the same direction as the v tex-coord
@@ -504,12 +533,12 @@ namespace GeometryGenerator {
 				//  dz/dv = (r0-r1)*sin(t)
 
 				// This is unit length.
-				vertex.mTangentU = XMFLOAT3{ -s, 0.0f, c };
+				vertex.mTangent = XMFLOAT3{ -s, 0.0f, c };
 
 				const float dr{ bottomRadius - topRadius };
 				const XMFLOAT3 bitangent{ dr * c, -height, dr * s };
 
-				const XMVECTOR T(XMLoadFloat3(&vertex.mTangentU));
+				const XMVECTOR T(XMLoadFloat3(&vertex.mTangent));
 				const XMVECTOR B(XMLoadFloat3(&bitangent));
 				const XMVECTOR N(XMVector3Normalize(XMVector3Cross(T, B)));
 				XMStoreFloat3(&vertex.mNormal, N);
@@ -564,11 +593,11 @@ namespace GeometryGenerator {
 
 				meshData.mVertices[i * n + j].mPosition = XMFLOAT3{ x, 0.0f, z };
 				meshData.mVertices[i * n + j].mNormal = XMFLOAT3{ 0.0f, 1.0f, 0.0f };
-				meshData.mVertices[i * n + j].mTangentU = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
+				meshData.mVertices[i * n + j].mTangent = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
 
 				// Stretch texture over grid.
-				meshData.mVertices[i * n + j].mTexC.x = j * du;
-				meshData.mVertices[i * n + j].mTexC.y = i * dv;
+				meshData.mVertices[i * n + j].mTextureCoordinates.x = j * du;
+				meshData.mVertices[i * n + j].mTextureCoordinates.y = i * dv;
 			}
 		}
 
@@ -595,85 +624,5 @@ namespace GeometryGenerator {
 				k += 6U; // next quad
 			}
 		}
-	}
-
-	void CreateQuad(const float x, const float y, const float w, const float h, const float depth, MeshData& meshData) noexcept {
-		meshData.mVertices.resize(4U);
-		meshData.mIndices32.resize(6U);
-
-		// Position coordinates specified in NDC space.
-		meshData.mVertices[0U] = Vertex{
-			XMFLOAT3{ x, y - h, depth },
-			XMFLOAT3{ 0.0f, 0.0f, -1.0f },
-			XMFLOAT3{ 1.0f, 0.0f, 0.0f },
-			XMFLOAT2{ 0.0f, 1.0f } };
-
-		meshData.mVertices[1U] = Vertex{
-			XMFLOAT3{ x, y, depth },
-			XMFLOAT3{ 0.0f, 0.0f, -1.0f },
-			XMFLOAT3{ 1.0f, 0.0f, 0.0f },
-			XMFLOAT2{ 0.0f, 0.0f } };
-
-		meshData.mVertices[2U] = Vertex{
-			XMFLOAT3{ x + w, y, depth },
-			XMFLOAT3{ 0.0f, 0.0f, -1.0f },
-			XMFLOAT3{ 1.0f, 0.0f, 0.0f },
-			XMFLOAT2{ 1.0f, 0.0f } };
-
-		meshData.mVertices[3U] = Vertex{
-			XMFLOAT3{ x + w, y - h, depth },
-			XMFLOAT3{ 0.0f, 0.0f, -1.0f },
-			XMFLOAT3{ 1.0f, 0.0f, 0.0f },
-			XMFLOAT2{ 1.0f, 1.0f }};
-
-		meshData.mIndices32[0U] = 0U;
-		meshData.mIndices32[1U] = 1U;
-		meshData.mIndices32[2U] = 2U;
-
-		meshData.mIndices32[3U] = 0U;
-		meshData.mIndices32[4U] = 2U;
-		meshData.mIndices32[5U] = 3U;
-	}
-
-	void CreateFullscreenQuad(MeshData& meshData) noexcept {
-		meshData.mVertices.resize(4U);
-		meshData.mIndices32.resize(6U);
-
-		// Position coordinates specified in NDC space.
-		// Bottom left vertex
-		meshData.mVertices[0U] = Vertex{
-			XMFLOAT3{ -1.0f, -1.0f, 0.0f },
-			XMFLOAT3{ 0.0f, 0.0f, -1.0f },
-			XMFLOAT3{ 1.0f, 0.0f, 0.0f },
-			XMFLOAT2{ 0.0f, 1.0f } };
-
-		// Top left vertex
-		meshData.mVertices[1U] = Vertex{
-			XMFLOAT3{ -1.0f, 1.0f, 0.0f },
-			XMFLOAT3{ 0.0f, 0.0f, -1.0f },
-			XMFLOAT3{ 1.0f, 0.0f, 0.0f },
-			XMFLOAT2{ 0.0f, 0.0f } };
-
-		// Top right vertex
-		meshData.mVertices[2U] = Vertex{
-			XMFLOAT3{ 1.0f, 1.0f, 0.0f },
-			XMFLOAT3{ 0.0f, 0.0f, -1.0f },
-			XMFLOAT3{ 1.0f, 0.0f, 0.0f },
-			XMFLOAT2{ 1.0f, 0.0f } };
-
-		// Bottom right vertex
-		meshData.mVertices[3U] = Vertex{
-			XMFLOAT3{ 1.0f, -1.0f, 0.0f },
-			XMFLOAT3{ 0.0f, 0.0f, -1.0f },
-			XMFLOAT3{ 1.0f, 0.0f, 0.0f },
-			XMFLOAT2{ 1.0f, 1.0f } };
-
-		meshData.mIndices32[0U] = 0U;
-		meshData.mIndices32[1U] = 1U;
-		meshData.mIndices32[2U] = 2U;
-
-		meshData.mIndices32[3U] = 0U;
-		meshData.mIndices32[4U] = 2U;
-		meshData.mIndices32[5U] = 3U;
 	}
 }

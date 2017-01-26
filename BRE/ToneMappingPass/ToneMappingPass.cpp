@@ -102,8 +102,8 @@ void ToneMappingPass::ExecuteBeginTask() noexcept {
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		ResourceStateManager::Get().TransitionState(*mInputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		ResourceStateManager::Get().TransitionState(*mOutputColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mInputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mOutputColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
 	mCmdList->ResourceBarrier(_countof(barriers), barriers);
 

@@ -105,8 +105,8 @@ void PostProcessPass::ExecuteBeginTask(
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		ResourceStateManager::Get().TransitionState(*mColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		ResourceStateManager::Get().TransitionState(frameBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),		
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(frameBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),		
 	};
 	mCmdList->ResourceBarrier(_countof(barriers), barriers);
 

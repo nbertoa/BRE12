@@ -5,7 +5,7 @@
 #include <CommandManager/CommandAllocatorManager.h>
 #include <CommandManager/CommandListManager.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
-#include <PSOCreator/PSOCreator.h>
+#include <PSOManager/PSOManager.h>
 #include <Utils/DebugUtils.h>
 
 // Root Signature:
@@ -48,20 +48,20 @@ void AmbientLightCmdListRecorder::InitPSO() noexcept {
 	ASSERT(sRootSign == nullptr);
 
 	// Build pso and root signature
-	PSOCreator::PSOParams psoParams{};
-	const std::size_t rtCount{ _countof(psoParams.mRtFormats) };
-	psoParams.mBlendDesc = D3DFactory::GetAlwaysBlendDesc();
-	psoParams.mDepthStencilDesc = D3DFactory::GetDisabledDepthStencilDesc();
-	psoParams.mPSFilename = "AmbientLightPass/Shaders/AmbientLight/PS.cso";
-	psoParams.mRootSignFilename = "AmbientLightPass/Shaders/AmbientLight/RS.cso";
-	psoParams.mVSFilename = "AmbientLightPass/Shaders/AmbientLight/VS.cso";
-	psoParams.mNumRenderTargets = 1U;
-	psoParams.mRtFormats[0U] = SettingsManager::sColorBufferFormat;
-	for (std::size_t i = psoParams.mNumRenderTargets; i < rtCount; ++i) {
-		psoParams.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
+	PSOManager::PSOCreationData psoData{};
+	const std::size_t rtCount{ _countof(psoData.mRtFormats) };
+	psoData.mBlendDesc = D3DFactory::GetAlwaysBlendDesc();
+	psoData.mDepthStencilDesc = D3DFactory::GetDisabledDepthStencilDesc();
+	psoData.mPSFilename = "AmbientLightPass/Shaders/AmbientLight/PS.cso";
+	psoData.mRootSignFilename = "AmbientLightPass/Shaders/AmbientLight/RS.cso";
+	psoData.mVSFilename = "AmbientLightPass/Shaders/AmbientLight/VS.cso";
+	psoData.mNumRenderTargets = 1U;
+	psoData.mRtFormats[0U] = SettingsManager::sColorBufferFormat;
+	for (std::size_t i = psoData.mNumRenderTargets; i < rtCount; ++i) {
+		psoData.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
-	psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	PSOCreator::CreatePSO(psoParams, sPSO, sRootSign);
+	psoData.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSign);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);

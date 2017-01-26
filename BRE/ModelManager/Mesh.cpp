@@ -22,9 +22,9 @@ namespace {
 			const XMFLOAT3& v2 = meshData.mVertices[i2].mPosition;
 			const XMFLOAT3& v3 = meshData.mVertices[i3].mPosition;
 
-			const XMFLOAT2& w1 = meshData.mVertices[i1].mTexC;
-			const XMFLOAT2& w2 = meshData.mVertices[i2].mTexC;
-			const XMFLOAT2& w3 = meshData.mVertices[i3].mTexC;
+			const XMFLOAT2& w1 = meshData.mVertices[i1].mTextureCoordinates;
+			const XMFLOAT2& w2 = meshData.mVertices[i2].mTextureCoordinates;
+			const XMFLOAT2& w3 = meshData.mVertices[i3].mTextureCoordinates;
 
 			const float x1{ v2.x - v1.x };
 			const float x2{ v3.x - v1.x };
@@ -101,7 +101,7 @@ Mesh::Mesh(
 		const aiVector3D* aiTextureCoordinates{ mesh.mTextureCoords[0U] };
 		ASSERT(aiTextureCoordinates != nullptr);
 		for (std::uint32_t i = 0U; i < numVertices; i++) {
-			meshData.mVertices[i].mTexC = XMFLOAT2(reinterpret_cast<const float*>(&aiTextureCoordinates[i]));
+			meshData.mVertices[i].mTextureCoordinates = XMFLOAT2(reinterpret_cast<const float*>(&aiTextureCoordinates[i]));
 		}
 	}
 	
@@ -122,7 +122,7 @@ Mesh::Mesh(
 	// Tangents
 	if (mesh.HasTangentsAndBitangents()) {
 		for (std::uint32_t i = 0U; i < numVertices; ++i) {
-			meshData.mVertices[i].mTangentU = XMFLOAT3(reinterpret_cast<const float*>(&mesh.mTangents[i]));
+			meshData.mVertices[i].mTangent = XMFLOAT3(reinterpret_cast<const float*>(&mesh.mTangents[i]));
 		}
 	}
 	else {

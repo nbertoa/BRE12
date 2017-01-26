@@ -7,15 +7,19 @@
 
 struct ID3D12Resource;
 
-// Class responsible of tracking resource states to be 
-// able to transition between them easier.
+// To track resource states.
 // Its functionality includes:
 // - Resource state registration
 // - Resource state change
 // - Resource unregistration
 class ResourceStateManager {
 public:
+	// Preconditions:
+	// - Create() must be called once
 	static ResourceStateManager& Create() noexcept;
+
+	// Preconditions:
+	// - Create() must be called before this method
 	static ResourceStateManager& Get() noexcept;
 
 	~ResourceStateManager() = default;
@@ -24,18 +28,20 @@ public:
 	ResourceStateManager(ResourceStateManager&&) = delete;
 	ResourceStateManager& operator=(ResourceStateManager&&) = delete;
 
-	// Register a resource with its initial state. Preconditions:
+	// Preconditions:
 	// - Resource must not have been registered
-	void Add(ID3D12Resource& res, const D3D12_RESOURCE_STATES state) noexcept;
-
-	// Change state of a resource and returns a CD3DX12_RESOURCE_BARRIER. Preconditions:
+	void AddResource(ID3D12Resource& resource, const D3D12_RESOURCE_STATES initialState) noexcept;
+ 
+	// Preconditions:
 	// - Resource must have been registered
 	// - New state must be different than current state
-	CD3DX12_RESOURCE_BARRIER TransitionState(ID3D12Resource& res, const D3D12_RESOURCE_STATES state) noexcept;
+	CD3DX12_RESOURCE_BARRIER ChangeResourceStateAndGetBarrier(
+		ID3D12Resource& resource, 
+		const D3D12_RESOURCE_STATES newState) noexcept;
 
-	// Unregister a resource. Preconditions:
+	// Preconditions:
 	// - Resource must have been registered.
-	void Remove(ID3D12Resource& res) noexcept;
+	void RemoveResource(ID3D12Resource& res) noexcept;
 
 	void Clear() noexcept { mStateByResource.clear(); }
 

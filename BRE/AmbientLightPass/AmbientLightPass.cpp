@@ -183,8 +183,8 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		ResourceStateManager::Get().TransitionState(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
-		ResourceStateManager::Get().TransitionState(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),		
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),		
 	};
 	const std::uint32_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == 2UL);
@@ -213,8 +213,8 @@ void AmbientLightPass::ExecuteEndingTask() noexcept {
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER endBarriers[]{
-		ResourceStateManager::Get().TransitionState(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		ResourceStateManager::Get().TransitionState(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),		
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),		
 	};
 	const std::uint32_t barriersCount = _countof(endBarriers);
 	ASSERT(barriersCount == 2UL);

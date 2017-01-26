@@ -186,62 +186,6 @@ std::size_t ModelManager::CreateGrid(
 	return id;
 }
 
-std::size_t ModelManager::CreateQuad(
-	const float x, 
-	const float y, 
-	const float w, 
-	const float h, 
-	const float depth, 
-	Model* &model, 
-	ID3D12GraphicsCommandList& cmdList,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept {
-	GeometryGenerator::MeshData meshData;
-	GeometryGenerator::CreateQuad(x, y, w, h, depth, meshData);
-
-	mMutex.lock();
-	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
-	mMutex.unlock();
-
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	ModelById::accessor accessor;
-#ifdef _DEBUG
-	mModelById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mModelById.insert(accessor, id);
-	accessor->second.reset(model);
-	accessor.release();
-
-	return id;
-}
-
-std::size_t ModelManager::CreateFullscreenQuad(
-	Model* &model,
-	ID3D12GraphicsCommandList& cmdList,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept {
-
-	GeometryGenerator::MeshData meshData;
-	GeometryGenerator::CreateFullscreenQuad(meshData);
-
-	mMutex.lock();
-	model = new Model(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer);
-	mMutex.unlock();
-
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	ModelById::accessor accessor;
-#ifdef _DEBUG
-	mModelById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mModelById.insert(accessor, id);
-	accessor->second.reset(model);
-	accessor.release();
-
-	return id;
-}
-
 Model& ModelManager::GetModel(const std::size_t id) noexcept {
 	ModelById::accessor accessor;
 	mModelById.find(accessor, id);

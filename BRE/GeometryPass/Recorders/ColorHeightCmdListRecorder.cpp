@@ -6,7 +6,7 @@
 #include <DirectXManager\DirectXManager.h>
 #include <MaterialManager/Material.h>
 #include <MathUtils/MathUtils.h>
-#include <PSOCreator/PSOCreator.h>
+#include <PSOManager/PSOManager.h>
 #include <ResourceManager/ResourceManager.h>
 #include <ResourceManager/UploadBuffer.h>
 #include <ShaderUtils\CBuffers.h>
@@ -33,17 +33,17 @@ void ColorHeightCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormat
 	ASSERT(sRootSign == nullptr);
 
 	// Build pso and root signature
-	PSOCreator::PSOParams psoParams{};
-	psoParams.mDSFilename = "GeometryPass/Shaders/ColorHeightMapping/DS.cso";
-	psoParams.mHSFilename = "GeometryPass/Shaders/ColorHeightMapping/HS.cso";
-	psoParams.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
-	psoParams.mPSFilename = "GeometryPass/Shaders/ColorHeightMapping/PS.cso";
-	psoParams.mRootSignFilename = "GeometryPass/Shaders/ColorHeightMapping/RS.cso";
-	psoParams.mVSFilename = "GeometryPass/Shaders/ColorHeightMapping/VS.cso";
-	psoParams.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
-	psoParams.mNumRenderTargets = geometryBufferCount;
-	memcpy(psoParams.mRtFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoParams.mNumRenderTargets);
-	PSOCreator::CreatePSO(psoParams, sPSO, sRootSign);
+	PSOManager::PSOCreationData psoData{};
+	psoData.mDSFilename = "GeometryPass/Shaders/ColorHeightMapping/DS.cso";
+	psoData.mHSFilename = "GeometryPass/Shaders/ColorHeightMapping/HS.cso";
+	psoData.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
+	psoData.mPSFilename = "GeometryPass/Shaders/ColorHeightMapping/PS.cso";
+	psoData.mRootSignFilename = "GeometryPass/Shaders/ColorHeightMapping/RS.cso";
+	psoData.mVSFilename = "GeometryPass/Shaders/ColorHeightMapping/VS.cso";
+	psoData.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
+	psoData.mNumRenderTargets = geometryBufferCount;
+	memcpy(psoData.mRtFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSign);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
