@@ -251,7 +251,7 @@ void TextureCmdListRecorder::BuildBuffers(
 	mMaterialsCBufferGpuDescBegin =
 		DescriptorManager::Get().CreateConstantBufferViews(materialCbufferViewDescVec.data(), static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
 	mTexturesBufferGpuDescBegin =
-		DescriptorManager::Get().CreateShaderResourceView(resVec.data(), srvDescVec.data(), static_cast<std::uint32_t>(srvDescVec.size()));
+		DescriptorManager::Get().CreateShaderResourceViews(resVec.data(), srvDescVec.data(), static_cast<std::uint32_t>(srvDescVec.size()));
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };

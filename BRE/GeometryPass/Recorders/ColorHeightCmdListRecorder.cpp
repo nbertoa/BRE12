@@ -271,9 +271,9 @@ void ColorHeightCmdListRecorder::BuildBuffers(
 	mMaterialsCBufferGpuDescBegin =
 		DescriptorManager::Get().CreateConstantBufferViews(materialCbufferViewDescVec.data(), static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
 	mNormalsBufferGpuDescBegin =
-		DescriptorManager::Get().CreateShaderResourceView(normalResVec.data(), normalSrvDescVec.data(), static_cast<std::uint32_t>(normalSrvDescVec.size()));
+		DescriptorManager::Get().CreateShaderResourceViews(normalResVec.data(), normalSrvDescVec.data(), static_cast<std::uint32_t>(normalSrvDescVec.size()));
 	mHeightsBufferGpuDescBegin =
-		DescriptorManager::Get().CreateShaderResourceView(heightResVec.data(), heightSrvDescVec.data(), static_cast<std::uint32_t>(heightSrvDescVec.size()));
+		DescriptorManager::Get().CreateShaderResourceViews(heightResVec.data(), heightSrvDescVec.data(), static_cast<std::uint32_t>(heightSrvDescVec.size()));
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };

@@ -6,12 +6,17 @@
 
 #include <Utils/DebugUtils.h>
 
-// This class is responsible to:
-// - Create descriptor heaps
-// - Create descriptors
+// To create descriptor heaps
+// To create descriptors
 class DescriptorManager {
 public:
+
+	// Preconditions:
+	// - Create() must be called once
 	static DescriptorManager& Create() noexcept;
+
+	// Preconditions:
+	// - Create() must be called before this method
 	static DescriptorManager& Get() noexcept;
 
 	~DescriptorManager() = default;
@@ -33,40 +38,74 @@ public:
 	// you can easily build GPU desc handle for other view.
 	//
 	
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferView(const D3D12_CONSTANT_BUFFER_VIEW_DESC& desc) noexcept;
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(const D3D12_CONSTANT_BUFFER_VIEW_DESC* desc, const std::uint32_t count) noexcept;
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferView(const D3D12_CONSTANT_BUFFER_VIEW_DESC& cBufferViewDescriptor) noexcept;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceView(ID3D12Resource& res, const D3D12_SHADER_RESOURCE_VIEW_DESC& desc) noexcept;
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceView(ID3D12Resource* *res, const D3D12_SHADER_RESOURCE_VIEW_DESC* desc, const std::uint32_t count) noexcept;
+	// Preconditions:
+	// - "descriptors" must not be nullptr
+	// - "descriptorCount" must be greated than zero
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(
+		const D3D12_CONSTANT_BUFFER_VIEW_DESC* descriptors,
+		const std::uint32_t descriptorCount) noexcept;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateUnorderedAccessView(ID3D12Resource& res, const D3D12_UNORDERED_ACCESS_VIEW_DESC& desc) noexcept;
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateUnorderedAccessView(ID3D12Resource* *res, const D3D12_UNORDERED_ACCESS_VIEW_DESC* desc, const std::uint32_t count) noexcept;
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceView(
+		ID3D12Resource& resource, 
+		const D3D12_SHADER_RESOURCE_VIEW_DESC& shaderResourceViewDescriptor) noexcept;
+
+	// Preconditions:
+	// - "resources" must not be nullptr
+	// - "descriptors" must not be nullptr
+	// - "descriptorCount" must be greated than zero
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceViews(
+		ID3D12Resource* *resources, 
+		const D3D12_SHADER_RESOURCE_VIEW_DESC* descriptors,
+		const std::uint32_t descriptorCount) noexcept;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateUnorderedAccessView(
+		ID3D12Resource& resource, 
+		const D3D12_UNORDERED_ACCESS_VIEW_DESC& descriptor) noexcept;
+
+	// Preconditions:
+	// - "resources" must not be nullptr
+	// - "descriptors" must not be nullptr
+	// - "descriptorCount" must be greated than zero
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateUnorderedAccessViews(
+		ID3D12Resource* *resources, 
+		const D3D12_UNORDERED_ACCESS_VIEW_DESC* descriptors,
+		const std::uint32_t descriptorCount) noexcept;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateRenderTargetView(
-		ID3D12Resource& res, 
-		const D3D12_RENDER_TARGET_VIEW_DESC& desc, 
-		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDesc = nullptr) noexcept;
+		ID3D12Resource& resource, 
+		const D3D12_RENDER_TARGET_VIEW_DESC& descriptor, 
+		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle = nullptr) noexcept;
 
+	// Preconditions:
+	// - "resources" must not be nullptr
+	// - "descriptors" must not be nullptr
+	// - "descriptorCount" must be greater than zero
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateRenderTargetViews(
-		ID3D12Resource* *res, 
-		const D3D12_RENDER_TARGET_VIEW_DESC* desc, 
-		const std::uint32_t count,
-		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDesc = nullptr) noexcept;
+		ID3D12Resource* *resources, 
+		const D3D12_RENDER_TARGET_VIEW_DESC* descriptors,
+		const std::uint32_t descriptorCount,
+		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle = nullptr) noexcept;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateDepthStencilView(
-		ID3D12Resource& res,
-		const D3D12_DEPTH_STENCIL_VIEW_DESC& desc,
-		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDesc = nullptr) noexcept;
+		ID3D12Resource& resource,
+		const D3D12_DEPTH_STENCIL_VIEW_DESC& descriptor,
+		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle = nullptr) noexcept;
 
+	// Preconditions:
+	// - "resources" must not be nullptr
+	// - "descriptors" must not be nullptr
+	// - "descriptorCount" must be greater than zero
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateDepthStencilViews(
-		ID3D12Resource* *res,
-		const D3D12_DEPTH_STENCIL_VIEW_DESC* desc,
-		const std::uint32_t count,
-		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDesc = nullptr) noexcept;
+		ID3D12Resource* *resources,
+		const D3D12_DEPTH_STENCIL_VIEW_DESC* descriptors,
+		const std::uint32_t descriptorCount,
+		D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle = nullptr) noexcept;
 		
 	ID3D12DescriptorHeap& GetCbvSrcUavDescriptorHeap() noexcept {
-		ASSERT(mCbvSrvUavDescHeap.Get() != nullptr);
-		return *mCbvSrvUavDescHeap.Get();
+		ASSERT(mCbvSrvUavDescriptorHeap.Get() != nullptr);
+		return *mCbvSrvUavDescriptorHeap.Get();
 	}
 
 private:
@@ -76,18 +115,18 @@ private:
 	// - Constant Buffer View - Shader Resource View - Unordered Access View
 	// - Render Target View
 	// - Depth Stencil View
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvSrvUavDescHeap;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRtvDescHeap;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDsvDescHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvSrvUavDescriptorHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRenderTargetViewDescriptorHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDepthStencilViewDescriptorHeap;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCurrCbvSrvUavGpuDesc{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mCurrCbvSrvUavCpuDesc{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mCurrentCbvSrvUavGpuDescriptorHandle{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mCurrentCbvSrvUavCpuDescriptorHandle{ 0UL };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCurrRtvGpuDesc{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mCurrRtvCpuDesc{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mCurrentRenderTargetViewDescriptorHandle{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mCurrentRenderTargetViewCpuDescriptorHandle{ 0UL };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCurrDsvGpuDesc{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mCurrDsvCpuDesc{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mCurrentDepthStencilViewGpuDescriptorHandle{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mCurrentDepthStencilCpuDescriptorHandle{ 0UL };
 
 	std::mutex mMutex;
 };

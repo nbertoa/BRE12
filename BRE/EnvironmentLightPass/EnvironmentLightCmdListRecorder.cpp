@@ -212,7 +212,7 @@ void EnvironmentLightCmdListRecorder::BuildBuffers(
 	res[descIndex] = &specularPreConvolvedCubeMap;
 	++descIndex;
 
-	mTexturesGpuDesc = DescriptorManager::Get().CreateShaderResourceView(res.data(), srvDesc.data(), static_cast<std::uint32_t>(srvDesc.size()));
+	mTexturesGpuDesc = DescriptorManager::Get().CreateShaderResourceViews(res.data(), srvDesc.data(), static_cast<std::uint32_t>(srvDesc.size()));
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };

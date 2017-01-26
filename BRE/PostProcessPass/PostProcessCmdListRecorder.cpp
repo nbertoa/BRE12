@@ -138,5 +138,5 @@ void PostProcessCmdListRecorder::BuildBuffers(ID3D12Resource& colorBuffer) noexc
 	srvDesc[0].Format = colorBuffer.GetDesc().Format;
 	srvDesc[0].Texture2D.MipLevels = colorBuffer.GetDesc().MipLevels;
 
-	mColorBufferGpuDesc = DescriptorManager::Get().CreateShaderResourceView(res, srvDesc, _countof(srvDesc));
+	mColorBufferGpuDesc = DescriptorManager::Get().CreateShaderResourceViews(res, srvDesc, _countof(srvDesc));
 }

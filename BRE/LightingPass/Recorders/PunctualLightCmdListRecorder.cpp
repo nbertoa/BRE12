@@ -96,7 +96,7 @@ void PunctualLightCmdListRecorder::Init(
 	res[resIndex] = &depthBuffer;
 	
 	// Create textures SRV descriptors
-	mTexturesGpuDesc = DescriptorManager::Get().CreateShaderResourceView(res.data(), srvDescVec.data(), static_cast<uint32_t>(srvDescVec.size()));
+	mTexturesGpuDesc = DescriptorManager::Get().CreateShaderResourceViews(res.data(), srvDescVec.data(), static_cast<uint32_t>(srvDescVec.size()));
 
 	// Create lights buffer SRV	descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};

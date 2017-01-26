@@ -144,5 +144,5 @@ void ToneMappingCmdListRecorder::BuildBuffers(ID3D12Resource& colorBuffer) noexc
 	srvDesc[0].Format = colorBuffer.GetDesc().Format;
 	srvDesc[0].Texture2D.MipLevels = colorBuffer.GetDesc().MipLevels;
 
-	mInputColorBufferGpuDesc = DescriptorManager::Get().CreateShaderResourceView(res, srvDesc, _countof(srvDesc));
+	mInputColorBufferGpuDesc = DescriptorManager::Get().CreateShaderResourceViews(res, srvDesc, _countof(srvDesc));
 }

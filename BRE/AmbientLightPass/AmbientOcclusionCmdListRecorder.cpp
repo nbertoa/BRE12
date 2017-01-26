@@ -411,5 +411,5 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	srvDesc[3].Texture2D.MipLevels = noiseTexture->GetDesc().MipLevels;
 
 	// Create SRVs
-	mPixelShaderBuffersGpuDesc = DescriptorManager::Get().CreateShaderResourceView(res, srvDesc, _countof(srvDesc));
+	mPixelShaderBuffersGpuDesc = DescriptorManager::Get().CreateShaderResourceViews(res, srvDesc, _countof(srvDesc));
 }
