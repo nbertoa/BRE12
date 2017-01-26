@@ -8,7 +8,7 @@
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <MasterRender/MasterRender.h>
-#include <Material/Material.h>
+#include <MaterialManager/MaterialManager.h>
 #include <ModelManager\ModelManager.h>
 #include <PSOManager\PSOManager.h>
 #include <ResourceManager\ResourceManager.h>
@@ -39,7 +39,7 @@ namespace {
 		CommandManager::Create();
 		DescriptorManager::Create();
 		ModelManager::Create();
-		Materials::InitMaterials();
+		MaterialManager::Create();
 		PSOManager::Create();
 		ResourceManager::Create();
 		ResourceStateManager::Create();

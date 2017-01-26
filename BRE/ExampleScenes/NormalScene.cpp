@@ -6,7 +6,7 @@
 #include <GeometryPass/Recorders/NormalCmdListRecorder.h>
 #include <LightingPass/PunctualLight.h>
 #include <LightingPass/Recorders/PunctualLightCmdListRecorder.h>
-#include <Material/Material.h>
+#include <MaterialManager/Material.h>
 #include <MathUtils\MathUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>

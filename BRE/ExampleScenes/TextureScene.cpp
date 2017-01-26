@@ -6,7 +6,7 @@
 #include <GeometryPass/Recorders/TextureCmdListRecorder.h>
 #include <LightingPass/PunctualLight.h>
 #include <LightingPass/Recorders/PunctualLightCmdListRecorder.h>
-#include <Material/Material.h>
+#include <MaterialManager/Material.h>
 #include <MathUtils/MathUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
@@ -111,7 +111,7 @@ void TextureScene::CreateGeometryPassRecorders(
 			materials.reserve(numGeometry);
 			for (std::size_t i = 0UL; i < numGeometry; ++i) {
 				Material material;
-				material.RandomMaterial();
+				material.RandomizeMaterial();
 				materials.push_back(material);
 			}
 

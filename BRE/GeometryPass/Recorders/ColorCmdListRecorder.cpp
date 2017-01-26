@@ -4,7 +4,7 @@
 
 #include <DescriptorManager\DescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
-#include <Material/Material.h>
+#include <MaterialManager/Material.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>

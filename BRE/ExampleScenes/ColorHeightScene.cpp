@@ -6,7 +6,7 @@
 #include <GeometryPass/Recorders/ColorHeightCmdListRecorder.h>
 #include <LightingPass/PunctualLight.h>
 #include <LightingPass/Recorders/PunctualLightCmdListRecorder.h>
-#include <Material/Material.h>
+#include <MaterialManager/Material.h>
 #include <MathUtils\MathUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
@@ -207,7 +207,7 @@ void ColorHeightScene::CreateGeometryPassRecorders(
 
 	Material materials[numResources];
 	for (std::uint32_t i = 0UL; i < numResources; ++i) {
-		materials[i].RandomBaseColor();
+		materials[i].RandomizeBaseColor();
 		materials[i].mBaseColor_MetalMask[3U] = 1.0f;
 		materials[i].mSmoothness = 0.9f;
 	}

@@ -5,7 +5,7 @@
 #include <DirectXManager\DirectXManager.h>
 #include <GeometryPass/Recorders/ColorCmdListRecorder.h>
 #include <GeometryPass/Recorders/NormalCmdListRecorder.h>
-#include <Material/Material.h>
+#include <MaterialManager/Material.h>
 #include <MathUtils\MathUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>

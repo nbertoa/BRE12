@@ -2,9 +2,11 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Material.cpp" />
+    <ClCompile Include="MaterialManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

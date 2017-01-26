@@ -6,7 +6,7 @@
 #include <GeometryPass/Recorders/ColorCmdListRecorder.h>
 #include <LightingPass/PunctualLight.h>
 #include <LightingPass/Recorders/PunctualLightCmdListRecorder.h>
-#include <Material/Material.h>
+#include <MaterialManager/MaterialManager.h>
 #include <MathUtils\MathUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\ModelManager.h>
@@ -87,7 +87,7 @@ namespace {
 		ColorCmdListRecorder* &recorder) {
 		recorder = new ColorCmdListRecorder();
 
-		const std::size_t numMaterials(Materials::NUM_MATERIALS);
+		const std::size_t numMaterials(MaterialManager::NUM_MATERIALS);
 
 		const std::size_t numMeshes{ meshes.size() };
 		ASSERT(numMeshes > 0UL);
@@ -111,7 +111,7 @@ namespace {
 			DirectX::XMFLOAT4X4 w;
 			MathUtils::ComputeMatrix(w, tx, ty, tz, sS, sS, sS, DirectX::XM_PIDIV2);
 
-			Material mat(Materials::GetMaterial(static_cast<Materials::MaterialType>(i)));
+			Material mat(MaterialManager::Get().GetMaterial(static_cast<MaterialManager::MaterialType>(i)));
 			for (std::size_t j = 0UL; j < numMeshes; ++j) {
 				materials[i + j * numMaterials] = mat;
 				GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[j] };
