@@ -3,7 +3,8 @@
 #include <d3d12.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
-#include <CommandManager\CommandManager.h>
+#include <CommandManager\CommandAllocatorManager.h>
+#include <CommandManager\CommandListManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <Utils\DebugUtils.h>
 
@@ -16,8 +17,8 @@ namespace {
 		ASSERT(cmdList == nullptr);
 
 		// Create command allocator and command list
-		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
-		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
+		CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
 		cmdList->Close();
 	}
 }

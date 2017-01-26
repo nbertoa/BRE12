@@ -119,10 +119,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CommandManager.h" />
+    <ClInclude Include="CommandAllocatorManager.h" />
+    <ClInclude Include="CommandListManager.h" />
+    <ClInclude Include="CommandQueueManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CommandManager.cpp" />
+    <ClCompile Include="CommandAllocatorManager.cpp" />
+    <ClCompile Include="CommandListManager.cpp" />
+    <ClCompile Include="CommandQueueManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

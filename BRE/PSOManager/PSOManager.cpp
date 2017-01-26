@@ -22,7 +22,7 @@ PSOManager& PSOManager::Get() noexcept {
 
 std::size_t PSOManager::CreateGraphicsPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, ID3D12PipelineState* &pso) noexcept {
 	mMutex.lock();
-	CHECK_HR(DirectXManager::Device().CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
+	CHECK_HR(DirectXManager::GetDevice().CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
 	mMutex.unlock();
 	
 	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };

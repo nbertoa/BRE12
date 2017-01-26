@@ -3,7 +3,8 @@
 #include <d3d12.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
-#include <CommandManager\CommandManager.h>
+#include <CommandManager\CommandAllocatorManager.h>
+#include <CommandManager\CommandListManager.h>
 #include <DXUtils\DXUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
@@ -24,8 +25,8 @@ namespace {
 		ASSERT(fence == nullptr);
 
 		// Create command allocators and command list
-		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
-		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
+		CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
 		cmdList->Close();
 
 		ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, fence);

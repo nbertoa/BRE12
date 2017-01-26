@@ -2,8 +2,9 @@
 
 #include <DirectXMath.h>
 
-#include <CommandManager/CommandManager.h>
-#include <DescriptorManager\DescriptorManager.h>
+#include <CommandManager/CommandAllocatorManager.h>
+#include <CommandManager/CommandListManager.h>
+#include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <PSOCreator/PSOCreator.h>
 #include <Utils/DebugUtils.h>
 
@@ -24,10 +25,10 @@ namespace {
 #endif
 
 		for (std::uint32_t i = 0U; i < cmdAllocCount; ++i) {
-			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc[i]);
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc[i]);
 		}
 
-		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
 
 		// Start off in a closed state.  This is because the first time we refer 
 		// to the command list we will Reset it, and it needs to be closed before
@@ -99,7 +100,7 @@ void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, nullptr);
 
-	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 	
@@ -149,7 +150,7 @@ void AmbientLightCmdListRecorder::BuildBuffers(
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDesc.Format = baseColorMetalMaskBuffer.GetDesc().Format;
 	srvDesc.Texture2D.MipLevels = baseColorMetalMaskBuffer.GetDesc().MipLevels;
-	mBaseColor_MetalMaskGpuDesc = DescriptorManager::Get().CreateShaderResourceView(baseColorMetalMaskBuffer, srvDesc);
+	mBaseColor_MetalMaskGpuDesc = CbvSrvUavDescriptorManager::Get().CreateShaderResourceView(baseColorMetalMaskBuffer, srvDesc);
 
 	// Create ambient accessibility buffer texture descriptor
 	srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
@@ -159,5 +160,5 @@ void AmbientLightCmdListRecorder::BuildBuffers(
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDesc.Format = ambientAccessibilityBuffer.GetDesc().Format;
 	srvDesc.Texture2D.MipLevels = ambientAccessibilityBuffer.GetDesc().MipLevels;
-	DescriptorManager::Get().CreateShaderResourceView(ambientAccessibilityBuffer, srvDesc);
+	CbvSrvUavDescriptorManager::Get().CreateShaderResourceView(ambientAccessibilityBuffer, srvDesc);
 }

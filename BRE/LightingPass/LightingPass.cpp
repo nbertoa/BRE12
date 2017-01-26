@@ -5,7 +5,8 @@
 #include <tbb/parallel_for.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
-#include <CommandManager\CommandManager.h>
+#include <CommandManager\CommandAllocatorManager.h>
+#include <CommandManager\CommandListManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\GeometryPass.h>
 #include <LightingPass\Recorders\PunctualLightCmdListRecorder.h>
@@ -25,12 +26,12 @@ namespace {
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 			ASSERT(cmdAllocsBegin[i] == nullptr);
-			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsBegin[i]);
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsBegin[i]);
 
 			ASSERT(cmdAllocsEnd[i] == nullptr);
-			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsEnd[i]);
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsEnd[i]);
 		}
-		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocsBegin[0], cmdList);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocsBegin[0], cmdList);
 		cmdList->Close();
 	}
 }

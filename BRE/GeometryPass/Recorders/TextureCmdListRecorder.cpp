@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-#include <DescriptorManager\DescriptorManager.h>
+#include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
 #include <MaterialManager/Material.h>
 #include <MathUtils/MathUtils.h>
@@ -101,7 +101,7 @@ void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frame
 	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
 
-	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 
@@ -247,11 +247,18 @@ void TextureCmdListRecorder::BuildBuffers(
 		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 	}
 	mObjectCBufferGpuDescBegin =
-		DescriptorManager::Get().CreateConstantBufferViews(objectCbufferViewDescVec.data(), static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
+		CbvSrvUavDescriptorManager::Get().CreateConstantBufferViews(
+			objectCbufferViewDescVec.data(), 
+			static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
 	mMaterialsCBufferGpuDescBegin =
-		DescriptorManager::Get().CreateConstantBufferViews(materialCbufferViewDescVec.data(), static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
+		CbvSrvUavDescriptorManager::Get().CreateConstantBufferViews(
+			materialCbufferViewDescVec.data(), 
+			static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
 	mTexturesBufferGpuDescBegin =
-		DescriptorManager::Get().CreateShaderResourceViews(resVec.data(), srvDescVec.data(), static_cast<std::uint32_t>(srvDescVec.size()));
+		CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(
+			resVec.data(), 
+			srvDescVec.data(), 
+			static_cast<std::uint32_t>(srvDescVec.size()));
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };

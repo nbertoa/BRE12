@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-#include <DescriptorManager\DescriptorManager.h>
+#include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <LightingPass/PunctualLight.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
@@ -96,7 +96,7 @@ void PunctualLightCmdListRecorder::Init(
 	res[resIndex] = &depthBuffer;
 	
 	// Create textures SRV descriptors
-	mTexturesGpuDesc = DescriptorManager::Get().CreateShaderResourceViews(res.data(), srvDescVec.data(), static_cast<uint32_t>(srvDescVec.size()));
+	mTexturesGpuDesc = CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(res.data(), srvDescVec.data(), static_cast<uint32_t>(srvDescVec.size()));
 
 	// Create lights buffer SRV	descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -106,7 +106,7 @@ void PunctualLightCmdListRecorder::Init(
 	srvDesc.Buffer.FirstElement = 0UL;
 	srvDesc.Buffer.NumElements = mNumLights;
 	srvDesc.Buffer.StructureByteStride = sizeof(PunctualLight);
-	mLightsBufferGpuDescBegin = DescriptorManager::Get().CreateShaderResourceView(*mLightsBuffer->Resource(), srvDesc);
+	mLightsBufferGpuDescBegin = CbvSrvUavDescriptorManager::Get().CreateShaderResourceView(*mLightsBuffer->Resource(), srvDesc);
 	
 	ASSERT(IsDataValid());
 }
@@ -132,7 +132,7 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, nullptr);
 
-	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 

@@ -5,8 +5,9 @@
 #include <tbb/parallel_for.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
-#include <CommandManager\CommandManager.h>
-#include <DescriptorManager\DescriptorManager.h>
+#include <CommandManager\CommandAllocatorManager.h>
+#include <CommandManager\CommandListManager.h>
+#include <DescriptorManager\RenderTargetDescriptorManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\Recorders\ColorCmdListRecorder.h>
 #include <GeometryPass\Recorders\ColorHeightCmdListRecorder.h>
@@ -70,10 +71,16 @@ namespace {
 			D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 			rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 			rtvDesc.Format = resDesc.Format;
-			ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue[i], res);
+			ResourceManager::Get().CreateCommittedResource(
+				heapProps, 
+				D3D12_HEAP_FLAG_NONE, 
+				resDesc, 
+				D3D12_RESOURCE_STATE_RENDER_TARGET, 
+				&clearValue[i], 
+				res);
 
 			buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-			DescriptorManager::Get().CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &rtvCpuDescs[i]);
+			RenderTargetDescriptorManager::Get().CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &rtvCpuDescs[i]);
 		}
 	}
 
@@ -87,9 +94,9 @@ namespace {
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 			ASSERT(cmdAllocs[i] == nullptr);
-			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocs[i]);
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocs[i]);
 		}
-		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocs[0], cmdList);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocs[0], cmdList);
 		cmdList->Close();
 	}
 }

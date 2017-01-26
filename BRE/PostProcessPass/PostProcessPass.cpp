@@ -4,7 +4,8 @@
 #include <DirectXColors.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
-#include <CommandManager\CommandManager.h>
+#include <CommandManager\CommandAllocatorManager.h>
+#include <CommandManager\CommandListManager.h>
 #include <DXUtils/d3dx12.h>
 #include <ResourceManager\ResourceManager.h>
 #include <ResourceStateManager\ResourceStateManager.h>
@@ -22,9 +23,9 @@ namespace {
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 			ASSERT(cmdAllocs[i] == nullptr);
-			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocs[i]);
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocs[i]);
 		}
-		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocs[0], cmdList);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocs[0], cmdList);
 		cmdList->Close();
 	}
 }

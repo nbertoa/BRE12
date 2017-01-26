@@ -116,10 +116,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DescriptorManager.h" />
+    <ClInclude Include="CbvSrvUavDescriptorManager.h" />
+    <ClInclude Include="DepthStencilDescriptorManager.h" />
+    <ClInclude Include="RenderTargetDescriptorManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DescriptorManager.cpp" />
+    <ClCompile Include="CbvSrvUavDescriptorManager.cpp" />
+    <ClCompile Include="DepthStencilDescriptorManager.cpp" />
+    <ClCompile Include="RenderTargetDescriptorManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

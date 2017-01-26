@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-#include <DescriptorManager\DescriptorManager.h>
+#include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
 #include <MaterialManager/Material.h>
 #include <MathUtils/MathUtils.h>
@@ -104,7 +104,7 @@ void NormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
 
-	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 
@@ -261,13 +261,23 @@ void NormalCmdListRecorder::BuildBuffers(
 		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 	}
 	mObjectCBufferGpuDescBegin =
-		DescriptorManager::Get().CreateConstantBufferViews(objectCbufferViewDescVec.data(), static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
+		CbvSrvUavDescriptorManager::Get().CreateConstantBufferViews(
+			objectCbufferViewDescVec.data(), 
+			static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
 	mMaterialsCBufferGpuDescBegin =
-		DescriptorManager::Get().CreateConstantBufferViews(materialCbufferViewDescVec.data(), static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
+		CbvSrvUavDescriptorManager::Get().CreateConstantBufferViews(
+			materialCbufferViewDescVec.data(), 
+			static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
 	mTexturesBufferGpuDescBegin =
-		DescriptorManager::Get().CreateShaderResourceViews(textureResVec.data(), textureSrvDescVec.data(), static_cast<std::uint32_t>(textureSrvDescVec.size()));
+		CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(
+			textureResVec.data(), 
+			textureSrvDescVec.data(), 
+			static_cast<std::uint32_t>(textureSrvDescVec.size()));
 	mNormalsBufferGpuDescBegin =
-		DescriptorManager::Get().CreateShaderResourceViews(normalResVec.data(), normalSrvDescVec.data(), static_cast<std::uint32_t>(normalSrvDescVec.size()));
+		CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(
+			normalResVec.data(), 
+			normalSrvDescVec.data(), 
+			static_cast<std::uint32_t>(normalSrvDescVec.size()));
 	
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };

@@ -26,7 +26,7 @@ std::size_t RootSignatureManager::CreateRootSignatureFromBlob(
 	ID3D12RootSignature* &rootSignature) noexcept 
 {
 	mMutex.lock();
-	DirectXManager::Device().CreateRootSignature(
+	DirectXManager::GetDevice().CreateRootSignature(
 		0U, 
 		blob.GetBufferPointer(), 
 		blob.GetBufferSize(), 

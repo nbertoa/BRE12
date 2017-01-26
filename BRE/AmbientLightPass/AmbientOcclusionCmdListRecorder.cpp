@@ -2,8 +2,9 @@
 
 #include <DirectXMath.h>
 
-#include <CommandManager/CommandManager.h>
-#include <DescriptorManager\DescriptorManager.h>
+#include <CommandManager/CommandAllocatorManager.h>
+#include <CommandManager/CommandListManager.h>
+#include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DXUtils\d3dx12.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOCreator/PSOCreator.h>
@@ -34,10 +35,10 @@ namespace {
 #endif
 
 		for (std::uint32_t i = 0U; i < cmdAllocCount; ++i) {
-			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc[i]);
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc[i]);
 		}
 
-		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
 
 		// Start off in a closed state.  This is because the first time we refer 
 		// to the command list we will Reset it, and it needs to be closed before
@@ -236,7 +237,7 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mAmbientAccessBufferCpuDesc, false, nullptr);
 
-	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);	
 
@@ -411,5 +412,5 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	srvDesc[3].Texture2D.MipLevels = noiseTexture->GetDesc().MipLevels;
 
 	// Create SRVs
-	mPixelShaderBuffersGpuDesc = DescriptorManager::Get().CreateShaderResourceViews(res, srvDesc, _countof(srvDesc));
+	mPixelShaderBuffersGpuDesc = CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(res, srvDesc, _countof(srvDesc));
 }

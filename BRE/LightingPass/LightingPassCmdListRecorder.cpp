@@ -1,6 +1,7 @@
 #include "LightingPassCmdListRecorder.h"
 
-#include <CommandManager/CommandManager.h>
+#include <CommandManager/CommandAllocatorManager.h>
+#include <CommandManager/CommandListManager.h>
 #include <Utils/DebugUtils.h>
 
 namespace {
@@ -14,10 +15,10 @@ namespace {
 #endif
 
 		for (std::uint32_t i = 0U; i < cmdAllocCount; ++i) {
-			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc[i]);
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc[i]);
 		}
 
-		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
 
 		cmdList->Close();
 	}

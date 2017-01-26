@@ -11,13 +11,17 @@ struct ID3D12GraphicsCommandList;
 class Model;
 
 // Stores model's mesh vertex and buffer data.
-// It used by model class.
 class Mesh {
 	friend class Model;
 
 public:
-	__forceinline const BufferCreator::VertexBufferData& VertexBufferData() const noexcept { ASSERT(mVertexBufferData.IsDataValid()); return mVertexBufferData; }
-	__forceinline const BufferCreator::IndexBufferData& IndexBufferData() const noexcept { ASSERT(mIndexBufferData.IsDataValid()); return mIndexBufferData; }
+	__forceinline const BufferCreator::VertexBufferData& VertexBufferData() const noexcept { 
+		ASSERT(mVertexBufferData.IsDataValid()); return mVertexBufferData; 
+	}
+
+	__forceinline const BufferCreator::IndexBufferData& IndexBufferData() const noexcept { 
+		ASSERT(mIndexBufferData.IsDataValid()); return mIndexBufferData; 
+	}
 
 	~Mesh() = default;
 	Mesh(const Mesh&) = delete;
@@ -27,17 +31,18 @@ public:
 
 private:
 	// Command lists are used to store buffers creation (vertex and index per mesh)
-	// cmdList must be in recorded state before calling these method.
-	// cmdList must be executed after calling these methods, to create the commited resource.
+	// "commandList" must be executed after calling these methods, to create the commited resource.
+	// Preconditions:
+	// - "commandList" must be in recorded state before calling these method.
 	explicit Mesh(
 		const aiMesh& mesh, 
-		ID3D12GraphicsCommandList& cmdList,
+		ID3D12GraphicsCommandList& commandList,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
 
 	explicit Mesh(
 		const GeometryGenerator::MeshData& meshData, 
-		ID3D12GraphicsCommandList& cmdList,
+		ID3D12GraphicsCommandList& commandList,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
 	

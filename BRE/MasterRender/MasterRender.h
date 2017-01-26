@@ -54,7 +54,7 @@ private:
 	void FlushCommandQueue() noexcept;
 	void SignalFenceAndPresent() noexcept;
 
-	HWND mHwnd{ nullptr };
+	HWND mWindowHandle{ nullptr };
 	Microsoft::WRL::ComPtr<IDXGISwapChain3> mSwapChain{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 			

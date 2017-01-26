@@ -40,7 +40,7 @@ std::size_t ResourceManager::LoadTextureFromFile(
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 
 	mMutex.lock();
-	CHECK_HR(DirectX::CreateDDSTextureFromFile12(&DirectXManager::Device(), &cmdList, filePathW.c_str(), resource, uploadBuffer));
+	CHECK_HR(DirectX::CreateDDSTextureFromFile12(&DirectXManager::GetDevice(), &cmdList, filePathW.c_str(), resource, uploadBuffer));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
@@ -78,7 +78,7 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 
 	CD3DX12_RESOURCE_DESC resDesc{ CD3DX12_RESOURCE_DESC::Buffer(byteSize) };
 	mMutex.lock();
-	CHECK_HR(DirectXManager::Device().CreateCommittedResource(
+	CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -96,7 +96,7 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	heapProps.VisibleNodeMask = 1U;
 	resDesc = CD3DX12_RESOURCE_DESC::Buffer(byteSize);
 
-	CHECK_HR(DirectXManager::Device().CreateCommittedResource(
+	CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -142,7 +142,7 @@ std::size_t ResourceManager::CreateCommittedResource(
 	ID3D12Resource* &res) noexcept
 {
 	mMutex.lock();
-	CHECK_HR(DirectXManager::Device().CreateCommittedResource(&heapProps, heapFlags, &resDesc, resStates, clearValue, IID_PPV_ARGS(&res)));
+	CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProps, heapFlags, &resDesc, resStates, clearValue, IID_PPV_ARGS(&res)));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
@@ -162,7 +162,7 @@ std::size_t ResourceManager::CreateCommittedResource(
 
 std::size_t ResourceManager::CreateFence(const std::uint64_t initValue, const D3D12_FENCE_FLAGS& flags, ID3D12Fence* &fence) noexcept {
 	mMutex.lock();
-	CHECK_HR(DirectXManager::Device().CreateFence(initValue, flags, IID_PPV_ARGS(&fence)));
+	CHECK_HR(DirectXManager::GetDevice().CreateFence(initValue, flags, IID_PPV_ARGS(&fence)));
 	mMutex.unlock();
 
 	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
@@ -186,7 +186,7 @@ std::size_t ResourceManager::CreateUploadBuffer(const std::size_t elemSize, cons
 	ASSERT(accessor.empty());
 #endif
 	mUploadBufferById.insert(accessor, id);
-	accessor->second = std::make_unique<UploadBuffer>(DirectXManager::Device(), elemSize, elemCount);
+	accessor->second = std::make_unique<UploadBuffer>(DirectXManager::GetDevice(), elemSize, elemCount);
 	buffer = accessor->second.get();
 	accessor.release();
 

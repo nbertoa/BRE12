@@ -3,42 +3,57 @@
 #include <SettingsManager\SettingsManager.h>
 
 namespace {
-	void InitMainWindow(HWND& hwnd, const HINSTANCE hInstance) noexcept {
-		WNDCLASS wc = {};
-		wc.style = CS_HREDRAW | CS_VREDRAW;
-		wc.lpfnWndProc = DefWindowProc;
-		wc.cbClsExtra = 0;
-		wc.cbWndExtra = 0;
-		wc.hInstance = hInstance;
-		wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
-		wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-		wc.hbrBackground = reinterpret_cast<HBRUSH>(GetStockObject(NULL_BRUSH));
-		wc.lpszMenuName = nullptr;
-		wc.lpszClassName = L"MainWnd";
+	void InitMainWindow(HWND& windowHandle, const HINSTANCE moduleInstanceHandle) noexcept {
+		WNDCLASS windowClass = {};
+		windowClass.style = CS_HREDRAW | CS_VREDRAW;
+		windowClass.lpfnWndProc = DefWindowProc;
+		windowClass.cbClsExtra = 0;
+		windowClass.cbWndExtra = 0;
+		windowClass.hInstance = moduleInstanceHandle;
+		windowClass.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+		windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+		windowClass.hbrBackground = reinterpret_cast<HBRUSH>(GetStockObject(NULL_BRUSH));
+		windowClass.lpszMenuName = nullptr;
+		windowClass.lpszClassName = L"MainWnd";
 
-		ASSERT(RegisterClass(&wc));
+		ASSERT(RegisterClass(&windowClass));
 
 		// Compute window rectangle dimensions based on requested client area dimensions.
-		RECT r = { 0, 0, static_cast<long>(SettingsManager::sWindowWidth), static_cast<long>(SettingsManager::sWindowHeight) };
-		AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, false);
-		const int32_t width{ r.right - r.left };
-		const int32_t height{ r.bottom - r.top };
+		RECT rect = { 0, 0, static_cast<long>(SettingsManager::sWindowWidth), static_cast<long>(SettingsManager::sWindowHeight) };
+		AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
+		const int32_t width{ rect.right - rect.left };
+		const int32_t height{ rect.bottom - rect.top };
 
-		const std::uint32_t dwStyle = SettingsManager::sIsFullscreenWindow ? WS_POPUP : WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
-		hwnd = CreateWindowEx(WS_EX_APPWINDOW, L"MainWnd", L"App", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, hInstance, nullptr);
-		ASSERT(hwnd);
+		const std::uint32_t windowStyle = 
+			SettingsManager::sIsFullscreenWindow ? WS_POPUP 
+											     : WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+		windowHandle = CreateWindowEx(
+			WS_EX_APPWINDOW, 
+			L"MainWnd", 
+			L"App", 
+			windowStyle,
+			CW_USEDEFAULT, 
+			CW_USEDEFAULT, 
+			width, 
+			height, 
+			nullptr, 
+			nullptr, 
+			moduleInstanceHandle, 
+			nullptr);
 
-		ShowWindow(hwnd, SW_SHOW);
-		UpdateWindow(hwnd);
+		ASSERT(windowHandle);
+
+		ShowWindow(windowHandle, SW_SHOW);
+		UpdateWindow(windowHandle);
 	}
 }
 
-HWND DirectXManager::mHwnd;
+HWND DirectXManager::mWindowHandle;
 Microsoft::WRL::ComPtr<IDXGIFactory4> DirectXManager::mDxgiFactory{ nullptr };
 Microsoft::WRL::ComPtr<ID3D12Device> DirectXManager::mDevice{ nullptr };
 
-void DirectXManager::InitDirect3D(const HINSTANCE hInstance) noexcept {
-	InitMainWindow(mHwnd, hInstance);
+void DirectXManager::Init(const HINSTANCE moduleInstanceHandle) noexcept {
+	InitMainWindow(mWindowHandle, moduleInstanceHandle);
 
 #if defined(DEBUG) || defined(_DEBUG) 
 	// Enable the D3D12 debug layer.

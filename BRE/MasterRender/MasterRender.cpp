@@ -3,8 +3,11 @@
 #include <tbb/parallel_for.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
-#include <CommandManager/CommandManager.h>
-#include <DescriptorManager\DescriptorManager.h>
+#include <CommandManager/CommandAllocatorManager.h>
+#include <CommandManager/CommandListManager.h>
+#include <CommandManager/CommandQueueManager.h>
+#include <DescriptorManager\DepthStencilDescriptorManager.h>
+#include <DescriptorManager\RenderTargetDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
 #include <DXUtils/d3dx12.h>
 #include <Input/Keyboard.h>
@@ -101,13 +104,13 @@ namespace {
 		sd.Stereo = false;
 		sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
-		CHECK_HR(DirectXManager::Factory().CreateSwapChainForHwnd(&cmdQueue, hwnd, &sd, nullptr, nullptr, &baseSwapChain));
+		CHECK_HR(DirectXManager::GetIDXGIFactory().CreateSwapChainForHwnd(&cmdQueue, hwnd, &sd, nullptr, nullptr, &baseSwapChain));
 		CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain3.GetAddressOf())));
 
 		CHECK_HR(swapChain3->ResizeBuffers(SettingsManager::sSwapChainBufferCount, SettingsManager::sWindowWidth, SettingsManager::sWindowHeight, frameBufferFormat, sd.Flags));
 		
 		// Make window association
-		CHECK_HR(DirectXManager::Factory().MakeWindowAssociation(hwnd, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
+		CHECK_HR(DirectXManager::GetIDXGIFactory().MakeWindowAssociation(hwnd, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
 
 #ifdef V_SYNC
 		CHECK_HR(swapChain3->SetMaximumFrameLatency(SettingsManager::sQueuedFrameCount));
@@ -125,7 +128,7 @@ MasterRender* MasterRender::Create(const HWND hwnd, Scene& scene) noexcept {
 }
 
 MasterRender::MasterRender(const HWND hwnd, Scene& scene)
-	: mHwnd(hwnd)
+	: mWindowHandle(hwnd)
 {
 	ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 	CreateMergePassCommandObjects();
@@ -264,11 +267,11 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 
 	// Create swap chain and render target views
 	ASSERT(mSwapChain == nullptr);
-	CreateSwapChain(mHwnd, *mCmdQueue, SettingsManager::sFrameBufferFormat, mSwapChain);
+	CreateSwapChain(mWindowHandle, *mCmdQueue, SettingsManager::sFrameBufferFormat, mSwapChain);
 	const std::size_t rtvDescSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
-		DescriptorManager::Get().CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDesc, &mFrameBufferRTVs[i]);
+		RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDesc, &mFrameBufferRTVs[i]);
 		ResourceStateManager::Get().Add(*mFrameBuffers[i].Get(), D3D12_RESOURCE_STATE_PRESENT);
 	}
 
@@ -299,7 +302,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	depthStencilViewDesc.Format = SettingsManager::sDepthStencilViewFormat;
 	depthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
-	DescriptorManager::Get().CreateDepthStencilView(*mDepthStencilBuffer, depthStencilViewDesc, &mDepthStencilBufferRTV);
+	DepthStencilDescriptorManager::Get().CreateDepthStencilView(*mDepthStencilBuffer, depthStencilViewDesc, &mDepthStencilBufferRTV);
 }
 
 void MasterRender::CreateColorBuffers() noexcept {
@@ -331,12 +334,12 @@ void MasterRender::CreateColorBuffers() noexcept {
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue, res);
 	mColorBuffer1 = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-	DescriptorManager::Get().CreateRenderTargetView(*mColorBuffer1.Get(), rtvDesc, &mColorBuffer1RTVCpuDesc);
+	RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mColorBuffer1.Get(), rtvDesc, &mColorBuffer1RTVCpuDesc);
 
 	// Create RTV's descriptor for color buffer 2
 	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, res);
 	mColorBuffer2 = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-	DescriptorManager::Get().CreateRenderTargetView(*mColorBuffer2.Get(), rtvDesc, &mColorBuffer2RTVCpuDesc);
+	RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mColorBuffer2.Get(), rtvDesc, &mColorBuffer2RTVCpuDesc);
 }
 
 void MasterRender::CreateMergePassCommandObjects() noexcept {
@@ -345,12 +348,12 @@ void MasterRender::CreateMergePassCommandObjects() noexcept {
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	CommandManager::Get().CreateCmdQueue(queueDesc, mCmdQueue);
+	CommandQueueManager::Get().CreateCommandQueue(queueDesc, mCmdQueue);
 
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, mMergePassCmdAllocs[i]);
+		CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mMergePassCmdAllocs[i]);
 	}
-	CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mMergePassCmdAllocs[0], mMergePassCmdList);
+	CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mMergePassCmdAllocs[0], mMergePassCmdList);
 	mMergePassCmdList->Close();
 }
 

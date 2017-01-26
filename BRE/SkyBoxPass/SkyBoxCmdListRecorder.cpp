@@ -2,8 +2,9 @@
 
 #include <DirectXMath.h>
 
-#include <CommandManager/CommandManager.h>
-#include <DescriptorManager\DescriptorManager.h>
+#include <CommandManager/CommandAllocatorManager.h>
+#include <CommandManager/CommandListManager.h>
+#include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
 #include <PSOCreator/PSOCreator.h>
 #include <ResourceManager/ResourceManager.h>
@@ -30,10 +31,10 @@ namespace {
 #endif
 
 		for (std::uint32_t i = 0U; i < cmdAllocCount; ++i) {
-			CommandManager::Get().CreateCmdAlloc(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc[i]);
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc[i]);
 		}
 
-		CommandManager::Get().CreateCmdList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
 
 		// Start off in a closed state.  This is because the first time we refer 
 		// to the command list we will Reset it, and it needs to be closed before
@@ -119,7 +120,7 @@ void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
-	ID3D12DescriptorHeap* heaps[] = { &DescriptorManager::Get().GetCbvSrcUavDescriptorHeap() };
+	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
 	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCmdList->SetGraphicsRootSignature(sRootSign);
 
@@ -190,7 +191,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
 	mObjectCBuffer->CopyData(0U, &objCBuffer, sizeof(objCBuffer));
 	
 	// Set begin for cube map in GPU
-	const std::size_t descHandleIncSize{ DirectXManager::Device().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+	const std::size_t descHandleIncSize{ DirectXManager::GetDevice().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 	mCubeMapBufferGpuDescBegin.ptr = mObjectCBufferGpuDescBegin.ptr + descHandleIncSize;
 
 	// Create object cbuffer descriptor
@@ -198,7 +199,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
 	const D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->Resource()->GetGPUVirtualAddress() };
 	cBufferDesc.BufferLocation = objCBufferGpuAddress;
 	cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(objCBufferElemSize);
-	mObjectCBufferGpuDescBegin = DescriptorManager::Get().CreateConstantBufferView(cBufferDesc);
+	mObjectCBufferGpuDescBegin = CbvSrvUavDescriptorManager::Get().CreateConstantBufferView(cBufferDesc);
 
 	// Create cube map texture descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -208,7 +209,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
 	srvDesc.TextureCube.MipLevels = cubeMap.GetDesc().MipLevels;
 	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
 	srvDesc.Format = cubeMap.GetDesc().Format;
-	mCubeMapBufferGpuDescBegin = DescriptorManager::Get().CreateShaderResourceView(cubeMap, srvDesc);
+	mCubeMapBufferGpuDescBegin = CbvSrvUavDescriptorManager::Get().CreateShaderResourceView(cubeMap, srvDesc);
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };

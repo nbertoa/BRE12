@@ -2,8 +2,12 @@
 
 #include <memory>
 
-#include <CommandManager/CommandManager.h>
-#include <DescriptorManager/DescriptorManager.h>
+#include <CommandManager/CommandAllocatorManager.h>
+#include <CommandManager/CommandListManager.h>
+#include <CommandManager/CommandQueueManager.h>
+#include <DescriptorManager/CbvSrvUavDescriptorManager.h>
+#include <DescriptorManager/DepthStencilDescriptorManager.h>
+#include <DescriptorManager/RenderTargetDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
@@ -25,7 +29,7 @@ namespace {
 
 	void CreateSystems(const HINSTANCE moduleInstanceHandle) noexcept 
 	{
-		const HWND windowHandle = DirectXManager::WindowHandle();
+		const HWND windowHandle = DirectXManager::GetWindowHandle();
 
 		LPDIRECTINPUT8 directInput;
 		CHECK_HR(DirectInput8Create(moduleInstanceHandle, 
@@ -36,8 +40,12 @@ namespace {
 		Keyboard::Create(*directInput, windowHandle);
 		Mouse::Create(*directInput, windowHandle);
 
-		CommandManager::Create();
-		DescriptorManager::Create();
+		CommandAllocatorManager::Create();
+		CommandListManager::Create();
+		CommandQueueManager::Create();
+		CbvSrvUavDescriptorManager::Create();
+		DepthStencilDescriptorManager::Create();
+		RenderTargetDescriptorManager::Create();
 		ModelManager::Create();
 		MaterialManager::Create();
 		PSOManager::Create();
@@ -106,7 +114,7 @@ SceneExecutor::SceneExecutor(HINSTANCE moduleInstanceHandle, Scene* scene)
 	, mScene(scene)
 {
 	ASSERT(scene != nullptr);
-	DirectXManager::InitDirect3D(moduleInstanceHandle);
+	DirectXManager::Init(moduleInstanceHandle);
 	CreateSystems(moduleInstanceHandle);
-	mMasterRender = MasterRender::Create(DirectXManager::WindowHandle(), *mScene.get());	
+	mMasterRender = MasterRender::Create(DirectXManager::GetWindowHandle(), *mScene.get());	
 }
