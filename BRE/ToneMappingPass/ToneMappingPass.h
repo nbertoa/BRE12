@@ -13,7 +13,6 @@ struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
-// Pass that applies tone mapping
 class ToneMappingPass {
 public:
 	using Recorder = std::unique_ptr<ToneMappingCmdListRecorder>;
@@ -25,27 +24,27 @@ public:
 	ToneMappingPass(ToneMappingPass&&) = delete;
 	ToneMappingPass& operator=(ToneMappingPass&&) = delete;
 
-	// You should call this method before Execute()
 	void Init(
-		ID3D12CommandQueue& cmdQueue,
+		ID3D12CommandQueue& commandQueue,
 		ID3D12Resource& inputColorBuffer,
 		ID3D12Resource& outputColorBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept;
 
+	// Preconditions:
+	// - Init() must be called before
 	void Execute() noexcept;
 
 private:
-	// Method used internally for validation purposes
 	bool IsDataValid() const noexcept;
 
 	void ExecuteBeginTask() noexcept;
 
-	ID3D12CommandQueue* mCmdQueue{ nullptr };
+	ID3D12CommandQueue* mCommandQueue{ nullptr };
 
-	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCmdAllocs[SettingsManager::sQueuedFrameCount]{ nullptr };
+	// 1 command allocator per queued frame.	
+	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 
 	ID3D12Fence* mFence{ nullptr };
 	

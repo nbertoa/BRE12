@@ -10,16 +10,16 @@
 
 namespace {
 	void CreateCommandObjects(
-		ID3D12CommandAllocator* &cmdAlloc,
-		ID3D12GraphicsCommandList* &cmdList) noexcept {
+		ID3D12CommandAllocator* &commandAllocators,
+		ID3D12GraphicsCommandList* &commandList) noexcept {
 
 		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
-		ASSERT(cmdList == nullptr);
+		ASSERT(commandList == nullptr);
 
 		// Create command allocator and command list
-		CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
-		cmdList->Close();
+		CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators, commandList);
+		commandList->Close();
 	}
 }
 
@@ -27,13 +27,13 @@ void EnvironmentLightPass::Init(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
 	ID3D12Resource& diffuseIrradianceCubeMap,
-	ID3D12Resource& specularPreConvolvedCubeMap) noexcept {
-
+	ID3D12Resource& specularPreConvolvedCubeMap) noexcept 
+{
 	ASSERT(ValidateData() == false);
 	
-	CreateCommandObjects(mCmdAlloc, mCmdList);
+	CreateCommandObjects(mCommandAllocators, mCommandList);
 
 	// Initialize recorder's PSO
 	EnvironmentLightCmdListRecorder::InitPSO();
@@ -44,7 +44,7 @@ void EnvironmentLightPass::Init(
 		geometryBuffers, 
 		geometryBuffersCount,
 		depthBuffer,
-		colorBufferCpuDesc,
+		outputColorBufferCpuDesc,
 		diffuseIrradianceCubeMap,
 		specularPreConvolvedCubeMap);
 
@@ -59,8 +59,8 @@ void EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) const noexc
 
 bool EnvironmentLightPass::ValidateData() const noexcept {
 	const bool b =
-		mCmdAlloc != nullptr &&
-		mCmdList != nullptr &&
+		mCommandAllocators != nullptr &&
+		mCommandList != nullptr &&
 		mRecorder.get() != nullptr;
 
 	return b;

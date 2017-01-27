@@ -16,50 +16,50 @@
 
 namespace {
 	void CreateCommandObjects(
-		ID3D12CommandAllocator* &cmdAlloc,
-		ID3D12GraphicsCommandList* &cmdList,
-		ID3D12Fence* &fence) noexcept {
-
-		ASSERT(cmdAlloc == nullptr);
-		ASSERT(cmdList == nullptr);
+		ID3D12CommandAllocator* &commandAllocators,
+		ID3D12GraphicsCommandList* &commandList,
+		ID3D12Fence* &fence) noexcept 
+	{
+		ASSERT(commandAllocators == nullptr);
+		ASSERT(commandList == nullptr);
 		ASSERT(fence == nullptr);
 
 		// Create command allocators and command list
-		CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc);
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc, cmdList);
-		cmdList->Close();
+		CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators, commandList);
+		commandList->Close();
 
 		ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, fence);
 	}
 }
 
 void SkyBoxPass::Init(
-	ID3D12CommandQueue& cmdQueue,
+	ID3D12CommandQueue& commandQueue,
 	ID3D12Resource& skyBoxCubeMap,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept {
-
+	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept 
+{
 	ASSERT(IsDataValid() == false);
 
-	CreateCommandObjects(mCmdAlloc, mCmdList, mFence);
+	CreateCommandObjects(mCommandAllocators, mCommandList, mFence);
 
-	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
+	CHECK_HR(mCommandList->Reset(mCommandAllocators, nullptr));
 
 	// Create sky box sphere
 	Model* model;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	ModelManager::Get().CreateSphere(3000, 50, 50, model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
+	ModelManager::Get().CreateSphere(3000, 50, 50, model, *mCommandList, uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
 	const std::vector<Mesh>& meshes(model->GetMeshes());
 	ASSERT(meshes.size() == 1UL);
 
 	// Build world matrix
 	const Mesh& mesh{ meshes[0] };
-	DirectX::XMFLOAT4X4 w;
-	MathUtils::ComputeMatrix(w, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
+	DirectX::XMFLOAT4X4 worldMatrix;
+	MathUtils::ComputeMatrix(worldMatrix, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 	
-	DXUtils::ExecuteCommandListAndWaitForCompletion(cmdQueue, *mCmdList, *mFence);
+	DXUtils::ExecuteCommandListAndWaitForCompletion(commandQueue, *mCommandList, *mFence);
 
 	// Initialize recoders's pso
 	SkyBoxCmdListRecorder::InitPSO();
@@ -69,9 +69,9 @@ void SkyBoxPass::Init(
 	mRecorder->Init(
 		mesh.GetVertexBufferData(),
 		mesh.GetIndexBufferData(), 
-		w, 
+		worldMatrix, 
 		skyBoxCubeMap,
-		colorBufferCpuDesc,
+		outputColorBufferCpuDesc,
 		depthBufferCpuDesc);
 
 	ASSERT(IsDataValid());
@@ -92,8 +92,8 @@ void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 bool SkyBoxPass::IsDataValid() const noexcept {
 	const bool b =
 		mRecorder.get() != nullptr &&
-		mCmdAlloc != nullptr &&
-		mCmdList != nullptr &&
+		mCommandAllocators != nullptr &&
+		mCommandList != nullptr &&
 		mFence != nullptr;
 
 	return b;

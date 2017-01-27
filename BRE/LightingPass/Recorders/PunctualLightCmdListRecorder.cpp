@@ -22,12 +22,12 @@
 
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
-	ID3D12RootSignature* sRootSign{ nullptr };
+	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
 void PunctualLightCmdListRecorder::InitPSO() noexcept {
 	ASSERT(sPSO == nullptr);
-	ASSERT(sRootSign == nullptr);
+	ASSERT(sRootSignature == nullptr);
 
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
@@ -44,10 +44,10 @@ void PunctualLightCmdListRecorder::InitPSO() noexcept {
 		psoData.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSign);
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
 
 	ASSERT(sPSO != nullptr);
-	ASSERT(sRootSign != nullptr);
+	ASSERT(sRootSignature != nullptr);
 }
 
 void PunctualLightCmdListRecorder::Init(
@@ -97,7 +97,7 @@ void PunctualLightCmdListRecorder::Init(
 	res[resIndex] = &depthBuffer;
 	
 	// Create textures SRV descriptors
-	mTexturesGpuDesc = CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(res.data(), srvDescVec.data(), static_cast<uint32_t>(srvDescVec.size()));
+	mPixelShaderBuffersGpuDesc = CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(res.data(), srvDescVec.data(), static_cast<uint32_t>(srvDescVec.size()));
 
 	// Create lights buffer SRV	descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -115,51 +115,51 @@ void PunctualLightCmdListRecorder::Init(
 void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
-	ASSERT(sRootSign != nullptr);
-	ASSERT(mColorBufferCpuDesc.ptr != 0UL);
+	ASSERT(sRootSignature != nullptr);
+	ASSERT(mOutputColorBufferCpuDesc.ptr != 0UL);
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
+	ID3D12CommandAllocator* cmdAlloc{ mCommandAllocators[mCurrentFrameIndex] };
 	ASSERT(cmdAlloc != nullptr);	
 
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrFrameIndex]);
+	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrentFrameIndex]);
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
+	CHECK_HR(mCommandList->Reset(cmdAlloc, sPSO));
 
-	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, nullptr);
+	mCommandList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+	mCommandList->OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
-	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
-	mCmdList->SetGraphicsRootSignature(sRootSign);
+	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
+	mCommandList->SetGraphicsRootSignature(sRootSignature);
 
 	// Set root parameters
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
 	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescBegin);
-	mCmdList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootConstantBufferView(4U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootDescriptorTable(5U, mTexturesGpuDesc);
+	mCommandList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
+	mCommandList->SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescBegin);
+	mCommandList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
+	mCommandList->SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
+	mCommandList->SetGraphicsRootConstantBufferView(4U, frameCBufferGpuVAddress);
+	mCommandList->SetGraphicsRootDescriptorTable(5U, mPixelShaderBuffersGpuDesc);
 	
-	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	
-	mCmdList->DrawInstanced(mNumLights, 1U, 0U, 0U);
+	mCommandList->DrawInstanced(mNumLights, 1U, 0U, 0U);
 
-	mCmdList->Close();
+	mCommandList->Close();
 
-	CommandListExecutor::Get().AddCommandList(*mCmdList);
+	CommandListExecutor::Get().AddCommandList(*mCommandList);
 
 	// Next frame
-	mCurrFrameIndex = (mCurrFrameIndex + 1) % _countof(mCmdAlloc);
+	mCurrentFrameIndex = (mCurrentFrameIndex + 1) % _countof(mCommandAllocators);
 }
 
 bool PunctualLightCmdListRecorder::IsDataValid() const noexcept {
-	return LightingPassCmdListRecorder::IsDataValid() && mTexturesGpuDesc.ptr != 0UL;
+	return LightingPassCmdListRecorder::IsDataValid() && mPixelShaderBuffersGpuDesc.ptr != 0UL;
 }
 
 void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {

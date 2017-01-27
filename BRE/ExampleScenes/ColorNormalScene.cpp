@@ -76,10 +76,10 @@ namespace {
 		PunctualLightCmdListRecorder* &recorder) {
 		recorder = new PunctualLightCmdListRecorder();
 		PunctualLight light[1];
-		light[0].mPosAndRange[0] = 0.0f;
-		light[0].mPosAndRange[1] = 300.0f;
-		light[0].mPosAndRange[2] = -100.0f;
-		light[0].mPosAndRange[3] = 10000.0f;
+		light[0].mPositionAndRange[0] = 0.0f;
+		light[0].mPositionAndRange[1] = 300.0f;
+		light[0].mPositionAndRange[2] = -100.0f;
+		light[0].mPositionAndRange[3] = 10000.0f;
 		light[0].mColorAndPower[0] = 1.0f;
 		light[0].mColorAndPower[1] = 1.0f;
 		light[0].mColorAndPower[2] = 1.0f;
@@ -165,10 +165,10 @@ void ColorNormalScene::Init(ID3D12CommandQueue& cmdQueue) noexcept {
 	Scene::Init(cmdQueue);
 
 	// Load textures
-	sResourceContainer.LoadTextures(sTexFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
+	sResourceContainer.LoadTextures(sTexFiles, cmdQueue, *mCommandAllocators, *mCommandList, *mFence);
 
 	// Load models
-	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
+	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCommandAllocators, *mCommandList, *mFence);
 }
 
 void ColorNormalScene::CreateGeometryPassRecorders(

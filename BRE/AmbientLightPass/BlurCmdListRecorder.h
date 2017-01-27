@@ -6,8 +6,6 @@
 
 class UploadBuffer;
 
-// Responsible of command lists recording to be executed by CommandListExecutor.
-// This class has common data and functionality to record command list to blur a color buffer.
 class BlurCmdListRecorder {
 public:
 	BlurCmdListRecorder();
@@ -23,9 +21,11 @@ public:
 	static void InitPSO() noexcept;
 
 	void Init(
-		ID3D12Resource& ambientAccessibilityBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& blurBufferCpuDesc) noexcept;
+		ID3D12Resource& inputColorBuffer,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc) noexcept;
 
+	// Preconditions:
+	// - Init() must be called first
 	void RecordAndPushCommandLists() noexcept;
 
 	bool ValidateData() const noexcept;
@@ -33,10 +33,10 @@ public:
 private:
 	void BuildBuffers(ID3D12Resource& colorBuffer) noexcept;
 
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mColorBufferGpuDesc{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferGpuDesc{ 0UL };
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
 };

@@ -11,10 +11,10 @@
 #include <DirectXManager\DirectXManager.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
-#include <MasterRender/MasterRender.h>
 #include <MaterialManager/MaterialManager.h>
 #include <ModelManager\ModelManager.h>
 #include <PSOManager\PSOManager.h>
+#include <RenderManager/RenderManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
@@ -100,8 +100,7 @@ void SceneExecutor::Destroy() noexcept {
 }
 
 SceneExecutor::~SceneExecutor() {
-	ASSERT(mMasterRender != nullptr);
-	mMasterRender->Terminate();
+	RenderManager::Get().Terminate();
 	mTaskSchedulerInit.terminate();
 }
 
@@ -116,5 +115,5 @@ SceneExecutor::SceneExecutor(HINSTANCE moduleInstanceHandle, Scene* scene)
 	ASSERT(scene != nullptr);
 	DirectXManager::Init(moduleInstanceHandle);
 	CreateSystems(moduleInstanceHandle);
-	mMasterRender = MasterRender::Create(DirectXManager::GetWindowHandle(), *mScene.get());	
+	RenderManager::Create(*mScene.get());	
 }

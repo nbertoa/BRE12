@@ -5,8 +5,6 @@
 
 class UploadBuffer;
 
-// Responsible of command lists recording to be executed by CommandListExecutor.
-// This class has common data and functionality to record command list for tone mapping pass.
 class ToneMappingCmdListRecorder {
 public:
 	ToneMappingCmdListRecorder();
@@ -25,6 +23,8 @@ public:
 		ID3D12Resource& inputColorBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept;
 
+	// Preconditions:
+	// - Init() must be called first
 	void RecordAndPushCommandLists() noexcept;
 
 	bool IsDataValid() const noexcept;
@@ -32,8 +32,8 @@ public:
 private:
 	void BuildBuffers(ID3D12Resource& colorBuffer) noexcept;
 
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 		
 	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferGpuDesc{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };

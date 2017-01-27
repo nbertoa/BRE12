@@ -119,10 +119,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="MasterRender.cpp" />
+    <ClCompile Include="RenderManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MasterRender.h" />
+    <ClInclude Include="RenderManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

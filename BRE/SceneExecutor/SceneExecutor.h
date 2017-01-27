@@ -12,8 +12,6 @@
 #include <crtdbg.h>               
 #endif 
 
-class MasterRender;
-
 // To execute a scene.
 class SceneExecutor {
 public:
@@ -44,6 +42,5 @@ private:
 	// Needed by Intel TBB
 	tbb::task_scheduler_init mTaskSchedulerInit;
 
-	MasterRender* mMasterRender{ nullptr };
 	std::unique_ptr<Scene> mScene;
 };

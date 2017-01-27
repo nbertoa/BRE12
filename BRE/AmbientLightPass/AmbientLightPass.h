@@ -25,14 +25,15 @@ public:
 	AmbientLightPass(AmbientLightPass&&) = delete;
 	AmbientLightPass& operator=(AmbientLightPass&&) = delete;
 
-	// You should call this method before Execute()
 	void Init(
-		ID3D12CommandQueue& cmdQueue,
+		ID3D12CommandQueue& commandQueue,
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		ID3D12Resource& normalSmoothnessBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
 		ID3D12Resource& depthBuffer) noexcept;
 
+	// Preconditions:
+	// - Init() must be called first
 	void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
@@ -42,11 +43,11 @@ private:
 	void ExecuteBeginTask() noexcept;
 	void ExecuteEndingTask() noexcept;
 
-	ID3D12CommandQueue* mCmdQueue{ nullptr };
+	ID3D12CommandQueue* mCommandQueue{ nullptr };
 	
 	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCmdAllocsBegin[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12CommandAllocator* mCmdAllocsEnd[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocatorsBegin[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocatorsEnd[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdListBegin{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListEnd{ nullptr };
@@ -56,8 +57,8 @@ private:
 	std::unique_ptr<BlurCmdListRecorder> mBlurRecorder;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
-	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRTCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetCpuDesc{ 0UL };
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
-	D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRTCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRenderTargetCpuDesc{ 0UL };
 };

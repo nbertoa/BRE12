@@ -25,11 +25,12 @@ public:
 	PostProcessPass(PostProcessPass&&) = delete;
 	PostProcessPass& operator=(PostProcessPass&&) = delete;
 
-	// You should call this method before Execute()
 	void Init(
-		ID3D12CommandQueue& cmdQueue,
+		ID3D12CommandQueue& commandQueue,
 		ID3D12Resource& colorBuffer) noexcept;
 
+	// Preconditions:
+	// - Init() must be called first
 	void Execute(
 		ID3D12Resource& frameBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
@@ -42,12 +43,12 @@ private:
 		ID3D12Resource& frameBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
 
-	ID3D12CommandQueue* mCmdQueue{ nullptr };
+	ID3D12CommandQueue* mCommandQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCmdAllocs[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 
 	ID3D12Fence* mFence{ nullptr };
 	

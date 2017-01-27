@@ -33,7 +33,11 @@ public:
 	LightingPassCmdListRecorder(LightingPassCmdListRecorder&&) = default;
 	LightingPassCmdListRecorder& operator=(LightingPassCmdListRecorder&&) = default;
 
-	// This method must be called before RecordAndPushCommandLists()
+	// Preconditions:
+	// - "geometryBuffers" must not be nullptr
+	// - "geometryBuffersCount" must be greater than zero
+	// - "lights" must not be nullptr
+	// - "numLights" must be greater than zero
 	virtual void Init(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
@@ -41,10 +45,11 @@ public:
 		const void* lights,
 		const std::uint32_t numLights) noexcept = 0;
 
-	// This method must be called before calling RecordAndPushCommandLists()
-	void InitInternal(const D3D12_CPU_DESCRIPTOR_HANDLE colorBufferCpuDesc) noexcept;
+	void InitInternal(const D3D12_CPU_DESCRIPTOR_HANDLE outputColorBufferCpuDesc) noexcept;
 
-	// Record command lists and push them to the queue.
+	// Preconditions:
+	// - Init() must be called first
+	// - InitInternal() must be called first
 	virtual void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept = 0;
 
 	// This method validates all data (nullptr's, etc)
@@ -53,14 +58,14 @@ public:
 	virtual bool IsDataValid() const noexcept;
 
 protected:
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
-	std::uint32_t mCurrFrameIndex{ 0U };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
+	std::uint32_t mCurrentFrameIndex{ 0U };
 
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
 	
-	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
 
 	std::uint32_t mNumLights{ 0U };
 

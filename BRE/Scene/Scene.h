@@ -12,7 +12,7 @@ struct ID3D12Fence;
 struct ID3D12GraphicsCommandList;
 
 // Abstract class to inherit from.
-// To generate CmdListRecorder's used by MasterRender
+// To generate CmdListRecorder's used by RenderManager
 // to record command lists for rendering purposes
 class Scene {
 public:
@@ -48,7 +48,7 @@ public:
 protected:
 	bool IsDataValid() const;
 
-	ID3D12CommandAllocator* mCmdAlloc{ nullptr };
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 	ID3D12Fence* mFence{ nullptr };
 };

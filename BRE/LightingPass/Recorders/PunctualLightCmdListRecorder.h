@@ -16,7 +16,11 @@ public:
 	// This method is initialized by its corresponding pass.
 	static void InitPSO() noexcept;
 
-	// This method must be called before RecordAndPushCommandLists()
+	// Preconditions:
+	// - "geometryBuffers" must not be nullptr
+	// - "geometryBuffersCount" must be greater than zero
+	// - "lights" must not be nullptr
+	// - "numLights" must be greater than zero
 	void Init(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
@@ -24,13 +28,16 @@ public:
 		const void* lights,
 		const std::uint32_t numLights) noexcept final override;
 
-	// Record command lists and push them to the queue.
+	// Preconditions:
+	// - Init() must be called first
 	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept final override;
 
 	bool IsDataValid() const noexcept override;
 
 private:
+	// Preconditions:
+	// - "lights" must not be nullptr
 	void BuildBuffers(const void* lights) noexcept;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mTexturesGpuDesc{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDesc{ 0UL };
 };

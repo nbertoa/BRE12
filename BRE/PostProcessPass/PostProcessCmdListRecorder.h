@@ -6,8 +6,7 @@
 
 class UploadBuffer;
 
-// Responsible of command lists recording to be executed by CommandListExecutor.
-// This class has common data and functionality to record command list for post processing effects (anti aliasing, color grading, etc).
+// To record command list for post processing effects (anti aliasing, color grading, etc).
 class PostProcessCmdListRecorder {
 public:
 	PostProcessCmdListRecorder();
@@ -22,17 +21,19 @@ public:
 	// This method is initialized by its corresponding pass.
 	static void InitPSO() noexcept;
 
-	void Init(ID3D12Resource& colorBuffer) noexcept;
+	void Init(ID3D12Resource& inputColorBuffer) noexcept;
 
+	// Preconditions:
+	// - Init() must be called first
 	void RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
 
 	bool IsDataValid() const noexcept;
 
 private:
-	void BuildBuffers(ID3D12Resource& colorBuffer) noexcept;
+	void BuildBuffers(ID3D12Resource& inputColorBuffer) noexcept;
 
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mColorBufferGpuDesc{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferGpuDesc{ 0UL };
 };

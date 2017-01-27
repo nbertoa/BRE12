@@ -33,10 +33,12 @@ public:
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
+	// Preconditions:
+	// - Init() must be called first
 	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
 
 	bool ValidateData() const noexcept;
@@ -49,15 +51,14 @@ private:
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapsBufferGpuDescBegin;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
 
-	// Textures GPU descriptor handle
-	D3D12_GPU_DESCRIPTOR_HANDLE mTexturesGpuDesc{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDesc{ 0UL };
 };

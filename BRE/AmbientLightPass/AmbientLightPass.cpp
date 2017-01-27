@@ -13,70 +13,75 @@
 
 namespace {
 	void CreateCommandObjects(
-		ID3D12CommandAllocator* cmdAllocsBegin[SettingsManager::sQueuedFrameCount],
-		ID3D12CommandAllocator* cmdAllocsEnd[SettingsManager::sQueuedFrameCount],
-		ID3D12GraphicsCommandList* &cmdListBegin,
-		ID3D12GraphicsCommandList* &cmdListEnd) noexcept {
-
+		ID3D12CommandAllocator* cmdAllocatorsBegin[SettingsManager::sQueuedFrameCount],
+		ID3D12CommandAllocator* cmdAllocatorsEnd[SettingsManager::sQueuedFrameCount],
+		ID3D12GraphicsCommandList* &commandListBegin,
+		ID3D12GraphicsCommandList* &commandListEnd) noexcept 
+	{
 		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
-		ASSERT(cmdListBegin == nullptr);
-		ASSERT(cmdListEnd == nullptr);
+		ASSERT(commandListBegin == nullptr);
+		ASSERT(commandListEnd == nullptr);
 
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-			ASSERT(cmdAllocsEnd[i] == nullptr);
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsBegin[i]);
+			ASSERT(cmdAllocatorsEnd[i] == nullptr);
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocatorsBegin[i]);
 
-			ASSERT(cmdAllocsEnd[i] == nullptr);
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsEnd[i]);
+			ASSERT(cmdAllocatorsEnd[i] == nullptr);
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocatorsEnd[i]);
 		}
 
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocsBegin[0], cmdListBegin);
-		cmdListBegin->Close();
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsBegin[0], commandListBegin);
+		commandListBegin->Close();
 
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocsEnd[0], cmdListEnd);
-		cmdListEnd->Close();
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsEnd[0], commandListEnd);
+		commandListEnd->Close();
 	}
 
-	void CreateBuffer(
+	void CreateResourceAndRenderTargetDescriptor(
 		Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
-		D3D12_CPU_DESCRIPTOR_HANDLE& bufferRTCpuDesc) noexcept {
+		D3D12_CPU_DESCRIPTOR_HANDLE& bufferRenderTargetCpuDesc) noexcept {
 		
 		// Set shared buffers properties
-		D3D12_RESOURCE_DESC resDesc = {};
-		resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		resDesc.Alignment = 0U;
-		resDesc.Width = SettingsManager::sWindowWidth;
-		resDesc.Height = SettingsManager::sWindowHeight;
-		resDesc.DepthOrArraySize = 1U;
-		resDesc.MipLevels = 0U;
-		resDesc.SampleDesc.Count = 1U;
-		resDesc.SampleDesc.Quality = 0U;
-		resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-		resDesc.Format = DXGI_FORMAT_R16_UNORM;
+		D3D12_RESOURCE_DESC resourceDescriptor = {};
+		resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		resourceDescriptor.Alignment = 0U;
+		resourceDescriptor.Width = SettingsManager::sWindowWidth;
+		resourceDescriptor.Height = SettingsManager::sWindowHeight;
+		resourceDescriptor.DepthOrArraySize = 1U;
+		resourceDescriptor.MipLevels = 0U;
+		resourceDescriptor.SampleDesc.Count = 1U;
+		resourceDescriptor.SampleDesc.Quality = 0U;
+		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+		resourceDescriptor.Format = DXGI_FORMAT_R16_UNORM;
 
-		//D3D12_CLEAR_VALUE clearValue { DXGI_FORMAT_R24_UNORM_X8_TYPELESS, 0.0f, 0.0f, 0.0f, 0.0f };
-		D3D12_CLEAR_VALUE clearValue{ resDesc.Format, 0.0f, 0.0f, 0.0f, 0.0f };
+		D3D12_CLEAR_VALUE clearValue{ resourceDescriptor.Format, 0.0f, 0.0f, 0.0f, 0.0f };
 		buffer.Reset();
 		
 		CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 
 		// Create buffer resource
-		ID3D12Resource* res{ nullptr };			
-		ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, res);
+		ID3D12Resource* resource{ nullptr };			
+		ResourceManager::Get().CreateCommittedResource(
+			heapProps, 
+			D3D12_HEAP_FLAG_NONE, 
+			resourceDescriptor, 
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
+			&clearValue, 
+			resource);
 		
 		// Create RTV's descriptor for buffer
-		buffer = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
-		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		rtvDesc.Format = resDesc.Format;
-		RenderTargetDescriptorManager::Get().CreateRenderTargetView(*buffer.Get(), rtvDesc, &bufferRTCpuDesc);
+		buffer = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
+		D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor{};
+		rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+		rtvDescriptor.Format = resourceDescriptor.Format;
+		RenderTargetDescriptorManager::Get().CreateRenderTargetView(*buffer.Get(), rtvDescriptor, &bufferRenderTargetCpuDesc);
 	}
 }
 
 void AmbientLightPass::Init(
-	ID3D12CommandQueue& cmdQueue,
+	ID3D12CommandQueue& commandQueue,
 	ID3D12Resource& baseColorMetalMaskBuffer,
 	ID3D12Resource& normalSmoothnessBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
@@ -84,9 +89,9 @@ void AmbientLightPass::Init(
 
 	ASSERT(ValidateData() == false);
 
-	mCmdQueue = &cmdQueue;
+	mCommandQueue = &commandQueue;
 	
-	CreateCommandObjects(mCmdAllocsBegin, mCmdAllocsEnd, mCmdListBegin, mCmdListEnd);
+	CreateCommandObjects(mCmdAllocatorsBegin, mCmdAllocatorsEnd, mCmdListBegin, mCmdListEnd);
 
 	// Initialize recorder's PSO
 	AmbientLightCmdListRecorder::InitPSO();
@@ -94,21 +99,21 @@ void AmbientLightPass::Init(
 	BlurCmdListRecorder::InitPSO();
 
 	// Create ambient accessibility buffer and blur buffer
-	CreateBuffer(mAmbientAccessibilityBuffer, mAmbientAccessibilityBufferRTCpuDesc);
-	CreateBuffer(mBlurBuffer, mBlurBufferRTCpuDesc);
+	CreateResourceAndRenderTargetDescriptor(mAmbientAccessibilityBuffer, mAmbientAccessibilityBufferRenderTargetCpuDesc);
+	CreateResourceAndRenderTargetDescriptor(mBlurBuffer, mBlurBufferRenderTargetCpuDesc);
 	
 	// Initialize ambient occlusion recorder
 	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder());
 	mAmbientOcclusionRecorder->Init(
 		normalSmoothnessBuffer,
-		mAmbientAccessibilityBufferRTCpuDesc,
+		mAmbientAccessibilityBufferRenderTargetCpuDesc,
 		depthBuffer);
 
 	// Initialize blur recorder
 	mBlurRecorder.reset(new BlurCmdListRecorder());
 	mBlurRecorder->Init(
 		*mAmbientAccessibilityBuffer.Get(),
-		mBlurBufferRTCpuDesc);
+		mBlurBufferRenderTargetCpuDesc);
 
 	// Initialize ambient light recorder
 	mAmbientLightRecorder.reset(new AmbientLightCmdListRecorder());
@@ -116,7 +121,7 @@ void AmbientLightPass::Init(
 		baseColorMetalMaskBuffer,
 		colorBufferCpuDesc,
 		*mBlurBuffer.Get(),
-		mBlurBufferRTCpuDesc);
+		mBlurBufferRenderTargetCpuDesc);
 
 	ASSERT(ValidateData());
 }
@@ -141,27 +146,27 @@ void AmbientLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 
 bool AmbientLightPass::ValidateData() const noexcept {
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCmdAllocsBegin[i] == nullptr) {
+		if (mCmdAllocatorsBegin[i] == nullptr) {
 			return false;
 		}
 	}
 
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCmdAllocsEnd[i] == nullptr) {
+		if (mCmdAllocatorsEnd[i] == nullptr) {
 			return false;
 		}
 	}
 
 	const bool b =
-		mCmdQueue != nullptr &&
+		mCommandQueue != nullptr &&
 		mCmdListBegin != nullptr &&
 		mCmdListEnd != nullptr &&
 		mAmbientOcclusionRecorder.get() != nullptr &&
 		mAmbientLightRecorder.get() != nullptr &&
 		mAmbientAccessibilityBuffer.Get() != nullptr &&
-		mAmbientAccessibilityBufferRTCpuDesc.ptr != 0UL &&
+		mAmbientAccessibilityBufferRenderTargetCpuDesc.ptr != 0UL &&
 		mBlurBuffer.Get() != nullptr &&
-		mBlurBufferRTCpuDesc.ptr != 0UL;
+		mBlurBufferRenderTargetCpuDesc.ptr != 0UL;
 
 	return b;
 }
@@ -170,13 +175,13 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 	ASSERT(ValidateData());
 
 	// Used to choose a different command list allocator each call.
-	static std::uint32_t cmdAllocIndex{ 0U };
+	static std::uint32_t commandAllocatorIndex{ 0U };
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocsBegin[cmdAllocIndex] };
-	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocsBegin);
+	ID3D12CommandAllocator* commandAllocator{ mCmdAllocatorsBegin[commandAllocatorIndex] };
+	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCmdAllocatorsBegin);
 
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdListBegin->Reset(cmdAlloc, nullptr));
+	CHECK_HR(commandAllocator->Reset());
+	CHECK_HR(mCmdListBegin->Reset(commandAllocator, nullptr));
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
@@ -189,7 +194,7 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 
 	// Clear render targets
 	float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	mCmdListBegin->ClearRenderTargetView(mAmbientAccessibilityBufferRTCpuDesc, clearColor, 0U, nullptr);
+	mCmdListBegin->ClearRenderTargetView(mAmbientAccessibilityBufferRenderTargetCpuDesc, clearColor, 0U, nullptr);
 	CHECK_HR(mCmdListBegin->Close());
 
 	CommandListExecutor::Get().AddCommandList(*mCmdListBegin);
@@ -199,14 +204,14 @@ void AmbientLightPass::ExecuteEndingTask() noexcept {
 	ASSERT(ValidateData());
 
 	// Used to choose a different command list allocator each call.
-	static std::uint32_t cmdAllocIndex{ 0U };
+	static std::uint32_t commandAllocatorIndex{ 0U };
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAllocsEnd[cmdAllocIndex] };
-	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocsBegin);
+	ID3D12CommandAllocator* commandAllocator{ mCmdAllocatorsEnd[commandAllocatorIndex] };
+	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCmdAllocatorsBegin);
 
 	// Prepare end task
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdListEnd->Reset(cmdAlloc, nullptr));
+	CHECK_HR(commandAllocator->Reset());
+	CHECK_HR(mCmdListEnd->Reset(commandAllocator, nullptr));
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER endBarriers[]{

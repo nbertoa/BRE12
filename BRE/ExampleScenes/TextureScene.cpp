@@ -56,10 +56,10 @@ void TextureScene::Init(ID3D12CommandQueue& cmdQueue) noexcept {
 	Scene::Init(cmdQueue);
 
 	// Load textures
-	sResourceContainer.LoadTextures(sTexFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
+	sResourceContainer.LoadTextures(sTexFiles, cmdQueue, *mCommandAllocators, *mCommandList, *mFence);
 
 	// Load models
-	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
+	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCommandAllocators, *mCommandList, *mFence);
 }
 
 void TextureScene::CreateGeometryPassRecorders(
@@ -147,19 +147,19 @@ void TextureScene::CreateLightingPassRecorders(
 			PunctualLightCmdListRecorder& task{ *new PunctualLightCmdListRecorder() };
 			tasks[k].reset(&task);
 			PunctualLight light[2];
-			light[0].mPosAndRange[0] = 0.0f;
-			light[0].mPosAndRange[1] = 300.0f;
-			light[0].mPosAndRange[2] = 0.0f;
-			light[0].mPosAndRange[3] = 100000.0f;
+			light[0].mPositionAndRange[0] = 0.0f;
+			light[0].mPositionAndRange[1] = 300.0f;
+			light[0].mPositionAndRange[2] = 0.0f;
+			light[0].mPositionAndRange[3] = 100000.0f;
 			light[0].mColorAndPower[0] = 1.0f;
 			light[0].mColorAndPower[1] = 1.0f;
 			light[0].mColorAndPower[2] = 1.0f;
 			light[0].mColorAndPower[3] = 1000000.0f;
 
-			light[1].mPosAndRange[0] = 0.0f;
-			light[1].mPosAndRange[1] = -300.0f;
-			light[1].mPosAndRange[2] = 0.0f;
-			light[1].mPosAndRange[3] = 100000.0f;
+			light[1].mPositionAndRange[0] = 0.0f;
+			light[1].mPositionAndRange[1] = -300.0f;
+			light[1].mPositionAndRange[2] = 0.0f;
+			light[1].mPositionAndRange[3] = 100000.0f;
 			light[1].mColorAndPower[0] = 1.0f;
 			light[1].mColorAndPower[1] = 1.0f;
 			light[1].mColorAndPower[2] = 1.0f;

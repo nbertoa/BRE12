@@ -14,37 +14,41 @@
 
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
-	ID3D12RootSignature* sRootSign{ nullptr };
+	ID3D12RootSignature* sRootSignature{ nullptr };
 
-	void BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* cmdAlloc[], const std::size_t cmdAllocCount) noexcept {
-		ASSERT(cmdList == nullptr);
+	void BuildCommandObjects(
+		ID3D12GraphicsCommandList* &commandList, 
+		ID3D12CommandAllocator* commandAllocators[], 
+		const std::size_t commandAllocatorCount) noexcept 
+	{
+		ASSERT(commandList == nullptr);
 
 #ifdef _DEBUG
-		for (std::uint32_t i = 0U; i < cmdAllocCount; ++i) {
-			ASSERT(cmdAlloc[i] == nullptr);
+		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
+			ASSERT(commandAllocators[i] == nullptr);
 		}
 #endif
 
-		for (std::uint32_t i = 0U; i < cmdAllocCount; ++i) {
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc[i]);
+		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
 		}
 
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
 
 		// Start off in a closed state.  This is because the first time we refer 
 		// to the command list we will Reset it, and it needs to be closed before
 		// calling Reset.
-		cmdList->Close();
+		commandList->Close();
 	}
 }
 
 PostProcessCmdListRecorder::PostProcessCmdListRecorder() {
-	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
+	BuildCommandObjects(mCommandList, mCommandAllocators, _countof(mCommandAllocators));
 }
 
 void PostProcessCmdListRecorder::InitPSO() noexcept {
 	ASSERT(sPSO == nullptr);
-	ASSERT(sRootSign == nullptr);
+	ASSERT(sRootSignature == nullptr);
 
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
@@ -59,16 +63,16 @@ void PostProcessCmdListRecorder::InitPSO() noexcept {
 		psoData.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSign);
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
 
 	ASSERT(sPSO != nullptr);
-	ASSERT(sRootSign != nullptr);
+	ASSERT(sRootSignature != nullptr);
 }
 
-void PostProcessCmdListRecorder::Init(ID3D12Resource& colorBuffer) noexcept  {
+void PostProcessCmdListRecorder::Init(ID3D12Resource& inputColorBuffer) noexcept  {
 	ASSERT(IsDataValid() == false);
 	
-	BuildBuffers(colorBuffer);
+	BuildBuffers(inputColorBuffer);
 
 	ASSERT(IsDataValid());
 }
@@ -76,58 +80,57 @@ void PostProcessCmdListRecorder::Init(ID3D12Resource& colorBuffer) noexcept  {
 void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
-	ASSERT(sRootSign != nullptr);
+	ASSERT(sRootSignature != nullptr);
 
-	static std::uint32_t currFrameIndex = 0U;
+	static std::uint32_t currentFrameIndex = 0U;
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[currFrameIndex] };
-	ASSERT(cmdAlloc != nullptr);
+	ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[currentFrameIndex] };
+	ASSERT(commandAllocator != nullptr);
 	
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
+	CHECK_HR(commandAllocator->Reset());
+	CHECK_HR(mCommandList->Reset(commandAllocator, sPSO));
 
-	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &frameBufferCpuDesc, false, nullptr);
+	mCommandList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+	mCommandList->OMSetRenderTargets(1U, &frameBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
-	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
-	mCmdList->SetGraphicsRootSignature(sRootSign);
+	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
+	mCommandList->SetGraphicsRootSignature(sRootSignature);
 	
 	// Set root parameters
-	mCmdList->SetGraphicsRootDescriptorTable(0U, mColorBufferGpuDesc);
+	mCommandList->SetGraphicsRootDescriptorTable(0U, mInputColorBufferGpuDesc);
 
 	// Draw object	
-	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	mCmdList->DrawInstanced(6U, 1U, 0U, 0U);
+	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCommandList->DrawInstanced(6U, 1U, 0U, 0U);
 
-	mCmdList->Close();
+	mCommandList->Close();
 
-	CommandListExecutor::Get().AddCommandList(*mCmdList);
+	CommandListExecutor::Get().AddCommandList(*mCommandList);
 
 	// Next frame
-	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
+	currentFrameIndex = (currentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 bool PostProcessCmdListRecorder::IsDataValid() const noexcept {
-
 	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCmdAlloc[i] == nullptr) {
+		if (mCommandAllocators[i] == nullptr) {
 			return false;
 		}
 	}
 
 	const bool result =
-		mCmdList != nullptr &&
-		mColorBufferGpuDesc.ptr != 0UL;
+		mCommandList != nullptr &&
+		mInputColorBufferGpuDesc.ptr != 0UL;
 
 	return result;
 }
 
-void PostProcessCmdListRecorder::BuildBuffers(ID3D12Resource& colorBuffer) noexcept {
+void PostProcessCmdListRecorder::BuildBuffers(ID3D12Resource& inputColorBuffer) noexcept {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc[1U]{};
-	ID3D12Resource* res[1] = {
-		&colorBuffer,
+	ID3D12Resource* resources[1] = {
+		&inputColorBuffer,
 	};
 
 	// Create color buffer texture descriptor
@@ -135,8 +138,8 @@ void PostProcessCmdListRecorder::BuildBuffers(ID3D12Resource& colorBuffer) noexc
 	srvDesc[0].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc[0].Texture2D.MostDetailedMip = 0;
 	srvDesc[0].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc[0].Format = colorBuffer.GetDesc().Format;
-	srvDesc[0].Texture2D.MipLevels = colorBuffer.GetDesc().MipLevels;
+	srvDesc[0].Format = inputColorBuffer.GetDesc().Format;
+	srvDesc[0].Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
 
-	mColorBufferGpuDesc = CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(res, srvDesc, _countof(srvDesc));
+	mInputColorBufferGpuDesc = CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(resources, srvDesc, _countof(srvDesc));
 }

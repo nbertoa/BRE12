@@ -16,41 +16,41 @@
 
 namespace {
 	void CreateCommandObjects(
-		ID3D12CommandAllocator* cmdAllocsBegin[SettingsManager::sQueuedFrameCount],
-		ID3D12CommandAllocator* cmdAllocsEnd[SettingsManager::sQueuedFrameCount],
-		ID3D12GraphicsCommandList* &cmdList) noexcept {
-
+		ID3D12CommandAllocator* cmdAllocatorsBegin[SettingsManager::sQueuedFrameCount],
+		ID3D12CommandAllocator* cmdAllocatorsEnd[SettingsManager::sQueuedFrameCount],
+		ID3D12GraphicsCommandList* &commandList) noexcept 
+	{
 		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
-		ASSERT(cmdList == nullptr);
+		ASSERT(commandList == nullptr);
 
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-			ASSERT(cmdAllocsBegin[i] == nullptr);
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsBegin[i]);
+			ASSERT(cmdAllocatorsBegin[i] == nullptr);
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocatorsBegin[i]);
 
-			ASSERT(cmdAllocsEnd[i] == nullptr);
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocsEnd[i]);
+			ASSERT(cmdAllocatorsEnd[i] == nullptr);
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocatorsEnd[i]);
 		}
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocsBegin[0], cmdList);
-		cmdList->Close();
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsBegin[0], commandList);
+		commandList->Close();
 	}
 }
 
 void LightingPass::Init(
-	ID3D12CommandQueue& cmdQueue,
+	ID3D12CommandQueue& commandQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 	ID3D12Resource& diffuseIrradianceCubeMap,
-	ID3D12Resource& specularPreConvolvedCubeMap) noexcept {
-
+	ID3D12Resource& specularPreConvolvedCubeMap) noexcept 
+{
 	ASSERT(IsDataValid() == false);
 
-	CreateCommandObjects(mCmdAllocsBegin, mCmdAllocsEnd, mCmdList);
-	mCmdQueue = &cmdQueue;
+	CreateCommandObjects(mCmdAllocatorsBegin, mCmdAllocatorsEnd, mCommandList);
+	mCommandQueue = &commandQueue;
 	mGeometryBuffers = geometryBuffers;
-	mColorBufferCpuDesc = colorBufferCpuDesc;
+	mOutputColorBufferCpuDesc = colorBufferCpuDesc;
 	mDepthBuffer = &depthBuffer;
 
 	// Initialize recorder's pso
@@ -59,7 +59,7 @@ void LightingPass::Init(
 	// Initialize ambient pass
 	ASSERT(geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get() != nullptr);
 	mAmbientLightPass.Init(
-		cmdQueue,
+		commandQueue,
 		*geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(),
 		*geometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(),
 		colorBufferCpuDesc,
@@ -117,13 +117,13 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 
 bool LightingPass::IsDataValid() const noexcept {
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCmdAllocsBegin[i] == nullptr) {
+		if (mCmdAllocatorsBegin[i] == nullptr) {
 			return false;
 		}
 	}
 
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCmdAllocsEnd[i] == nullptr) {
+		if (mCmdAllocatorsEnd[i] == nullptr) {
 			return false;
 		}
 	}
@@ -135,9 +135,9 @@ bool LightingPass::IsDataValid() const noexcept {
 	}
 
 	const bool b =
-		mCmdQueue != nullptr &&
-		mCmdList != nullptr &&
-		mColorBufferCpuDesc.ptr != 0UL &&
+		mCommandQueue != nullptr &&
+		mCommandList != nullptr &&
+		mOutputColorBufferCpuDesc.ptr != 0UL &&
 		mDepthBuffer != nullptr;
 
 	return b;
@@ -149,11 +149,11 @@ void LightingPass::ExecuteBeginTask() noexcept {
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };
 
-	ID3D12CommandAllocator* cmdAllocBegin{ mCmdAllocsBegin[cmdAllocIndex] };
-	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocsBegin);
+	ID3D12CommandAllocator* cmdAllocBegin{ mCmdAllocatorsBegin[cmdAllocIndex] };
+	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocatorsBegin);
 
 	CHECK_HR(cmdAllocBegin->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAllocBegin, nullptr));
+	CHECK_HR(mCommandList->Reset(cmdAllocBegin, nullptr));
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
@@ -163,16 +163,16 @@ void LightingPass::ExecuteBeginTask() noexcept {
 	};
 	const std::uint32_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 1UL);
-	mCmdList->ResourceBarrier(barriersCount, barriers);
+	mCommandList->ResourceBarrier(barriersCount, barriers);
 
 	// Clear render targets
-	mCmdList->ClearRenderTargetView(mColorBufferCpuDesc, DirectX::Colors::Black, 0U, nullptr);
-	CHECK_HR(mCmdList->Close());
+	mCommandList->ClearRenderTargetView(mOutputColorBufferCpuDesc, DirectX::Colors::Black, 0U, nullptr);
+	CHECK_HR(mCommandList->Close());
 
 	// Execute preliminary task
 	{
-		ID3D12CommandList* cmdLists[] = { mCmdList };
-		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+		ID3D12CommandList* cmdLists[] = { mCommandList };
+		mCommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 	}
 }
 
@@ -180,14 +180,14 @@ void LightingPass::ExecuteEndingTask() noexcept {
 	ASSERT(IsDataValid());
 
 	// Used to choose a different command list allocator each call.
-	static std::uint32_t cmdAllocIndex{ 0U };
+	static std::uint32_t commandAllocatorIndex{ 0U };
 
-	ID3D12CommandAllocator* cmdAllocEnd{ mCmdAllocsEnd[cmdAllocIndex] };
-	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocsBegin);
+	ID3D12CommandAllocator* commandAllocatorEnd{ mCmdAllocatorsEnd[commandAllocatorIndex] };
+	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCmdAllocatorsBegin);
 
 	// Prepare end task
-	CHECK_HR(cmdAllocEnd->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAllocEnd, nullptr));
+	CHECK_HR(commandAllocatorEnd->Reset());
+	CHECK_HR(mCommandList->Reset(commandAllocatorEnd, nullptr));
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER endBarriers[]{
@@ -195,12 +195,12 @@ void LightingPass::ExecuteEndingTask() noexcept {
 	};
 	const std::uint32_t barriersCount = _countof(endBarriers);
 	ASSERT(barriersCount == 1UL);
-	mCmdList->ResourceBarrier(barriersCount, endBarriers);
-	CHECK_HR(mCmdList->Close());
+	mCommandList->ResourceBarrier(barriersCount, endBarriers);
+	CHECK_HR(mCommandList->Close());
 
 	// Execute end task
 	{
-		ID3D12CommandList* cmdLists[] = { mCmdList };
-		mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+		ID3D12CommandList* cmdLists[] = { mCommandList };
+		mCommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 	}
 }

@@ -1,4 +1,4 @@
-#include "MasterRender.h"
+#include "RenderManager.h"
 
 #include <tbb/parallel_for.h>
 
@@ -20,6 +20,8 @@
 using namespace DirectX;
 
 namespace {
+	RenderManager* gManager = nullptr;
+
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };	
 	
 	// Update camera's view matrix and store data in parameters.
@@ -80,37 +82,50 @@ namespace {
 		lastXY[1] = y;
 	}
 
-	// Create swap chainm and stores it in swapChain3 parameter.
+	// Create swap chainm and stores it in swapChain parameter.
 	void CreateSwapChain(
-		const HWND hwnd, 
-		ID3D12CommandQueue& cmdQueue, 
+		const HWND windowHandle, 
+		ID3D12CommandQueue& commandQueue, 
 		const DXGI_FORMAT frameBufferFormat,
-		Microsoft::WRL::ComPtr<IDXGISwapChain3>& swapChain3) noexcept {
+		Microsoft::WRL::ComPtr<IDXGISwapChain3>& swapChain) noexcept {
 
 		IDXGISwapChain1* baseSwapChain{ nullptr };
 
-		DXGI_SWAP_CHAIN_DESC1 sd = {};
-		sd.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-		sd.BufferCount = SettingsManager::sSwapChainBufferCount;
-		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		DXGI_SWAP_CHAIN_DESC1 swapChainDescriptor = {};
+		swapChainDescriptor.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+		swapChainDescriptor.BufferCount = SettingsManager::sSwapChainBufferCount;
+		swapChainDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 #ifdef V_SYNC
 		sd.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 #else 
-		sd.Flags = 0U;
+		swapChainDescriptor.Flags = 0U;
 #endif
-		sd.Format = frameBufferFormat;
-		sd.SampleDesc.Count = 1U;
-		sd.Scaling = DXGI_SCALING_NONE;
-		sd.Stereo = false;
-		sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		swapChainDescriptor.Format = frameBufferFormat;
+		swapChainDescriptor.SampleDesc.Count = 1U;
+		swapChainDescriptor.Scaling = DXGI_SCALING_NONE;
+		swapChainDescriptor.Stereo = false;
+		swapChainDescriptor.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
-		CHECK_HR(DirectXManager::GetIDXGIFactory().CreateSwapChainForHwnd(&cmdQueue, hwnd, &sd, nullptr, nullptr, &baseSwapChain));
-		CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain3.GetAddressOf())));
+		CHECK_HR(DirectXManager::GetIDXGIFactory().CreateSwapChainForHwnd(
+			&commandQueue, 
+			windowHandle, 
+			&swapChainDescriptor, 
+			nullptr, 
+			nullptr, 
+			&baseSwapChain));
+		CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain.GetAddressOf())));
 
-		CHECK_HR(swapChain3->ResizeBuffers(SettingsManager::sSwapChainBufferCount, SettingsManager::sWindowWidth, SettingsManager::sWindowHeight, frameBufferFormat, sd.Flags));
+		CHECK_HR(swapChain->ResizeBuffers(
+			SettingsManager::sSwapChainBufferCount, 
+			SettingsManager::sWindowWidth, 
+			SettingsManager::sWindowHeight, 
+			frameBufferFormat, 
+			swapChainDescriptor.Flags));
 		
 		// Make window association
-		CHECK_HR(DirectXManager::GetIDXGIFactory().MakeWindowAssociation(hwnd, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
+		CHECK_HR(DirectXManager::GetIDXGIFactory().MakeWindowAssociation(
+			windowHandle, 
+			DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
 
 #ifdef V_SYNC
 		CHECK_HR(swapChain3->SetMaximumFrameLatency(SettingsManager::sQueuedFrameCount));
@@ -120,24 +135,35 @@ namespace {
 
 using namespace DirectX;
 
-MasterRender* MasterRender::Create(const HWND hwnd, Scene& scene) noexcept {
+RenderManager& RenderManager::Create(Scene& scene) noexcept {
+	ASSERT(gManager == nullptr);
+
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
 	// Reference count is 2: 1 parent task + 1 master render task
 	parent->set_ref_count(2);
-	return new (parent->allocate_child()) MasterRender(hwnd, scene);
+
+	gManager = new (parent->allocate_child()) RenderManager(scene);
+	return *gManager;
 }
 
-MasterRender::MasterRender(const HWND hwnd, Scene& scene)
-	: mWindowHandle(hwnd)
-{
+RenderManager& RenderManager::Get() noexcept {
+	ASSERT(gManager != nullptr);
+	return *gManager;
+}
+
+RenderManager::RenderManager(Scene& scene) {
 	ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
-	CreateMergePassCommandObjects();
-	CreateRtvAndDsv();
-	CreateColorBuffers();
+	CreateFinalPassCommandObjects();
+	CreateRenderTargetViewAndDepthStencilView();
+	CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors();
 
-	mCamera.SetFrustum(SettingsManager::sVerticalFieldOfView, SettingsManager::AspectRatio(), SettingsManager::sNearPlaneZ, SettingsManager::sFarPlaneZ);
+	mCamera.SetFrustum(
+		SettingsManager::sVerticalFieldOfView, 
+		SettingsManager::AspectRatio(), 
+		SettingsManager::sNearPlaneZ, 
+		SettingsManager::sFarPlaneZ);
 
-	CommandListExecutor::Create(*mCmdQueue, MAX_NUM_CMD_LISTS);
+	CommandListExecutor::Create(*mCommandQueue, MAX_NUM_CMD_LISTS);
 	
 	InitPasses(scene);
 
@@ -145,13 +171,13 @@ MasterRender::MasterRender(const HWND hwnd, Scene& scene)
 	parent()->spawn(*this);
 }
 
-void MasterRender::InitPasses(Scene& scene) noexcept {
+void RenderManager::InitPasses(Scene& scene) noexcept {
 	// Initialize scene
-	scene.Init(*mCmdQueue);
+	scene.Init(*mCommandQueue);
 	
 	// Generate recorders for all the passes
 	scene.CreateGeometryPassRecorders(mGeometryPass.GetRecorders());
-	mGeometryPass.Init(DepthStencilCpuDesc(), *mCmdQueue);
+	mGeometryPass.Init(DepthStencilCpuDesc(), *mCommandQueue);
 
 	ID3D12Resource* skyBoxCubeMap;
 	ID3D12Resource* diffuseIrradianceCubeMap;
@@ -162,49 +188,49 @@ void MasterRender::InitPasses(Scene& scene) noexcept {
 	ASSERT(specularPreConvolvedCubeMap != nullptr);
 
 	scene.CreateLightingPassRecorders(
-		mGeometryPass.GetBuffers(), 
+		mGeometryPass.GetGeometryBuffers(), 
 		GeometryPass::BUFFERS_COUNT, 
 		*mDepthStencilBuffer, 
 		mLightingPass.GetRecorders());
 
 	mLightingPass.Init(
-		*mCmdQueue, 
-		mGeometryPass.GetBuffers(),
+		*mCommandQueue, 
+		mGeometryPass.GetGeometryBuffers(),
 		GeometryPass::BUFFERS_COUNT,
 		*mDepthStencilBuffer,
-		mColorBuffer1RTVCpuDesc, 
+		mIntermediateColorBuffer1RTVCpuDesc, 
 		*diffuseIrradianceCubeMap,
 		*specularPreConvolvedCubeMap);
 
 	mSkyBoxPass.Init(
-		*mCmdQueue, 
+		*mCommandQueue, 
 		*skyBoxCubeMap, 
-		mColorBuffer1RTVCpuDesc,
+		mIntermediateColorBuffer1RTVCpuDesc,
 		DepthStencilCpuDesc());
 
 	mToneMappingPass.Init(
-		*mCmdQueue, 
-		*mColorBuffer1.Get(), 
-		*mColorBuffer2.Get(),
-		mColorBuffer2RTVCpuDesc);
+		*mCommandQueue, 
+		*mIntermediateColorBuffer1.Get(), 
+		*mIntermediateColorBuffer2.Get(),
+		mIntermediateColorBuffer2RTVCpuDesc);
 
 	mPostProcessPass.Init(
-		*mCmdQueue,
-		*mColorBuffer2.Get());
+		*mCommandQueue,
+		*mIntermediateColorBuffer2.Get());
 		
 	// Initialize fence values for all frames to the same number.
 	const std::uint64_t count{ _countof(mFenceValueByQueuedFrameIndex) };
 	for (std::uint64_t i = 0UL; i < count; ++i) {
-		mFenceValueByQueuedFrameIndex[i] = mCurrFenceValue;
+		mFenceValueByQueuedFrameIndex[i] = mCurrentFenceValue;
 	}
 }
 
-void MasterRender::Terminate() noexcept {
+void RenderManager::Terminate() noexcept {
 	mTerminate = true;
 	parent()->wait_for_all();
 }
 
-tbb::task* MasterRender::execute() {
+tbb::task* RenderManager::execute() {
 	while (!mTerminate) {
 		mTimer.Tick();
 		UpdateCameraAndFrameCBuffer(mTimer.DeltaTimeInSeconds(), mCamera, mFrameCBuffer);
@@ -217,7 +243,7 @@ tbb::task* MasterRender::execute() {
 		mSkyBoxPass.Execute(mFrameCBuffer);
 		mToneMappingPass.Execute();
 		mPostProcessPass.Execute(*CurrentFrameBuffer(), CurrentFrameBufferCpuDesc());
-		ExecuteMergePass();
+		ExecuteFinalPass();
 
 		SignalFenceAndPresent();
 	}
@@ -230,42 +256,53 @@ tbb::task* MasterRender::execute() {
 	return nullptr;
 }
 
-void MasterRender::ExecuteMergePass() {
-	ID3D12CommandAllocator* cmdAlloc{ mMergePassCmdAllocs[mCurrQueuedFrameIndex] };
+void RenderManager::ExecuteFinalPass() {
+	ID3D12CommandAllocator* commandAllocator{ mFinalPassCommandAllocators[mCurrentQueuedFrameIndex] };
 
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mMergePassCmdList->Reset(cmdAlloc, nullptr));
+	CHECK_HR(commandAllocator->Reset());
+	CHECK_HR(mFinalPassCommandList->Reset(commandAllocator, nullptr));
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mGeometryPass.GetBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mGeometryPass.GetBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*CurrentFrameBuffer(), D3D12_RESOURCE_STATE_PRESENT),
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mColorBuffer1.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),	
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(
+			*mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(), 
+			D3D12_RESOURCE_STATE_RENDER_TARGET),
+
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(
+			*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(), 
+			D3D12_RESOURCE_STATE_RENDER_TARGET),
+
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(
+			*CurrentFrameBuffer(), 
+			D3D12_RESOURCE_STATE_PRESENT),
+
+		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(
+			*mIntermediateColorBuffer1.Get(), 
+			D3D12_RESOURCE_STATE_RENDER_TARGET),	
 	};
-	const std::size_t barriersCount = _countof(barriers);
-	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 2UL);
-	mMergePassCmdList->ResourceBarrier(_countof(barriers), barriers);
+	const std::size_t barrierCount = _countof(barriers);
+	ASSERT(barrierCount == GeometryPass::BUFFERS_COUNT + 2UL);
+	mFinalPassCommandList->ResourceBarrier(_countof(barriers), barriers);
 
 	// Execute command list
-	CHECK_HR(mMergePassCmdList->Close());
-	ID3D12CommandList* cmdLists[] = { mMergePassCmdList };
-	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	CHECK_HR(mFinalPassCommandList->Close());
+	ID3D12CommandList* cmdLists[] = { mFinalPassCommandList };
+	mCommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 }
 
-void MasterRender::CreateRtvAndDsv() noexcept {
+void RenderManager::CreateRenderTargetViewAndDepthStencilView() noexcept {
 	// Setup RTV descriptor.
-	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-	rtvDesc.Format = SettingsManager::sFrameBufferRTFormat;
-	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor = {};
+	rtvDescriptor.Format = SettingsManager::sFrameBufferRTFormat;
+	rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	// Create swap chain and render target views
 	ASSERT(mSwapChain == nullptr);
-	CreateSwapChain(mWindowHandle, *mCmdQueue, SettingsManager::sFrameBufferFormat, mSwapChain);
+	CreateSwapChain(DirectXManager::GetWindowHandle(), *mCommandQueue, SettingsManager::sFrameBufferFormat, mSwapChain);
 	const std::size_t rtvDescSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
-		RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDesc, &mFrameBufferRTVs[i]);
+		RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDescriptor, &mFrameBufferRTVs[i]);
 		ResourceStateManager::Get().AddResource(*mFrameBuffers[i].Get(), D3D12_RESOURCE_STATE_PRESENT);
 	}
 
@@ -289,7 +326,13 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	clearValue.DepthStencil.Stencil = 0U;
 
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, depthStencilDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, &clearValue, mDepthStencilBuffer);
+	ResourceManager::Get().CreateCommittedResource(
+		heapProps, 
+		D3D12_HEAP_FLAG_NONE, 
+		depthStencilDesc, 
+		D3D12_RESOURCE_STATE_DEPTH_WRITE, 
+		&clearValue, 
+		mDepthStencilBuffer);
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
 	D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
@@ -299,7 +342,7 @@ void MasterRender::CreateRtvAndDsv() noexcept {
 	DepthStencilDescriptorManager::Get().CreateDepthStencilView(*mDepthStencilBuffer, depthStencilViewDesc, &mDepthStencilBufferRTV);
 }
 
-void MasterRender::CreateColorBuffers() noexcept {
+void RenderManager::CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors() noexcept {
 	// Fill resource description
 	D3D12_RESOURCE_DESC resDesc = {};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -316,66 +359,66 @@ void MasterRender::CreateColorBuffers() noexcept {
 
 	D3D12_CLEAR_VALUE clearValue = { resDesc.Format, 0.0f, 0.0f, 0.0f, 1.0f };
 
-	mColorBuffer1.Reset();
-	mColorBuffer2.Reset();
+	mIntermediateColorBuffer1.Reset();
+	mIntermediateColorBuffer2.Reset();
 			
-	ID3D12Resource* res{ nullptr };
+	ID3D12Resource* resource{ nullptr };
 	
 	// Create RTV's descriptor for color buffer 1
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;		
 	rtvDesc.Format = resDesc.Format;
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue, res);
-	mColorBuffer1 = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-	RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mColorBuffer1.Get(), rtvDesc, &mColorBuffer1RTVCpuDesc);
+	ResourceManager::Get().CreateCommittedResource(
+		heapProps, 
+		D3D12_HEAP_FLAG_NONE, 
+		resDesc, 
+		D3D12_RESOURCE_STATE_RENDER_TARGET, 
+		&clearValue, 
+		resource);
+	mIntermediateColorBuffer1 = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
+	RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mIntermediateColorBuffer1.Get(), rtvDesc, &mIntermediateColorBuffer1RTVCpuDesc);
 
 	// Create RTV's descriptor for color buffer 2
-	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, res);
-	mColorBuffer2 = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-	RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mColorBuffer2.Get(), rtvDesc, &mColorBuffer2RTVCpuDesc);
+	ResourceManager::Get().CreateCommittedResource(
+		heapProps, 
+		D3D12_HEAP_FLAG_NONE, 
+		resDesc, 
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
+		&clearValue, 
+		resource);
+	mIntermediateColorBuffer2 = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
+	RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mIntermediateColorBuffer2.Get(), rtvDesc, &mIntermediateColorBuffer2RTVCpuDesc);
 }
 
-void MasterRender::CreateMergePassCommandObjects() noexcept {
+void RenderManager::CreateFinalPassCommandObjects() noexcept {
 	ASSERT(SettingsManager::sQueuedFrameCount > 0U);
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	CommandQueueManager::Get().CreateCommandQueue(queueDesc, mCmdQueue);
+	CommandQueueManager::Get().CreateCommandQueue(queueDesc, mCommandQueue);
 
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mMergePassCmdAllocs[i]);
+		CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mFinalPassCommandAllocators[i]);
 	}
-	CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mMergePassCmdAllocs[0], mMergePassCmdList);
-	mMergePassCmdList->Close();
+
+	CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mFinalPassCommandAllocators[0], mFinalPassCommandList);
+	mFinalPassCommandList->Close();
 }
 
-ID3D12Resource* MasterRender::CurrentFrameBuffer() const noexcept {
-	ASSERT(mSwapChain != nullptr);
-	return mFrameBuffers[mSwapChain->GetCurrentBackBufferIndex()].Get();
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::CurrentFrameBufferCpuDesc() const noexcept {
-	return mFrameBufferRTVs[mSwapChain->GetCurrentBackBufferIndex()];
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE MasterRender::DepthStencilCpuDesc() const noexcept {
-	return mDepthStencilBufferRTV;
-}
-
-void MasterRender::FlushCommandQueue() noexcept {
+void RenderManager::FlushCommandQueue() noexcept {
 	// Signal a new fence value
-	++mCurrFenceValue;
-	CHECK_HR(mCmdQueue->Signal(mFence, mCurrFenceValue));
+	++mCurrentFenceValue;
+	CHECK_HR(mCommandQueue->Signal(mFence, mCurrentFenceValue));
 
 	// Wait until the GPU has completed commands up to this fence point.
-	if (mFence->GetCompletedValue() < mCurrFenceValue) {
+	if (mFence->GetCompletedValue() < mCurrentFenceValue) {
 		const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
 		ASSERT(eventHandle);
 
 		// Fire event when GPU hits current fence.  
-		CHECK_HR(mFence->SetEventOnCompletion(mCurrFenceValue, eventHandle));
+		CHECK_HR(mFence->SetEventOnCompletion(mCurrentFenceValue, eventHandle));
 
 		// Wait until the GPU hits current fence event is fired.
 		WaitForSingleObject(eventHandle, INFINITE);
@@ -383,7 +426,7 @@ void MasterRender::FlushCommandQueue() noexcept {
 	}
 }
 
-void MasterRender::SignalFenceAndPresent() noexcept {
+void RenderManager::SignalFenceAndPresent() noexcept {
 	ASSERT(mSwapChain != nullptr);
 
 #ifdef V_SYNC
@@ -397,13 +440,13 @@ void MasterRender::SignalFenceAndPresent() noexcept {
 	// Add an instruction to the command queue to set a new fence point.  Because we 
 	// are on the GPU time line, the new fence point won't be set until the GPU finishes
 	// processing all the commands prior to this Signal().
-	mFenceValueByQueuedFrameIndex[mCurrQueuedFrameIndex] = ++mCurrFenceValue;
-	CHECK_HR(mCmdQueue->Signal(mFence, mCurrFenceValue));
-	mCurrQueuedFrameIndex = (mCurrQueuedFrameIndex + 1U) % SettingsManager::sQueuedFrameCount;	
+	mFenceValueByQueuedFrameIndex[mCurrentQueuedFrameIndex] = ++mCurrentFenceValue;
+	CHECK_HR(mCommandQueue->Signal(mFence, mCurrentFenceValue));
+	mCurrentQueuedFrameIndex = (mCurrentQueuedFrameIndex + 1U) % SettingsManager::sQueuedFrameCount;	
 
 	// If we executed command lists for all queued frames, then we need to wait
 	// at least 1 of them to be completed, before continue recording command lists. 
-	const std::uint64_t oldestFence{ mFenceValueByQueuedFrameIndex[mCurrQueuedFrameIndex] };
+	const std::uint64_t oldestFence{ mFenceValueByQueuedFrameIndex[mCurrentQueuedFrameIndex] };
 	if (mFence->GetCompletedValue() < oldestFence) {
 		const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
 		ASSERT(eventHandle);

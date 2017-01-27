@@ -5,32 +5,36 @@
 #include <Utils/DebugUtils.h>
 
 namespace {
-	void BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* cmdAlloc[], const std::size_t cmdAllocCount) noexcept {
-		ASSERT(cmdList == nullptr);
+	void BuildCommandObjects(
+		ID3D12GraphicsCommandList* &commandList, 
+		ID3D12CommandAllocator* commandAllocators[], 
+		const std::size_t commandAllocatorCount) noexcept 
+	{
+		ASSERT(commandList == nullptr);
 
 #ifdef _DEBUG
-		for (std::uint32_t i = 0U; i < cmdAllocCount; ++i) {
-			ASSERT(cmdAlloc[i] == nullptr);
+		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
+			ASSERT(commandAllocators[i] == nullptr);
 		}
 #endif
 
-		for (std::uint32_t i = 0U; i < cmdAllocCount; ++i) {
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc[i]);
+		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
 		}
 
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
 
-		cmdList->Close();
+		commandList->Close();
 	}
 }
 
 LightingPassCmdListRecorder::LightingPassCmdListRecorder() {
-	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
+	BuildCommandObjects(mCommandList, mCommandAllocators, _countof(mCommandAllocators));
 }
 
 bool LightingPassCmdListRecorder::IsDataValid() const noexcept {
 	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCmdAlloc[i] == nullptr) {
+		if (mCommandAllocators[i] == nullptr) {
 			return false;
 		}
 	}
@@ -42,15 +46,15 @@ bool LightingPassCmdListRecorder::IsDataValid() const noexcept {
 	}
 
 	return
-		mCmdList != nullptr &&
+		mCommandList != nullptr &&
 		mNumLights != 0UL &&
 		mImmutableCBuffer != nullptr &&
 		mLightsBuffer != nullptr &&
 		mLightsBufferGpuDescBegin.ptr != 0UL;
 }
 
-void LightingPassCmdListRecorder::InitInternal(const D3D12_CPU_DESCRIPTOR_HANDLE colorBufferCpuDesc) noexcept
+void LightingPassCmdListRecorder::InitInternal(const D3D12_CPU_DESCRIPTOR_HANDLE outputColorBufferCpuDesc) noexcept
 {
-	ASSERT(colorBufferCpuDesc.ptr != 0UL);
-	mColorBufferCpuDesc = colorBufferCpuDesc;
+	ASSERT(outputColorBufferCpuDesc.ptr != 0UL);
+	mOutputColorBufferCpuDesc = outputColorBufferCpuDesc;
 }

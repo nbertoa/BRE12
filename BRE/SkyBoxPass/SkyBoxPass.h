@@ -7,7 +7,6 @@
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 
-// Pass that renders the sky box
 class SkyBoxPass {
 public:
 	using Recorder = std::unique_ptr<SkyBoxCmdListRecorder>;
@@ -19,21 +18,22 @@ public:
 	SkyBoxPass(SkyBoxPass&&) = delete;
 	SkyBoxPass& operator=(SkyBoxPass&&) = delete;
 
-	// You should call this method after filling recorder and before Execute()
 	void Init(
-		ID3D12CommandQueue& cmdQueue,
+		ID3D12CommandQueue& commandQueue,
 		ID3D12Resource& skyBoxCubeMap,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
+	// Preconditions:
+	// - Init() must be called first
 	void Execute(const FrameCBuffer& frameCBuffer) const noexcept;
 
 private:
 	// Method used internally for validation purposes
 	bool IsDataValid() const noexcept;
 	
-	ID3D12CommandAllocator* mCmdAlloc{ nullptr };
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 
 	ID3D12Fence* mFence{ nullptr };
 

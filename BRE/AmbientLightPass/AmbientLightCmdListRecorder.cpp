@@ -14,41 +14,45 @@
 
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
-	ID3D12RootSignature* sRootSign{ nullptr };
+	ID3D12RootSignature* sRootSignature{ nullptr };
 
-	void BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* cmdAlloc[], const std::size_t cmdAllocCount) noexcept {
-		ASSERT(cmdList == nullptr);
+	void BuildCommandObjects(
+		ID3D12GraphicsCommandList* &commandList, 
+		ID3D12CommandAllocator* commandAllocators[], 
+		const std::size_t commandAllocatorCount) noexcept 
+	{
+		ASSERT(commandList == nullptr);
 
 #ifdef _DEBUG
-		for (std::uint32_t i = 0U; i < cmdAllocCount; ++i) {
-			ASSERT(cmdAlloc[i] == nullptr);
+		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
+			ASSERT(commandAllocators[i] == nullptr);
 		}
 #endif
 
-		for (std::uint32_t i = 0U; i < cmdAllocCount; ++i) {
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc[i]);
+		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
+			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
 		}
 
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
+		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
 
 		// Start off in a closed state.  This is because the first time we refer 
 		// to the command list we will Reset it, and it needs to be closed before
 		// calling Reset.
-		cmdList->Close();
+		commandList->Close();
 	}
 }
 
 AmbientLightCmdListRecorder::AmbientLightCmdListRecorder() {
-	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
+	BuildCommandObjects(mCommandList, mCommandAllocators, _countof(mCommandAllocators));
 }
 
 void AmbientLightCmdListRecorder::InitPSO() noexcept {
 	ASSERT(sPSO == nullptr);
-	ASSERT(sRootSign == nullptr);
+	ASSERT(sRootSignature == nullptr);
 
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
-	const std::size_t rtCount{ _countof(psoData.mRtFormats) };
+	const std::size_t renderTargetCount{ _countof(psoData.mRtFormats) };
 	psoData.mBlendDesc = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDesc = D3DFactory::GetDisabledDepthStencilDesc();
 	psoData.mPSFilename = "AmbientLightPass/Shaders/AmbientLight/PS.cso";
@@ -56,26 +60,26 @@ void AmbientLightCmdListRecorder::InitPSO() noexcept {
 	psoData.mVSFilename = "AmbientLightPass/Shaders/AmbientLight/VS.cso";
 	psoData.mNumRenderTargets = 1U;
 	psoData.mRtFormats[0U] = SettingsManager::sColorBufferFormat;
-	for (std::size_t i = psoData.mNumRenderTargets; i < rtCount; ++i) {
+	for (std::size_t i = psoData.mNumRenderTargets; i < renderTargetCount; ++i) {
 		psoData.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSign);
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
 
 	ASSERT(sPSO != nullptr);
-	ASSERT(sRootSign != nullptr);
+	ASSERT(sRootSignature != nullptr);
 }
 
 void AmbientLightCmdListRecorder::Init(
 	ID3D12Resource& baseColorMetalMaskBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
 	ID3D12Resource& ambientAccessibilityBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRTCpuDesc) noexcept
+	const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRenderTargetCpuDesc) noexcept
 {
 	ASSERT(ValidateData() == false);
 
-	mColorBufferCpuDesc = colorBufferCpuDesc;
-	mAmbientAccessibilityBufferRTCpuDesc = ambientAccessibilityBufferRTCpuDesc;
+	mOutputColorBufferCpuDesc = outputColorBufferCpuDesc;
+	mAmbientAccessibilityBufferRenderTargetCpuDesc = ambientAccessibilityBufferRenderTargetCpuDesc;
 
 	BuildBuffers(baseColorMetalMaskBuffer, ambientAccessibilityBuffer);
 
@@ -85,51 +89,50 @@ void AmbientLightCmdListRecorder::Init(
 void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	ASSERT(ValidateData());
 	ASSERT(sPSO != nullptr);
-	ASSERT(sRootSign != nullptr);
+	ASSERT(sRootSignature != nullptr);
 
-	static std::uint32_t currFrameIndex = 0U;
+	static std::uint32_t currentFrameIndex = 0U;
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[currFrameIndex] };
-	ASSERT(cmdAlloc != nullptr);
+	ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[currentFrameIndex] };
+	ASSERT(commandAllocator != nullptr);
 	
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
+	CHECK_HR(commandAllocator->Reset());
+	CHECK_HR(mCommandList->Reset(commandAllocator, sPSO));
 
-	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, nullptr);
+	mCommandList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+	mCommandList->OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
-	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
-	mCmdList->SetGraphicsRootSignature(sRootSign);
+	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
+	mCommandList->SetGraphicsRootSignature(sRootSignature);
 	
 	// Set root parameters
-	mCmdList->SetGraphicsRootDescriptorTable(0U, mBaseColor_MetalMaskGpuDesc);
+	mCommandList->SetGraphicsRootDescriptorTable(0U, mBaseColor_MetalMaskGpuDesc);
 
 	// Draw
-	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	mCmdList->DrawInstanced(6U, 1U, 0U, 0U);
+	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCommandList->DrawInstanced(6U, 1U, 0U, 0U);
 
-	mCmdList->Close();
+	mCommandList->Close();
 
-	CommandListExecutor::Get().AddCommandList(*mCmdList);
+	CommandListExecutor::Get().AddCommandList(*mCommandList);
 
 	// Next frame
-	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
+	currentFrameIndex = (currentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 bool AmbientLightCmdListRecorder::ValidateData() const noexcept {
-
 	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCmdAlloc[i] == nullptr) {
+		if (mCommandAllocators[i] == nullptr) {
 			return false;
 		}
 	}
 
 	const bool result =
-		mCmdList != nullptr &&
-		mColorBufferCpuDesc.ptr != 0UL &&
-		mAmbientAccessibilityBufferRTCpuDesc.ptr != 0UL &&
+		mCommandList != nullptr &&
+		mOutputColorBufferCpuDesc.ptr != 0UL &&
+		mAmbientAccessibilityBufferRenderTargetCpuDesc.ptr != 0UL &&
 		mBaseColor_MetalMaskGpuDesc.ptr != 0UL;
 
 	return result;

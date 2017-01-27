@@ -20,7 +20,7 @@
 
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
-	ID3D12RootSignature* sRootSign{ nullptr };
+	ID3D12RootSignature* sRootSignature{ nullptr };
 
 	void BuildCommandObjects(ID3D12GraphicsCommandList* &cmdList, ID3D12CommandAllocator* cmdAlloc[], const std::size_t cmdAllocCount) noexcept {
 		ASSERT(cmdList == nullptr);
@@ -45,16 +45,16 @@ namespace {
 }
 
 SkyBoxCmdListRecorder::SkyBoxCmdListRecorder() {
-	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
+	BuildCommandObjects(mCommandList, mCommandAllocators, _countof(mCommandAllocators));
 }
 
 void SkyBoxCmdListRecorder::InitPSO() noexcept {
 	ASSERT(sPSO == nullptr);
-	ASSERT(sRootSign == nullptr);
+	ASSERT(sRootSignature == nullptr);
 
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
-	const std::size_t rtCount{ _countof(psoData.mRtFormats) };
+	const std::size_t renderTargetCount{ _countof(psoData.mRtFormats) };
 	// The camera is inside the sky sphere, so just turn off culling.
 	psoData.mRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	// Make sure the depth function is LESS_EQUAL and not just GREATER.  
@@ -67,22 +67,22 @@ void SkyBoxCmdListRecorder::InitPSO() noexcept {
 	psoData.mVSFilename = "SkyBoxPass/Shaders/VS.cso";
 	psoData.mNumRenderTargets = 1U;
 	psoData.mRtFormats[0U] = SettingsManager::sColorBufferFormat;
-	for (std::size_t i = psoData.mNumRenderTargets; i < rtCount; ++i) {
+	for (std::size_t i = psoData.mNumRenderTargets; i < renderTargetCount; ++i) {
 		psoData.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSign);
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
 
 	ASSERT(sPSO != nullptr);
-	ASSERT(sRootSign != nullptr);
+	ASSERT(sRootSignature != nullptr);
 }
 
 void SkyBoxCmdListRecorder::Init(
 	const BufferCreator::VertexBufferData& vertexBufferData,
 	const BufferCreator::IndexBufferData indexBufferData, 
 	const DirectX::XMFLOAT4X4& worldMatrix,
-	ID3D12Resource& cubeMap,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+	ID3D12Resource& skyBoxCubeMap,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
 {
 	ASSERT(IsDataValid() == false);
@@ -90,10 +90,10 @@ void SkyBoxCmdListRecorder::Init(
 	mVertexBufferData = vertexBufferData;
 	mIndexBufferData = indexBufferData;
 	mWorldMatrix = worldMatrix;
-	mColorBufferCpuDesc = colorBufferCpuDesc;
+	mOutputColorBufferCpuDesc = outputColorBufferCpuDesc;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
-	BuildBuffers(cubeMap);
+	BuildBuffers(skyBoxCubeMap);
 
 	ASSERT(IsDataValid());
 }
@@ -101,57 +101,56 @@ void SkyBoxCmdListRecorder::Init(
 void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
-	ASSERT(sRootSign != nullptr);
+	ASSERT(sRootSignature != nullptr);
 
-	static std::uint32_t currFrameIndex = 0U;
+	static std::uint32_t currentFrameIndex = 0U;
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[currFrameIndex] };
-	ASSERT(cmdAlloc != nullptr);
+	ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[currentFrameIndex] };
+	ASSERT(commandAllocator != nullptr);
 
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[currFrameIndex]);
+	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[currentFrameIndex]);
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
+	CHECK_HR(commandAllocator->Reset());
+	CHECK_HR(mCommandList->Reset(commandAllocator, sPSO));
 
-	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	mCmdList->OMSetRenderTargets(1U, &mColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
+	mCommandList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+	mCommandList->OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
-	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
-	mCmdList->SetGraphicsRootSignature(sRootSign);
+	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
+	mCommandList->SetGraphicsRootSignature(sRootSignature);
 
 	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescBegin);
 	D3D12_GPU_DESCRIPTOR_HANDLE cubeMapBufferGpuDesc(mCubeMapBufferGpuDescBegin);
 
-	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Set frame constants root parameters
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
+	mCommandList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	
 	// Draw object
-	mCmdList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
-	mCmdList->IASetIndexBuffer(&mIndexBufferData.mBufferView);
-	mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
-	mCmdList->SetGraphicsRootDescriptorTable(2U, cubeMapBufferGpuDesc);
+	mCommandList->IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
+	mCommandList->IASetIndexBuffer(&mIndexBufferData.mBufferView);
+	mCommandList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
+	mCommandList->SetGraphicsRootDescriptorTable(2U, cubeMapBufferGpuDesc);
 
-	mCmdList->DrawIndexedInstanced(mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
+	mCommandList->DrawIndexedInstanced(mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
 
-	mCmdList->Close();
+	mCommandList->Close();
 
-	CommandListExecutor::Get().AddCommandList(*mCmdList);
+	CommandListExecutor::Get().AddCommandList(*mCommandList);
 
 	// Next frame
-	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
+	currentFrameIndex = (currentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 bool SkyBoxCmdListRecorder::IsDataValid() const noexcept {
-
 	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCmdAlloc[i] == nullptr) {
+		if (mCommandAllocators[i] == nullptr) {
 			return false;
 		}
 	}
@@ -163,17 +162,17 @@ bool SkyBoxCmdListRecorder::IsDataValid() const noexcept {
 	}
 
 	const bool result =
-		mCmdList != nullptr &&
+		mCommandList != nullptr &&
 		mObjectCBuffer != nullptr &&
 		mObjectCBufferGpuDescBegin.ptr != 0UL &&
 		mCubeMapBufferGpuDescBegin.ptr != 0UL &&
-		mColorBufferCpuDesc.ptr != 0UL &&
+		mOutputColorBufferCpuDesc.ptr != 0UL &&
 		mDepthBufferCpuDesc.ptr != 0UL;
 
 	return result;
 }
 
-void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
+void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& skyBoxCubeMap) noexcept {
 #ifdef _DEBUG
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ASSERT(mFrameCBuffer[i] == nullptr);
@@ -205,10 +204,10 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& cubeMap) noexcept {
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
 	srvDesc.TextureCube.MostDetailedMip = 0;
-	srvDesc.TextureCube.MipLevels = cubeMap.GetDesc().MipLevels;
+	srvDesc.TextureCube.MipLevels = skyBoxCubeMap.GetDesc().MipLevels;
 	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
-	srvDesc.Format = cubeMap.GetDesc().Format;
-	mCubeMapBufferGpuDescBegin = CbvSrvUavDescriptorManager::Get().CreateShaderResourceView(cubeMap, srvDesc);
+	srvDesc.Format = skyBoxCubeMap.GetDesc().Format;
+	mCubeMapBufferGpuDescBegin = CbvSrvUavDescriptorManager::Get().CreateShaderResourceView(skyBoxCubeMap, srvDesc);
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };

@@ -27,10 +27,12 @@ public:
 
 	void Init(
 		ID3D12Resource& baseColorMetalMaskBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
 		ID3D12Resource& ambientAccessibilityBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRTCpuDesc) noexcept;
 
+	// Preconditions:
+	// - Init() must be called first
 	void RecordAndPushCommandLists() noexcept;
 
 	bool ValidateData() const noexcept;
@@ -40,13 +42,11 @@ private:
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		ID3D12Resource& ambientAccessibilityBuffer) noexcept;
 
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 
-	// Buffers cpu descriptors
-	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRTCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetCpuDesc{ 0UL };
 
-	// BaseColor_MetalMask GPU descriptor handle
 	D3D12_GPU_DESCRIPTOR_HANDLE mBaseColor_MetalMaskGpuDesc{ 0UL };
 };

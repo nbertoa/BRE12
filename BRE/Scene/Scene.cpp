@@ -11,9 +11,9 @@
 void Scene::Init(ID3D12CommandQueue& /*cmdQueue*/) noexcept {
 	ASSERT(IsDataValid() == false);
 
-	CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mCmdAlloc);
-	CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCmdAlloc, mCmdList);
-	mCmdList->Close();
+	CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandAllocators);
+	CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCommandAllocators, mCommandList);
+	mCommandList->Close();
 	ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 
 	ASSERT(IsDataValid());
@@ -22,8 +22,8 @@ void Scene::Init(ID3D12CommandQueue& /*cmdQueue*/) noexcept {
 bool 
 Scene::IsDataValid() const {
 	const bool b =
-		mCmdAlloc != nullptr &&
-		mCmdList != nullptr &&
+		mCommandAllocators != nullptr &&
+		mCommandList != nullptr &&
 		mFence != nullptr;
 
 	return b;

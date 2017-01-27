@@ -22,14 +22,14 @@
 
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
-	ID3D12RootSignature* sRootSign{ nullptr };
+	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
 void TextureCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept {
 	ASSERT(geometryBufferFormats != nullptr);
 	ASSERT(geometryBufferCount > 0U);
 	ASSERT(sPSO == nullptr);
-	ASSERT(sRootSign == nullptr);
+	ASSERT(sRootSignature == nullptr);
 
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
@@ -39,22 +39,22 @@ void TextureCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, c
 	psoData.mVSFilename = "GeometryPass/Shaders/TextureMapping/VS.cso";
 	psoData.mNumRenderTargets = geometryBufferCount;
 	memcpy(psoData.mRtFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSign);
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
 
 	ASSERT(sPSO != nullptr);
-	ASSERT(sRootSign != nullptr);
+	ASSERT(sRootSignature != nullptr);
 }
 
 void TextureCmdListRecorder::Init(
 	const GeometryData* geometryDataVec,
-	const std::uint32_t numGeomData,
+	const std::uint32_t geometryDataCount,
 	const Material* materials,
 	ID3D12Resource** textures,
 	const std::uint32_t numResources) noexcept
 {
 	ASSERT(IsDataValid() == false);
 	ASSERT(geometryDataVec != nullptr);
-	ASSERT(numGeomData != 0U);
+	ASSERT(geometryDataCount != 0U);
 	ASSERT(materials != nullptr);
 	ASSERT(numResources > 0UL);
 	ASSERT(textures != nullptr);
@@ -62,15 +62,15 @@ void TextureCmdListRecorder::Init(
 	// Check that the total number of matrices (geometry to be drawn) will be equal to available materials
 #ifdef _DEBUG
 	std::size_t totalNumMatrices{ 0UL };
-	for (std::size_t i = 0UL; i < numGeomData; ++i) {
+	for (std::size_t i = 0UL; i < geometryDataCount; ++i) {
 		const std::size_t numMatrices{ geometryDataVec[i].mWorldMatrices.size() };
 		totalNumMatrices += numMatrices;
 		ASSERT(numMatrices != 0UL);
 	}
 	ASSERT(totalNumMatrices == numResources);
 #endif
-	mGeometryDataVec.reserve(numGeomData);
-	for (std::uint32_t i = 0U; i < numGeomData; ++i) {
+	mGeometryDataVec.reserve(geometryDataCount);
+	for (std::uint32_t i = 0U; i < geometryDataCount; ++i) {
 		mGeometryDataVec.push_back(geometryDataVec[i]);
 	}
 
@@ -82,73 +82,73 @@ void TextureCmdListRecorder::Init(
 void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
-	ASSERT(sRootSign != nullptr);
+	ASSERT(sRootSignature != nullptr);
 	ASSERT(mGeometryBuffersCpuDescs != nullptr);
 	ASSERT(mGeometryBuffersCpuDescCount != 0U);
 	ASSERT(mDepthBufferCpuDesc.ptr != 0U);
 
-	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
-	ASSERT(cmdAlloc != nullptr);
+	ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[mCurrentFrameIndex] };
+	ASSERT(commandAllocator != nullptr);
 
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrFrameIndex]);
+	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrentFrameIndex]);
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCmdList->Reset(cmdAlloc, sPSO));
+	CHECK_HR(commandAllocator->Reset());
+	CHECK_HR(mCommandList->Reset(commandAllocator, sPSO));
 
-	mCmdList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
-	mCmdList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	mCmdList->OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
+	mCommandList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+	mCommandList->OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
-	mCmdList->SetDescriptorHeaps(_countof(heaps), heaps);
-	mCmdList->SetGraphicsRootSignature(sRootSign);
+	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
+	mCommandList->SetGraphicsRootSignature(sRootSignature);
 
 	const std::size_t descHandleIncSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescBegin);
 	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mMaterialsCBufferGpuDescBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDesc(mTexturesBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDesc(mBaseColorBufferGpuDescBegin);
 
-	mCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Set frame constants root parameters
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
-	mCmdList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	mCmdList->SetGraphicsRootConstantBufferView(3U, frameCBufferGpuVAddress);
+	mCommandList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
+	mCommandList->SetGraphicsRootConstantBufferView(3U, frameCBufferGpuVAddress);
 
 	// Draw objects
 	const std::size_t geomCount{ mGeometryDataVec.size() };
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
 		GeometryData& geomData{ mGeometryDataVec[i] };
-		mCmdList->IASetVertexBuffers(0U, 1U, &geomData.mVertexBufferData.mBufferView);
-		mCmdList->IASetIndexBuffer(&geomData.mIndexBufferData.mBufferView);
+		mCommandList->IASetVertexBuffers(0U, 1U, &geomData.mVertexBufferData.mBufferView);
+		mCommandList->IASetIndexBuffer(&geomData.mIndexBufferData.mBufferView);
 		const std::size_t worldMatsCount{ geomData.mWorldMatrices.size() };
 		for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
-			mCmdList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
+			mCommandList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
 			objectCBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDesc);
+			mCommandList->SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDesc);
 			materialsCBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCmdList->SetGraphicsRootDescriptorTable(4U, texturesBufferGpuDesc);
+			mCommandList->SetGraphicsRootDescriptorTable(4U, texturesBufferGpuDesc);
 			texturesBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCmdList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
+			mCommandList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
 		}
 	}
 
-	mCmdList->Close();
+	mCommandList->Close();
 
-	CommandListExecutor::Get().AddCommandList(*mCmdList);
+	CommandListExecutor::Get().AddCommandList(*mCommandList);
 
 	// Next frame
-	mCurrFrameIndex = (mCurrFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
+	mCurrentFrameIndex = (mCurrentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 bool TextureCmdListRecorder::IsDataValid() const noexcept {
-	const std::size_t numGeomData{ mGeometryDataVec.size() };
-	for (std::size_t i = 0UL; i < numGeomData; ++i) {
+	const std::size_t geometryDataCount{ mGeometryDataVec.size() };
+	for (std::size_t i = 0UL; i < geometryDataCount; ++i) {
 		const std::size_t numMatrices{ mGeometryDataVec[i].mWorldMatrices.size() };
 		if (numMatrices == 0UL) {
 			return false;
@@ -163,7 +163,7 @@ bool TextureCmdListRecorder::IsDataValid() const noexcept {
 
 	const bool result =
 		GeometryPassCmdListRecorder::IsDataValid() &&
-		mTexturesBufferGpuDescBegin.ptr != 0UL;
+		mBaseColorBufferGpuDescBegin.ptr != 0UL;
 
 	return result;
 }
@@ -188,9 +188,9 @@ void TextureCmdListRecorder::BuildBuffers(
 	const std::size_t objCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ObjectCBuffer)) };
 	ResourceManager::Get().CreateUploadBuffer(objCBufferElemSize, dataCount, mObjectCBuffer);
 	std::uint32_t k = 0U;
-	const std::size_t numGeomData{ mGeometryDataVec.size() };
+	const std::size_t geometryDataCount{ mGeometryDataVec.size() };
 	ObjectCBuffer objCBuffer;
-	for (std::size_t i = 0UL; i < numGeomData; ++i) {
+	for (std::size_t i = 0UL; i < geometryDataCount; ++i) {
 		GeometryData& geomData{ mGeometryDataVec[i] };
 		const std::uint32_t worldMatsCount{ static_cast<std::uint32_t>(geomData.mWorldMatrices.size()) };
 		for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
@@ -254,7 +254,7 @@ void TextureCmdListRecorder::BuildBuffers(
 		CbvSrvUavDescriptorManager::Get().CreateConstantBufferViews(
 			materialCbufferViewDescVec.data(), 
 			static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
-	mTexturesBufferGpuDescBegin =
+	mBaseColorBufferGpuDescBegin =
 		CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(
 			resVec.data(), 
 			srvDescVec.data(), 

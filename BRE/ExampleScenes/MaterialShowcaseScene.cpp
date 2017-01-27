@@ -367,10 +367,10 @@ void MaterialShowcaseScene::Init(ID3D12CommandQueue& cmdQueue) noexcept {
 	Scene::Init(cmdQueue);
 
 	// Load textures
-	sResourceContainer.LoadTextures(sTexFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);	
+	sResourceContainer.LoadTextures(sTexFiles, cmdQueue, *mCommandAllocators, *mCommandList, *mFence);	
 
 	// Load models
-	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCmdAlloc, *mCmdList, *mFence);
+	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCommandAllocators, *mCommandList, *mFence);
 }
 
 void MaterialShowcaseScene::CreateGeometryPassRecorders(

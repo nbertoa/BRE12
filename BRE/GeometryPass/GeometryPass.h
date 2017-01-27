@@ -36,13 +36,13 @@ public:
 	// You should get recorders and fill them, before calling Init()
 	__forceinline Recorders& GetRecorders() noexcept { return mRecorders; }
 
-	// You should call this method after filling recorders and before Execute()
+	// Preconditions:
+	// - You should fill recorders with GetRecorders() before
 	void Init(
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
-		ID3D12CommandQueue& cmdQueue) noexcept;
+		ID3D12CommandQueue& commandQueue) noexcept;
 	
-	// Get geometry buffers
-	__forceinline Microsoft::WRL::ComPtr<ID3D12Resource>* GetBuffers() noexcept { return mBuffers; }
+	__forceinline Microsoft::WRL::ComPtr<ID3D12Resource>* GetGeometryBuffers() noexcept { return mGeometryBuffers; }
 	
 	void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
@@ -52,22 +52,19 @@ private:
 
 	void ExecuteBeginTask() noexcept;
 
-	ID3D12CommandQueue* mCmdQueue{ nullptr };
+	ID3D12CommandQueue* mCommandQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCmdAllocs[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 
 	// Geometry buffers data
-	Microsoft::WRL::ComPtr<ID3D12Resource> mBuffers[BUFFERS_COUNT];
-	D3D12_CPU_DESCRIPTOR_HANDLE mRtvCpuDescs[BUFFERS_COUNT];
-
-	// Depth buffer cpu descriptor
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
-
-	// Geometry buffers cpu descriptors
+	Microsoft::WRL::ComPtr<ID3D12Resource> mGeometryBuffers[BUFFERS_COUNT];
+	D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBufferRenderTargetCpuDescs[BUFFERS_COUNT];
 	D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBuffersCpuDescs[BUFFERS_COUNT]{ 0UL };
-	
+
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
+		
 	Recorders mRecorders;
 };

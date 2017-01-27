@@ -30,9 +30,11 @@ public:
 
 	void Init(
 		ID3D12Resource& normalSmoothnessBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessBufferCpuDesc,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferCpuDesc,
 		ID3D12Resource& depthBuffer) noexcept;
 
+	// Preconditions:
+	// - Init() must be called first
 	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
 
 	bool ValidateData() const noexcept;
@@ -44,8 +46,8 @@ private:
 		ID3D12Resource& normalSmoothnessBuffer,
 		ID3D12Resource& depthBuffer) noexcept;
 	
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	std::uint32_t mNumSamples{ 0U };
 
@@ -56,6 +58,5 @@ private:
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessBufferCpuDesc{ 0UL };
 
-	// Pixel shader buffers GPU descriptor handle
 	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDesc{ 0UL };
 };

@@ -10,8 +10,6 @@
 struct FrameCBuffer;
 class UploadBuffer;
 
-// Responsible of command lists recording to be executed by CommandListExecutor.
-// This class has common data and functionality to record command list for sky box pass.
 class SkyBoxCmdListRecorder {
 public:
 	SkyBoxCmdListRecorder();
@@ -26,24 +24,25 @@ public:
 	// This method is initialized by its corresponding pass.
 	static void InitPSO() noexcept;
 
-	// This method must be called before RecordAndPushCommandLists()
 	void Init(
 		const BufferCreator::VertexBufferData& vertexBufferData, 
 		const BufferCreator::IndexBufferData indexBufferData,
 		const DirectX::XMFLOAT4X4& worldMatrix,
-		ID3D12Resource& cubeMap,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+		ID3D12Resource& skyBoxCubeMap,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 
+	// Preconditions:
+	// - Init() must be called first
 	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
 
 	bool IsDataValid() const noexcept;
 
 private:
-	void BuildBuffers(ID3D12Resource& cubeMap) noexcept;
+	void BuildBuffers(ID3D12Resource& skyBoxCubeMap) noexcept;
 
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 	
 	BufferCreator::VertexBufferData mVertexBufferData;
 	BufferCreator::IndexBufferData mIndexBufferData;
@@ -56,6 +55,6 @@ private:
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapBufferGpuDescBegin;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 };

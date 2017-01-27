@@ -10,7 +10,7 @@
 struct FrameCBuffer;
 class UploadBuffer;
 
-// This class has common data and functionality to record command lists for deferred shading geometry pass.
+// To record command lists for deferred shading geometry pass.
 // Steps:
 // - Inherit from it and reimplement RecordAndPushCommandLists() method
 // - Call RecordAndPushCommandLists() to create command lists to execute in the GPU
@@ -32,13 +32,14 @@ public:
 	GeometryPassCmdListRecorder(GeometryPassCmdListRecorder&&) = default;
 	GeometryPassCmdListRecorder& operator=(GeometryPassCmdListRecorder&&) = default;
 
-	// This method must be called before calling RecordAndPushCommandLists()
+	// Preconditions:
+	// - "geometryBuffersCpuDescs" must not be nullptr
+	// - "geometryBuffersCpuDescCount" must be greater than zero
 	void InitInternal(
 		const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBuffersCpuDescs,
 		const std::uint32_t geometryBuffersCpuDescCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
-
-	// Record command lists and push them to the queue.
+		
 	virtual void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept = 0;
 
 	// This method validates all data (nullptr's, etc)
@@ -48,9 +49,9 @@ public:
 
 protected:
 	// 1 command allocater per queued frame.
-	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
-	std::uint32_t mCurrFrameIndex{ 0U };
+	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	std::uint32_t mCurrentFrameIndex{ 0U };
 
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)

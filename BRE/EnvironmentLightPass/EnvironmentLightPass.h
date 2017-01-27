@@ -24,24 +24,25 @@ public:
 	EnvironmentLightPass(EnvironmentLightPass&&) = delete;
 	EnvironmentLightPass& operator=(EnvironmentLightPass&&) = delete;
 
-	// You should call this method before Execute()
 	void Init(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
+	// Preconditions:
+	// - Init() must be called first
 	void Execute(const FrameCBuffer& frameCBuffer) const noexcept;
 
 private:
 	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
 	
-	ID3D12CommandAllocator* mCmdAlloc{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocators{ nullptr };
 
-	ID3D12GraphicsCommandList* mCmdList{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 
 	ID3D12Fence* mFence{ nullptr };
 
