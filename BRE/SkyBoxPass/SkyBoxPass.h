@@ -4,7 +4,6 @@
 
 #include <SkyBoxPass\SkyBoxCmdListRecorder.h>
 
-class CommandListExecutor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 
@@ -22,7 +21,6 @@ public:
 
 	// You should call this method after filling recorder and before Execute()
 	void Init(
-		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
 		ID3D12Resource& skyBoxCubeMap,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
@@ -34,7 +32,6 @@ private:
 	// Method used internally for validation purposes
 	bool IsDataValid() const noexcept;
 	
-	CommandListExecutor* mCmdListExecutor{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc{ nullptr };
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 

@@ -1,8 +1,6 @@
 #pragma once
 
 #include <d3d12.h>
-#include <tbb/concurrent_queue.h>
-
 #include <SettingsManager\SettingsManager.h>
 
 class UploadBuffer;
@@ -11,7 +9,7 @@ class UploadBuffer;
 // This class has common data and functionality to record command list for tone mapping pass.
 class ToneMappingCmdListRecorder {
 public:
-	explicit ToneMappingCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	ToneMappingCmdListRecorder();
 	~ToneMappingCmdListRecorder() = default;
 	ToneMappingCmdListRecorder(const ToneMappingCmdListRecorder&) = delete;
 	const ToneMappingCmdListRecorder& operator=(const ToneMappingCmdListRecorder&) = delete;
@@ -33,8 +31,6 @@ public:
 
 private:
 	void BuildBuffers(ID3D12Resource& colorBuffer) noexcept;
-
-	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };

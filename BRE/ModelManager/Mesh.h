@@ -15,19 +15,25 @@ class Mesh {
 	friend class Model;
 
 public:
-	__forceinline const BufferCreator::VertexBufferData& VertexBufferData() const noexcept { 
-		ASSERT(mVertexBufferData.IsDataValid()); return mVertexBufferData; 
-	}
-
-	__forceinline const BufferCreator::IndexBufferData& IndexBufferData() const noexcept { 
-		ASSERT(mIndexBufferData.IsDataValid()); return mIndexBufferData; 
-	}
-
 	~Mesh() = default;
 	Mesh(const Mesh&) = delete;
 	const Mesh& operator=(const Mesh&) = delete;
 	Mesh(Mesh&&) = default;
 	Mesh& operator=(Mesh&&) = delete;
+
+	// Preconditions:
+	// - data must be valid
+	__forceinline const BufferCreator::VertexBufferData& GetVertexBufferData() const noexcept {
+		ASSERT(mVertexBufferData.IsDataValid());
+		return mVertexBufferData;
+	}
+
+	// Preconditions:
+	// - data must be valid
+	__forceinline const BufferCreator::IndexBufferData& GetIndexBufferData() const noexcept {
+		ASSERT(mIndexBufferData.IsDataValid());
+		return mIndexBufferData;
+	}
 
 private:
 	// Command lists are used to store buffers creation (vertex and index per mesh)

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <tbb/concurrent_queue.h>
 #include <wrl.h>
 
 #include <SettingsManager\SettingsManager.h>
@@ -18,8 +17,7 @@ struct ID3D12Resource;
 // This class has common data and functionality to record command list for environment light pass.
 class EnvironmentLightCmdListRecorder {
 public:
-	explicit EnvironmentLightCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
-
+	EnvironmentLightCmdListRecorder();
 	~EnvironmentLightCmdListRecorder() = default;
 	EnvironmentLightCmdListRecorder(const EnvironmentLightCmdListRecorder&) = delete;
 	const EnvironmentLightCmdListRecorder& operator=(const EnvironmentLightCmdListRecorder&) = delete;
@@ -50,8 +48,6 @@ private:
 		ID3D12Resource& depthBuffer,
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
-
-	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };

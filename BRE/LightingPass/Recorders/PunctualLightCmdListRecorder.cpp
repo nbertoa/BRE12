@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 
+#include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <LightingPass/PunctualLight.h>
 #include <MathUtils/MathUtils.h>
@@ -115,7 +116,6 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
-	ASSERT(mCmdListQueue != nullptr);
 	ASSERT(mColorBufferCpuDesc.ptr != 0UL);
 
 	ID3D12CommandAllocator* cmdAlloc{ mCmdAlloc[mCurrFrameIndex] };
@@ -152,7 +152,7 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 
 	mCmdList->Close();
 
-	mCmdListQueue->push(mCmdList);
+	CommandListExecutor::Get().AddCommandList(*mCmdList);
 
 	// Next frame
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % _countof(mCmdAlloc);

@@ -212,8 +212,8 @@ namespace {
 		for (std::size_t i = 0UL; i < numMeshes; ++i) {
 			GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[i] };
 			const Mesh& mesh{ meshes[i] };
-			geomData.mVertexBufferData = mesh.VertexBufferData();
-			geomData.mIndexBufferData = mesh.IndexBufferData();
+			geomData.mVertexBufferData = mesh.GetVertexBufferData();
+			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			geomData.mWorldMatrices.reserve(numMaterials);
 		}
 
@@ -281,8 +281,8 @@ namespace {
 		for (std::size_t i = 0UL; i < numMeshes; ++i) {
 			GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[i] };
 			const Mesh& mesh{ meshes[i] };
-			geomData.mVertexBufferData = mesh.VertexBufferData();
-			geomData.mIndexBufferData = mesh.IndexBufferData();
+			geomData.mVertexBufferData = mesh.GetVertexBufferData();
+			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			geomData.mWorldMatrices.reserve(numMaterials);
 		}
 
@@ -342,8 +342,8 @@ namespace {
 			GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[i] };
 			const Mesh& mesh{ meshes[i] };
 
-			geomData.mVertexBufferData = mesh.VertexBufferData();
-			geomData.mIndexBufferData = mesh.IndexBufferData();
+			geomData.mVertexBufferData = mesh.GetVertexBufferData();
+			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			
 			geomData.mWorldMatrices.push_back(w);
 		}
@@ -391,7 +391,7 @@ void MaterialShowcaseScene::CreateGeometryPassRecorders(
 	//
 	NormalCmdListRecorder* normalRecorder{ nullptr };
 	GenerateFloorRecorder(
-		floor.Meshes(),
+		floor.GetMeshes(),
 		textures[WOOD],
 		textures[WOOD_NORMAL],
 		normalRecorder);
@@ -450,7 +450,7 @@ void MaterialShowcaseScene::CreateGeometryPassRecorders(
 		0.0f, 
 		0.0f, 
 		sModel, 
-		model.Meshes(), 
+		model.GetMeshes(), 
 		diffuses.data(), 
 		normals.data(), 
 		materials.data(), 
@@ -495,7 +495,7 @@ void MaterialShowcaseScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -564,7 +564,7 @@ void MaterialShowcaseScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -633,7 +633,7 @@ void MaterialShowcaseScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -662,7 +662,7 @@ void MaterialShowcaseScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		25,
-		buddha.Meshes(),
+		buddha.GetMeshes(),
 		materials.data(),
 		materials.size(),
 		colorRecorder);
@@ -688,7 +688,7 @@ void MaterialShowcaseScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		8,
-		bunny.Meshes(),
+		bunny.GetMeshes(),
 		materials.data(),
 		materials.size(),
 		colorRecorder);

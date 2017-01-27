@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <tbb/concurrent_queue.h>
 
 #include <EnvironmentLightPass\EnvironmentLightCmdListRecorder.h>
 
@@ -27,7 +26,6 @@ public:
 
 	// You should call this method before Execute()
 	void Init(
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,

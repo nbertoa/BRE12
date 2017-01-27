@@ -34,7 +34,6 @@ namespace {
 }
 
 void SkyBoxPass::Init(
-	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource& skyBoxCubeMap,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
@@ -43,7 +42,6 @@ void SkyBoxPass::Init(
 	ASSERT(IsDataValid() == false);
 
 	CreateCommandObjects(mCmdAlloc, mCmdList, mFence);
-	mCmdListExecutor = &cmdListExecutor;
 
 	CHECK_HR(mCmdList->Reset(mCmdAlloc, nullptr));
 
@@ -53,7 +51,7 @@ void SkyBoxPass::Init(
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
 	ModelManager::Get().CreateSphere(3000, 50, 50, model, *mCmdList, uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
-	const std::vector<Mesh>& meshes(model->Meshes());
+	const std::vector<Mesh>& meshes(model->GetMeshes());
 	ASSERT(meshes.size() == 1UL);
 
 	// Build world matrix
@@ -67,10 +65,10 @@ void SkyBoxPass::Init(
 	SkyBoxCmdListRecorder::InitPSO();
 
 	// Initialize recorder
-	mRecorder.reset(new SkyBoxCmdListRecorder(cmdListExecutor.CmdListQueue()));
+	mRecorder.reset(new SkyBoxCmdListRecorder());
 	mRecorder->Init(
-		mesh.VertexBufferData(),
-		mesh.IndexBufferData(), 
+		mesh.GetVertexBufferData(),
+		mesh.GetIndexBufferData(), 
 		w, 
 		skyBoxCubeMap,
 		colorBufferCpuDesc,
@@ -82,18 +80,17 @@ void SkyBoxPass::Init(
 void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 	ASSERT(IsDataValid());
 
-	mCmdListExecutor->ResetExecutedCmdListCount();
+	CommandListExecutor::Get().ResetExecutedCommandListCount();
 	mRecorder->RecordAndPushCommandLists(frameCBuffer);
 
 	// Wait until all previous tasks command lists are executed
-	while (mCmdListExecutor->ExecutedCmdListCount() < 1U) {
+	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1U) {
 		Sleep(0U);
 	}
 }
 
 bool SkyBoxPass::IsDataValid() const noexcept {
 	const bool b =
-		mCmdListExecutor != nullptr &&
 		mRecorder.get() != nullptr &&
 		mCmdAlloc != nullptr &&
 		mCmdList != nullptr &&

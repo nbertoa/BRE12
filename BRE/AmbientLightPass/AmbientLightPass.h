@@ -1,14 +1,12 @@
 #pragma once
 
 #include <memory>
-#include <tbb/concurrent_queue.h>
 #include <wrl.h>
 
 #include <AmbientLightPass\AmbientLightCmdListRecorder.h>
 #include <AmbientLightPass\AmbientOcclusionCmdListRecorder.h>
 #include <AmbientLightPass\BlurCmdListRecorder.h>
 
-class CommandListExecutor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12CommandAllocator;
 struct ID3D12CommandList;
@@ -29,7 +27,6 @@ public:
 
 	// You should call this method before Execute()
 	void Init(
-		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		ID3D12Resource& normalSmoothnessBuffer,
@@ -63,6 +60,4 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
 	D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRTCpuDesc{ 0UL };
-
-	CommandListExecutor* mCmdListExecutor{ nullptr };
 };

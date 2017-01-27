@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 
+#include <CommandListExecutor\CommandListExecutor.h>
 #include <CommandManager/CommandAllocatorManager.h>
 #include <CommandManager/CommandListManager.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
@@ -37,9 +38,7 @@ namespace {
 	}
 }
 
-ToneMappingCmdListRecorder::ToneMappingCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
-	: mCmdListQueue(cmdListQueue)
-{
+ToneMappingCmdListRecorder::ToneMappingCmdListRecorder() {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 
@@ -109,7 +108,7 @@ void ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 	mCmdList->Close();
 
-	mCmdListQueue.push(mCmdList);
+	CommandListExecutor::Get().AddCommandList(*mCmdList);
 
 	// Next frame
 	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;

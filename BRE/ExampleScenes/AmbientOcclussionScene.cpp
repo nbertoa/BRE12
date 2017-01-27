@@ -111,8 +111,8 @@ namespace {
 		for (std::size_t i = 0UL; i < numMeshes; ++i) {
 			GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[i] };
 			const Mesh& mesh{ meshes[i] };
-			geomData.mVertexBufferData = mesh.VertexBufferData();
-			geomData.mIndexBufferData = mesh.IndexBufferData();
+			geomData.mVertexBufferData = mesh.GetVertexBufferData();
+			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			geomData.mWorldMatrices.reserve(numMaterials);
 		}
 
@@ -178,8 +178,8 @@ namespace {
 		for (std::size_t i = 0UL; i < numMeshes; ++i) {
 			GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[i] };
 			const Mesh& mesh{ meshes[i] };
-			geomData.mVertexBufferData = mesh.VertexBufferData();
-			geomData.mIndexBufferData = mesh.IndexBufferData();
+			geomData.mVertexBufferData = mesh.GetVertexBufferData();
+			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			geomData.mWorldMatrices.reserve(numMaterials);
 		}
 
@@ -239,8 +239,8 @@ namespace {
 			GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[i] };
 			const Mesh& mesh{ meshes[i] };
 
-			geomData.mVertexBufferData = mesh.VertexBufferData();
-			geomData.mIndexBufferData = mesh.IndexBufferData();
+			geomData.mVertexBufferData = mesh.GetVertexBufferData();
+			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 
 			geomData.mWorldMatrices.push_back(w);
 		}
@@ -287,7 +287,7 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 	ColorCmdListRecorder* recorder{ nullptr };
 	NormalCmdListRecorder* recorder2{ nullptr };
 	GenerateFloorRecorder(
-		floor.Meshes(),
+		floor.GetMeshes(),
 		textures[WOOD],
 		textures[WOOD_NORMAL],
 		recorder2);
@@ -349,7 +349,7 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -366,7 +366,7 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -383,7 +383,7 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -400,7 +400,7 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -417,7 +417,7 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -434,7 +434,7 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -451,7 +451,7 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -468,7 +468,7 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -485,7 +485,7 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),
@@ -502,7 +502,7 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 		0.0f,
 		0.0f,
 		sModel,
-		model.Meshes(),
+		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
 		materials.data(),

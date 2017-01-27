@@ -1,45 +1,68 @@
 #include "CommandListExecutor.h"
 
+#include <memory>
+
 #include <Utils/DebugUtils.h>
 
-CommandListExecutor* CommandListExecutor::Create(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists) noexcept {
+namespace {
+	CommandListExecutor* gExecutor{ nullptr };
+}
+
+CommandListExecutor& CommandListExecutor::Create(
+	ID3D12CommandQueue& cmdQueue, 
+	const std::uint32_t maxNumCmdLists) noexcept 
+{
+	ASSERT(gExecutor == nullptr);
+
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
 
 	// 1 reference for the parent + 1 reference for the child
 	parent->set_ref_count(2);
-	return new (parent->allocate_child()) CommandListExecutor(cmdQueue, maxNumCmdLists);
+
+	gExecutor = new (parent->allocate_child()) CommandListExecutor(cmdQueue, maxNumCmdLists);
+
+	return *gExecutor;
 }
 
-CommandListExecutor::CommandListExecutor(ID3D12CommandQueue* cmdQueue, const std::uint32_t maxNumCmdLists)
-	: mMaxNumCmdLists(maxNumCmdLists)
-	, mCmdQueue(cmdQueue)
+CommandListExecutor& CommandListExecutor::Get() noexcept {
+	ASSERT(gExecutor != nullptr);
+	return *gExecutor;
+}
+
+CommandListExecutor::CommandListExecutor(
+	ID3D12CommandQueue& commandQueue, 
+	const std::uint32_t maxNumberOfCommandListsToExecute)
+	: mMaxNumberOfCommandListsToExecute(maxNumberOfCommandListsToExecute)
+	, mCommandQueue(&commandQueue)
 {
-	ASSERT(maxNumCmdLists > 0U);
+	ASSERT(maxNumberOfCommandListsToExecute > 0U);
 	parent()->spawn(*this);
 }
 
 tbb::task* CommandListExecutor::execute() {
-	ASSERT(mMaxNumCmdLists > 0);
+	ASSERT(mMaxNumberOfCommandListsToExecute > 0);
 
-	ID3D12CommandList* *cmdLists{ new ID3D12CommandList*[mMaxNumCmdLists] };
-	while (!mTerminate) {
-		// Pop at most mMaxNumCmdLists from command list queue
-		while (mPendingCmdLists < mMaxNumCmdLists && mCmdListQueue.try_pop(cmdLists[mPendingCmdLists])) {
-			++mPendingCmdLists;
+	ID3D12CommandList* *pendingCommandLists{ new ID3D12CommandList*[mMaxNumberOfCommandListsToExecute] };
+	while (mTerminate == false) {
+		// Pop at most mMaxNumberOfCommandListsToExecute from command list queue
+		while (mPendingCommandListCount < mMaxNumberOfCommandListsToExecute && 
+			   mCommandListsToExecute.try_pop(pendingCommandLists[mPendingCommandListCount])) 
+		{
+			++mPendingCommandListCount;
 		}
 
 		// Execute command lists (if any)
-		if (mPendingCmdLists != 0U) {
-			mCmdQueue->ExecuteCommandLists(mPendingCmdLists, cmdLists);
-			mExecutedCmdLists += mPendingCmdLists;
-			mPendingCmdLists = 0U;
+		if (mPendingCommandListCount != 0U) {
+			mCommandQueue->ExecuteCommandLists(mPendingCommandListCount, pendingCommandLists);
+			mExecutedCommandListCount += mPendingCommandListCount;
+			mPendingCommandListCount = 0U;
 		}
 		else {
 			Sleep(0U);
 		}
 	}
 
-	delete[] cmdLists;
+	delete[] pendingCommandLists;
 
 	return nullptr;
 }

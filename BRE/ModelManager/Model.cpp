@@ -9,21 +9,22 @@
 #include <Utils/DebugUtils.h>
 
 Model::Model(
-	const char* filename, 
-	ID3D12GraphicsCommandList& cmdList,
+	const char* modelFilename, 
+	ID3D12GraphicsCommandList& commandList,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) {
-	ASSERT(filename != nullptr);
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) 
+{
+	ASSERT(modelFilename != nullptr);
 	std::string filePath(SettingsManager::sResourcesPath);
-	filePath += filename;
+	filePath += modelFilename;
 
 	Assimp::Importer importer;
 	const std::uint32_t flags{ aiProcessPreset_TargetRealtime_Fast | aiProcess_ConvertToLeftHanded };
 	const aiScene* scene{ importer.ReadFile(filePath.c_str(), flags) };
 	if (scene == nullptr) {
-		const std::string errorMsg{ importer.GetErrorString() };
-		const std::wstring msg = StringUtils::AnsiToWString(errorMsg);
-		MessageBox(nullptr, msg.c_str(), nullptr, 0);
+		const std::string errorMessage{ importer.GetErrorString() };
+		const std::wstring wideErrorMessage = StringUtils::AnsiToWString(errorMessage);
+		MessageBox(nullptr, wideErrorMessage.c_str(), nullptr, 0);
 		ASSERT(scene != nullptr);
 	}
 
@@ -32,14 +33,15 @@ Model::Model(
 	for (std::uint32_t i = 0U; i < scene->mNumMeshes; ++i) {
 		aiMesh* mesh{ scene->mMeshes[i] };
 		ASSERT(mesh != nullptr);
-		mMeshes.push_back(Mesh(*mesh, cmdList, uploadVertexBuffer, uploadIndexBuffer));
+		mMeshes.push_back(Mesh(*mesh, commandList, uploadVertexBuffer, uploadIndexBuffer));
 	}
 }
 
 Model::Model(
 	const GeometryGenerator::MeshData& meshData, 
-	ID3D12GraphicsCommandList& cmdList,
+	ID3D12GraphicsCommandList& commandList,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) {
-	mMeshes.push_back(Mesh(meshData, cmdList, uploadVertexBuffer, uploadIndexBuffer));
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) 
+{
+	mMeshes.push_back(Mesh(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer));
 }

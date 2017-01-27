@@ -31,14 +31,12 @@ namespace {
 }
 
 void PostProcessPass::Init(
-	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource& colorBuffer) noexcept {
 
 	ASSERT(IsDataValid() == false);
 	
 	CreateCommandObjects(mCmdAllocs, mCmdList);
-	mCmdListExecutor = &cmdListExecutor;
 	mCmdQueue = &cmdQueue;
 	mColorBuffer = &colorBuffer;
 
@@ -46,7 +44,7 @@ void PostProcessPass::Init(
 	PostProcessCmdListRecorder::InitPSO();
 
 	// Initialize recorder
-	mRecorder.reset(new PostProcessCmdListRecorder(cmdListExecutor.CmdListQueue()));
+	mRecorder.reset(new PostProcessCmdListRecorder());
 	mRecorder->Init(colorBuffer);
 
 	ASSERT(IsDataValid());
@@ -61,11 +59,11 @@ void PostProcessPass::Execute(
 
 	ExecuteBeginTask(frameBuffer, frameBufferCpuDesc);
 
-	mCmdListExecutor->ResetExecutedCmdListCount();
+	CommandListExecutor::Get().ResetExecutedCommandListCount();
 	mRecorder->RecordAndPushCommandLists(frameBufferCpuDesc);
 	
 	// Wait until all previous tasks command lists are executed
-	while (mCmdListExecutor->ExecutedCmdListCount() < 1) {
+	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
 		Sleep(0U);
 	}
 }
@@ -78,7 +76,6 @@ bool PostProcessPass::IsDataValid() const noexcept {
 	}
 
 	const bool b =
-		mCmdListExecutor != nullptr &&
 		mCmdQueue != nullptr &&
 		mCmdList != nullptr &&
 		mRecorder.get() != nullptr &&
@@ -115,7 +112,6 @@ void PostProcessPass::ExecuteBeginTask(
 	CHECK_HR(mCmdList->Close());
 
 	// Execute preliminary task
-	mCmdListExecutor->ResetExecutedCmdListCount();
 	ID3D12CommandList* cmdLists[] = { mCmdList };
 	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 }

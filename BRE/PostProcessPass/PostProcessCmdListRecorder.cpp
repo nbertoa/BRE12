@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 
+#include <CommandListExecutor\CommandListExecutor.h>
 #include <CommandManager/CommandAllocatorManager.h>
 #include <CommandManager/CommandListManager.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
@@ -37,9 +38,7 @@ namespace {
 	}
 }
 
-PostProcessCmdListRecorder::PostProcessCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
-	: mCmdListQueue(cmdListQueue)
-{
+PostProcessCmdListRecorder::PostProcessCmdListRecorder() {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 
@@ -104,7 +103,7 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 
 	mCmdList->Close();
 
-	mCmdListQueue.push(mCmdList);
+	CommandListExecutor::Get().AddCommandList(*mCmdList);
 
 	// Next frame
 	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;

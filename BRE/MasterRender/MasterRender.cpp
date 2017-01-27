@@ -137,9 +137,7 @@ MasterRender::MasterRender(const HWND hwnd, Scene& scene)
 
 	mCamera.SetFrustum(SettingsManager::sVerticalFieldOfView, SettingsManager::AspectRatio(), SettingsManager::sNearPlaneZ, SettingsManager::sFarPlaneZ);
 
-	// Create and spawn command list processor thread.
-	mCmdListExecutor = CommandListExecutor::Create(mCmdQueue, MAX_NUM_CMD_LISTS);
-	ASSERT(mCmdListExecutor != nullptr);
+	CommandListExecutor::Create(*mCmdQueue, MAX_NUM_CMD_LISTS);
 	
 	InitPasses(scene);
 
@@ -153,7 +151,7 @@ void MasterRender::InitPasses(Scene& scene) noexcept {
 	
 	// Generate recorders for all the passes
 	scene.CreateGeometryPassRecorders(mGeometryPass.GetRecorders());
-	mGeometryPass.Init(DepthStencilCpuDesc(), *mCmdListExecutor, *mCmdQueue);
+	mGeometryPass.Init(DepthStencilCpuDesc(), *mCmdQueue);
 
 	ID3D12Resource* skyBoxCubeMap;
 	ID3D12Resource* diffuseIrradianceCubeMap;
@@ -170,7 +168,6 @@ void MasterRender::InitPasses(Scene& scene) noexcept {
 		mLightingPass.GetRecorders());
 
 	mLightingPass.Init(
-		*mCmdListExecutor,
 		*mCmdQueue, 
 		mGeometryPass.GetBuffers(),
 		GeometryPass::BUFFERS_COUNT,
@@ -180,21 +177,18 @@ void MasterRender::InitPasses(Scene& scene) noexcept {
 		*specularPreConvolvedCubeMap);
 
 	mSkyBoxPass.Init(
-		*mCmdListExecutor, 
 		*mCmdQueue, 
 		*skyBoxCubeMap, 
 		mColorBuffer1RTVCpuDesc,
 		DepthStencilCpuDesc());
 
 	mToneMappingPass.Init(
-		*mCmdListExecutor,
 		*mCmdQueue, 
 		*mColorBuffer1.Get(), 
 		*mColorBuffer2.Get(),
 		mColorBuffer2RTVCpuDesc);
 
 	mPostProcessPass.Init(
-		*mCmdListExecutor,
 		*mCmdQueue,
 		*mColorBuffer2.Get());
 		
@@ -215,7 +209,7 @@ tbb::task* MasterRender::execute() {
 		mTimer.Tick();
 		UpdateCameraAndFrameCBuffer(mTimer.DeltaTimeInSeconds(), mCamera, mFrameCBuffer);
 
-		ASSERT(mCmdListExecutor->IsIdle());
+		ASSERT(CommandListExecutor::Get().AreTherePendingCommandListsToExecute());
 
 		// Execute passes
 		mGeometryPass.Execute(mFrameCBuffer);
@@ -230,7 +224,7 @@ tbb::task* MasterRender::execute() {
 
 	// If we need to terminate, then we terminates command list processor
 	// and waits until all GPU command lists are properly executed.
-	mCmdListExecutor->Terminate();
+	CommandListExecutor::Get().Terminate();
 	FlushCommandQueue();
 
 	return nullptr;

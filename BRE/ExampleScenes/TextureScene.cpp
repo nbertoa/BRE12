@@ -76,13 +76,13 @@ void TextureScene::CreateGeometryPassRecorders(
 	tasks.resize(SettingsManager::sCpuProcessorCount);
 
 	ASSERT(model.HasMeshes());	
-	const Mesh& mesh{ model.Meshes()[0U] };
+	const Mesh& mesh{ model.GetMeshes()[0U] };
 
 	std::vector<GeometryPassCmdListRecorder::GeometryData> geomDataVec;
 	geomDataVec.resize(SettingsManager::sCpuProcessorCount);
 	for (GeometryPassCmdListRecorder::GeometryData& geomData : geomDataVec) {
-		geomData.mVertexBufferData = mesh.VertexBufferData();
-		geomData.mIndexBufferData = mesh.IndexBufferData();
+		geomData.mVertexBufferData = mesh.GetVertexBufferData();
+		geomData.mIndexBufferData = mesh.GetIndexBufferData();
 		geomData.mWorldMatrices.reserve(numGeometry);
 	}
 

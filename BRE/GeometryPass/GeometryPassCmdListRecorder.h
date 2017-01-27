@@ -2,7 +2,6 @@
 
 #include <d3d12.h>
 #include <DirectXMath.h>
-#include <tbb/concurrent_queue.h>
 
 #include <DXUtils/D3DFactory.h>
 #include <ResourceManager/BufferCreator.h>
@@ -35,7 +34,6 @@ public:
 
 	// This method must be called before calling RecordAndPushCommandLists()
 	void InitInternal(
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 		const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBuffersCpuDescs,
 		const std::uint32_t geometryBuffersCpuDescCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
@@ -69,10 +67,7 @@ protected:
 	// Material CBuffer info
 	D3D12_GPU_DESCRIPTOR_HANDLE mMaterialsCBufferGpuDescBegin;
 	UploadBuffer* mMaterialsCBuffer{ nullptr };
-
-	// Where we push recorded command lists
-	tbb::concurrent_queue<ID3D12CommandList*>* mCmdListQueue;
-
+	
 	// Geometry & depth buffers cpu descriptors
 	const D3D12_CPU_DESCRIPTOR_HANDLE* mGeometryBuffersCpuDescs{ nullptr };
 	std::uint32_t mGeometryBuffersCpuDescCount{ 0U };

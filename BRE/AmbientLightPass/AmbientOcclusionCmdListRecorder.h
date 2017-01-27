@@ -1,7 +1,5 @@
 #pragma once
 
-#include <tbb/concurrent_queue.h>
-
 #include <SettingsManager\SettingsManager.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
@@ -17,7 +15,7 @@ class UploadBuffer;
 // This class has common data and functionality to record command list for ambient occlusion pass.
 class AmbientOcclusionCmdListRecorder {
 public:
-	explicit AmbientOcclusionCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	AmbientOcclusionCmdListRecorder();
 
 	~AmbientOcclusionCmdListRecorder() = default;
 	AmbientOcclusionCmdListRecorder(const AmbientOcclusionCmdListRecorder&) = delete;
@@ -45,9 +43,7 @@ private:
 		const void* kernelNoise,
 		ID3D12Resource& normalSmoothnessBuffer,
 		ID3D12Resource& depthBuffer) noexcept;
-
-	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
-
+	
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };
 

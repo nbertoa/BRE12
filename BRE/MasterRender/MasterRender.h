@@ -57,9 +57,7 @@ private:
 	HWND mWindowHandle{ nullptr };
 	Microsoft::WRL::ComPtr<IDXGISwapChain3> mSwapChain{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
-			
-	CommandListExecutor* mCmdListExecutor{ nullptr };
-	
+				
 	// Fences data for syncrhonization purposes.
 	ID3D12Fence* mFence{ nullptr };
 	std::uint32_t mCurrQueuedFrameIndex{ 0U };

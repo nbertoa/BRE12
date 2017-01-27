@@ -37,7 +37,6 @@ namespace {
 }
 
 void LightingPass::Init(
-	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
@@ -49,7 +48,6 @@ void LightingPass::Init(
 	ASSERT(IsDataValid() == false);
 
 	CreateCommandObjects(mCmdAllocsBegin, mCmdAllocsEnd, mCmdList);
-	mCmdListExecutor = &cmdListExecutor;
 	mCmdQueue = &cmdQueue;
 	mGeometryBuffers = geometryBuffers;
 	mColorBufferCpuDesc = colorBufferCpuDesc;
@@ -61,7 +59,6 @@ void LightingPass::Init(
 	// Initialize ambient pass
 	ASSERT(geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get() != nullptr);
 	mAmbientLightPass.Init(
-		cmdListExecutor,
 		cmdQueue,
 		*geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(),
 		*geometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(),
@@ -70,7 +67,6 @@ void LightingPass::Init(
 
 	// Initialize environment light pass
 	mEnvironmentLightPass.Init(
-		cmdListExecutor.CmdListQueue(),
 		geometryBuffers, 
 		geometryBuffersCount,
 		*mDepthBuffer,
@@ -81,7 +77,7 @@ void LightingPass::Init(
 	// Init internal data for all lights recorders
 	for (Recorders::value_type& recorder : mRecorders) {
 		ASSERT(recorder.get() != nullptr);
-		recorder->InitInternal(cmdListExecutor.CmdListQueue(), colorBufferCpuDesc);
+		recorder->InitInternal(colorBufferCpuDesc);
 	}
 
 	ASSERT(IsDataValid());
@@ -93,7 +89,7 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ExecuteBeginTask();
 
 	// Total tasks = Light tasks + 1 ambient pass task + 1 environment light pass task
-	mCmdListExecutor->ResetExecutedCmdListCount();
+	CommandListExecutor::Get().ResetExecutedCommandListCount();
 	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mRecorders.size())};
 	
 	// Execute light pass tasks
@@ -106,7 +102,7 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	);
 	
 	// Wait until all previous tasks command lists are executed
-	while (mCmdListExecutor->ExecutedCmdListCount() < lightTaskCount) {
+	while (CommandListExecutor::Get().GetExecutedCommandListCount() < lightTaskCount) {
 		Sleep(0U);
 	}
 
@@ -139,7 +135,6 @@ bool LightingPass::IsDataValid() const noexcept {
 	}
 
 	const bool b =
-		mCmdListExecutor != nullptr &&
 		mCmdQueue != nullptr &&
 		mCmdList != nullptr &&
 		mColorBufferCpuDesc.ptr != 0UL &&

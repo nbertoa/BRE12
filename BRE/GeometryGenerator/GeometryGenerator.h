@@ -70,13 +70,13 @@ namespace GeometryGenerator {
 		const std::uint32_t stackCount, 
 		MeshData& meshData) noexcept;
 
-	// Creates an mxn grid in the xz-plane with m rows and n columns, centered
+	// Creates an row x columns grid in the xz-plane with rows rows and columns columns, centered
 	// at the origin with the specified width and depth.
 	void CreateGrid(
 		const float width, 
 		const float depth, 
-		const std::uint32_t m, 
-		const std::uint32_t n, 
+		const std::uint32_t rows, 
+		const std::uint32_t columns, 
 		MeshData& meshData) noexcept;
 }
 

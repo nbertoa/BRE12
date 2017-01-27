@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 
+#include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
 #include <MaterialManager/Material.h>
@@ -92,7 +93,6 @@ void HeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
-	ASSERT(mCmdListQueue != nullptr);
 	ASSERT(mGeometryBuffersCpuDescs != nullptr);
 	ASSERT(mGeometryBuffersCpuDescCount != 0U);
 	ASSERT(mDepthBufferCpuDesc.ptr != 0U);
@@ -159,7 +159,7 @@ void HeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 
 	mCmdList->Close();
 
-	mCmdListQueue->push(mCmdList);
+	CommandListExecutor::Get().AddCommandList(*mCmdList);
 
 	// Next frame
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % SettingsManager::sQueuedFrameCount;

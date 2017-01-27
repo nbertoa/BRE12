@@ -8,12 +8,16 @@
 
 #include <ModelManager/Model.h>
 
-// This class is responsible to create/get/erase models or geometry
-// - Models
-// - Geometry
+// To create/get models or built-in geometry.
 class ModelManager {
 public:
+public:
+	// Preconditions:
+	// - Create() must be called once
 	static ModelManager& Create() noexcept;
+
+	// Preconditions:
+	// - Create() must be called before this method
 	static ModelManager& Get() noexcept;
 
 	~ModelManager() = default;
@@ -24,47 +28,46 @@ public:
 
 	// Returns id to get model after creation
 	std::size_t LoadModel(
-		const char* filename, 
-		Model* &model, ID3D12GraphicsCommandList& cmdList,
+		const char* modelFilename, 
+		Model* &model, ID3D12GraphicsCommandList& commandList,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
-	// Creates a box centered at the origin with the given dimensions, where each
-	// face has m rows and n columns of vertices.
+	// Geometry is centered at the origin.
+	// Returns id of the model
 	std::size_t CreateBox(
 		const float width, 
 		const float height, 
 		const float depth, 
 		const std::uint32_t numSubdivisions, 
 		Model* &model, 
-		ID3D12GraphicsCommandList& cmdList,
+		ID3D12GraphicsCommandList& commandList,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
-	// Creates a sphere centered at the origin with the given radius.  The
-	// slices and stacks parameters control the degree of tessellation.
+	// Geometry is centered at the origin.
+	// Returns id of the model
 	std::size_t CreateSphere(
 		const float radius, 
 		const std::uint32_t sliceCount, 
 		const std::uint32_t stackCount, 
 		Model* &model, 
-		ID3D12GraphicsCommandList& cmdList,
+		ID3D12GraphicsCommandList& commandList,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
-	// Creates a geosphere centered at the origin with the given radius.  The
-	// depth controls the level of tessellation.
+	// Geometry is centered at the origin.
+	// Returns id of the model
 	std::size_t CreateGeosphere(
 		const float radius, 
 		const std::uint32_t numSubdivisions, 
 		Model* &model, 
-		ID3D12GraphicsCommandList& cmdList,
+		ID3D12GraphicsCommandList& commandList,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
 	// Creates a cylinder parallel to the y-axis, and centered about the origin.  
-	// The bottom and top radius can vary to form various cone shapes rather than true
-	// cylinders.  The slices and stacks parameters control the degree of tessellation.
+	// Returns id of the model
 	std::size_t CreateCylinder(
 		const float bottomRadius,
 		const float topRadius,
@@ -72,30 +75,26 @@ public:
 		const std::uint32_t sliceCount,
 		const std::uint32_t stackCount,
 		Model* &model,
-		ID3D12GraphicsCommandList& cmdList,
+		ID3D12GraphicsCommandList& commandList,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
-	// Creates an mxn grid in the xz-plane with m rows and n columns, centered
-	// at the origin with the specified width and depth.
+	// Creates a rows x columns grid in the xz-plane centered
+	// at the origin.
+	// Returns id of the model.
 	std::size_t CreateGrid(
 		const float width, 
 		const float depth, 
-		const std::uint32_t m, 
-		const std::uint32_t n, 
+		const std::uint32_t rows, 
+		const std::uint32_t columns, 
 		Model* &model, 
-		ID3D12GraphicsCommandList& cmdList,
+		ID3D12GraphicsCommandList& commandList,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
-	// Asserts if id does not exist
+	// Preconditions:
+	// - id must be valid
 	Model& GetModel(const std::size_t id) noexcept;
-
-	// Asserts if id is not present
-	void Erase(const std::size_t id) noexcept;
-
-	// Invalidate all ids.
-	__forceinline void Clear() noexcept { mModelById.clear(); }
 
 private:
 	ModelManager() = default;

@@ -76,7 +76,6 @@ namespace {
 }
 
 void AmbientLightPass::Init(
-	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource& baseColorMetalMaskBuffer,
 	ID3D12Resource& normalSmoothnessBuffer,
@@ -86,7 +85,6 @@ void AmbientLightPass::Init(
 	ASSERT(ValidateData() == false);
 
 	mCmdQueue = &cmdQueue;
-	mCmdListExecutor = &cmdListExecutor;
 	
 	CreateCommandObjects(mCmdAllocsBegin, mCmdAllocsEnd, mCmdListBegin, mCmdListEnd);
 
@@ -100,20 +98,20 @@ void AmbientLightPass::Init(
 	CreateBuffer(mBlurBuffer, mBlurBufferRTCpuDesc);
 	
 	// Initialize ambient occlusion recorder
-	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder(cmdListExecutor.CmdListQueue()));
+	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder());
 	mAmbientOcclusionRecorder->Init(
 		normalSmoothnessBuffer,
 		mAmbientAccessibilityBufferRTCpuDesc,
 		depthBuffer);
 
 	// Initialize blur recorder
-	mBlurRecorder.reset(new BlurCmdListRecorder(cmdListExecutor.CmdListQueue()));
+	mBlurRecorder.reset(new BlurCmdListRecorder());
 	mBlurRecorder->Init(
 		*mAmbientAccessibilityBuffer.Get(),
 		mBlurBufferRTCpuDesc);
 
 	// Initialize ambient light recorder
-	mAmbientLightRecorder.reset(new AmbientLightCmdListRecorder(cmdListExecutor.CmdListQueue()));
+	mAmbientLightRecorder.reset(new AmbientLightCmdListRecorder());
 	mAmbientLightRecorder->Init(
 		baseColorMetalMaskBuffer,
 		colorBufferCpuDesc,
@@ -127,7 +125,7 @@ void AmbientLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(ValidateData());
 
 	const std::uint32_t taskCount{ 5U };
-	mCmdListExecutor->ResetExecutedCmdListCount();
+	CommandListExecutor::Get().ResetExecutedCommandListCount();
 
 	ExecuteBeginTask();
 	mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
@@ -136,7 +134,7 @@ void AmbientLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	mAmbientLightRecorder->RecordAndPushCommandLists();
 
 	// Wait until all previous tasks command lists are executed
-	while (mCmdListExecutor->ExecutedCmdListCount() < taskCount) {
+	while (CommandListExecutor::Get().GetExecutedCommandListCount() < taskCount) {
 		Sleep(0U);
 	}
 }
@@ -163,8 +161,7 @@ bool AmbientLightPass::ValidateData() const noexcept {
 		mAmbientAccessibilityBuffer.Get() != nullptr &&
 		mAmbientAccessibilityBufferRTCpuDesc.ptr != 0UL &&
 		mBlurBuffer.Get() != nullptr &&
-		mBlurBufferRTCpuDesc.ptr != 0UL &&
-		mCmdListExecutor != nullptr;
+		mBlurBufferRTCpuDesc.ptr != 0UL;
 
 	return b;
 }
@@ -195,7 +192,7 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 	mCmdListBegin->ClearRenderTargetView(mAmbientAccessibilityBufferRTCpuDesc, clearColor, 0U, nullptr);
 	CHECK_HR(mCmdListBegin->Close());
 
-	mCmdListExecutor->CmdListQueue().push(mCmdListBegin);
+	CommandListExecutor::Get().AddCommandList(*mCmdListBegin);
 }
 
 void AmbientLightPass::ExecuteEndingTask() noexcept {
@@ -221,5 +218,5 @@ void AmbientLightPass::ExecuteEndingTask() noexcept {
 	mCmdListEnd->ResourceBarrier(barriersCount, endBarriers);
 	CHECK_HR(mCmdListEnd->Close());
 
-	mCmdListExecutor->CmdListQueue().push(mCmdListEnd);
+	CommandListExecutor::Get().AddCommandList(*mCmdListEnd);
 }

@@ -9,34 +9,34 @@
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
-// - Load model data from a filepath.
-// - Get meshes 
-// It stores vertex/index data in Mesh class.
+// - To load model data from a filepath.
+// - To get meshes 
 class Model {
 public:
-	// Command lists are used to store buffers creation (vertex and index per mesh)
-	// cmdList must be in recorded state before calling these method.
-	// cmdList must be executed after calling these methods, to create the commited resource.
-	explicit Model(
-		const char* filename, 
-		ID3D12GraphicsCommandList& cmdList,
-		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
-
-	explicit Model(
-		const GeometryGenerator::MeshData& meshData, 
-		ID3D12GraphicsCommandList& cmdList,
-		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
-
 	~Model() = default;
 	Model(const Model&) = delete;
 	const Model& operator=(const Model&) = delete;
 	Model(Model&&) = delete;
 	Model& operator=(Model&&) = delete;
 
+	// Command lists are used to store buffers creation (vertex and index per mesh)
+	// Preconditions:
+	// - "commandList" must be in recorded state before calling these method.
+	// - "commandList" must be executed after calling these methods, to create the commited resource.
+	explicit Model(
+		const char* modelFilename,
+		ID3D12GraphicsCommandList& commandList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
+
+	explicit Model(
+		const GeometryGenerator::MeshData& meshData,
+		ID3D12GraphicsCommandList& commandList,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
+
 	__forceinline bool HasMeshes() const noexcept { return (mMeshes.size() > 0UL); }
-	__forceinline const std::vector<Mesh>& Meshes() const noexcept { return mMeshes; }
+	__forceinline const std::vector<Mesh>& GetMeshes() const noexcept { return mMeshes; }
 
 private:
 	std::vector<Mesh> mMeshes;

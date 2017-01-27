@@ -1,12 +1,10 @@
 #pragma once
 
 #include <memory>
-#include <tbb/concurrent_queue.h>
 
 #include <SettingsManager\SettingsManager.h>
 #include <ToneMappingPass\ToneMappingCmdListRecorder.h>
 
-class CommandListExecutor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12CommandAllocator;
 struct ID3D12CommandList;
@@ -29,7 +27,6 @@ public:
 
 	// You should call this method before Execute()
 	void Init(
-		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
 		ID3D12Resource& inputColorBuffer,
 		ID3D12Resource& outputColorBuffer,
@@ -43,7 +40,6 @@ private:
 
 	void ExecuteBeginTask() noexcept;
 
-	CommandListExecutor* mCmdListExecutor{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	

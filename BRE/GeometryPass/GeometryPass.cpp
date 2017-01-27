@@ -103,14 +103,12 @@ namespace {
 
 void GeometryPass::Init(
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
-	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue) noexcept {
 
 	ASSERT(IsDataValid() == false);
 	
 	ASSERT(mRecorders.empty() == false);
 
-	mCmdListExecutor = &cmdListExecutor;
 	mCmdQueue = &cmdQueue;
 
 	CreateBuffers(mBuffers, mRtvCpuDescs);
@@ -137,11 +135,7 @@ void GeometryPass::Init(
 	// Init internal data for all geometry recorders
 	for (Recorders::value_type& recorder : mRecorders) {
 		ASSERT(recorder.get() != nullptr);
-		recorder->InitInternal(
-			mCmdListExecutor->CmdListQueue(),
-			mGeometryBuffersCpuDescs,
-			BUFFERS_COUNT,
-			mDepthBufferCpuDesc);
+		recorder->InitInternal(mGeometryBuffersCpuDescs, BUFFERS_COUNT, mDepthBufferCpuDesc);
 	}
 
 	ASSERT(IsDataValid());
@@ -154,7 +148,7 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ExecuteBeginTask();
 
 	const std::uint32_t taskCount{ static_cast<std::uint32_t>(mRecorders.size()) };
-	mCmdListExecutor->ResetExecutedCmdListCount();
+	CommandListExecutor::Get().ResetExecutedCommandListCount();
 
 	// Execute geometry tasks
 	std::uint32_t grainSize{ max(1U, (taskCount) / SettingsManager::sCpuProcessorCount) };
@@ -166,7 +160,7 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	);
 
 	// Wait until all previous tasks command lists are executed
-	while (mCmdListExecutor->ExecutedCmdListCount() < taskCount) {
+	while (CommandListExecutor::Get().GetExecutedCommandListCount() < taskCount) {
 		Sleep(0U);
 	}
 }
@@ -191,7 +185,6 @@ bool GeometryPass::IsDataValid() const noexcept {
 	}
 
 	const bool b =
-		mCmdListExecutor != nullptr &&
 		mCmdQueue != nullptr &&
 		mCmdList != nullptr &&
 		mRecorders.empty() == false &&

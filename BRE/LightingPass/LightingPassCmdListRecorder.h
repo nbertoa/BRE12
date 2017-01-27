@@ -2,7 +2,6 @@
 
 #include <d3d12.h>
 #include <DirectXMath.h>
-#include <tbb/concurrent_queue.h>
 
 #include <DXUtils/D3DFactory.h>
 #include <ResourceManager/BufferCreator.h>
@@ -43,9 +42,7 @@ public:
 		const std::uint32_t numLights) noexcept = 0;
 
 	// This method must be called before calling RecordAndPushCommandLists()
-	void InitInternal(
-		tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
-		const D3D12_CPU_DESCRIPTOR_HANDLE colorBufferCpuDesc) noexcept;
+	void InitInternal(const D3D12_CPU_DESCRIPTOR_HANDLE colorBufferCpuDesc) noexcept;
 
 	// Record command lists and push them to the queue.
 	virtual void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept = 0;
@@ -62,10 +59,7 @@ protected:
 
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
-
-	// Where we push recorded command lists
-	tbb::concurrent_queue<ID3D12CommandList*>* mCmdListQueue{ nullptr };
-
+	
 	D3D12_CPU_DESCRIPTOR_HANDLE mColorBufferCpuDesc{ 0UL };
 
 	std::uint32_t mNumLights{ 0U };

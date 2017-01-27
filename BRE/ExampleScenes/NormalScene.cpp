@@ -135,8 +135,8 @@ namespace {
 		for (std::size_t i = 0UL; i < numMeshes; ++i) {
 			GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[i] };
 			const Mesh& mesh{ meshes[i] };
-			geomData.mVertexBufferData = mesh.VertexBufferData();
-			geomData.mIndexBufferData = mesh.IndexBufferData();
+			geomData.mVertexBufferData = mesh.GetVertexBufferData();
+			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			geomData.mWorldMatrices.reserve(numMaterials);
 		}
 
@@ -236,7 +236,7 @@ void NormalScene::CreateGeometryPassRecorders(
 	ASSERT(numResources == _countof(normal));
 
 	NormalCmdListRecorder* recorder{ nullptr };
-	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, model.Meshes(), tex, normal, materials, numResources, recorder);
+	GenerateRecorder(sTx1, sTy1, sTz1, sOffsetX1, 0.0f, 0.0f, model.GetMeshes(), tex, normal, materials, numResources, recorder);
 	ASSERT(recorder != nullptr);
 	tasks.push_back(std::unique_ptr<GeometryPassCmdListRecorder>(recorder));
 }

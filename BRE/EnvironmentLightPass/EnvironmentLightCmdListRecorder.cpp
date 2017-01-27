@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 
+#include <CommandListExecutor\CommandListExecutor.h>
 #include <CommandManager/CommandAllocatorManager.h>
 #include <CommandManager/CommandListManager.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
@@ -41,9 +42,7 @@ namespace {
 	}
 }
 
-EnvironmentLightCmdListRecorder::EnvironmentLightCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue)
-	: mCmdListQueue(cmdListQueue)
-{
+EnvironmentLightCmdListRecorder::EnvironmentLightCmdListRecorder() {
 	BuildCommandObjects(mCmdList, mCmdAlloc, _countof(mCmdAlloc));
 }
 
@@ -127,7 +126,7 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 	mCmdList->Close();
 
-	mCmdListQueue.push(mCmdList);
+	CommandListExecutor::Get().AddCommandList(*mCmdList);
 
 	// Next frame
 	currFrameIndex = (currFrameIndex + 1) % SettingsManager::sQueuedFrameCount;

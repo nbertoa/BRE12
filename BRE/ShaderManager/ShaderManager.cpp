@@ -34,6 +34,7 @@ ShaderManager& ShaderManager::Create() noexcept {
 	gManager.reset(new ShaderManager());
 	return *gManager.get();
 }
+
 ShaderManager& ShaderManager::Get() noexcept {
 	ASSERT(gManager != nullptr);
 	return *gManager.get();

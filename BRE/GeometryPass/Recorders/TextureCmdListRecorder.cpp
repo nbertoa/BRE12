@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 
+#include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
 #include <MaterialManager/Material.h>
@@ -82,7 +83,6 @@ void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frame
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSign != nullptr);
-	ASSERT(mCmdListQueue != nullptr);
 	ASSERT(mGeometryBuffersCpuDescs != nullptr);
 	ASSERT(mGeometryBuffersCpuDescCount != 0U);
 	ASSERT(mDepthBufferCpuDesc.ptr != 0U);
@@ -140,7 +140,7 @@ void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frame
 
 	mCmdList->Close();
 
-	mCmdListQueue->push(mCmdList);
+	CommandListExecutor::Get().AddCommandList(*mCmdList);
 
 	// Next frame
 	mCurrFrameIndex = (mCurrFrameIndex + 1) % SettingsManager::sQueuedFrameCount;

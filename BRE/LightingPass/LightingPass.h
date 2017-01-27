@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <tbb/concurrent_queue.h>
 #include <vector>
 #include <wrl.h>
 
@@ -10,7 +9,6 @@
 #include <LightingPass\LightingPassCmdListRecorder.h>
 #include <SettingsManager\SettingsManager.h>
 
-class CommandListExecutor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 struct ID3D12CommandAllocator;
@@ -36,7 +34,6 @@ public:
 
 	// You should call this method after filling recorders and before Execute()
 	void Init(
-		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
 		const std::uint32_t geometryBuffersCount,
@@ -54,7 +51,6 @@ private:
 	void ExecuteBeginTask() noexcept;
 	void ExecuteEndingTask() noexcept;
 
-	CommandListExecutor* mCmdListExecutor{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	

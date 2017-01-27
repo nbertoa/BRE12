@@ -2,7 +2,6 @@
 
 #include <d3d12.h>
 #include <DirectXMath.h>
-#include <tbb/concurrent_queue.h>
 
 #include <MathUtils\MathUtils.h>
 #include <ResourceManager/BufferCreator.h>
@@ -15,7 +14,7 @@ class UploadBuffer;
 // This class has common data and functionality to record command list for sky box pass.
 class SkyBoxCmdListRecorder {
 public:
-	explicit SkyBoxCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	SkyBoxCmdListRecorder();
 	~SkyBoxCmdListRecorder() = default;
 	SkyBoxCmdListRecorder(const SkyBoxCmdListRecorder&) = delete;
 	const SkyBoxCmdListRecorder& operator=(const SkyBoxCmdListRecorder&) = delete;
@@ -42,8 +41,6 @@ public:
 
 private:
 	void BuildBuffers(ID3D12Resource& cubeMap) noexcept;
-
-	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };

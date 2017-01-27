@@ -49,12 +49,8 @@ bool LightingPassCmdListRecorder::IsDataValid() const noexcept {
 		mLightsBufferGpuDescBegin.ptr != 0UL;
 }
 
-void LightingPassCmdListRecorder::InitInternal(
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
-	const D3D12_CPU_DESCRIPTOR_HANDLE colorBufferCpuDesc) noexcept
+void LightingPassCmdListRecorder::InitInternal(const D3D12_CPU_DESCRIPTOR_HANDLE colorBufferCpuDesc) noexcept
 {
 	ASSERT(colorBufferCpuDesc.ptr != 0UL);
-
-	mCmdListQueue = &cmdListQueue;
 	mColorBufferCpuDesc = colorBufferCpuDesc;
 }

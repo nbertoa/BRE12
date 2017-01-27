@@ -60,7 +60,6 @@ bool GeometryPassCmdListRecorder::IsDataValid() const noexcept {
 }
 
 void GeometryPassCmdListRecorder::InitInternal(
-	tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue,
 	const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBuffersCpuDescs,
 	const std::uint32_t geometryBuffersCpuDescCount,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
@@ -69,7 +68,6 @@ void GeometryPassCmdListRecorder::InitInternal(
 	ASSERT(geometryBuffersCpuDescCount != 0U);
 	ASSERT(depthBufferCpuDesc.ptr != 0UL);
 
-	mCmdListQueue = &cmdListQueue;
 	mGeometryBuffersCpuDescs = geometryBuffersCpuDescs;
 	mGeometryBuffersCpuDescCount = geometryBuffersCpuDescCount;
 	mDepthBufferCpuDesc = depthBufferCpuDesc;

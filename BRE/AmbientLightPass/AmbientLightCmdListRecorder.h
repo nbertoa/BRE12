@@ -1,7 +1,5 @@
 #pragma once
 
-#include <tbb/concurrent_queue.h>
-
 #include <SettingsManager\SettingsManager.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
@@ -15,8 +13,7 @@ class UploadBuffer;
 // This class has common data and functionality to record command list for ambient light pass.
 class AmbientLightCmdListRecorder {
 public:
-	explicit AmbientLightCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
-
+	AmbientLightCmdListRecorder();
 	~AmbientLightCmdListRecorder() = default;
 	AmbientLightCmdListRecorder(const AmbientLightCmdListRecorder&) = delete;
 	const AmbientLightCmdListRecorder& operator=(const AmbientLightCmdListRecorder&) = delete;
@@ -42,8 +39,6 @@ private:
 	void BuildBuffers(
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		ID3D12Resource& ambientAccessibilityBuffer) noexcept;
-	
-	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };

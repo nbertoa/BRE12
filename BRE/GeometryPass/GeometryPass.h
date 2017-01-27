@@ -6,7 +6,6 @@
 #include <GeometryPass\GeometryPassCmdListRecorder.h>
 #include <SettingsManager\SettingsManager.h>
 
-class CommandListExecutor;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 struct ID3D12CommandAllocator;
@@ -40,7 +39,6 @@ public:
 	// You should call this method after filling recorders and before Execute()
 	void Init(
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
-		CommandListExecutor& cmdListExecutor,
 		ID3D12CommandQueue& cmdQueue) noexcept;
 	
 	// Get geometry buffers
@@ -54,7 +52,6 @@ private:
 
 	void ExecuteBeginTask() noexcept;
 
-	CommandListExecutor* mCmdListExecutor{ nullptr };
 	ID3D12CommandQueue* mCmdQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	

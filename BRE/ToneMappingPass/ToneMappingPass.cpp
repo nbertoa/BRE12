@@ -31,7 +31,6 @@ namespace {
 }
 
 void ToneMappingPass::Init(
-	CommandListExecutor& cmdListExecutor,
 	ID3D12CommandQueue& cmdQueue,
 	ID3D12Resource& inputColorBuffer,
 	ID3D12Resource& outputColorBuffer,
@@ -40,7 +39,6 @@ void ToneMappingPass::Init(
 	ASSERT(IsDataValid() == false);
 	
 	CreateCommandObjects(mCmdAllocs, mCmdList);
-	mCmdListExecutor = &cmdListExecutor;
 	mCmdQueue = &cmdQueue;
 	mInputColorBuffer = &inputColorBuffer;
 	mOutputColorBuffer = &outputColorBuffer;
@@ -49,7 +47,7 @@ void ToneMappingPass::Init(
 	ToneMappingCmdListRecorder::InitPSO();
 
 	// Initialize recorder
-	mRecorder.reset(new ToneMappingCmdListRecorder(cmdListExecutor.CmdListQueue()));
+	mRecorder.reset(new ToneMappingCmdListRecorder());
 	mRecorder->Init(*mInputColorBuffer, outputBufferCpuDesc);
 
 	ASSERT(IsDataValid());
@@ -60,11 +58,11 @@ void ToneMappingPass::Execute() noexcept {
 
 	ExecuteBeginTask();
 
-	mCmdListExecutor->ResetExecutedCmdListCount();
+	CommandListExecutor::Get().ResetExecutedCommandListCount();
 	mRecorder->RecordAndPushCommandLists();
 	
 	// Wait until all previous tasks command lists are executed
-	while (mCmdListExecutor->ExecutedCmdListCount() < 1) {
+	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
 		Sleep(0U);
 	}
 }
@@ -77,7 +75,6 @@ bool ToneMappingPass::IsDataValid() const noexcept {
 	}
 
 	const bool b =
-		mCmdListExecutor != nullptr &&
 		mCmdQueue != nullptr &&
 		mCmdList != nullptr &&
 		mRecorder.get() != nullptr &&
@@ -111,7 +108,6 @@ void ToneMappingPass::ExecuteBeginTask() noexcept {
 	CHECK_HR(mCmdList->Close());
 
 	// Execute preliminary task
-	mCmdListExecutor->ResetExecutedCmdListCount();
 	ID3D12CommandList* cmdLists[] = { mCmdList };
 	mCmdQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <d3d12.h>
-#include <tbb/concurrent_queue.h>
 
 #include <SettingsManager\SettingsManager.h>
 
@@ -11,7 +10,7 @@ class UploadBuffer;
 // This class has common data and functionality to record command list for post processing effects (anti aliasing, color grading, etc).
 class PostProcessCmdListRecorder {
 public:
-	explicit PostProcessCmdListRecorder(tbb::concurrent_queue<ID3D12CommandList*>& cmdListQueue);
+	PostProcessCmdListRecorder();
 	~PostProcessCmdListRecorder() = default;
 	PostProcessCmdListRecorder(const PostProcessCmdListRecorder&) = delete;
 	const PostProcessCmdListRecorder& operator=(const PostProcessCmdListRecorder&) = delete;
@@ -31,8 +30,6 @@ public:
 
 private:
 	void BuildBuffers(ID3D12Resource& colorBuffer) noexcept;
-
-	tbb::concurrent_queue<ID3D12CommandList*>& mCmdListQueue;
 
 	ID3D12GraphicsCommandList* mCmdList{ nullptr };
 	ID3D12CommandAllocator* mCmdAlloc[SettingsManager::sQueuedFrameCount]{ nullptr };

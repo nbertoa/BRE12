@@ -568,9 +568,15 @@ namespace GeometryGenerator {
 		BuildCylinderBottomCap(bottomRadius, height, sliceCount, meshData);
 	}
 
-	void CreateGrid(const float width, const float depth, const std::uint32_t m, const std::uint32_t n, MeshData& meshData) noexcept {
-		const std::uint32_t vertexCount{ m * n };
-		const std::uint32_t faceCount{ (m - 1U) * (n - 1U) * 2U };
+	void CreateGrid(
+		const float width, 
+		const float depth, 
+		const std::uint32_t rows, 
+		const std::uint32_t columns,
+		MeshData& meshData) noexcept 
+	{
+		const std::uint32_t vertexCount{ rows * columns };
+		const std::uint32_t faceCount{ (rows - 1U) * (columns - 1U) * 2U };
 
 		//
 		// Create the mVertices.
@@ -579,25 +585,25 @@ namespace GeometryGenerator {
 		const float halfWidth{ 0.5f * width };
 		const float halfDepth{ 0.5f * depth };
 
-		const float dx{ width / (n - 1U) };
-		const float dz{ depth / (m - 1U) };
+		const float dx{ width / (columns - 1U) };
+		const float dz{ depth / (rows - 1U) };
 
-		const float du{ 1.0f / (n - 1U) };
-		const float dv{ 1.0f / (m - 1U) };
+		const float du{ 1.0f / (columns - 1U) };
+		const float dv{ 1.0f / (rows - 1U) };
 
 		meshData.mVertices.resize(vertexCount);
-		for (std::uint32_t i = 0U; i < m; ++i) {
+		for (std::uint32_t i = 0U; i < rows; ++i) {
 			const float z{ halfDepth - i * dz };
-			for (std::uint32_t j = 0U; j < n; ++j) {
+			for (std::uint32_t j = 0U; j < columns; ++j) {
 				const float x{ -halfWidth + j * dx };
 
-				meshData.mVertices[i * n + j].mPosition = XMFLOAT3{ x, 0.0f, z };
-				meshData.mVertices[i * n + j].mNormal = XMFLOAT3{ 0.0f, 1.0f, 0.0f };
-				meshData.mVertices[i * n + j].mTangent = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
+				meshData.mVertices[i * columns + j].mPosition = XMFLOAT3{ x, 0.0f, z };
+				meshData.mVertices[i * columns + j].mNormal = XMFLOAT3{ 0.0f, 1.0f, 0.0f };
+				meshData.mVertices[i * columns + j].mTangent = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
 
 				// Stretch texture over grid.
-				meshData.mVertices[i * n + j].mTextureCoordinates.x = j * du;
-				meshData.mVertices[i * n + j].mTextureCoordinates.y = i * dv;
+				meshData.mVertices[i * columns + j].mTextureCoordinates.x = j * du;
+				meshData.mVertices[i * columns + j].mTextureCoordinates.y = i * dv;
 			}
 		}
 
@@ -609,17 +615,17 @@ namespace GeometryGenerator {
 
 													// Iterate over each quad and compute indices.
 		std::uint32_t k{ 0U };
-		const std::uint32_t count1{ m - 1U };
-		const std::uint32_t count2{ n - 1U };
+		const std::uint32_t count1{ rows - 1U };
+		const std::uint32_t count2{ columns - 1U };
 		for (std::uint32_t i = 0U; i < count1; ++i) {
 			for (std::uint32_t j = 0U; j < count2; ++j) {
-				meshData.mIndices32[k] = i * n + j;
-				meshData.mIndices32[k + 1U] = i * n + j + 1U;
-				meshData.mIndices32[k + 2U] = (i + 1U) * n + j;
+				meshData.mIndices32[k] = i * columns + j;
+				meshData.mIndices32[k + 1U] = i * columns + j + 1U;
+				meshData.mIndices32[k + 2U] = (i + 1U) * columns + j;
 
-				meshData.mIndices32[k + 3U] = (i + 1U) * n + j;
-				meshData.mIndices32[k + 4U] = i * n + j + 1U;
-				meshData.mIndices32[k + 5U] = (i + 1U) * n + j + 1U;
+				meshData.mIndices32[k + 3U] = (i + 1U) * columns + j;
+				meshData.mIndices32[k + 4U] = i * columns + j + 1U;
+				meshData.mIndices32[k + 5U] = (i + 1U) * columns + j + 1U;
 
 				k += 6U; // next quad
 			}

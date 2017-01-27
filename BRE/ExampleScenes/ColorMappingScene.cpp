@@ -97,8 +97,8 @@ namespace {
 		for (std::size_t i = 0UL; i < numMeshes; ++i) {
 			GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[i] };
 			const Mesh& mesh{ meshes[i] };
-			geomData.mVertexBufferData = mesh.VertexBufferData();
-			geomData.mIndexBufferData = mesh.IndexBufferData();
+			geomData.mVertexBufferData = mesh.GetVertexBufferData();
+			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			geomData.mWorldMatrices.reserve(numMaterials);
 		}
 
@@ -150,7 +150,7 @@ void ColorMappingScene::CreateGeometryPassRecorders(
 	const Model& model = sResourceContainer.GetModel(BUNNY);
 
 	ColorCmdListRecorder* recorder{ nullptr };
-	GenerateRecorder(sTx, sTy, sTz, sOffsetX, 0.0f, 0.0f, model.Meshes(), recorder);
+	GenerateRecorder(sTx, sTy, sTz, sOffsetX, 0.0f, 0.0f, model.GetMeshes(), recorder);
 	ASSERT(recorder != nullptr);
 	tasks.push_back(std::unique_ptr<GeometryPassCmdListRecorder>(recorder));
 }
