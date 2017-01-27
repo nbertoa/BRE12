@@ -6,8 +6,8 @@
 
 #include <Utils/DebugUtils.h>
 
-// To create Constant Buffer / Shader Resource / Unordered Access Views descriptor heaps
-// To create Constant Buffer / Shader Resource / Unordered Access descriptors
+// To create Constant Buffer / Shader GetResource / Unordered Access Views descriptor heaps
+// To create Constant Buffer / Shader GetResource / Unordered Access descriptors
 class CbvSrvUavDescriptorManager {
 public:
 

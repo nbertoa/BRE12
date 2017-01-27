@@ -183,7 +183,7 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 	CHECK_HR(commandAllocator->Reset());
 	CHECK_HR(mCmdListBegin->Reset(commandAllocator, nullptr));
 
-	// Resource barriers
+	// GetResource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
 		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
 		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),		
@@ -213,7 +213,7 @@ void AmbientLightPass::ExecuteEndingTask() noexcept {
 	CHECK_HR(commandAllocator->Reset());
 	CHECK_HR(mCmdListEnd->Reset(commandAllocator, nullptr));
 
-	// Resource barriers
+	// GetResource barriers
 	CD3DX12_RESOURCE_BARRIER endBarriers[]{
 		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),		

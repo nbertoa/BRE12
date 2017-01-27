@@ -155,7 +155,7 @@ void LightingPass::ExecuteBeginTask() noexcept {
 	CHECK_HR(cmdAllocBegin->Reset());
 	CHECK_HR(mCommandList->Reset(cmdAllocBegin, nullptr));
 
-	// Resource barriers
+	// GetResource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
 		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mGeometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mGeometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
@@ -189,7 +189,7 @@ void LightingPass::ExecuteEndingTask() noexcept {
 	CHECK_HR(commandAllocatorEnd->Reset());
 	CHECK_HR(mCommandList->Reset(commandAllocatorEnd, nullptr));
 
-	// Resource barriers
+	// GetResource barriers
 	CD3DX12_RESOURCE_BARRIER endBarriers[]{
 		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mDepthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE),
 	};

@@ -9,9 +9,9 @@ struct ID3D12Resource;
 
 // To track resource states.
 // Its functionality includes:
-// - Resource state registration
-// - Resource state change
-// - Resource unregistration
+// - GetResource state registration
+// - GetResource state change
+// - GetResource unregistration
 class ResourceStateManager {
 public:
 	// Preconditions:
@@ -29,18 +29,18 @@ public:
 	ResourceStateManager& operator=(ResourceStateManager&&) = delete;
 
 	// Preconditions:
-	// - Resource must not have been registered
+	// - GetResource must not have been registered
 	void AddResource(ID3D12Resource& resource, const D3D12_RESOURCE_STATES initialState) noexcept;
  
 	// Preconditions:
-	// - Resource must have been registered
+	// - GetResource must have been registered
 	// - New state must be different than current state
 	CD3DX12_RESOURCE_BARRIER ChangeResourceStateAndGetBarrier(
 		ID3D12Resource& resource, 
 		const D3D12_RESOURCE_STATES newState) noexcept;
 
 	// Preconditions:
-	// - Resource must have been registered.
+	// - GetResource must have been registered.
 	void RemoveResource(ID3D12Resource& res) noexcept;
 
 	void Clear() noexcept { mStateByResource.clear(); }

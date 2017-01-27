@@ -118,7 +118,7 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCommandList->SetGraphicsRootSignature(sRootSignature);
 	
 	// Set root parameters
-	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
+	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
 	mCommandList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	mCommandList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	mCommandList->SetGraphicsRootDescriptorTable(2U, mPixelShaderBuffersGpuDesc);
@@ -217,7 +217,7 @@ void EnvironmentLightCmdListRecorder::BuildBuffers(
 	mPixelShaderBuffersGpuDesc = CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(res.data(), srvDesc.data(), static_cast<std::uint32_t>(srvDesc.size()));
 
 	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
+	const std::size_t frameCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}

@@ -66,20 +66,20 @@ namespace {
 		ASSERT(indexBufferData.IsDataValid() == false);
 
 		// Create vertex buffer
-		BufferCreator::BufferParams vertexBufferParams(
+		BufferCreator::BufferData vertexBufferParams(
 			meshData.mVertices.data(), 
 			static_cast<std::uint32_t>(meshData.mVertices.size()), 
 			sizeof(GeometryGenerator::Vertex));
 
-		BufferCreator::CreateBuffer(commandList, vertexBufferParams, vertexBufferData, uploadVertexBuffer);
+		BufferCreator::CreateVertexBuffer(commandList, vertexBufferParams, vertexBufferData, uploadVertexBuffer);
 
 		// Create index buffer
-		BufferCreator::BufferParams indexBufferParams(
+		BufferCreator::BufferData indexBufferParams(
 			meshData.mIndices32.data(), 
 			static_cast<std::uint32_t>(meshData.mIndices32.size()), 
 			sizeof(std::uint32_t));
 
-		BufferCreator::CreateBuffer(commandList, indexBufferParams, indexBufferData, uploadIndexBuffer);
+		BufferCreator::CreateIndexBuffer(commandList, indexBufferParams, indexBufferData, uploadIndexBuffer);
 
 		ASSERT(vertexBufferData.IsDataValid());
 		ASSERT(indexBufferData.IsDataValid());

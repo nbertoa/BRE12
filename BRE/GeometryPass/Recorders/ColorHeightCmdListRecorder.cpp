@@ -121,7 +121,7 @@ void ColorHeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
 	// Set frame constants root parameters
-	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
+	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
 	mCommandList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	mCommandList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
 	mCommandList->SetGraphicsRootConstantBufferView(5U, frameCBufferGpuVAddress);
@@ -146,7 +146,7 @@ void ColorHeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 			mCommandList->SetGraphicsRootDescriptorTable(6U, normalsBufferGpuDesc);
 			normalsBufferGpuDesc.ptr += descHandleIncSize;
 			
-			mCommandList->DrawIndexedInstanced(geomData.mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
+			mCommandList->DrawIndexedInstanced(geomData.mIndexBufferData.mElementCount, 1U, 0U, 0U, 0U);
 		}
 	}
 
@@ -187,7 +187,7 @@ void ColorHeightCmdListRecorder::BuildBuffers(
 	ASSERT(mMaterialsCBuffer == nullptr);
 
 	// Create object cbuffer and fill it
-	const std::size_t objCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ObjectCBuffer)) };
+	const std::size_t objCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
 	ResourceManager::Get().CreateUploadBuffer(objCBufferElemSize, dataCount, mObjectCBuffer);
 	std::uint32_t k = 0U;
 	const std::size_t geometryDataCount{ mGeometryDataVec.size() };
@@ -205,11 +205,11 @@ void ColorHeightCmdListRecorder::BuildBuffers(
 	}
 
 	// Create materials cbuffer		
-	const std::size_t matCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(Material)) };
+	const std::size_t matCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(Material)) };
 	ResourceManager::Get().CreateUploadBuffer(matCBufferElemSize, dataCount, mMaterialsCBuffer);
 
-	D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialsCBuffer->Resource()->GetGPUVirtualAddress() };
-	D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->Resource()->GetGPUVirtualAddress() };
+	D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialsCBuffer->GetResource()->GetGPUVirtualAddress() };
+	D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->GetResource()->GetGPUVirtualAddress() };
 
 	// Create object / materials cbuffers descriptors
 	// Create textures SRV descriptors
@@ -286,7 +286,7 @@ void ColorHeightCmdListRecorder::BuildBuffers(
 			static_cast<std::uint32_t>(heightSrvDescVec.size()));
 
 	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
+	const std::size_t frameCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}

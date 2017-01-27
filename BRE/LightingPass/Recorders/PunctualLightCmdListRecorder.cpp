@@ -102,12 +102,12 @@ void PunctualLightCmdListRecorder::Init(
 	// Create lights buffer SRV	descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = mLightsBuffer->Resource()->GetDesc().Format;
+	srvDesc.Format = mLightsBuffer->GetResource()->GetDesc().Format;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	srvDesc.Buffer.FirstElement = 0UL;
 	srvDesc.Buffer.NumElements = mNumLights;
 	srvDesc.Buffer.StructureByteStride = sizeof(PunctualLight);
-	mLightsBufferGpuDescBegin = CbvSrvUavDescriptorManager::Get().CreateShaderResourceView(*mLightsBuffer->Resource(), srvDesc);
+	mLightsBufferGpuDescBegin = CbvSrvUavDescriptorManager::Get().CreateShaderResourceView(*mLightsBuffer->GetResource(), srvDesc);
 	
 	ASSERT(IsDataValid());
 }
@@ -137,8 +137,8 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	mCommandList->SetGraphicsRootSignature(sRootSignature);
 
 	// Set root parameters
-	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
-	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->Resource()->GetGPUVirtualAddress());
+	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
+	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->GetResource()->GetGPUVirtualAddress());
 	mCommandList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	mCommandList->SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescBegin);
 	mCommandList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
@@ -181,13 +181,13 @@ void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {
 	}
 
 	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
+	const std::size_t frameCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 
 	// Create immutable cbuffer
-	const std::size_t immutableCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ImmutableCBuffer)) };
+	const std::size_t immutableCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(ImmutableCBuffer)) };
 	ResourceManager::Get().CreateUploadBuffer(immutableCBufferElemSize, 1U, mImmutableCBuffer);
 	ImmutableCBuffer immutableCBuffer;
 	mImmutableCBuffer->CopyData(0U, &immutableCBuffer, sizeof(immutableCBuffer));

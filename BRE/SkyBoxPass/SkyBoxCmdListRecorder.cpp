@@ -129,7 +129,7 @@ void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Set frame constants root parameters
-	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
+	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
 	mCommandList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	
 	// Draw object
@@ -138,7 +138,7 @@ void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	mCommandList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
 	mCommandList->SetGraphicsRootDescriptorTable(2U, cubeMapBufferGpuDesc);
 
-	mCommandList->DrawIndexedInstanced(mIndexBufferData.mCount, 1U, 0U, 0U, 0U);
+	mCommandList->DrawIndexedInstanced(mIndexBufferData.mElementCount, 1U, 0U, 0U, 0U);
 
 	mCommandList->Close();
 
@@ -181,7 +181,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& skyBoxCubeMap) noexcept
 	ASSERT(mObjectCBuffer == nullptr);
 
 	// Create object cbuffer and fill it
-	const std::size_t objCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(ObjectCBuffer)) };
+	const std::size_t objCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
 	ResourceManager::Get().CreateUploadBuffer(objCBufferElemSize, 1U, mObjectCBuffer);
 	ObjectCBuffer objCBuffer;
 	const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&mWorldMatrix));
@@ -194,7 +194,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& skyBoxCubeMap) noexcept
 
 	// Create object cbuffer descriptor
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
-	const D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->Resource()->GetGPUVirtualAddress() };
+	const D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->GetResource()->GetGPUVirtualAddress() };
 	cBufferDesc.BufferLocation = objCBufferGpuAddress;
 	cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(objCBufferElemSize);
 	mObjectCBufferGpuDescBegin = CbvSrvUavDescriptorManager::Get().CreateConstantBufferView(cBufferDesc);
@@ -210,7 +210,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& skyBoxCubeMap) noexcept
 	mCubeMapBufferGpuDescBegin = CbvSrvUavDescriptorManager::Get().CreateShaderResourceView(skyBoxCubeMap, srvDesc);
 
 	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
+	const std::size_t frameCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}

@@ -245,7 +245,7 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCommandList->SetGraphicsRootSignature(sRootSignature);	
 
 	// Set root parameters
-	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.Resource()->GetGPUVirtualAddress());
+	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
 	mCommandList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	mCommandList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	mCommandList->SetGraphicsRootDescriptorTable(2U, mPixelShaderBuffersGpuDesc);
@@ -309,7 +309,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	for (std::uint32_t i = 0UL; i < mNumSamples; ++i) {
 		mSampleKernelBuffer->CopyData(i, sampleKernelPtr + sampleKernelBufferElemSize * i, sampleKernelBufferElemSize);
 	}
-	mSampleKernelBufferGpuDescBegin.ptr = mSampleKernelBuffer->Resource()->GetGPUVirtualAddress();
+	mSampleKernelBufferGpuDescBegin.ptr = mSampleKernelBuffer->GetResource()->GetGPUVirtualAddress();
 
 	// Kernel noise resource and fill it
 	D3D12_RESOURCE_DESC resDesc = {};
@@ -369,7 +369,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	mCmdListQueue.push(mCommandList);*/
 
 	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::CalcConstantBufferByteSize(sizeof(FrameCBuffer)) };
+	const std::size_t frameCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
@@ -378,7 +378,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	ID3D12Resource* res[4] = {
 		&normalSmoothnessBuffer,
 		&depthBuffer,
-		mSampleKernelBuffer->Resource(),
+		mSampleKernelBuffer->GetResource(),
 		noiseTexture,
 	};
 
@@ -400,7 +400,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 
 	// Fill sample kernel buffer descriptor
 	srvDesc[2].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc[2].Format = mSampleKernelBuffer->Resource()->GetDesc().Format;
+	srvDesc[2].Format = mSampleKernelBuffer->GetResource()->GetDesc().Format;
 	srvDesc[2].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	srvDesc[2].Buffer.FirstElement = 0UL;
 	srvDesc[2].Buffer.NumElements = mNumSamples;
