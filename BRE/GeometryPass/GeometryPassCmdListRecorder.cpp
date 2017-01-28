@@ -63,7 +63,7 @@ bool GeometryPassCmdListRecorder::IsDataValid() const noexcept {
 		mMaterialsCBufferGpuDescBegin.ptr != 0UL;
 }
 
-void GeometryPassCmdListRecorder::InitInternal(
+void GeometryPassCmdListRecorder::Init(
 	const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBuffersCpuDescs,
 	const std::uint32_t geometryBuffersCpuDescCount,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept

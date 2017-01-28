@@ -16,7 +16,7 @@ struct ID3D12Resource;
 // Pass that applies post processing effects (anti aliasing, color grading, etc)
 class PostProcessPass {
 public:
-	using Recorder = std::unique_ptr<PostProcessCmdListRecorder>;
+	using CommandListRecorders = std::unique_ptr<PostProcessCmdListRecorder>;
 
 	PostProcessPass() = default;
 	~PostProcessPass() = default;
@@ -54,5 +54,5 @@ private:
 	
 	ID3D12Resource* mColorBuffer{ nullptr };
 
-	Recorder mRecorder;
+	CommandListRecorders mRecorder;
 };

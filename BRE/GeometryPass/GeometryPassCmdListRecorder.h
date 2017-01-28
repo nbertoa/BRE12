@@ -35,11 +35,13 @@ public:
 	// Preconditions:
 	// - "geometryBuffersCpuDescs" must not be nullptr
 	// - "geometryBuffersCpuDescCount" must be greater than zero
-	void InitInternal(
+	void Init(
 		const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBuffersCpuDescs,
 		const std::uint32_t geometryBuffersCpuDescCount,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 		
+	// Preconditions:
+	// - Init() must be called before
 	virtual void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept = 0;
 
 	// This method validates all data (nullptr's, etc)

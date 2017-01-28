@@ -53,7 +53,8 @@ bool LightingPassCmdListRecorder::IsDataValid() const noexcept {
 		mLightsBufferGpuDescBegin.ptr != 0UL;
 }
 
-void LightingPassCmdListRecorder::InitInternal(const D3D12_CPU_DESCRIPTOR_HANDLE outputColorBufferCpuDesc) noexcept
+void LightingPassCmdListRecorder::SetOutputColorBufferCpuDescriptor(
+	const D3D12_CPU_DESCRIPTOR_HANDLE outputColorBufferCpuDesc) noexcept
 {
 	ASSERT(outputColorBufferCpuDesc.ptr != 0UL);
 	mOutputColorBufferCpuDesc = outputColorBufferCpuDesc;

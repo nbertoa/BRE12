@@ -15,7 +15,7 @@ struct ID3D12Resource;
 
 class ToneMappingPass {
 public:
-	using Recorder = std::unique_ptr<ToneMappingCmdListRecorder>;
+	using CommandListRecorders = std::unique_ptr<ToneMappingCmdListRecorder>;
 
 	ToneMappingPass() = default;
 	~ToneMappingPass() = default; 
@@ -51,5 +51,5 @@ private:
 	ID3D12Resource* mInputColorBuffer{ nullptr };
 	ID3D12Resource* mOutputColorBuffer{ nullptr };
 
-	Recorder mRecorder;
+	CommandListRecorders mRecorder;
 };

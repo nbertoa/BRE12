@@ -4,7 +4,7 @@
 
 struct Material;
 
-// Recorder that does color mapping
+// CommandListRecorders that does color mapping
 class ColorCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
 	ColorCmdListRecorder() = default;

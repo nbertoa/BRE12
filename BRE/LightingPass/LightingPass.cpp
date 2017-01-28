@@ -74,10 +74,9 @@ void LightingPass::Init(
 		diffuseIrradianceCubeMap,
 		specularPreConvolvedCubeMap);
 
-	// Init internal data for all lights recorders
-	for (Recorders::value_type& recorder : mRecorders) {
+	for (CommandListRecorders::value_type& recorder : mRecorders) {
 		ASSERT(recorder.get() != nullptr);
-		recorder->InitInternal(colorBufferCpuDesc);
+		recorder->SetOutputColorBufferCpuDescriptor(colorBufferCpuDesc);
 	}
 
 	ASSERT(IsDataValid());

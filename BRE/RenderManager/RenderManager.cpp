@@ -178,7 +178,7 @@ void RenderManager::InitPasses(Scene& scene) noexcept {
 	scene.Init(*mCommandQueue);
 	
 	// Generate recorders for all the passes
-	scene.CreateGeometryPassRecorders(mGeometryPass.GetRecorders());
+	scene.CreateGeometryPassRecorders(mGeometryPass.GetCommandListRecorders());
 	mGeometryPass.Init(DepthStencilCpuDesc(), *mCommandQueue);
 
 	ID3D12Resource* skyBoxCubeMap;
@@ -193,7 +193,7 @@ void RenderManager::InitPasses(Scene& scene) noexcept {
 		mGeometryPass.GetGeometryBuffers(), 
 		GeometryPass::BUFFERS_COUNT, 
 		*mDepthStencilBuffer, 
-		mLightingPass.GetRecorders());
+		mLightingPass.GetCommandListRecorders());
 
 	mLightingPass.Init(
 		*mCommandQueue, 

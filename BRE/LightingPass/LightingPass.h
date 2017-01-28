@@ -20,7 +20,7 @@ struct ID3D12Resource;
 // Pass responsible to execute recorders related with deferred shading lighting pass
 class LightingPass {
 public:
-	using Recorders = std::vector<std::unique_ptr<LightingPassCmdListRecorder>>;
+	using CommandListRecorders = std::vector<std::unique_ptr<LightingPassCmdListRecorder>>;
 
 	LightingPass() = default;
 	~LightingPass() = default;
@@ -30,7 +30,7 @@ public:
 	LightingPass& operator=(LightingPass&&) = delete;
 
 	// You should get recorders and fill them, before calling Init()
-	__forceinline Recorders& GetRecorders() noexcept { return mRecorders; }
+	__forceinline CommandListRecorders& GetCommandListRecorders() noexcept { return mRecorders; }
 
 	// Preconditions:
 	// - "geometryBuffers" must not be nullptr
@@ -70,7 +70,7 @@ private:
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
 
-	Recorders mRecorders;
+	CommandListRecorders mRecorders;
 
 	AmbientLightPass mAmbientLightPass;
 	EnvironmentLightPass mEnvironmentLightPass;

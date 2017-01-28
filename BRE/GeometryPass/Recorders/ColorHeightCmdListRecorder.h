@@ -4,7 +4,7 @@
 
 struct Material;
 
-// Recorder that does color mapping + normal mapping + height mapping
+// CommandListRecorders that does color mapping + normal mapping + height mapping
 class ColorHeightCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
 	ColorHeightCmdListRecorder();

@@ -4,7 +4,7 @@
 
 struct Material;
 
-// Recorder that does texture mapping + normal mapping
+// CommandListRecorders that does texture mapping + normal mapping
 class NormalCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
 	NormalCmdListRecorder() = default;

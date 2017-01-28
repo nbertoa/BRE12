@@ -9,7 +9,7 @@ struct FrameCBuffer;
 
 class SkyBoxPass {
 public:
-	using Recorder = std::unique_ptr<SkyBoxCmdListRecorder>;
+	using CommandListRecorders = std::unique_ptr<SkyBoxCmdListRecorder>;
 
 	SkyBoxPass() = default;
 	~SkyBoxPass() = default;
@@ -37,5 +37,5 @@ private:
 
 	ID3D12Fence* mFence{ nullptr };
 
-	Recorder mRecorder;
+	CommandListRecorders mRecorder;
 };

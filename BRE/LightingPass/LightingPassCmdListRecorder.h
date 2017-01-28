@@ -45,11 +45,11 @@ public:
 		const void* lights,
 		const std::uint32_t numLights) noexcept = 0;
 
-	void InitInternal(const D3D12_CPU_DESCRIPTOR_HANDLE outputColorBufferCpuDesc) noexcept;
+	void SetOutputColorBufferCpuDescriptor(const D3D12_CPU_DESCRIPTOR_HANDLE outputColorBufferCpuDesc) noexcept;
 
 	// Preconditions:
 	// - Init() must be called first
-	// - InitInternal() must be called first
+	// - SetOutputColorBufferCpuDescriptor() must be called first
 	virtual void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept = 0;
 
 	// This method validates all data (nullptr's, etc)

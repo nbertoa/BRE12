@@ -24,7 +24,7 @@ public:
 		BUFFERS_COUNT
 	};
 
-	using Recorders = std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>;
+	using CommandListRecorders = std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>;
 
 	GeometryPass() = default;
 	~GeometryPass() = default;
@@ -34,16 +34,18 @@ public:
 	GeometryPass& operator=(GeometryPass&&) = delete;
 
 	// You should get recorders and fill them, before calling Init()
-	__forceinline Recorders& GetRecorders() noexcept { return mRecorders; }
+	__forceinline CommandListRecorders& GetCommandListRecorders() noexcept { return mRecorders; }
 
 	// Preconditions:
-	// - You should fill recorders with GetRecorders() before
+	// - You should fill recorders with GetCommandListRecorders() before
 	void Init(
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
 		ID3D12CommandQueue& commandQueue) noexcept;
 	
 	__forceinline Microsoft::WRL::ComPtr<ID3D12Resource>* GetGeometryBuffers() noexcept { return mGeometryBuffers; }
 	
+	// Preconditions:
+	// - Init() must be called first
 	void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
@@ -66,5 +68,5 @@ private:
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 		
-	Recorders mRecorders;
+	CommandListRecorders mRecorders;
 };

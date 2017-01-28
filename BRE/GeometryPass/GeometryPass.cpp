@@ -133,9 +133,9 @@ void GeometryPass::Init(
 	memcpy(mGeometryBuffersCpuDescs, &geometryBuffersCpuDescs, sizeof(geometryBuffersCpuDescs));
 
 	// Init internal data for all geometry recorders
-	for (Recorders::value_type& recorder : mRecorders) {
+	for (CommandListRecorders::value_type& recorder : mRecorders) {
 		ASSERT(recorder.get() != nullptr);
-		recorder->InitInternal(mGeometryBuffersCpuDescs, BUFFERS_COUNT, mDepthBufferCpuDesc);
+		recorder->Init(mGeometryBuffersCpuDescs, BUFFERS_COUNT, mDepthBufferCpuDesc);
 	}
 
 	ASSERT(IsDataValid());

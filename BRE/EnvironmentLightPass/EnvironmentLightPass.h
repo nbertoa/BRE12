@@ -15,7 +15,7 @@ struct ID3D12Resource;
 // Pass responsible to apply diffuse irradiance & specular pre-convolved environment cube maps
 class EnvironmentLightPass {
 public:
-	using Recorder = std::unique_ptr<EnvironmentLightCmdListRecorder>;
+	using CommandListRecorders = std::unique_ptr<EnvironmentLightCmdListRecorder>;
 
 	EnvironmentLightPass() = default;
 	~EnvironmentLightPass() = default;
@@ -46,5 +46,5 @@ private:
 
 	ID3D12Fence* mFence{ nullptr };
 
-	Recorder mRecorder;
+	CommandListRecorders mRecorder;
 };

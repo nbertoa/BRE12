@@ -4,7 +4,7 @@
 
 struct Material;
 
-// Recorder that does texture mapping + normal mapping + height mapping
+// CommandListRecorders that does texture mapping + normal mapping + height mapping
 class HeightCmdListRecorder : public GeometryPassCmdListRecorder {
 public:
 	HeightCmdListRecorder() = default;
