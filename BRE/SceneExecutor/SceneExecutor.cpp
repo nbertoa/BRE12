@@ -5,6 +5,7 @@
 #include <CommandManager/CommandAllocatorManager.h>
 #include <CommandManager/CommandListManager.h>
 #include <CommandManager/CommandQueueManager.h>
+#include <CommandManager/FenceManager.h>
 #include <DescriptorManager/CbvSrvUavDescriptorManager.h>
 #include <DescriptorManager/DepthStencilDescriptorManager.h>
 #include <DescriptorManager/RenderTargetDescriptorManager.h>
@@ -16,6 +17,7 @@
 #include <PSOManager\PSOManager.h>
 #include <RenderManager/RenderManager.h>
 #include <ResourceManager\ResourceManager.h>
+#include <ResourceManager\UploadBufferManager.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
@@ -45,6 +47,7 @@ namespace {
 		CommandQueueManager::Create();
 		CbvSrvUavDescriptorManager::Create();
 		DepthStencilDescriptorManager::Create();
+		FenceManager::Create();
 		RenderTargetDescriptorManager::Create();
 		ModelManager::Create();
 		MaterialManager::Create();
@@ -53,6 +56,7 @@ namespace {
 		ResourceStateManager::Create();
 		RootSignatureManager::Create();
 		ShaderManager::Create();
+		UploadBufferManager::Create();
 
 		//ShowCursor(false);
 	}

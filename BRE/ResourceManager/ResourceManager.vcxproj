@@ -119,16 +119,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BufferCreator.h" />
+    <ClInclude Include="VertexAndIndexBufferCreator.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="UploadBuffer.h" />
+    <ClInclude Include="UploadBufferManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BufferCreator.cpp" />
+    <ClCompile Include="VertexAndIndexBufferCreator.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="UploadBuffer.cpp" />
+    <ClCompile Include="UploadBufferManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

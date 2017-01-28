@@ -3,7 +3,7 @@
 #include <cstdint>
 
 #include <GeometryGenerator/GeometryGenerator.h>
-#include <ResourceManager\BufferCreator.h>
+#include <ResourceManager\VertexAndIndexBufferCreator.h>
 #include <Utils/DebugUtils.h>
 
 struct aiMesh;
@@ -23,14 +23,14 @@ public:
 
 	// Preconditions:
 	// - data must be valid
-	__forceinline const BufferCreator::VertexBufferData& GetVertexBufferData() const noexcept {
+	__forceinline const VertexAndIndexBufferCreator::VertexBufferData& GetVertexBufferData() const noexcept {
 		ASSERT(mVertexBufferData.IsDataValid());
 		return mVertexBufferData;
 	}
 
 	// Preconditions:
 	// - data must be valid
-	__forceinline const BufferCreator::IndexBufferData& GetIndexBufferData() const noexcept {
+	__forceinline const VertexAndIndexBufferCreator::IndexBufferData& GetIndexBufferData() const noexcept {
 		ASSERT(mIndexBufferData.IsDataValid());
 		return mIndexBufferData;
 	}
@@ -52,6 +52,6 @@ private:
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
 	
-	BufferCreator::VertexBufferData mVertexBufferData;
-	BufferCreator::IndexBufferData mIndexBufferData;
+	VertexAndIndexBufferCreator::VertexBufferData mVertexBufferData;
+	VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
 };

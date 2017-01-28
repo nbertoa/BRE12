@@ -28,7 +28,7 @@ public:
 	// Constant buffers must be a multiple of the minimum hardware
 	// allocation size (usually 256 bytes). So round up to nearest
 	// multiple of 256.
-	static std::size_t RoundConstantBufferSizeInBytes(const std::size_t sizeInBytes);
+	static std::size_t GetRoundedConstantBufferSizeInBytes(const std::size_t sizeInBytes);
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBuffer;

@@ -5,7 +5,6 @@
 #include <DirectXManager/DirectXManager.h>
 #include <RootSignatureManager/RootSignatureManager.h>
 #include <SettingsManager\SettingsManager.h>
-#include <ShaderManager/ShaderManager.h>
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
@@ -25,12 +24,12 @@ PSOManager& PSOManager::Get() noexcept {
 }
 
 bool PSOManager::PSOCreationData::IsDataValid() const noexcept {
-	if (mNumRenderTargets == 0 || mNumRenderTargets > D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT || mRootSignFilename == nullptr) {
+	if (mNumRenderTargets == 0 || mNumRenderTargets > D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT) {
 		return false;
 	}
 
 	for (std::uint32_t i = mNumRenderTargets; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
-		if (mRtFormats[i] != DXGI_FORMAT_UNKNOWN) {
+		if (mRenderTargetFormats[i] != DXGI_FORMAT_UNKNOWN) {
 			return false;
 		}
 	}
@@ -45,57 +44,31 @@ std::size_t PSOManager::CreateGraphicsPSO(
 {
 	ASSERT(psoData.IsDataValid());
 
-	ID3DBlob* rootSignatureBlob{ nullptr };
-	ShaderManager::Get().LoadShaderFile(psoData.mRootSignFilename, rootSignatureBlob);
-	RootSignatureManager::Get().CreateRootSignatureFromBlob(*rootSignatureBlob, rootSign);
-
-	D3D12_SHADER_BYTECODE vertexShader{};
-	if (psoData.mVSFilename != nullptr) {
-		ShaderManager::Get().LoadShaderFile(psoData.mVSFilename, vertexShader);
-	}
-
-	D3D12_SHADER_BYTECODE geomShader{};
-	if (psoData.mGSFilename != nullptr) {
-		ShaderManager::Get().LoadShaderFile(psoData.mGSFilename, geomShader);
-	}
-
-	D3D12_SHADER_BYTECODE domainShader{};
-	if (psoData.mDSFilename != nullptr) {
-		ShaderManager::Get().LoadShaderFile(psoData.mDSFilename, domainShader);
-	}
-
-	D3D12_SHADER_BYTECODE hullShader{};
-	if (psoData.mHSFilename != nullptr) {
-		ShaderManager::Get().LoadShaderFile(psoData.mHSFilename, hullShader);
-	}
-
-	D3D12_SHADER_BYTECODE pixelShader{};
-	if (psoData.mPSFilename != nullptr) {
-		ShaderManager::Get().LoadShaderFile(psoData.mPSFilename, pixelShader);
-	}
+	ASSERT(psoData.mRootSignatureBlob != nullptr);
+	RootSignatureManager::Get().CreateRootSignatureFromBlob(*psoData.mRootSignatureBlob, rootSign);
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDescriptor = {};
-	psoDescriptor.BlendState = psoData.mBlendDesc;
-	psoDescriptor.DepthStencilState = psoData.mDepthStencilDesc;
-	psoDescriptor.DS = domainShader;
+	psoDescriptor.BlendState = psoData.mBlendDescriptor;
+	psoDescriptor.DepthStencilState = psoData.mDepthStencilDescriptor;
+	psoDescriptor.DS = psoData.mDomainShaderBytecode;
 	psoDescriptor.DSVFormat = SettingsManager::sDepthStencilViewFormat;
-	psoDescriptor.GS = geomShader;
-	psoDescriptor.HS = hullShader;
+	psoDescriptor.GS = psoData.mGeometryShaderBytecode;
+	psoDescriptor.HS = psoData.mHullShaderBytecode;
 	psoDescriptor.InputLayout =
 	{
-		psoData.mInputLayout.empty()
+		psoData.mInputLayoutDescriptors.empty()
 		? nullptr
-		: psoData.mInputLayout.data(), static_cast<std::uint32_t>(psoData.mInputLayout.size())
+		: psoData.mInputLayoutDescriptors.data(), static_cast<std::uint32_t>(psoData.mInputLayoutDescriptors.size())
 	};
 	psoDescriptor.NumRenderTargets = psoData.mNumRenderTargets;
-	psoDescriptor.PrimitiveTopologyType = psoData.mTopology;
+	psoDescriptor.PrimitiveTopologyType = psoData.mPrimitiveTopologyType;
 	psoDescriptor.pRootSignature = rootSign;
-	psoDescriptor.PS = pixelShader;
-	psoDescriptor.RasterizerState = psoData.mRasterizerDesc;
-	memcpy(psoDescriptor.RTVFormats, psoData.mRtFormats, sizeof(psoData.mRtFormats));
-	psoDescriptor.SampleDesc = psoData.mSampleDesc;
+	psoDescriptor.PS = psoData.mPixelShaderBytecode;
+	psoDescriptor.RasterizerState = psoData.mRasterizerDescriptor;
+	memcpy(psoDescriptor.RTVFormats, psoData.mRenderTargetFormats, sizeof(psoData.mRenderTargetFormats));
+	psoDescriptor.SampleDesc = psoData.mSampleDescriptor;
 	psoDescriptor.SampleMask = psoData.mSampleMask;
-	psoDescriptor.VS = vertexShader;
+	psoDescriptor.VS = psoData.mVertexShaderBytecode;
 
 	const std::size_t id = CreateGraphicsPSOByDescriptor(psoDescriptor, pso);
 

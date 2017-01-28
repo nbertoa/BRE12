@@ -55,8 +55,8 @@ namespace {
 	}
 
 	void CreateVertexAndIndexBufferData(
-		BufferCreator::VertexBufferData& vertexBufferData,
-		BufferCreator::IndexBufferData& indexBufferData,
+		VertexAndIndexBufferCreator::VertexBufferData& vertexBufferData,
+		VertexAndIndexBufferCreator::IndexBufferData& indexBufferData,
 		const GeometryGenerator::MeshData& meshData,
 		ID3D12GraphicsCommandList& commandList,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
@@ -66,20 +66,28 @@ namespace {
 		ASSERT(indexBufferData.IsDataValid() == false);
 
 		// Create vertex buffer
-		BufferCreator::BufferData vertexBufferParams(
+		VertexAndIndexBufferCreator::BufferCreationData vertexBufferParams(
 			meshData.mVertices.data(), 
 			static_cast<std::uint32_t>(meshData.mVertices.size()), 
 			sizeof(GeometryGenerator::Vertex));
 
-		BufferCreator::CreateVertexBuffer(commandList, vertexBufferParams, vertexBufferData, uploadVertexBuffer);
+		VertexAndIndexBufferCreator::CreateVertexBuffer(
+			commandList, 
+			vertexBufferParams, 
+			vertexBufferData, 
+			uploadVertexBuffer);
 
 		// Create index buffer
-		BufferCreator::BufferData indexBufferParams(
+		VertexAndIndexBufferCreator::BufferCreationData indexBufferParams(
 			meshData.mIndices32.data(), 
 			static_cast<std::uint32_t>(meshData.mIndices32.size()), 
 			sizeof(std::uint32_t));
 
-		BufferCreator::CreateIndexBuffer(commandList, indexBufferParams, indexBufferData, uploadIndexBuffer);
+		VertexAndIndexBufferCreator::CreateIndexBuffer(
+			commandList, 
+			indexBufferParams, 
+			indexBufferData, 
+			uploadIndexBuffer);
 
 		ASSERT(vertexBufferData.IsDataValid());
 		ASSERT(indexBufferData.IsDataValid());

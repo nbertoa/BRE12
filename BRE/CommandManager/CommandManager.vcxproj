@@ -122,11 +122,13 @@
     <ClInclude Include="CommandAllocatorManager.h" />
     <ClInclude Include="CommandListManager.h" />
     <ClInclude Include="CommandQueueManager.h" />
+    <ClInclude Include="FenceManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CommandAllocatorManager.cpp" />
     <ClCompile Include="CommandListManager.cpp" />
     <ClCompile Include="CommandQueueManager.cpp" />
+    <ClCompile Include="FenceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

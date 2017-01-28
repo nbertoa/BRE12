@@ -7,16 +7,18 @@
 
 #include <ResourceManager/UploadBuffer.h>
 
-// This class is responsible to create/get/erase:
+// This class is responsible to create/get:
 // - Textures
 // - Buffers
 // - Resources
-// - Descriptor heaps
-// - Fences
-// - Descriptors (Views)
 class ResourceManager {
 public:
+	// Preconditions:
+	// - Create() must be called once
 	static ResourceManager& Create() noexcept;
+
+	// Preconditions:
+	// - Create() must be called before this method
 	static ResourceManager& Get() noexcept;
 	
 	~ResourceManager() = default;
@@ -26,59 +28,42 @@ public:
 	ResourceManager& operator=(ResourceManager&&) = delete;
 
 	std::size_t LoadTextureFromFile(
-		const char* filename, 
-		ID3D12Resource* &res, 
-		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
-		ID3D12GraphicsCommandList& cmdList) noexcept;
+		const char* textureFilename, 
+		ID3D12GraphicsCommandList& commandList,
+		ID3D12Resource* &resource, 
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
 
 	// Note: uploadBuffer has to be kept alive after the above function calls because
 	// the command list has not been executed yet that performs the actual copy.
 	// The caller can Release the uploadBuffer after it knows the copy has been executed.
+	
+	// Preconditions:
+	// - "sourceData" must not be nullptr
+	// - "sourceDataSize" must be greater than zero
 	std::size_t CreateDefaultBuffer(	
-		ID3D12GraphicsCommandList& cmdList,
-		const void* initData,
-		const std::size_t byteSize,
-		ID3D12Resource* &defaultBuffer,
+		ID3D12GraphicsCommandList& commandList,
+		const void* sourceData,
+		const std::size_t sourceDataSize,
+		ID3D12Resource* &buffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
 
 	std::size_t CreateCommittedResource(
-		const D3D12_HEAP_PROPERTIES& heapProps,
+		const D3D12_HEAP_PROPERTIES& heapProperties,
 		const D3D12_HEAP_FLAGS& heapFlags,
-		const D3D12_RESOURCE_DESC& resDesc,
-		const D3D12_RESOURCE_STATES& resStates,
+		const D3D12_RESOURCE_DESC& resourceDescriptor,
+		const D3D12_RESOURCE_STATES& resourceStates,
 		const D3D12_CLEAR_VALUE* clearValue,
-		ID3D12Resource* &res) noexcept;
+		ID3D12Resource* &resource) noexcept;
 
-	std::size_t CreateUploadBuffer(const std::size_t elemSize, const std::uint32_t elemCount, UploadBuffer*& buffer) noexcept;
-	std::size_t CreateFence(const std::uint64_t initValue, const D3D12_FENCE_FLAGS& flags, ID3D12Fence* &fence) noexcept;
-
-	// Asserts if resource id is not present
-	ID3D12Resource& GetTexture(const std::size_t id) noexcept;
-	UploadBuffer& GetUploadBuffer(const std::size_t id) noexcept;
-	ID3D12DescriptorHeap& GetDescriptorHeap(const std::size_t id) noexcept;
-	ID3D12Fence& GetFence(const std::size_t id) noexcept;
-	
-	void EraseResource(const std::size_t id) noexcept;
-	void EraseUploadBuffer(const std::size_t id) noexcept;
-	void EraseFence(const std::size_t id) noexcept;
-
-	// This will invalidate all ids.
-	__forceinline void ClearResources() noexcept { mResourceById.clear(); }
-	__forceinline void ClearUploadBuffers() noexcept { mUploadBufferById.clear(); }
-	__forceinline void ClearFences() noexcept { mFenceById.clear(); }
-	__forceinline void Clear() noexcept { ClearResources(); ClearUploadBuffers(); ClearFences(); }
+	// Preconditions:
+	// - "id" must be valid.
+	ID3D12Resource& GetResource(const std::size_t id) noexcept;
 
 private:
 	ResourceManager() = default;
 
 	using ResourceById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12Resource>>;
 	ResourceById mResourceById;
-
-	using UploadBufferById = tbb::concurrent_hash_map<std::size_t, std::unique_ptr<UploadBuffer>>;
-	UploadBufferById mUploadBufferById;
-
-	using FenceById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12Fence>>;
-	FenceById mFenceById;
 
 	std::mutex mMutex;
 };

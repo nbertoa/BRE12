@@ -34,32 +34,36 @@ public:
 
 		bool IsDataValid() const noexcept;
 
-		// If a shader filename is nullptr, then we do not load it.
-		std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout{};
-		const char* mRootSignFilename{ nullptr };
-		const char* mVSFilename{ nullptr };
-		const char* mGSFilename{ nullptr };
-		const char* mDSFilename{ nullptr };
-		const char* mHSFilename{ nullptr };
-		const char* mPSFilename{ nullptr };
 
-		D3D12_BLEND_DESC mBlendDesc = D3DFactory::GetDisabledBlendDesc();
-		D3D12_RASTERIZER_DESC mRasterizerDesc = D3DFactory::GetDefaultRasterizerDesc();
-		D3D12_DEPTH_STENCIL_DESC mDepthStencilDesc = D3DFactory::GetDefaultDepthStencilDesc();
+		std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayoutDescriptors{};
+
+		ID3DBlob* mRootSignatureBlob{ nullptr };
+		ID3D12RootSignature* mRootSignature{ nullptr };
+
+		// If a shader bytecode is not valid, then we do not load it.
+		D3D12_SHADER_BYTECODE mVertexShaderBytecode{ 0UL };
+		D3D12_SHADER_BYTECODE mGeometryShaderBytecode{ 0UL };
+		D3D12_SHADER_BYTECODE mDomainShaderBytecode{ 0UL };
+		D3D12_SHADER_BYTECODE mHullShaderBytecode{ 0UL };
+		D3D12_SHADER_BYTECODE mPixelShaderBytecode{ 0UL };
+
+		D3D12_BLEND_DESC mBlendDescriptor = D3DFactory::GetDisabledBlendDesc();
+		D3D12_RASTERIZER_DESC mRasterizerDescriptor = D3DFactory::GetDefaultRasterizerDesc();
+		D3D12_DEPTH_STENCIL_DESC mDepthStencilDescriptor = D3DFactory::GetDefaultDepthStencilDesc();
 		std::uint32_t mNumRenderTargets{ 0U };
-		DXGI_FORMAT mRtFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{ DXGI_FORMAT_UNKNOWN };
-		DXGI_SAMPLE_DESC mSampleDesc{ 1U, 0U };
+		DXGI_FORMAT mRenderTargetFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{ DXGI_FORMAT_UNKNOWN };
+		DXGI_SAMPLE_DESC mSampleDescriptor{ 1U, 0U };
 		std::uint32_t mSampleMask{ UINT_MAX };
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE mTopology{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE mPrimitiveTopologyType{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
 	};
 
 	// Returns id of the pipeline state object
 	// Preconditions:
-	// - "psoData" must be valid
+	// - "psoCreationData" must be valid
 	std::size_t CreateGraphicsPSO(
-		const PSOManager::PSOCreationData& psoData,
+		const PSOManager::PSOCreationData& psoCreationData,
 		ID3D12PipelineState* &pso,
-		ID3D12RootSignature* &rootSign) noexcept;
+		ID3D12RootSignature* &rootSignature) noexcept;
 
 	// Preconditions:
 	// - "id" must be valid

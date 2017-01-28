@@ -10,7 +10,9 @@
 #include <MathUtils/MathUtils.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager/ResourceManager.h>
+#include <ResourceManager/UploadBufferManager.h>
 #include <ResourceStateManager\ResourceStateManager.h>
+#include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
@@ -182,18 +184,18 @@ void AmbientOcclusionCmdListRecorder::InitPSO() noexcept {
 
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
-	const std::size_t renderTargetCount{ _countof(psoData.mRtFormats) };
-	psoData.mBlendDesc = D3DFactory::GetAlwaysBlendDesc();
-	psoData.mDepthStencilDesc = D3DFactory::GetDisabledDepthStencilDesc();
-	psoData.mPSFilename = "AmbientLightPass/Shaders/AmbientOcclusion/PS.cso";
-	psoData.mRootSignFilename = "AmbientLightPass/Shaders/AmbientOcclusion/RS.cso";
-	psoData.mVSFilename = "AmbientLightPass/Shaders/AmbientOcclusion/VS.cso";
+	const std::size_t renderTargetCount{ _countof(psoData.mRenderTargetFormats) };
+	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
+	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
+	ShaderManager::Get().LoadShaderFile("AmbientLightPass/Shaders/AmbientOcclusion/PS.cso", psoData.mPixelShaderBytecode);
+	ShaderManager::Get().LoadShaderFile("AmbientLightPass/Shaders/AmbientOcclusion/VS.cso", psoData.mVertexShaderBytecode);
+	ShaderManager::Get().LoadShaderFile("AmbientLightPass/Shaders/AmbientOcclusion/RS.cso", psoData.mRootSignatureBlob);
 	psoData.mNumRenderTargets = 1U;
-	psoData.mRtFormats[0U] = DXGI_FORMAT_R16_UNORM;
+	psoData.mRenderTargetFormats[0U] = DXGI_FORMAT_R16_UNORM;
 	for (std::size_t i = psoData.mNumRenderTargets; i < renderTargetCount; ++i) {
-		psoData.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
+		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
-	psoData.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
 
 	ASSERT(sPSO != nullptr);
@@ -304,7 +306,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 
 	// Create sample kernel buffer and fill it
 	const std::size_t sampleKernelBufferElemSize{ sizeof(XMFLOAT4) };
-	ResourceManager::Get().CreateUploadBuffer(sampleKernelBufferElemSize, mNumSamples, mSampleKernelBuffer);
+	UploadBufferManager::Get().CreateUploadBuffer(sampleKernelBufferElemSize, mNumSamples, mSampleKernelBuffer);
 	const std::uint8_t* sampleKernelPtr = reinterpret_cast<const std::uint8_t*>(sampleKernel);
 	for (std::uint32_t i = 0UL; i < mNumSamples; ++i) {
 		mSampleKernelBuffer->CopyData(i, sampleKernelPtr + sampleKernelBufferElemSize * i, sampleKernelBufferElemSize);
@@ -369,9 +371,9 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	mCmdListQueue.push(mCommandList);*/
 
 	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
+	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		UploadBufferManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc[4U]{};

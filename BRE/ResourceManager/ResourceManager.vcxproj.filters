@@ -3,14 +3,16 @@
   <ItemGroup>
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="UploadBuffer.h" />
-    <ClInclude Include="BufferCreator.h" />
     <ClInclude Include="DDSTextureLoader.h" />
+    <ClInclude Include="UploadBufferManager.h" />
+    <ClInclude Include="VertexAndIndexBufferCreator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="UploadBuffer.cpp" />
-    <ClCompile Include="BufferCreator.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
+    <ClCompile Include="UploadBufferManager.cpp" />
+    <ClCompile Include="VertexAndIndexBufferCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

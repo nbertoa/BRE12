@@ -29,10 +29,10 @@ namespace SceneUtils {
 		
 		for (std::size_t i = 0UL; i < newTextureCount; ++i, ++nextTextureAvailableIndex) {
 			ResourceManager::Get().LoadTextureFromFile(
-				sourceTextureFilenames[i].c_str(), 
+				sourceTextureFilenames[i].c_str(),
+				cmdList,
 				mTextures[nextTextureAvailableIndex],
-				uploadBuffers[i], 
-				cmdList);
+				uploadBuffers[i]);
 			ASSERT(mTextures[nextTextureAvailableIndex] != nullptr);
 		}
 		DXUtils::ExecuteCommandListAndWaitForCompletion(cmdQueue, cmdList, fence);

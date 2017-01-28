@@ -5,11 +5,11 @@
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandAllocatorManager.h>
 #include <CommandManager\CommandListManager.h>
+#include <CommandManager\FenceManager.h>
 #include <DXUtils\DXUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
 #include <ModelManager\ModelManager.h>
-#include <ResourceManager\ResourceManager.h>
 #include <SkyBoxPass\SkyBoxCmdListRecorder.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
@@ -29,7 +29,7 @@ namespace {
 		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators, commandList);
 		commandList->Close();
 
-		ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, fence);
+		FenceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, fence);
 	}
 }
 

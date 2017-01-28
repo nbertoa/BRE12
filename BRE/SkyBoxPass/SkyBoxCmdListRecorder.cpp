@@ -8,8 +8,8 @@
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
 #include <PSOManager/PSOManager.h>
-#include <ResourceManager/ResourceManager.h>
-#include <ResourceManager/UploadBuffer.h>
+#include <ResourceManager/UploadBufferManager.h>
+#include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
@@ -54,23 +54,23 @@ void SkyBoxCmdListRecorder::InitPSO() noexcept {
 
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
-	const std::size_t renderTargetCount{ _countof(psoData.mRtFormats) };
+	const std::size_t renderTargetCount{ _countof(psoData.mRenderTargetFormats) };
 	// The camera is inside the sky sphere, so just turn off culling.
-	psoData.mRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	psoData.mRasterizerDescriptor.CullMode = D3D12_CULL_MODE_NONE;
 	// Make sure the depth function is LESS_EQUAL and not just GREATER.  
 	// Otherwise, the normalized depth values at z = 1 (NDC) will 
 	// fail the depth test if the depth buffer was cleared to 1.
-	psoData.mDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	psoData.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
-	psoData.mPSFilename = "SkyBoxPass/Shaders/PS.cso";
-	psoData.mRootSignFilename = "SkyBoxPass/Shaders/RS.cso";
-	psoData.mVSFilename = "SkyBoxPass/Shaders/VS.cso";
+	psoData.mDepthStencilDescriptor.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
+	ShaderManager::Get().LoadShaderFile("SkyBoxPass/Shaders/PS.cso", psoData.mPixelShaderBytecode);
+	ShaderManager::Get().LoadShaderFile("SkyBoxPass/Shaders/VS.cso", psoData.mVertexShaderBytecode);
+	ShaderManager::Get().LoadShaderFile("SkyBoxPass/Shaders/RS.cso", psoData.mRootSignatureBlob);
 	psoData.mNumRenderTargets = 1U;
-	psoData.mRtFormats[0U] = SettingsManager::sColorBufferFormat;
+	psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
 	for (std::size_t i = psoData.mNumRenderTargets; i < renderTargetCount; ++i) {
-		psoData.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
+		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
-	psoData.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
 
 	ASSERT(sPSO != nullptr);
@@ -78,8 +78,8 @@ void SkyBoxCmdListRecorder::InitPSO() noexcept {
 }
 
 void SkyBoxCmdListRecorder::Init(
-	const BufferCreator::VertexBufferData& vertexBufferData,
-	const BufferCreator::IndexBufferData indexBufferData, 
+	const VertexAndIndexBufferCreator::VertexBufferData& vertexBufferData,
+	const VertexAndIndexBufferCreator::IndexBufferData indexBufferData, 
 	const DirectX::XMFLOAT4X4& worldMatrix,
 	ID3D12Resource& skyBoxCubeMap,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
@@ -181,8 +181,8 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& skyBoxCubeMap) noexcept
 	ASSERT(mObjectCBuffer == nullptr);
 
 	// Create object cbuffer and fill it
-	const std::size_t objCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
-	ResourceManager::Get().CreateUploadBuffer(objCBufferElemSize, 1U, mObjectCBuffer);
+	const std::size_t objCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
+	UploadBufferManager::Get().CreateUploadBuffer(objCBufferElemSize, 1U, mObjectCBuffer);
 	ObjectCBuffer objCBuffer;
 	const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&mWorldMatrix));
 	DirectX::XMStoreFloat4x4(&objCBuffer.mWorldMatrix, wMatrix);
@@ -210,8 +210,8 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& skyBoxCubeMap) noexcept
 	mCubeMapBufferGpuDescBegin = CbvSrvUavDescriptorManager::Get().CreateShaderResourceView(skyBoxCubeMap, srvDesc);
 
 	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
+	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		UploadBufferManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 }

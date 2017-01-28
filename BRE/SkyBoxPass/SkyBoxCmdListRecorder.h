@@ -4,7 +4,7 @@
 #include <DirectXMath.h>
 
 #include <MathUtils\MathUtils.h>
-#include <ResourceManager/BufferCreator.h>
+#include <ResourceManager/VertexAndIndexBufferCreator.h>
 #include <SettingsManager\SettingsManager.h>
 
 struct FrameCBuffer;
@@ -25,8 +25,8 @@ public:
 	static void InitPSO() noexcept;
 
 	void Init(
-		const BufferCreator::VertexBufferData& vertexBufferData, 
-		const BufferCreator::IndexBufferData indexBufferData,
+		const VertexAndIndexBufferCreator::VertexBufferData& vertexBufferData, 
+		const VertexAndIndexBufferCreator::IndexBufferData indexBufferData,
 		const DirectX::XMFLOAT4X4& worldMatrix,
 		ID3D12Resource& skyBoxCubeMap,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc,
@@ -44,8 +44,8 @@ private:
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 	
-	BufferCreator::VertexBufferData mVertexBufferData;
-	BufferCreator::IndexBufferData mIndexBufferData;
+	VertexAndIndexBufferCreator::VertexBufferData mVertexBufferData;
+	VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
 	DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::GetIdentity4x4Matrix() };
 
 	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };

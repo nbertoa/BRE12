@@ -4,7 +4,7 @@
 #include <DirectXMath.h>
 
 #include <DXUtils/D3DFactory.h>
-#include <ResourceManager/BufferCreator.h>
+#include <ResourceManager/VertexAndIndexBufferCreator.h>
 #include <SettingsManager\SettingsManager.h>
 
 struct FrameCBuffer;
@@ -20,8 +20,8 @@ public:
 	struct GeometryData {
 		GeometryData() = default;
 
-		BufferCreator::VertexBufferData mVertexBufferData;
-		BufferCreator::IndexBufferData mIndexBufferData;
+		VertexAndIndexBufferCreator::VertexBufferData mVertexBufferData;
+		VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
 		std::vector<DirectX::XMFLOAT4X4> mWorldMatrices;
 	};
 

@@ -5,20 +5,31 @@
 #include <d3d12.h>
 #include <wrl.h>
 
-namespace  BufferCreator {
-	struct BufferData {
-		BufferData() = default;
-		explicit BufferData(const void* data, const std::uint32_t elemCount, const std::size_t elemSize);
-		~BufferData() = default;
-		BufferData(const BufferData&) = delete;
-		const BufferData& operator=(const BufferData&) = delete;
-		BufferData(BufferData&&) = delete;
-		BufferData& operator=(BufferData&&) = delete;
+class VertexAndIndexBufferCreator {
+public:
+	VertexAndIndexBufferCreator() = delete;
+	~VertexAndIndexBufferCreator() = delete;
+	VertexAndIndexBufferCreator(const VertexAndIndexBufferCreator&) = delete;
+	const VertexAndIndexBufferCreator& operator=(const VertexAndIndexBufferCreator&) = delete;
+	VertexAndIndexBufferCreator(VertexAndIndexBufferCreator&&) = delete;
+	VertexAndIndexBufferCreator& operator=(VertexAndIndexBufferCreator&&) = delete;
+
+	struct BufferCreationData {
+		BufferCreationData() = default;
+		explicit BufferCreationData(
+			const void* data, 
+			const std::uint32_t elementCount, 
+			const std::size_t elementSize);
+		~BufferCreationData() = default;
+		BufferCreationData(const BufferCreationData&) = delete;
+		const BufferCreationData& operator=(const BufferCreationData&) = delete;
+		BufferCreationData(BufferCreationData&&) = delete;
+		BufferCreationData& operator=(BufferCreationData&&) = delete;
 
 		bool IsDataValid() const noexcept;
 
 		const void* mData{ nullptr };
-		std::uint32_t mElemCount{ 0U };
+		std::uint32_t mElementCount{ 0U };
 		std::size_t mElementSize{ 0UL };
 	};
 
@@ -38,12 +49,6 @@ namespace  BufferCreator {
 		D3D12_VERTEX_BUFFER_VIEW mBufferView{};
 		std::uint32_t mElementCount{ 0U };
 	};
-	
-	void CreateVertexBuffer(
-		ID3D12GraphicsCommandList& commandList, 
-		const BufferData& bufferData,
-		VertexBufferData& vertexBufferData,
-		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
 
 	struct IndexBufferData {
 		IndexBufferData() = default;
@@ -61,10 +66,16 @@ namespace  BufferCreator {
 		D3D12_INDEX_BUFFER_VIEW mBufferView{};
 		std::uint32_t mElementCount{ 0U };
 	};
-
-	void CreateIndexBuffer(
+	
+	static void CreateVertexBuffer(
 		ID3D12GraphicsCommandList& commandList, 
-		const BufferData& bufferData, 
+		const BufferCreationData& bufferCreationData,
+		VertexBufferData& vertexBufferData,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
+
+	static void CreateIndexBuffer(
+		ID3D12GraphicsCommandList& commandList, 
+		const BufferCreationData& bufferCreationData,
 		IndexBufferData& indexBufferData,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
-}
+};

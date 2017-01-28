@@ -4,7 +4,7 @@
 
 #include <CommandManager\CommandAllocatorManager.h>
 #include <CommandManager\CommandListManager.h>
-#include <ResourceManager\ResourceManager.h>
+#include <CommandManager\FenceManager.h>
 #include <Utils\DebugUtils.h>
 
 // cmdQueue is used by derived classes
@@ -14,7 +14,7 @@ void Scene::Init(ID3D12CommandQueue& /*cmdQueue*/) noexcept {
 	CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandAllocators);
 	CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCommandAllocators, mCommandList);
 	mCommandList->Close();
-	ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
+	FenceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 
 	ASSERT(IsDataValid());
 }

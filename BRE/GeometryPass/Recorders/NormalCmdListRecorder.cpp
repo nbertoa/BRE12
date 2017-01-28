@@ -8,8 +8,8 @@
 #include <MaterialManager/Material.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOManager/PSOManager.h>
-#include <ResourceManager/ResourceManager.h>
-#include <ResourceManager/UploadBuffer.h>
+#include <ResourceManager/UploadBufferManager.h>
+#include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
@@ -34,12 +34,12 @@ void NormalCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, co
 
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
-	psoData.mInputLayout = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
-	psoData.mPSFilename = "GeometryPass/Shaders/NormalMapping/PS.cso";
-	psoData.mRootSignFilename = "GeometryPass/Shaders/NormalMapping/RS.cso";
-	psoData.mVSFilename = "GeometryPass/Shaders/NormalMapping/VS.cso";
+	psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
+	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/NormalMapping/PS.cso", psoData.mPixelShaderBytecode);
+	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/NormalMapping/VS.cso", psoData.mVertexShaderBytecode);
+	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/NormalMapping/RS.cso", psoData.mRootSignatureBlob);
 	psoData.mNumRenderTargets = geometryBufferCount;
-	memcpy(psoData.mRtFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
+	memcpy(psoData.mRenderTargetFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
 	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
 
 	ASSERT(sPSO != nullptr);
@@ -181,8 +181,8 @@ void NormalCmdListRecorder::BuildBuffers(
 	ASSERT(mMaterialsCBuffer == nullptr);
 
 	// Create object cbuffer and fill it
-	const std::size_t objCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
-	ResourceManager::Get().CreateUploadBuffer(objCBufferElemSize, dataCount, mObjectCBuffer);
+	const std::size_t objCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
+	UploadBufferManager::Get().CreateUploadBuffer(objCBufferElemSize, dataCount, mObjectCBuffer);
 	std::uint32_t k = 0U;
 	const std::size_t geometryDataCount{ mGeometryDataVec.size() };
 	ObjectCBuffer objCBuffer;
@@ -199,8 +199,8 @@ void NormalCmdListRecorder::BuildBuffers(
 	}
 
 	// Create materials cbuffer		
-	const std::size_t matCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(Material)) };
-	ResourceManager::Get().CreateUploadBuffer(matCBufferElemSize, dataCount, mMaterialsCBuffer);
+	const std::size_t matCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(Material)) };
+	UploadBufferManager::Get().CreateUploadBuffer(matCBufferElemSize, dataCount, mMaterialsCBuffer);
 
 	D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialsCBuffer->GetResource()->GetGPUVirtualAddress() };
 	D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->GetResource()->GetGPUVirtualAddress() };
@@ -280,8 +280,8 @@ void NormalCmdListRecorder::BuildBuffers(
 			static_cast<std::uint32_t>(normalSrvDescVec.size()));
 	
 	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
+	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		UploadBufferManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 }

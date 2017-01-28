@@ -4,11 +4,13 @@
     <ClInclude Include="CommandListManager.h" />
     <ClInclude Include="CommandQueueManager.h" />
     <ClInclude Include="CommandAllocatorManager.h" />
+    <ClInclude Include="FenceManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CommandListManager.cpp" />
     <ClCompile Include="CommandQueueManager.cpp" />
     <ClCompile Include="CommandAllocatorManager.cpp" />
+    <ClCompile Include="FenceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

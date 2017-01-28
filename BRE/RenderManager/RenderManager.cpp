@@ -6,6 +6,7 @@
 #include <CommandManager/CommandAllocatorManager.h>
 #include <CommandManager/CommandListManager.h>
 #include <CommandManager/CommandQueueManager.h>
+#include <CommandManager/FenceManager.h>
 #include <DescriptorManager\DepthStencilDescriptorManager.h>
 #include <DescriptorManager\RenderTargetDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
@@ -152,7 +153,7 @@ RenderManager& RenderManager::Get() noexcept {
 }
 
 RenderManager::RenderManager(Scene& scene) {
-	ResourceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
+	FenceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 	CreateFinalPassCommandObjects();
 	CreateRenderTargetViewAndDepthStencilView();
 	CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors();
@@ -163,6 +164,7 @@ RenderManager::RenderManager(Scene& scene) {
 		SettingsManager::sNearPlaneZ, 
 		SettingsManager::sFarPlaneZ);
 
+	ASSERT(mCommandQueue != nullptr);
 	CommandListExecutor::Create(*mCommandQueue, MAX_NUM_CMD_LISTS);
 	
 	InitPasses(scene);

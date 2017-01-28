@@ -7,7 +7,8 @@
 #include <CommandManager/CommandListManager.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <PSOManager/PSOManager.h>
-#include <ResourceManager/ResourceManager.h>
+#include <ResourceManager/UploadBufferManager.h>
+#include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
@@ -55,18 +56,18 @@ void EnvironmentLightCmdListRecorder::InitPSO() noexcept {
 
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
-	const std::size_t renderTargetCount{ _countof(psoData.mRtFormats) };
-	psoData.mBlendDesc = D3DFactory::GetAlwaysBlendDesc();
-	psoData.mDepthStencilDesc = D3DFactory::GetDisabledDepthStencilDesc();
-	psoData.mPSFilename = "EnvironmentLightPass/Shaders/PS.cso";
-	psoData.mRootSignFilename = "EnvironmentLightPass/Shaders/RS.cso";
-	psoData.mVSFilename = "EnvironmentLightPass/Shaders/VS.cso";
+	const std::size_t renderTargetCount{ _countof(psoData.mRenderTargetFormats) };
+	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
+	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
+	ShaderManager::Get().LoadShaderFile("EnvironmentLightPass/Shaders/PS.cso", psoData.mPixelShaderBytecode);
+	ShaderManager::Get().LoadShaderFile("EnvironmentLightPass/Shaders/VS.cso", psoData.mVertexShaderBytecode);
+	ShaderManager::Get().LoadShaderFile("EnvironmentLightPass/Shaders/RS.cso", psoData.mRootSignatureBlob);
 	psoData.mNumRenderTargets = 1U;
-	psoData.mRtFormats[0U] = SettingsManager::sColorBufferFormat;
+	psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
 	for (std::size_t i = psoData.mNumRenderTargets; i < renderTargetCount; ++i) {
-		psoData.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
+		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
-	psoData.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
 
 	ASSERT(sPSO != nullptr);
@@ -217,8 +218,8 @@ void EnvironmentLightCmdListRecorder::BuildBuffers(
 	mPixelShaderBuffersGpuDesc = CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(res.data(), srvDesc.data(), static_cast<std::uint32_t>(srvDesc.size()));
 
 	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::RoundConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
+	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		ResourceManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		UploadBufferManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 }

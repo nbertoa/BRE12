@@ -7,6 +7,7 @@
 #include <CommandManager/CommandListManager.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <PSOManager/PSOManager.h>
+#include <ShaderManager\ShaderManager.h>
 #include <Utils/DebugUtils.h>
 
 // Root Signature:
@@ -52,17 +53,17 @@ void ToneMappingCmdListRecorder::InitPSO() noexcept {
 
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
-	const std::size_t rtCount{ _countof(psoData.mRtFormats) };
-	psoData.mDepthStencilDesc = D3DFactory::GetDisabledDepthStencilDesc();
-	psoData.mPSFilename = "ToneMappingPass/Shaders/PS.cso";
-	psoData.mRootSignFilename = "ToneMappingPass/Shaders/RS.cso";
-	psoData.mVSFilename = "ToneMappingPass/Shaders/VS.cso";
+	const std::size_t rtCount{ _countof(psoData.mRenderTargetFormats) };
+	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
+	ShaderManager::Get().LoadShaderFile("ToneMappingPass/Shaders/PS.cso", psoData.mPixelShaderBytecode);
+	ShaderManager::Get().LoadShaderFile("ToneMappingPass/Shaders/VS.cso", psoData.mVertexShaderBytecode);
+	ShaderManager::Get().LoadShaderFile("ToneMappingPass/Shaders/RS.cso", psoData.mRootSignatureBlob);
 	psoData.mNumRenderTargets = 1U;
-	psoData.mRtFormats[0U] = SettingsManager::sColorBufferFormat;
+	psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
 	for (std::size_t i = psoData.mNumRenderTargets; i < rtCount; ++i) {
-		psoData.mRtFormats[i] = DXGI_FORMAT_UNKNOWN;
+		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
-	psoData.mTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
 
 	ASSERT(sPSO != nullptr);
