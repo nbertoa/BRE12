@@ -42,10 +42,10 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/character1.obj",
+		"models/torusKnot.obj",
 	};
 
-	const float sS{ 0.10f };
+	const float sS{ 4.0f };
 
 	const float sTx{ 0.0f };
 	const float sTy{ -3.5f };

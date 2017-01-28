@@ -110,7 +110,7 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	mAmbientLightPass.Execute(frameCBuffer);
 
 	// Execute environment light pass tasks
-	//mEnvironmentLightPass.Execute(frameCBuffer);
+	mEnvironmentLightPass.Execute(frameCBuffer);
 
 	ExecuteEndingTask();
 }

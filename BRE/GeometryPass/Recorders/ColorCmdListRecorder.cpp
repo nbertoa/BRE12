@@ -9,6 +9,7 @@
 #include <MathUtils/MathUtils.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager/UploadBufferManager.h>
+#include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
@@ -33,12 +34,18 @@ void ColorCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, con
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
 	psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
+
 	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/ColorMapping/PS.cso", psoData.mPixelShaderBytecode);
 	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/ColorMapping/VS.cso", psoData.mVertexShaderBytecode);
-	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/ColorMapping/RS.cso", psoData.mRootSignatureBlob);
+
+	ID3DBlob* rootSignatureBlob;
+	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/ColorMapping/RS.cso", rootSignatureBlob);
+	RootSignatureManager::Get().CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	sRootSignature = psoData.mRootSignature;
+
 	psoData.mNumRenderTargets = geometryBufferCount;
 	memcpy(psoData.mRenderTargetFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);

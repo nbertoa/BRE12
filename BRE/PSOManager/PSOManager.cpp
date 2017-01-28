@@ -3,7 +3,6 @@
 #include <memory>
 
 #include <DirectXManager/DirectXManager.h>
-#include <RootSignatureManager/RootSignatureManager.h>
 #include <SettingsManager\SettingsManager.h>
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
@@ -24,7 +23,9 @@ PSOManager& PSOManager::Get() noexcept {
 }
 
 bool PSOManager::PSOCreationData::IsDataValid() const noexcept {
-	if (mNumRenderTargets == 0 || mNumRenderTargets > D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT) {
+	if (mNumRenderTargets == 0 || 
+		mNumRenderTargets > D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT || 
+		mRootSignature == nullptr) {
 		return false;
 	}
 
@@ -39,14 +40,10 @@ bool PSOManager::PSOCreationData::IsDataValid() const noexcept {
 
 std::size_t PSOManager::CreateGraphicsPSO(
 	const PSOManager::PSOCreationData& psoData,
-	ID3D12PipelineState* &pso,
-	ID3D12RootSignature* &rootSign) noexcept
+	ID3D12PipelineState* &pso) noexcept
 {
 	ASSERT(psoData.IsDataValid());
-
-	ASSERT(psoData.mRootSignatureBlob != nullptr);
-	RootSignatureManager::Get().CreateRootSignatureFromBlob(*psoData.mRootSignatureBlob, rootSign);
-
+		
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDescriptor = {};
 	psoDescriptor.BlendState = psoData.mBlendDescriptor;
 	psoDescriptor.DepthStencilState = psoData.mDepthStencilDescriptor;
@@ -62,7 +59,7 @@ std::size_t PSOManager::CreateGraphicsPSO(
 	};
 	psoDescriptor.NumRenderTargets = psoData.mNumRenderTargets;
 	psoDescriptor.PrimitiveTopologyType = psoData.mPrimitiveTopologyType;
-	psoDescriptor.pRootSignature = rootSign;
+	psoDescriptor.pRootSignature = psoData.mRootSignature;
 	psoDescriptor.PS = psoData.mPixelShaderBytecode;
 	psoDescriptor.RasterizerState = psoData.mRasterizerDescriptor;
 	memcpy(psoDescriptor.RTVFormats, psoData.mRenderTargetFormats, sizeof(psoData.mRenderTargetFormats));
@@ -73,7 +70,6 @@ std::size_t PSOManager::CreateGraphicsPSO(
 	const std::size_t id = CreateGraphicsPSOByDescriptor(psoDescriptor, pso);
 
 	ASSERT(pso != nullptr);
-	ASSERT(rootSign != nullptr);
 
 	return id;
 }

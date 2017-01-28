@@ -9,6 +9,7 @@
 #include <MathUtils/MathUtils.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager/UploadBufferManager.h>
+#include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
@@ -37,15 +38,21 @@ void HeightCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, co
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
 	psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
+
 	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/HeightMapping/DS.cso", psoData.mDomainShaderBytecode);
 	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/HeightMapping/HS.cso", psoData.mHullShaderBytecode);
 	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/HeightMapping/PS.cso", psoData.mPixelShaderBytecode);
 	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/HeightMapping/VS.cso", psoData.mVertexShaderBytecode);
-	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/HeightMapping/RS.cso", psoData.mRootSignatureBlob);
+
+	ID3DBlob* rootSignatureBlob;
+	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/HeightMapping/RS.cso", rootSignatureBlob);
+	RootSignatureManager::Get().CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	sRootSignature = psoData.mRootSignature;
+
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
 	psoData.mNumRenderTargets = geometryBufferCount;
 	memcpy(psoData.mRenderTargetFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);

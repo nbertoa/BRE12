@@ -8,6 +8,7 @@
 #include <MathUtils/MathUtils.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager/UploadBufferManager.h>
+#include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
@@ -34,17 +35,23 @@ void PunctualLightCmdListRecorder::InitPSO() noexcept {
 	const std::size_t rtCount{ _countof(psoData.mRenderTargetFormats) };
 	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
+
 	ShaderManager::Get().LoadShaderFile("LightingPass/Shaders/PunctualLight/GS.cso", psoData.mGeometryShaderBytecode);
 	ShaderManager::Get().LoadShaderFile("LightingPass/Shaders/PunctualLight/PS.cso", psoData.mPixelShaderBytecode);
 	ShaderManager::Get().LoadShaderFile("LightingPass/Shaders/PunctualLight/VS.cso", psoData.mVertexShaderBytecode);
-	ShaderManager::Get().LoadShaderFile("LightingPass/Shaders/PunctualLight/RS.cso", psoData.mRootSignatureBlob);
+
+	ID3DBlob* rootSignatureBlob;
+	ShaderManager::Get().LoadShaderFile("LightingPass/Shaders/PunctualLight/RS.cso", rootSignatureBlob);
+	RootSignatureManager::Get().CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	sRootSignature = psoData.mRootSignature;
+
 	psoData.mNumRenderTargets = 1U;
 	psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
 	for (std::size_t i = psoData.mNumRenderTargets; i < rtCount; ++i) {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);

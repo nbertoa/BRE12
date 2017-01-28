@@ -33,11 +33,9 @@ public:
 		PSOCreationData& operator=(PSOCreationData&&) = delete;
 
 		bool IsDataValid() const noexcept;
-
-
+		
 		std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayoutDescriptors{};
 
-		ID3DBlob* mRootSignatureBlob{ nullptr };
 		ID3D12RootSignature* mRootSignature{ nullptr };
 
 		// If a shader bytecode is not valid, then we do not load it.
@@ -62,8 +60,7 @@ public:
 	// - "psoCreationData" must be valid
 	std::size_t CreateGraphicsPSO(
 		const PSOManager::PSOCreationData& psoCreationData,
-		ID3D12PipelineState* &pso,
-		ID3D12RootSignature* &rootSignature) noexcept;
+		ID3D12PipelineState* &pso) noexcept;
 
 	// Preconditions:
 	// - "id" must be valid

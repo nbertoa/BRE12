@@ -7,6 +7,7 @@
 #include <CommandManager/CommandListManager.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <PSOManager/PSOManager.h>
+#include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <Utils/DebugUtils.h>
 
@@ -55,16 +56,22 @@ void BlurCmdListRecorder::InitPSO() noexcept {
 	PSOManager::PSOCreationData psoData{};
 	const std::size_t renderTargetCount{ _countof(psoData.mRenderTargetFormats) };
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
+
 	ShaderManager::Get().LoadShaderFile("AmbientLightPass/Shaders/Blur/PS.cso", psoData.mPixelShaderBytecode);
 	ShaderManager::Get().LoadShaderFile("AmbientLightPass/Shaders/Blur/VS.cso", psoData.mVertexShaderBytecode);
-	ShaderManager::Get().LoadShaderFile("AmbientLightPass/Shaders/Blur/RS.cso", psoData.mRootSignatureBlob);
+
+	ID3DBlob* rootSignatureBlob;
+	ShaderManager::Get().LoadShaderFile("AmbientLightPass/Shaders/Blur/RS.cso", rootSignatureBlob);
+	RootSignatureManager::Get().CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	sRootSignature = psoData.mRootSignature;
+
 	psoData.mNumRenderTargets = 1U;
 	psoData.mRenderTargetFormats[0U] = DXGI_FORMAT_R16_UNORM;
 	for (std::size_t i = psoData.mNumRenderTargets; i < renderTargetCount; ++i) {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO, sRootSignature);
+	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
