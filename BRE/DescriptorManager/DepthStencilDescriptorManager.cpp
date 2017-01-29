@@ -6,22 +6,12 @@
 #include <DXUtils/d3dx12.h>
 #include <SettingsManager\SettingsManager.h>
 
-namespace {
-	std::unique_ptr<DepthStencilDescriptorManager> gManager{ nullptr };
-}
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DepthStencilDescriptorManager::mDepthStencilViewDescriptorHeap;
+D3D12_GPU_DESCRIPTOR_HANDLE DepthStencilDescriptorManager::mCurrentDepthStencilViewGpuDescriptorHandle{ 0UL };
+D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilDescriptorManager::mCurrentDepthStencilCpuDescriptorHandle{ 0UL };
+std::mutex DepthStencilDescriptorManager::mMutex;
 
-DepthStencilDescriptorManager& DepthStencilDescriptorManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new DepthStencilDescriptorManager());
-	return *gManager.get();
-}
-
-DepthStencilDescriptorManager& DepthStencilDescriptorManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
-
-DepthStencilDescriptorManager::DepthStencilDescriptorManager() {
+void DepthStencilDescriptorManager::Init() noexcept {
 	D3D12_DESCRIPTOR_HEAP_DESC depthStencilViewDescriptorHeapDescriptor{};
 	depthStencilViewDescriptorHeapDescriptor.NumDescriptors = 1U;
 	depthStencilViewDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;

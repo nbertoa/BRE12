@@ -6,20 +6,8 @@
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
-namespace {
-	std::unique_ptr<FenceManager> gManager{ nullptr };
-}
-
-FenceManager& FenceManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new FenceManager());
-	return *gManager.get();
-}
-
-FenceManager& FenceManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
+FenceManager::FenceById FenceManager::mFenceById;
+std::mutex FenceManager::mMutex;
 
 std::size_t FenceManager::CreateFence(
 	const std::uint64_t fenceInitialValue,

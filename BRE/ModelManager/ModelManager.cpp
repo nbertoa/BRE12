@@ -4,21 +4,8 @@
 #include <Utils/DebugUtils.h>
 #include <Utils\NumberGeneration.h>
 
-namespace {
-
-	std::unique_ptr<ModelManager> gManager{ nullptr };
-}
-
-ModelManager& ModelManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new ModelManager());
-	return *gManager.get();
-}
-
-ModelManager& ModelManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
+ModelManager::ModelById ModelManager::mModelById;
+std::mutex ModelManager::mMutex;
 
 std::size_t ModelManager::LoadModel(
 	const char* modelFilename, 

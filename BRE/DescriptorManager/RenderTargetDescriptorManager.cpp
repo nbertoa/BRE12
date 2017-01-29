@@ -6,22 +6,12 @@
 #include <DXUtils/d3dx12.h>
 #include <SettingsManager\SettingsManager.h>
 
-namespace {
-	std::unique_ptr<RenderTargetDescriptorManager> gManager{ nullptr };
-}
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> RenderTargetDescriptorManager::mRenderTargetViewDescriptorHeap;
+D3D12_GPU_DESCRIPTOR_HANDLE RenderTargetDescriptorManager::mCurrentRenderTargetViewDescriptorHandle{ 0UL };
+D3D12_CPU_DESCRIPTOR_HANDLE RenderTargetDescriptorManager::mCurrentRenderTargetViewCpuDescriptorHandle{ 0UL };
+std::mutex RenderTargetDescriptorManager::mMutex;
 
-RenderTargetDescriptorManager& RenderTargetDescriptorManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new RenderTargetDescriptorManager());
-	return *gManager.get();
-}
-
-RenderTargetDescriptorManager& RenderTargetDescriptorManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
-
-RenderTargetDescriptorManager::RenderTargetDescriptorManager() {
+void RenderTargetDescriptorManager::Init() noexcept {
 	D3D12_DESCRIPTOR_HEAP_DESC renderTargetViewDescriptorHeapDescriptor{};
 	renderTargetViewDescriptorHeapDescriptor.NumDescriptors = 10U;
 	renderTargetViewDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;

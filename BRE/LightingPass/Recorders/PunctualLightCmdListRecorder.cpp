@@ -36,13 +36,13 @@ void PunctualLightCmdListRecorder::InitPSO() noexcept {
 	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-	ShaderManager::Get().LoadShaderFile("LightingPass/Shaders/PunctualLight/GS.cso", psoData.mGeometryShaderBytecode);
-	ShaderManager::Get().LoadShaderFile("LightingPass/Shaders/PunctualLight/PS.cso", psoData.mPixelShaderBytecode);
-	ShaderManager::Get().LoadShaderFile("LightingPass/Shaders/PunctualLight/VS.cso", psoData.mVertexShaderBytecode);
+	ShaderManager::LoadShaderFile("LightingPass/Shaders/PunctualLight/GS.cso", psoData.mGeometryShaderBytecode);
+	ShaderManager::LoadShaderFile("LightingPass/Shaders/PunctualLight/PS.cso", psoData.mPixelShaderBytecode);
+	ShaderManager::LoadShaderFile("LightingPass/Shaders/PunctualLight/VS.cso", psoData.mVertexShaderBytecode);
 
 	ID3DBlob* rootSignatureBlob;
-	ShaderManager::Get().LoadShaderFile("LightingPass/Shaders/PunctualLight/RS.cso", rootSignatureBlob);
-	RootSignatureManager::Get().CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	ShaderManager::LoadShaderFile("LightingPass/Shaders/PunctualLight/RS.cso", rootSignatureBlob);
+	RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
 	sRootSignature = psoData.mRootSignature;
 
 	psoData.mNumRenderTargets = 1U;
@@ -51,7 +51,7 @@ void PunctualLightCmdListRecorder::InitPSO() noexcept {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO);
+	PSOManager::CreateGraphicsPSO(psoData, sPSO);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -104,7 +104,7 @@ void PunctualLightCmdListRecorder::Init(
 	res[resIndex] = &depthBuffer;
 	
 	// Create textures SRV descriptors
-	mPixelShaderBuffersGpuDesc = CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(res.data(), srvDescVec.data(), static_cast<uint32_t>(srvDescVec.size()));
+	mPixelShaderBuffersGpuDesc = CbvSrvUavDescriptorManager::CreateShaderResourceViews(res.data(), srvDescVec.data(), static_cast<uint32_t>(srvDescVec.size()));
 
 	// Create lights buffer SRV	descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -114,7 +114,7 @@ void PunctualLightCmdListRecorder::Init(
 	srvDesc.Buffer.FirstElement = 0UL;
 	srvDesc.Buffer.NumElements = mNumLights;
 	srvDesc.Buffer.StructureByteStride = sizeof(PunctualLight);
-	mLightsBufferGpuDescBegin = CbvSrvUavDescriptorManager::Get().CreateShaderResourceView(*mLightsBuffer->GetResource(), srvDesc);
+	mLightsBufferGpuDescBegin = CbvSrvUavDescriptorManager::CreateShaderResourceView(*mLightsBuffer->GetResource(), srvDesc);
 	
 	ASSERT(IsDataValid());
 }
@@ -139,7 +139,7 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCommandList->OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, nullptr);
 
-	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
+	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCommandList->SetGraphicsRootSignature(sRootSignature);
 
@@ -181,7 +181,7 @@ void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {
 
 	// Create lights buffer and fill it
 	const std::size_t lightBufferElemSize{ sizeof(PunctualLight) };
-	UploadBufferManager::Get().CreateUploadBuffer(lightBufferElemSize, mNumLights, mLightsBuffer);
+	UploadBufferManager::CreateUploadBuffer(lightBufferElemSize, mNumLights, mLightsBuffer);
 	const std::uint8_t* lightsPtr = reinterpret_cast<const std::uint8_t*>(lights);
 	for (std::uint32_t i = 0UL; i < mNumLights; ++i) {
 		mLightsBuffer->CopyData(i, lightsPtr + sizeof(PunctualLight) * i, sizeof(PunctualLight));
@@ -190,12 +190,12 @@ void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		UploadBufferManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 
 	// Create immutable cbuffer
 	const std::size_t immutableCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ImmutableCBuffer)) };
-	UploadBufferManager::Get().CreateUploadBuffer(immutableCBufferElemSize, 1U, mImmutableCBuffer);
+	UploadBufferManager::CreateUploadBuffer(immutableCBufferElemSize, 1U, mImmutableCBuffer);
 	ImmutableCBuffer immutableCBuffer;
 	mImmutableCBuffer->CopyData(0U, &immutableCBuffer, sizeof(immutableCBuffer));
 }

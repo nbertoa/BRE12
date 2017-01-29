@@ -21,8 +21,6 @@
 using namespace DirectX;
 
 namespace {
-	RenderManager* gManager = nullptr;
-
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };	
 	
 	// Update camera's view matrix and store data in parameters.
@@ -83,7 +81,7 @@ namespace {
 		lastXY[1] = y;
 	}
 
-	// Create swap chainm and stores it in swapChain parameter.
+	// Create swap chain and stores it in swapChain parameter.
 	void CreateSwapChain(
 		const HWND windowHandle, 
 		ID3D12CommandQueue& commandQueue, 
@@ -136,24 +134,21 @@ namespace {
 
 using namespace DirectX;
 
+RenderManager* RenderManager::sRenderManager{ nullptr };
+
 RenderManager& RenderManager::Create(Scene& scene) noexcept {
-	ASSERT(gManager == nullptr);
+	ASSERT(sRenderManager == nullptr);
 
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
 	// Reference count is 2: 1 parent task + 1 master render task
 	parent->set_ref_count(2);
 
-	gManager = new (parent->allocate_child()) RenderManager(scene);
-	return *gManager;
-}
-
-RenderManager& RenderManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager;
+	sRenderManager = new (parent->allocate_child()) RenderManager(scene);
+	return *sRenderManager;
 }
 
 RenderManager::RenderManager(Scene& scene) {
-	FenceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
+	FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 	CreateFinalPassCommandObjects();
 	CreateRenderTargetViewAndDepthStencilView();
 	CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors();
@@ -179,7 +174,7 @@ void RenderManager::InitPasses(Scene& scene) noexcept {
 	
 	// Generate recorders for all the passes
 	scene.CreateGeometryPassRecorders(mGeometryPass.GetCommandListRecorders());
-	mGeometryPass.Init(DepthStencilCpuDesc(), *mCommandQueue);
+	mGeometryPass.Init(DepthStencilCpuDesc());
 
 	ID3D12Resource* skyBoxCubeMap;
 	ID3D12Resource* diffuseIrradianceCubeMap;
@@ -196,7 +191,6 @@ void RenderManager::InitPasses(Scene& scene) noexcept {
 		mLightingPass.GetCommandListRecorders());
 
 	mLightingPass.Init(
-		*mCommandQueue, 
 		mGeometryPass.GetGeometryBuffers(),
 		GeometryPass::BUFFERS_COUNT,
 		*mDepthStencilBuffer,
@@ -211,14 +205,11 @@ void RenderManager::InitPasses(Scene& scene) noexcept {
 		DepthStencilCpuDesc());
 
 	mToneMappingPass.Init(
-		*mCommandQueue, 
 		*mIntermediateColorBuffer1.Get(), 
 		*mIntermediateColorBuffer2.Get(),
 		mIntermediateColorBuffer2RTVCpuDesc);
 
-	mPostProcessPass.Init(
-		*mCommandQueue,
-		*mIntermediateColorBuffer2.Get());
+	mPostProcessPass.Init(*mIntermediateColorBuffer2.Get());
 		
 	// Initialize fence values for all frames to the same number.
 	const std::uint64_t count{ _countof(mFenceValueByQueuedFrameIndex) };
@@ -266,19 +257,19 @@ void RenderManager::ExecuteFinalPass() {
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(
 			*mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(), 
 			D3D12_RESOURCE_STATE_RENDER_TARGET),
 
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(
 			*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(), 
 			D3D12_RESOURCE_STATE_RENDER_TARGET),
 
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(
 			*CurrentFrameBuffer(), 
 			D3D12_RESOURCE_STATE_PRESENT),
 
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(
 			*mIntermediateColorBuffer1.Get(), 
 			D3D12_RESOURCE_STATE_RENDER_TARGET),	
 	};
@@ -304,8 +295,8 @@ void RenderManager::CreateRenderTargetViewAndDepthStencilView() noexcept {
 	const std::size_t rtvDescSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
-		RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDescriptor, &mFrameBufferRTVs[i]);
-		ResourceStateManager::Get().AddResource(*mFrameBuffers[i].Get(), D3D12_RESOURCE_STATE_PRESENT);
+		RenderTargetDescriptorManager::CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDescriptor, &mFrameBufferRTVs[i]);
+		ResourceStateManager::AddResource(*mFrameBuffers[i].Get(), D3D12_RESOURCE_STATE_PRESENT);
 	}
 
 	// Create the depth/stencil buffer and view.
@@ -328,7 +319,7 @@ void RenderManager::CreateRenderTargetViewAndDepthStencilView() noexcept {
 	clearValue.DepthStencil.Stencil = 0U;
 
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::Get().CreateCommittedResource(
+	ResourceManager::CreateCommittedResource(
 		heapProps, 
 		D3D12_HEAP_FLAG_NONE, 
 		depthStencilDesc, 
@@ -341,7 +332,7 @@ void RenderManager::CreateRenderTargetViewAndDepthStencilView() noexcept {
 	depthStencilViewDesc.Format = SettingsManager::sDepthStencilViewFormat;
 	depthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
-	DepthStencilDescriptorManager::Get().CreateDepthStencilView(*mDepthStencilBuffer, depthStencilViewDesc, &mDepthStencilBufferRTV);
+	DepthStencilDescriptorManager::CreateDepthStencilView(*mDepthStencilBuffer, depthStencilViewDesc, &mDepthStencilBufferRTV);
 }
 
 void RenderManager::CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors() noexcept {
@@ -371,7 +362,7 @@ void RenderManager::CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors(
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;		
 	rtvDesc.Format = resDesc.Format;
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::Get().CreateCommittedResource(
+	ResourceManager::CreateCommittedResource(
 		heapProps, 
 		D3D12_HEAP_FLAG_NONE, 
 		resDesc, 
@@ -379,10 +370,10 @@ void RenderManager::CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors(
 		&clearValue, 
 		resource);
 	mIntermediateColorBuffer1 = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
-	RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mIntermediateColorBuffer1.Get(), rtvDesc, &mIntermediateColorBuffer1RTVCpuDesc);
+	RenderTargetDescriptorManager::CreateRenderTargetView(*mIntermediateColorBuffer1.Get(), rtvDesc, &mIntermediateColorBuffer1RTVCpuDesc);
 
 	// Create RTV's descriptor for color buffer 2
-	ResourceManager::Get().CreateCommittedResource(
+	ResourceManager::CreateCommittedResource(
 		heapProps, 
 		D3D12_HEAP_FLAG_NONE, 
 		resDesc, 
@@ -390,7 +381,7 @@ void RenderManager::CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors(
 		&clearValue, 
 		resource);
 	mIntermediateColorBuffer2 = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
-	RenderTargetDescriptorManager::Get().CreateRenderTargetView(*mIntermediateColorBuffer2.Get(), rtvDesc, &mIntermediateColorBuffer2RTVCpuDesc);
+	RenderTargetDescriptorManager::CreateRenderTargetView(*mIntermediateColorBuffer2.Get(), rtvDesc, &mIntermediateColorBuffer2RTVCpuDesc);
 }
 
 void RenderManager::CreateFinalPassCommandObjects() noexcept {
@@ -399,13 +390,13 @@ void RenderManager::CreateFinalPassCommandObjects() noexcept {
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	CommandQueueManager::Get().CreateCommandQueue(queueDesc, mCommandQueue);
+	CommandQueueManager::CreateCommandQueue(queueDesc, mCommandQueue);
 
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mFinalPassCommandAllocators[i]);
+		CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mFinalPassCommandAllocators[i]);
 	}
 
-	CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mFinalPassCommandAllocators[0], mFinalPassCommandList);
+	CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mFinalPassCommandAllocators[0], mFinalPassCommandList);
 	mFinalPassCommandList->Close();
 }
 

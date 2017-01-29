@@ -6,20 +6,8 @@
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
-namespace {
-	std::unique_ptr<CommandAllocatorManager> gManager{ nullptr };
-}
-
-CommandAllocatorManager& CommandAllocatorManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new CommandAllocatorManager());
-	return *gManager.get();
-}
-
-CommandAllocatorManager& CommandAllocatorManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
+CommandAllocatorManager::CommandAllocatorById CommandAllocatorManager::mCommandAllocatorById;
+std::mutex CommandAllocatorManager::mMutex;
 
 std::size_t CommandAllocatorManager::CreateCommandAllocator(
 	const D3D12_COMMAND_LIST_TYPE& commandListType, 

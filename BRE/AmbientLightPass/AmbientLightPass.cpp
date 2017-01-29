@@ -25,16 +25,16 @@ namespace {
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 			ASSERT(cmdAllocatorsEnd[i] == nullptr);
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocatorsBegin[i]);
+			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocatorsBegin[i]);
 
 			ASSERT(cmdAllocatorsEnd[i] == nullptr);
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocatorsEnd[i]);
+			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocatorsEnd[i]);
 		}
 
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsBegin[0], commandListBegin);
+		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsBegin[0], commandListBegin);
 		commandListBegin->Close();
 
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsEnd[0], commandListEnd);
+		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsEnd[0], commandListEnd);
 		commandListEnd->Close();
 	}
 
@@ -63,7 +63,7 @@ namespace {
 
 		// Create buffer resource
 		ID3D12Resource* resource{ nullptr };			
-		ResourceManager::Get().CreateCommittedResource(
+		ResourceManager::CreateCommittedResource(
 			heapProps, 
 			D3D12_HEAP_FLAG_NONE, 
 			resourceDescriptor, 
@@ -76,22 +76,19 @@ namespace {
 		D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor{};
 		rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 		rtvDescriptor.Format = resourceDescriptor.Format;
-		RenderTargetDescriptorManager::Get().CreateRenderTargetView(*buffer.Get(), rtvDescriptor, &bufferRenderTargetCpuDesc);
+		RenderTargetDescriptorManager::CreateRenderTargetView(*buffer.Get(), rtvDescriptor, &bufferRenderTargetCpuDesc);
 	}
 }
 
 void AmbientLightPass::Init(
-	ID3D12CommandQueue& commandQueue,
 	ID3D12Resource& baseColorMetalMaskBuffer,
 	ID3D12Resource& normalSmoothnessBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
 	ID3D12Resource& depthBuffer) noexcept {
 
 	ASSERT(ValidateData() == false);
-
-	mCommandQueue = &commandQueue;
-	
-	CreateCommandObjects(mCmdAllocatorsBegin, mCmdAllocatorsEnd, mCmdListBegin, mCmdListEnd);
+		
+	CreateCommandObjects(mCmdAllocatorsBegin, mCmdAllocatorsFinal, mCmdListBegin, mCmdListEnd);
 
 	// Initialize recorder's PSO
 	AmbientLightCmdListRecorder::InitPSO();
@@ -135,7 +132,7 @@ void AmbientLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ExecuteBeginTask();
 	mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
 	mBlurRecorder->RecordAndPushCommandLists();
-	ExecuteEndingTask();
+	ExecuteFinalTask();
 	mAmbientLightRecorder->RecordAndPushCommandLists();
 
 	// Wait until all previous tasks command lists are executed
@@ -152,13 +149,12 @@ bool AmbientLightPass::ValidateData() const noexcept {
 	}
 
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCmdAllocatorsEnd[i] == nullptr) {
+		if (mCmdAllocatorsFinal[i] == nullptr) {
 			return false;
 		}
 	}
 
 	const bool b =
-		mCommandQueue != nullptr &&
 		mCmdListBegin != nullptr &&
 		mCmdListEnd != nullptr &&
 		mAmbientOcclusionRecorder.get() != nullptr &&
@@ -185,8 +181,8 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 
 	// GetResource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),		
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),		
 	};
 	const std::uint32_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == 2UL);
@@ -200,13 +196,13 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 	CommandListExecutor::Get().AddCommandList(*mCmdListBegin);
 }
 
-void AmbientLightPass::ExecuteEndingTask() noexcept {
+void AmbientLightPass::ExecuteFinalTask() noexcept {
 	ASSERT(ValidateData());
 
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t commandAllocatorIndex{ 0U };
 
-	ID3D12CommandAllocator* commandAllocator{ mCmdAllocatorsEnd[commandAllocatorIndex] };
+	ID3D12CommandAllocator* commandAllocator{ mCmdAllocatorsFinal[commandAllocatorIndex] };
 	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCmdAllocatorsBegin);
 
 	// Prepare end task
@@ -215,8 +211,8 @@ void AmbientLightPass::ExecuteEndingTask() noexcept {
 
 	// GetResource barriers
 	CD3DX12_RESOURCE_BARRIER endBarriers[]{
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),		
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),		
 	};
 	const std::uint32_t barriersCount = _countof(endBarriers);
 	ASSERT(barriersCount == 2UL);

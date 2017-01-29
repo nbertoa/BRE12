@@ -23,29 +23,26 @@ namespace {
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 			ASSERT(cmdAllocators[i] == nullptr);
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocators[i]);
+			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocators[i]);
 		}
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocators[0], commandList);
+		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocators[0], commandList);
 		commandList->Close();
 	}
 }
 
-void PostProcessPass::Init(
-	ID3D12CommandQueue& commandQueue,
-	ID3D12Resource& colorBuffer) noexcept {
+void PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept {
 
 	ASSERT(IsDataValid() == false);
 	
 	CreateCommandObjects(mCommandAllocators, mCommandList);
-	mCommandQueue = &commandQueue;
-	mColorBuffer = &colorBuffer;
+	mColorBuffer = &inputColorBuffer;
 
 	// Initialize recorder's PSO
 	PostProcessCmdListRecorder::InitPSO();
 
 	// Initialize recorder
 	mRecorder.reset(new PostProcessCmdListRecorder());
-	mRecorder->Init(colorBuffer);
+	mRecorder->Init(inputColorBuffer);
 
 	ASSERT(IsDataValid());
 }
@@ -76,7 +73,6 @@ bool PostProcessPass::IsDataValid() const noexcept {
 	}
 
 	const bool b =
-		mCommandQueue != nullptr &&
 		mCommandList != nullptr &&
 		mRecorder.get() != nullptr &&
 		mColorBuffer != nullptr;
@@ -102,8 +98,8 @@ void PostProcessPass::ExecuteBeginTask(
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(*mColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		ResourceStateManager::Get().ChangeResourceStateAndGetBarrier(frameBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),		
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(frameBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),		
 	};
 	mCommandList->ResourceBarrier(_countof(barriers), barriers);
 
@@ -112,6 +108,11 @@ void PostProcessPass::ExecuteBeginTask(
 	CHECK_HR(mCommandList->Close());
 
 	// Execute preliminary task
-	ID3D12CommandList* cmdLists[] = { mCommandList };
-	mCommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	CommandListExecutor::Get().ResetExecutedCommandListCount();
+	CommandListExecutor::Get().AddCommandList(*mCommandList);
+
+	// Wait until all previous tasks command lists are executed
+	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
+		Sleep(0U);
+	}
 }

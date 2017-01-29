@@ -11,19 +11,8 @@
 #include <Utils/NumberGeneration.h>
 #include <Utils\StringUtils.h>
 
-namespace {
-	std::unique_ptr<ResourceManager> gManager{ nullptr };
-}
-
-ResourceManager& ResourceManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new ResourceManager());
-	return *gManager.get();
-}
-ResourceManager& ResourceManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
+ResourceManager::ResourceById ResourceManager::mResourceById;
+std::mutex ResourceManager::mMutex;
 
 std::size_t ResourceManager::LoadTextureFromFile(
 	const char* textureFilename, 
@@ -160,7 +149,7 @@ std::size_t ResourceManager::CreateCommittedResource(
 	accessor->second = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
 	accessor.release();
 
-	ResourceStateManager::Get().AddResource(*resource, resourceStates);
+	ResourceStateManager::AddResource(*resource, resourceStates);
 
 	return id;
 }

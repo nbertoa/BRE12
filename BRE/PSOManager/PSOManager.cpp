@@ -7,20 +7,8 @@
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
-namespace {
-	std::unique_ptr<PSOManager> gManager{ nullptr };
-}
-
-PSOManager& PSOManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new PSOManager());
-	return *gManager.get();
-}
-
-PSOManager& PSOManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
+PSOManager::PSOById PSOManager::mPSOById;
+std::mutex PSOManager::mMutex;
 
 bool PSOManager::PSOCreationData::IsDataValid() const noexcept {
 	if (mNumRenderTargets == 0 || 

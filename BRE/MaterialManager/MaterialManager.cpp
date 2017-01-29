@@ -4,22 +4,9 @@
 
 #include <Utils\DebugUtils.h>
 
-namespace {
-	std::unique_ptr<MaterialManager> gManager{ nullptr };
-}
+Material MaterialManager::mMaterials[MaterialManager::NUM_MATERIALS];
 
-MaterialManager& MaterialManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new MaterialManager());
-	return *gManager.get();
-}
-MaterialManager& MaterialManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
-
-MaterialManager::MaterialManager()
-{
+void MaterialManager::Init() noexcept {
 	Material* material = &mMaterials[GOLD];
 	material->mBaseColor_MetalMask[0U] = 1.0f;
 	material->mBaseColor_MetalMask[1U] = 0.71f;

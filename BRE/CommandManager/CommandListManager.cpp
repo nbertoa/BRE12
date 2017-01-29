@@ -6,20 +6,8 @@
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
-namespace {
-	std::unique_ptr<CommandListManager> gManager{ nullptr };
-}
-
-CommandListManager& CommandListManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new CommandListManager());
-	return *gManager.get();
-}
-
-CommandListManager& CommandListManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
+CommandListManager::CommandListById CommandListManager::mCommandListById;
+std::mutex CommandListManager::mMutex;
 
 std::size_t CommandListManager::CreateCommandList(
 	const D3D12_COMMAND_LIST_TYPE& commandListType,

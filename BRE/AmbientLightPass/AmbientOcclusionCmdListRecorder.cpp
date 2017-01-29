@@ -43,10 +43,10 @@ namespace {
 #endif
 
 		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
+			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
 		}
 
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
+		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
 
 		// Start off in a closed state.  This is because the first time we refer 
 		// to the command list we will Reset it, and it needs to be closed before
@@ -189,12 +189,12 @@ void AmbientOcclusionCmdListRecorder::InitPSO() noexcept {
 	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-	ShaderManager::Get().LoadShaderFile("AmbientLightPass/Shaders/AmbientOcclusion/PS.cso", psoData.mPixelShaderBytecode);
-	ShaderManager::Get().LoadShaderFile("AmbientLightPass/Shaders/AmbientOcclusion/VS.cso", psoData.mVertexShaderBytecode);
+	ShaderManager::LoadShaderFile("AmbientLightPass/Shaders/AmbientOcclusion/PS.cso", psoData.mPixelShaderBytecode);
+	ShaderManager::LoadShaderFile("AmbientLightPass/Shaders/AmbientOcclusion/VS.cso", psoData.mVertexShaderBytecode);
 
 	ID3DBlob* rootSignatureBlob;
-	ShaderManager::Get().LoadShaderFile("AmbientLightPass/Shaders/AmbientOcclusion/RS.cso", rootSignatureBlob);
-	RootSignatureManager::Get().CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	ShaderManager::LoadShaderFile("AmbientLightPass/Shaders/AmbientOcclusion/RS.cso", rootSignatureBlob);
+	RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
 	sRootSignature = psoData.mRootSignature;
 
 	psoData.mNumRenderTargets = 1U;
@@ -203,7 +203,7 @@ void AmbientOcclusionCmdListRecorder::InitPSO() noexcept {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO);
+	PSOManager::CreateGraphicsPSO(psoData, sPSO);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -249,7 +249,7 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCommandList->OMSetRenderTargets(1U, &mAmbientAccessBufferCpuDesc, false, nullptr);
 
-	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
+	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCommandList->SetGraphicsRootSignature(sRootSignature);	
 
@@ -313,7 +313,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 
 	// Create sample kernel buffer and fill it
 	const std::size_t sampleKernelBufferElemSize{ sizeof(XMFLOAT4) };
-	UploadBufferManager::Get().CreateUploadBuffer(sampleKernelBufferElemSize, mNumSamples, mSampleKernelBuffer);
+	UploadBufferManager::CreateUploadBuffer(sampleKernelBufferElemSize, mNumSamples, mSampleKernelBuffer);
 	const std::uint8_t* sampleKernelPtr = reinterpret_cast<const std::uint8_t*>(sampleKernel);
 	for (std::uint32_t i = 0UL; i < mNumSamples; ++i) {
 		mSampleKernelBuffer->CopyData(i, sampleKernelPtr + sampleKernelBufferElemSize * i, sampleKernelBufferElemSize);
@@ -335,14 +335,14 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 	ID3D12Resource* noiseTexture{ nullptr };
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::Get().CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, nullptr, noiseTexture);
+	ResourceManager::CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, nullptr, noiseTexture);
 
 	// In order to copy CPU memory data into our default buffer, we need to create
 	// an intermediate upload heap. 
 	const std::uint32_t num2DSubresources = resDesc.DepthOrArraySize * resDesc.MipLevels;
 	const std::size_t uploadBufferSize = GetRequiredIntermediateSize(noiseTexture, 0, num2DSubresources);
 	ID3D12Resource* noiseTextureUploadBuffer{ nullptr };
-	ResourceManager::Get().CreateCommittedResource(
+	ResourceManager::CreateCommittedResource(
 		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE,
 		CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
@@ -367,11 +367,11 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	CHECK_HR(mCommandList->Reset(commandAllocators, nullptr));
 
 	D3D12_RESOURCE_BARRIER barriers[] = { 
-		ResourceStateManager::Get().TransitionState(*noiseTexture, D3D12_RESOURCE_STATE_COPY_DEST),		
+		ResourceStateManager::TransitionState(*noiseTexture, D3D12_RESOURCE_STATE_COPY_DEST),		
 	};
 	mCommandList->ResourceBarrier(_countof(barriers), barriers);
 	UpdateSubresources(mCommandList, noiseTexture, noiseTextureUploadBuffer, 0U, 0U, num2DSubresources, &subResourceData);
-	barriers[0] = ResourceStateManager::Get().TransitionState(*noiseTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	barriers[0] = ResourceStateManager::TransitionState(*noiseTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	mCommandList->ResourceBarrier(_countof(barriers), barriers);
 
 	mCommandList->Close();
@@ -380,7 +380,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		UploadBufferManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc[4U]{};
@@ -424,5 +424,5 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	srvDesc[3].Texture2D.MipLevels = noiseTexture->GetDesc().MipLevels;
 
 	// Create SRVs
-	mPixelShaderBuffersGpuDesc = CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(res, srvDesc, _countof(srvDesc));
+	mPixelShaderBuffersGpuDesc = CbvSrvUavDescriptorManager::CreateShaderResourceViews(res, srvDesc, _countof(srvDesc));
 }

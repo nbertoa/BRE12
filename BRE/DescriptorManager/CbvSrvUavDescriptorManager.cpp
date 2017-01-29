@@ -6,22 +6,12 @@
 #include <DXUtils/d3dx12.h>
 #include <SettingsManager\SettingsManager.h>
 
-namespace {
-	std::unique_ptr<CbvSrvUavDescriptorManager> gManager{ nullptr };
-}
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CbvSrvUavDescriptorManager::mCbvSrvUavDescriptorHeap;
+D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::mCurrentCbvSrvUavGpuDescriptorHandle{ 0UL };
+D3D12_CPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::mCurrentCbvSrvUavCpuDescriptorHandle{ 0UL };
+std::mutex CbvSrvUavDescriptorManager::mMutex;
 
-CbvSrvUavDescriptorManager& CbvSrvUavDescriptorManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new CbvSrvUavDescriptorManager());
-	return *gManager.get();
-}
-
-CbvSrvUavDescriptorManager& CbvSrvUavDescriptorManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
-
-CbvSrvUavDescriptorManager::CbvSrvUavDescriptorManager() {
+void CbvSrvUavDescriptorManager::Init() noexcept {
 	D3D12_DESCRIPTOR_HEAP_DESC cbvSrvUavDescriptorHeapDescriptor{};
 	cbvSrvUavDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvSrvUavDescriptorHeapDescriptor.NodeMask = 0U;

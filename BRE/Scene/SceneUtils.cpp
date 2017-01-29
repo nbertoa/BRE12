@@ -28,7 +28,7 @@ namespace SceneUtils {
 		CHECK_HR(cmdList.Reset(&cmdAlloc, nullptr));
 		
 		for (std::size_t i = 0UL; i < newTextureCount; ++i, ++nextTextureAvailableIndex) {
-			ResourceManager::Get().LoadTextureFromFile(
+			ResourceManager::LoadTextureFromFile(
 				sourceTextureFilenames[i].c_str(),
 				cmdList,
 				mTextures[nextTextureAvailableIndex],
@@ -69,7 +69,7 @@ namespace SceneUtils {
 		CHECK_HR(cmdList.Reset(&cmdAlloc, nullptr));
 
 		for (std::size_t i = 0UL; i < numModelsToLoad; ++i, ++nextModelAvailableIndex) {
-			ModelManager::Get().LoadModel(
+			ModelManager::LoadModel(
 				modelFiles[i].c_str(), 
 				mModels[nextModelAvailableIndex], 
 				cmdList, 

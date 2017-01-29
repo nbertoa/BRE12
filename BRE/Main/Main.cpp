@@ -14,9 +14,8 @@ int WINAPI WinMain(_In_ HINSTANCE moduleInstanceHandle,
 				   _In_opt_ HINSTANCE /*previousModuleInstanceHandle*/, 
 				   _In_ LPSTR /*commandLine*/, 
 	               _In_ int /*showCommand*/) {
-	SceneExecutor::Create(moduleInstanceHandle, new AmbientOcclussionScene());
-	SceneExecutor::Get().Execute();
-	SceneExecutor::Destroy();
+	SceneExecutor sceneExecutor(moduleInstanceHandle, new MaterialShowcaseScene());
+	sceneExecutor.Execute();
 
 	return 0;
 }

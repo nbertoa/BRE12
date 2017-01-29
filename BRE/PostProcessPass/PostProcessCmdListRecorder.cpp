@@ -32,10 +32,10 @@ namespace {
 #endif
 
 		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
+			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
 		}
 
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
+		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
 
 		// Start off in a closed state.  This is because the first time we refer 
 		// to the command list we will Reset it, and it needs to be closed before
@@ -57,12 +57,12 @@ void PostProcessCmdListRecorder::InitPSO() noexcept {
 	const std::size_t rtCount{ _countof(psoData.mRenderTargetFormats) };
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-	ShaderManager::Get().LoadShaderFile("PostProcessPass/Shaders/PS.cso", psoData.mPixelShaderBytecode);
-	ShaderManager::Get().LoadShaderFile("PostProcessPass/Shaders/VS.cso", psoData.mVertexShaderBytecode);
+	ShaderManager::LoadShaderFile("PostProcessPass/Shaders/PS.cso", psoData.mPixelShaderBytecode);
+	ShaderManager::LoadShaderFile("PostProcessPass/Shaders/VS.cso", psoData.mVertexShaderBytecode);
 
 	ID3DBlob* rootSignatureBlob;
-	ShaderManager::Get().LoadShaderFile("PostProcessPass/Shaders/RS.cso", rootSignatureBlob);
-	RootSignatureManager::Get().CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	ShaderManager::LoadShaderFile("PostProcessPass/Shaders/RS.cso", rootSignatureBlob);
+	RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
 	sRootSignature = psoData.mRootSignature;
 
 	psoData.mNumRenderTargets = 1U;
@@ -71,7 +71,7 @@ void PostProcessCmdListRecorder::InitPSO() noexcept {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO);
+	PSOManager::CreateGraphicsPSO(psoData, sPSO);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -102,7 +102,7 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCommandList->OMSetRenderTargets(1U, &frameBufferCpuDesc, false, nullptr);
 
-	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
+	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCommandList->SetGraphicsRootSignature(sRootSignature);
 	
@@ -149,5 +149,5 @@ void PostProcessCmdListRecorder::BuildBuffers(ID3D12Resource& inputColorBuffer) 
 	srvDesc[0].Format = inputColorBuffer.GetDesc().Format;
 	srvDesc[0].Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
 
-	mInputColorBufferGpuDesc = CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(resources, srvDesc, _countof(srvDesc));
+	mInputColorBufferGpuDesc = CbvSrvUavDescriptorManager::CreateShaderResourceViews(resources, srvDesc, _countof(srvDesc));
 }

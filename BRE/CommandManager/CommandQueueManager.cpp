@@ -6,20 +6,8 @@
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
-namespace {
-	std::unique_ptr<CommandQueueManager> gManager{ nullptr };
-}
-
-CommandQueueManager& CommandQueueManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new CommandQueueManager());
-	return *gManager.get();
-}
-
-CommandQueueManager& CommandQueueManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
+CommandQueueManager::CommandQueueById CommandQueueManager::mCommandQueueById;
+std::mutex CommandQueueManager::mMutex;
 
 std::size_t CommandQueueManager::CreateCommandQueue(
 	const D3D12_COMMAND_QUEUE_DESC& descriptor, 

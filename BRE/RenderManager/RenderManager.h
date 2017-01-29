@@ -27,10 +27,6 @@ public:
 	// - Create() must be called once
 	static RenderManager& Create(Scene& scene) noexcept;
 
-	// Preconditions:
-	// - Create() must be called before this method
-	static RenderManager& RenderManager::Get() noexcept;
-
 	~RenderManager() = default;
 	RenderManager(const RenderManager&) = delete;
 	const RenderManager& operator=(const RenderManager&) = delete;
@@ -44,6 +40,8 @@ private:
 
 	// Called when tbb::task is spawned
 	tbb::task* execute() final override;
+
+	static RenderManager* sRenderManager;
 
 	void InitPasses(Scene& scene) noexcept;
 

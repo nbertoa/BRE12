@@ -55,7 +55,7 @@ void VertexAndIndexBufferCreator::CreateVertexBuffer(
 	const std::uint32_t bufferSize { 
 		bufferCreationData.mElementCount * static_cast<std::uint32_t>(bufferCreationData.mElementSize) 
 	};
-	ResourceManager::Get().CreateDefaultBuffer(
+	ResourceManager::CreateDefaultBuffer(
 		commandList, 
 		bufferCreationData.mData, 
 		bufferSize, 
@@ -108,7 +108,7 @@ void VertexAndIndexBufferCreator::CreateIndexBuffer(
 	// Create buffer
 	const std::uint32_t elementSize{ static_cast<std::uint32_t>(bufferCreationData.mElementSize) };
 	const std::uint32_t bufferSize{ bufferCreationData.mElementCount * elementSize };
-	ResourceManager::Get().CreateDefaultBuffer(
+	ResourceManager::CreateDefaultBuffer(
 		commandList, 
 		bufferCreationData.mData, 
 		bufferSize, 

@@ -25,11 +25,11 @@ namespace {
 		ASSERT(fence == nullptr);
 
 		// Create command allocators and command list
-		CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators);
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators, commandList);
+		CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators);
+		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators, commandList);
 		commandList->Close();
 
-		FenceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, fence);
+		FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE, fence);
 	}
 }
 
@@ -49,7 +49,7 @@ void SkyBoxPass::Init(
 	Model* model;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	ModelManager::Get().CreateSphere(3000, 50, 50, model, *mCommandList, uploadVertexBuffer, uploadIndexBuffer);
+	ModelManager::CreateSphere(3000, 50, 50, model, *mCommandList, uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
 	const std::vector<Mesh>& meshes(model->GetMeshes());
 	ASSERT(meshes.size() == 1UL);

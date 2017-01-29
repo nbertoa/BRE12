@@ -36,7 +36,6 @@ public:
 	// - "geometryBuffers" must not be nullptr
 	// - "geometryBuffersCount" must be greater than zero
 	void Init(
-		ID3D12CommandQueue& commandQueue,
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
@@ -53,13 +52,11 @@ private:
 	bool IsDataValid() const noexcept;
 
 	void ExecuteBeginTask() noexcept;
-	void ExecuteEndingTask() noexcept;
-
-	ID3D12CommandQueue* mCommandQueue{ nullptr };
+	void ExecuteFinalTask() noexcept;
 
 	// 1 command allocater per queued frame.	
 	ID3D12CommandAllocator* mCmdAllocatorsBegin[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12CommandAllocator* mCmdAllocatorsEnd[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocatorsFinal[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 

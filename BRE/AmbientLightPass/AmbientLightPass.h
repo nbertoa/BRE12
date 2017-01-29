@@ -26,7 +26,6 @@ public:
 	AmbientLightPass& operator=(AmbientLightPass&&) = delete;
 
 	void Init(
-		ID3D12CommandQueue& commandQueue,
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		ID3D12Resource& normalSmoothnessBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
@@ -41,13 +40,11 @@ private:
 	bool ValidateData() const noexcept;
 
 	void ExecuteBeginTask() noexcept;
-	void ExecuteEndingTask() noexcept;
-
-	ID3D12CommandQueue* mCommandQueue{ nullptr };
+	void ExecuteFinalTask() noexcept;
 	
 	// 1 command allocater per queued frame.	
 	ID3D12CommandAllocator* mCmdAllocatorsBegin[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12CommandAllocator* mCmdAllocatorsEnd[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocatorsFinal[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdListBegin{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListEnd{ nullptr };

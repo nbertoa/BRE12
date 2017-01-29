@@ -18,7 +18,7 @@ public:
 	// Preconditions:
 	// - Create() must be called once
 	// - "maxNumberOfCommandListsToExecute" must be greater than zero
-	static CommandListExecutor& Create(
+	static void Create(
 		ID3D12CommandQueue& commandQueue, 
 		const std::uint32_t maxNumberOfCommandListsToExecute) noexcept;
 
@@ -54,6 +54,8 @@ private:
 
 	// Called when tbb::task is spawned
 	tbb::task* execute() final override;
+
+	static CommandListExecutor* sExecutor;
 
 	bool mTerminate{ false };
 	std::uint32_t mExecutedCommandListCount{ 0U };

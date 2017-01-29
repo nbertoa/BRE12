@@ -38,9 +38,7 @@ public:
 
 	// Preconditions:
 	// - You should fill recorders with GetCommandListRecorders() before
-	void Init(
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
-		ID3D12CommandQueue& commandQueue) noexcept;
+	void Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
 	
 	__forceinline Microsoft::WRL::ComPtr<ID3D12Resource>* GetGeometryBuffers() noexcept { return mGeometryBuffers; }
 	
@@ -53,8 +51,6 @@ private:
 	bool IsDataValid() const noexcept;
 
 	void ExecuteBeginTask() noexcept;
-
-	ID3D12CommandQueue* mCommandQueue{ nullptr };
 
 	// 1 command allocater per queued frame.	
 	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };

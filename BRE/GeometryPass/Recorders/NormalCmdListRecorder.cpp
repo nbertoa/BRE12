@@ -36,17 +36,17 @@ void NormalCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, co
 	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
 	psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
-	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/NormalMapping/PS.cso", psoData.mPixelShaderBytecode);
-	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/NormalMapping/VS.cso", psoData.mVertexShaderBytecode);
+	ShaderManager::LoadShaderFile("GeometryPass/Shaders/NormalMapping/PS.cso", psoData.mPixelShaderBytecode);
+	ShaderManager::LoadShaderFile("GeometryPass/Shaders/NormalMapping/VS.cso", psoData.mVertexShaderBytecode);
 
 	ID3DBlob* rootSignatureBlob;
-	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/NormalMapping/RS.cso", rootSignatureBlob);
-	RootSignatureManager::Get().CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	ShaderManager::LoadShaderFile("GeometryPass/Shaders/NormalMapping/RS.cso", rootSignatureBlob);
+	RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
 	sRootSignature = psoData.mRootSignature;
 
 	psoData.mNumRenderTargets = geometryBufferCount;
 	memcpy(psoData.mRenderTargetFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO);
+	PSOManager::CreateGraphicsPSO(psoData, sPSO);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -110,7 +110,7 @@ void NormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCommandList->OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
 
-	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
+	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCommandList->SetGraphicsRootSignature(sRootSignature);
 
@@ -188,7 +188,7 @@ void NormalCmdListRecorder::BuildBuffers(
 
 	// Create object cbuffer and fill it
 	const std::size_t objCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
-	UploadBufferManager::Get().CreateUploadBuffer(objCBufferElemSize, dataCount, mObjectCBuffer);
+	UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, dataCount, mObjectCBuffer);
 	std::uint32_t k = 0U;
 	const std::size_t geometryDataCount{ mGeometryDataVec.size() };
 	ObjectCBuffer objCBuffer;
@@ -206,7 +206,7 @@ void NormalCmdListRecorder::BuildBuffers(
 
 	// Create materials cbuffer		
 	const std::size_t matCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(Material)) };
-	UploadBufferManager::Get().CreateUploadBuffer(matCBufferElemSize, dataCount, mMaterialsCBuffer);
+	UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, dataCount, mMaterialsCBuffer);
 
 	D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialsCBuffer->GetResource()->GetGPUVirtualAddress() };
 	D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->GetResource()->GetGPUVirtualAddress() };
@@ -267,20 +267,20 @@ void NormalCmdListRecorder::BuildBuffers(
 		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 	}
 	mObjectCBufferGpuDescBegin =
-		CbvSrvUavDescriptorManager::Get().CreateConstantBufferViews(
+		CbvSrvUavDescriptorManager::CreateConstantBufferViews(
 			objectCbufferViewDescVec.data(), 
 			static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
 	mMaterialsCBufferGpuDescBegin =
-		CbvSrvUavDescriptorManager::Get().CreateConstantBufferViews(
+		CbvSrvUavDescriptorManager::CreateConstantBufferViews(
 			materialCbufferViewDescVec.data(), 
 			static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
 	mBaseColorBufferGpuDescBegin =
-		CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(
+		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			textureResVec.data(), 
 			textureSrvDescVec.data(), 
 			static_cast<std::uint32_t>(textureSrvDescVec.size()));
 	mNormalsBufferGpuDescBegin =
-		CbvSrvUavDescriptorManager::Get().CreateShaderResourceViews(
+		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			normalResVec.data(), 
 			normalSrvDescVec.data(), 
 			static_cast<std::uint32_t>(normalSrvDescVec.size()));
@@ -288,6 +288,6 @@ void NormalCmdListRecorder::BuildBuffers(
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		UploadBufferManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 }

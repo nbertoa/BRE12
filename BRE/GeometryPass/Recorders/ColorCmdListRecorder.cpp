@@ -35,17 +35,17 @@ void ColorCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, con
 	PSOManager::PSOCreationData psoData{};
 	psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
 
-	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/ColorMapping/PS.cso", psoData.mPixelShaderBytecode);
-	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/ColorMapping/VS.cso", psoData.mVertexShaderBytecode);
+	ShaderManager::LoadShaderFile("GeometryPass/Shaders/ColorMapping/PS.cso", psoData.mPixelShaderBytecode);
+	ShaderManager::LoadShaderFile("GeometryPass/Shaders/ColorMapping/VS.cso", psoData.mVertexShaderBytecode);
 
 	ID3DBlob* rootSignatureBlob;
-	ShaderManager::Get().LoadShaderFile("GeometryPass/Shaders/ColorMapping/RS.cso", rootSignatureBlob);
-	RootSignatureManager::Get().CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	ShaderManager::LoadShaderFile("GeometryPass/Shaders/ColorMapping/RS.cso", rootSignatureBlob);
+	RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
 	sRootSignature = psoData.mRootSignature;
 
 	psoData.mNumRenderTargets = geometryBufferCount;
 	memcpy(psoData.mRenderTargetFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
-	PSOManager::Get().CreateGraphicsPSO(psoData, sPSO);
+	PSOManager::CreateGraphicsPSO(psoData, sPSO);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -105,7 +105,7 @@ void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	mCommandList->OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
 
-	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::Get().GetDescriptorHeap() };
+	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
 	mCommandList->SetGraphicsRootSignature(sRootSignature);
 
@@ -160,7 +160,7 @@ void ColorCmdListRecorder::BuildBuffers(const Material* materials, const std::ui
 
 	// Create object cbuffer and fill it
 	const std::size_t objCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
-	UploadBufferManager::Get().CreateUploadBuffer(objCBufferElemSize, numMaterials, mObjectCBuffer);
+	UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, numMaterials, mObjectCBuffer);
 	std::uint32_t k = 0U;
 	const std::size_t geometryDataCount{ mGeometryDataVec.size() };
 	ObjectCBuffer objCBuffer;
@@ -178,7 +178,7 @@ void ColorCmdListRecorder::BuildBuffers(const Material* materials, const std::ui
 
 	// Create materials cbuffer		
 	const std::size_t matCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(Material)) };
-	UploadBufferManager::Get().CreateUploadBuffer(matCBufferElemSize, numMaterials, mMaterialsCBuffer);
+	UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, numMaterials, mMaterialsCBuffer);
 
 	D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialsCBuffer->GetResource()->GetGPUVirtualAddress() };
 	D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->GetResource()->GetGPUVirtualAddress() };
@@ -205,17 +205,17 @@ void ColorCmdListRecorder::BuildBuffers(const Material* materials, const std::ui
 		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 	}
 	mObjectCBufferGpuDescBegin =
-		CbvSrvUavDescriptorManager::Get().CreateConstantBufferViews(
+		CbvSrvUavDescriptorManager::CreateConstantBufferViews(
 			objectCbufferViewDescVec.data(), 
 			static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
 	mMaterialsCBufferGpuDescBegin =
-		CbvSrvUavDescriptorManager::Get().CreateConstantBufferViews(
+		CbvSrvUavDescriptorManager::CreateConstantBufferViews(
 			materialCbufferViewDescVec.data(), 
 			static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		UploadBufferManager::Get().CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
 	}
 }

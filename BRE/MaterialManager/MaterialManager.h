@@ -16,24 +16,17 @@ public:
 		NUM_MATERIALS
 	};
 
-	// Preconditions:
-	// - Create() must be called once
-	static MaterialManager& Create() noexcept;
-
-	// Preconditions:
-	// - Create() must be called before this method
-	static MaterialManager& Get() noexcept;
-
-	~MaterialManager() = default;
+	MaterialManager() = delete;
+	~MaterialManager() = delete;
 	MaterialManager(const MaterialManager&) = delete;
 	const MaterialManager& operator=(const MaterialManager&) = delete;
 	MaterialManager(MaterialManager&&) = delete;
 	MaterialManager& operator=(MaterialManager&&) = delete;
 
-	const Material& GetMaterial(const MaterialType material) noexcept;
+	static void Init() noexcept;
+
+	static const Material& GetMaterial(const MaterialType material) noexcept;
 
 private:
-	MaterialManager();
-
-	Material mMaterials[NUM_MATERIALS];
+	static Material mMaterials[NUM_MATERIALS];
 };

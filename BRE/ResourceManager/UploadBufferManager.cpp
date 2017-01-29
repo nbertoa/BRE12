@@ -6,19 +6,8 @@
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
-namespace {
-	std::unique_ptr<UploadBufferManager> gManager{ nullptr };
-}
-
-UploadBufferManager& UploadBufferManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new UploadBufferManager());
-	return *gManager.get();
-}
-UploadBufferManager& UploadBufferManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
+UploadBufferManager::UploadBufferById UploadBufferManager::mUploadBufferById;
+std::mutex UploadBufferManager::mMutex;
 
 std::size_t UploadBufferManager::CreateUploadBuffer(
 	const std::size_t elementSize,

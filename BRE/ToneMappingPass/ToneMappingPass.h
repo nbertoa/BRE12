@@ -25,7 +25,6 @@ public:
 	ToneMappingPass& operator=(ToneMappingPass&&) = delete;
 
 	void Init(
-		ID3D12CommandQueue& commandQueue,
 		ID3D12Resource& inputColorBuffer,
 		ID3D12Resource& outputColorBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept;
@@ -38,8 +37,6 @@ private:
 	bool IsDataValid() const noexcept;
 
 	void ExecuteBeginTask() noexcept;
-
-	ID3D12CommandQueue* mCommandQueue{ nullptr };
 
 	// 1 command allocator per queued frame.	
 	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };

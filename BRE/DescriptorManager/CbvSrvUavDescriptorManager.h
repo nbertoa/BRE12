@@ -10,20 +10,14 @@
 // To create Constant Buffer / Shader GetResource / Unordered Access descriptors
 class CbvSrvUavDescriptorManager {
 public:
-
-	// Preconditions:
-	// - Create() must be called once
-	static CbvSrvUavDescriptorManager& Create() noexcept;
-
-	// Preconditions:
-	// - Create() must be called before this method
-	static CbvSrvUavDescriptorManager& Get() noexcept;
-
-	~CbvSrvUavDescriptorManager() = default;
+	CbvSrvUavDescriptorManager() = delete;
+	~CbvSrvUavDescriptorManager() = delete;
 	CbvSrvUavDescriptorManager(const CbvSrvUavDescriptorManager&) = delete;
 	const CbvSrvUavDescriptorManager& operator=(const CbvSrvUavDescriptorManager&) = delete;
 	CbvSrvUavDescriptorManager(CbvSrvUavDescriptorManager&&) = delete;
 	CbvSrvUavDescriptorManager& operator=(CbvSrvUavDescriptorManager&&) = delete;
+
+	static void Init() noexcept;
 
 	//
 	// The following methods return GPU descriptor handle for the CBV, SRV or UAV.
@@ -33,16 +27,17 @@ public:
 	// you can easily build GPU desc handle for other view.
 	//
 
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferView(const D3D12_CONSTANT_BUFFER_VIEW_DESC& cBufferViewDescriptor) noexcept;
+	static D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferView(
+		const D3D12_CONSTANT_BUFFER_VIEW_DESC& cBufferViewDescriptor) noexcept;
 
 	// Preconditions:
 	// - "descriptors" must not be nullptr
 	// - "descriptorCount" must be greated than zero
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(
+	static D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(
 		const D3D12_CONSTANT_BUFFER_VIEW_DESC* descriptors,
 		const std::uint32_t descriptorCount) noexcept;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceView(
+	static D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceView(
 		ID3D12Resource& resource,
 		const D3D12_SHADER_RESOURCE_VIEW_DESC& shaderResourceViewDescriptor) noexcept;
 
@@ -50,12 +45,12 @@ public:
 	// - "resources" must not be nullptr
 	// - "descriptors" must not be nullptr
 	// - "descriptorCount" must be greated than zero
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceViews(
+	static D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceViews(
 		ID3D12Resource* *resources,
 		const D3D12_SHADER_RESOURCE_VIEW_DESC* descriptors,
 		const std::uint32_t descriptorCount) noexcept;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateUnorderedAccessView(
+	static D3D12_GPU_DESCRIPTOR_HANDLE CreateUnorderedAccessView(
 		ID3D12Resource& resource,
 		const D3D12_UNORDERED_ACCESS_VIEW_DESC& descriptor) noexcept;
 
@@ -63,23 +58,21 @@ public:
 	// - "resources" must not be nullptr
 	// - "descriptors" must not be nullptr
 	// - "descriptorCount" must be greated than zero
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateUnorderedAccessViews(
+	static D3D12_GPU_DESCRIPTOR_HANDLE CreateUnorderedAccessViews(
 		ID3D12Resource* *resources,
 		const D3D12_UNORDERED_ACCESS_VIEW_DESC* descriptors,
 		const std::uint32_t descriptorCount) noexcept;
 
-	ID3D12DescriptorHeap& GetDescriptorHeap() noexcept {
+	static ID3D12DescriptorHeap& GetDescriptorHeap() noexcept {
 		ASSERT(mCbvSrvUavDescriptorHeap.Get() != nullptr);
 		return *mCbvSrvUavDescriptorHeap.Get();
 	}
 
 private:
-	CbvSrvUavDescriptorManager();
+	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvSrvUavDescriptorHeap;
 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvSrvUavDescriptorHeap;
+	static D3D12_GPU_DESCRIPTOR_HANDLE mCurrentCbvSrvUavGpuDescriptorHandle;
+	static D3D12_CPU_DESCRIPTOR_HANDLE mCurrentCbvSrvUavCpuDescriptorHandle;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCurrentCbvSrvUavGpuDescriptorHandle{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mCurrentCbvSrvUavCpuDescriptorHandle{ 0UL };
-
-	std::mutex mMutex;
+	static std::mutex mMutex;
 };

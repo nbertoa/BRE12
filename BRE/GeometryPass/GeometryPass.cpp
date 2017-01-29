@@ -71,7 +71,7 @@ namespace {
 			D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 			rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 			rtvDesc.Format = resourceDescriptor.Format;
-			ResourceManager::Get().CreateCommittedResource(
+			ResourceManager::CreateCommittedResource(
 				heapProps, 
 				D3D12_HEAP_FLAG_NONE, 
 				resourceDescriptor, 
@@ -80,7 +80,7 @@ namespace {
 				res);
 
 			buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-			RenderTargetDescriptorManager::Get().CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &renderTargetViewCpuDescs[i]);
+			RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &renderTargetViewCpuDescs[i]);
 		}
 	}
 
@@ -94,22 +94,18 @@ namespace {
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 			ASSERT(commandAllocators[i] == nullptr);
-			CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
+			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
 		}
-		CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
+		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
 		commandList->Close();
 	}
 }
 
-void GeometryPass::Init(
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc,
-	ID3D12CommandQueue& commandQueue) noexcept 
+void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept 
 {
 	ASSERT(IsDataValid() == false);
 	
 	ASSERT(mRecorders.empty() == false);
-
-	mCommandQueue = &commandQueue;
 
 	CreateGeometryBuffers(mGeometryBuffers, mGeometryBufferRenderTargetCpuDescs);
 	CreateCommandObjects(mCommandAllocators, mCommandList);
@@ -184,7 +180,6 @@ bool GeometryPass::IsDataValid() const noexcept {
 	}
 
 	const bool b =
-		mCommandQueue != nullptr &&
 		mCommandList != nullptr &&
 		mRecorders.empty() == false &&
 		mDepthBufferCpuDesc.ptr != 0UL;
@@ -216,7 +211,11 @@ void GeometryPass::ExecuteBeginTask() noexcept {
 	CHECK_HR(mCommandList->Close());
 
 	// Execute preliminary task
-	ID3D12CommandList* cmdLists[] = { mCommandList };
-	ASSERT(mCommandQueue != nullptr);
-	mCommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	CommandListExecutor::Get().ResetExecutedCommandListCount();
+	CommandListExecutor::Get().AddCommandList(*mCommandList);
+
+	// Wait until all previous tasks command lists are executed
+	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
+		Sleep(0U);
+	}
 }

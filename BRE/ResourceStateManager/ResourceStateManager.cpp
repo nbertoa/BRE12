@@ -4,20 +4,7 @@
 
 #include <Utils\DebugUtils.h>
 
-namespace {
-	std::unique_ptr<ResourceStateManager> gManager{ nullptr };
-}
-
-ResourceStateManager& ResourceStateManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new ResourceStateManager());
-	return *gManager.get();
-}
-
-ResourceStateManager& ResourceStateManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
+ResourceStateManager::StateByResource ResourceStateManager::mStateByResource;
 
 void ResourceStateManager::AddResource(ID3D12Resource& resource, const D3D12_RESOURCE_STATES initialState) noexcept {
 	StateByResource::accessor accessor;
@@ -44,12 +31,4 @@ CD3DX12_RESOURCE_BARRIER ResourceStateManager::ChangeResourceStateAndGetBarrier(
 	accessor.release();
 
 	return CD3DX12_RESOURCE_BARRIER::Transition(&resource, oldState, newState);
-}
-
-void ResourceStateManager::RemoveResource(ID3D12Resource& resource) noexcept {
-	StateByResource::accessor accessor;
-	mStateByResource.find(accessor, &resource);
-	ASSERT(accessor.empty() == false);
-	mStateByResource.erase(accessor);
-	accessor.release();
 }

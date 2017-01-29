@@ -10,20 +10,14 @@
 // To create depth stencil descriptors
 class DepthStencilDescriptorManager {
 public:
-
-	// Preconditions:
-	// - Create() must be called once
-	static DepthStencilDescriptorManager& Create() noexcept;
-
-	// Preconditions:
-	// - Create() must be called before this method
-	static DepthStencilDescriptorManager& Get() noexcept;
-
-	~DepthStencilDescriptorManager() = default;
+	DepthStencilDescriptorManager() = delete;
+	~DepthStencilDescriptorManager() = delete;
 	DepthStencilDescriptorManager(const DepthStencilDescriptorManager&) = delete;
 	const DepthStencilDescriptorManager& operator=(const DepthStencilDescriptorManager&) = delete;
 	DepthStencilDescriptorManager(DepthStencilDescriptorManager&&) = delete;
 	DepthStencilDescriptorManager& operator=(DepthStencilDescriptorManager&&) = delete;
+
+	static void Init() noexcept;
 
 	//
 	// The following methods return GPU descriptor handle for the depth stencil view.
@@ -37,7 +31,7 @@ public:
 	// you can easily build GPU desc handle for other view.
 	//
 
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateDepthStencilView(
+	static D3D12_GPU_DESCRIPTOR_HANDLE CreateDepthStencilView(
 		ID3D12Resource& resource,
 		const D3D12_DEPTH_STENCIL_VIEW_DESC& descriptor,
 		D3D12_CPU_DESCRIPTOR_HANDLE* firstViewCpuDescriptorHandle = nullptr) noexcept;
@@ -46,19 +40,17 @@ public:
 	// - "resources" must not be nullptr
 	// - "descriptors" must not be nullptr
 	// - "descriptorCount" must be greater than zero
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateDepthStencilViews(
+	static D3D12_GPU_DESCRIPTOR_HANDLE CreateDepthStencilViews(
 		ID3D12Resource* *resources,
 		const D3D12_DEPTH_STENCIL_VIEW_DESC* descriptors,
 		const std::uint32_t descriptorCount,
 		D3D12_CPU_DESCRIPTOR_HANDLE* firstViewCpuDescriptorHandle = nullptr) noexcept;
 
 private:
-	DepthStencilDescriptorManager();
+	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDepthStencilViewDescriptorHeap;
 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDepthStencilViewDescriptorHeap;
+	static D3D12_GPU_DESCRIPTOR_HANDLE mCurrentDepthStencilViewGpuDescriptorHandle;
+	static D3D12_CPU_DESCRIPTOR_HANDLE mCurrentDepthStencilCpuDescriptorHandle;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCurrentDepthStencilViewGpuDescriptorHandle{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mCurrentDepthStencilCpuDescriptorHandle{ 0UL };
-
-	std::mutex mMutex;
+	static std::mutex mMutex;
 };

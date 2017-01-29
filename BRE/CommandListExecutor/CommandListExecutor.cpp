@@ -4,29 +4,25 @@
 
 #include <Utils/DebugUtils.h>
 
-namespace {
-	CommandListExecutor* gExecutor{ nullptr };
-}
+CommandListExecutor* CommandListExecutor::sExecutor{ nullptr };
 
-CommandListExecutor& CommandListExecutor::Create(
+void CommandListExecutor::Create(
 	ID3D12CommandQueue& cmdQueue, 
 	const std::uint32_t maxNumCmdLists) noexcept 
 {
-	ASSERT(gExecutor == nullptr);
+	ASSERT(sExecutor == nullptr);
 
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
 
 	// 1 reference for the parent + 1 reference for the child
 	parent->set_ref_count(2);
 
-	gExecutor = new (parent->allocate_child()) CommandListExecutor(cmdQueue, maxNumCmdLists);
-
-	return *gExecutor;
+	sExecutor = new (parent->allocate_child()) CommandListExecutor(cmdQueue, maxNumCmdLists);
 }
 
 CommandListExecutor& CommandListExecutor::Get() noexcept {
-	ASSERT(gExecutor != nullptr);
-	return *gExecutor;
+	ASSERT(sExecutor != nullptr);
+	return *sExecutor;
 }
 
 CommandListExecutor::CommandListExecutor(

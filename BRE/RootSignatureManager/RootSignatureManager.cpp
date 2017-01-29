@@ -7,19 +7,8 @@
 #include <Utils/DebugUtils.h>
 #include <Utils/NumberGeneration.h>
 
-namespace {
-	std::unique_ptr<RootSignatureManager> gManager{ nullptr };
-}
-
-RootSignatureManager& RootSignatureManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new RootSignatureManager());
-	return *gManager.get();
-}
-RootSignatureManager& RootSignatureManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
+RootSignatureManager::RootSignatureById RootSignatureManager::mRootSignatureById;
+std::mutex RootSignatureManager::mMutex;
 
 std::size_t RootSignatureManager::CreateRootSignatureFromBlob(
 	ID3DBlob& blob, 

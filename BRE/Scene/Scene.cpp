@@ -11,10 +11,10 @@
 void Scene::Init(ID3D12CommandQueue& /*cmdQueue*/) noexcept {
 	ASSERT(IsDataValid() == false);
 
-	CommandAllocatorManager::Get().CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandAllocators);
-	CommandListManager::Get().CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCommandAllocators, mCommandList);
+	CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandAllocators);
+	CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCommandAllocators, mCommandList);
 	mCommandList->Close();
-	FenceManager::Get().CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
+	FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 
 	ASSERT(IsDataValid());
 }

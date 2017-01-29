@@ -11,23 +11,15 @@
 // To create/get models or built-in geometry.
 class ModelManager {
 public:
-public:
-	// Preconditions:
-	// - Create() must be called once
-	static ModelManager& Create() noexcept;
-
-	// Preconditions:
-	// - Create() must be called before this method
-	static ModelManager& Get() noexcept;
-
-	~ModelManager() = default;
+	ModelManager() = delete;
+	~ModelManager() = delete;
 	ModelManager(const ModelManager&) = delete;
 	const ModelManager& operator=(const ModelManager&) = delete;
 	ModelManager(ModelManager&&) = delete;
 	ModelManager& operator=(ModelManager&&) = delete;
 
 	// Returns id to get model after creation
-	std::size_t LoadModel(
+	static std::size_t LoadModel(
 		const char* modelFilename, 
 		Model* &model, ID3D12GraphicsCommandList& commandList,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
@@ -35,7 +27,7 @@ public:
 
 	// Geometry is centered at the origin.
 	// Returns id of the model
-	std::size_t CreateBox(
+	static std::size_t CreateBox(
 		const float width, 
 		const float height, 
 		const float depth, 
@@ -47,7 +39,7 @@ public:
 
 	// Geometry is centered at the origin.
 	// Returns id of the model
-	std::size_t CreateSphere(
+	static std::size_t CreateSphere(
 		const float radius, 
 		const std::uint32_t sliceCount, 
 		const std::uint32_t stackCount, 
@@ -58,7 +50,7 @@ public:
 
 	// Geometry is centered at the origin.
 	// Returns id of the model
-	std::size_t CreateGeosphere(
+	static std::size_t CreateGeosphere(
 		const float radius, 
 		const std::uint32_t numSubdivisions, 
 		Model* &model, 
@@ -68,7 +60,7 @@ public:
 
 	// Creates a cylinder parallel to the y-axis, and centered about the origin.  
 	// Returns id of the model
-	std::size_t CreateCylinder(
+	static std::size_t CreateCylinder(
 		const float bottomRadius,
 		const float topRadius,
 		const float height, 
@@ -82,7 +74,7 @@ public:
 	// Creates a rows x columns grid in the xz-plane centered
 	// at the origin.
 	// Returns id of the model.
-	std::size_t CreateGrid(
+	static std::size_t CreateGrid(
 		const float width, 
 		const float depth, 
 		const std::uint32_t rows, 
@@ -94,13 +86,11 @@ public:
 
 	// Preconditions:
 	// - id must be valid
-	Model& GetModel(const std::size_t id) noexcept;
+	static Model& GetModel(const std::size_t id) noexcept;
 
 private:
-	ModelManager() = default;
-
 	using ModelById = tbb::concurrent_hash_map<std::size_t, std::unique_ptr<Model>>;
-	ModelById mModelById;
+	static ModelById mModelById;
 
-	std::mutex mMutex;
+	static std::mutex mMutex;
 };

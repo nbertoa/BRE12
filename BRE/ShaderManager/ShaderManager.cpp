@@ -25,20 +25,10 @@ namespace {
 
 		return blob;
 	}
-
-	std::unique_ptr<ShaderManager> gManager{ nullptr };
 }
 
-ShaderManager& ShaderManager::Create() noexcept {
-	ASSERT(gManager == nullptr);
-	gManager.reset(new ShaderManager());
-	return *gManager.get();
-}
-
-ShaderManager& ShaderManager::Get() noexcept {
-	ASSERT(gManager != nullptr);
-	return *gManager.get();
-}
+ShaderManager::BlobById ShaderManager::mBlobById;
+std::mutex ShaderManager::mMutex;
 
 std::size_t ShaderManager::LoadShaderFile(const char* filename, ID3DBlob* &blob) noexcept {
 	ASSERT(filename != nullptr);
