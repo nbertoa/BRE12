@@ -100,9 +100,5 @@ void ToneMappingPass::ExecuteBeginTask() noexcept {
 	CHECK_HR(mCommandList->Close());
 
 	// Execute preliminary task
-	CommandListExecutor::Get().ResetExecutedCommandListCount();
-	CommandListExecutor::Get().AddCommandList(*mCommandList);
-	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
-		Sleep(0U);
-	}
+	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mCommandList);
 }

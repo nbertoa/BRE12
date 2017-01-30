@@ -4,8 +4,6 @@
 #include <vector>
 
 struct ID3D12CommandAllocator;
-struct ID3D12CommandQueue;
-struct ID3D12Fence;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 class Model;
@@ -24,8 +22,7 @@ namespace SceneUtils {
 		void LoadTextures(
 			const std::vector<std::string>& sourceTextureFiles,
 			ID3D12CommandAllocator& cmdAlloc,
-			ID3D12GraphicsCommandList& cmdList,
-			ID3D12Fence& fence) noexcept;
+			ID3D12GraphicsCommandList& cmdList) noexcept;
 
 		// Preconditionts:
 		// - There must be a valid texture at "index" 
@@ -35,8 +32,7 @@ namespace SceneUtils {
 		void LoadModels(
 			const std::vector<std::string>& modelFilenames,
 			ID3D12CommandAllocator& cmdAlloc,
-			ID3D12GraphicsCommandList& cmdList,
-			ID3D12Fence& fence) noexcept;
+			ID3D12GraphicsCommandList& cmdList) noexcept;
 
 		// Preconditionts:
 		// - There must be a valid model at "index" 

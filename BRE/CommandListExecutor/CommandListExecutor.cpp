@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <CommandManager\CommandQueueManager.h>
+#include <CommandManager\FenceManager.h>
 
 CommandListExecutor* CommandListExecutor::sExecutor{ nullptr };
 
@@ -33,6 +34,8 @@ CommandListExecutor::CommandListExecutor(const std::uint32_t maxNumberOfCommandL
 	commandQueueDescriptor.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	CommandQueueManager::CreateCommandQueue(commandQueueDescriptor, mCommandQueue);
 	ASSERT(mCommandQueue != nullptr);
+
+	FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 
 	parent()->spawn(*this);
 }
@@ -87,17 +90,15 @@ void CommandListExecutor::SignalFenceAndWaitForCompletion(
 	}
 }
 
-void CommandListExecutor::ExecuteCommandListAndWaitForCompletion(
-	ID3D12CommandList& cmdList,
-	ID3D12Fence& fence) noexcept
-{
+void CommandListExecutor::ExecuteCommandListAndWaitForCompletion(ID3D12CommandList& cmdList) noexcept {
 	ASSERT(mCommandQueue != nullptr);
+	ASSERT(mFence != nullptr);
 
 	ID3D12CommandList* cmdLists[1U]{ &cmdList };
 	mCommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 
-	const std::uint64_t valueToSignal = fence.GetCompletedValue() + 1UL;
-	SignalFenceAndWaitForCompletion(fence, valueToSignal, valueToSignal);
+	const std::uint64_t valueToSignal = mFence->GetCompletedValue() + 1UL;
+	SignalFenceAndWaitForCompletion(*mFence, valueToSignal, valueToSignal);
 }
 
 void CommandListExecutor::Terminate() noexcept {

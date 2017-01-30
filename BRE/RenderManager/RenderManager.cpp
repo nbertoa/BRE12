@@ -276,11 +276,7 @@ void RenderManager::ExecuteFinalPass() {
 	CHECK_HR(mFinalPassCommandList->Close());
 
 	// Execute command list
-	CommandListExecutor::Get().ResetExecutedCommandListCount();
-	CommandListExecutor::Get().AddCommandList(*mFinalPassCommandList);
-	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
-		Sleep(0U);
-	}
+	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mFinalPassCommandList);
 }
 
 void RenderManager::CreateRenderTargetViewAndDepthStencilView() noexcept {

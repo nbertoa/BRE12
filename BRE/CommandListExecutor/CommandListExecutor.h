@@ -57,9 +57,7 @@ public:
 		const std::uint64_t valueToSignal,
 		const std::uint64_t valueToWaitFor) noexcept;
 
-	void ExecuteCommandListAndWaitForCompletion(
-		ID3D12CommandList& cmdList,
-		ID3D12Fence& fence) noexcept;
+	void ExecuteCommandListAndWaitForCompletion(ID3D12CommandList& cmdList) noexcept;
 		
 	void Terminate() noexcept;	
 
@@ -77,4 +75,5 @@ private:
 	std::uint32_t mMaxNumberOfCommandListsToExecute{ 1U };
 	ID3D12CommandQueue* mCommandQueue{ nullptr };
 	tbb::concurrent_queue<ID3D12CommandList*> mCommandListsToExecute;
+	ID3D12Fence* mFence{ nullptr };
 };

@@ -50,5 +50,4 @@ protected:
 
 	ID3D12CommandAllocator* mCommandAllocators{ nullptr };
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
-	ID3D12Fence* mFence{ nullptr };
 };

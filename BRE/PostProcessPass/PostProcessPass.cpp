@@ -108,11 +108,5 @@ void PostProcessPass::ExecuteBeginTask(
 	CHECK_HR(mCommandList->Close());
 
 	// Execute preliminary task
-	CommandListExecutor::Get().ResetExecutedCommandListCount();
-	CommandListExecutor::Get().AddCommandList(*mCommandList);
-
-	// Wait until all previous tasks command lists are executed
-	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
-		Sleep(0U);
-	}
+	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mCommandList);
 }

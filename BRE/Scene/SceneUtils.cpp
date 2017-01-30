@@ -13,8 +13,7 @@ namespace SceneUtils {
 	void SceneResources::LoadTextures(
 		const std::vector<std::string>& sourceTextureFilenames,
 		ID3D12CommandAllocator& cmdAlloc,
-		ID3D12GraphicsCommandList& cmdList,
-		ID3D12Fence& fence) noexcept
+		ID3D12GraphicsCommandList& cmdList) noexcept
 	{
 		const std::size_t numTexturesToLoad = sourceTextureFilenames.size();
 		ASSERT(numTexturesToLoad > 0UL);
@@ -37,7 +36,7 @@ namespace SceneUtils {
 		}
 		cmdList.Close();
 
-		CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(cmdList, fence);
+		CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(cmdList);
 	}
 
 	ID3D12Resource& SceneResources::GetTexture(const std::size_t index) noexcept {
@@ -50,8 +49,7 @@ namespace SceneUtils {
 	void SceneResources::LoadModels(
 		const std::vector<std::string>& modelFiles,
 		ID3D12CommandAllocator& cmdAlloc,
-		ID3D12GraphicsCommandList& cmdList,
-		ID3D12Fence& fence) noexcept
+		ID3D12GraphicsCommandList& cmdList) noexcept
 	{
 		ASSERT(mModels.empty());
 
@@ -80,9 +78,7 @@ namespace SceneUtils {
 		}
 		cmdList.Close();
 
-		const std::uint64_t completedFenceValue = fence.GetCompletedValue();
-		const std::uint64_t newFenceValue = completedFenceValue + 1UL;
-		CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(cmdList, fence);
+		CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(cmdList);
 	}
 
 	const Model& SceneResources::GetModel(const std::size_t index) const noexcept {

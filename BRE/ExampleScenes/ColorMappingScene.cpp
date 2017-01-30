@@ -135,10 +135,10 @@ void ColorMappingScene::Init() noexcept {
 	Scene::Init();
 
 	// Load textures
-	sResourceContainer.LoadTextures(sTexFiles, *mCommandAllocators, *mCommandList, *mFence);
+	sResourceContainer.LoadTextures(sTexFiles, *mCommandAllocators, *mCommandList);
 
 	// Load models
-	sResourceContainer.LoadModels(sModelFiles, *mCommandAllocators, *mCommandList, *mFence);
+	sResourceContainer.LoadModels(sModelFiles, *mCommandAllocators, *mCommandList);
 }
 
 void ColorMappingScene::CreateGeometryPassRecorders(
