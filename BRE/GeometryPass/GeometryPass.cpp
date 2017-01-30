@@ -34,7 +34,7 @@ namespace {
 
 	void CreateGeometryBuffers(
 		Microsoft::WRL::ComPtr<ID3D12Resource> buffers[GeometryPass::BUFFERS_COUNT],
-		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetViewCpuDescs[GeometryPass::BUFFERS_COUNT]) noexcept {
+		D3D12_CPU_DESCRIPTOR_HANDLE bufferRenderTargetViewCpuDescriptors[GeometryPass::BUFFERS_COUNT]) noexcept {
 
 		// Set shared buffers properties
 		D3D12_RESOURCE_DESC resourceDescriptor = {};
@@ -49,7 +49,8 @@ namespace {
 		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
-		D3D12_CLEAR_VALUE clearValue[]{
+		D3D12_CLEAR_VALUE clearValue[]
+		{
 			{ DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 1.0f },
 			{ DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 0.0f },
 		};
@@ -80,7 +81,7 @@ namespace {
 				res);
 
 			buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
-			RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &renderTargetViewCpuDescs[i]);
+			RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &bufferRenderTargetViewCpuDescriptors[i]);
 		}
 	}
 
@@ -121,7 +122,8 @@ void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) n
 	TextureCmdListRecorder::InitPSO(sGeometryBufferFormats, BUFFERS_COUNT);
 
 	// Build geometry buffers cpu descriptors
-	const D3D12_CPU_DESCRIPTOR_HANDLE geometryBuffersCpuDescs[]{
+	const D3D12_CPU_DESCRIPTOR_HANDLE geometryBuffersCpuDescs[]
+	{
 		mGeometryBufferRenderTargetCpuDescs[NORMAL_SMOOTHNESS],
 		mGeometryBufferRenderTargetCpuDescs[BASECOLOR_METALMASK],
 	};

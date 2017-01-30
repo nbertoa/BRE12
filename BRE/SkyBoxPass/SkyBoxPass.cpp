@@ -6,7 +6,6 @@
 #include <CommandManager\CommandAllocatorManager.h>
 #include <CommandManager\CommandListManager.h>
 #include <CommandManager\FenceManager.h>
-#include <DXUtils\DXUtils.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
 #include <ModelManager\ModelManager.h>
@@ -34,7 +33,6 @@ namespace {
 }
 
 void SkyBoxPass::Init(
-	ID3D12CommandQueue& commandQueue,
 	ID3D12Resource& skyBoxCubeMap,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept 
@@ -58,8 +56,10 @@ void SkyBoxPass::Init(
 	const Mesh& mesh{ meshes[0] };
 	DirectX::XMFLOAT4X4 worldMatrix;
 	MathUtils::ComputeMatrix(worldMatrix, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
-	
-	DXUtils::ExecuteCommandListAndWaitForCompletion(commandQueue, *mCommandList, *mFence);
+
+	mCommandList->Close();
+
+	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mCommandList);
 
 	// Initialize recoders's pso
 	SkyBoxCmdListRecorder::InitPSO();

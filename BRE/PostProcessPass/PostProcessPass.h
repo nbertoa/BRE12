@@ -30,8 +30,8 @@ public:
 	// Preconditions:
 	// - Init() must be called first
 	void Execute(
-		ID3D12Resource& frameBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
+		ID3D12Resource& outputColorBuffer,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDescriptor) noexcept;
 
 private:
 	// Method used internally for validation purposes

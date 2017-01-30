@@ -121,11 +121,9 @@
   <ItemGroup>
     <ClInclude Include="D3DFactory.h" />
     <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="DXUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3DFactory.cpp" />
-    <ClCompile Include="DXUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

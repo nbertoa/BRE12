@@ -150,8 +150,8 @@ RenderManager::RenderManager(Scene& scene) {
 	CommandListExecutor::Create(MAX_NUM_CMD_LISTS);
 	FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 	CreateFinalPassCommandObjects();
-	CreateRenderTargetViewAndDepthStencilView();
-	CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors();
+	CreateRenderTargetViewsAndDepthStencilView();
+	CreateIntermediateColorBuffersAndRenderTargetCpuDescriptors();
 
 	mCamera.SetFrustum(
 		SettingsManager::sVerticalFieldOfView, 
@@ -166,7 +166,6 @@ RenderManager::RenderManager(Scene& scene) {
 }
 
 void RenderManager::InitPasses(Scene& scene) noexcept {
-	// Initialize scene
 	scene.Init();
 	
 	// Generate recorders for all the passes
@@ -196,7 +195,6 @@ void RenderManager::InitPasses(Scene& scene) noexcept {
 		*specularPreConvolvedCubeMap);
 
 	mSkyBoxPass.Init(
-		CommandListExecutor::Get().GetCommandQueue(), 
 		*skyBoxCubeMap, 
 		mIntermediateColorBuffer1RTVCpuDesc,
 		DepthStencilCpuDesc());
@@ -279,7 +277,7 @@ void RenderManager::ExecuteFinalPass() {
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mFinalPassCommandList);
 }
 
-void RenderManager::CreateRenderTargetViewAndDepthStencilView() noexcept {
+void RenderManager::CreateRenderTargetViewsAndDepthStencilView() noexcept {
 	// Setup RTV descriptor.
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor = {};
 	rtvDescriptor.Format = SettingsManager::sFrameBufferRTFormat;
@@ -334,22 +332,22 @@ void RenderManager::CreateRenderTargetViewAndDepthStencilView() noexcept {
 	DepthStencilDescriptorManager::CreateDepthStencilView(*mDepthStencilBuffer, depthStencilViewDesc, &mDepthStencilBufferRTV);
 }
 
-void RenderManager::CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors() noexcept {
+void RenderManager::CreateIntermediateColorBuffersAndRenderTargetCpuDescriptors() noexcept {
 	// Fill resource description
-	D3D12_RESOURCE_DESC resDesc = {};
-	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	resDesc.Alignment = 0U;
-	resDesc.Width = SettingsManager::sWindowWidth;
-	resDesc.Height = SettingsManager::sWindowHeight;
-	resDesc.DepthOrArraySize = 1U;
-	resDesc.MipLevels = 0U;	
-	resDesc.SampleDesc.Count = 1U;
-	resDesc.SampleDesc.Quality = 0U;
-	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-	resDesc.Format = SettingsManager::sColorBufferFormat;
+	D3D12_RESOURCE_DESC resourceDescriptor = {};
+	resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	resourceDescriptor.Alignment = 0U;
+	resourceDescriptor.Width = SettingsManager::sWindowWidth;
+	resourceDescriptor.Height = SettingsManager::sWindowHeight;
+	resourceDescriptor.DepthOrArraySize = 1U;
+	resourceDescriptor.MipLevels = 0U;	
+	resourceDescriptor.SampleDesc.Count = 1U;
+	resourceDescriptor.SampleDesc.Quality = 0U;
+	resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+	resourceDescriptor.Format = SettingsManager::sColorBufferFormat;
 
-	D3D12_CLEAR_VALUE clearValue = { resDesc.Format, 0.0f, 0.0f, 0.0f, 1.0f };
+	D3D12_CLEAR_VALUE clearValue = { resourceDescriptor.Format, 0.0f, 0.0f, 0.0f, 1.0f };
 
 	mIntermediateColorBuffer1.Reset();
 	mIntermediateColorBuffer2.Reset();
@@ -357,30 +355,33 @@ void RenderManager::CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors(
 	ID3D12Resource* resource{ nullptr };
 	
 	// Create RTV's descriptor for color buffer 1
-	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
-	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;		
-	rtvDesc.Format = resDesc.Format;
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor{};
+	rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;		
+	rtvDescriptor.Format = resourceDescriptor.Format;
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 	ResourceManager::CreateCommittedResource(
 		heapProps, 
 		D3D12_HEAP_FLAG_NONE, 
-		resDesc, 
+		resourceDescriptor, 
 		D3D12_RESOURCE_STATE_RENDER_TARGET, 
 		&clearValue, 
 		resource);
 	mIntermediateColorBuffer1 = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
-	RenderTargetDescriptorManager::CreateRenderTargetView(*mIntermediateColorBuffer1.Get(), rtvDesc, &mIntermediateColorBuffer1RTVCpuDesc);
+	RenderTargetDescriptorManager::CreateRenderTargetView(
+		*mIntermediateColorBuffer1.Get(), 
+		rtvDescriptor, 
+		&mIntermediateColorBuffer1RTVCpuDesc);
 
 	// Create RTV's descriptor for color buffer 2
 	ResourceManager::CreateCommittedResource(
 		heapProps, 
 		D3D12_HEAP_FLAG_NONE, 
-		resDesc, 
+		resourceDescriptor, 
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
 		&clearValue, 
 		resource);
 	mIntermediateColorBuffer2 = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
-	RenderTargetDescriptorManager::CreateRenderTargetView(*mIntermediateColorBuffer2.Get(), rtvDesc, &mIntermediateColorBuffer2RTVCpuDesc);
+	RenderTargetDescriptorManager::CreateRenderTargetView(*mIntermediateColorBuffer2.Get(), rtvDescriptor, &mIntermediateColorBuffer2RTVCpuDesc);
 }
 
 void RenderManager::CreateFinalPassCommandObjects() noexcept {

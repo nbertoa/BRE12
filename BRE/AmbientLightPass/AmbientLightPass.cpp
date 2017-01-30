@@ -39,7 +39,7 @@ namespace {
 	}
 
 	void CreateResourceAndRenderTargetDescriptor(
-		Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& resource,
 		D3D12_CPU_DESCRIPTOR_HANDLE& bufferRenderTargetCpuDesc) noexcept {
 		
 		// Set shared buffers properties
@@ -57,26 +57,26 @@ namespace {
 		resourceDescriptor.Format = DXGI_FORMAT_R16_UNORM;
 
 		D3D12_CLEAR_VALUE clearValue{ resourceDescriptor.Format, 0.0f, 0.0f, 0.0f, 0.0f };
-		buffer.Reset();
+		resource.Reset();
 		
 		CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 
 		// Create buffer resource
-		ID3D12Resource* resource{ nullptr };			
+		ID3D12Resource* resourcePtr{ nullptr };			
 		ResourceManager::CreateCommittedResource(
 			heapProps, 
 			D3D12_HEAP_FLAG_NONE, 
 			resourceDescriptor, 
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
 			&clearValue, 
-			resource);
+			resourcePtr);
 		
 		// Create RTV's descriptor for buffer
-		buffer = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
+		resource = Microsoft::WRL::ComPtr<ID3D12Resource>(resourcePtr);
 		D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor{};
 		rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 		rtvDescriptor.Format = resourceDescriptor.Format;
-		RenderTargetDescriptorManager::CreateRenderTargetView(*buffer.Get(), rtvDescriptor, &bufferRenderTargetCpuDesc);
+		RenderTargetDescriptorManager::CreateRenderTargetView(*resource.Get(), rtvDescriptor, &bufferRenderTargetCpuDesc);
 	}
 }
 
@@ -180,7 +180,8 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 	CHECK_HR(mCmdListBegin->Reset(commandAllocator, nullptr));
 
 	// GetResource barriers
-	CD3DX12_RESOURCE_BARRIER barriers[]{
+	CD3DX12_RESOURCE_BARRIER barriers[]
+	{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),		
 	};
@@ -210,7 +211,8 @@ void AmbientLightPass::ExecuteFinalTask() noexcept {
 	CHECK_HR(mCmdListEnd->Reset(commandAllocator, nullptr));
 
 	// GetResource barriers
-	CD3DX12_RESOURCE_BARRIER endBarriers[]{
+	CD3DX12_RESOURCE_BARRIER endBarriers[]
+	{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),		
 	};

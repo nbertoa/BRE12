@@ -31,7 +31,6 @@ namespace {
 }
 
 void PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept {
-
 	ASSERT(IsDataValid() == false);
 	
 	CreateCommandObjects(mCommandAllocators, mCommandList);
@@ -48,18 +47,17 @@ void PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept {
 }
 
 void PostProcessPass::Execute(
-	ID3D12Resource& frameBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
-
+	ID3D12Resource& outputColorBuffer,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDescriptor) noexcept 
+{
 	ASSERT(IsDataValid());
-	ASSERT(frameBufferCpuDesc.ptr != 0UL);
+	ASSERT(outputColorBufferCpuDescriptor.ptr != 0UL);
 
-	ExecuteBeginTask(frameBuffer, frameBufferCpuDesc);
+	ExecuteBeginTask(outputColorBuffer, outputColorBufferCpuDescriptor);
 
-	CommandListExecutor::Get().ResetExecutedCommandListCount();
-	mRecorder->RecordAndPushCommandLists(frameBufferCpuDesc);
-	
 	// Wait until all previous tasks command lists are executed
+	CommandListExecutor::Get().ResetExecutedCommandListCount();
+	mRecorder->RecordAndPushCommandLists(outputColorBufferCpuDescriptor);
 	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
 		Sleep(0U);
 	}
@@ -81,11 +79,11 @@ bool PostProcessPass::IsDataValid() const noexcept {
 }
 
 void PostProcessPass::ExecuteBeginTask(
-	ID3D12Resource& frameBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
+	ID3D12Resource& outputColorBuffer,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDescriptor) noexcept {
 
 	ASSERT(IsDataValid());
-	ASSERT(frameBufferCpuDesc.ptr != 0UL);
+	ASSERT(outputColorBufferCpuDescriptor.ptr != 0UL);
 
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };
@@ -99,12 +97,12 @@ void PostProcessPass::ExecuteBeginTask(
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		ResourceStateManager::ChangeResourceStateAndGetBarrier(frameBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),		
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(outputColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),		
 	};
 	mCommandList->ResourceBarrier(_countof(barriers), barriers);
 
 	// Clear render targets
-	mCommandList->ClearRenderTargetView(frameBufferCpuDesc, DirectX::Colors::Black, 0U, nullptr);
+	mCommandList->ClearRenderTargetView(outputColorBufferCpuDescriptor, DirectX::Colors::Black, 0U, nullptr);
 	CHECK_HR(mCommandList->Close());
 
 	// Execute preliminary task

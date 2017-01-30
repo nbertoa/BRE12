@@ -19,7 +19,6 @@ public:
 	SkyBoxPass& operator=(SkyBoxPass&&) = delete;
 
 	void Init(
-		ID3D12CommandQueue& commandQueue,
 		ID3D12Resource& skyBoxCubeMap,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;

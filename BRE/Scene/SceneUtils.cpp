@@ -4,7 +4,6 @@
 #include <wrl.h>
 
 #include <CommandListExecutor\CommandListExecutor.h>
-#include <DXUtils\DXUtils.h>
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <Utils/DebugUtils.h>

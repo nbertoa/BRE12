@@ -40,7 +40,7 @@ void LightingPass::Init(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
 	ID3D12Resource& diffuseIrradianceCubeMap,
 	ID3D12Resource& specularPreConvolvedCubeMap) noexcept 
 {
@@ -48,7 +48,7 @@ void LightingPass::Init(
 
 	CreateCommandObjects(mCmdAllocatorsBegin, mCmdAllocatorsFinal, mCommandList);
 	mGeometryBuffers = geometryBuffers;
-	mOutputColorBufferCpuDesc = colorBufferCpuDesc;
+	mOutputColorBufferCpuDesc = outputColorBufferCpuDesc;
 	mDepthBuffer = &depthBuffer;
 
 	// Initialize recorder's pso
@@ -59,7 +59,7 @@ void LightingPass::Init(
 	mAmbientLightPass.Init(
 		*geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(),
 		*geometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(),
-		colorBufferCpuDesc,
+		outputColorBufferCpuDesc,
 		depthBuffer);
 
 	// Initialize environment light pass
@@ -67,13 +67,13 @@ void LightingPass::Init(
 		geometryBuffers, 
 		geometryBuffersCount,
 		*mDepthBuffer,
-		colorBufferCpuDesc, 
+		outputColorBufferCpuDesc, 
 		diffuseIrradianceCubeMap,
 		specularPreConvolvedCubeMap);
 
 	for (CommandListRecorders::value_type& recorder : mRecorders) {
 		ASSERT(recorder.get() != nullptr);
-		recorder->SetOutputColorBufferCpuDescriptor(colorBufferCpuDesc);
+		recorder->SetOutputColorBufferCpuDescriptor(outputColorBufferCpuDesc);
 	}
 
 	ASSERT(IsDataValid());
@@ -182,7 +182,8 @@ void LightingPass::ExecuteFinalTask() noexcept {
 	CHECK_HR(mCommandList->Reset(commandAllocatorEnd, nullptr));
 
 	// GetResource barriers
-	CD3DX12_RESOURCE_BARRIER endBarriers[]{
+	CD3DX12_RESOURCE_BARRIER endBarriers[]
+	{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mDepthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE),
 	};
 	const std::uint32_t barriersCount = _countof(endBarriers);

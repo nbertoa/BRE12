@@ -45,8 +45,8 @@ private:
 
 	void InitPasses(Scene& scene) noexcept;
 
-	void CreateRenderTargetViewAndDepthStencilView() noexcept;
-	void CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors() noexcept;
+	void CreateRenderTargetViewsAndDepthStencilView() noexcept;
+	void CreateIntermediateColorBuffersAndRenderTargetCpuDescriptors() noexcept;
 	void CreateFinalPassCommandObjects() noexcept;
 	
 	ID3D12Resource* CurrentFrameBuffer() const noexcept {
