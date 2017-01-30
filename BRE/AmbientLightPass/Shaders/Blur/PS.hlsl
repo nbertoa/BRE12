@@ -34,8 +34,7 @@ Output main(const in Input input){
 		}
 	}
 
-	//output.mBlur = result / float(BLUR_SIZE * BLUR_SIZE);
-	output.mBlur = BufferTexture.Load(int3(input.mPosH.xy, 0)).x;
+	output.mBlur = result / float(BLUR_SIZE * BLUR_SIZE);
 	
 	return output;
 }

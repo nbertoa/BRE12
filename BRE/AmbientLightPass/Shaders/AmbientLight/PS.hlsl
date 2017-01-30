@@ -2,6 +2,8 @@
 
 #define AMBIENT_FACTOR 0.04f
 
+//#define DEBUG_AMBIENT_ACCESIBILITY
+
 struct Input {
 	float4 mPosH : SV_POSITION;
 };
@@ -17,15 +19,18 @@ struct Output {
 Output main(const in Input input){
 	Output output = (Output)0;
 
-	// Get base color
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
+
 	const float3 baseColor = BaseColor_MetalMask.Load(screenCoord).xyz;
 
-	// Get ambient accessibility (1.0f - ambient occlussion factor)
-	const float accessibility = AmbientAccessibility.Load(screenCoord);
+	// Ambient accessibility (1.0f - ambient occlussion factor)
+	const float ambientAccessibility = AmbientAccessibility.Load(screenCoord);
 
-	output.mColor = float4(baseColor * AMBIENT_FACTOR/* * accessibility*/, 1.0f);
-	//output.mColor = float4(accessibility, accessibility, accessibility, 1.0f);
+	output.mColor = float4(baseColor * AMBIENT_FACTOR/* * ambientAccessibility*/, 1.0f);
+
+#ifdef DEBUG_AMBIENT_ACCESIBILITY
+	output.mColor = float4(ambientAccessibility, ambientAccessibility, ambientAccessibility, 1.0f);
+#endif
 	
 	return output;
 }

@@ -24,7 +24,7 @@ struct Output {
 Output main(in const Input input) {
 	Output output;
 
-	// Quad covering screen in NDC space.
+	// Quad covering screen in NDC space ([-1.0, 1.0] x [-1.0, 1.0] x [0.0, 1.0] x [1.0])
 	const float2 texCoord = gTexCoords[input.mVertexId];
 	output.mPosH = float4(2.0f * texCoord.x - 1.0f, 1.0f - 2.0f * texCoord.y, 0.0f, 1.0f);
 

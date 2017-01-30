@@ -33,11 +33,11 @@ Output main(const in Input input){
 
 	// Compute fragment position in view space
 	const float depthNDC = Depth.Load(screenCoord);
-	const float3 fragPosV = ViewRayToViewPosition(input.mViewRayV, depthNDC, gFrameCBuffer.mP);
+	const float3 viewRayV = normalize(input.mViewRayV);
+	const float3 fragPosV = ViewRayToViewPosition(viewRayV, depthNDC, gFrameCBuffer.mP);
 
 	const float3 geomPosW = mul(float4(fragPosV, 1.0f), gFrameCBuffer.mInvV).xyz;
 	
-	// Get normal
 	const float2 normal = normal_smoothness.xy;
 	const float3 normalV = normalize(Decode(normal));
 	const float3 normalW = normalize(mul(float4(normalV, 0.0f), gFrameCBuffer.mInvV).xyz);
@@ -46,7 +46,7 @@ Output main(const in Input input){
 
 	// As we are working at view space, we do not need camera position to 
 	// compute vector from geometry position to camera.
-	const float3 viewV = normalize(-fragPosV);
+	const float3 fragPosToCameraV = normalize(-fragPosV);
 
 	// Diffuse reflection color.
 	// When we sample a cube map, we need to use data in world space, not view space.
@@ -65,7 +65,7 @@ Output main(const in Input input){
 
 	// Specular reflection color
 	const float3 f0 = (1.0f - baseColor_metalmask.w) * float3(0.04f, 0.04f, 0.04f) + baseColor_metalmask.xyz * baseColor_metalmask.w;
-	const float3 F = F_Schlick(f0, 1.0f, dot(viewV, normalV));
+	const float3 F = F_Schlick(f0, 1.0f, dot(fragPosToCameraV, normalV));
 	const float3 indirectFSpecular = F * specularReflection;
 
 	const float3 color = indirectFDiffuse + indirectFSpecular;

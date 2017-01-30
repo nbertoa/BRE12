@@ -59,10 +59,12 @@ Output main(const in Input input) {
 		float4(0.0f, 0.0f, -1.0f, 0.0f)
 	};
 
-	// Compute fragment position in view space
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
+
+	// Compute fragment position in view space
 	const float depthNDC = Depth.Load(screenCoord);
-	const float4 fragPosV = float4(ViewRayToViewPosition(input.mViewRayV, depthNDC, gFrameCBuffer.mP), 1.0f);
+	const float viewRayV = normalize(input.mViewRayV);
+	const float4 fragPosV = float4(ViewRayToViewPosition(viewRayV, depthNDC, gFrameCBuffer.mP), 1.0f);
 
 	/*const float2 normal = Normal_Smoothness.Load(screenCoord).xy;
 	const float3 normalV = normalize(Decode(normal));
