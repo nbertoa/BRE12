@@ -37,15 +37,7 @@ namespace SceneUtils {
 		}
 		cmdList.Close();
 
-		const std::uint64_t completedFenceValue = fence.GetCompletedValue();
-		const std::uint64_t newFenceValue = completedFenceValue + 1UL;
-		CommandListExecutor::Get().ExecuteCommandListAndSignalFenceAndWaitForCompletion(
-			cmdList,
-			fence,
-			newFenceValue,
-			newFenceValue);
-
-		//DXUtils::ExecuteCommandListAndWaitForCompletion(cmdQueue, cmdList, fence);
+		CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(cmdList, fence);
 	}
 
 	ID3D12Resource& SceneResources::GetTexture(const std::size_t index) noexcept {
@@ -90,13 +82,7 @@ namespace SceneUtils {
 
 		const std::uint64_t completedFenceValue = fence.GetCompletedValue();
 		const std::uint64_t newFenceValue = completedFenceValue + 1UL;
-		CommandListExecutor::Get().ExecuteCommandListAndSignalFenceAndWaitForCompletion(
-			cmdList,
-			fence,
-			newFenceValue,
-			newFenceValue);
-
-		//DXUtils::ExecuteCommandListAndWaitForCompletion(cmdQueue, cmdList, fence);
+		CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(cmdList, fence);
 	}
 
 	const Model& SceneResources::GetModel(const std::size_t index) const noexcept {

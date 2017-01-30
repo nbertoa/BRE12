@@ -87,18 +87,17 @@ void CommandListExecutor::SignalFenceAndWaitForCompletion(
 	}
 }
 
-void CommandListExecutor::ExecuteCommandListAndSignalFenceAndWaitForCompletion(
+void CommandListExecutor::ExecuteCommandListAndWaitForCompletion(
 	ID3D12CommandList& cmdList,
-	ID3D12Fence& fence,
-	const std::uint64_t valueToSignal,
-	const std::uint64_t valueToWaitFor) noexcept
+	ID3D12Fence& fence) noexcept
 {
 	ASSERT(mCommandQueue != nullptr);
 
 	ID3D12CommandList* cmdLists[1U]{ &cmdList };
 	mCommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 
-	SignalFenceAndWaitForCompletion(fence, valueToSignal, valueToWaitFor);
+	const std::uint64_t valueToSignal = fence.GetCompletedValue() + 1UL;
+	SignalFenceAndWaitForCompletion(fence, valueToSignal, valueToSignal);
 }
 
 void CommandListExecutor::Terminate() noexcept {
