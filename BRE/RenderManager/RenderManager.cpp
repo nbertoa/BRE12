@@ -83,8 +83,7 @@ namespace {
 
 	// Create swap chain and stores it in swapChain parameter.
 	void CreateSwapChain(
-		const HWND windowHandle, 
-		ID3D12CommandQueue& commandQueue, 
+		const HWND windowHandle,  
 		const DXGI_FORMAT frameBufferFormat,
 		Microsoft::WRL::ComPtr<IDXGISwapChain3>& swapChain) noexcept {
 
@@ -106,7 +105,7 @@ namespace {
 		swapChainDescriptor.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
 		CHECK_HR(DirectXManager::GetIDXGIFactory().CreateSwapChainForHwnd(
-			&commandQueue, 
+			&CommandListExecutor::Get().GetCommandQueue(), 
 			windowHandle, 
 			&swapChainDescriptor, 
 			nullptr, 
@@ -294,7 +293,6 @@ void RenderManager::CreateRenderTargetViewAndDepthStencilView() noexcept {
 	ASSERT(mSwapChain == nullptr);
 	CreateSwapChain(
 		DirectXManager::GetWindowHandle(), 
-		CommandListExecutor::Get().GetCommandQueue(),
 		SettingsManager::sFrameBufferFormat, 
 		mSwapChain);
 	const std::size_t rtvDescSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
