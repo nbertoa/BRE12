@@ -56,6 +56,12 @@ public:
 		ID3D12Fence& fence, 
 		const std::uint64_t valueToSignal,
 		const std::uint64_t valueToWaitFor) noexcept;
+
+	void ExecuteCommandListAndSignalFenceAndWaitForCompletion(
+		ID3D12CommandList& cmdList,
+		ID3D12Fence& fence,
+		const std::uint64_t valueToSignal,
+		const std::uint64_t valueToWaitFor) noexcept;
 		
 	void Terminate() noexcept;	
 

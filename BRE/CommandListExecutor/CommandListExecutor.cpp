@@ -70,10 +70,11 @@ void CommandListExecutor::SignalFenceAndWaitForCompletion(
 	const std::uint64_t valueToSignal,
 	const std::uint64_t valueToWaitFor) noexcept
 {
+	const std::uint64_t completedFenceValue = fence.GetCompletedValue();
 	CHECK_HR(mCommandQueue->Signal(&fence, valueToSignal));
 
 	// Wait until the GPU has completed commands up to this fence point.
-	if (fence.GetCompletedValue() < valueToWaitFor) {
+	if (completedFenceValue < valueToWaitFor) {
 		const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
 		ASSERT(eventHandle);
 
@@ -84,6 +85,20 @@ void CommandListExecutor::SignalFenceAndWaitForCompletion(
 		WaitForSingleObject(eventHandle, INFINITE);
 		CloseHandle(eventHandle);
 	}
+}
+
+void CommandListExecutor::ExecuteCommandListAndSignalFenceAndWaitForCompletion(
+	ID3D12CommandList& cmdList,
+	ID3D12Fence& fence,
+	const std::uint64_t valueToSignal,
+	const std::uint64_t valueToWaitFor) noexcept
+{
+	ASSERT(mCommandQueue != nullptr);
+
+	ID3D12CommandList* cmdLists[1U]{ &cmdList };
+	mCommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+
+	SignalFenceAndWaitForCompletion(fence, valueToSignal, valueToWaitFor);
 }
 
 void CommandListExecutor::Terminate() noexcept {

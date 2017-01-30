@@ -11,7 +11,7 @@ public:
 	ColorHeightScene(ColorHeightScene&&) = delete;
 	ColorHeightScene& operator=(ColorHeightScene&&) = delete;
 
-	void Init(ID3D12CommandQueue& cmdQueue) noexcept final override;
+	void Init() noexcept final override;
 
 	void CreateGeometryPassRecorders(
 		std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>& tasks) noexcept final override;

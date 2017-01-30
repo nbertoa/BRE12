@@ -3,6 +3,7 @@
 #include <d3d12.h>
 #include <wrl.h>
 
+#include <CommandListExecutor\CommandListExecutor.h>
 #include <DXUtils\DXUtils.h>
 #include <ModelManager\ModelManager.h>
 #include <ResourceManager\ResourceManager.h>
@@ -11,7 +12,6 @@
 namespace SceneUtils {
 	void SceneResources::LoadTextures(
 		const std::vector<std::string>& sourceTextureFilenames,
-		ID3D12CommandQueue& cmdQueue,
 		ID3D12CommandAllocator& cmdAlloc,
 		ID3D12GraphicsCommandList& cmdList,
 		ID3D12Fence& fence) noexcept
@@ -35,7 +35,17 @@ namespace SceneUtils {
 				uploadBuffers[i]);
 			ASSERT(mTextures[nextTextureAvailableIndex] != nullptr);
 		}
-		DXUtils::ExecuteCommandListAndWaitForCompletion(cmdQueue, cmdList, fence);
+		cmdList.Close();
+
+		const std::uint64_t completedFenceValue = fence.GetCompletedValue();
+		const std::uint64_t newFenceValue = completedFenceValue + 1UL;
+		CommandListExecutor::Get().ExecuteCommandListAndSignalFenceAndWaitForCompletion(
+			cmdList,
+			fence,
+			newFenceValue,
+			newFenceValue);
+
+		//DXUtils::ExecuteCommandListAndWaitForCompletion(cmdQueue, cmdList, fence);
 	}
 
 	ID3D12Resource& SceneResources::GetTexture(const std::size_t index) noexcept {
@@ -47,7 +57,6 @@ namespace SceneUtils {
 
 	void SceneResources::LoadModels(
 		const std::vector<std::string>& modelFiles,
-		ID3D12CommandQueue& cmdQueue,
 		ID3D12CommandAllocator& cmdAlloc,
 		ID3D12GraphicsCommandList& cmdList,
 		ID3D12Fence& fence) noexcept
@@ -77,8 +86,17 @@ namespace SceneUtils {
 				uploadIndexBuffers[i]);
 			ASSERT(mTextures[nextModelAvailableIndex] != nullptr);
 		}
+		cmdList.Close();
 
-		DXUtils::ExecuteCommandListAndWaitForCompletion(cmdQueue, cmdList, fence);
+		const std::uint64_t completedFenceValue = fence.GetCompletedValue();
+		const std::uint64_t newFenceValue = completedFenceValue + 1UL;
+		CommandListExecutor::Get().ExecuteCommandListAndSignalFenceAndWaitForCompletion(
+			cmdList,
+			fence,
+			newFenceValue,
+			newFenceValue);
+
+		//DXUtils::ExecuteCommandListAndWaitForCompletion(cmdQueue, cmdList, fence);
 	}
 
 	const Model& SceneResources::GetModel(const std::size_t index) const noexcept {

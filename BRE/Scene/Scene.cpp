@@ -7,8 +7,7 @@
 #include <CommandManager\FenceManager.h>
 #include <Utils\DebugUtils.h>
 
-// cmdQueue is used by derived classes
-void Scene::Init(ID3D12CommandQueue& /*cmdQueue*/) noexcept {
+void Scene::Init() noexcept {
 	ASSERT(IsDataValid() == false);
 
 	CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandAllocators);

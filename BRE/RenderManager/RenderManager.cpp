@@ -167,7 +167,7 @@ RenderManager::RenderManager(Scene& scene) {
 
 void RenderManager::InitPasses(Scene& scene) noexcept {
 	// Initialize scene
-	scene.Init(CommandListExecutor::Get().GetCommandQueue());
+	scene.Init();
 	
 	// Generate recorders for all the passes
 	scene.CreateGeometryPassRecorders(mGeometryPass.GetCommandListRecorders());

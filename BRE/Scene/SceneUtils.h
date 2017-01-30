@@ -23,7 +23,6 @@ namespace SceneUtils {
 
 		void LoadTextures(
 			const std::vector<std::string>& sourceTextureFiles,
-			ID3D12CommandQueue& cmdQueue,
 			ID3D12CommandAllocator& cmdAlloc,
 			ID3D12GraphicsCommandList& cmdList,
 			ID3D12Fence& fence) noexcept;
@@ -35,7 +34,6 @@ namespace SceneUtils {
 
 		void LoadModels(
 			const std::vector<std::string>& modelFilenames,
-			ID3D12CommandQueue& cmdQueue,
 			ID3D12CommandAllocator& cmdAlloc,
 			ID3D12GraphicsCommandList& cmdList,
 			ID3D12Fence& fence) noexcept;

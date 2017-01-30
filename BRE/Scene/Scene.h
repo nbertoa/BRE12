@@ -23,7 +23,7 @@ public:
 	Scene(Scene&&) = delete;
 	Scene& operator=(Scene&&) = delete;
 
-	virtual void Init(ID3D12CommandQueue& cmdQueue) noexcept;
+	virtual void Init() noexcept;
 	
 	// Preconditions:
 	// - Init() must be called before

@@ -204,14 +204,14 @@ namespace {
 	}
 }
 
-void HeightScene::Init(ID3D12CommandQueue& cmdQueue) noexcept {
-	Scene::Init(cmdQueue);
+void HeightScene::Init() noexcept {
+	Scene::Init();
 
 	// Load textures
-	sResourceContainer.LoadTextures(sTexFiles, cmdQueue, *mCommandAllocators, *mCommandList, *mFence);
+	sResourceContainer.LoadTextures(sTexFiles, *mCommandAllocators, *mCommandList, *mFence);
 
 	// Load models
-	sResourceContainer.LoadModels(sModelFiles, cmdQueue, *mCommandAllocators, *mCommandList, *mFence);
+	sResourceContainer.LoadModels(sModelFiles, *mCommandAllocators, *mCommandList, *mFence);
 }		
 
 void HeightScene::CreateGeometryPassRecorders(
