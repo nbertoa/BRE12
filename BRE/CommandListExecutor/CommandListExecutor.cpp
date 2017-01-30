@@ -2,13 +2,11 @@
 
 #include <memory>
 
-#include <Utils/DebugUtils.h>
+#include <CommandManager\CommandQueueManager.h>
 
 CommandListExecutor* CommandListExecutor::sExecutor{ nullptr };
 
-void CommandListExecutor::Create(
-	ID3D12CommandQueue& cmdQueue, 
-	const std::uint32_t maxNumCmdLists) noexcept 
+void CommandListExecutor::Create(const std::uint32_t maxNumCmdLists) noexcept 
 {
 	ASSERT(sExecutor == nullptr);
 
@@ -17,7 +15,7 @@ void CommandListExecutor::Create(
 	// 1 reference for the parent + 1 reference for the child
 	parent->set_ref_count(2);
 
-	sExecutor = new (parent->allocate_child()) CommandListExecutor(cmdQueue, maxNumCmdLists);
+	sExecutor = new (parent->allocate_child()) CommandListExecutor(maxNumCmdLists);
 }
 
 CommandListExecutor& CommandListExecutor::Get() noexcept {
@@ -25,13 +23,17 @@ CommandListExecutor& CommandListExecutor::Get() noexcept {
 	return *sExecutor;
 }
 
-CommandListExecutor::CommandListExecutor(
-	ID3D12CommandQueue& commandQueue, 
-	const std::uint32_t maxNumberOfCommandListsToExecute)
+CommandListExecutor::CommandListExecutor(const std::uint32_t maxNumberOfCommandListsToExecute)
 	: mMaxNumberOfCommandListsToExecute(maxNumberOfCommandListsToExecute)
-	, mCommandQueue(&commandQueue)
 {
 	ASSERT(maxNumberOfCommandListsToExecute > 0U);
+
+	D3D12_COMMAND_QUEUE_DESC commandQueueDescriptor = {};
+	commandQueueDescriptor.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	commandQueueDescriptor.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+	CommandQueueManager::CreateCommandQueue(commandQueueDescriptor, mCommandQueue);
+	ASSERT(mCommandQueue != nullptr);
+
 	parent()->spawn(*this);
 }
 
@@ -61,6 +63,27 @@ tbb::task* CommandListExecutor::execute() {
 	delete[] pendingCommandLists;
 
 	return nullptr;
+}
+
+void CommandListExecutor::SignalFenceAndWaitForCompletion(
+	ID3D12Fence& fence,
+	const std::uint64_t valueToSignal,
+	const std::uint64_t valueToWaitFor) noexcept
+{
+	CHECK_HR(mCommandQueue->Signal(&fence, valueToSignal));
+
+	// Wait until the GPU has completed commands up to this fence point.
+	if (fence.GetCompletedValue() < valueToWaitFor) {
+		const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
+		ASSERT(eventHandle);
+
+		// Fire event when GPU hits current fence.  
+		CHECK_HR(fence.SetEventOnCompletion(valueToWaitFor, eventHandle));
+
+		// Wait until the GPU hits current fence event is fired.
+		WaitForSingleObject(eventHandle, INFINITE);
+		CloseHandle(eventHandle);
+	}
 }
 
 void CommandListExecutor::Terminate() noexcept {

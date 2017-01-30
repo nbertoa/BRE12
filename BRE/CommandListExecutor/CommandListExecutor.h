@@ -5,6 +5,8 @@
 #include <tbb/concurrent_queue.h>
 #include <tbb/task.h>
 
+#include <Utils\DebugUtils.h>
+
 // To check for new command lists and execute them.
 // Steps:
 // - Use CommandListExecutor::Create() to create and spawn an instance.
@@ -18,9 +20,7 @@ public:
 	// Preconditions:
 	// - Create() must be called once
 	// - "maxNumberOfCommandListsToExecute" must be greater than zero
-	static void Create(
-		ID3D12CommandQueue& commandQueue, 
-		const std::uint32_t maxNumberOfCommandListsToExecute) noexcept;
+	static void Create(const std::uint32_t maxNumberOfCommandListsToExecute) noexcept;
 
 	// Preconditions:
 	// - Create() must be called before this method
@@ -46,11 +46,21 @@ public:
 	__forceinline std::uint32_t GetExecutedCommandListCount() const noexcept { return mExecutedCommandListCount; }
 	
 	__forceinline void AddCommandList(ID3D12CommandList& commandList) noexcept { mCommandListsToExecute.push(&commandList); }
+
+	__forceinline ID3D12CommandQueue& GetCommandQueue() noexcept {
+		ASSERT(mCommandQueue != nullptr);
+		return *mCommandQueue;
+	}
+
+	void SignalFenceAndWaitForCompletion(
+		ID3D12Fence& fence, 
+		const std::uint64_t valueToSignal,
+		const std::uint64_t valueToWaitFor) noexcept;
 		
 	void Terminate() noexcept;	
 
 private:
-	explicit CommandListExecutor(ID3D12CommandQueue& cmdQueue, const std::uint32_t maxNumCmdLists);
+	explicit CommandListExecutor(const std::uint32_t maxNumCmdLists);
 
 	// Called when tbb::task is spawned
 	tbb::task* execute() final override;

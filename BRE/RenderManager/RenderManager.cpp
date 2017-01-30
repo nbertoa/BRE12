@@ -148,6 +148,7 @@ RenderManager& RenderManager::Create(Scene& scene) noexcept {
 }
 
 RenderManager::RenderManager(Scene& scene) {
+	CommandListExecutor::Create(MAX_NUM_CMD_LISTS);
 	FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
 	CreateFinalPassCommandObjects();
 	CreateRenderTargetViewAndDepthStencilView();
@@ -158,9 +159,6 @@ RenderManager::RenderManager(Scene& scene) {
 		SettingsManager::AspectRatio(), 
 		SettingsManager::sNearPlaneZ, 
 		SettingsManager::sFarPlaneZ);
-
-	ASSERT(mCommandQueue != nullptr);
-	CommandListExecutor::Create(*mCommandQueue, MAX_NUM_CMD_LISTS);
 	
 	InitPasses(scene);
 
@@ -170,7 +168,7 @@ RenderManager::RenderManager(Scene& scene) {
 
 void RenderManager::InitPasses(Scene& scene) noexcept {
 	// Initialize scene
-	scene.Init(*mCommandQueue);
+	scene.Init(CommandListExecutor::Get().GetCommandQueue());
 	
 	// Generate recorders for all the passes
 	scene.CreateGeometryPassRecorders(mGeometryPass.GetCommandListRecorders());
@@ -199,7 +197,7 @@ void RenderManager::InitPasses(Scene& scene) noexcept {
 		*specularPreConvolvedCubeMap);
 
 	mSkyBoxPass.Init(
-		*mCommandQueue, 
+		CommandListExecutor::Get().GetCommandQueue(), 
 		*skyBoxCubeMap, 
 		mIntermediateColorBuffer1RTVCpuDesc,
 		DepthStencilCpuDesc());
@@ -276,11 +274,14 @@ void RenderManager::ExecuteFinalPass() {
 	const std::size_t barrierCount = _countof(barriers);
 	ASSERT(barrierCount == GeometryPass::BUFFERS_COUNT + 2UL);
 	mFinalPassCommandList->ResourceBarrier(_countof(barriers), barriers);
+	CHECK_HR(mFinalPassCommandList->Close());
 
 	// Execute command list
-	CHECK_HR(mFinalPassCommandList->Close());
-	ID3D12CommandList* cmdLists[] = { mFinalPassCommandList };
-	mCommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	CommandListExecutor::Get().ResetExecutedCommandListCount();
+	CommandListExecutor::Get().AddCommandList(*mFinalPassCommandList);
+	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
+		Sleep(0U);
+	}
 }
 
 void RenderManager::CreateRenderTargetViewAndDepthStencilView() noexcept {
@@ -291,7 +292,11 @@ void RenderManager::CreateRenderTargetViewAndDepthStencilView() noexcept {
 
 	// Create swap chain and render target views
 	ASSERT(mSwapChain == nullptr);
-	CreateSwapChain(DirectXManager::GetWindowHandle(), *mCommandQueue, SettingsManager::sFrameBufferFormat, mSwapChain);
+	CreateSwapChain(
+		DirectXManager::GetWindowHandle(), 
+		CommandListExecutor::Get().GetCommandQueue(),
+		SettingsManager::sFrameBufferFormat, 
+		mSwapChain);
 	const std::size_t rtvDescSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
@@ -387,11 +392,6 @@ void RenderManager::CreateIntermedaiteColorBuffersAndRenderTargetCpuDescriptors(
 void RenderManager::CreateFinalPassCommandObjects() noexcept {
 	ASSERT(SettingsManager::sQueuedFrameCount > 0U);
 
-	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	CommandQueueManager::CreateCommandQueue(queueDesc, mCommandQueue);
-
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mFinalPassCommandAllocators[i]);
 	}
@@ -401,22 +401,11 @@ void RenderManager::CreateFinalPassCommandObjects() noexcept {
 }
 
 void RenderManager::FlushCommandQueue() noexcept {
-	// Signal a new fence value
 	++mCurrentFenceValue;
-	CHECK_HR(mCommandQueue->Signal(mFence, mCurrentFenceValue));
-
-	// Wait until the GPU has completed commands up to this fence point.
-	if (mFence->GetCompletedValue() < mCurrentFenceValue) {
-		const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
-		ASSERT(eventHandle);
-
-		// Fire event when GPU hits current fence.  
-		CHECK_HR(mFence->SetEventOnCompletion(mCurrentFenceValue, eventHandle));
-
-		// Wait until the GPU hits current fence event is fired.
-		WaitForSingleObject(eventHandle, INFINITE);
-		CloseHandle(eventHandle);
-	}
+	CommandListExecutor::Get().SignalFenceAndWaitForCompletion(
+		*mFence,
+		mCurrentFenceValue,
+		mCurrentFenceValue);
 }
 
 void RenderManager::SignalFenceAndPresent() noexcept {
@@ -434,21 +423,13 @@ void RenderManager::SignalFenceAndPresent() noexcept {
 	// are on the GPU time line, the new fence point won't be set until the GPU finishes
 	// processing all the commands prior to this Signal().
 	mFenceValueByQueuedFrameIndex[mCurrentQueuedFrameIndex] = ++mCurrentFenceValue;
-	CHECK_HR(mCommandQueue->Signal(mFence, mCurrentFenceValue));
-	mCurrentQueuedFrameIndex = (mCurrentQueuedFrameIndex + 1U) % SettingsManager::sQueuedFrameCount;	
+	mCurrentQueuedFrameIndex = (mCurrentQueuedFrameIndex + 1U) % SettingsManager::sQueuedFrameCount;
+	const std::uint64_t oldestFence{ mFenceValueByQueuedFrameIndex[mCurrentQueuedFrameIndex] };
 
 	// If we executed command lists for all queued frames, then we need to wait
 	// at least 1 of them to be completed, before continue recording command lists. 
-	const std::uint64_t oldestFence{ mFenceValueByQueuedFrameIndex[mCurrentQueuedFrameIndex] };
-	if (mFence->GetCompletedValue() < oldestFence) {
-		const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
-		ASSERT(eventHandle);
-
-		// Fire event when GPU hits current fence.  
-		CHECK_HR(mFence->SetEventOnCompletion(oldestFence, eventHandle));
-
-		// Wait until the GPU hits current fence event is fired.
-		WaitForSingleObject(eventHandle, INFINITE);
-		CloseHandle(eventHandle);
-	}
+	CommandListExecutor::Get().SignalFenceAndWaitForCompletion(
+		*mFence,
+		mCurrentFenceValue,
+		oldestFence);
 }

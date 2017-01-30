@@ -68,7 +68,6 @@ private:
 	void SignalFenceAndPresent() noexcept;
 
 	Microsoft::WRL::ComPtr<IDXGISwapChain3> mSwapChain{ nullptr };
-	ID3D12CommandQueue* mCommandQueue{ nullptr };
 				
 	// Fences data for synchronization purposes.
 	ID3D12Fence* mFence{ nullptr };

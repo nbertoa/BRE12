@@ -82,8 +82,6 @@ void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
 	mRecorder->RecordAndPushCommandLists(frameCBuffer);
-
-	// Wait until all previous tasks command lists are executed
 	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1U) {
 		Sleep(0U);
 	}

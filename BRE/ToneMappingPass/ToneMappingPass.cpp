@@ -56,8 +56,6 @@ void ToneMappingPass::Execute() noexcept {
 
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
 	mRecorder->RecordAndPushCommandLists();
-	
-	// Wait until all previous tasks command lists are executed
 	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
 		Sleep(0U);
 	}
@@ -104,8 +102,6 @@ void ToneMappingPass::ExecuteBeginTask() noexcept {
 	// Execute preliminary task
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
 	CommandListExecutor::Get().AddCommandList(*mCommandList);
-
-	// Wait until all previous tasks command lists are executed
 	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
 		Sleep(0U);
 	}
