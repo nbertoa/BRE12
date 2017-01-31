@@ -2,47 +2,48 @@
 
 #include <GeometryGenerator\GeometryGenerator.h>
 #include <Utils/DebugUtils.h>
-#include <Utils\NumberGeneration.h>
 
-ModelManager::ModelById ModelManager::mModelById;
+ModelManager::Models ModelManager::mModels;
 std::mutex ModelManager::mMutex;
 
-std::size_t ModelManager::LoadModel(
+ModelManager::~ModelManager() {
+	for (Model* model : mModels) {
+		ASSERT(model != nullptr);
+		delete model;
+	}
+}
+
+Model& ModelManager::LoadModel(
 	const char* modelFilename, 
-	Model* &model, 
 	ID3D12GraphicsCommandList& commandList,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept 
 {
 	ASSERT(modelFilename != nullptr);
 
+	Model* model{ nullptr };
+
 	mMutex.lock();
 	model = new Model(modelFilename, commandList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	ModelById::accessor accessor;
-#ifdef _DEBUG
-	mModelById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mModelById.insert(accessor, id);
-	accessor->second.reset(model);
-	accessor.release();
+	ASSERT(model != nullptr);
+	mModels.insert(model);
 
-	return id;
+	return *model;
 }
 
-std::size_t ModelManager::CreateBox(
+Model& ModelManager::CreateBox(
 	const float width, 
 	const float height, 
 	const float depth, 
 	const std::uint32_t numSubdivisions,
-	Model* &model, 
 	ID3D12GraphicsCommandList& commandList,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept 
 {
+	Model* model{ nullptr };
+
 	GeometryGenerator::MeshData meshData;
 	GeometryGenerator::CreateBox(width, height, depth, numSubdivisions, meshData);
 
@@ -50,28 +51,22 @@ std::size_t ModelManager::CreateBox(
 	model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	ModelById::accessor accessor;
-#ifdef _DEBUG
-	mModelById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mModelById.insert(accessor, id);
-	accessor->second.reset(model);
-	accessor.release();
+	ASSERT(model != nullptr);
+	mModels.insert(model);
 
-	return id;
+	return *model;
 }
 
-std::size_t ModelManager::CreateSphere(
+Model& ModelManager::CreateSphere(
 	const float radius, 
 	const std::uint32_t sliceCount, 
 	const std::uint32_t stackCount, 
-	Model* &model, 
 	ID3D12GraphicsCommandList& commandList,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
 {
+	Model* model{ nullptr };
+
 	GeometryGenerator::MeshData meshData;
 	GeometryGenerator::CreateSphere(radius, sliceCount, stackCount, meshData);
 
@@ -79,27 +74,21 @@ std::size_t ModelManager::CreateSphere(
 	model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	ModelById::accessor accessor;
-#ifdef _DEBUG
-	mModelById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mModelById.insert(accessor, id);
-	accessor->second.reset(model);
-	accessor.release();
+	ASSERT(model != nullptr);
+	mModels.insert(model);
 
-	return id;
+	return *model;
 }
 
-std::size_t ModelManager::CreateGeosphere(
+Model& ModelManager::CreateGeosphere(
 	const float radius, 
 	const std::uint32_t numSubdivisions, 
-	Model* &model, 
 	ID3D12GraphicsCommandList& commandList,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept 
 {
+	Model* model{ nullptr };
+
 	GeometryGenerator::MeshData meshData;
 	GeometryGenerator::CreateGeosphere(radius, numSubdivisions, meshData);
 
@@ -107,30 +96,24 @@ std::size_t ModelManager::CreateGeosphere(
 	model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	ModelById::accessor accessor;
-#ifdef _DEBUG
-	mModelById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mModelById.insert(accessor, id);
-	accessor->second.reset(model);
-	accessor.release();
+	ASSERT(model != nullptr);
+	mModels.insert(model);
 
-	return id;
+	return *model;
 }
 
-std::size_t ModelManager::CreateCylinder(
+Model& ModelManager::CreateCylinder(
 	const float bottomRadius,
 	const float topRadius,
 	const float height, 
 	const std::uint32_t sliceCount,
 	const std::uint32_t stackCount,
-	Model* &model, 
 	ID3D12GraphicsCommandList& commandList,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept 
 {
+	Model* model{ nullptr };
+
 	GeometryGenerator::MeshData meshData;
 	GeometryGenerator::CreateCylinder(bottomRadius, topRadius, height, sliceCount, stackCount, meshData);
 
@@ -138,29 +121,23 @@ std::size_t ModelManager::CreateCylinder(
 	model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	ModelById::accessor accessor;
-#ifdef _DEBUG
-	mModelById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mModelById.insert(accessor, id);
-	accessor->second.reset(model);
-	accessor.release();
+	ASSERT(model != nullptr);
+	mModels.insert(model);
 
-	return id;
+	return *model;
 }
 
-std::size_t ModelManager::CreateGrid(
+Model& ModelManager::CreateGrid(
 	const float width, 
 	const float depth, 
 	const std::uint32_t rows, 
 	const std::uint32_t columns, 
-	Model* &model, 
 	ID3D12GraphicsCommandList& commandList,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept 
 {
+	Model* model{ nullptr };
+
 	GeometryGenerator::MeshData meshData;
 	GeometryGenerator::CreateGrid(width, depth, rows, columns, meshData);
 
@@ -168,26 +145,8 @@ std::size_t ModelManager::CreateGrid(
 	model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	ModelById::accessor accessor;
-#ifdef _DEBUG
-	mModelById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mModelById.insert(accessor, id);
-	accessor->second.reset(model);
-	accessor.release();
-
-	return id;
-}
-
-Model& ModelManager::GetModel(const std::size_t id) noexcept {
-	ModelById::accessor accessor;
-	mModelById.find(accessor, id);
-	ASSERT(!accessor.empty());
-
-	Model* model{ accessor->second.get() };
-	accessor.release();
+	ASSERT(model != nullptr);
+	mModels.insert(model);
 
 	return *model;
 }

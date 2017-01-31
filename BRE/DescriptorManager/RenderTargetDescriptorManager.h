@@ -46,21 +46,6 @@ public:
 		const std::uint32_t descriptorCount,
 		D3D12_CPU_DESCRIPTOR_HANDLE* firstViewCpuDescriptorHandle = nullptr) noexcept;
 
-	static D3D12_GPU_DESCRIPTOR_HANDLE CreateDepthStencilView(
-		ID3D12Resource& resource,
-		const D3D12_DEPTH_STENCIL_VIEW_DESC& descriptor,
-		D3D12_CPU_DESCRIPTOR_HANDLE* firstViewCpuDescriptorHandle = nullptr) noexcept;
-
-	// Preconditions:
-	// - "resources" must not be nullptr
-	// - "descriptors" must not be nullptr
-	// - "descriptorCount" must be greater than zero
-	static D3D12_GPU_DESCRIPTOR_HANDLE CreateDepthStencilViews(
-		ID3D12Resource* *resources,
-		const D3D12_DEPTH_STENCIL_VIEW_DESC* descriptors,
-		const std::uint32_t descriptorCount,
-		D3D12_CPU_DESCRIPTOR_HANDLE* firstViewCpuDescriptorHandle = nullptr) noexcept;
-
 private:
 	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRenderTargetViewDescriptorHeap;
 

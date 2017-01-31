@@ -37,17 +37,16 @@ void ColorNormalCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormat
 	PSOManager::PSOCreationData psoData{};
 	psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
 
-	ShaderManager::LoadShaderFile("GeometryPass/Shaders/ColorNormalMapping/PS.cso", psoData.mPixelShaderBytecode);
-	ShaderManager::LoadShaderFile("GeometryPass/Shaders/ColorNormalMapping/VS.cso", psoData.mVertexShaderBytecode);
+	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("GeometryPass/Shaders/ColorNormalMapping/PS.cso");
+	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("GeometryPass/Shaders/ColorNormalMapping/VS.cso");
 
-	ID3DBlob* rootSignatureBlob;
-	ShaderManager::LoadShaderFile("GeometryPass/Shaders/ColorNormalMapping/RS.cso", rootSignatureBlob);
-	RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("GeometryPass/Shaders/ColorNormalMapping/RS.cso");
+	psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
 	sRootSignature = psoData.mRootSignature;
 
 	psoData.mNumRenderTargets = geometryBufferCount;
 	memcpy(psoData.mRenderTargetFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
-	PSOManager::CreateGraphicsPSO(psoData, sPSO);
+	sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -181,7 +180,7 @@ void ColorNormalCmdListRecorder::BuildBuffers(
 
 	// Create object cbuffer and fill it
 	const std::size_t objCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
-	UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, dataCount, mObjectCBuffer);
+	mObjectCBuffer = &UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, dataCount);
 	std::uint32_t k = 0U;
 	const std::size_t geometryDataCount{ mGeometryDataVec.size() };
 	ObjectCBuffer objCBuffer;
@@ -199,7 +198,7 @@ void ColorNormalCmdListRecorder::BuildBuffers(
 
 	// Create materials cbuffer		
 	const std::size_t matCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(Material)) };
-	UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, dataCount, mMaterialsCBuffer);
+	mMaterialsCBuffer = &UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, dataCount);
 	D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialsCBuffer->GetResource()->GetGPUVirtualAddress() };
 	D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->GetResource()->GetGPUVirtualAddress() };
 
@@ -258,6 +257,6 @@ void ColorNormalCmdListRecorder::BuildBuffers(
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
 	}
 }

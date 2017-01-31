@@ -35,10 +35,10 @@ namespace {
 #endif
 
 		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
-			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
+			commandAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		}
 
-		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
+		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0]);
 
 		// Start off in a closed state.  This is because the first time we refer 
 		// to the command list we will Reset it, and it needs to be closed before
@@ -61,12 +61,11 @@ void EnvironmentLightCmdListRecorder::InitPSO() noexcept {
 	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-	ShaderManager::LoadShaderFile("EnvironmentLightPass/Shaders/PS.cso", psoData.mPixelShaderBytecode);
-	ShaderManager::LoadShaderFile("EnvironmentLightPass/Shaders/VS.cso", psoData.mVertexShaderBytecode);
+	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("EnvironmentLightPass/Shaders/PS.cso");
+	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("EnvironmentLightPass/Shaders/VS.cso");
 
-	ID3DBlob* rootSignatureBlob;
-	ShaderManager::LoadShaderFile("EnvironmentLightPass/Shaders/RS.cso", rootSignatureBlob);
-	RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("EnvironmentLightPass/Shaders/RS.cso");
+	psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
 	sRootSignature = psoData.mRootSignature;
 
 	psoData.mNumRenderTargets = 1U;
@@ -75,7 +74,7 @@ void EnvironmentLightCmdListRecorder::InitPSO() noexcept {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	PSOManager::CreateGraphicsPSO(psoData, sPSO);
+	sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -227,6 +226,6 @@ void EnvironmentLightCmdListRecorder::BuildBuffers(
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
 	}
 }

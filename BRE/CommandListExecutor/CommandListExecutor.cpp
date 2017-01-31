@@ -32,10 +32,10 @@ CommandListExecutor::CommandListExecutor(const std::uint32_t maxNumberOfCommandL
 	D3D12_COMMAND_QUEUE_DESC commandQueueDescriptor = {};
 	commandQueueDescriptor.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	commandQueueDescriptor.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	CommandQueueManager::CreateCommandQueue(commandQueueDescriptor, mCommandQueue);
+	mCommandQueue = &CommandQueueManager::CreateCommandQueue(commandQueueDescriptor);
 	ASSERT(mCommandQueue != nullptr);
 
-	FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
+	mFence = &FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE);
 
 	parent()->spawn(*this);
 }

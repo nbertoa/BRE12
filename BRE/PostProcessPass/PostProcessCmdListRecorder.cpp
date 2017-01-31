@@ -32,10 +32,10 @@ namespace {
 #endif
 
 		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
-			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
+			commandAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		}
 
-		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
+		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0]);
 
 		// Start off in a closed state.  This is because the first time we refer 
 		// to the command list we will Reset it, and it needs to be closed before
@@ -57,12 +57,11 @@ void PostProcessCmdListRecorder::InitPSO() noexcept {
 	const std::size_t rtCount{ _countof(psoData.mRenderTargetFormats) };
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-	ShaderManager::LoadShaderFile("PostProcessPass/Shaders/PS.cso", psoData.mPixelShaderBytecode);
-	ShaderManager::LoadShaderFile("PostProcessPass/Shaders/VS.cso", psoData.mVertexShaderBytecode);
+	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("PostProcessPass/Shaders/PS.cso");
+	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("PostProcessPass/Shaders/VS.cso");
 
-	ID3DBlob* rootSignatureBlob;
-	ShaderManager::LoadShaderFile("PostProcessPass/Shaders/RS.cso", rootSignatureBlob);
-	RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("PostProcessPass/Shaders/RS.cso");
+	psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
 	sRootSignature = psoData.mRootSignature;
 
 	psoData.mNumRenderTargets = 1U;
@@ -71,7 +70,7 @@ void PostProcessCmdListRecorder::InitPSO() noexcept {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	PSOManager::CreateGraphicsPSO(psoData, sPSO);
+	sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);

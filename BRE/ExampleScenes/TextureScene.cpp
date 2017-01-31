@@ -56,10 +56,10 @@ void TextureScene::Init() noexcept {
 	Scene::Init();
 
 	// Load textures
-	sResourceContainer.LoadTextures(sTexFiles, *mCommandAllocators, *mCommandList);
+	sResourceContainer.LoadTextures(sTexFiles, *mCommandAllocator, *mCommandList);
 
 	// Load models
-	sResourceContainer.LoadModels(sModelFiles, *mCommandAllocators, *mCommandList);
+	sResourceContainer.LoadModels(sModelFiles, *mCommandAllocator, *mCommandList);
 }
 
 void TextureScene::CreateGeometryPassRecorders(

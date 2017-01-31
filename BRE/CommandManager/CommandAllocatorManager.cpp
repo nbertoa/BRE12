@@ -1,41 +1,30 @@
 #include "CommandAllocatorManager.h"
 
-#include <memory>
-
 #include <DirectXManager/DirectXManager.h>
 #include <Utils/DebugUtils.h>
-#include <Utils/NumberGeneration.h>
 
-CommandAllocatorManager::CommandAllocatorById CommandAllocatorManager::mCommandAllocatorById;
+CommandAllocatorManager::CommandAllocators CommandAllocatorManager::mCommandAllocators;
 std::mutex CommandAllocatorManager::mMutex;
 
-std::size_t CommandAllocatorManager::CreateCommandAllocator(
-	const D3D12_COMMAND_LIST_TYPE& commandListType, 
-	ID3D12CommandAllocator* &commandAllocator) noexcept 
+CommandAllocatorManager::~CommandAllocatorManager() {
+	for (ID3D12CommandAllocator* commandAllocator : mCommandAllocators) {
+		ASSERT(commandAllocator != nullptr);
+		commandAllocator->Release();
+		delete commandAllocator;
+	}
+}
+
+ID3D12CommandAllocator& CommandAllocatorManager::CreateCommandAllocator(
+	const D3D12_COMMAND_LIST_TYPE& commandListType) noexcept 
 {
+	ID3D12CommandAllocator* commandAllocator{ nullptr };
+
 	mMutex.lock();
 	CHECK_HR(DirectXManager::GetDevice().CreateCommandAllocator(commandListType, IID_PPV_ARGS(&commandAllocator)));
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	CommandAllocatorById::accessor accessor;
-#ifdef _DEBUG
-	mCommandAllocatorById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mCommandAllocatorById.insert(accessor, id);
-	accessor->second = Microsoft::WRL::ComPtr<ID3D12CommandAllocator>(commandAllocator);
-	accessor.release();
+	ASSERT(commandAllocator != nullptr);
+	mCommandAllocators.insert(commandAllocator);
 
-	return id;
-}
-
-ID3D12CommandAllocator& CommandAllocatorManager::GetCommandAllocator(const std::size_t id) noexcept {
-	CommandAllocatorById::accessor accessor;
-	mCommandAllocatorById.find(accessor, id);
-	ASSERT(!accessor.empty());
-	ID3D12CommandAllocator* elem{ accessor->second.Get() };
-	accessor.release();
-
-	return *elem;
+	return *commandAllocator;
 }

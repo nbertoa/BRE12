@@ -2,8 +2,7 @@
 
 #include <d3d12.h>
 #include <mutex>
-#include <tbb/concurrent_hash_map.h>
-#include <wrl.h>
+#include <tbb/concurrent_unordered_set.h>
 
 #include <DXUtils/D3DFactory.h>
 
@@ -11,7 +10,7 @@
 class PSOManager {
 public:
 	PSOManager() = delete;
-	~PSOManager() = delete;
+	~PSOManager();
 	PSOManager(const PSOManager&) = delete;
 	const PSOManager& operator=(const PSOManager&) = delete;
 	PSOManager(PSOManager&&) = delete;
@@ -48,24 +47,15 @@ public:
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE mPrimitiveTopologyType{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
 	};
 
-	// Returns id of the pipeline state object
 	// Preconditions:
 	// - "psoCreationData" must be valid
-	static std::size_t CreateGraphicsPSO(
-		const PSOManager::PSOCreationData& psoCreationData,
-		ID3D12PipelineState* &pso) noexcept;
-
-	// Preconditions:
-	// - "id" must be valid
-	static ID3D12PipelineState& GetGraphicsPSO(const std::size_t id) noexcept;
+	static ID3D12PipelineState& CreateGraphicsPSO(const PSOManager::PSOCreationData& psoCreationData) noexcept;
 
 private:
-	static std::size_t CreateGraphicsPSOByDescriptor(
-		const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDescriptor, 
-		ID3D12PipelineState* &pso) noexcept;
+	static ID3D12PipelineState& CreateGraphicsPSOByDescriptor(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDescriptor) noexcept;
 
-	using PSOById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>>;
-	static PSOById mPSOById;
+	using PSOs = tbb::concurrent_unordered_set<ID3D12PipelineState*>;
+	static PSOs mPSOs;
 
 	static std::mutex mMutex;
 };

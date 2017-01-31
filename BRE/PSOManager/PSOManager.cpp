@@ -1,14 +1,19 @@
 #include "PSOManager.h"
 
-#include <memory>
-
 #include <DirectXManager/DirectXManager.h>
 #include <SettingsManager\SettingsManager.h>
 #include <Utils/DebugUtils.h>
-#include <Utils/NumberGeneration.h>
 
-PSOManager::PSOById PSOManager::mPSOById;
+PSOManager::PSOs PSOManager::mPSOs;
 std::mutex PSOManager::mMutex;
+
+PSOManager::~PSOManager() {
+	for (ID3D12PipelineState* pso : mPSOs) {
+		ASSERT(pso != nullptr);
+		pso->Release();
+		delete pso;
+	}
+}
 
 bool PSOManager::PSOCreationData::IsDataValid() const noexcept {
 	if (mNumRenderTargets == 0 || 
@@ -26,10 +31,7 @@ bool PSOManager::PSOCreationData::IsDataValid() const noexcept {
 	return true;
 }
 
-std::size_t PSOManager::CreateGraphicsPSO(
-	const PSOManager::PSOCreationData& psoData,
-	ID3D12PipelineState* &pso) noexcept
-{
+ID3D12PipelineState& PSOManager::CreateGraphicsPSO(const PSOManager::PSOCreationData& psoData) noexcept {
 	ASSERT(psoData.IsDataValid());
 		
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDescriptor = {};
@@ -55,40 +57,20 @@ std::size_t PSOManager::CreateGraphicsPSO(
 	psoDescriptor.SampleMask = psoData.mSampleMask;
 	psoDescriptor.VS = psoData.mVertexShaderBytecode;
 
-	const std::size_t id = CreateGraphicsPSOByDescriptor(psoDescriptor, pso);
-
-	ASSERT(pso != nullptr);
-
-	return id;
+	return CreateGraphicsPSOByDescriptor(psoDescriptor);
 }
 
-std::size_t PSOManager::CreateGraphicsPSOByDescriptor(
-	const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDescriptor, 
-	ID3D12PipelineState* &pso) noexcept 
+ID3D12PipelineState& PSOManager::CreateGraphicsPSOByDescriptor(
+	const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDescriptor) noexcept 
 {
+	ID3D12PipelineState* pso{ nullptr };
+
 	mMutex.lock();
 	CHECK_HR(DirectXManager::GetDevice().CreateGraphicsPipelineState(&psoDescriptor, IID_PPV_ARGS(&pso)));
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	PSOById::accessor accessor;
-#ifdef _DEBUG
-	mPSOById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mPSOById.insert(accessor, id);
-	accessor->second = Microsoft::WRL::ComPtr<ID3D12PipelineState>(pso);
-	accessor.release();
+	ASSERT(pso != nullptr);
+	mPSOs.insert(pso);
 
-	return id;
-}
-
-ID3D12PipelineState& PSOManager::GetGraphicsPSO(const std::size_t id) noexcept {
-	PSOById::accessor accessor;
-	mPSOById.find(accessor, id);
-	ASSERT(!accessor.empty());
-	ID3D12PipelineState* state{ accessor->second.Get() };
-	accessor.release();
-
-	return *state;
+	return *pso;
 }

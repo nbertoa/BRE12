@@ -17,8 +17,8 @@ namespace {
 		ASSERT(commandList == nullptr);
 
 		// Create command allocator and command list
-		CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators);
-		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators, commandList);
+		commandAllocators = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
+		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators);
 		commandList->Close();
 	}
 }

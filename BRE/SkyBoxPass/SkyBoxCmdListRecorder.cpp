@@ -33,10 +33,10 @@ namespace {
 #endif
 
 		for (std::uint32_t i = 0U; i < cmdAllocCount; ++i) {
-			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc[i]);
+			cmdAlloc[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		}
 
-		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0], cmdList);
+		cmdList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAlloc[0]);
 
 		// Start off in a closed state.  This is because the first time we refer 
 		// to the command list we will Reset it, and it needs to be closed before
@@ -64,12 +64,11 @@ void SkyBoxCmdListRecorder::InitPSO() noexcept {
 	psoData.mDepthStencilDescriptor.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 	psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
 
-	ShaderManager::LoadShaderFile("SkyBoxPass/Shaders/PS.cso", psoData.mPixelShaderBytecode);
-	ShaderManager::LoadShaderFile("SkyBoxPass/Shaders/VS.cso", psoData.mVertexShaderBytecode);
+	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("SkyBoxPass/Shaders/PS.cso");
+	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("SkyBoxPass/Shaders/VS.cso");
 
-	ID3DBlob* rootSignatureBlob;
-	ShaderManager::LoadShaderFile("SkyBoxPass/Shaders/RS.cso", rootSignatureBlob);
-	RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("SkyBoxPass/Shaders/RS.cso");
+	psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
 	sRootSignature = psoData.mRootSignature;
 
 	psoData.mNumRenderTargets = 1U;
@@ -78,7 +77,7 @@ void SkyBoxCmdListRecorder::InitPSO() noexcept {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	PSOManager::CreateGraphicsPSO(psoData, sPSO);
+	sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -189,7 +188,7 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& skyBoxCubeMap) noexcept
 
 	// Create object cbuffer and fill it
 	const std::size_t objCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
-	UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, 1U, mObjectCBuffer);
+	mObjectCBuffer = &UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, 1U);
 	ObjectCBuffer objCBuffer;
 	const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&mWorldMatrix));
 	DirectX::XMStoreFloat4x4(&objCBuffer.mWorldMatrix, wMatrix);
@@ -219,6 +218,6 @@ void SkyBoxCmdListRecorder::BuildBuffers(ID3D12Resource& skyBoxCubeMap) noexcept
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
 	}
 }

@@ -48,6 +48,6 @@ public:
 protected:
 	bool IsDataValid() const;
 
-	ID3D12CommandAllocator* mCommandAllocators{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocator{ nullptr };
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 };

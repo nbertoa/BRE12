@@ -26,10 +26,9 @@ namespace SceneUtils {
 		CHECK_HR(cmdList.Reset(&cmdAlloc, nullptr));
 		
 		for (std::size_t i = 0UL; i < newTextureCount; ++i, ++nextTextureAvailableIndex) {
-			ResourceManager::LoadTextureFromFile(
+			mTextures[nextTextureAvailableIndex] = &ResourceManager::LoadTextureFromFile(
 				sourceTextureFilenames[i].c_str(),
 				cmdList,
-				mTextures[nextTextureAvailableIndex],
 				uploadBuffers[i]);
 			ASSERT(mTextures[nextTextureAvailableIndex] != nullptr);
 		}
@@ -67,9 +66,8 @@ namespace SceneUtils {
 		CHECK_HR(cmdList.Reset(&cmdAlloc, nullptr));
 
 		for (std::size_t i = 0UL; i < numModelsToLoad; ++i, ++nextModelAvailableIndex) {
-			ModelManager::LoadModel(
-				modelFiles[i].c_str(), 
-				mModels[nextModelAvailableIndex], 
+			mModels[nextModelAvailableIndex] = &ModelManager::LoadModel(
+				modelFiles[i].c_str(),
 				cmdList, 
 				uploadVertexBuffers[i], 
 				uploadIndexBuffers[i]);

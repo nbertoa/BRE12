@@ -148,7 +148,7 @@ RenderManager& RenderManager::Create(Scene& scene) noexcept {
 
 RenderManager::RenderManager(Scene& scene) {
 	CommandListExecutor::Create(MAX_NUM_CMD_LISTS);
-	FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE, mFence);
+	mFence = &FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE);
 	CreateFinalPassCommandObjects();
 	CreateRenderTargetViewsAndDepthStencilView();
 	CreateIntermediateColorBuffersAndRenderTargetCpuDescriptors();
@@ -316,13 +316,12 @@ void RenderManager::CreateRenderTargetViewsAndDepthStencilView() noexcept {
 	clearValue.DepthStencil.Stencil = 0U;
 
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::CreateCommittedResource(
+	mDepthStencilBuffer = &ResourceManager::CreateCommittedResource(
 		heapProps, 
 		D3D12_HEAP_FLAG_NONE, 
 		depthStencilDesc, 
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, 
-		&clearValue, 
-		mDepthStencilBuffer);
+		&clearValue);
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
 	D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
@@ -359,13 +358,12 @@ void RenderManager::CreateIntermediateColorBuffersAndRenderTargetCpuDescriptors(
 	rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;		
 	rtvDescriptor.Format = resourceDescriptor.Format;
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::CreateCommittedResource(
+	resource = &ResourceManager::CreateCommittedResource(
 		heapProps, 
 		D3D12_HEAP_FLAG_NONE, 
 		resourceDescriptor, 
 		D3D12_RESOURCE_STATE_RENDER_TARGET, 
-		&clearValue, 
-		resource);
+		&clearValue);
 	mIntermediateColorBuffer1 = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
 	RenderTargetDescriptorManager::CreateRenderTargetView(
 		*mIntermediateColorBuffer1.Get(), 
@@ -373,13 +371,12 @@ void RenderManager::CreateIntermediateColorBuffersAndRenderTargetCpuDescriptors(
 		&mIntermediateColorBuffer1RTVCpuDesc);
 
 	// Create RTV's descriptor for color buffer 2
-	ResourceManager::CreateCommittedResource(
+	resource = &ResourceManager::CreateCommittedResource(
 		heapProps, 
 		D3D12_HEAP_FLAG_NONE, 
 		resourceDescriptor, 
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
-		&clearValue, 
-		resource);
+		&clearValue);
 	mIntermediateColorBuffer2 = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
 	RenderTargetDescriptorManager::CreateRenderTargetView(*mIntermediateColorBuffer2.Get(), rtvDescriptor, &mIntermediateColorBuffer2RTVCpuDesc);
 }
@@ -388,10 +385,12 @@ void RenderManager::CreateFinalPassCommandObjects() noexcept {
 	ASSERT(SettingsManager::sQueuedFrameCount > 0U);
 
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mFinalPassCommandAllocators[i]);
+		mFinalPassCommandAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	}
 
-	CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mFinalPassCommandAllocators[0], mFinalPassCommandList);
+	mFinalPassCommandList = &CommandListManager::CreateCommandList(
+		D3D12_COMMAND_LIST_TYPE_DIRECT, 
+		*mFinalPassCommandAllocators[0]);
 	mFinalPassCommandList->Close();
 }
 

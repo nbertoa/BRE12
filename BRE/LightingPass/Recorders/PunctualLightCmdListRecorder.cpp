@@ -36,13 +36,12 @@ void PunctualLightCmdListRecorder::InitPSO() noexcept {
 	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-	ShaderManager::LoadShaderFile("LightingPass/Shaders/PunctualLight/GS.cso", psoData.mGeometryShaderBytecode);
-	ShaderManager::LoadShaderFile("LightingPass/Shaders/PunctualLight/PS.cso", psoData.mPixelShaderBytecode);
-	ShaderManager::LoadShaderFile("LightingPass/Shaders/PunctualLight/VS.cso", psoData.mVertexShaderBytecode);
+	psoData.mGeometryShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("LightingPass/Shaders/PunctualLight/GS.cso");
+	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("LightingPass/Shaders/PunctualLight/PS.cso");
+	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("LightingPass/Shaders/PunctualLight/VS.cso");
 
-	ID3DBlob* rootSignatureBlob;
-	ShaderManager::LoadShaderFile("LightingPass/Shaders/PunctualLight/RS.cso", rootSignatureBlob);
-	RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("LightingPass/Shaders/PunctualLight/RS.cso");
+	psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
 	sRootSignature = psoData.mRootSignature;
 
 	psoData.mNumRenderTargets = 1U;
@@ -51,7 +50,7 @@ void PunctualLightCmdListRecorder::InitPSO() noexcept {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-	PSOManager::CreateGraphicsPSO(psoData, sPSO);
+	sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -181,7 +180,7 @@ void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {
 
 	// Create lights buffer and fill it
 	const std::size_t lightBufferElemSize{ sizeof(PunctualLight) };
-	UploadBufferManager::CreateUploadBuffer(lightBufferElemSize, mNumLights, mLightsBuffer);
+	mLightsBuffer = &UploadBufferManager::CreateUploadBuffer(lightBufferElemSize, mNumLights);
 	const std::uint8_t* lightsPtr = reinterpret_cast<const std::uint8_t*>(lights);
 	for (std::uint32_t i = 0UL; i < mNumLights; ++i) {
 		mLightsBuffer->CopyData(i, lightsPtr + sizeof(PunctualLight) * i, sizeof(PunctualLight));
@@ -190,12 +189,12 @@ void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
 	}
 
 	// Create immutable cbuffer
 	const std::size_t immutableCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ImmutableCBuffer)) };
-	UploadBufferManager::CreateUploadBuffer(immutableCBufferElemSize, 1U, mImmutableCBuffer);
+	mImmutableCBuffer = &UploadBufferManager::CreateUploadBuffer(immutableCBufferElemSize, 1U);
 	ImmutableCBuffer immutableCBuffer;
 	mImmutableCBuffer->CopyData(0U, &immutableCBuffer, sizeof(immutableCBuffer));
 }

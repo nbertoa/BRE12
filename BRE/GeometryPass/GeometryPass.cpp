@@ -72,13 +72,12 @@ namespace {
 			D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 			rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 			rtvDesc.Format = resourceDescriptor.Format;
-			ResourceManager::CreateCommittedResource(
+			res = &ResourceManager::CreateCommittedResource(
 				heapProps, 
 				D3D12_HEAP_FLAG_NONE, 
 				resourceDescriptor, 
 				D3D12_RESOURCE_STATE_RENDER_TARGET, 
-				&clearValue[i], 
-				res);
+				&clearValue[i]);
 
 			buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
 			RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &bufferRenderTargetViewCpuDescriptors[i]);
@@ -95,9 +94,9 @@ namespace {
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 			ASSERT(commandAllocators[i] == nullptr);
-			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
+			commandAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		}
-		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
+		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0]);
 		commandList->Close();
 	}
 }

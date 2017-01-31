@@ -55,11 +55,10 @@ void VertexAndIndexBufferCreator::CreateVertexBuffer(
 	const std::uint32_t bufferSize { 
 		bufferCreationData.mElementCount * static_cast<std::uint32_t>(bufferCreationData.mElementSize) 
 	};
-	ResourceManager::CreateDefaultBuffer(
+	vertexBufferData.mBuffer = &ResourceManager::CreateDefaultBuffer(
 		commandList, 
 		bufferCreationData.mData, 
 		bufferSize, 
-		vertexBufferData.mBuffer, 
 		uploadBuffer);
 	vertexBufferData.mElementCount = bufferCreationData.mElementCount;
 
@@ -108,11 +107,10 @@ void VertexAndIndexBufferCreator::CreateIndexBuffer(
 	// Create buffer
 	const std::uint32_t elementSize{ static_cast<std::uint32_t>(bufferCreationData.mElementSize) };
 	const std::uint32_t bufferSize{ bufferCreationData.mElementCount * elementSize };
-	ResourceManager::CreateDefaultBuffer(
+	indexBufferData.mBuffer = &ResourceManager::CreateDefaultBuffer(
 		commandList, 
 		bufferCreationData.mData, 
 		bufferSize, 
-		indexBufferData.mBuffer, 
 		uploadBuffer);
 	indexBufferData.mElementCount = bufferCreationData.mElementCount;
 

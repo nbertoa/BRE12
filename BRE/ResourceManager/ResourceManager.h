@@ -2,8 +2,7 @@
 
 #include <d3d12.h>
 #include <mutex>
-#include <tbb/concurrent_hash_map.h>
-#include <wrl.h>
+#include <tbb/concurrent_unordered_set.h>
 
 #include <ResourceManager/UploadBuffer.h>
 
@@ -14,16 +13,15 @@
 class ResourceManager {
 public:
 	ResourceManager() = delete;
-	~ResourceManager() = delete;
+	~ResourceManager();
 	ResourceManager(const ResourceManager&) = delete;
 	const ResourceManager& operator=(const ResourceManager&) = delete;
 	ResourceManager(ResourceManager&&) = delete;
 	ResourceManager& operator=(ResourceManager&&) = delete;
 
-	static std::size_t LoadTextureFromFile(
+	static ID3D12Resource& LoadTextureFromFile(
 		const char* textureFilename, 
 		ID3D12GraphicsCommandList& commandList,
-		ID3D12Resource* &resource, 
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
 
 	// Note: uploadBuffer has to be kept alive after the above function calls because
@@ -33,28 +31,22 @@ public:
 	// Preconditions:
 	// - "sourceData" must not be nullptr
 	// - "sourceDataSize" must be greater than zero
-	static std::size_t CreateDefaultBuffer(
+	static ID3D12Resource& CreateDefaultBuffer(
 		ID3D12GraphicsCommandList& commandList,
 		const void* sourceData,
 		const std::size_t sourceDataSize,
-		ID3D12Resource* &buffer,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
 
-	static std::size_t CreateCommittedResource(
+	static ID3D12Resource& CreateCommittedResource(
 		const D3D12_HEAP_PROPERTIES& heapProperties,
 		const D3D12_HEAP_FLAGS& heapFlags,
 		const D3D12_RESOURCE_DESC& resourceDescriptor,
 		const D3D12_RESOURCE_STATES& resourceStates,
-		const D3D12_CLEAR_VALUE* clearValue,
-		ID3D12Resource* &resource) noexcept;
-
-	// Preconditions:
-	// - "id" must be valid.
-	static ID3D12Resource& GetResource(const std::size_t id) noexcept;
+		const D3D12_CLEAR_VALUE* clearValue) noexcept;
 
 private:
-	using ResourceById = tbb::concurrent_hash_map<std::size_t, Microsoft::WRL::ComPtr<ID3D12Resource>>;
-	static ResourceById mResourceById;
+	using Resources = tbb::concurrent_unordered_set<ID3D12Resource*>;
+	static Resources mResources;
 
 	static std::mutex mMutex;
 };

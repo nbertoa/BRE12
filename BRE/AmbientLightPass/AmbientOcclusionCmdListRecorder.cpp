@@ -43,10 +43,10 @@ namespace {
 #endif
 
 		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
-			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[i]);
+			commandAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		}
 
-		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0], commandList);
+		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0]);
 
 		// Start off in a closed state.  This is because the first time we refer 
 		// to the command list we will Reset it, and it needs to be closed before
@@ -189,12 +189,11 @@ void AmbientOcclusionCmdListRecorder::InitPSO() noexcept {
 	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-	ShaderManager::LoadShaderFile("AmbientLightPass/Shaders/AmbientOcclusion/PS.cso", psoData.mPixelShaderBytecode);
-	ShaderManager::LoadShaderFile("AmbientLightPass/Shaders/AmbientOcclusion/VS.cso", psoData.mVertexShaderBytecode);
+	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("AmbientLightPass/Shaders/AmbientOcclusion/PS.cso");
+	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("AmbientLightPass/Shaders/AmbientOcclusion/VS.cso");
 
-	ID3DBlob* rootSignatureBlob;
-	ShaderManager::LoadShaderFile("AmbientLightPass/Shaders/AmbientOcclusion/RS.cso", rootSignatureBlob);
-	RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob, psoData.mRootSignature);
+	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("AmbientLightPass/Shaders/AmbientOcclusion/RS.cso");
+	psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
 	sRootSignature = psoData.mRootSignature;
 
 	psoData.mNumRenderTargets = 1U;
@@ -203,7 +202,7 @@ void AmbientOcclusionCmdListRecorder::InitPSO() noexcept {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	PSOManager::CreateGraphicsPSO(psoData, sPSO);
+	sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -313,7 +312,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 
 	// Create sample kernel buffer and fill it
 	const std::size_t sampleKernelBufferElemSize{ sizeof(XMFLOAT4) };
-	UploadBufferManager::CreateUploadBuffer(sampleKernelBufferElemSize, mNumSamples, mSampleKernelBuffer);
+	mSampleKernelBuffer = &UploadBufferManager::CreateUploadBuffer(sampleKernelBufferElemSize, mNumSamples);
 	const std::uint8_t* sampleKernelPtr = reinterpret_cast<const std::uint8_t*>(sampleKernel);
 	for (std::uint32_t i = 0UL; i < mNumSamples; ++i) {
 		mSampleKernelBuffer->CopyData(i, sampleKernelPtr + sampleKernelBufferElemSize * i, sampleKernelBufferElemSize);
@@ -335,20 +334,24 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 	ID3D12Resource* noiseTexture{ nullptr };
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	ResourceManager::CreateCommittedResource(heapProps, D3D12_HEAP_FLAG_NONE, resDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, nullptr, noiseTexture);
+	noiseTexture = &ResourceManager::CreateCommittedResource(
+		heapProps, 
+		D3D12_HEAP_FLAG_NONE, 
+		resDesc, 
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
+		nullptr);
 
 	// In order to copy CPU memory data into our default buffer, we need to create
 	// an intermediate upload heap. 
 	const std::uint32_t num2DSubresources = resDesc.DepthOrArraySize * resDesc.MipLevels;
 	const std::size_t uploadBufferSize = GetRequiredIntermediateSize(noiseTexture, 0, num2DSubresources);
 	ID3D12Resource* noiseTextureUploadBuffer{ nullptr };
-	ResourceManager::CreateCommittedResource(
+	noiseTextureUploadBuffer = &ResourceManager::CreateCommittedResource(
 		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE,
 		CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
 		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		noiseTextureUploadBuffer);
+		nullptr);
 
 	D3D12_SUBRESOURCE_DATA subResourceData = {};
 	subResourceData.pData = kernelNoise;
@@ -380,7 +383,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U, mFrameCBuffer[i]);
+		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
 	}
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc[4U]{};

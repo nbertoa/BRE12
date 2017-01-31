@@ -9,8 +9,8 @@
 void Scene::Init() noexcept {
 	ASSERT(IsDataValid() == false);
 
-	CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandAllocators);
-	CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCommandAllocators, mCommandList);
+	mCommandAllocator = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	mCommandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *mCommandAllocator);
 	mCommandList->Close();	
 
 	ASSERT(IsDataValid());
@@ -19,7 +19,7 @@ void Scene::Init() noexcept {
 bool 
 Scene::IsDataValid() const {
 	const bool b =
-		mCommandAllocators != nullptr &&
+		mCommandAllocator != nullptr &&
 		mCommandList != nullptr;
 
 	return b;

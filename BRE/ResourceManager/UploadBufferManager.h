@@ -2,8 +2,7 @@
 
 #include <d3d12.h>
 #include <mutex>
-#include <tbb/concurrent_hash_map.h>
-#include <wrl.h>
+#include <tbb/concurrent_unordered_set.h>
 
 #include <ResourceManager/UploadBuffer.h>
 
@@ -11,7 +10,7 @@
 class UploadBufferManager {
 public:
 	UploadBufferManager() = delete;
-	~UploadBufferManager() = delete;
+	~UploadBufferManager();
 	UploadBufferManager(const UploadBufferManager&) = delete;
 	const UploadBufferManager& operator=(const UploadBufferManager&) = delete;
 	UploadBufferManager(UploadBufferManager&&) = delete;
@@ -20,18 +19,13 @@ public:
 	// Preconditions:
 	// - "elementSize" must be greater than zero.
 	// - "elementCount" must be greater than zero.
-	static std::size_t CreateUploadBuffer(
+	static UploadBuffer& CreateUploadBuffer(
 		const std::size_t elementSize,
-		const std::uint32_t elementCount,
-		UploadBuffer*& uploadBuffer) noexcept;
-
-	// Preconditions:
-	// - "id" must be valid.
-	static UploadBuffer& GetUploadBuffer(const std::size_t id) noexcept;
+		const std::uint32_t elementCount) noexcept;
 
 private:
-	using UploadBufferById = tbb::concurrent_hash_map<std::size_t, std::unique_ptr<UploadBuffer>>;
-	static UploadBufferById mUploadBufferById;
+	using UploadBuffers = tbb::concurrent_unordered_set<UploadBuffer*>;
+	static UploadBuffers mUploadBuffers;
 
 	static std::mutex mMutex;
 };

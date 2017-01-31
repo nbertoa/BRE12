@@ -1,39 +1,27 @@
 #include "UploadBufferManager.h"
 
-#include <memory>
-
 #include <DirectXManager/DirectXManager.h>
 #include <Utils/DebugUtils.h>
-#include <Utils/NumberGeneration.h>
 
-UploadBufferManager::UploadBufferById UploadBufferManager::mUploadBufferById;
+UploadBufferManager::UploadBuffers UploadBufferManager::mUploadBuffers;
 std::mutex UploadBufferManager::mMutex;
 
-std::size_t UploadBufferManager::CreateUploadBuffer(
-	const std::size_t elementSize,
-	const std::uint32_t elementCount,
-	UploadBuffer*& uploadBuffer) noexcept
-{
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	UploadBufferById::accessor accessor;
-#ifdef _DEBUG
-	mUploadBufferById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mUploadBufferById.insert(accessor, id);
-	accessor->second = std::make_unique<UploadBuffer>(DirectXManager::GetDevice(), elementSize, elementCount);
-	uploadBuffer = accessor->second.get();
-	accessor.release();
-
-	return id;
+UploadBufferManager::~UploadBufferManager() {
+	for (UploadBuffer* uploadBuffer : mUploadBuffers) {
+		ASSERT(uploadBuffer != nullptr);
+		delete uploadBuffer;
+	}
 }
 
-UploadBuffer& UploadBufferManager::GetUploadBuffer(const size_t id) noexcept {
-	UploadBufferById::accessor accessor;
-	mUploadBufferById.find(accessor, id);
-	ASSERT(!accessor.empty());
-	UploadBuffer* elem{ accessor->second.get() };
-	accessor.release();
+UploadBuffer& UploadBufferManager::CreateUploadBuffer(
+	const std::size_t elementSize,
+	const std::uint32_t elementCount) noexcept
+{
+	ASSERT(elementSize > 0UL);
+	ASSERT(elementCount > 0U);
 
-	return *elem;
+	UploadBuffer* uploadBuffer = new UploadBuffer(DirectXManager::GetDevice(), elementSize, elementCount);
+	mUploadBuffers.insert(uploadBuffer);
+
+	return *uploadBuffer;
 }

@@ -25,16 +25,16 @@ namespace {
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 			ASSERT(cmdAllocatorsEnd[i] == nullptr);
-			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocatorsBegin[i]);
+			cmdAllocatorsBegin[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
 
 			ASSERT(cmdAllocatorsEnd[i] == nullptr);
-			CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocatorsEnd[i]);
+			cmdAllocatorsEnd[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		}
 
-		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsBegin[0], commandListBegin);
+		commandListBegin = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsBegin[0]);
 		commandListBegin->Close();
 
-		CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsEnd[0], commandListEnd);
+		commandListEnd = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsEnd[0]);
 		commandListEnd->Close();
 	}
 
@@ -62,14 +62,12 @@ namespace {
 		CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 
 		// Create buffer resource
-		ID3D12Resource* resourcePtr{ nullptr };			
-		ResourceManager::CreateCommittedResource(
+		ID3D12Resource* resourcePtr = &ResourceManager::CreateCommittedResource(
 			heapProps, 
 			D3D12_HEAP_FLAG_NONE, 
 			resourceDescriptor, 
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
-			&clearValue, 
-			resourcePtr);
+			&clearValue);
 		
 		// Create RTV's descriptor for buffer
 		resource = Microsoft::WRL::ComPtr<ID3D12Resource>(resourcePtr);

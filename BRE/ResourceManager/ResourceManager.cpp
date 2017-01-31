@@ -1,33 +1,38 @@
 #include "ResourceManager.h"
 
-#include <memory>
-
 #include <DirectXManager/DirectXManager.h>
 #include <DXUtils/d3dx12.h>
 #include <ResourceManager\DDSTextureLoader.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <SettingsManager\SettingsManager.h>
 #include <Utils/DebugUtils.h>
-#include <Utils/NumberGeneration.h>
 #include <Utils\StringUtils.h>
 
-ResourceManager::ResourceById ResourceManager::mResourceById;
+ResourceManager::Resources ResourceManager::mResources;
 std::mutex ResourceManager::mMutex;
 
-std::size_t ResourceManager::LoadTextureFromFile(
+ResourceManager::~ResourceManager() {
+	for (ID3D12Resource* resource : mResources) {
+		ASSERT(resource != nullptr);
+		resource->Release();
+		delete resource;
+	}
+}
+
+ID3D12Resource& ResourceManager::LoadTextureFromFile(
 	const char* textureFilename, 
 	ID3D12GraphicsCommandList& commandList,
-	ID3D12Resource* &resource, 
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept 
 {
+	ID3D12Resource* resource{ nullptr };
+
 	ASSERT(textureFilename != nullptr);
 	std::string filePath(SettingsManager::sResourcesPath);
 	filePath += textureFilename;
 
 	const std::wstring filePathW(StringUtils::ToWideString(filePath));
-
+	
 	Microsoft::WRL::ComPtr<ID3D12Resource> resourcePtr;
-
 	mMutex.lock();
 	CHECK_HR(DirectX::CreateDDSTextureFromFile12(
 		&DirectXManager::GetDevice(), 
@@ -37,30 +42,24 @@ std::size_t ResourceManager::LoadTextureFromFile(
 		uploadBuffer));
 	mMutex.unlock();
 
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	ResourceById::accessor accessor;
-#ifdef _DEBUG
-	mResourceById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mResourceById.insert(accessor, id);
-	accessor->second = resourcePtr;
-	accessor.release();
+	resource = resourcePtr.Detach();
 
-	resource = resourcePtr.Get();
+	ASSERT(resource != nullptr);
+	mResources.insert(resource);
 
-	return id;
+	return *resource;
 }
 
-std::size_t ResourceManager::CreateDefaultBuffer(
+ID3D12Resource& ResourceManager::CreateDefaultBuffer(
 	ID3D12GraphicsCommandList& commandList,
 	const void* sourceData,
 	const std::size_t sourceDataSize,
-	ID3D12Resource* &buffer,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept
 {
 	ASSERT(sourceData != nullptr);
 	ASSERT(sourceDataSize > 0);
+
+	ID3D12Resource* resource{ nullptr };
 	
 	// Create the actual default buffer resource.
 	D3D12_HEAP_PROPERTIES heapProps{};
@@ -78,7 +77,7 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 		&resDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
-		IID_PPV_ARGS(&buffer)));
+		IID_PPV_ARGS(&resource)));
 
 	// In order to copy CPU memory data into our default buffer, we need to create
 	// an intermediate upload heap. 
@@ -108,58 +107,43 @@ std::size_t ResourceManager::CreateDefaultBuffer(
 	// Schedule to copy the data to the default buffer resource. At a high level, the helper function UpdateSubresources
 	// will copy the CPU memory into the intermediate upload heap.  Then, using ID3D12CommandList::CopySubresourceRegion,
 	// the intermediate upload heap data will be copied to mBuffer.
-	CD3DX12_RESOURCE_BARRIER resBarrier{ CD3DX12_RESOURCE_BARRIER::Transition(buffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST) };
+	CD3DX12_RESOURCE_BARRIER resBarrier{ CD3DX12_RESOURCE_BARRIER::Transition(
+		resource, 
+		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST) };
 	commandList.ResourceBarrier(1, &resBarrier);
-	UpdateSubresources<1>(&commandList, buffer, uploadBuffer.Get(), 0, 0, 1, &subResourceData);
-	resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(buffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+	UpdateSubresources<1>(&commandList, resource, uploadBuffer.Get(), 0, 0, 1, &subResourceData);
+	resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(resource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 	commandList.ResourceBarrier(1, &resBarrier);
 
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	ResourceById::accessor accessor;
-#ifdef _DEBUG
-	mResourceById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mResourceById.insert(accessor, id);
-	accessor->second = Microsoft::WRL::ComPtr<ID3D12Resource>(buffer);
-	accessor.release();
+	ASSERT(resource != nullptr);
+	mResources.insert(resource);
 
-	return id;
+	return *resource;
 }
 
-std::size_t ResourceManager::CreateCommittedResource(
+ID3D12Resource& ResourceManager::CreateCommittedResource(
 	const D3D12_HEAP_PROPERTIES& heapProperties,
 	const D3D12_HEAP_FLAGS& heapFlags,
 	const D3D12_RESOURCE_DESC& resourceDescriptor,
 	const D3D12_RESOURCE_STATES& resourceStates,
-	const D3D12_CLEAR_VALUE* clearValue,
-	ID3D12Resource* &resource) noexcept
+	const D3D12_CLEAR_VALUE* clearValue) noexcept
 {
-	mMutex.lock();
-	CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, resourceStates, clearValue, IID_PPV_ARGS(&resource)));
-	mMutex.unlock();
+	ID3D12Resource* resource{ nullptr };
 
-	const std::size_t id{ NumberGeneration::GetIncrementalSizeT() };
-	ResourceById::accessor accessor;
-#ifdef _DEBUG
-	mResourceById.find(accessor, id);
-	ASSERT(accessor.empty());
-#endif
-	mResourceById.insert(accessor, id);
-	accessor->second = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
-	accessor.release();
+	mMutex.lock();
+	CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(
+		&heapProperties, 
+		heapFlags, 
+		&resourceDescriptor, 
+		resourceStates, 
+		clearValue, 
+		IID_PPV_ARGS(&resource)));
+	mMutex.unlock();
 
 	ResourceStateManager::AddResource(*resource, resourceStates);
 
-	return id;
-}
+	ASSERT(resource != nullptr);
+	mResources.insert(resource);
 
-ID3D12Resource& ResourceManager::GetResource(const std::size_t id) noexcept {
-	ResourceById::accessor accessor;
-	mResourceById.find(accessor, id);
-	ASSERT(!accessor.empty());
-	ID3D12Resource* elem{ accessor->second.Get() };
-	accessor.release();
-
-	return *elem;
+	return *resource;
 }
