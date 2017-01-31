@@ -35,7 +35,6 @@ Output main(in const Input input) {
 	// Transform quad corners to view space near plane.
 	const float4 ph = mul(output.mPosH, gFrameCBuffer.mInvP);
 	output.mViewRayV = ph.xyz / ph.w;
-	output.mViewRayV = normalize(output.mViewRayV);
 
 	return output;
 }

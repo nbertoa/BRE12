@@ -31,7 +31,8 @@ Output main(const in Input input) {
 	
 	// Compute fragment position in view space
 	const float depthNDC = Depth.Load(screenCoord);
-	const float3 fragPosV = ViewRayToViewPosition(input.mViewRayV, depthNDC, gFrameCBuffer.mP);
+	const float3 viewRayV = normalize(input.mViewRayV);
+	const float3 fragPosV = ViewRayToViewPosition(viewRayV, depthNDC, gFrameCBuffer.mP);
 
 	PunctualLight light = input.mPunctualLight;
 

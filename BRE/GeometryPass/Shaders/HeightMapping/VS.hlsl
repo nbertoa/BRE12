@@ -37,7 +37,6 @@ Output main(in const Input input) {
 
 	output.mTexCoordO = gObjCBuffer.mTexTransform * input.mTexCoordO;
 		
-
 	// Normalized tessellation factor. 
 	// The tessellation is 
 	//   0 if d >= MIN_TESS_DISTANCE and

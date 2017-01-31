@@ -36,7 +36,7 @@ Output main(const in Input input){
 	const float3 viewRayV = normalize(input.mViewRayV);
 	const float3 fragPosV = ViewRayToViewPosition(viewRayV, depthNDC, gFrameCBuffer.mP);
 
-	const float3 geomPosW = mul(float4(fragPosV, 1.0f), gFrameCBuffer.mInvV).xyz;
+	const float3 fragPosW = mul(float4(fragPosV, 1.0f), gFrameCBuffer.mInvV).xyz;
 	
 	const float2 normal = normal_smoothness.xy;
 	const float3 normalV = normalize(Decode(normal));
@@ -56,7 +56,7 @@ Output main(const in Input input){
 
 	// Compute incident vector. 
 	// When we sample a cube map, we need to use data in world space, not view space.
-	const float3 incidentVecW = geomPosW - gFrameCBuffer.mEyePosW.xyz;
+	const float3 incidentVecW = fragPosW - gFrameCBuffer.mEyePosW.xyz;
 	const float3 reflectionVecW = reflect(incidentVecW, normalW);
 	// Our cube map has 10 mip map levels (0 - 9) based on smoothness
 	const float smoothness = normal_smoothness.z;

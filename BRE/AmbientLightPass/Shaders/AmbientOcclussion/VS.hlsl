@@ -35,7 +35,6 @@ Output main(in const Input input) {
 	// Transform current quad corner to view space.
 	const float4 ph = mul(output.mPosH, gFrameCBuffer.mInvP);
 	output.mViewRayV = ph.xyz / ph.w;
-	output.mViewRayV = normalize(output.mViewRayV);
 
 	return output;
 }

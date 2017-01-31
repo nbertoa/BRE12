@@ -15,6 +15,7 @@ struct Output {
 [RootSignature(RS)]
 Output main(const in Input input) {
 	Output output = (Output)0;
+
 	output.mColor = CubeMap.Sample(TexSampler, input.mPosO);
 
 	return output;

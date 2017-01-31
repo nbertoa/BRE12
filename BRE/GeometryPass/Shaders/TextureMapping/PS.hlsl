@@ -29,8 +29,8 @@ Output main(const in Input input) {
 	Output output = (Output)0;
 
 	// Normal (encoded in view space)
-	const float3 normal = normalize(input.mNormalV);
-	output.mNormal_Smoothness.xy = Encode(normal);
+	const float3 normalV = normalize(input.mNormalV);
+	output.mNormal_Smoothness.xy = Encode(normalV);
 
 	// Base color and metal mask
 	const float3 diffuseColor = DiffuseTexture.Sample(TexSampler, input.mTexCoordO).rgb;

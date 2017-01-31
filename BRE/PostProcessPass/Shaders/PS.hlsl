@@ -29,7 +29,8 @@ Output main(const in Input input){
 	Output output = (Output)0;
 
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
-	/*FxaaTex tex = { TexSampler, ColorBufferTexture };
+
+	FxaaTex tex = { TexSampler, ColorBufferTexture };
 	const float4 unusedFloat4 = { 0.0f, 0.0f, 0.0f, 0.0f };
 	const float unusedFloat = 0.0f;
 	output.mColor = FxaaPixelShader(
@@ -38,7 +39,7 @@ Output main(const in Input input){
 		RCP_FRAME,
 		QUALITY_SUB_PIX,
 		QUALITY_EDGE_THRESHOLD,
-		QUALITY_EDGE_THRESHOLD_MIN);*/
-	output.mColor = ColorBufferTexture.Load(screenCoord);
+		QUALITY_EDGE_THRESHOLD_MIN);
+
 	return output;
 }
