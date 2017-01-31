@@ -10,7 +10,4 @@
     <ClCompile Include="RenderTargetDescriptorManager.cpp" />
     <ClCompile Include="DepthStencilDescriptorManager.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

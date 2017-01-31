@@ -20,7 +20,4 @@
     <ClInclude Include="NormalScene.h" />
     <ClInclude Include="AmbientOcclussionScene.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

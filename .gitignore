@@ -2542,3 +2542,6 @@
 /BRE/SceneExecutor/x64/Debug/vc.nativecodeanalysis.all.xml
 /BRE/SettingsManager/x64/Debug/settingsmanager.nativecodeanalysis.xml
 /BRE/SettingsManager/x64/Debug/vc.nativecodeanalysis.all.xml
+/BRE/packages/WinPixEventRuntime.1.0.170126001/ThirdPartyNotices.txt
+/BRE/packages/WinPixEventRuntime.1.0.170126001/WinPixEventRuntime.1.0.170126001.nupkg
+/BRE/packages/WinPixEventRuntime.1.0.170126001/build/WinPixEventRuntime.targets

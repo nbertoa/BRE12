@@ -10,7 +10,4 @@
     <ClCompile Include="HashUtils.cpp" />
     <ClCompile Include="NumberGeneration.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

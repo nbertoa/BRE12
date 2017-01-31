@@ -10,7 +10,4 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelManager.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

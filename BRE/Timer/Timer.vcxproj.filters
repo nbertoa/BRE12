@@ -6,7 +6,4 @@
   <ItemGroup>
     <ClInclude Include="Timer.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

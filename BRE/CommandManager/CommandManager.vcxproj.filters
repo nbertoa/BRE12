@@ -12,7 +12,4 @@
     <ClCompile Include="CommandAllocatorManager.cpp" />
     <ClCompile Include="FenceManager.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

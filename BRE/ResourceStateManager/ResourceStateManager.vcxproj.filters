@@ -6,7 +6,4 @@
   <ItemGroup>
     <ClCompile Include="ResourceStateManager.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

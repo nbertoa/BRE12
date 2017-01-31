@@ -14,7 +14,4 @@
     <ClCompile Include="UploadBufferManager.cpp" />
     <ClCompile Include="VertexAndIndexBufferCreator.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

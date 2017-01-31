@@ -6,7 +6,4 @@
   <ItemGroup>
     <ClCompile Include="DirectXManager.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>
