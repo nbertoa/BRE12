@@ -339,7 +339,8 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 		D3D12_HEAP_FLAG_NONE, 
 		resDesc, 
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
-		nullptr);
+		nullptr,
+		L"Noise Buffer");
 
 	// In order to copy CPU memory data into our default buffer, we need to create
 	// an intermediate upload heap. 
@@ -351,6 +352,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 		D3D12_HEAP_FLAG_NONE,
 		CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
 		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
 		nullptr);
 
 	D3D12_SUBRESOURCE_DATA subResourceData = {};

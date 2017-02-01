@@ -24,3 +24,5 @@ const float SettingsManager::sVerticalFieldOfView{ 0.4f * MathUtils::Pi };
 
 const D3D12_VIEWPORT SettingsManager::sScreenViewport{ 0.0f, 0.0f, SettingsManager::sWindowWidth, SettingsManager::sWindowHeight, 0.0f, 1.0f };
 const D3D12_RECT SettingsManager::sScissorRect{ 0, 0, SettingsManager::sWindowWidth, SettingsManager::sWindowHeight };
+
+const float SettingsManager::sSecondsPerFrame{ 1.0f / 60.0f };

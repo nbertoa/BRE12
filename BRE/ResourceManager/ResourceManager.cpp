@@ -22,7 +22,8 @@ ResourceManager::~ResourceManager() {
 ID3D12Resource& ResourceManager::LoadTextureFromFile(
 	const char* textureFilename, 
 	ID3D12GraphicsCommandList& commandList,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept 
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
+	const wchar_t* resourceName) noexcept
 {
 	ID3D12Resource* resource{ nullptr };
 
@@ -47,6 +48,10 @@ ID3D12Resource& ResourceManager::LoadTextureFromFile(
 	ASSERT(resource != nullptr);
 	mResources.insert(resource);
 
+	if (resourceName != nullptr) {
+		resource->SetName(resourceName);
+	}
+	
 	return *resource;
 }
 
@@ -54,7 +59,8 @@ ID3D12Resource& ResourceManager::CreateDefaultBuffer(
 	ID3D12GraphicsCommandList& commandList,
 	const void* sourceData,
 	const std::size_t sourceDataSize,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept
+	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
+	const wchar_t* resourceName) noexcept
 {
 	ASSERT(sourceData != nullptr);
 	ASSERT(sourceDataSize > 0);
@@ -118,6 +124,10 @@ ID3D12Resource& ResourceManager::CreateDefaultBuffer(
 	ASSERT(resource != nullptr);
 	mResources.insert(resource);
 
+	if (resourceName != nullptr) {
+		resource->SetName(resourceName);
+	}
+
 	return *resource;
 }
 
@@ -126,7 +136,8 @@ ID3D12Resource& ResourceManager::CreateCommittedResource(
 	const D3D12_HEAP_FLAGS& heapFlags,
 	const D3D12_RESOURCE_DESC& resourceDescriptor,
 	const D3D12_RESOURCE_STATES& resourceStates,
-	const D3D12_CLEAR_VALUE* clearValue) noexcept
+	const D3D12_CLEAR_VALUE* clearValue,
+	const wchar_t* resourceName) noexcept
 {
 	ID3D12Resource* resource{ nullptr };
 
@@ -144,6 +155,10 @@ ID3D12Resource& ResourceManager::CreateCommittedResource(
 
 	ASSERT(resource != nullptr);
 	mResources.insert(resource);
+
+	if (resourceName != nullptr) {
+		resource->SetName(resourceName);
+	}
 
 	return *resource;
 }

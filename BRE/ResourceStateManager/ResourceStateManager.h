@@ -22,15 +22,19 @@ public:
 	ResourceStateManager& operator=(ResourceStateManager&&) = delete;
 
 	// Preconditions:
-	// - GetResource must not have been registered
+	// - Resource must not have been registered
 	static void AddResource(ID3D12Resource& resource, const D3D12_RESOURCE_STATES initialState) noexcept;
  
 	// Preconditions:
-	// - GetResource must have been registered
+	// - Resource must have been registered
 	// - New state must be different than current state
 	static CD3DX12_RESOURCE_BARRIER ChangeResourceStateAndGetBarrier(
 		ID3D12Resource& resource, 
 		const D3D12_RESOURCE_STATES newState) noexcept;
+
+	// Preconditions:
+	// - Resource must have been registered
+	static D3D12_RESOURCE_STATES GetResourceState(ID3D12Resource& resource) noexcept;
 
 private:
 	using StateByResource = tbb::concurrent_hash_map<ID3D12Resource*, D3D12_RESOURCE_STATES>;

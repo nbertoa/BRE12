@@ -80,6 +80,12 @@ bool ToneMappingPass::IsDataValid() const noexcept {
 void ToneMappingPass::ExecuteBeginTask() noexcept {
 	ASSERT(IsDataValid());
 
+	// Check resource states:
+	// - Input color buffer was used as render target in previous pass
+	// - Output color buffer was used as pixel shader resource in previous pass
+	ASSERT(ResourceStateManager::GetResourceState(*mInputColorBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+	ASSERT(ResourceStateManager::GetResourceState(*mOutputColorBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocatorIndex{ 0U };
 

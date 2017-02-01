@@ -59,7 +59,8 @@ void VertexAndIndexBufferCreator::CreateVertexBuffer(
 		commandList, 
 		bufferCreationData.mData, 
 		bufferSize, 
-		uploadBuffer);
+		uploadBuffer,
+		nullptr);
 	vertexBufferData.mElementCount = bufferCreationData.mElementCount;
 
 	// Fill view
@@ -111,7 +112,8 @@ void VertexAndIndexBufferCreator::CreateIndexBuffer(
 		commandList, 
 		bufferCreationData.mData, 
 		bufferSize, 
-		uploadBuffer);
+		uploadBuffer,
+		nullptr);
 	indexBufferData.mElementCount = bufferCreationData.mElementCount;
 
 	// Set index format

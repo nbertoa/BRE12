@@ -29,7 +29,8 @@ namespace SceneUtils {
 			mTextures[nextTextureAvailableIndex] = &ResourceManager::LoadTextureFromFile(
 				sourceTextureFilenames[i].c_str(),
 				cmdList,
-				uploadBuffers[i]);
+				uploadBuffers[i],
+				nullptr);
 			ASSERT(mTextures[nextTextureAvailableIndex] != nullptr);
 		}
 		cmdList.Close();

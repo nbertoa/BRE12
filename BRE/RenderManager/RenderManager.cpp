@@ -23,62 +23,68 @@ using namespace DirectX;
 namespace {
 	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };	
 	
-	// Update camera's view matrix and store data in parameters.
 	void UpdateCameraAndFrameCBuffer(
 		const float elapsedFrameTime,
 		Camera& camera,		
 		FrameCBuffer& frameCBuffer) noexcept {
 
-		static const float translationAcceleration = 100.0f; // rate of acceleration in units/sec
-		const float translationDelta = translationAcceleration * elapsedFrameTime;
+		static float elapsedFrameTimeAccumulator = 0.0f;
+		elapsedFrameTimeAccumulator += elapsedFrameTime;
 
-		static const float rotationAcceleration = 400.0f;
-		const float rotationDelta = rotationAcceleration * elapsedFrameTime;
+		while (elapsedFrameTimeAccumulator >= SettingsManager::sSecondsPerFrame) {
+			static const float translationAcceleration = 5.0f; // rate of acceleration in units/sec
+			const float translationDelta = translationAcceleration;
 
-		static std::int32_t lastXY[]{ 0UL, 0UL };
-		static const float sCameraOffset{ 7.5f };
-		static const float sCameraMultiplier{ 10.0f };
+			static const float rotationAcceleration = 10.0f;
+			const float rotationDelta = rotationAcceleration;
 
-		camera.UpdateViewMatrix(elapsedFrameTime);
+			static std::int32_t lastXY[]{ 0UL, 0UL };
+			static const float sCameraOffset{ 7.5f };
+			static const float sCameraMultiplier{ 10.0f };
 
-		frameCBuffer.mEyeWorldPosition = camera.GetPosition4f();
+			camera.UpdateViewMatrix();
 
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mViewMatrix, MathUtils::GetTransposeMatrix(camera.GetViewMatrix()));
-		DirectX::XMFLOAT4X4 inverse = camera.GetInverseViewMatrix();
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mInverseViewMatrix, MathUtils::GetTransposeMatrix(inverse));
+			frameCBuffer.mEyeWorldPosition = camera.GetPosition4f();
 
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mProjectionMatrix, MathUtils::GetTransposeMatrix(camera.GetProjectionMatrix()));
-		inverse = camera.GetInverseProjectionMatrix();
-		DirectX::XMStoreFloat4x4(&frameCBuffer.mInverseProjectionMatrix, MathUtils::GetTransposeMatrix(inverse));
-		
-		// Update camera based on keyboard
-		const float offset = translationDelta * (Keyboard::Get().IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f);
-		if (Keyboard::Get().IsKeyDown(DIK_W)) {
-			camera.Walk(offset);
+			DirectX::XMStoreFloat4x4(&frameCBuffer.mViewMatrix, MathUtils::GetTransposeMatrix(camera.GetViewMatrix()));
+			DirectX::XMFLOAT4X4 inverse = camera.GetInverseViewMatrix();
+			DirectX::XMStoreFloat4x4(&frameCBuffer.mInverseViewMatrix, MathUtils::GetTransposeMatrix(inverse));
+
+			DirectX::XMStoreFloat4x4(&frameCBuffer.mProjectionMatrix, MathUtils::GetTransposeMatrix(camera.GetProjectionMatrix()));
+			inverse = camera.GetInverseProjectionMatrix();
+			DirectX::XMStoreFloat4x4(&frameCBuffer.mInverseProjectionMatrix, MathUtils::GetTransposeMatrix(inverse));
+
+			// Update camera based on keyboard
+			const float offset = translationDelta * (Keyboard::Get().IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f);
+			if (Keyboard::Get().IsKeyDown(DIK_W)) {
+				camera.Walk(offset);
+			}
+			if (Keyboard::Get().IsKeyDown(DIK_S)) {
+				camera.Walk(-offset);
+			}
+			if (Keyboard::Get().IsKeyDown(DIK_A)) {
+				camera.Strafe(-offset);
+			}
+			if (Keyboard::Get().IsKeyDown(DIK_D)) {
+				camera.Strafe(offset);
+			}
+
+			// Update camera based on mouse
+			const std::int32_t x{ Mouse::Get().GetX() };
+			const std::int32_t y{ Mouse::Get().GetY() };
+			if (Mouse::Get().IsButtonDown(Mouse::MouseButtonsLeft)) {
+				const float dx = static_cast<float>(x - lastXY[0]) / SettingsManager::sWindowWidth;
+				const float dy = static_cast<float>(y - lastXY[1]) / SettingsManager::sWindowHeight;
+
+				camera.Pitch(dy * rotationDelta);
+				camera.RotateY(dx * rotationDelta);
+			}
+
+			lastXY[0] = x;
+			lastXY[1] = y;
+
+			elapsedFrameTimeAccumulator -= SettingsManager::sSecondsPerFrame;
 		}
-		if (Keyboard::Get().IsKeyDown(DIK_S)) {
-			camera.Walk(-offset);
-		}
-		if (Keyboard::Get().IsKeyDown(DIK_A)) {
-			camera.Strafe(-offset);
-		}
-		if (Keyboard::Get().IsKeyDown(DIK_D)) {
-			camera.Strafe(offset);
-		}
-
-		// Update camera based on mouse
-		const std::int32_t x{ Mouse::Get().GetX() };
-		const std::int32_t y{ Mouse::Get().GetY() };
-		if (Mouse::Get().IsButtonDown(Mouse::MouseButtonsLeft)) {
-			const float dx = static_cast<float>(x - lastXY[0]) / SettingsManager::sWindowWidth;
-			const float dy = static_cast<float>(y - lastXY[1]) / SettingsManager::sWindowHeight;
-
-			camera.Pitch(dy * rotationDelta);
-			camera.RotateY(dx * rotationDelta);
-		}
-
-		lastXY[0] = x;
-		lastXY[1] = y;
 	}
 
 	// Create swap chain and stores it in swapChain parameter.
@@ -321,7 +327,8 @@ void RenderManager::CreateRenderTargetViewsAndDepthStencilView() noexcept {
 		D3D12_HEAP_FLAG_NONE, 
 		depthStencilDesc, 
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, 
-		&clearValue);
+		&clearValue,
+		L"Depth Stencil Buffer");
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
 	D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
@@ -363,7 +370,8 @@ void RenderManager::CreateIntermediateColorBuffersAndRenderTargetCpuDescriptors(
 		D3D12_HEAP_FLAG_NONE, 
 		resourceDescriptor, 
 		D3D12_RESOURCE_STATE_RENDER_TARGET, 
-		&clearValue);
+		&clearValue,
+		L"Intermediate Color Buffer 1");
 	mIntermediateColorBuffer1 = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
 	RenderTargetDescriptorManager::CreateRenderTargetView(
 		*mIntermediateColorBuffer1.Get(), 
@@ -376,9 +384,13 @@ void RenderManager::CreateIntermediateColorBuffersAndRenderTargetCpuDescriptors(
 		D3D12_HEAP_FLAG_NONE, 
 		resourceDescriptor, 
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
-		&clearValue);
+		&clearValue,
+		L"Intermediate Color Buffer 2");
 	mIntermediateColorBuffer2 = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
-	RenderTargetDescriptorManager::CreateRenderTargetView(*mIntermediateColorBuffer2.Get(), rtvDescriptor, &mIntermediateColorBuffer2RTVCpuDesc);
+	RenderTargetDescriptorManager::CreateRenderTargetView(
+		*mIntermediateColorBuffer2.Get(), 
+		rtvDescriptor,
+		&mIntermediateColorBuffer2RTVCpuDesc);
 }
 
 void RenderManager::CreateFinalPassCommandObjects() noexcept {

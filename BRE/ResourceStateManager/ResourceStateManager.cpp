@@ -32,3 +32,10 @@ CD3DX12_RESOURCE_BARRIER ResourceStateManager::ChangeResourceStateAndGetBarrier(
 
 	return CD3DX12_RESOURCE_BARRIER::Transition(&resource, oldState, newState);
 }
+
+D3D12_RESOURCE_STATES ResourceStateManager::GetResourceState(ID3D12Resource& resource) noexcept {
+	StateByResource::accessor accessor;
+	mStateByResource.find(accessor, &resource);
+	ASSERT(accessor.empty() == false);
+	return accessor->second;
+}

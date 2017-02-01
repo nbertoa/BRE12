@@ -141,6 +141,18 @@ bool LightingPass::IsDataValid() const noexcept {
 void LightingPass::ExecuteBeginTask() noexcept {
 	ASSERT(IsDataValid());
 
+	// Check resource states:
+	// - All geometry shaders must be in render target state because they were output
+	// of the geometry pass.
+#ifdef _DEBUG
+	for (std::uint32_t i = 0U; i < GeometryPass::BUFFERS_COUNT; ++i) {
+		ASSERT(ResourceStateManager::GetResourceState(*mGeometryBuffers[i].Get()) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+	}
+#endif
+
+	// - Depth buffer was used for depth testing in geometry pass, so it must be in depth write state
+	ASSERT(ResourceStateManager::GetResourceState(*mDepthBuffer) == D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };
 
@@ -152,9 +164,17 @@ void LightingPass::ExecuteBeginTask() noexcept {
 
 	// GetResource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
-		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mGeometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mGeometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mDepthBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(
+			*mGeometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(), 
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(
+			*mGeometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(), 
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(
+			*mDepthBuffer, 
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 	};
 	const std::uint32_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 1UL);
@@ -170,6 +190,18 @@ void LightingPass::ExecuteBeginTask() noexcept {
 
 void LightingPass::ExecuteFinalTask() noexcept {
 	ASSERT(IsDataValid());
+
+	// Check resource states:
+	// - All geometry shaders must be in pixel shader resource state because they were used
+	// by lighting pass shaders.
+#ifdef _DEBUG
+	for (std::uint32_t i = 0U; i < GeometryPass::BUFFERS_COUNT; ++i) {
+		ASSERT(ResourceStateManager::GetResourceState(*mGeometryBuffers[i].Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	}
+#endif
+
+	// - Depth buffer must be in pixel shader resource because it was used by lighting pass shader.
+	ASSERT(ResourceStateManager::GetResourceState(*mDepthBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t commandAllocatorIndex{ 0U };

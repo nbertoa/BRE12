@@ -13,34 +13,33 @@
 
 namespace {
 	void CreateCommandObjects(
-		ID3D12CommandAllocator* cmdAllocatorsBegin[SettingsManager::sQueuedFrameCount],
-		ID3D12CommandAllocator* cmdAllocatorsEnd[SettingsManager::sQueuedFrameCount],
-		ID3D12GraphicsCommandList* &commandListBegin,
-		ID3D12GraphicsCommandList* &commandListEnd) noexcept 
+		ID3D12CommandAllocator* cmdAllocators[SettingsManager::sQueuedFrameCount],
+		ID3D12GraphicsCommandList* &commandList) noexcept 
 	{
 		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
-		ASSERT(commandListBegin == nullptr);
-		ASSERT(commandListEnd == nullptr);
+		ASSERT(commandList == nullptr);
+
+#ifdef _DEBUG
+		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
+			ASSERT(cmdAllocators[i] == nullptr);
+		}
+#endif
 
 		// Create command allocators and command list
 		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-			ASSERT(cmdAllocatorsEnd[i] == nullptr);
-			cmdAllocatorsBegin[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
-
-			ASSERT(cmdAllocatorsEnd[i] == nullptr);
-			cmdAllocatorsEnd[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
+			ASSERT(cmdAllocators[i] == nullptr);
+			cmdAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		}
 
-		commandListBegin = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsBegin[0]);
-		commandListBegin->Close();
-
-		commandListEnd = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsEnd[0]);
-		commandListEnd->Close();
+		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocators[0]);
+		commandList->Close();
 	}
 
 	void CreateResourceAndRenderTargetDescriptor(
 		Microsoft::WRL::ComPtr<ID3D12Resource>& resource,
-		D3D12_CPU_DESCRIPTOR_HANDLE& bufferRenderTargetCpuDesc) noexcept {
+		D3D12_CPU_DESCRIPTOR_HANDLE& bufferRenderTargetCpuDesc,
+		const D3D12_RESOURCE_STATES& resourceStates,
+		const wchar_t* resourceName) noexcept {
 		
 		// Set shared buffers properties
 		D3D12_RESOURCE_DESC resourceDescriptor = {};
@@ -66,8 +65,9 @@ namespace {
 			heapProps, 
 			D3D12_HEAP_FLAG_NONE, 
 			resourceDescriptor, 
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
-			&clearValue);
+			resourceStates,
+			&clearValue,
+			resourceName);
 		
 		// Create RTV's descriptor for buffer
 		resource = Microsoft::WRL::ComPtr<ID3D12Resource>(resourcePtr);
@@ -86,7 +86,9 @@ void AmbientLightPass::Init(
 
 	ASSERT(ValidateData() == false);
 		
-	CreateCommandObjects(mCmdAllocatorsBegin, mCmdAllocatorsFinal, mCmdListBegin, mCmdListEnd);
+	CreateCommandObjects(mCmdAllocatorsBegin, mCmdListBegin);
+	CreateCommandObjects(mCmdAllocatorsMiddle, mCmdListMiddle);
+	CreateCommandObjects(mCmdAllocatorsFinal, mCmdListEnd);
 
 	// Initialize recorder's PSO
 	AmbientLightCmdListRecorder::InitPSO();
@@ -94,8 +96,16 @@ void AmbientLightPass::Init(
 	BlurCmdListRecorder::InitPSO();
 
 	// Create ambient accessibility buffer and blur buffer
-	CreateResourceAndRenderTargetDescriptor(mAmbientAccessibilityBuffer, mAmbientAccessibilityBufferRenderTargetCpuDesc);
-	CreateResourceAndRenderTargetDescriptor(mBlurBuffer, mBlurBufferRenderTargetCpuDesc);
+	CreateResourceAndRenderTargetDescriptor(
+		mAmbientAccessibilityBuffer, 
+		mAmbientAccessibilityBufferRenderTargetCpuDesc,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		L"Ambient Accessibility Buffer");
+	CreateResourceAndRenderTargetDescriptor(
+		mBlurBuffer, 
+		mBlurBufferRenderTargetCpuDesc,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		L"Blur Buffer");
 	
 	// Initialize ambient occlusion recorder
 	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder());
@@ -129,6 +139,7 @@ void AmbientLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 
 	ExecuteBeginTask();
 	mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
+	ExecuteMiddleTask();
 	mBlurRecorder->RecordAndPushCommandLists();
 	ExecuteFinalTask();
 	mAmbientLightRecorder->RecordAndPushCommandLists();
@@ -147,6 +158,12 @@ bool AmbientLightPass::ValidateData() const noexcept {
 	}
 
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
+		if (mCmdAllocatorsMiddle[i] == nullptr) {
+			return false;
+		}
+	}
+
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mCmdAllocatorsFinal[i] == nullptr) {
 			return false;
 		}
@@ -154,6 +171,7 @@ bool AmbientLightPass::ValidateData() const noexcept {
 
 	const bool b =
 		mCmdListBegin != nullptr &&
+		mCmdListMiddle != nullptr &&
 		mCmdListEnd != nullptr &&
 		mAmbientOcclusionRecorder.get() != nullptr &&
 		mAmbientLightRecorder.get() != nullptr &&
@@ -168,6 +186,13 @@ bool AmbientLightPass::ValidateData() const noexcept {
 void AmbientLightPass::ExecuteBeginTask() noexcept {
 	ASSERT(ValidateData());
 
+	// Check resource states:
+	// Ambient accesibility buffer was used as pixel shader resource by blur shader.
+	ASSERT(ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer.Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+	// Blur buffer was used as pixel shader resource by ambient light shader
+	ASSERT(ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t commandAllocatorIndex{ 0U };
 
@@ -177,14 +202,15 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 	CHECK_HR(commandAllocator->Reset());
 	CHECK_HR(mCmdListBegin->Reset(commandAllocator, nullptr));
 
-	// GetResource barriers
+	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]
 	{
-		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),
-		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET),		
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(
+			*mAmbientAccessibilityBuffer.Get(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
 	const std::uint32_t barriersCount = _countof(barriers);
-	ASSERT(barriersCount == 2UL);
+	ASSERT(barriersCount == 1UL);
 	mCmdListBegin->ResourceBarrier(barriersCount, barriers);
 
 	// Clear render targets
@@ -195,8 +221,60 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 	CommandListExecutor::Get().AddCommandList(*mCmdListBegin);
 }
 
+void AmbientLightPass::ExecuteMiddleTask() noexcept {
+	ASSERT(ValidateData());
+
+	// Check resource states:
+	// Ambient accesibility buffer was used as render target resource by ambient accesibility shader.
+	ASSERT(ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer.Get()) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	// Blur buffer was used as pixel shader resource by ambient light shader
+	ASSERT(ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+	// Check resource states:
+	// Ambient accesibility was used as pixel shader resource and must be changed to 
+	ASSERT(ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer.Get()) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	ASSERT(ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+	// Used to choose a different command list allocator each call.
+	static std::uint32_t commandAllocatorIndex{ 0U };
+
+	ID3D12CommandAllocator* commandAllocator{ mCmdAllocatorsMiddle[commandAllocatorIndex] };
+	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCmdAllocatorsMiddle);
+
+	// Prepare end task
+	CHECK_HR(commandAllocator->Reset());
+	CHECK_HR(mCmdListMiddle->Reset(commandAllocator, nullptr));
+
+	// Resource barriers
+	CD3DX12_RESOURCE_BARRIER barriers[]
+	{
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(
+			*mAmbientAccessibilityBuffer.Get(), 
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(
+			*mBlurBuffer.Get(), 
+			D3D12_RESOURCE_STATE_RENDER_TARGET),
+	};
+	const std::uint32_t barriersCount = _countof(barriers);
+	ASSERT(barriersCount == 2UL);
+	mCmdListMiddle->ResourceBarrier(barriersCount, barriers);
+	CHECK_HR(mCmdListMiddle->Close());
+
+	CommandListExecutor::Get().AddCommandList(*mCmdListMiddle);
+}
+
 void AmbientLightPass::ExecuteFinalTask() noexcept {
 	ASSERT(ValidateData());
+
+	// Check resource states:
+	// Ambient accesibility buffer was used as pixel shader resource by blur shader.
+	ASSERT(ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer.Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+	// Blur buffer was used as render target resource by blur shader
+	ASSERT(ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) == D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t commandAllocatorIndex{ 0U };
@@ -207,16 +285,15 @@ void AmbientLightPass::ExecuteFinalTask() noexcept {
 	// Prepare end task
 	CHECK_HR(commandAllocator->Reset());
 	CHECK_HR(mCmdListEnd->Reset(commandAllocator, nullptr));
-
-	// GetResource barriers
-	CD3DX12_RESOURCE_BARRIER endBarriers[]
+	
+	// Resource barriers
+	CD3DX12_RESOURCE_BARRIER barriers[]
 	{
-		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),		
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 	};
-	const std::uint32_t barriersCount = _countof(endBarriers);
-	ASSERT(barriersCount == 2UL);
-	mCmdListEnd->ResourceBarrier(barriersCount, endBarriers);
+	const std::uint32_t barriersCount = _countof(barriers);
+	ASSERT(barriersCount == 1UL);
+	mCmdListEnd->ResourceBarrier(barriersCount, barriers);
 	CHECK_HR(mCmdListEnd->Close());
 
 	CommandListExecutor::Get().AddCommandList(*mCmdListEnd);

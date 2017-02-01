@@ -1,5 +1,6 @@
 #include "Camera.h"
 
+#include <SettingsManager\SettingsManager.h>
 #include <Utils\DebugUtils.h>
 
 using namespace DirectX;
@@ -65,11 +66,11 @@ void Camera::RotateY(const float angleInRadians) noexcept {
 	XMStoreFloat3(&mLookVector, XMVector3TransformNormal(XMLoadFloat3(&mLookVector), rotationYMatrix));
 }
 
-void Camera::UpdateViewMatrix(const float elapsedFrameTime) noexcept {
-	ASSERT(elapsedFrameTime > 0.0f);
-
+void Camera::UpdateViewMatrix() noexcept {
 	static float maxVelocitySpeed{ 100.0f }; // speed = velocity magnitude
 	static float velocityDamp{ 0.1f }; // fraction of velocity retained per second
+
+	const float secondsPerFrame = SettingsManager::sSecondsPerFrame;
 
 	// Clamp velocity
 	XMVECTOR velocityVector = XMLoadFloat3(&mVelocityVector);
@@ -81,10 +82,10 @@ void Camera::UpdateViewMatrix(const float elapsedFrameTime) noexcept {
 
 	// Apply velocity and pitch-way-roll
 	XMVECTOR position = XMLoadFloat3(&mPosition);
-	position = position + velocityVector * elapsedFrameTime;
+	position = position + velocityVector * secondsPerFrame;
 	
 	// Damp velocity
-	velocityVector = velocityVector * static_cast<float>(pow(velocityDamp, elapsedFrameTime));
+	velocityVector = velocityVector * static_cast<float>(pow(velocityDamp, secondsPerFrame));
 	
 	// Keep camera's axes orthogonal to each other and of unit length.
 	XMVECTOR rightVector(XMLoadFloat3(&mRightVector));

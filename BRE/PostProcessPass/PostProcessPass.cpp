@@ -85,6 +85,12 @@ void PostProcessPass::ExecuteBeginTask(
 	ASSERT(IsDataValid());
 	ASSERT(outputColorBufferCpuDescriptor.ptr != 0UL);
 
+	// Check resource states:
+	// - Input color buffer was used as render target in previous pass
+	// - Output color buffer is the frame buffer, so it was used to present before.
+	ASSERT(ResourceStateManager::GetResourceState(*mColorBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+	ASSERT(ResourceStateManager::GetResourceState(outputColorBuffer) == D3D12_RESOURCE_STATE_PRESENT);
+
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t cmdAllocIndex{ 0U };
 

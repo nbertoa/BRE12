@@ -40,9 +40,7 @@ public:
 	void Pitch(const float angleInRadians) noexcept;
 	void RotateY(const float angleInRadians) noexcept;
 
-	// Preconditions:
-	// - elapsedFrameTime must be positive
-	void UpdateViewMatrix(const float elapsedFrameTime) noexcept;
+	void UpdateViewMatrix() noexcept;
 
 private:
 	DirectX::XMFLOAT3 mPosition = { 0.0f, 0.0f, 0.0f };

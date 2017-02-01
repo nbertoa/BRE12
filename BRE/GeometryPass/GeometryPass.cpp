@@ -16,6 +16,7 @@
 #include <GeometryPass\Recorders\NormalCmdListRecorder.h>
 #include <GeometryPass\Recorders\TextureCmdListRecorder.h>
 #include <ResourceManager\ResourceManager.h>
+#include <ResourceStateManager\ResourceStateManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
@@ -64,6 +65,11 @@ namespace {
 		ID3D12Resource* res{ nullptr };
 
 		// Create and store RTV's descriptors for buffers
+		const wchar_t* resourceNames[GeometryPass::BUFFERS_COUNT] =
+		{
+			L"Normal_Smoothness Buffer",
+			L"BaseColor_MetalMask Buffer"
+		};
 		for (std::uint32_t i = 0U; i < GeometryPass::BUFFERS_COUNT; ++i) {
 			resourceDescriptor.Format = sGeometryBufferFormats[i];
 
@@ -77,7 +83,8 @@ namespace {
 				D3D12_HEAP_FLAG_NONE, 
 				resourceDescriptor, 
 				D3D12_RESOURCE_STATE_RENDER_TARGET, 
-				&clearValue[i]);
+				&clearValue[i],
+				resourceNames[i]);
 
 			buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
 			RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &bufferRenderTargetViewCpuDescriptors[i]);
@@ -191,6 +198,15 @@ bool GeometryPass::IsDataValid() const noexcept {
 void GeometryPass::ExecuteBeginTask() noexcept {
 	ASSERT(IsDataValid());
 
+	// Check resource states:
+	// As geometry pass is the first pass, then all geometry buffers must be 
+	// in render target state because final pass changed them.
+#ifdef _DEBUG
+	for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
+		ASSERT(ResourceStateManager::GetResourceState(*mGeometryBuffers[i].Get()) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+	}
+#endif
+
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t commandAllocatorIndex{ 0U };
 
@@ -207,7 +223,7 @@ void GeometryPass::ExecuteBeginTask() noexcept {
 	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	mCommandList->ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescs[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
 	mCommandList->ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescs[BASECOLOR_METALMASK], zero, 0U, nullptr);
-	mCommandList->ClearDepthStencilView(mDepthBufferCpuDesc, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0U, 0U, nullptr);
+	mCommandList->ClearDepthStencilView(mDepthBufferCpuDesc, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0U, 0U, nullptr);
 
 	CHECK_HR(mCommandList->Close());
 

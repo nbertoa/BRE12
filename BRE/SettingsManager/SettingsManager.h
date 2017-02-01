@@ -44,4 +44,9 @@ public:
 
 	static const D3D12_VIEWPORT sScreenViewport;
 	static const D3D12_RECT sScissorRect;
+
+	// Used to update physics. If you
+	// want a fixed update time step, for example,
+	// 60 FPS, then you should store 1.0f / 60.0f here
+	static const float sSecondsPerFrame;
 };

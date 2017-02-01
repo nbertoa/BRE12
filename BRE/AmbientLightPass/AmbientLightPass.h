@@ -40,13 +40,16 @@ private:
 	bool ValidateData() const noexcept;
 
 	void ExecuteBeginTask() noexcept;
+	void ExecuteMiddleTask() noexcept;
 	void ExecuteFinalTask() noexcept;
 	
 	// 1 command allocater per queued frame.	
 	ID3D12CommandAllocator* mCmdAllocatorsBegin[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCmdAllocatorsMiddle[SettingsManager::sQueuedFrameCount]{ nullptr };
 	ID3D12CommandAllocator* mCmdAllocatorsFinal[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	ID3D12GraphicsCommandList* mCmdListBegin{ nullptr };
+	ID3D12GraphicsCommandList* mCmdListMiddle{ nullptr };
 	ID3D12GraphicsCommandList* mCmdListEnd{ nullptr };
 
 	std::unique_ptr<AmbientOcclusionCmdListRecorder> mAmbientOcclusionRecorder;
