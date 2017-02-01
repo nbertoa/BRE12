@@ -5,6 +5,8 @@
 #define FXAA_PC 1
 #define FXAA_QUALITY__PRESET 12
 
+//#define SKIP_POST_PROCESS
+
 #include <ShaderUtils/Fxaa.hlsli>
 
 #define RCP_FRAME float2(1.0f / 1920.0f, 1.0f / 1080.0f)
@@ -30,16 +32,20 @@ Output main(const in Input input){
 
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
 
+#ifdef SKIP_POST_PROCESS
+	output.mColor = ColorBufferTexture.Load(screenCoord);
+#else
 	FxaaTex tex = { TexSampler, ColorBufferTexture };
 	const float4 unusedFloat4 = { 0.0f, 0.0f, 0.0f, 0.0f };
 	const float unusedFloat = 0.0f;
 	output.mColor = FxaaPixelShader(
-		input.mTexCoordO.xy, 
-		tex,  
+		input.mTexCoordO.xy,
+		tex,
 		RCP_FRAME,
 		QUALITY_SUB_PIX,
 		QUALITY_EDGE_THRESHOLD,
 		QUALITY_EDGE_THRESHOLD_MIN);
+#endif
 
 	return output;
 }

@@ -74,7 +74,7 @@ namespace {
 			// oriented along the z axis
 			const float x = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
 			const float y = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
-			const float z = MathUtils::RandomFloatInInverval(-1.0f, 0.0f);
+			const float z = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
 			elem = XMFLOAT4(x, y, z, 0.0f);
 			vec = XMLoadFloat4(&elem);
 			vec = XMVector4Normalize(vec);
@@ -82,7 +82,7 @@ namespace {
 			// Accelerating interpolation function to falloff 
 			// from the distance from the origin.
 			float scale = i / numSamplesF;
-			scale = MathUtils::Lerp(0.5f, 1.0f, scale);
+			scale = MathUtils::Lerp(0.1f, 1.0f, scale);
 			vec = XMVectorScale(vec, scale);
 			XMStoreFloat4(&elem, vec);
 		}

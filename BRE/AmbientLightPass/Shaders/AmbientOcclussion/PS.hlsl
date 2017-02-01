@@ -4,10 +4,10 @@
 
 #include "RS.hlsl"
 
-#define VERSION1
+//#define VERSION1
 #define SAMPLE_KERNEL_SIZE 128U
 #define NOISE_SCALE float2(1920.0f / 4.0f, 1080.0f / 4.0f)
-#define OCCLUSION_RADIUS 10.0f
+#define OCCLUSION_RADIUS 2.5f
 #define SURFACE_EPSILON 0.05f
 #define OCCLUSION_FADE_START 0.2f
 #define OCCLUSION_FADE_END 1000.0f
@@ -63,24 +63,12 @@ Output main(const in Input input) {
 
 	// Compute fragment position in view space
 	const float depthNDC = Depth.Load(screenCoord);
-	const float viewRayV = normalize(input.mViewRayV);
+	const float3 viewRayV = normalize(input.mViewRayV);
 	const float4 fragPosV = float4(ViewRayToViewPosition(viewRayV, depthNDC, gFrameCBuffer.mP), 1.0f);
-
-	/*const float2 normal = Normal_Smoothness.Load(screenCoord).xy;
-	const float3 normalV = normalize(Decode(normal));
-
-	// Get position resulting from the displacement of fragPosV by offsetV
-	const float4 samplePosV = fragPosV + float4(normalV, 0.0f) * OCCLUSION_RADIUS;
-
-	// Convert sample position to NDC and sample depth at that position in depth buffer.
-	const float4 samplePosH = mul(samplePosV, gFrameCBuffer.mP);
-	const float sampleDepthNDC = Depth.Load(int3(samplePosH.xy / samplePosH.w, 0));
-
-	// Convert sample depth from NDC to view space
-	const float sampleDepthV = NdcDepthToViewDepth(sampleDepthNDC, gFrameCBuffer.mP);*/
 
 	// Iterate over sample kernel
 	float occlusionSum = 0.0f;
+	const float3 noiseVec = NoiseTexture.SampleLevel(TexSampler, 4.0f * input.mTexCoordO, 0.0f).xyz * 2.0f - 1.0f;
 	for (uint i = 0U; i < SAMPLE_KERNEL_SIZE; ++i) {
 		// Convert sample to view space
 		const float4 offsetV = mul(SampleKernel[i], gFrameCBuffer.mV);
@@ -89,8 +77,11 @@ Output main(const in Input input) {
 		const float4 samplePosV = fragPosV + offsetV * OCCLUSION_RADIUS;
 
 		// Convert sample position to NDC and sample depth at that position in depth buffer.
-		const float4 samplePosH = mul(samplePosV, gFrameCBuffer.mP);
-		const float sampleDepthNDC = Depth.Load(int3(samplePosH.xy / samplePosH.w, 0));
+		float4 samplePosH = mul(samplePosV, gFrameCBuffer.mP);
+		samplePosH /= samplePosH.w;
+		const float x = (samplePosH.x + 1.0f) * 1920.0f * 0.5f;
+		const float y = (1.0f - samplePosH.y) * 1080.0f * 0.5f;
+		const float sampleDepthNDC = Depth.Load(int3(x, y, 0));
 
 		// Convert sample depth from NDC to view space
 		const float sampleDepthV = NdcDepthToViewDepth(sampleDepthNDC, gFrameCBuffer.mP);
@@ -100,18 +91,13 @@ Output main(const in Input input) {
 
 	output.mAccessibility = 1.0f - (occlusionSum / SAMPLE_KERNEL_SIZE);
 
-	//output.mAccessibility = (samplePosV.z <= fragPosV.z ? 1.0 : 0.0);
+	// Sharpen the contrast of the SSAO map to make the SSAO affect more dramatic.
+	output.mAccessibility = saturate(pow(output.mAccessibility, 2.0f));
 
 	return output;
 
-	/*const int3 screenCoord = int3(input.mPosH.xy, 0);
-
-	// Compute fragment position in view space
-	const float depthNDC = Depth.Load(screenCoord);
-	const float3 fragPosV = ViewRayToViewPosition(input.mViewRayV, depthNDC, gFrameCBuffer.mP);
-
 	// Get normal
-	const float2 normal = Normal_Smoothness.Load(screenCoord).xy;
+	/*const float2 normal = Normal_Smoothness.Load(screenCoord).xy;
 	const float3 normalV = normalize(Decode(normal));
 
 	// Construct a change-of-basis matrix to reorient our sample kernel
@@ -131,7 +117,7 @@ Output main(const in Input input) {
 		sampleKernelMatrix,
 		gFrameCBuffer.mP,
 		OCCLUSION_RADIUS,
-		fragPosV,
+		fragPosV.xyz,
 		Depth);
 
 #else
@@ -141,7 +127,7 @@ Output main(const in Input input) {
 		normalV,
 		gFrameCBuffer.mP,
 		OCCLUSION_RADIUS,
-		fragPosV,
+		fragPosV.xyz,
 		Depth,
 		SURFACE_EPSILON,
 		OCCLUSION_FADE_START,

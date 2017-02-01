@@ -2,6 +2,8 @@
 
 #include "RS.hlsl"
 
+//#define SKIP_TONE_MAPPING
+
 struct Input {
 	float4 mPosH : SV_POSITION;
 };
@@ -19,9 +21,14 @@ Output main(const in Input input){
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
 
 	const float4 color = ColorBufferTexture.Load(screenCoord);
-	output.mColor = float4(FilmicToneMapping(color.rgb), color.a);	
+
+#ifdef SKIP_TONE_MAPPING
+	output.mColor = color;
+#else 
+	output.mColor = float4(FilmicToneMapping(color.rgb), color.a);
 	output.mColor = float4(accurateLinearToSRGB(output.mColor.xyz), 1.0f);
 	output.mColor.a = dot(output.mColor.rgb, float3(0.299, 0.587, 0.114)); // compute luma
+#endif 
 
 	return output;
 }

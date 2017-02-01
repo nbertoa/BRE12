@@ -61,10 +61,11 @@ float SSAOVersion1(
 	float4 sampleH = float4(sampleV, 1.0f);
 	sampleH = mul(sampleH, projMatrix);
 	sampleH.xy /= sampleH.w;
-	sampleH.xy = sampleH.xy * 0.5 + 0.5;
+	const float x = (sampleH.x + 1.0f) * 1920.0f * 0.5f;
+	const float y = (1.0f - sampleH.y) * 1080.0f * 0.5f;
 
 	// Get sample depth
-	float sampleDepthV = depthTex.Load(float3(sampleH.xy, 0));
+	float sampleDepthV = depthTex.Load(float3(x, y, 0));
 	sampleDepthV = NdcDepthToViewDepth(sampleDepthV, projMatrix);
 
 	// Range check and ambient occlusion factor
@@ -94,11 +95,13 @@ float SSAOVersion2(
 	// Project sample
 	float4 sampleH = mul(float4(sampleV, 1.0f), projMatrix);
 	sampleH /= sampleH.w;
+	const float x = (sampleH.x + 1.0f) * 1920.0f * 0.5f;
+	const float y = (1.0f - sampleH.y) * 1080.0f * 0.5f;
 
 	// Find the nearest depth value along the ray from the eye to q (this is not
 	// the depth of q, as q is just an arbitrary point near p and might
 	// occupy empty space).  To find the nearest depth we look it up in the depthmap.
-	float sampleDepthV = depthTex.Load(float3(sampleH.xy, 0));
+	float sampleDepthV = depthTex.Load(float3(x, y, 0));
 	sampleDepthV = NdcDepthToViewDepth(sampleDepthV, projMatrix);
 
 	// Reconstruct full view space position r = (rx,ry,rz).  We know r
