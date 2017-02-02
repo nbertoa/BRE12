@@ -72,18 +72,18 @@ namespace {
 
 	const float sTx{ 0.0f };
 	const float sTy{ sFloorTy + 0.5f };
-	const float sOffsetX{ 15.0f };
+	const float sOffsetX{ 13.5f };
 
 	const float sTz0{ 0.0f };
-	const float sTz1{ -15.0f };
-	const float sTz2{ -30.0f };
-	const float sTz3{ -45.0f };
-	const float sTz4{ -60.0f };
-	const float sTz5{ -75.0f };
-	const float sTz6{ -90.0f };
-	const float sTz7{ -105.0f };
-	const float sTz8{ -120.0f };
-	const float sTz9{ -135.0f };
+	const float sTz1{ -13.0f };
+	const float sTz2{ -26.0f };
+	const float sTz3{ -39.0f };
+	const float sTz4{ -52.0f };
+	const float sTz5{ -65.0f };
+	const float sTz6{ -78.0f };
+	const float sTz7{ -91.0f };
+	const float sTz8{ -104.0f };
+	const float sTz9{ -117.0f };
 
 	void GenerateRecorder(
 		const float initX,

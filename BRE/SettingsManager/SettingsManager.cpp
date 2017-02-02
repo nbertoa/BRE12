@@ -18,8 +18,8 @@ const DXGI_FORMAT SettingsManager::sDepthStencilFormat{ DXGI_FORMAT_R32_TYPELESS
 const DXGI_FORMAT SettingsManager::sDepthStencilViewFormat{ DXGI_FORMAT_D32_FLOAT };
 const DXGI_FORMAT SettingsManager::sDepthStencilSRVFormat{ DXGI_FORMAT_R32_FLOAT };
 
-const float SettingsManager::sNearPlaneZ{ 0.5f };
-const float SettingsManager::sFarPlaneZ{ 1000.0f };
+const float SettingsManager::sNearPlaneZ{ 2.0f };
+const float SettingsManager::sFarPlaneZ{ FLT_MAX };
 const float SettingsManager::sVerticalFieldOfView{ 0.4f * MathUtils::Pi };
 
 const D3D12_VIEWPORT SettingsManager::sScreenViewport{ 0.0f, 0.0f, SettingsManager::sWindowWidth, SettingsManager::sWindowHeight, 0.0f, 1.0f };

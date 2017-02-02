@@ -45,7 +45,7 @@ float OcclusionFunction(
 // Returns ambient occlusion factor.
 // sampleKernelMatrix: Change-of-basis matrix to reorient our sample kernel
 // along the origin's normal.
-float SSAOVersion1(
+float JohnChapmanSSAO(
 	const float3 sampleKernel,
 	const float3x3 sampleKernelMatrix, 
 	const float4x4 projMatrix,
@@ -73,7 +73,7 @@ float SSAOVersion1(
 	return (sampleDepthV <= sampleV.z ? 1.0 : 0.0) * rangeCheck;
 }
 
-float SSAOVersion2(
+float FrankLunaSSAO(
 	const float3 sampleKernel, 
 	const float3 noiseVec,
 	const float3 normalV,
@@ -123,5 +123,37 @@ float SSAOVersion2(
 
 	return dp * OcclusionFunction(distZ, surfaceEpsilon, occlusionFadeStart, occlusionFadeEnd);
 }
+/*
+float FrankLunaSSAO(
+	const float3 sampleKernel,
+	const float3 noiseVec,
+	const float3 normalV,
+	const float4x4 projMatrix,
+	const float4x4 projMatrix,
+	const float occlusionRadius,
+	const float3 fragPosV,
+	Texture2D<float> depthTex,
+	const float surfaceEpsilon,
+	const float occlusionFadeStart,
+	const float occlusionFadeEnd)
+{
+	// Convert sample to view space
+	const float4 offsetV = mul(sampleKernel, gFrameCBuffer.mV);
+
+	// Get position resulting from the displacement of fragPosV by offsetV
+	const float4 samplePosV = fragPosV + offsetV * OCCLUSION_RADIUS;
+
+	// Convert sample position to NDC and sample depth at that position in depth buffer.
+	float4 samplePosH = mul(samplePosV, gFrameCBuffer.mP);
+	samplePosH /= samplePosH.w;
+	const float x = (samplePosH.x + 1.0f) * 1920.0f * 0.5f;
+	const float y = (1.0f - samplePosH.y) * 1080.0f * 0.5f;
+	const float sampleDepthNDC = Depth.Load(int3(x, y, 0));
+
+	// Convert sample depth from NDC to view space
+	const float sampleDepthV = NdcDepthToViewDepth(sampleDepthNDC, gFrameCBuffer.mP);
+
+	occlusionSum += (sampleDepthV <= fragPosV.z ? 1.0 : 0.0);
+}*/
 
 #endif

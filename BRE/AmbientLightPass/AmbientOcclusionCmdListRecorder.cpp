@@ -27,7 +27,6 @@ using namespace DirectX;
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
 	ID3D12RootSignature* sRootSignature{ nullptr };
-	const std::uint32_t sNoiseTextureDimension = 256U;
 
 	void BuildCommandObjects(
 		ID3D12GraphicsCommandList* &commandList, 
@@ -74,7 +73,7 @@ namespace {
 			// oriented along the z axis
 			const float x = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
 			const float y = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
-			const float z = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
+			const float z = MathUtils::RandomFloatInInverval(0.0f, 1.0f);
 			elem = XMFLOAT4(x, y, z, 0.0f);
 			vec = XMLoadFloat4(&elem);
 			vec = XMVector4Normalize(vec);
@@ -82,50 +81,9 @@ namespace {
 			// Accelerating interpolation function to falloff 
 			// from the distance from the origin.
 			float scale = i / numSamplesF;
-			scale = MathUtils::Lerp(0.1f, 1.0f, scale);
+			scale = MathUtils::Lerp(0.1f, 1.0f, scale * scale);
 			vec = XMVectorScale(vec, scale);
 			XMStoreFloat4(&elem, vec);
-		}
-	}
-
-	void GenerateSampleKernel(std::vector<XMFLOAT4>& kernels) {
-		kernels.resize(14);
-
-		// Start with 14 uniformly distributed vectors.  We choose the 8 corners of the cube
-		// and the 6 center points along each cube face.  We always alternate the points on 
-		// opposites sides of the cubes.  This way we still get the vectors spread out even
-		// if we choose to use less than 14 samples.
-
-		// 8 cube corners
-		kernels[0] = XMFLOAT4(+1.0f, +1.0f, +1.0f, 0.0f);
-		kernels[1] = XMFLOAT4(-1.0f, -1.0f, -1.0f, 0.0f);
-
-		kernels[2] = XMFLOAT4(-1.0f, +1.0f, +1.0f, 0.0f);
-		kernels[3] = XMFLOAT4(+1.0f, -1.0f, -1.0f, 0.0f);
-
-		kernels[4] = XMFLOAT4(+1.0f, +1.0f, -1.0f, 0.0f);
-		kernels[5] = XMFLOAT4(-1.0f, -1.0f, +1.0f, 0.0f);
-
-		kernels[6] = XMFLOAT4(-1.0f, +1.0f, -1.0f, 0.0f);
-		kernels[7] = XMFLOAT4(+1.0f, -1.0f, +1.0f, 0.0f);
-
-		// 6 centers of cube faces
-		kernels[8] = XMFLOAT4(-1.0f, 0.0f, 0.0f, 0.0f);
-		kernels[9] = XMFLOAT4(+1.0f, 0.0f, 0.0f, 0.0f);
-
-		kernels[10] = XMFLOAT4(0.0f, -1.0f, 0.0f, 0.0f);
-		kernels[11] = XMFLOAT4(0.0f, +1.0f, 0.0f, 0.0f);
-
-		kernels[12] = XMFLOAT4(0.0f, 0.0f, -1.0f, 0.0f);
-		kernels[13] = XMFLOAT4(0.0f, 0.0f, +1.0f, 0.0f);
-
-		for (int i = 0; i < 14; ++i) {
-			// Create random lengths in [0.25, 1.0].
-			const float s = MathUtils::RandomFloatInInverval(0.25f, 1.0f);
-
-			XMVECTOR v = s * XMVector4Normalize(XMLoadFloat4(&kernels[i]));
-
-			XMStoreFloat4(&kernels[i], v);
 		}
 	}
 
@@ -155,22 +113,6 @@ namespace {
 			elem.x = elem.x * 0.5f + 0.5f;
 			elem.y = elem.y * 0.5f + 0.5f;
 			elem.z = elem.z * 0.5f + 0.5f;
-		}
-	}
-
-	void GenerateNoise(std::vector<XMFLOAT4>& noises) {
-		const std::size_t numElems = sNoiseTextureDimension * sNoiseTextureDimension;
-		noises.resize(numElems);
-		XMFLOAT4* data(noises.data());
-		for (std::uint32_t i = 0U; i < numElems; ++i) {
-			XMFLOAT4& elem = data[i];
-
-			// Create sample points on the surface of a hemisphere
-			// oriented along the z axis
-			const float x = MathUtils::RandomFloatInInverval(0.0f, 1.0f);
-			const float y = MathUtils::RandomFloatInInverval(0.0f, 1.0f);
-			const float z = MathUtils::RandomFloatInInverval(0.0f, 1.0f);
-			elem = XMFLOAT4(x, y, z, 0.0f);
 		}
 	}
 }
@@ -218,10 +160,11 @@ void AmbientOcclusionCmdListRecorder::Init(
 	mAmbientAccessBufferCpuDesc = ambientAccessBufferCpuDesc;
 
 	mNumSamples = 128U;
+	mNoiseTextureDimension = 4U;
 	std::vector<XMFLOAT4> sampleKernel;
 	GenerateSampleKernel(mNumSamples, sampleKernel);
 	std::vector<XMFLOAT4> noises;
-	GenerateNoise(mNumSamples, noises);
+	GenerateNoise(mNoiseTextureDimension * mNoiseTextureDimension, noises);
 	BuildBuffers(sampleKernel.data(), noises.data(), normalSmoothnessBuffer, depthBuffer);
 
 	ASSERT(ValidateData());
@@ -323,8 +266,8 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	D3D12_RESOURCE_DESC resDesc = {};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	resDesc.Alignment = 0U;
-	resDesc.Width = sNoiseTextureDimension;
-	resDesc.Height = sNoiseTextureDimension;
+	resDesc.Width = mNoiseTextureDimension;
+	resDesc.Height = mNoiseTextureDimension;
 	resDesc.DepthOrArraySize = 1U;
 	resDesc.MipLevels = 1U;
 	resDesc.SampleDesc.Count = 1U;
@@ -357,30 +300,8 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 
 	D3D12_SUBRESOURCE_DATA subResourceData = {};
 	subResourceData.pData = kernelNoise;
-	subResourceData.RowPitch = sNoiseTextureDimension * sizeof(XMFLOAT4);
-	subResourceData.SlicePitch = subResourceData.RowPitch * sNoiseTextureDimension;
-	
-	//
-	// Schedule to copy the data to the default resource, and change states.
-	// Note that mCurrSol is put in the GENERIC_READ state so it can be 
-	// read by a shader.
-	//
-
-	/*ID3D12CommandAllocator* commandAllocators{ mCommandAllocators[0] };
-	ASSERT(commandAllocators != nullptr);
-	CHECK_HR(commandAllocators->Reset());
-	CHECK_HR(mCommandList->Reset(commandAllocators, nullptr));
-
-	D3D12_RESOURCE_BARRIER barriers[] = { 
-		ResourceStateManager::TransitionState(*noiseTexture, D3D12_RESOURCE_STATE_COPY_DEST),		
-	};
-	mCommandList->ResourceBarrier(_countof(barriers), barriers);
-	UpdateSubresources(mCommandList, noiseTexture, noiseTextureUploadBuffer, 0U, 0U, num2DSubresources, &subResourceData);
-	barriers[0] = ResourceStateManager::TransitionState(*noiseTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-	mCommandList->ResourceBarrier(_countof(barriers), barriers);
-
-	mCommandList->Close();
-	mCmdListQueue.push(mCommandList);*/
+	subResourceData.RowPitch = mNoiseTextureDimension * sizeof(XMFLOAT4);
+	subResourceData.SlicePitch = subResourceData.RowPitch * mNoiseTextureDimension;
 
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };

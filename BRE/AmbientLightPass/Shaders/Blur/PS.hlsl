@@ -2,9 +2,10 @@
 
 #include "RS.hlsl"
 
+// This should match noise texture dimension (for example, 4x4)
 #define BLUR_SIZE 4
 
-#define SKIP_BLUR
+//#define SKIP_BLUR
 
 struct Input {
 	float4 mPosH : SV_POSITION;

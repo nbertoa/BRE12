@@ -50,6 +50,7 @@ private:
 	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 
 	std::uint32_t mNumSamples{ 0U };
+	std::uint32_t mNoiseTextureDimension{ 4U };
 
 	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
 

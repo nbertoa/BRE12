@@ -12,6 +12,22 @@ float NdcDepthToViewDepth(const float depthNDC, const float4x4 projection) {
 	return depthV;
 }
 
+int2 NdcToViewportCoordinates(
+	const float2 ndcPoint,
+	const float screenTopLeftX,
+	const float screenTopLeftY,
+	const float screenWidth,
+	const float screenHeight) {
+	
+	const int2 viewportPoint = 
+		int2(
+			(ndcPoint.x + 1.0f) * screenWidth * 0.5f + screenTopLeftX,
+			(1.0f - ndcPoint.y) * screenHeight * 0.5f + screenTopLeftY
+		);
+
+	return viewportPoint;
+}
+
 float3 ViewRayToViewPosition(const float3 normalizedViewRayV, const float depthNDC, const float4x4 projection) {
 	const float depthV = NdcDepthToViewDepth(depthNDC, projection);
 
