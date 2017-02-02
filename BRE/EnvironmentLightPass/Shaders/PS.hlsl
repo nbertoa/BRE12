@@ -4,6 +4,8 @@
 
 #include "RS.hlsl"
 
+#define SKIP_ENVIRONMENT_LIGHT
+
 struct Input {
 	float4 mPosH : SV_POSITION;
 	float3 mViewRayV : VIEW_RAY;
@@ -27,6 +29,9 @@ struct Output {
 Output main(const in Input input){
 	Output output = (Output)0;
 
+#ifdef SKIP_ENVIRONMENT_LIGHT
+	output.mColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+#else
 	const int3 screenCoord = int3(input.mPosH.xy, 0);
 
 	const float4 normal_smoothness = Normal_Smoothness.Load(screenCoord);
@@ -71,6 +76,7 @@ Output main(const in Input input){
 	const float3 color = indirectFDiffuse + indirectFSpecular;
 
 	output.mColor = float4(color, 1.0f);
+#endif
 	
 	return output;
 }

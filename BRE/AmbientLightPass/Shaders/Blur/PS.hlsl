@@ -4,7 +4,7 @@
 
 #define BLUR_SIZE 4
 
-//#define SKIP_BLUR
+#define SKIP_BLUR
 
 struct Input {
 	float4 mPosH : SV_POSITION;

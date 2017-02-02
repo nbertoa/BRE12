@@ -2,7 +2,7 @@
 
 #include "RS.hlsl"
 
-//#define SKIP_TONE_MAPPING
+#define SKIP_TONE_MAPPING
 
 struct Input {
 	float4 mPosH : SV_POSITION;
