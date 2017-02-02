@@ -16,9 +16,9 @@ namespace {
 	SceneUtils::SceneResources sResourceContainer;
 
 	enum Textures {
-		// Metal
-		METAL = 0U,
-		METAL_NORMAL,
+		// Brick
+		BRICK = 0U,
+		BRICK_NORMAL,
 
 		// Wood
 		WOOD,
@@ -35,9 +35,9 @@ namespace {
 	// Textures to load
 	std::vector<std::string> sTexFiles =
 	{
-		// Metal
-		"textures/metal/metal.dds",
-		"textures/metal/metal_normal.dds",
+		// Brick
+		"textures/brick/brick2.dds",
+		"textures/brick/brick2_normal.dds",
 
 		// Wood
 		"textures/wood/wood.dds",
@@ -98,7 +98,7 @@ namespace {
 		ID3D12Resource** normals,
 		Material* materials,
 		const std::size_t numMaterials,
-		ColorCmdListRecorder* &recorder) {
+		NormalCmdListRecorder* &recorder) {
 
 		ASSERT(textures != nullptr);
 		ASSERT(normals != nullptr);
@@ -149,70 +149,13 @@ namespace {
 		}
 
 		// Create recorder
-		recorder = new ColorCmdListRecorder();
+		recorder = new NormalCmdListRecorder();
 		recorder->Init(
 			geomDataVec.data(),
 			static_cast<std::uint32_t>(geomDataVec.size()),
 			materialsVec.data(),
-			static_cast<std::uint32_t>(materialsVec.size()));
-	}
-
-	void GenerateRecorder(
-		const float initX,
-		const float initY,
-		const float initZ,
-		const float offsetX,
-		const float offsetY,
-		const float offsetZ,
-		const float scaleFactor,
-		const std::vector<Mesh>& meshes,
-		Material* materials,
-		const std::size_t numMaterials,
-		ColorCmdListRecorder* &recorder) {
-
-		// Fill geometry data
-		const std::size_t numMeshes{ meshes.size() };
-		ASSERT(numMeshes > 0UL);
-		std::vector<GeometryPassCmdListRecorder::GeometryData> geomDataVec;
-		geomDataVec.resize(numMeshes);
-		for (std::size_t i = 0UL; i < numMeshes; ++i) {
-			GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[i] };
-			const Mesh& mesh{ meshes[i] };
-			geomData.mVertexBufferData = mesh.GetVertexBufferData();
-			geomData.mIndexBufferData = mesh.GetIndexBufferData();
-			geomData.mWorldMatrices.reserve(numMaterials);
-		}
-
-		// Fill material and textures
-		std::vector<Material> materialsVec;
-		materialsVec.resize(numMaterials * numMeshes);
-
-		float tx{ initX };
-		float ty{ initY };
-		float tz{ initZ };
-		for (std::size_t i = 0UL; i < numMaterials; ++i) {
-			DirectX::XMFLOAT4X4 w;
-			MathUtils::ComputeMatrix(w, tx, ty, tz, scaleFactor, scaleFactor, scaleFactor);
-
-			Material& mat(materials[i]);
-			for (std::size_t j = 0UL; j < numMeshes; ++j) {
-				const std::size_t index{ i + j * numMaterials };
-				materialsVec[index] = mat;
-				GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[j] };
-				geomData.mWorldMatrices.push_back(w);
-			}
-
-			tx += offsetX;
-			ty += offsetY;
-			tz += offsetZ;
-		}
-
-		// Create recorder
-		recorder = new ColorCmdListRecorder();
-		recorder->Init(
-			geomDataVec.data(),
-			static_cast<std::uint32_t>(geomDataVec.size()),
-			materialsVec.data(),
+			texturesVec.data(),
+			normalsVec.data(),
 			static_cast<std::uint32_t>(materialsVec.size()));
 	}
 
@@ -284,7 +227,7 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 	//
 	// Generate floor
 	//
-	ColorCmdListRecorder* recorder{ nullptr };
+	NormalCmdListRecorder* recorder{ nullptr };
 	NormalCmdListRecorder* recorder2{ nullptr };
 	GenerateFloorRecorder(
 		floor.GetMeshes(),
@@ -298,44 +241,44 @@ void AmbientOcclussionScene::CreateGeometryPassRecorders(
 	//	
 	std::vector<Material> materials =
 	{
-		{ 1.0f, 1.0f, 1.0f, 1.0f, 0.95f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f, 0.85f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f, 0.75f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f, 0.65f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f, 0.55f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f, 0.45f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f, 0.35f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f, 0.25f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f, 0.15f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f, 0.05f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f, 0.95f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f, 0.85f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f, 0.75f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f, 0.65f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f, 0.55f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f, 0.45f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f, 0.35f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f, 0.25f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f, 0.15f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f, 0.05f },
 	};
 
 	std::vector<ID3D12Resource*> diffuses =
 	{
-		textures[METAL],
-		textures[METAL],
-		textures[METAL],
-		textures[METAL],
-		textures[METAL],
-		textures[METAL],
-		textures[METAL],
-		textures[METAL],
-		textures[METAL],
-		textures[METAL],
+		textures[BRICK],
+		textures[BRICK],
+		textures[BRICK],
+		textures[BRICK],
+		textures[BRICK],
+		textures[BRICK],
+		textures[BRICK],
+		textures[BRICK],
+		textures[BRICK],
+		textures[BRICK],
 	};
 
 	std::vector<ID3D12Resource*> normals =
 	{
-		textures[METAL_NORMAL],
-		textures[METAL_NORMAL],
-		textures[METAL_NORMAL],
-		textures[METAL_NORMAL],
-		textures[METAL_NORMAL],
-		textures[METAL_NORMAL],
-		textures[METAL_NORMAL],
-		textures[METAL_NORMAL],
-		textures[METAL_NORMAL],
-		textures[METAL_NORMAL],
+		textures[BRICK_NORMAL],
+		textures[BRICK_NORMAL],
+		textures[BRICK_NORMAL],
+		textures[BRICK_NORMAL],
+		textures[BRICK_NORMAL],
+		textures[BRICK_NORMAL],
+		textures[BRICK_NORMAL],
+		textures[BRICK_NORMAL],
+		textures[BRICK_NORMAL],
+		textures[BRICK_NORMAL],
 	};
 
 	ASSERT(materials.size() == diffuses.size());

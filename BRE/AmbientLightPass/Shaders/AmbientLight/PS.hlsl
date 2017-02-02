@@ -1,6 +1,6 @@
 #include "RS.hlsl"
 
-#define AMBIENT_FACTOR 0.04f
+#define AMBIENT_FACTOR 0.3f
 
 #define DEBUG_AMBIENT_ACCESIBILITY
 
@@ -26,7 +26,7 @@ Output main(const in Input input){
 	// Ambient accessibility (1.0f - ambient occlussion factor)
 	const float ambientAccessibility = AmbientAccessibility.Load(screenCoord);
 
-	output.mColor = float4(baseColor * AMBIENT_FACTOR * ambientAccessibility, 1.0f);
+	output.mColor = float4(baseColor * AMBIENT_FACTOR/* * ambientAccessibility*/, 1.0f);
 
 #ifdef DEBUG_AMBIENT_ACCESIBILITY
 	output.mColor = float4(ambientAccessibility, ambientAccessibility, ambientAccessibility, 1.0f);
