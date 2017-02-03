@@ -38,10 +38,10 @@ float getAngleAtt(const float3 normalizedLightVector, const float3 lightDir, con
 	return attenuation;
 }
 
-float3 computePunctualLightDirectLightContribution(PunctualLight light, const float3 fragPosV, const float3 normalV, const float cutoff) {
+float3 computePunctualLightDirectLightContribution(PunctualLight light, const float3 fragmentPositionViewSpace, const float3 normalViewSpace, const float cutoff) {
 	// Calculate normalized light vector and distance to sphere light surface
 	const float r = light.mLightPosVAndRange.w;
-	float3 L = light.mLightPosVAndRange.xyz - fragPosV;
+	float3 L = light.mLightPosVAndRange.xyz - fragmentPositionViewSpace;
 	const float distance = length(L);
 	const float d = max(distance - r, 0);
 	L /= distance;
@@ -56,15 +56,15 @@ float3 computePunctualLightDirectLightContribution(PunctualLight light, const fl
 	att = (att - cutoff) / (1 - cutoff);
 	att = max(att, 0);
 
-	return att * light.mLightColorAndPower.w * light.mLightColorAndPower.xyz * saturate(dot(L, normalV));
+	return att * light.mLightColorAndPower.w * light.mLightColorAndPower.xyz * saturate(dot(L, normalViewSpace));
 }
 
-float3 computePunctualLightFrostbiteLightContribution(PunctualLight light, const float3 fragPosV, const float3 normalV) {
-	const float3 lightV = light.mLightPosVAndRange.xyz - fragPosV;
+float3 computePunctualLightFrostbiteLightContribution(PunctualLight light, const float3 fragmentPositionViewSpace, const float3 normalViewSpace) {
+	const float3 lightV = light.mLightPosVAndRange.xyz - fragmentPositionViewSpace;
 	const float range = light.mLightPosVAndRange.w;
 	const float lightInvSqrAttRadius = 1.0f / (range * range);
 	const float att = getDistanceAtt(lightV, lightInvSqrAttRadius);
-	return att * light.mLightColorAndPower.w * light.mLightColorAndPower.xyz * saturate(dot(normalize(lightV), normalV)) / (4.0f * PI);
+	return att * light.mLightColorAndPower.w * light.mLightColorAndPower.xyz * saturate(dot(normalize(lightV), normalViewSpace)) / (4.0f * PI);
 }
 
 #endif

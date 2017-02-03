@@ -14,7 +14,7 @@ namespace GeometryGenerator {
 			const DirectX::XMFLOAT3& position, 
 			const DirectX::XMFLOAT3& normal, 
 			const DirectX::XMFLOAT3& tangent, 
-			const DirectX::XMFLOAT2& textureCoordinates);
+			const DirectX::XMFLOAT2& uv);
 
 		~Vertex() = default;
 		Vertex(const Vertex&) = default;
@@ -24,7 +24,7 @@ namespace GeometryGenerator {
 		DirectX::XMFLOAT3 mPosition = {0.0f, 0.0f, 0.0f};
         DirectX::XMFLOAT3 mNormal = { 0.0f, 0.0f, 0.0f };
         DirectX::XMFLOAT3 mTangent = { 0.0f, 0.0f, 0.0f };
-        DirectX::XMFLOAT2 mTextureCoordinates = { 0.0f, 0.0f };
+        DirectX::XMFLOAT2 mUV = { 0.0f, 0.0f };
 	};
 
 	struct MeshData {

@@ -12,7 +12,7 @@ float NdcDepthToViewDepth(const float depthNDC, const float4x4 projection) {
 	return depthV;
 }
 
-int2 NdcToViewportCoordinates(
+int2 NdcToScreenCoordinates(
 	const float2 ndcPoint,
 	const float screenTopLeftX,
 	const float screenTopLeftY,
@@ -37,9 +37,9 @@ float3 ViewRayToViewPosition(const float3 normalizedViewRayV, const float depthN
 	// p.z = t * normalizedViewRayV.z
 	// t = p.z / normalizedViewRayV.z
 	//
-	const float3 fragPosV = (depthV / normalizedViewRayV.z) * normalizedViewRayV;
+	const float3 fragmentPositionViewSpace = (depthV / normalizedViewRayV.z) * normalizedViewRayV;
 
-	return fragPosV;
+	return fragmentPositionViewSpace;
 }
 
 //

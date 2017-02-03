@@ -12,7 +12,7 @@
 #include <Utils/DebugUtils.h>
 
 // Root Signature:
-// "DescriptorTable(SRV(t0), SRV(t1), visibility = SHADER_VISIBILITY_PIXEL)" 0 -> BaseColor_MetalMask texture, AmbientAccessibility texture
+// "DescriptorTable(SRV(t0), SRV(t1), visibility = SHADER_VISIBILITY_PIXEL)" 0 -> BaseColor_MetalMaskTexture texture, AmbientAccessibility texture
 
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };

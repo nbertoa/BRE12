@@ -13,8 +13,8 @@ ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b0);
 ConstantBuffer<ImmutableCBuffer> gImmutableCBuffer : register(b1);
 
 struct Output {
-	float4 mPosH : SV_POSITION;
-	float3 mViewRayV : VIEW_RAY;
+	float4 mPositionClipSpace : SV_POSITION;
+	float3 mCameraToFragmentViewSpace : VIEW_RAY;
 	nointerpolation PunctualLight mPunctualLight : PUNCTUAL_LIGHT;
 };
 
@@ -23,13 +23,13 @@ struct Output {
 void main(const in point Input input[1], inout TriangleStream<Output> triangleStream) {
 	// Compute quad center position in view space.
 	// Then we can easily build a quad (two triangles) that face the camera.
-	const float4 lightPosV = float4(input[0].mPunctualLight.mLightPosVAndRange.xyz, 1.0f);
+	const float4 lightPositionViewSpace = float4(input[0].mPunctualLight.mLightPosVAndRange.xyz, 1.0f);
 	const float lightRange = input[0].mPunctualLight.mLightPosVAndRange.w;
 
 	// Fix light z coordinate
 	const float nearZ = gImmutableCBuffer.mNearZ_FarZ_ScreenW_ScreenH.x;
-	const float lightMinZ = lightPosV.z - lightRange;
-	const float lightMaxZ = lightPosV.z + lightRange;
+	const float lightMinZ = lightPositionViewSpace.z - lightRange;
+	const float lightMaxZ = lightPositionViewSpace.z + lightRange;
 	const float cond = lightMinZ < nearZ && nearZ < lightMaxZ;
 	const float lightZ = cond * nearZ + (1.0f - cond) * lightMinZ;
 
@@ -37,29 +37,29 @@ void main(const in point Input input[1], inout TriangleStream<Output> triangleSt
 	// a quad whose center position is lightCenterPosV
 	Output output = (Output)0;
 
-	float3 posV = float3(0.0f, 0.0f, lightZ);
+	float3 positionViewSpace = float3(0.0f, 0.0f, lightZ);
 
-	posV.xy = lightPosV.xy + float2(-lightRange, lightRange);
-	output.mPosH = mul(float4(posV, 1.0f), gFrameCBuffer.mP);
-	output.mViewRayV = posV;
+	positionViewSpace.xy = lightPositionViewSpace.xy + float2(-lightRange, lightRange);
+	output.mPositionClipSpace = mul(float4(positionViewSpace, 1.0f), gFrameCBuffer.mProjectionMatrix);
+	output.mCameraToFragmentViewSpace = positionViewSpace;
 	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
-	posV.xy = lightPosV.xy + float2(lightRange, lightRange);
-	output.mPosH = mul(float4(posV, 1.0f), gFrameCBuffer.mP);
-	output.mViewRayV = posV;
+	positionViewSpace.xy = lightPositionViewSpace.xy + float2(lightRange, lightRange);
+	output.mPositionClipSpace = mul(float4(positionViewSpace, 1.0f), gFrameCBuffer.mProjectionMatrix);
+	output.mCameraToFragmentViewSpace = positionViewSpace;
 	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
-	posV.xy = lightPosV.xy + float2(-lightRange, -lightRange);
-	output.mPosH = mul(float4(posV, 1.0f), gFrameCBuffer.mP);
-	output.mViewRayV = posV;
+	positionViewSpace.xy = lightPositionViewSpace.xy + float2(-lightRange, -lightRange);
+	output.mPositionClipSpace = mul(float4(positionViewSpace, 1.0f), gFrameCBuffer.mProjectionMatrix);
+	output.mCameraToFragmentViewSpace = positionViewSpace;
 	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 
-	posV.xy = lightPosV.xy + float2(lightRange, -lightRange);
-	output.mPosH = mul(float4(posV, 1.0f), gFrameCBuffer.mP);
-	output.mViewRayV = posV;
+	positionViewSpace.xy = lightPositionViewSpace.xy + float2(lightRange, -lightRange);
+	output.mPositionClipSpace = mul(float4(positionViewSpace, 1.0f), gFrameCBuffer.mProjectionMatrix);
+	output.mCameraToFragmentViewSpace = positionViewSpace;
 	output.mPunctualLight = input[0].mPunctualLight;
 	triangleStream.Append(output);
 

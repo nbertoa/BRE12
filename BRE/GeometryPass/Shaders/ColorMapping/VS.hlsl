@@ -3,34 +3,34 @@
 #include "RS.hlsl"
 
 struct Input {
-	float3 mPosO : POSITION;
-	float3 mNormalO : NORMAL;
-	float3 mTangentO : TANGENT;
-	float2 mTexCoordO : TEXCOORD;
+	float3 mPositionObjectSpace : POSITION;
+	float3 mNormalObjectSpace : NORMAL;
+	float3 mTangentObjectSpace : TANGENT;
+	float2 mUV : TEXCOORD;
 };
 
 ConstantBuffer<ObjectCBuffer> gObjCBuffer : register(b0);
 ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
 
 struct Output {	
-	float4 mPosH : SV_POSITION;
-	float3 mPosW : POS_WORLD;
-	float3 mPosV : POS_VIEW;
-	float3 mNormalW : NORMAL_WORLD;
-	float3 mNormalV : NORMAL_VIEW;
+	float4 mPositionClipSpace : SV_POSITION;
+	float3 mPositionWorldSpace : POS_WORLD;
+	float3 mPositionViewSpace : POS_VIEW;
+	float3 mNormalWorldSpace : NORMAL_WORLD;
+	float3 mNormalViewSpace : NORMAL_VIEW;
 };
 
 [RootSignature(RS)]
 Output main(in const Input input) {
 	Output output;
 
-	output.mPosW = mul(float4(input.mPosO, 1.0f), gObjCBuffer.mW).xyz;
-	output.mPosV = mul(float4(output.mPosW, 1.0f), gFrameCBuffer.mV).xyz;
+	output.mPositionWorldSpace = mul(float4(input.mPositionObjectSpace, 1.0f), gObjCBuffer.mWorldMatrix).xyz;
+	output.mPositionViewSpace = mul(float4(output.mPositionWorldSpace, 1.0f), gFrameCBuffer.mViewMatrix).xyz;
 
-	output.mNormalW = mul(float4(input.mNormalO, 0.0f), gObjCBuffer.mW).xyz;
-	output.mNormalV = mul(float4(output.mNormalW, 0.0f), gFrameCBuffer.mV).xyz;
+	output.mNormalWorldSpace = mul(float4(input.mNormalObjectSpace, 0.0f), gObjCBuffer.mWorldMatrix).xyz;
+	output.mNormalViewSpace = mul(float4(output.mNormalWorldSpace, 0.0f), gFrameCBuffer.mViewMatrix).xyz;
 
-	output.mPosH = mul(float4(output.mPosV, 1.0f), gFrameCBuffer.mP);
+	output.mPositionClipSpace = mul(float4(output.mPositionViewSpace, 1.0f), gFrameCBuffer.mProjectionMatrix);
 
 	return output;
 }

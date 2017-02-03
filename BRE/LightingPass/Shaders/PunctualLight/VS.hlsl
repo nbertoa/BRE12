@@ -17,14 +17,14 @@ struct Output {
 
 [RootSignature(RS)]
 Output main(in const Input input) {
-	PunctualLight l = gPunctualLights[input.mVertexId];
+	PunctualLight light = gPunctualLights[input.mVertexId];
 
-	float4 lightPosV = float4(l.mLightPosVAndRange.xyz, 1.0f);
-	lightPosV = mul(lightPosV, gFrameCBuffer.mV);
+	float4 lightPositionViewSpace = float4(light.mLightPosVAndRange.xyz, 1.0f);
+	lightPositionViewSpace = mul(lightPositionViewSpace, gFrameCBuffer.mViewMatrix);
 
 	Output output = (Output)0;
-	output.mPunctualLight.mLightPosVAndRange = float4(lightPosV.xyz, l.mLightPosVAndRange.w);
-	output.mPunctualLight.mLightColorAndPower = l.mLightColorAndPower;
+	output.mPunctualLight.mLightPosVAndRange = float4(lightPositionViewSpace.xyz, light.mLightPosVAndRange.w);
+	output.mPunctualLight.mLightColorAndPower = light.mLightColorAndPower;
 	return output;
 }
 

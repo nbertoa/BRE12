@@ -8,11 +8,11 @@
 //#define SKIP_BLUR
 
 struct Input {
-	float4 mPosH : SV_POSITION;
-	float2 mTexCoordO : TEXCOORD;
+	float4 mPositionNDC : SV_POSITION;
+	float2 mUV : TEXCOORD;
 };
 
-SamplerState TexSampler : register (s0);
+SamplerState TextureSampler : register (s0);
 Texture2D<float> BufferTexture : register(t0);
 
 struct Output {
@@ -24,8 +24,8 @@ Output main(const in Input input){
 	Output output = (Output)0;
 
 #ifdef SKIP_BLUR
-	const int3 screenCoord = int3(input.mPosH.xy, 0);
-	output.mColor = BufferTexture.Load(screenCoord);
+	const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
+	output.mColor = BufferTexture.Load(fragmentScreenSpace);
 #else
 	float w;
 	float h;
@@ -37,7 +37,7 @@ Output main(const in Input input){
 	for (uint i = 0; i < BLUR_SIZE; ++i) {
 		for (uint j = 0; j < BLUR_SIZE; ++j) {
 			const float2 offset = (hlim + float2(float(i), float(j))) * texelSize;
-			result += BufferTexture.Sample(TexSampler, input.mTexCoordO + offset).r;
+			result += BufferTexture.Sample(TextureSampler, input.mUV + offset).r;
 		}
 	}
 

@@ -3,11 +3,11 @@
 #define NUM_PATCH_POINTS 3
 
 struct Input {
-	float3 mPosW : POS_WORLD;
-	float3 mNormalW : NORMAL_WORLD;
-	float3 mTangentW : TANGENT_WORLD;
-	float2 mTexCoordO : TEXCOORD0;
-	float mTessFactor : TESS;
+	float3 mPositionWorldSpace : POS_WORLD;
+	float3 mNormalWorldSpace : NORMAL_WORLD;
+	float3 mTangentWorldSpace : TANGENT_WORLD;
+	float2 mUV : TEXCOORD0;
+	float mTessellationFactor : TESS;
 };
 
 struct HullShaderConstantOutput {
@@ -16,10 +16,10 @@ struct HullShaderConstantOutput {
 };
 
 struct Output {
-	float3 mPosW : POS_WORLD;
-	float3 mNormalW : NORMAL_WORLD;
-	float3 mTangentW : TANGENT_WORLD;
-	float2 mTexCoordO : TEXCOORD0;
+	float3 mPositionWorldSpace : POS_WORLD;
+	float3 mNormalWorldSpace : NORMAL_WORLD;
+	float3 mTangentWorldSpace : TANGENT_WORLD;
+	float2 mUV : TEXCOORD0;
 };
 
 HullShaderConstantOutput constant_hull_shader(const InputPatch<Input, NUM_PATCH_POINTS> patch, const uint patchID : SV_PrimitiveID) {
@@ -29,9 +29,9 @@ HullShaderConstantOutput constant_hull_shader(const InputPatch<Input, NUM_PATCH_
 	// more than one triangle will have the same tessellation factor.  
 	// Otherwise, gaps can appear.
 	HullShaderConstantOutput output = (HullShaderConstantOutput)0;
-	output.mEdgeFactors[0] = 0.5f * (patch[1].mTessFactor + patch[2].mTessFactor);
-	output.mEdgeFactors[1] = 0.5f * (patch[2].mTessFactor + patch[0].mTessFactor);
-	output.mEdgeFactors[2] = 0.5f * (patch[0].mTessFactor + patch[1].mTessFactor);
+	output.mEdgeFactors[0] = 0.5f * (patch[1].mTessellationFactor + patch[2].mTessellationFactor);
+	output.mEdgeFactors[1] = 0.5f * (patch[2].mTessellationFactor + patch[0].mTessellationFactor);
+	output.mEdgeFactors[2] = 0.5f * (patch[0].mTessellationFactor + patch[1].mTessellationFactor);
 	output.mInsideFactors = output.mEdgeFactors[0];
 
 	return output;
@@ -45,10 +45,10 @@ HullShaderConstantOutput constant_hull_shader(const InputPatch<Input, NUM_PATCH_
 [patchconstantfunc("constant_hull_shader")]
 Output main(const InputPatch <Input, NUM_PATCH_POINTS> patch, const uint controlPointID : SV_OutputControlPointID, const uint patchId : SV_PrimitiveID) {
 	Output output = (Output)0;
-	output.mPosW = patch[controlPointID].mPosW;
-	output.mNormalW = patch[controlPointID].mNormalW;
-	output.mTangentW = patch[controlPointID].mTangentW;
-	output.mTexCoordO = patch[controlPointID].mTexCoordO;
+	output.mPositionWorldSpace = patch[controlPointID].mPositionWorldSpace;
+	output.mNormalWorldSpace = patch[controlPointID].mNormalWorldSpace;
+	output.mTangentWorldSpace = patch[controlPointID].mTangentWorldSpace;
+	output.mUV = patch[controlPointID].mUV;
 	
 	return output;
 }

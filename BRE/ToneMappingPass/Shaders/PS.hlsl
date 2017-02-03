@@ -5,7 +5,7 @@
 #define SKIP_TONE_MAPPING
 
 struct Input {
-	float4 mPosH : SV_POSITION;
+	float4 mPositionNDC : SV_POSITION;
 };
 
 Texture2D<float4> ColorBufferTexture : register(t0);
@@ -18,9 +18,9 @@ struct Output {
 Output main(const in Input input){
 	Output output = (Output)0;
 
-	const int3 screenCoord = int3(input.mPosH.xy, 0);
+	const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
 
-	const float4 color = ColorBufferTexture.Load(screenCoord);
+	const float4 color = ColorBufferTexture.Load(fragmentScreenSpace);
 
 #ifdef SKIP_TONE_MAPPING
 	output.mColor = color;

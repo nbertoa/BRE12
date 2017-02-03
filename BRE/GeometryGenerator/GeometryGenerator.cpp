@@ -18,8 +18,8 @@ namespace {
 		const XMVECTOR tangent0(XMLoadFloat3(&vertex0.mTangent));
 		const XMVECTOR tangent1(XMLoadFloat3(&vertex1.mTangent));
 
-		const XMVECTOR uv0(XMLoadFloat2(&vertex0.mTextureCoordinates));
-		const XMVECTOR uv1(XMLoadFloat2(&vertex1.mTextureCoordinates));
+		const XMVECTOR uv0(XMLoadFloat2(&vertex0.mUV));
+		const XMVECTOR uv1(XMLoadFloat2(&vertex1.mUV));
 
 		// Compute the midpoints of all the attributes. Vectors need to be normalized
 		// since linear interpolating can make them not unit length.  
@@ -32,7 +32,7 @@ namespace {
 		XMStoreFloat3(&middleVertex.mPosition, position);
 		XMStoreFloat3(&middleVertex.mNormal, normal);
 		XMStoreFloat3(&middleVertex.mTangent, tangent);
-		XMStoreFloat2(&middleVertex.mTextureCoordinates, uv);
+		XMStoreFloat2(&middleVertex.mUV, uv);
 
 		return middleVertex;
 	}
@@ -183,11 +183,11 @@ namespace GeometryGenerator {
 		const XMFLOAT3& position, 
 		const XMFLOAT3& normal, 
 		const XMFLOAT3& tangent, 
-		const XMFLOAT2& textureCoordinates) 
+		const XMFLOAT2& uv) 
 		: mPosition(position)
 		, mNormal(normal)
 		, mTangent(tangent)
-		, mTextureCoordinates(textureCoordinates) 
+		, mUV(uv) 
 	{
 	}
 
@@ -345,8 +345,8 @@ namespace GeometryGenerator {
 				const XMVECTOR p(XMLoadFloat3(&v.mPosition));
 				XMStoreFloat3(&v.mNormal, XMVector3Normalize(p));
 
-				v.mTextureCoordinates.x = theta / XM_2PI;
-				v.mTextureCoordinates.y = phi / XM_PI;
+				v.mUV.x = theta / XM_2PI;
+				v.mUV.y = phi / XM_PI;
 
 				meshData.mVertices.push_back(v);
 			}
@@ -463,8 +463,8 @@ namespace GeometryGenerator {
 
 			const float phi{ acosf(meshData.mVertices[i].mPosition.y / radius) };
 
-			meshData.mVertices[i].mTextureCoordinates.x = theta / XM_2PI;
-			meshData.mVertices[i].mTextureCoordinates.y = phi / XM_PI;
+			meshData.mVertices[i].mUV.x = theta / XM_2PI;
+			meshData.mVertices[i].mUV.y = phi / XM_PI;
 
 			// Partial derivative of P with respect to theta
 			meshData.mVertices[i].mTangent.x = -radius * sinf(phi) * sinf(theta);
@@ -510,8 +510,8 @@ namespace GeometryGenerator {
 
 				vertex.mPosition = XMFLOAT3{ r * c, y, r * s };
 
-				vertex.mTextureCoordinates.x = static_cast<float>(j) / sliceCount;
-				vertex.mTextureCoordinates.y = 1.0f - static_cast<float>(i) / stackCount;
+				vertex.mUV.x = static_cast<float>(j) / sliceCount;
+				vertex.mUV.y = 1.0f - static_cast<float>(i) / stackCount;
 
 				// Cylinder can be parameterized as follows, where we introduce v
 				// parameter that goes in the same direction as the v tex-coord
@@ -602,8 +602,8 @@ namespace GeometryGenerator {
 				meshData.mVertices[i * columns + j].mTangent = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
 
 				// Stretch texture over grid.
-				meshData.mVertices[i * columns + j].mTextureCoordinates.x = j * du;
-				meshData.mVertices[i * columns + j].mTextureCoordinates.y = i * dv;
+				meshData.mVertices[i * columns + j].mUV.x = j * du;
+				meshData.mVertices[i * columns + j].mUV.y = i * dv;
 			}
 		}
 

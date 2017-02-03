@@ -67,8 +67,8 @@ namespace {
 		// Create and store RTV's descriptors for buffers
 		const wchar_t* resourceNames[GeometryPass::BUFFERS_COUNT] =
 		{
-			L"Normal_Smoothness Buffer",
-			L"BaseColor_MetalMask Buffer"
+			L"Normal_SmoothnessTexture Buffer",
+			L"BaseColor_MetalMaskTexture Buffer"
 		};
 		for (std::uint32_t i = 0U; i < GeometryPass::BUFFERS_COUNT; ++i) {
 			resourceDescriptor.Format = sGeometryBufferFormats[i];

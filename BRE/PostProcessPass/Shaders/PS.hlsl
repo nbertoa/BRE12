@@ -15,11 +15,11 @@
 #define QUALITY_EDGE_THRESHOLD_MIN 0.0625
 
 struct Input {
-	float4 mPosH : SV_POSITION;
-	float2 mTexCoordO : TEXCOORD0;
+	float4 mPositionClipSpace : SV_POSITION;
+	float2 mUV : TEXCOORD0;
 };
 
-SamplerState TexSampler : register (s0);
+SamplerState TextureSampler : register (s0);
 Texture2D<float4> ColorBufferTexture : register(t0);
 
 struct Output {
@@ -30,16 +30,16 @@ struct Output {
 Output main(const in Input input){
 	Output output = (Output)0;
 
-	const int3 screenCoord = int3(input.mPosH.xy, 0);
+	const int3 fragmentScreenSpace = int3(input.mPositionClipSpace.xy, 0);
 
 #ifdef SKIP_POST_PROCESS
-	output.mColor = ColorBufferTexture.Load(screenCoord);
+	output.mColor = ColorBufferTexture.Load(fragmentScreenSpace);
 #else
-	FxaaTex tex = { TexSampler, ColorBufferTexture };
+	FxaaTex tex = { TextureSampler, ColorBufferTexture };
 	const float4 unusedFloat4 = { 0.0f, 0.0f, 0.0f, 0.0f };
 	const float unusedFloat = 0.0f;
 	output.mColor = FxaaPixelShader(
-		input.mTexCoordO.xy,
+		input.mUV.xy,
 		tex,
 		RCP_FRAME,
 		QUALITY_SUB_PIX,

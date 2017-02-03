@@ -6,7 +6,6 @@
     <None Include="Lights.hlsli" />
     <None Include="Material.hlsli" />
     <None Include="Utils.hlsli" />
-    <None Include="AmbientOcclusion.hlsli" />
     <None Include="Fxaa.hlsli" />
   </ItemGroup>
   <ItemGroup>

@@ -3,17 +3,17 @@
 
 // Per object constant buffer data
 struct ObjectCBuffer {
-	float4x4 mW;
+	float4x4 mWorldMatrix;
 	float mTexTransform;
 };
 
 // Per frame constant buffer data
 struct FrameCBuffer {	
-	float4x4 mV;
-	float4x4 mInvV;
-	float4x4 mP;
-	float4x4 mInvP;	
-	float4 mEyePosW;
+	float4x4 mViewMatrix;
+	float4x4 mInverseViewMatrix;
+	float4x4 mProjectionMatrix;
+	float4x4 mInverseProjectionMatrix;	
+	float4 mEyePositionWorldSpace;
 };
 
 // Immutable constant buffer data (does not change across frames or objects) 
