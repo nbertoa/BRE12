@@ -41,8 +41,8 @@ public:
 
 private:
 	void BuildBuffers(
-		const void* sampleKernel,
-		const void* kernelNoise,
+		const void* randomSamples,
+		const void* noiseVectors,
 		ID3D12Resource& normalSmoothnessBuffer,
 		ID3D12Resource& depthBuffer) noexcept;
 	
@@ -54,10 +54,10 @@ private:
 
 	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
 
-	UploadBuffer* mSampleKernelBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mSampleKernelBufferGpuDescBegin{ 0UL };
+	UploadBuffer* mRandomSamplesBuffer{ nullptr };
+	D3D12_GPU_DESCRIPTOR_HANDLE mRandomSamplesBufferGpuDescBegin{ 0UL };
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferCpuDesc{ 0UL };
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDesc{ 0UL };
 };

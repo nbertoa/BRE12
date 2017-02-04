@@ -53,24 +53,25 @@ namespace {
 		commandList->Close();
 	}
 
-	// Sample kernel for ambient occlusion. The requirements are that:
-	// - Sample positions fall within the unit hemisphere
+	// Random samples for ambient occlusion. The requirements are that:
+	// - Sample positions fall within the unit hemisphere oriented
+	//   toward positive z axis.
 	// - Sample positions are more densely clustered towards the origin.
 	//   This effectively attenuates the occlusion contribution
-	//   according to distance from the kernel centre (samples closer
+	//   according to distance from the random samples centre (samples closer
 	//   to a point occlude it more than samples further away).
-	void GenerateSampleKernel(const std::uint32_t numSamples, std::vector<XMFLOAT4>& kernels) {
+	void GenerateRandomSamples(const std::uint32_t numSamples, std::vector<XMFLOAT4>& samples) {
 		ASSERT(numSamples > 0U);
 
-		kernels.resize(numSamples);
-		XMFLOAT4* data(kernels.data());
+		samples.resize(numSamples);
+		XMFLOAT4* data(samples.data());
 		XMVECTOR vec;
 		const float numSamplesF = static_cast<float>(numSamples);
 		for (std::uint32_t i = 0U; i < numSamples; ++i) {
 			XMFLOAT4& elem = data[i];
 
 			// Create sample points on the surface of a hemisphere
-			// oriented along the z axis
+			// oriented along the positive z axis
 			const float x = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
 			const float y = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
 			const float z = MathUtils::RandomFloatInInverval(0.0f, 1.0f);
@@ -87,14 +88,14 @@ namespace {
 		}
 	}
 
-	// Generate a set of random values used to rotate the sample kernel,
+	// Generate a set of random values used to rotate the random samples,
 	// which will effectively increase the sample count and minimize 
 	// the 'banding' artifacts.
-	void GenerateNoise(const std::uint32_t numSamples, std::vector<XMFLOAT4>& noises) {
+	void GenerateNoise(const std::uint32_t numSamples, std::vector<XMFLOAT4>& noiseVectors) {
 		ASSERT(numSamples > 0U);
 
-		noises.resize(numSamples);
-		XMFLOAT4* data(noises.data());
+		noiseVectors.resize(numSamples);
+		XMFLOAT4* data(noiseVectors.data());
 		XMVECTOR vec;
 		for (std::uint32_t i = 0U; i < numSamples; ++i) {
 			XMFLOAT4& elem = data[i];
@@ -157,12 +158,12 @@ void AmbientOcclusionCmdListRecorder::Init(
 {
 	ASSERT(ValidateData() == false);
 
-	mAmbientAccessBufferCpuDesc = ambientAccessBufferCpuDesc;
+	mAmbientAccessibilityBufferCpuDesc = ambientAccessBufferCpuDesc;
 
 	mNumSamples = 128U;
 	mNoiseTextureDimension = 4U;
 	std::vector<XMFLOAT4> sampleKernel;
-	GenerateSampleKernel(mNumSamples, sampleKernel);
+	GenerateRandomSamples(mNumSamples, sampleKernel);
 	std::vector<XMFLOAT4> noises;
 	GenerateNoise(mNoiseTextureDimension * mNoiseTextureDimension, noises);
 	BuildBuffers(sampleKernel.data(), noises.data(), normalSmoothnessBuffer, depthBuffer);
@@ -189,7 +190,7 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 	mCommandList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	mCommandList->OMSetRenderTargets(1U, &mAmbientAccessBufferCpuDesc, false, nullptr);
+	mCommandList->OMSetRenderTargets(1U, &mAmbientAccessibilityBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
@@ -229,17 +230,17 @@ bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		mCommandList != nullptr &&
 		mNumSamples != 0U &&
-		mSampleKernelBuffer != nullptr &&
-		mSampleKernelBufferGpuDescBegin.ptr != 0UL &&
-		mAmbientAccessBufferCpuDesc.ptr != 0UL &&
+		mRandomSamplesBuffer != nullptr &&
+		mRandomSamplesBufferGpuDescBegin.ptr != 0UL &&
+		mAmbientAccessibilityBufferCpuDesc.ptr != 0UL &&
 		mPixelShaderBuffersGpuDesc.ptr != 0UL;
 
 	return result;
 }
 
 void AmbientOcclusionCmdListRecorder::BuildBuffers(
-	const void* sampleKernel, 
-	const void* kernelNoise,
+	const void* randomSamples, 
+	const void* noiseVectors,
 	ID3D12Resource& normalSmoothnessBuffer,
 	ID3D12Resource& depthBuffer) noexcept 
 {
@@ -248,19 +249,19 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 		ASSERT(mFrameCBuffer[i] == nullptr);
 	}
 #endif
-	ASSERT(mSampleKernelBuffer == nullptr);
-	ASSERT(sampleKernel != nullptr);
-	ASSERT(kernelNoise != nullptr);
+	ASSERT(mRandomSamplesBuffer == nullptr);
+	ASSERT(randomSamples != nullptr);
+	ASSERT(noiseVectors != nullptr);
 	ASSERT(mNumSamples != 0U);
 
 	// Create sample kernel buffer and fill it
 	const std::size_t sampleKernelBufferElemSize{ sizeof(XMFLOAT4) };
-	mSampleKernelBuffer = &UploadBufferManager::CreateUploadBuffer(sampleKernelBufferElemSize, mNumSamples);
-	const std::uint8_t* sampleKernelPtr = reinterpret_cast<const std::uint8_t*>(sampleKernel);
+	mRandomSamplesBuffer = &UploadBufferManager::CreateUploadBuffer(sampleKernelBufferElemSize, mNumSamples);
+	const std::uint8_t* sampleKernelPtr = reinterpret_cast<const std::uint8_t*>(randomSamples);
 	for (std::uint32_t i = 0UL; i < mNumSamples; ++i) {
-		mSampleKernelBuffer->CopyData(i, sampleKernelPtr + sampleKernelBufferElemSize * i, sampleKernelBufferElemSize);
+		mRandomSamplesBuffer->CopyData(i, sampleKernelPtr + sampleKernelBufferElemSize * i, sampleKernelBufferElemSize);
 	}
-	mSampleKernelBufferGpuDescBegin.ptr = mSampleKernelBuffer->GetResource()->GetGPUVirtualAddress();
+	mRandomSamplesBufferGpuDescBegin.ptr = mRandomSamplesBuffer->GetResource()->GetGPUVirtualAddress();
 
 	// Kernel noise resource and fill it
 	D3D12_RESOURCE_DESC resDesc = {};
@@ -299,7 +300,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 		nullptr);
 
 	D3D12_SUBRESOURCE_DATA subResourceData = {};
-	subResourceData.pData = kernelNoise;
+	subResourceData.pData = noiseVectors;
 	subResourceData.RowPitch = mNoiseTextureDimension * sizeof(XMFLOAT4);
 	subResourceData.SlicePitch = subResourceData.RowPitch * mNoiseTextureDimension;
 
@@ -313,7 +314,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	ID3D12Resource* res[4] = {
 		&normalSmoothnessBuffer,
 		&depthBuffer,
-		mSampleKernelBuffer->GetResource(),
+		mRandomSamplesBuffer->GetResource(),
 		noiseTexture,
 	};
 
@@ -335,7 +336,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 
 	// Fill sample kernel buffer descriptor
 	srvDesc[2].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc[2].Format = mSampleKernelBuffer->GetResource()->GetDesc().Format;
+	srvDesc[2].Format = mRandomSamplesBuffer->GetResource()->GetDesc().Format;
 	srvDesc[2].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	srvDesc[2].Buffer.FirstElement = 0UL;
 	srvDesc[2].Buffer.NumElements = mNumSamples;
