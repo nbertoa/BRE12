@@ -34,7 +34,7 @@ namespace {
 		RenderTargetDescriptorManager::Init();
 		MaterialManager::Init();
 
-		//ShowCursor(false);
+		ShowCursor(false);
 	}
 
 	void UpdateKeyboardAndMouse() noexcept {

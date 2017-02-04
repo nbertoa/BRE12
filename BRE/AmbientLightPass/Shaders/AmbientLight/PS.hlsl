@@ -2,7 +2,7 @@
 
 #define AMBIENT_FACTOR 0.4f
 
-#define DEBUG_AMBIENT_ACCESIBILITY
+//#define DEBUG_AMBIENT_ACCESIBILITY
 
 struct Input {
 	float4 mPositionNDC : SV_POSITION;

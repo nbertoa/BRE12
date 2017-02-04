@@ -4,7 +4,7 @@
 
 #include "RS.hlsl"
 
-#define SKIP_ENVIRONMENT_LIGHT
+//#define SKIP_ENVIRONMENT_LIGHT
 
 struct Input {
 	float4 mPositionNDC : SV_POSITION;

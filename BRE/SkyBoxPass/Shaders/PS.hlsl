@@ -1,6 +1,6 @@
 #include "RS.hlsl"
 
-#define SKIP_SKYBOX 
+//#define SKIP_SKYBOX 
 
 struct Input {
 	float4 mPositionClipSpace : SV_POSITION;
