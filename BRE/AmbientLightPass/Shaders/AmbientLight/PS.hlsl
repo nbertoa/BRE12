@@ -2,7 +2,7 @@
 
 #define AMBIENT_FACTOR 0.4f
 
-//#define DEBUG_AMBIENT_ACCESIBILITY
+#define DEBUG_AMBIENT_ACCESIBILITY
 
 struct Input {
 	float4 mPositionNDC : SV_POSITION;
@@ -26,7 +26,7 @@ Output main(const in Input input){
 	// Ambient accessibility (1.0f - ambient occlussion factor)
 	const float ambientAccessibility = AmbientAccessibility.Load(fragmentScreenSpace);
 
-	output.mColor = float4(baseColor * AMBIENT_FACTOR/* * ambientAccessibility*/, 1.0f);
+	output.mColor = float4(baseColor * AMBIENT_FACTOR * ambientAccessibility, 1.0f);
 
 #ifdef DEBUG_AMBIENT_ACCESIBILITY
 	output.mColor = float4(ambientAccessibility, ambientAccessibility, ambientAccessibility, 1.0f);

@@ -49,13 +49,13 @@ private:
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
 
-	std::uint32_t mNumSamples{ 0U };
+	std::uint32_t mSampleKernelSize{ 0U };
 	std::uint32_t mNoiseTextureDimension{ 4U };
 
 	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
 
-	UploadBuffer* mRandomSamplesBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mRandomSamplesBufferGpuDescBegin{ 0UL };
+	UploadBuffer* mSampleKernelBuffer{ nullptr };
+	D3D12_GPU_DESCRIPTOR_HANDLE mSampleKernelBufferGpuDescBegin{ 0UL };
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferCpuDesc{ 0UL };
 

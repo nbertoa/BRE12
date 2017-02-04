@@ -53,67 +53,63 @@ namespace {
 		commandList->Close();
 	}
 
-	// Random samples for ambient occlusion. The requirements are that:
+	// Sample kernel for ambient occlusion. The requirements are that:
 	// - Sample positions fall within the unit hemisphere oriented
 	//   toward positive z axis.
 	// - Sample positions are more densely clustered towards the origin.
 	//   This effectively attenuates the occlusion contribution
-	//   according to distance from the random samples centre (samples closer
+	//   according to distance from the sample kernel centre (samples closer
 	//   to a point occlude it more than samples further away).
-	void GenerateRandomSamples(const std::uint32_t numSamples, std::vector<XMFLOAT4>& samples) {
-		ASSERT(numSamples > 0U);
+	void GenerateSampleKernel(const std::uint32_t sampleKernelSize, std::vector<XMFLOAT4>& sampleKernel) {
+		ASSERT(sampleKernelSize > 0U);
 
-		samples.resize(numSamples);
-		XMFLOAT4* data(samples.data());
+		sampleKernel.reserve(sampleKernelSize);
+		const float sampleKernelSizeFloat = static_cast<float>(sampleKernelSize);
 		XMVECTOR vec;
-		const float numSamplesF = static_cast<float>(numSamples);
-		for (std::uint32_t i = 0U; i < numSamples; ++i) {
-			XMFLOAT4& elem = data[i];
-
-			// Create sample points on the surface of a hemisphere
-			// oriented along the positive z axis
+		for (std::uint32_t i = 0U; i < sampleKernelSize; ++i) {
 			const float x = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
 			const float y = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
 			const float z = MathUtils::RandomFloatInInverval(0.0f, 1.0f);
-			elem = XMFLOAT4(x, y, z, 0.0f);
-			vec = XMLoadFloat4(&elem);
+			sampleKernel.push_back(XMFLOAT4(x, y, z, 0.0f));
+			XMFLOAT4& currentSample = sampleKernel.back();
+			vec = XMLoadFloat4(&currentSample);
 			vec = XMVector4Normalize(vec);
+			XMStoreFloat4(&currentSample, vec);
 
 			// Accelerating interpolation function to falloff 
 			// from the distance from the origin.
-			float scale = i / numSamplesF;
+			float scale = i / sampleKernelSizeFloat;
 			scale = MathUtils::Lerp(0.1f, 1.0f, scale * scale);
 			vec = XMVectorScale(vec, scale);
-			XMStoreFloat4(&elem, vec);
+			XMStoreFloat4(&currentSample, vec);
 		}
 	}
 
-	// Generate a set of random values used to rotate the random samples,
+	// Generate a set of random values used to rotate the sample kernel,
 	// which will effectively increase the sample count and minimize 
 	// the 'banding' artifacts.
 	void GenerateNoise(const std::uint32_t numSamples, std::vector<XMFLOAT4>& noiseVectors) {
 		ASSERT(numSamples > 0U);
 
-		noiseVectors.resize(numSamples);
-		XMFLOAT4* data(noiseVectors.data());
+		noiseVectors.reserve(numSamples);
 		XMVECTOR vec;
 		for (std::uint32_t i = 0U; i < numSamples; ++i) {
-			XMFLOAT4& elem = data[i];
-
-			// Create sample points on the surface of a hemisphere
-			// oriented along the z axis
 			const float x = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
 			const float y = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
-			const float z = 0.0f;			
-			elem = XMFLOAT4(x, y, z, 0.0f);
-			vec = XMLoadFloat4(&elem);
+			// The z component must zero. Since our kernel is oriented along the z-axis, 
+			// we want the random rotation to occur around that axis.
+			const float z = 0.0f;
+			noiseVectors.push_back(XMFLOAT4(x, y, z, 0.0f));
+			XMFLOAT4& currentSample = noiseVectors.back();
+			vec = XMLoadFloat4(&currentSample);
 			vec = XMVector4Normalize(vec);
-			XMStoreFloat4(&elem, vec);
+			XMStoreFloat4(&currentSample, vec);
 
-			// Map from [-1.0f, 1.0f] to [0.0f, 1.0f]
-			elem.x = elem.x * 0.5f + 0.5f;
-			elem.y = elem.y * 0.5f + 0.5f;
-			elem.z = elem.z * 0.5f + 0.5f;
+			// Map from [-1.0f, 1.0f] to [0.0f, 1.0f] because
+			// this is going to be stored in a texture
+			currentSample.x = currentSample.x * 0.5f + 0.5f;
+			currentSample.y = currentSample.y * 0.5f + 0.5f;
+			currentSample.z = currentSample.z * 0.5f + 0.5f;
 		}
 	}
 }
@@ -160,10 +156,10 @@ void AmbientOcclusionCmdListRecorder::Init(
 
 	mAmbientAccessibilityBufferCpuDesc = ambientAccessBufferCpuDesc;
 
-	mNumSamples = 128U;
+	mSampleKernelSize = 128U;
 	mNoiseTextureDimension = 4U;
 	std::vector<XMFLOAT4> sampleKernel;
-	GenerateRandomSamples(mNumSamples, sampleKernel);
+	GenerateSampleKernel(mSampleKernelSize, sampleKernel);
 	std::vector<XMFLOAT4> noises;
 	GenerateNoise(mNoiseTextureDimension * mNoiseTextureDimension, noises);
 	BuildBuffers(sampleKernel.data(), noises.data(), normalSmoothnessBuffer, depthBuffer);
@@ -229,9 +225,9 @@ bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
 
 	const bool result =
 		mCommandList != nullptr &&
-		mNumSamples != 0U &&
-		mRandomSamplesBuffer != nullptr &&
-		mRandomSamplesBufferGpuDescBegin.ptr != 0UL &&
+		mSampleKernelSize != 0U &&
+		mSampleKernelBuffer != nullptr &&
+		mSampleKernelBufferGpuDescBegin.ptr != 0UL &&
 		mAmbientAccessibilityBufferCpuDesc.ptr != 0UL &&
 		mPixelShaderBuffersGpuDesc.ptr != 0UL;
 
@@ -249,19 +245,19 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 		ASSERT(mFrameCBuffer[i] == nullptr);
 	}
 #endif
-	ASSERT(mRandomSamplesBuffer == nullptr);
+	ASSERT(mSampleKernelBuffer == nullptr);
 	ASSERT(randomSamples != nullptr);
 	ASSERT(noiseVectors != nullptr);
-	ASSERT(mNumSamples != 0U);
+	ASSERT(mSampleKernelSize != 0U);
 
 	// Create sample kernel buffer and fill it
 	const std::size_t sampleKernelBufferElemSize{ sizeof(XMFLOAT4) };
-	mRandomSamplesBuffer = &UploadBufferManager::CreateUploadBuffer(sampleKernelBufferElemSize, mNumSamples);
+	mSampleKernelBuffer = &UploadBufferManager::CreateUploadBuffer(sampleKernelBufferElemSize, mSampleKernelSize);
 	const std::uint8_t* sampleKernelPtr = reinterpret_cast<const std::uint8_t*>(randomSamples);
-	for (std::uint32_t i = 0UL; i < mNumSamples; ++i) {
-		mRandomSamplesBuffer->CopyData(i, sampleKernelPtr + sampleKernelBufferElemSize * i, sampleKernelBufferElemSize);
+	for (std::uint32_t i = 0UL; i < mSampleKernelSize; ++i) {
+		mSampleKernelBuffer->CopyData(i, sampleKernelPtr + sampleKernelBufferElemSize * i, sampleKernelBufferElemSize);
 	}
-	mRandomSamplesBufferGpuDescBegin.ptr = mRandomSamplesBuffer->GetResource()->GetGPUVirtualAddress();
+	mSampleKernelBufferGpuDescBegin.ptr = mSampleKernelBuffer->GetResource()->GetGPUVirtualAddress();
 
 	// Kernel noise resource and fill it
 	D3D12_RESOURCE_DESC resDesc = {};
@@ -314,7 +310,7 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 	ID3D12Resource* res[4] = {
 		&normalSmoothnessBuffer,
 		&depthBuffer,
-		mRandomSamplesBuffer->GetResource(),
+		mSampleKernelBuffer->GetResource(),
 		noiseTexture,
 	};
 
@@ -336,10 +332,10 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 
 	// Fill sample kernel buffer descriptor
 	srvDesc[2].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc[2].Format = mRandomSamplesBuffer->GetResource()->GetDesc().Format;
+	srvDesc[2].Format = mSampleKernelBuffer->GetResource()->GetDesc().Format;
 	srvDesc[2].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	srvDesc[2].Buffer.FirstElement = 0UL;
-	srvDesc[2].Buffer.NumElements = mNumSamples;
+	srvDesc[2].Buffer.NumElements = mSampleKernelSize;
 	srvDesc[2].Buffer.StructureByteStride = sizeof(XMFLOAT4);
 
 	// Fill kernel noise texture descriptor

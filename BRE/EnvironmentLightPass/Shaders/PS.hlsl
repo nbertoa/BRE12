@@ -41,11 +41,11 @@ Output main(const in Input input){
 	const float3 rayViewSpace = normalize(input.mCameraToFragmentViewSpace);
 	const float3 fragmentPositionViewSpace = ViewRayToViewPosition(rayViewSpace, depthNDC, gFrameCBuffer.mProjectionMatrix);
 
-	const float3 fragmentPositionWorldSpace = mul(float4(fragmentPositionViewSpace, 1.0f), gFrameCBuffer.mInvV).xyz;
+	const float3 fragmentPositionWorldSpace = mul(float4(fragmentPositionViewSpace, 1.0f), gFrameCBuffer.mInverseViewMatrix).xyz;
 	
 	const float2 normal = normal_smoothness.xy;
 	const float3 normalViewSpace = normalize(Decode(normal));
-	const float3 normalWorldSpace = normalize(mul(float4(normalViewSpace, 0.0f), gFrameCBuffer.mInvV).xyz);
+	const float3 normalWorldSpace = normalize(mul(float4(normalViewSpace, 0.0f), gFrameCBuffer.mInverseViewMatrix).xyz);
 
 	const float4 baseColor_metalmask = BaseColor_MetalMaskTexture.Load(fragmentScreenSpace);
 

@@ -3,7 +3,7 @@
 
 #include "RS.hlsl"
 
-#define SAMPLE_KERNEL_SIZE 128U
+#define SAMPLE_KERNEL_SIZE 32U
 #define SCREEN_WIDTH 1920.0f
 #define SCREEN_HEIGHT 1080.0f
 #define NOISE_TEXTURE_DIMENSION 4.0f
@@ -25,7 +25,7 @@ SamplerState TextureSampler : register (s0);
 
 Texture2D<float4> Normal_SmoothnessTexture : register (t0);
 Texture2D<float> DepthTexture : register (t1);
-StructuredBuffer<float4> RandomSamplesTexture : register(t2);
+StructuredBuffer<float4> SampleKernelBuffer : register(t2);
 Texture2D<float4> NoiseTexture : register (t3); 
 
 struct Output {
@@ -53,13 +53,13 @@ Output main(const in Input input) {
 	const float3 noiseVec = NoiseTexture.SampleLevel(TextureSampler, NOISE_SCALE * input.mUV, 0.0f).xyz * 2.0f - 1.0f;
 	const float3 tangentViewSpace = normalize(noiseVec - normalViewSpace * dot(noiseVec, normalViewSpace));
 	const float3 bitangentViewSpace = normalize(cross(normalViewSpace, tangentViewSpace));
-	const float3x3 reorientationMatrix = float3x3(tangentViewSpace, bitangentViewSpace, normalViewSpace);
+	const float3x3 sampleKernelRotationMatrix = float3x3(tangentViewSpace, bitangentViewSpace, normalViewSpace);
 
 	float occlusionSum = 0.0f;
 	for (uint i = 0U; i < SAMPLE_KERNEL_SIZE; ++i) {
-		// Reorient random sample and get sample position in view space
-		const float4 randomSample = float4(mul(RandomSamplesTexture[i].xyz, reorientationMatrix), 0.0f);
-		float4 samplePositionViewSpace = fragmentPositionViewSpace + randomSample * OCCLUSION_RADIUS;
+		// Rotate sample and get sample position in view space
+		float4 rotatedSample = float4(mul(SampleKernelBuffer[i].xyz, sampleKernelRotationMatrix), 0.0f);
+		float4 samplePositionViewSpace = fragmentPositionViewSpace + rotatedSample * OCCLUSION_RADIUS;
 				
 		float4 samplePositionNDC = mul(samplePositionViewSpace, gFrameCBuffer.mProjectionMatrix);
 		samplePositionNDC.xy /= samplePositionNDC.w;
@@ -70,7 +70,8 @@ Output main(const in Input input) {
 
 		const float sampleDepthViewSpace = NdcDepthToViewDepth(sampleDepthNDC, gFrameCBuffer.mProjectionMatrix);
 
-		occlusionSum += (sampleDepthViewSpace <= samplePositionViewSpace.z ? 1.0 : 0.0);
+		const float rangeCheck = abs(fragmentPositionViewSpace.z - samplePositionViewSpace.z) < OCCLUSION_RADIUS ? 1.0f : 0.0f;
+		occlusionSum += (sampleDepthViewSpace <= samplePositionViewSpace.z ? 1.0f : 0.0f) * rangeCheck;
 	}
 
 	output.mAmbientAccessibility = 1.0f - (occlusionSum / SAMPLE_KERNEL_SIZE);
