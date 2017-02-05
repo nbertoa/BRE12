@@ -66,12 +66,12 @@ Output main(const in Input input) {
 	
 		const int2 samplePositionScreenSpace = NdcToScreenCoordinates(samplePositionNDC.xy, 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-		float sampleDepthNDC = DepthTexture.Load(int3(samplePositionScreenSpace, 0));
+		float sampleZNDC = DepthTexture.Load(int3(samplePositionScreenSpace, 0));
 
-		const float sampleDepthViewSpace = NdcDepthToViewDepth(sampleDepthNDC, gFrameCBuffer.mProjectionMatrix);
+		const float sampleZViewSpace = NdcDepthToViewDepth(sampleZNDC, gFrameCBuffer.mProjectionMatrix);
 
-		const float rangeCheck = abs(fragmentPositionViewSpace.z - samplePositionViewSpace.z) < OCCLUSION_RADIUS ? 1.0f : 0.0f;
-		occlusionSum += (sampleDepthViewSpace <= samplePositionViewSpace.z ? 1.0f : 0.0f) * rangeCheck;
+		const float rangeCheck = abs(fragmentPositionViewSpace.z - sampleZViewSpace) < OCCLUSION_RADIUS ? 1.0f : 0.0f;
+		occlusionSum += (sampleZViewSpace <= samplePositionViewSpace.z ? 1.0f : 0.0f) * rangeCheck;
 	}
 
 	output.mAmbientAccessibility = 1.0f - (occlusionSum / SAMPLE_KERNEL_SIZE);
