@@ -41,9 +41,10 @@ Output main(const in Input input) {
 #else
 	const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
 
-	const float depthNDC = DepthTexture.Load(fragmentScreenSpace);
+	const float fragmentZNDC = DepthTexture.Load(fragmentScreenSpace);
 	const float3 rayViewSpace = normalize(input.mRayViewSpace);
-	const float4 fragmentPositionViewSpace = float4(ViewRayToViewPosition(rayViewSpace, depthNDC, gFrameCBuffer.mProjectionMatrix), 1.0f);
+	const float4 fragmentPositionViewSpace = 
+		float4(ViewRayToViewPosition(rayViewSpace, fragmentZNDC, gFrameCBuffer.mProjectionMatrix), 1.0f);
 
 	const float2 normal = Normal_SmoothnessTexture.Load(fragmentScreenSpace).xy;
 	const float3 normalViewSpace = normalize(Decode(normal));
