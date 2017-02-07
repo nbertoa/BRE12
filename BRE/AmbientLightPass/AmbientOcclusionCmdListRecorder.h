@@ -5,8 +5,6 @@
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 struct ID3D12CommandAllocator;
-struct ID3D12CommandList;
-struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 class UploadBuffer;

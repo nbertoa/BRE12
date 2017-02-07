@@ -17,9 +17,6 @@ namespace {
 		ID3D12CommandAllocator* &commandAllocator,
 		ID3D12GraphicsCommandList* &commandList) noexcept 
 	{
-		ASSERT(commandAllocator == nullptr);
-		ASSERT(commandList == nullptr);
-
 		// Create command allocators and command list
 		commandAllocator = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocator);
@@ -34,15 +31,17 @@ void SkyBoxPass::Init(
 {
 	ASSERT(IsDataValid() == false);
 
-	CreateCommandObjects(mCommandAllocators, mCommandList);
+	ID3D12CommandAllocator* commandAllocator;
+	ID3D12GraphicsCommandList* commandList;
+	CreateCommandObjects(commandAllocator, commandList);
 
-	CHECK_HR(mCommandList->Reset(mCommandAllocators, nullptr));
+	CHECK_HR(commandList->Reset(commandAllocator, nullptr));
 
 	// Create sky box sphere
 	Model* model;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	model = &ModelManager::CreateSphere(3000, 50, 50, *mCommandList, uploadVertexBuffer, uploadIndexBuffer);
+	model = &ModelManager::CreateSphere(3000, 50, 50, *commandList, uploadVertexBuffer, uploadIndexBuffer);
 	ASSERT(model != nullptr);
 	const std::vector<Mesh>& meshes(model->GetMeshes());
 	ASSERT(meshes.size() == 1UL);
@@ -52,9 +51,9 @@ void SkyBoxPass::Init(
 	DirectX::XMFLOAT4X4 worldMatrix;
 	MathUtils::ComputeMatrix(worldMatrix, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 
-	mCommandList->Close();
+	commandList->Close();
 
-	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mCommandList);
+	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*commandList);
 
 	// Initialize recoders's pso
 	SkyBoxCmdListRecorder::InitPSO();
@@ -83,10 +82,7 @@ void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 }
 
 bool SkyBoxPass::IsDataValid() const noexcept {
-	const bool b =
-		mCommandListRecorder.get() != nullptr &&
-		mCommandAllocators != nullptr &&
-		mCommandList != nullptr;
+	const bool b = mCommandListRecorder.get() != nullptr;
 
 	return b;
 }

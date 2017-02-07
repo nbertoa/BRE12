@@ -28,9 +28,6 @@ public:
 private:
 	// Method used internally for validation purposes
 	bool IsDataValid() const noexcept;
-	
-	ID3D12CommandAllocator* mCommandAllocators{ nullptr };
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 
 	std::unique_ptr<SkyBoxCmdListRecorder> mCommandListRecorder;
 };

@@ -1,5 +1,6 @@
 #include "BlurCmdListRecorder.h"
 
+#include <d3d12.h>
 #include <DirectXMath.h>
 
 #include <CommandListExecutor\CommandListExecutor.h>

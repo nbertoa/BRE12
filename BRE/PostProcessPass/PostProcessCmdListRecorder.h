@@ -4,8 +4,6 @@
 
 #include <SettingsManager\SettingsManager.h>
 
-class UploadBuffer;
-
 // To record command list for post processing effects (anti aliasing, color grading, etc).
 class PostProcessCmdListRecorder {
 public:

@@ -12,8 +12,6 @@
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 struct ID3D12CommandAllocator;
-struct ID3D12CommandQueue;
-struct ID3D12Device;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
@@ -57,7 +55,6 @@ private:
 	// 1 command allocater per queued frame.	
 	ID3D12CommandAllocator* mCmdAllocatorsBegin[SettingsManager::sQueuedFrameCount]{ nullptr };
 	ID3D12CommandAllocator* mCmdAllocatorsFinal[SettingsManager::sQueuedFrameCount]{ nullptr };
-
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 
 	// Geometry buffers created by GeometryPass

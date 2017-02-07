@@ -2,26 +2,8 @@
 
 #include <d3d12.h>
 
-#include <CommandListExecutor/CommandListExecutor.h>
-#include <CommandManager\CommandAllocatorManager.h>
-#include <CommandManager\CommandListManager.h>
 #include <ResourceManager\ResourceManager.h>
 #include <Utils\DebugUtils.h>
-
-namespace {
-	void CreateCommandObjects(
-		ID3D12CommandAllocator* &commandAllocators,
-		ID3D12GraphicsCommandList* &commandList) noexcept {
-
-		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
-		ASSERT(commandList == nullptr);
-
-		// Create command allocator and command list
-		commandAllocators = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
-		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators);
-		commandList->Close();
-	}
-}
 
 void EnvironmentLightPass::Init(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
@@ -32,8 +14,6 @@ void EnvironmentLightPass::Init(
 	ID3D12Resource& specularPreConvolvedCubeMap) noexcept 
 {
 	ASSERT(ValidateData() == false);
-	
-	CreateCommandObjects(mCommandAllocator, mCommandList);
 
 	// Initialize recorder's PSO
 	EnvironmentLightCmdListRecorder::InitPSO();
@@ -58,10 +38,7 @@ void EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) const noexc
 }
 
 bool EnvironmentLightPass::ValidateData() const noexcept {
-	const bool b =
-		mCommandAllocator != nullptr &&
-		mCommandList != nullptr &&
-		mCommandListRecorder.get() != nullptr;
+	const bool b = mCommandListRecorder.get() != nullptr;
 
 	return b;
 }

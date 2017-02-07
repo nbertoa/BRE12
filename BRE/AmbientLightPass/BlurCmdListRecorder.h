@@ -1,10 +1,12 @@
 #pragma once
 
-#include <d3d12.h>
-
 #include <SettingsManager\SettingsManager.h>
 
-class UploadBuffer;
+struct D3D12_CPU_DESCRIPTOR_HANDLE;
+struct D3D12_GPU_DESCRIPTOR_HANDLE;
+struct ID3D12CommandAllocator;
+struct ID3D12GraphicsCommandList;
+struct ID3D12Resource;
 
 class BlurCmdListRecorder {
 public:

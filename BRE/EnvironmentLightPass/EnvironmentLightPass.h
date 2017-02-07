@@ -6,10 +6,6 @@
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
-struct ID3D12CommandAllocator;
-struct ID3D12CommandList;
-struct ID3D12Device;
-struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 // Pass responsible to apply diffuse irradiance & specular pre-convolved environment cube maps
@@ -37,9 +33,6 @@ public:
 private:
 	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
-	
-	ID3D12CommandAllocator* mCommandAllocator{ nullptr };
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 
 	std::unique_ptr<EnvironmentLightCmdListRecorder> mCommandListRecorder;
 };

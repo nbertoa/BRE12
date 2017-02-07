@@ -4,10 +4,8 @@
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12CommandAllocator;
-struct ID3D12CommandList;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
-class UploadBuffer;
 
 // Responsible of command lists recording to be executed by CommandListExecutor.
 // This class has common data and functionality to record command list for ambient light pass.
@@ -41,9 +39,9 @@ private:
 	void InitShaderResourceViews(
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		ID3D12Resource& ambientAccessibilityBuffer) noexcept;
-
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+		
 	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetCpuDesc{ 0UL };
