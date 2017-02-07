@@ -26,8 +26,8 @@ namespace {
 	void UpdateCameraAndFrameCBuffer(
 		const float elapsedFrameTime,
 		Camera& camera,		
-		FrameCBuffer& frameCBuffer) noexcept {
-
+		FrameCBuffer& frameCBuffer) noexcept 
+	{
 		static float elapsedFrameTimeAccumulator = 0.0f;
 		elapsedFrameTimeAccumulator += elapsedFrameTime;
 
@@ -87,7 +87,6 @@ namespace {
 		}
 	}
 
-	// Create swap chain and stores it in swapChain parameter.
 	void CreateSwapChain(
 		const HWND windowHandle,  
 		const DXGI_FORMAT frameBufferFormat,
@@ -231,7 +230,6 @@ tbb::task* RenderManager::execute() {
 
 		ASSERT(CommandListExecutor::Get().AreTherePendingCommandListsToExecute());
 
-		// Execute passes
 		mGeometryPass.Execute(mFrameCBuffer);
 		mLightingPass.Execute(mFrameCBuffer);
 		mSkyBoxPass.Execute(mFrameCBuffer);
