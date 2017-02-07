@@ -147,27 +147,39 @@ bool AmbientLightCmdListRecorder::ValidateData() const noexcept {
 
 void AmbientLightCmdListRecorder::InitShaderResourceViews(
 	ID3D12Resource& baseColorMetalMaskBuffer, 
-	ID3D12Resource& ambientAccessibilityBuffer) noexcept {
-
+	ID3D12Resource& ambientAccessibilityBuffer) noexcept 
+{
 	ASSERT(mBaseColor_MetalMaskGpuDesc.ptr == 0UL);
+
+	ID3D12Resource* resources[] = 
+	{
+		&baseColorMetalMaskBuffer,
+		&ambientAccessibilityBuffer
+	};
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptors[2U]{};
 	
 	// Create baseColor_metalMask buffer texture descriptor
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc.Format = baseColorMetalMaskBuffer.GetDesc().Format;
-	srvDesc.Texture2D.MipLevels = baseColorMetalMaskBuffer.GetDesc().MipLevels;
-	mBaseColor_MetalMaskGpuDesc = CbvSrvUavDescriptorManager::CreateShaderResourceView(baseColorMetalMaskBuffer, srvDesc);
+	srvDescriptors[0].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptors[0].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptors[0].Texture2D.MostDetailedMip = 0;
+	srvDescriptors[0].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptors[0].Format = baseColorMetalMaskBuffer.GetDesc().Format;
+	srvDescriptors[0].Texture2D.MipLevels = baseColorMetalMaskBuffer.GetDesc().MipLevels;
 
 	// Create ambient accessibility buffer texture descriptor
-	srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc.Format = ambientAccessibilityBuffer.GetDesc().Format;
-	srvDesc.Texture2D.MipLevels = ambientAccessibilityBuffer.GetDesc().MipLevels;
-	CbvSrvUavDescriptorManager::CreateShaderResourceView(ambientAccessibilityBuffer, srvDesc);
+	srvDescriptors[1].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptors[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptors[1].Texture2D.MostDetailedMip = 0;
+	srvDescriptors[1].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptors[1].Format = ambientAccessibilityBuffer.GetDesc().Format;
+	srvDescriptors[1].Texture2D.MipLevels = ambientAccessibilityBuffer.GetDesc().MipLevels;
+
+	ASSERT(_countof(resources) == _countof(srvDescriptors));
+
+	mBaseColor_MetalMaskGpuDesc = 
+		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
+			resources, 
+			srvDescriptors, 
+			_countof(resources));
 }

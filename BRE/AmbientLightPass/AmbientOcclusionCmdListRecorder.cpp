@@ -322,46 +322,53 @@ void AmbientOcclusionCmdListRecorder::InitShaderResourceViews(
 	ASSERT(mSampleKernelBuffer != nullptr);
 	ASSERT(mSampleKernelSize != 0U);
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor[4U]{};
-	ID3D12Resource* resources[4] = {
+	ID3D12Resource* resources[] = {
 		&normalSmoothnessBuffer,
 		&depthBuffer,
 		mSampleKernelBuffer->GetResource(),
 		&noiseTexture,
 	};
 
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptors[4U]{};
+
 	// Fill normal_smoothness buffer texture descriptor
-	srvDescriptor[0].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDescriptor[0].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDescriptor[0].Texture2D.MostDetailedMip = 0;
-	srvDescriptor[0].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDescriptor[0].Format = normalSmoothnessBuffer.GetDesc().Format;
-	srvDescriptor[0].Texture2D.MipLevels = normalSmoothnessBuffer.GetDesc().MipLevels;
+	srvDescriptors[0].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptors[0].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptors[0].Texture2D.MostDetailedMip = 0;
+	srvDescriptors[0].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptors[0].Format = normalSmoothnessBuffer.GetDesc().Format;
+	srvDescriptors[0].Texture2D.MipLevels = normalSmoothnessBuffer.GetDesc().MipLevels;
 
 	// Fill depth buffer descriptor
-	srvDescriptor[1].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDescriptor[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDescriptor[1].Texture2D.MostDetailedMip = 0;
-	srvDescriptor[1].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDescriptor[1].Format = SettingsManager::sDepthStencilSRVFormat;
-	srvDescriptor[1].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
+	srvDescriptors[1].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptors[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptors[1].Texture2D.MostDetailedMip = 0;
+	srvDescriptors[1].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptors[1].Format = SettingsManager::sDepthStencilSRVFormat;
+	srvDescriptors[1].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
 
 	// Fill sample kernel buffer descriptor
-	srvDescriptor[2].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDescriptor[2].Format = mSampleKernelBuffer->GetResource()->GetDesc().Format;
-	srvDescriptor[2].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	srvDescriptor[2].Buffer.FirstElement = 0UL;
-	srvDescriptor[2].Buffer.NumElements = mSampleKernelSize;
-	srvDescriptor[2].Buffer.StructureByteStride = sizeof(XMFLOAT4);
+	srvDescriptors[2].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptors[2].Format = mSampleKernelBuffer->GetResource()->GetDesc().Format;
+	srvDescriptors[2].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	srvDescriptors[2].Buffer.FirstElement = 0UL;
+	srvDescriptors[2].Buffer.NumElements = mSampleKernelSize;
+	srvDescriptors[2].Buffer.StructureByteStride = sizeof(XMFLOAT4);
 
 	// Fill kernel noise texture descriptor
-	srvDescriptor[3].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDescriptor[3].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDescriptor[3].Texture2D.MostDetailedMip = 0;
-	srvDescriptor[3].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDescriptor[3].Format = noiseTexture.GetDesc().Format;
-	srvDescriptor[3].Texture2D.MipLevels = noiseTexture.GetDesc().MipLevels;
+	srvDescriptors[3].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptors[3].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptors[3].Texture2D.MostDetailedMip = 0;
+	srvDescriptors[3].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptors[3].Format = noiseTexture.GetDesc().Format;
+	srvDescriptors[3].Texture2D.MipLevels = noiseTexture.GetDesc().MipLevels;
+
+	ASSERT(_countof(resources) == _countof(srvDescriptors));
 
 	// Create SRVs
-	mPixelShaderBuffersGpuDesc = CbvSrvUavDescriptorManager::CreateShaderResourceViews(resources, srvDescriptor, _countof(srvDescriptor));
+	mPixelShaderBuffersGpuDesc = 
+		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
+			resources, 
+			srvDescriptors, 
+			_countof(srvDescriptors));
 }

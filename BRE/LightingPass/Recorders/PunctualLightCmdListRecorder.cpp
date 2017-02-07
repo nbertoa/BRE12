@@ -72,50 +72,63 @@ void PunctualLightCmdListRecorder::Init(
 	mNumLights = numLights;
 
 	InitConstantBuffers();
-	CreateLightBuffers(lights);
+	CreateLightBuffersAndViews(lights);
+	InitShaderResourceViews(geometryBuffers, geometryBuffersCount, depthBuffer);
 	
-	// Used to create SRV descriptors for textures (geometry buffers + depth buffer)
-	std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDescVec;
-	srvDescVec.resize(geometryBuffersCount + 1U); // 1 = depth buffer
-	std::vector<ID3D12Resource*> res;
-	res.resize(geometryBuffersCount + 1U);
+	ASSERT(IsDataValid());
+}
+
+void PunctualLightCmdListRecorder::InitShaderResourceViews(
+	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
+	const std::uint32_t geometryBuffersCount,
+	ID3D12Resource& depthBuffer) noexcept
+{
+	ASSERT(geometryBuffers != nullptr);
+	ASSERT(0 < geometryBuffersCount && geometryBuffersCount < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
+	ASSERT(mNumLights > 0U);
+
+	// Number of geometry buffers + depth buffer
+	const std::uint32_t numResources = geometryBuffersCount + 1U;
+
+	std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDescriptors;
+	srvDescriptors.reserve(numResources);
+
+	std::vector<ID3D12Resource*> resources;
+	resources.reserve(numResources);
 
 	// Fill data for geometry buffers SRV descriptors
 	for (std::uint32_t i = 0U; i < geometryBuffersCount; ++i) {
-		res[i] = geometryBuffers[i].Get();
+		ASSERT(geometryBuffers[i].Get() != nullptr);
 
-		srvDescVec[i].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDescVec[i].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDescVec[i].Texture2D.MostDetailedMip = 0;
-		srvDescVec[i].Texture2D.ResourceMinLODClamp = 0.0f;
-		srvDescVec[i].Format = res[i]->GetDesc().Format;
-		srvDescVec[i].Texture2D.MipLevels = res[i]->GetDesc().MipLevels;
+		resources.push_back(geometryBuffers[i].Get());
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
+		srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDescriptor.Texture2D.MostDetailedMip = 0;
+		srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+		srvDescriptor.Format = resources.back()->GetDesc().Format;
+		srvDescriptor.Texture2D.MipLevels = resources.back()->GetDesc().MipLevels;
+		srvDescriptors.emplace_back(srvDescriptor);
 	}
 
 	// Fill depth buffer SRV description
-	const std::uint32_t resIndex = geometryBuffersCount;
-	srvDescVec[resIndex].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDescVec[resIndex].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDescVec[resIndex].Texture2D.MostDetailedMip = 0;
-	srvDescVec[resIndex].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDescVec[resIndex].Format = SettingsManager::sDepthStencilSRVFormat;
-	srvDescVec[resIndex].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
-	res[resIndex] = &depthBuffer;
-	
-	// Create textures SRV descriptors
-	mPixelShaderBuffersGpuDesc = CbvSrvUavDescriptorManager::CreateShaderResourceViews(res.data(), srvDescVec.data(), static_cast<uint32_t>(srvDescVec.size()));
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
+	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptor.Texture2D.MostDetailedMip = 0;
+	srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptor.Format = SettingsManager::sDepthStencilSRVFormat;
+	srvDescriptor.Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
+	srvDescriptors.emplace_back(srvDescriptor);
+	resources.push_back(&depthBuffer);
 
-	// Create lights buffer SRV	descriptor
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = mLightsBuffer->GetResource()->GetDesc().Format;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	srvDesc.Buffer.FirstElement = 0UL;
-	srvDesc.Buffer.NumElements = mNumLights;
-	srvDesc.Buffer.StructureByteStride = sizeof(PunctualLight);
-	mLightsBufferGpuDescBegin = CbvSrvUavDescriptorManager::CreateShaderResourceView(*mLightsBuffer->GetResource(), srvDesc);
-	
-	ASSERT(IsDataValid());
+	// Create pixel shader SRV descriptors
+	mPixelShaderBuffersGpuDesc =
+		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
+			resources.data(),
+			srvDescriptors.data(),
+			numResources);
 }
 
 void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
@@ -124,15 +137,18 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	ASSERT(sRootSignature != nullptr);
 	ASSERT(mOutputColorBufferCpuDesc.ptr != 0UL);
 
-	ID3D12CommandAllocator* cmdAlloc{ mCommandAllocators[mCurrentFrameIndex] };
-	ASSERT(cmdAlloc != nullptr);	
+	// Used to choose a different command list allocator each call.
+	static std::uint32_t commandAllocatorIndex{ 0U };
 
+	ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[commandAllocatorIndex] };
+	ASSERT(commandAllocator != nullptr);	
+	
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrentFrameIndex]);
+	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[commandAllocatorIndex]);
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCommandList->Reset(cmdAlloc, sPSO));
+	CHECK_HR(commandAllocator->Reset());
+	CHECK_HR(mCommandList->Reset(commandAllocator, sPSO));
 
 	mCommandList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
@@ -157,18 +173,16 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	mCommandList->DrawInstanced(mNumLights, 1U, 0U, 0U);
 
 	mCommandList->Close();
-
 	CommandListExecutor::Get().AddCommandList(*mCommandList);
 
-	// Next frame
-	mCurrentFrameIndex = (mCurrentFrameIndex + 1) % _countof(mCommandAllocators);
+	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCommandAllocators);
 }
 
 bool PunctualLightCmdListRecorder::IsDataValid() const noexcept {
 	return LightingPassCmdListRecorder::IsDataValid() && mPixelShaderBuffersGpuDesc.ptr != 0UL;
 }
 
-void PunctualLightCmdListRecorder::CreateLightBuffers(const void* lights) noexcept {
+void PunctualLightCmdListRecorder::CreateLightBuffersAndViews(const void* lights) noexcept {
 #ifdef _DEBUG
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ASSERT(mFrameCBuffer[i] == nullptr);
@@ -185,6 +199,16 @@ void PunctualLightCmdListRecorder::CreateLightBuffers(const void* lights) noexce
 	for (std::uint32_t i = 0UL; i < mNumLights; ++i) {
 		mLightsBuffer->CopyData(i, lightsPtr + sizeof(PunctualLight) * i, sizeof(PunctualLight));
 	}
+
+	// Create lights buffer SRV	descriptor
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
+	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptor.Format = mLightsBuffer->GetResource()->GetDesc().Format;
+	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	srvDescriptor.Buffer.FirstElement = 0UL;
+	srvDescriptor.Buffer.NumElements = mNumLights;
+	srvDescriptor.Buffer.StructureByteStride = sizeof(PunctualLight);
+	mLightsBufferGpuDescBegin = CbvSrvUavDescriptorManager::CreateShaderResourceView(*mLightsBuffer->GetResource(), srvDescriptor);
 }
 
 void PunctualLightCmdListRecorder::InitConstantBuffers() noexcept {

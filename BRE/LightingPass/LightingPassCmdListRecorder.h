@@ -60,7 +60,6 @@ public:
 protected:
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
-	std::uint32_t mCurrentFrameIndex{ 0U };
 
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)

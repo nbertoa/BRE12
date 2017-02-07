@@ -33,8 +33,8 @@ namespace {
 void ToneMappingPass::Init(
 	ID3D12Resource& inputColorBuffer,
 	ID3D12Resource& outputColorBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept {
-
+	const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept 
+{
 	ASSERT(IsDataValid() == false);
 	
 	CreateCommandObjects(mCommandAllocators, mCommandList);
@@ -43,8 +43,8 @@ void ToneMappingPass::Init(
 
 	ToneMappingCmdListRecorder::InitPSO();
 
-	mRecorder.reset(new ToneMappingCmdListRecorder());
-	mRecorder->Init(*mInputColorBuffer, outputBufferCpuDesc);
+	mCommandListRecorder.reset(new ToneMappingCmdListRecorder());
+	mCommandListRecorder->Init(*mInputColorBuffer, outputBufferCpuDesc);
 
 	ASSERT(IsDataValid());
 }
@@ -55,7 +55,7 @@ void ToneMappingPass::Execute() noexcept {
 	ExecuteBeginTask();
 
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
-	mRecorder->RecordAndPushCommandLists();
+	mCommandListRecorder->RecordAndPushCommandLists();
 	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
 		Sleep(0U);
 	}
@@ -70,7 +70,7 @@ bool ToneMappingPass::IsDataValid() const noexcept {
 
 	const bool b =
 		mCommandList != nullptr &&
-		mRecorder.get() != nullptr &&
+		mCommandListRecorder.get() != nullptr &&
 		mInputColorBuffer != nullptr &&
 		mOutputColorBuffer != nullptr;
 
@@ -87,24 +87,23 @@ void ToneMappingPass::ExecuteBeginTask() noexcept {
 	ASSERT(ResourceStateManager::GetResourceState(*mOutputColorBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// Used to choose a different command list allocator each call.
-	static std::uint32_t cmdAllocatorIndex{ 0U };
+	static std::uint32_t commandAllocatorIndex{ 0U };
 
-	ID3D12CommandAllocator* cmdAllocator{ mCommandAllocators[cmdAllocatorIndex] };
-	cmdAllocatorIndex = (cmdAllocatorIndex + 1U) % _countof(mCommandAllocators);
+	ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[commandAllocatorIndex] };
 
-	CHECK_HR(cmdAllocator->Reset());
-	CHECK_HR(mCommandList->Reset(cmdAllocator, nullptr));
+	CHECK_HR(commandAllocator->Reset());
+	CHECK_HR(mCommandList->Reset(commandAllocator, nullptr));
 
 	// Set barriers
-	CD3DX12_RESOURCE_BARRIER barriers[]{
+	CD3DX12_RESOURCE_BARRIER barriers[]
+	{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mInputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mOutputColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
 	mCommandList->ResourceBarrier(_countof(barriers), barriers);
 
-	// Clear render targets
 	CHECK_HR(mCommandList->Close());
-
-	// Execute preliminary task
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mCommandList);
+
+	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCommandAllocators);
 }

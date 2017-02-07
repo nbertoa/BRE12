@@ -34,7 +34,7 @@ public:
 	GeometryPass& operator=(GeometryPass&&) = delete;
 
 	// You should get recorders and fill them, before calling Init()
-	__forceinline CommandListRecorders& GetCommandListRecorders() noexcept { return mRecorders; }
+	__forceinline CommandListRecorders& GetCommandListRecorders() noexcept { return mCommandListRecorders; }
 
 	// Preconditions:
 	// - You should fill recorders with GetCommandListRecorders() before
@@ -52,17 +52,15 @@ private:
 
 	void ExecuteBeginTask() noexcept;
 
-	// 1 command allocater per queued frame.	
+	// 1 command allocator per queued frame.	
 	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
-
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 
 	// Geometry buffers data
 	Microsoft::WRL::ComPtr<ID3D12Resource> mGeometryBuffers[BUFFERS_COUNT];
-	D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBufferRenderTargetCpuDescs[BUFFERS_COUNT];
-	D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBuffersCpuDescs[BUFFERS_COUNT]{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBufferRenderTargetCpuDescriptors[BUFFERS_COUNT];
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
 		
-	CommandListRecorders mRecorders;
+	CommandListRecorders mCommandListRecorders;
 };

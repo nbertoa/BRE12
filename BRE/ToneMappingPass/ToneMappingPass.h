@@ -15,8 +15,6 @@ struct ID3D12Resource;
 
 class ToneMappingPass {
 public:
-	using CommandListRecorders = std::unique_ptr<ToneMappingCmdListRecorder>;
-
 	ToneMappingPass() = default;
 	~ToneMappingPass() = default; 
 	ToneMappingPass(const ToneMappingPass&) = delete;
@@ -40,13 +38,10 @@ private:
 
 	// 1 command allocator per queued frame.	
 	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
-
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
-
-	ID3D12Fence* mFence{ nullptr };
 	
 	ID3D12Resource* mInputColorBuffer{ nullptr };
 	ID3D12Resource* mOutputColorBuffer{ nullptr };
 
-	CommandListRecorders mRecorder;
+	std::unique_ptr<ToneMappingCmdListRecorder> mCommandListRecorder;
 };

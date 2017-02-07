@@ -33,7 +33,7 @@ namespace {
 		DXGI_FORMAT_UNKNOWN
 	};
 
-	void CreateGeometryBuffers(
+	void CreateGeometryBuffersAndRenderTargetViews(
 		Microsoft::WRL::ComPtr<ID3D12Resource> buffers[GeometryPass::BUFFERS_COUNT],
 		D3D12_CPU_DESCRIPTOR_HANDLE bufferRenderTargetViewCpuDescriptors[GeometryPass::BUFFERS_COUNT]) noexcept {
 
@@ -61,10 +61,8 @@ namespace {
 		buffers[GeometryPass::BASECOLOR_METALMASK].Reset();
 
 		CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-
-		ID3D12Resource* res{ nullptr };
-
-		// Create and store RTV's descriptors for buffers
+		
+		// Create and store render target views
 		const wchar_t* resourceNames[GeometryPass::BUFFERS_COUNT] =
 		{
 			L"Normal_SmoothnessTexture Buffer",
@@ -78,7 +76,7 @@ namespace {
 			D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 			rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 			rtvDesc.Format = resourceDescriptor.Format;
-			res = &ResourceManager::CreateCommittedResource(
+			ID3D12Resource* resource = &ResourceManager::CreateCommittedResource(
 				heapProps, 
 				D3D12_HEAP_FLAG_NONE, 
 				resourceDescriptor, 
@@ -86,7 +84,7 @@ namespace {
 				&clearValue[i],
 				resourceNames[i]);
 
-			buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(res);
+			buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
 			RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &bufferRenderTargetViewCpuDescriptors[i]);
 		}
 	}
@@ -112,9 +110,9 @@ void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) n
 {
 	ASSERT(IsDataValid() == false);
 	
-	ASSERT(mRecorders.empty() == false);
+	ASSERT(mCommandListRecorders.empty() == false);
 
-	CreateGeometryBuffers(mGeometryBuffers, mGeometryBufferRenderTargetCpuDescs);
+	CreateGeometryBuffersAndRenderTargetViews(mGeometryBuffers, mGeometryBufferRenderTargetCpuDescriptors);
 	CreateCommandObjects(mCommandAllocators, mCommandList);
 
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
@@ -126,20 +124,11 @@ void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) n
 	HeightCmdListRecorder::InitPSO(sGeometryBufferFormats, BUFFERS_COUNT);
 	NormalCmdListRecorder::InitPSO(sGeometryBufferFormats, BUFFERS_COUNT);
 	TextureCmdListRecorder::InitPSO(sGeometryBufferFormats, BUFFERS_COUNT);
-
-	// Build geometry buffers cpu descriptors
-	const D3D12_CPU_DESCRIPTOR_HANDLE geometryBuffersCpuDescs[]
-	{
-		mGeometryBufferRenderTargetCpuDescs[NORMAL_SMOOTHNESS],
-		mGeometryBufferRenderTargetCpuDescs[BASECOLOR_METALMASK],
-	};
-	ASSERT(_countof(geometryBuffersCpuDescs) == BUFFERS_COUNT);
-	memcpy(mGeometryBuffersCpuDescs, &geometryBuffersCpuDescs, sizeof(geometryBuffersCpuDescs));
-
+	
 	// Init internal data for all geometry recorders
-	for (CommandListRecorders::value_type& recorder : mRecorders) {
+	for (CommandListRecorders::value_type& recorder : mCommandListRecorders) {
 		ASSERT(recorder.get() != nullptr);
-		recorder->Init(mGeometryBuffersCpuDescs, BUFFERS_COUNT, mDepthBufferCpuDesc);
+		recorder->Init(mGeometryBufferRenderTargetCpuDescriptors, BUFFERS_COUNT, mDepthBufferCpuDesc);
 	}
 
 	ASSERT(IsDataValid());
@@ -150,7 +139,7 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 
 	ExecuteBeginTask();
 
-	const std::uint32_t taskCount{ static_cast<std::uint32_t>(mRecorders.size()) };
+	const std::uint32_t taskCount{ static_cast<std::uint32_t>(mCommandListRecorders.size()) };
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
 
 	// Execute geometry tasks
@@ -158,7 +147,7 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
+			mCommandListRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
 	}
 	);
 
@@ -182,14 +171,14 @@ bool GeometryPass::IsDataValid() const noexcept {
 	}
 
 	for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
-		if (mGeometryBufferRenderTargetCpuDescs[i].ptr == 0UL) {
+		if (mGeometryBufferRenderTargetCpuDescriptors[i].ptr == 0UL) {
 			return false;
 		}
 	}
 
 	const bool b =
 		mCommandList != nullptr &&
-		mRecorders.empty() == false &&
+		mCommandListRecorders.empty() == false &&
 		mDepthBufferCpuDesc.ptr != 0UL;
 
 		return b;
@@ -221,12 +210,10 @@ void GeometryPass::ExecuteBeginTask() noexcept {
 
 	// Clear render targets and depth stencil
 	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	mCommandList->ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescs[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
-	mCommandList->ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescs[BASECOLOR_METALMASK], zero, 0U, nullptr);
+	mCommandList->ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescriptors[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
+	mCommandList->ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescriptors[BASECOLOR_METALMASK], zero, 0U, nullptr);
 	mCommandList->ClearDepthStencilView(mDepthBufferCpuDesc, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0U, 0U, nullptr);
 
 	CHECK_HR(mCommandList->Close());
-
-	// Execute preliminary task
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mCommandList);
 }

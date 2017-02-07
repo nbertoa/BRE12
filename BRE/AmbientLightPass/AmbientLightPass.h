@@ -44,21 +44,24 @@ private:
 	void ExecuteFinalTask() noexcept;
 	
 	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCmdAllocatorsBegin[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12CommandAllocator* mCmdAllocatorsMiddle[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12CommandAllocator* mCmdAllocatorsFinal[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12CommandAllocator* mCommandAllocatorsBegin[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12GraphicsCommandList* mCommandListBegin{ nullptr };
 
-	ID3D12GraphicsCommandList* mCmdListBegin{ nullptr };
-	ID3D12GraphicsCommandList* mCmdListMiddle{ nullptr };
-	ID3D12GraphicsCommandList* mCmdListEnd{ nullptr };
+	// 1 command allocater per queued frame.
+	ID3D12CommandAllocator* mCommandAllocatorsMiddle[SettingsManager::sQueuedFrameCount]{ nullptr };
+	ID3D12GraphicsCommandList* mCommandListMiddle{ nullptr };
 
-	std::unique_ptr<AmbientOcclusionCmdListRecorder> mAmbientOcclusionRecorder;
-	std::unique_ptr<AmbientLightCmdListRecorder> mAmbientLightRecorder;	
-	std::unique_ptr<BlurCmdListRecorder> mBlurRecorder;
+	// 1 command allocater per queued frame.
+	ID3D12CommandAllocator* mCommandAllocatorsFinal[SettingsManager::sQueuedFrameCount]{ nullptr };	
+	ID3D12GraphicsCommandList* mCommandListEnd{ nullptr };
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
-	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetCpuDescriptor{ 0UL };
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
-	D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRenderTargetCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRenderTargetCpuDescriptor{ 0UL };
+
+	std::unique_ptr<AmbientOcclusionCmdListRecorder> mAmbientOcclusionRecorder;
+	std::unique_ptr<AmbientLightCmdListRecorder> mAmbientLightRecorder;
+	std::unique_ptr<BlurCmdListRecorder> mBlurRecorder;
 };

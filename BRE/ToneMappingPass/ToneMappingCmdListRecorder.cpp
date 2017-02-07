@@ -141,22 +141,13 @@ bool ToneMappingCmdListRecorder::IsDataValid() const noexcept {
 }
 
 void ToneMappingCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept {
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor[1U]{};
-	ID3D12Resource* resources[1] = {
-		&inputColorBuffer,
-	};
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
+	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptor.Texture2D.MostDetailedMip = 0;
+	srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
+	srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
 
-	// Create color buffer texture descriptor
-	srvDescriptor[0].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDescriptor[0].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDescriptor[0].Texture2D.MostDetailedMip = 0;
-	srvDescriptor[0].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDescriptor[0].Format = inputColorBuffer.GetDesc().Format;
-	srvDescriptor[0].Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
-
-	mInputColorBufferGpuDesc = 
-		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
-			resources, 
-			srvDescriptor, 
-			_countof(srvDescriptor));
+	mInputColorBufferGpuDesc = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
 }

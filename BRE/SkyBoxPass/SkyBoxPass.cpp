@@ -5,7 +5,6 @@
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandAllocatorManager.h>
 #include <CommandManager\CommandListManager.h>
-#include <CommandManager\FenceManager.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
 #include <ModelManager\ModelManager.h>
@@ -16,19 +15,15 @@
 namespace {
 	void CreateCommandObjects(
 		ID3D12CommandAllocator* &commandAllocator,
-		ID3D12GraphicsCommandList* &commandList,
-		ID3D12Fence* &fence) noexcept 
+		ID3D12GraphicsCommandList* &commandList) noexcept 
 	{
 		ASSERT(commandAllocator == nullptr);
 		ASSERT(commandList == nullptr);
-		ASSERT(fence == nullptr);
 
 		// Create command allocators and command list
 		commandAllocator = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocator);
 		commandList->Close();
-
-		fence = &FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE);
 	}
 }
 
@@ -39,7 +34,7 @@ void SkyBoxPass::Init(
 {
 	ASSERT(IsDataValid() == false);
 
-	CreateCommandObjects(mCommandAllocators, mCommandList, mFence);
+	CreateCommandObjects(mCommandAllocators, mCommandList);
 
 	CHECK_HR(mCommandList->Reset(mCommandAllocators, nullptr));
 
@@ -65,8 +60,8 @@ void SkyBoxPass::Init(
 	SkyBoxCmdListRecorder::InitPSO();
 
 	// Initialize recorder
-	mRecorder.reset(new SkyBoxCmdListRecorder());
-	mRecorder->Init(
+	mCommandListRecorder.reset(new SkyBoxCmdListRecorder());
+	mCommandListRecorder->Init(
 		mesh.GetVertexBufferData(),
 		mesh.GetIndexBufferData(), 
 		worldMatrix, 
@@ -81,7 +76,7 @@ void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 	ASSERT(IsDataValid());
 
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
-	mRecorder->RecordAndPushCommandLists(frameCBuffer);
+	mCommandListRecorder->RecordAndPushCommandLists(frameCBuffer);
 	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1U) {
 		Sleep(0U);
 	}
@@ -89,10 +84,9 @@ void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 
 bool SkyBoxPass::IsDataValid() const noexcept {
 	const bool b =
-		mRecorder.get() != nullptr &&
+		mCommandListRecorder.get() != nullptr &&
 		mCommandAllocators != nullptr &&
-		mCommandList != nullptr &&
-		mFence != nullptr;
+		mCommandList != nullptr;
 
 	return b;
 }

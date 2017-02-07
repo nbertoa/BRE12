@@ -16,8 +16,6 @@ struct ID3D12Resource;
 // Pass that applies post processing effects (anti aliasing, color grading, etc)
 class PostProcessPass {
 public:
-	using CommandListRecorders = std::unique_ptr<PostProcessCmdListRecorder>;
-
 	PostProcessPass() = default;
 	~PostProcessPass() = default;
 	PostProcessPass(const PostProcessPass&) = delete;
@@ -43,12 +41,9 @@ private:
 
 	// 1 command allocater per queued frame.	
 	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
-
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
-
-	ID3D12Fence* mFence{ nullptr };
 	
 	ID3D12Resource* mColorBuffer{ nullptr };
 
-	CommandListRecorders mRecorder;
+	std::unique_ptr<PostProcessCmdListRecorder> mCommandListRecorder;
 };

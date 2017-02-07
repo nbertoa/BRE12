@@ -33,14 +33,14 @@ void EnvironmentLightPass::Init(
 {
 	ASSERT(ValidateData() == false);
 	
-	CreateCommandObjects(mCommandAllocators, mCommandList);
+	CreateCommandObjects(mCommandAllocator, mCommandList);
 
 	// Initialize recorder's PSO
 	EnvironmentLightCmdListRecorder::InitPSO();
 
 	// Initialize recorder
-	mRecorder.reset(new EnvironmentLightCmdListRecorder());
-	mRecorder->Init(
+	mCommandListRecorder.reset(new EnvironmentLightCmdListRecorder());
+	mCommandListRecorder->Init(
 		geometryBuffers, 
 		geometryBuffersCount,
 		depthBuffer,
@@ -54,14 +54,14 @@ void EnvironmentLightPass::Init(
 void EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 	ASSERT(ValidateData());
 
-	mRecorder->RecordAndPushCommandLists(frameCBuffer);
+	mCommandListRecorder->RecordAndPushCommandLists(frameCBuffer);
 }
 
 bool EnvironmentLightPass::ValidateData() const noexcept {
 	const bool b =
-		mCommandAllocators != nullptr &&
+		mCommandAllocator != nullptr &&
 		mCommandList != nullptr &&
-		mRecorder.get() != nullptr;
+		mCommandListRecorder.get() != nullptr;
 
 	return b;
 }

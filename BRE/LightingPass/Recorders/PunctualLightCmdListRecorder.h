@@ -21,6 +21,7 @@ public:
 	// - "geometryBuffersCount" must be greater than zero
 	// - "lights" must not be nullptr
 	// - "numLights" must be greater than zero
+	// - This method must be called once
 	void Init(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
@@ -39,7 +40,15 @@ private:
 
 	// Preconditions:
 	// - "lights" must not be nullptr
-	void CreateLightBuffers(const void* lights) noexcept;
+	void CreateLightBuffersAndViews(const void* lights) noexcept;
+
+	// Preconditions:
+	// - "geometryBuffers" must not be nullptr
+	// - "geometryBuffersCount" must be greater than zero
+	void InitShaderResourceViews(
+		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
+		const std::uint32_t geometryBuffersCount,
+		ID3D12Resource& depthBuffer) noexcept;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDesc{ 0UL };
 };

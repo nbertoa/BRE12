@@ -209,18 +209,13 @@ void SkyBoxCmdListRecorder::InitConstantBuffers() noexcept {
 	}
 }
 
-void SkyBoxCmdListRecorder::InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap) noexcept {
-	// Set begin for cube map in GPU
-	const std::size_t descHandleIncSize{ DirectXManager::GetDevice().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	mCubeMapBufferGpuDescBegin.ptr = mObjectCBufferGpuDescBegin.ptr + descHandleIncSize;
-	
-	// Create cube map texture descriptor
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-	srvDesc.TextureCube.MostDetailedMip = 0;
-	srvDesc.TextureCube.MipLevels = skyBoxCubeMap.GetDesc().MipLevels;
-	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
-	srvDesc.Format = skyBoxCubeMap.GetDesc().Format;
-	mCubeMapBufferGpuDescBegin = CbvSrvUavDescriptorManager::CreateShaderResourceView(skyBoxCubeMap, srvDesc);
+void SkyBoxCmdListRecorder::InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap) noexcept {	
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
+	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+	srvDescriptor.TextureCube.MostDetailedMip = 0;
+	srvDescriptor.TextureCube.MipLevels = skyBoxCubeMap.GetDesc().MipLevels;
+	srvDescriptor.TextureCube.ResourceMinLODClamp = 0.0f;
+	srvDescriptor.Format = skyBoxCubeMap.GetDesc().Format;
+	mCubeMapBufferGpuDescBegin = CbvSrvUavDescriptorManager::CreateShaderResourceView(skyBoxCubeMap, srvDescriptor);
 }
