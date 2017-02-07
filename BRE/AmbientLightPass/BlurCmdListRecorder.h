@@ -1,16 +1,14 @@
 #pragma once
 
-#include <SettingsManager\SettingsManager.h>
+#include <CommandManager\CommandListPerFrame.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct D3D12_GPU_DESCRIPTOR_HANDLE;
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 class BlurCmdListRecorder {
 public:
-	BlurCmdListRecorder();
+	BlurCmdListRecorder() = default;
 	~BlurCmdListRecorder() = default;
 	BlurCmdListRecorder(const BlurCmdListRecorder&) = delete;
 	const BlurCmdListRecorder& operator=(const BlurCmdListRecorder&) = delete;
@@ -35,8 +33,7 @@ public:
 private:
 	void InitShaderResourceViews(ID3D12Resource& colorBuffer) noexcept;
 
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
-	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
+	CommandListPerFrame mCommandListPerFrame;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferGpuDesc{ 0UL };
 

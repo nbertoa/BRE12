@@ -5,11 +5,13 @@
     <ClInclude Include="CommandQueueManager.h" />
     <ClInclude Include="CommandAllocatorManager.h" />
     <ClInclude Include="FenceManager.h" />
+    <ClInclude Include="CommandListPerFrame.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CommandListManager.cpp" />
     <ClCompile Include="CommandQueueManager.cpp" />
     <ClCompile Include="CommandAllocatorManager.cpp" />
     <ClCompile Include="FenceManager.cpp" />
+    <ClCompile Include="CommandListPerFrame.cpp" />
   </ItemGroup>
 </Project>

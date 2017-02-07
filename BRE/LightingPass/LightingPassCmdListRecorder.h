@@ -3,9 +3,9 @@
 #include <d3d12.h>
 #include <DirectXMath.h>
 
+#include <CommandManager\CommandListPerFrame.h>
 #include <DXUtils/D3DFactory.h>
 #include <ResourceManager/VertexAndIndexBufferCreator.h>
-#include <SettingsManager\SettingsManager.h>
 
 struct FrameCBuffer;
 class UploadBuffer;
@@ -25,7 +25,7 @@ public:
 		std::vector<DirectX::XMFLOAT4X4> mWorldMatrices;
 	};
 
-	LightingPassCmdListRecorder();
+	LightingPassCmdListRecorder() = default;
 	virtual ~LightingPassCmdListRecorder() {}
 
 	LightingPassCmdListRecorder(const LightingPassCmdListRecorder&) = delete;
@@ -58,8 +58,7 @@ public:
 	virtual bool IsDataValid() const noexcept;
 
 protected:
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
-	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
+	CommandListPerFrame mCommandListPerFrame;
 
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)

@@ -3,13 +3,11 @@
 #include <memory>
 #include <vector>
 
+#include <CommandManager\CommandListPerFrame.h>
 #include <GeometryPass\GeometryPassCmdListRecorder.h>
-#include <SettingsManager\SettingsManager.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 // Pass responsible to execute recorders related with deferred shading geometry pass
@@ -50,9 +48,7 @@ private:
 
 	void ExecuteBeginTask() noexcept;
 
-	// 1 command allocator per queued frame.	
-	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	CommandListPerFrame mCommandListPerFrame;
 
 	// Geometry buffers data
 	Microsoft::WRL::ComPtr<ID3D12Resource> mGeometryBuffers[BUFFERS_COUNT];

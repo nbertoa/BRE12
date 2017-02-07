@@ -1,13 +1,17 @@
 #pragma once
 
-#include <d3d12.h>
+#include <CommandManager\CommandListPerFrame.h>
 
-#include <SettingsManager\SettingsManager.h>
+struct D3D12_CPU_DESCRIPTOR_HANDLE;
+struct D3D12_GPU_DESCRIPTOR_HANDLE;
+struct ID3D12CommandAllocator;
+struct ID3D12GraphicsCommandList;
+struct ID3D12Resource;
 
 // To record command list for post processing effects (anti aliasing, color grading, etc).
 class PostProcessCmdListRecorder {
 public:
-	PostProcessCmdListRecorder();
+	PostProcessCmdListRecorder() = default;
 	~PostProcessCmdListRecorder() = default;
 	PostProcessCmdListRecorder(const PostProcessCmdListRecorder&) = delete;
 	const PostProcessCmdListRecorder& operator=(const PostProcessCmdListRecorder&) = delete;
@@ -30,8 +34,7 @@ public:
 private:
 	void InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept;
 
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
-	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
+	CommandListPerFrame mCommandListPerFrame;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferGpuDesc{ 0UL };
 };

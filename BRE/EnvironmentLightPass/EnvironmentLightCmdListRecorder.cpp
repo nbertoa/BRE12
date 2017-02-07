@@ -3,8 +3,6 @@
 #include <DirectXMath.h>
 
 #include <CommandListExecutor\CommandListExecutor.h>
-#include <CommandManager/CommandAllocatorManager.h>
-#include <CommandManager/CommandListManager.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager/UploadBufferManager.h>
@@ -21,34 +19,6 @@
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
 	ID3D12RootSignature* sRootSignature{ nullptr };
-
-	void BuildCommandObjects(
-		ID3D12GraphicsCommandList* &commandList, 
-		ID3D12CommandAllocator* commandAllocators[], 
-		const std::size_t commandAllocatorCount) noexcept {
-		ASSERT(commandList == nullptr);
-
-#ifdef _DEBUG
-		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
-			ASSERT(commandAllocators[i] == nullptr);
-		}
-#endif
-
-		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
-			commandAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
-		}
-
-		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0]);
-
-		// Start off in a closed state.  This is because the first time we refer 
-		// to the command list we will Reset it, and it needs to be closed before
-		// calling Reset.
-		commandList->Close();
-	}
-}
-
-EnvironmentLightCmdListRecorder::EnvironmentLightCmdListRecorder() {
-	BuildCommandObjects(mCommandList, mCommandAllocators, _countof(mCommandAllocators));
 }
 
 void EnvironmentLightCmdListRecorder::InitPSO() noexcept {
@@ -107,37 +77,33 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 	static std::uint32_t currentFrameIndex = 0U;
 
-	ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[currentFrameIndex] };
-	ASSERT(commandAllocator != nullptr);
-
 	// Update frame constants
 	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[currentFrameIndex]);
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 	
-	CHECK_HR(commandAllocator->Reset());
-	CHECK_HR(mCommandList->Reset(commandAllocator, sPSO));
+	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
 
-	mCommandList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
-	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	mCommandList->OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, nullptr);
+	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
-	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
-	mCommandList->SetGraphicsRootSignature(sRootSignature);
+	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
+	commandList.SetGraphicsRootSignature(sRootSignature);
 	
 	// Set root parameters
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
-	mCommandList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
-	mCommandList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	mCommandList->SetGraphicsRootDescriptorTable(2U, mPixelShaderBuffersGpuDesc);
+	commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
+	commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
+	commandList.SetGraphicsRootDescriptorTable(2U, mPixelShaderBuffersGpuDesc);
 
 	// Draw object
-	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	mCommandList->DrawInstanced(6U, 1U, 0U, 0U);
+	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList.DrawInstanced(6U, 1U, 0U, 0U);
 
-	mCommandList->Close();
+	commandList.Close();
 
-	CommandListExecutor::Get().AddCommandList(*mCommandList);
+	CommandListExecutor::Get().AddCommandList(commandList);
 
 	// Next frame
 	currentFrameIndex = (currentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
@@ -145,19 +111,12 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCommandAllocators[i] == nullptr) {
-			return false;
-		}
-	}
-
-	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
 		if (mFrameCBuffer[i] == nullptr) {
 			return false;
 		}
 	}
 
 	const bool result =
-		mCommandList != nullptr &&
 		mOutputColorBufferCpuDesc.ptr != 0UL &&
 		mPixelShaderBuffersGpuDesc.ptr != 0UL;
 

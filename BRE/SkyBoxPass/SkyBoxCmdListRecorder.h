@@ -1,18 +1,22 @@
 #pragma once
 
-#include <d3d12.h>
 #include <DirectXMath.h>
 
+#include <CommandManager\CommandListPerFrame.h>
 #include <MathUtils\MathUtils.h>
 #include <ResourceManager/VertexAndIndexBufferCreator.h>
-#include <SettingsManager\SettingsManager.h>
 
+struct D3D12_CPU_DESCRIPTOR_HANDLE;
+struct D3D12_GPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
+struct ID3D12CommandAllocator;
+struct ID3D12Resource;
+struct ID3D12GraphicsCommandList;
 class UploadBuffer;
 
 class SkyBoxCmdListRecorder {
 public:
-	SkyBoxCmdListRecorder();
+	SkyBoxCmdListRecorder() = default;
 	~SkyBoxCmdListRecorder() = default;
 	SkyBoxCmdListRecorder(const SkyBoxCmdListRecorder&) = delete;
 	const SkyBoxCmdListRecorder& operator=(const SkyBoxCmdListRecorder&) = delete;
@@ -42,8 +46,7 @@ private:
 	void InitConstantBuffers() noexcept;
 	void InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap) noexcept;
 
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
-	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
+	CommandListPerFrame mCommandListPerFrame;
 	
 	VertexAndIndexBufferCreator::VertexBufferData mVertexBufferData;
 	VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;

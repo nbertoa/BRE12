@@ -4,36 +4,15 @@
 #include <DirectXColors.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
-#include <CommandManager\CommandAllocatorManager.h>
-#include <CommandManager\CommandListManager.h>
 #include <DXUtils/d3dx12.h>
 #include <ResourceManager\ResourceManager.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
-namespace {
-	void CreateCommandObjects(
-		ID3D12CommandAllocator* cmdAllocators[SettingsManager::sQueuedFrameCount],
-		ID3D12GraphicsCommandList* &commandList) noexcept {
-
-		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
-		ASSERT(commandList == nullptr);
-
-		// Create command allocators and command list
-		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-			ASSERT(cmdAllocators[i] == nullptr);
-			cmdAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
-		}
-		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocators[0]);
-		commandList->Close();
-	}
-}
-
 void PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept {
 	ASSERT(IsDataValid() == false);
 	
-	CreateCommandObjects(mCommandAllocators, mCommandList);
 	mColorBuffer = &inputColorBuffer;
 
 	// Initialize recorder's PSO
@@ -64,14 +43,7 @@ void PostProcessPass::Execute(
 }
 
 bool PostProcessPass::IsDataValid() const noexcept {
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCommandAllocators[i] == nullptr) {
-			return false;
-		}
-	}
-
 	const bool b =
-		mCommandList != nullptr &&
 		mCommandListRecorder.get() != nullptr &&
 		mColorBuffer != nullptr;
 
@@ -91,13 +63,7 @@ void PostProcessPass::ExecuteBeginTask(
 	ASSERT(ResourceStateManager::GetResourceState(*mColorBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
 	ASSERT(ResourceStateManager::GetResourceState(outputColorBuffer) == D3D12_RESOURCE_STATE_PRESENT);
 
-	// Used to choose a different command list allocator each call.
-	static std::uint32_t commandAllocatorIndex{ 0U };
-
-	ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[commandAllocatorIndex] };
-
-	CHECK_HR(commandAllocator->Reset());
-	CHECK_HR(mCommandList->Reset(commandAllocator, nullptr));
+	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]
@@ -105,12 +71,10 @@ void PostProcessPass::ExecuteBeginTask(
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(outputColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),		
 	};
-	mCommandList->ResourceBarrier(_countof(barriers), barriers);
+	commandList.ResourceBarrier(_countof(barriers), barriers);
 
-	mCommandList->ClearRenderTargetView(outputColorBufferCpuDescriptor, DirectX::Colors::Black, 0U, nullptr);
+	commandList.ClearRenderTargetView(outputColorBufferCpuDescriptor, DirectX::Colors::Black, 0U, nullptr);
 
-	CHECK_HR(mCommandList->Close());
-	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mCommandList);
-
-	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCommandAllocators);
+	CHECK_HR(commandList.Close());
+	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }

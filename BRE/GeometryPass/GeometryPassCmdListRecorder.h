@@ -3,9 +3,9 @@
 #include <d3d12.h>
 #include <DirectXMath.h>
 
+#include <CommandManager\CommandListPerFrame.h>
 #include <DXUtils/D3DFactory.h>
 #include <ResourceManager/VertexAndIndexBufferCreator.h>
-#include <SettingsManager\SettingsManager.h>
 
 struct FrameCBuffer;
 class UploadBuffer;
@@ -24,7 +24,7 @@ public:
 		std::vector<DirectX::XMFLOAT4X4> mWorldMatrices;
 	};
 
-	GeometryPassCmdListRecorder();
+	GeometryPassCmdListRecorder() = default;
 	virtual ~GeometryPassCmdListRecorder() {}
 
 	GeometryPassCmdListRecorder(const GeometryPassCmdListRecorder&) = delete;
@@ -50,9 +50,8 @@ public:
 	virtual bool IsDataValid() const noexcept;
 
 protected:
-	// 1 command allocater per queued frame.
-	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	CommandListPerFrame mCommandListPerFrame;
+
 	std::uint32_t mCurrentFrameIndex{ 0U };
 
 	// Base command data. Once you inherits from this class, you should add

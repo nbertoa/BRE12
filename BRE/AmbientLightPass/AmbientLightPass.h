@@ -6,10 +6,9 @@
 #include <AmbientLightPass\AmbientLightCmdListRecorder.h>
 #include <AmbientLightPass\AmbientOcclusionCmdListRecorder.h>
 #include <AmbientLightPass\BlurCmdListRecorder.h>
+#include <CommandManager\CommandListPerFrame.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 // Pass responsible to apply ambient lighting and ambient occlusion
@@ -40,17 +39,11 @@ private:
 	void ExecuteMiddleTask() noexcept;
 	void ExecuteFinalTask() noexcept;
 	
-	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCommandAllocatorsBegin[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mCommandListBegin{ nullptr };
+	CommandListPerFrame mBeginCommandListPerFrame;
 
-	// 1 command allocater per queued frame.
-	ID3D12CommandAllocator* mCommandAllocatorsMiddle[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mCommandListMiddle{ nullptr };
+	CommandListPerFrame mMiddleCommandListPerFrame;
 
-	// 1 command allocater per queued frame.
-	ID3D12CommandAllocator* mCommandAllocatorsFinal[SettingsManager::sQueuedFrameCount]{ nullptr };	
-	ID3D12GraphicsCommandList* mCommandListEnd{ nullptr };
+	CommandListPerFrame mFinalCommandListPerFrame;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetCpuDescriptor{ 0UL };

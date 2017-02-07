@@ -2,12 +2,10 @@
 
 #include <memory>
 
-#include <SettingsManager\SettingsManager.h>
+#include <CommandManager\CommandListPerFrame.h>
 #include <ToneMappingPass\ToneMappingCmdListRecorder.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 class ToneMappingPass {
@@ -33,9 +31,7 @@ private:
 
 	void ExecuteBeginTask() noexcept;
 
-	// 1 command allocator per queued frame.	
-	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	CommandListPerFrame mCommandListPerFrame;
 	
 	ID3D12Resource* mInputColorBuffer{ nullptr };
 	ID3D12Resource* mOutputColorBuffer{ nullptr };

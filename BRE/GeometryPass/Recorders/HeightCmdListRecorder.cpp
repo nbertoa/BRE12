@@ -102,24 +102,20 @@ void HeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	ASSERT(mGeometryBuffersCpuDescs != nullptr);
 	ASSERT(mGeometryBuffersCpuDescCount != 0U);
 	ASSERT(mDepthBufferCpuDesc.ptr != 0U);
-
-	ID3D12CommandAllocator* cmdAlloc{ mCommandAllocators[mCurrentFrameIndex] };
-	ASSERT(cmdAlloc != nullptr);
-
+	
 	// Update frame constants
 	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrentFrameIndex]);
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
-	CHECK_HR(cmdAlloc->Reset());
-	CHECK_HR(mCommandList->Reset(cmdAlloc, sPSO));
+	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
 
-	mCommandList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
-	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	mCommandList->OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
+	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+	commandList.OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
-	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
-	mCommandList->SetGraphicsRootSignature(sRootSignature);
+	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
+	commandList.SetGraphicsRootSignature(sRootSignature);
 
 	const std::size_t descHandleIncSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescBegin);
@@ -128,44 +124,44 @@ void HeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	D3D12_GPU_DESCRIPTOR_HANDLE normalsBufferGpuDesc(mNormalsBufferGpuDescBegin);
 	D3D12_GPU_DESCRIPTOR_HANDLE heightsBufferGpuDesc(mHeightsBufferGpuDescBegin);
 
-	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
 	// Set frame constants root parameters
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
-	mCommandList->SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	mCommandList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
-	mCommandList->SetGraphicsRootConstantBufferView(5U, frameCBufferGpuVAddress);
+	commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
+	commandList.SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
+	commandList.SetGraphicsRootConstantBufferView(5U, frameCBufferGpuVAddress);
 	
 	// Draw objects
 	const std::size_t geomCount{ mGeometryDataVec.size() };
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
 		GeometryData& geomData{ mGeometryDataVec[i] };
-		mCommandList->IASetVertexBuffers(0U, 1U, &geomData.mVertexBufferData.mBufferView);
-		mCommandList->IASetIndexBuffer(&geomData.mIndexBufferData.mBufferView);
+		commandList.IASetVertexBuffers(0U, 1U, &geomData.mVertexBufferData.mBufferView);
+		commandList.IASetIndexBuffer(&geomData.mIndexBufferData.mBufferView);
 		const std::size_t worldMatsCount{ geomData.mWorldMatrices.size() };
 		for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
-			mCommandList->SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
+			commandList.SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
 			objectCBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCommandList->SetGraphicsRootDescriptorTable(3U, heightsBufferGpuDesc);
+			commandList.SetGraphicsRootDescriptorTable(3U, heightsBufferGpuDesc);
 			heightsBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCommandList->SetGraphicsRootDescriptorTable(4U, materialsCBufferGpuDesc);
+			commandList.SetGraphicsRootDescriptorTable(4U, materialsCBufferGpuDesc);
 			materialsCBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCommandList->SetGraphicsRootDescriptorTable(6U, texturesBufferGpuDesc);
+			commandList.SetGraphicsRootDescriptorTable(6U, texturesBufferGpuDesc);
 			texturesBufferGpuDesc.ptr += descHandleIncSize;
 
-			mCommandList->SetGraphicsRootDescriptorTable(7U, normalsBufferGpuDesc);
+			commandList.SetGraphicsRootDescriptorTable(7U, normalsBufferGpuDesc);
 			normalsBufferGpuDesc.ptr += descHandleIncSize;
 			
-			mCommandList->DrawIndexedInstanced(geomData.mIndexBufferData.mElementCount, 1U, 0U, 0U, 0U);
+			commandList.DrawIndexedInstanced(geomData.mIndexBufferData.mElementCount, 1U, 0U, 0U, 0U);
 		}
 	}
 
-	mCommandList->Close();
+	commandList.Close();
 
-	CommandListExecutor::Get().AddCommandList(*mCommandList);
+	CommandListExecutor::Get().AddCommandList(commandList);
 
 	// Next frame
 	mCurrentFrameIndex = (mCurrentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;

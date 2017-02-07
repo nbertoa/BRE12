@@ -1,11 +1,9 @@
 #pragma once
 
-#include <SettingsManager\SettingsManager.h>
+#include <CommandManager\CommandListPerFrame.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 class UploadBuffer;
 
@@ -13,8 +11,7 @@ class UploadBuffer;
 // This class has common data and functionality to record command list for ambient occlusion pass.
 class AmbientOcclusionCmdListRecorder {
 public:
-	AmbientOcclusionCmdListRecorder();
-
+	AmbientOcclusionCmdListRecorder() = default;
 	~AmbientOcclusionCmdListRecorder() = default;
 	AmbientOcclusionCmdListRecorder(const AmbientOcclusionCmdListRecorder&) = delete;
 	const AmbientOcclusionCmdListRecorder& operator=(const AmbientOcclusionCmdListRecorder&) = delete;
@@ -46,8 +43,7 @@ private:
 		ID3D12Resource& depthBuffer,
 		ID3D12Resource& noiseTexture) noexcept;
 	
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
-	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
+	CommandListPerFrame mCommandListPerFrame;
 
 	std::uint32_t mSampleKernelSize{ 0U };
 	std::uint32_t mNoiseTextureDimension{ 4U };

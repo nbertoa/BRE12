@@ -3,8 +3,6 @@
 #include <tbb/parallel_for.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
-#include <CommandManager/CommandAllocatorManager.h>
-#include <CommandManager/CommandListManager.h>
 #include <CommandManager/CommandQueueManager.h>
 #include <CommandManager/FenceManager.h>
 #include <DescriptorManager\DepthStencilDescriptorManager.h>
@@ -153,15 +151,19 @@ RenderManager& RenderManager::Create(Scene& scene) noexcept {
 
 RenderManager::RenderManager(Scene& scene) {
 	CommandListExecutor::Create(MAX_NUM_CMD_LISTS);
+
 	mFence = &FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE);
-	CreateFinalPassCommandObjects();
+
 	CreateRenderTargetBuffersAndViews();
+
 	CreateDepthStencilBufferAndView();
+
 	CreateIntermediateColorBufferAndRenderTargetView(
 		mIntermediateColorBuffer1,
 		mIntermediateColorBuffer1RTVCpuDesc,
 		L"Intermediate Color Buffer 1",
 		D3D12_RESOURCE_STATE_RENDER_TARGET);
+
 	CreateIntermediateColorBufferAndRenderTargetView(
 		mIntermediateColorBuffer2,
 		mIntermediateColorBuffer2RTVCpuDesc,
@@ -259,10 +261,7 @@ tbb::task* RenderManager::execute() {
 }
 
 void RenderManager::ExecuteFinalPass() {
-	ID3D12CommandAllocator* commandAllocator{ mFinalPassCommandAllocators[mCurrentQueuedFrameIndex] };
-
-	CHECK_HR(commandAllocator->Reset());
-	CHECK_HR(mFinalPassCommandList->Reset(commandAllocator, nullptr));
+	ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]{
@@ -284,11 +283,11 @@ void RenderManager::ExecuteFinalPass() {
 	};
 	const std::size_t barrierCount = _countof(barriers);
 	ASSERT(barrierCount == GeometryPass::BUFFERS_COUNT + 2UL);
-	mFinalPassCommandList->ResourceBarrier(_countof(barriers), barriers);
-	CHECK_HR(mFinalPassCommandList->Close());
+	commandList.ResourceBarrier(_countof(barriers), barriers);
+	CHECK_HR(commandList.Close());
 
 	// Execute command list
-	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mFinalPassCommandList);
+	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
 
 void RenderManager::CreateRenderTargetBuffersAndViews() noexcept {
@@ -393,19 +392,6 @@ void RenderManager::CreateIntermediateColorBufferAndRenderTargetView(
 		*buffer.Get(),
 		rtvDescriptor,
 		&renderTargetView);
-}
-
-void RenderManager::CreateFinalPassCommandObjects() noexcept {
-	ASSERT(SettingsManager::sQueuedFrameCount > 0U);
-
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		mFinalPassCommandAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
-	}
-
-	mFinalPassCommandList = &CommandListManager::CreateCommandList(
-		D3D12_COMMAND_LIST_TYPE_DIRECT, 
-		*mFinalPassCommandAllocators[0]);
-	mFinalPassCommandList->Close();
 }
 
 void RenderManager::FlushCommandQueue() noexcept {

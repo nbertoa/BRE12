@@ -140,42 +140,38 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	// Used to choose a different command list allocator each call.
 	static std::uint32_t commandAllocatorIndex{ 0U };
 
-	ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[commandAllocatorIndex] };
-	ASSERT(commandAllocator != nullptr);	
-	
 	// Update frame constants
 	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[commandAllocatorIndex]);
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
-	CHECK_HR(commandAllocator->Reset());
-	CHECK_HR(mCommandList->Reset(commandAllocator, sPSO));
+	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
 
-	mCommandList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
-	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	mCommandList->OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, nullptr);
+	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
-	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
-	mCommandList->SetGraphicsRootSignature(sRootSignature);
+	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
+	commandList.SetGraphicsRootSignature(sRootSignature);
 
 	// Set root parameters
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
 	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->GetResource()->GetGPUVirtualAddress());
-	mCommandList->SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
-	mCommandList->SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescBegin);
-	mCommandList->SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
-	mCommandList->SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
-	mCommandList->SetGraphicsRootConstantBufferView(4U, frameCBufferGpuVAddress);
-	mCommandList->SetGraphicsRootDescriptorTable(5U, mPixelShaderBuffersGpuDesc);
+	commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
+	commandList.SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescBegin);
+	commandList.SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
+	commandList.SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
+	commandList.SetGraphicsRootConstantBufferView(4U, frameCBufferGpuVAddress);
+	commandList.SetGraphicsRootDescriptorTable(5U, mPixelShaderBuffersGpuDesc);
 	
-	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	
-	mCommandList->DrawInstanced(mNumLights, 1U, 0U, 0U);
+	commandList.DrawInstanced(mNumLights, 1U, 0U, 0U);
 
-	mCommandList->Close();
-	CommandListExecutor::Get().AddCommandList(*mCommandList);
+	commandList.Close();
+	CommandListExecutor::Get().AddCommandList(commandList);
 
-	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCommandAllocators);
+	commandAllocatorIndex = (commandAllocatorIndex + 1U) % SettingsManager::sQueuedFrameCount;
 }
 
 bool PunctualLightCmdListRecorder::IsDataValid() const noexcept {

@@ -119,12 +119,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CommandListPerFrame.h" />
     <ClInclude Include="CommandAllocatorManager.h" />
     <ClInclude Include="CommandListManager.h" />
     <ClInclude Include="CommandQueueManager.h" />
     <ClInclude Include="FenceManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CommandListPerFrame.cpp" />
     <ClCompile Include="CommandAllocatorManager.cpp" />
     <ClCompile Include="CommandListManager.cpp" />
     <ClCompile Include="CommandQueueManager.cpp" />

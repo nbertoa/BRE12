@@ -3,8 +3,6 @@
 #include <d3d12.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
-#include <CommandManager\CommandAllocatorManager.h>
-#include <CommandManager\CommandListManager.h>
 #include <DescriptorManager\RenderTargetDescriptorManager.h>
 #include <DXUtils\d3dx12.h>
 #include <ResourceManager\ResourceManager.h>
@@ -12,29 +10,6 @@
 #include <Utils\DebugUtils.h>
 
 namespace {
-	void CreateCommandObjects(
-		ID3D12CommandAllocator* commandAllocators[SettingsManager::sQueuedFrameCount],
-		ID3D12GraphicsCommandList* &commandList) noexcept 
-	{
-		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
-		ASSERT(commandList == nullptr);
-
-#ifdef _DEBUG
-		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-			ASSERT(commandAllocators[i] == nullptr);
-		}
-#endif
-
-		// Create command allocators and command list
-		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-			ASSERT(commandAllocators[i] == nullptr);
-			commandAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
-		}
-
-		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0]);
-		commandList->Close();
-	}
-
 	void CreateResourceAndRenderTargetDescriptor(
 		Microsoft::WRL::ComPtr<ID3D12Resource>& resource,
 		D3D12_CPU_DESCRIPTOR_HANDLE& resourceRenderTargetCpuDesc,
@@ -85,10 +60,6 @@ void AmbientLightPass::Init(
 	ID3D12Resource& depthBuffer) noexcept 
 {
 	ASSERT(ValidateData() == false);
-		
-	CreateCommandObjects(mCommandAllocatorsBegin, mCommandListBegin);
-	CreateCommandObjects(mCommandAllocatorsMiddle, mCommandListMiddle);
-	CreateCommandObjects(mCommandAllocatorsFinal, mCommandListEnd);
 
 	// Initialize recorder's PSO
 	AmbientLightCmdListRecorder::InitPSO();
@@ -151,28 +122,7 @@ void AmbientLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 }
 
 bool AmbientLightPass::ValidateData() const noexcept {
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCommandAllocatorsBegin[i] == nullptr) {
-			return false;
-		}
-	}
-
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCommandAllocatorsMiddle[i] == nullptr) {
-			return false;
-		}
-	}
-
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCommandAllocatorsFinal[i] == nullptr) {
-			return false;
-		}
-	}
-
 	const bool b =
-		mCommandListBegin != nullptr &&
-		mCommandListMiddle != nullptr &&
-		mCommandListEnd != nullptr &&
 		mAmbientOcclusionRecorder.get() != nullptr &&
 		mAmbientLightRecorder.get() != nullptr &&
 		mAmbientAccessibilityBuffer.Get() != nullptr &&
@@ -193,14 +143,7 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 	// Blur buffer was used as pixel shader resource by ambient light shader
 	ASSERT(ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-	// Used to choose a different command list allocator each call.
-	static std::uint32_t commandAllocatorIndex{ 0U };
-
-	ID3D12CommandAllocator* commandAllocator{ mCommandAllocatorsBegin[commandAllocatorIndex] };
-	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCommandAllocatorsBegin);
-
-	CHECK_HR(commandAllocator->Reset());
-	CHECK_HR(mCommandListBegin->Reset(commandAllocator, nullptr));
+	ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]
@@ -209,15 +152,16 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 			*mAmbientAccessibilityBuffer.Get(),
 			D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
+
 	const std::uint32_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == 1UL);
-	mCommandListBegin->ResourceBarrier(barriersCount, barriers);
+	commandList.ResourceBarrier(barriersCount, barriers);
 
 	float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	mCommandListBegin->ClearRenderTargetView(mAmbientAccessibilityBufferRenderTargetCpuDescriptor, clearColor, 0U, nullptr);
+	commandList.ClearRenderTargetView(mAmbientAccessibilityBufferRenderTargetCpuDescriptor, clearColor, 0U, nullptr);
 
-	CHECK_HR(mCommandListBegin->Close());
-	CommandListExecutor::Get().AddCommandList(*mCommandListBegin);
+	CHECK_HR(commandList.Close());
+	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
 void AmbientLightPass::ExecuteMiddleTask() noexcept {
@@ -236,15 +180,7 @@ void AmbientLightPass::ExecuteMiddleTask() noexcept {
 
 	ASSERT(ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-	// Used to choose a different command list allocator each call.
-	static std::uint32_t commandAllocatorIndex{ 0U };
-
-	ID3D12CommandAllocator* commandAllocator{ mCommandAllocatorsMiddle[commandAllocatorIndex] };
-	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCommandAllocatorsMiddle);
-
-	// Prepare end task
-	CHECK_HR(commandAllocator->Reset());
-	CHECK_HR(mCommandListMiddle->Reset(commandAllocator, nullptr));
+	ID3D12GraphicsCommandList& commandList = mMiddleCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]
@@ -257,12 +193,13 @@ void AmbientLightPass::ExecuteMiddleTask() noexcept {
 			*mBlurBuffer.Get(), 
 			D3D12_RESOURCE_STATE_RENDER_TARGET),
 	};
+
 	const std::uint32_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == 2UL);
-	mCommandListMiddle->ResourceBarrier(barriersCount, barriers);
+	commandList.ResourceBarrier(barriersCount, barriers);
 
-	CHECK_HR(mCommandListMiddle->Close());
-	CommandListExecutor::Get().AddCommandList(*mCommandListMiddle);
+	CHECK_HR(commandList.Close());
+	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
 void AmbientLightPass::ExecuteFinalTask() noexcept {
@@ -275,25 +212,18 @@ void AmbientLightPass::ExecuteFinalTask() noexcept {
 	// Blur buffer was used as render target resource by blur shader
 	ASSERT(ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) == D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	// Used to choose a different command list allocator each call.
-	static std::uint32_t commandAllocatorIndex{ 0U };
-
-	ID3D12CommandAllocator* commandAllocator{ mCommandAllocatorsFinal[commandAllocatorIndex] };
-	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCommandAllocatorsBegin);
-
-	// Prepare end task
-	CHECK_HR(commandAllocator->Reset());
-	CHECK_HR(mCommandListEnd->Reset(commandAllocator, nullptr));
+	ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 	
 	// Resource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]
 	{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 	};
+
 	const std::uint32_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == 1UL);
-	mCommandListEnd->ResourceBarrier(barriersCount, barriers);
+	commandList.ResourceBarrier(barriersCount, barriers);
 
-	CHECK_HR(mCommandListEnd->Close());
-	CommandListExecutor::Get().AddCommandList(*mCommandListEnd);
+	CHECK_HR(commandList.Close());
+	CommandListExecutor::Get().AddCommandList(commandList);
 }

@@ -2,20 +2,18 @@
 
 #include <wrl.h>
 
-#include <SettingsManager\SettingsManager.h>
+#include <CommandManager\CommandListPerFrame.h>
 
 class UploadBuffer;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 // Responsible of command lists recording to be executed by CommandListExecutor.
 // This class has common data and functionality to record command list for environment light pass.
 class EnvironmentLightCmdListRecorder {
 public:
-	EnvironmentLightCmdListRecorder();
+	EnvironmentLightCmdListRecorder() = default;
 	~EnvironmentLightCmdListRecorder() = default;
 	EnvironmentLightCmdListRecorder(const EnvironmentLightCmdListRecorder&) = delete;
 	const EnvironmentLightCmdListRecorder& operator=(const EnvironmentLightCmdListRecorder&) = delete;
@@ -50,8 +48,7 @@ private:
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 		
-	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	CommandListPerFrame mCommandListPerFrame;
 
 	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
 

@@ -1,10 +1,9 @@
 #include "PostProcessCmdListRecorder.h"
 
+#include <d3d12.h>
 #include <DirectXMath.h>
 
 #include <CommandListExecutor\CommandListExecutor.h>
-#include <CommandManager/CommandAllocatorManager.h>
-#include <CommandManager/CommandListManager.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <PSOManager/PSOManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
@@ -17,35 +16,6 @@
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
 	ID3D12RootSignature* sRootSignature{ nullptr };
-
-	void BuildCommandObjects(
-		ID3D12GraphicsCommandList* &commandList, 
-		ID3D12CommandAllocator* commandAllocators[], 
-		const std::size_t commandAllocatorCount) noexcept 
-	{
-		ASSERT(commandList == nullptr);
-
-#ifdef _DEBUG
-		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
-			ASSERT(commandAllocators[i] == nullptr);
-		}
-#endif
-
-		for (std::uint32_t i = 0U; i < commandAllocatorCount; ++i) {
-			commandAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
-		}
-
-		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0]);
-
-		// Start off in a closed state.  This is because the first time we refer 
-		// to the command list we will Reset it, and it needs to be closed before
-		// calling Reset.
-		commandList->Close();
-	}
-}
-
-PostProcessCmdListRecorder::PostProcessCmdListRecorder() {
-	BuildCommandObjects(mCommandList, mCommandAllocators, _countof(mCommandAllocators));
 }
 
 void PostProcessCmdListRecorder::InitPSO() noexcept {
@@ -88,48 +58,31 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
-
-	static std::uint32_t currentFrameIndex = 0U;
-
-	ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[currentFrameIndex] };
-	ASSERT(commandAllocator != nullptr);
 	
-	CHECK_HR(commandAllocator->Reset());
-	CHECK_HR(mCommandList->Reset(commandAllocator, sPSO));
+	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
 
-	mCommandList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
-	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	mCommandList->OMSetRenderTargets(1U, &frameBufferCpuDesc, false, nullptr);
+	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+	commandList.OMSetRenderTargets(1U, &frameBufferCpuDesc, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
-	mCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
-	mCommandList->SetGraphicsRootSignature(sRootSignature);
+	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
+	commandList.SetGraphicsRootSignature(sRootSignature);
 	
 	// Set root parameters
-	mCommandList->SetGraphicsRootDescriptorTable(0U, mInputColorBufferGpuDesc);
+	commandList.SetGraphicsRootDescriptorTable(0U, mInputColorBufferGpuDesc);
 
 	// Draw object	
-	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	mCommandList->DrawInstanced(6U, 1U, 0U, 0U);
+	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList.DrawInstanced(6U, 1U, 0U, 0U);
 
-	mCommandList->Close();
+	commandList.Close();
 
-	CommandListExecutor::Get().AddCommandList(*mCommandList);
-
-	// Next frame
-	currentFrameIndex = (currentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
+	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
 bool PostProcessCmdListRecorder::IsDataValid() const noexcept {
-	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCommandAllocators[i] == nullptr) {
-			return false;
-		}
-	}
-
-	const bool result =
-		mCommandList != nullptr &&
-		mInputColorBufferGpuDesc.ptr != 0UL;
+	const bool result =	mInputColorBufferGpuDesc.ptr != 0UL;
 
 	return result;
 }

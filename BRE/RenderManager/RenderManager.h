@@ -4,6 +4,7 @@
 #include <dxgi1_4.h>
 #include <tbb/task.h>
 
+#include <CommandManager\CommandListPerFrame.h>
 #include <Camera/Camera.h>
 #include <GeometryPass\GeometryPass.h>
 #include <LightingPass\LightingPass.h>
@@ -52,7 +53,6 @@ private:
 		D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
 		const wchar_t* resourceName,
 		const D3D12_RESOURCE_STATES initialState) noexcept;
-	void CreateFinalPassCommandObjects() noexcept;
 	
 	ID3D12Resource* CurrentFrameBuffer() const noexcept {
 		ASSERT(mSwapChain != nullptr);
@@ -87,9 +87,7 @@ private:
 	ToneMappingPass mToneMappingPass;
 	PostProcessPass mPostProcessPass;
 
-	// Command allocators and list needed for final pass
-	ID3D12CommandAllocator* mFinalPassCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mFinalPassCommandList{ nullptr };
+	CommandListPerFrame mFinalCommandListPerFrame;
 	
 	// Frame buffers
 	Microsoft::WRL::ComPtr<ID3D12Resource> mFrameBuffers[SettingsManager::sSwapChainBufferCount];

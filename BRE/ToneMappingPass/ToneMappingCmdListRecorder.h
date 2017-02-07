@@ -1,13 +1,14 @@
 #pragma once
 
-#include <d3d12.h>
+#include <CommandManager\CommandListPerFrame.h>
 
-#include <SettingsManager\SettingsManager.h>
-
+struct D3D12_CPU_DESCRIPTOR_HANDLE;
+struct D3D12_GPU_DESCRIPTOR_HANDLE;
+struct ID3D12Resource;
 
 class ToneMappingCmdListRecorder {
 public:
-	ToneMappingCmdListRecorder();
+	ToneMappingCmdListRecorder() = default;
 	~ToneMappingCmdListRecorder() = default;
 	ToneMappingCmdListRecorder(const ToneMappingCmdListRecorder&) = delete;
 	const ToneMappingCmdListRecorder& operator=(const ToneMappingCmdListRecorder&) = delete;
@@ -32,8 +33,7 @@ public:
 private:
 	void InitShaderResourceViews(ID3D12Resource& colorBuffer) noexcept;
 
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
-	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
+	CommandListPerFrame mCommandListPerFrame;
 		
 	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferGpuDesc{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };

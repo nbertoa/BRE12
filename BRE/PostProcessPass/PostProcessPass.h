@@ -2,12 +2,10 @@
 
 #include <memory>
 
+#include <CommandManager\CommandListPerFrame.h>
 #include <PostProcessPass\PostProcessCmdListRecorder.h>
-#include <SettingsManager\SettingsManager.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 // Pass that applies post processing effects (anti aliasing, color grading, etc)
@@ -36,9 +34,7 @@ private:
 		ID3D12Resource& frameBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
 
-	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	CommandListPerFrame mCommandListPerFrame;
 	
 	ID3D12Resource* mColorBuffer{ nullptr };
 

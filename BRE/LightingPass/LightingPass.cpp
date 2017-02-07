@@ -5,36 +5,12 @@
 #include <tbb/parallel_for.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
-#include <CommandManager\CommandAllocatorManager.h>
-#include <CommandManager\CommandListManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\GeometryPass.h>
 #include <LightingPass\Recorders\PunctualLightCmdListRecorder.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
-
-namespace {
-	void CreateCommandObjects(
-		ID3D12CommandAllocator* cmdAllocatorsBegin[SettingsManager::sQueuedFrameCount],
-		ID3D12CommandAllocator* cmdAllocatorsEnd[SettingsManager::sQueuedFrameCount],
-		ID3D12GraphicsCommandList* &commandList) noexcept 
-	{
-		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
-		ASSERT(commandList == nullptr);
-
-		// Create command allocators and command list
-		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-			ASSERT(cmdAllocatorsBegin[i] == nullptr);
-			cmdAllocatorsBegin[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
-
-			ASSERT(cmdAllocatorsEnd[i] == nullptr);
-			cmdAllocatorsEnd[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
-		}
-		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *cmdAllocatorsBegin[0]);
-		commandList->Close();
-	}
-}
 
 void LightingPass::Init(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
@@ -46,9 +22,8 @@ void LightingPass::Init(
 {
 	ASSERT(IsDataValid() == false);
 
-	CreateCommandObjects(mCmdAllocatorsBegin, mCmdAllocatorsFinal, mCommandList);
 	mGeometryBuffers = geometryBuffers;
-	mOutputColorBufferCpuDesc = outputColorBufferCpuDesc;
+	mOutputColorBufferCpuDescriptor = outputColorBufferCpuDesc;
 	mDepthBuffer = &depthBuffer;
 
 	// Initialize recorder's pso
@@ -71,7 +46,7 @@ void LightingPass::Init(
 		diffuseIrradianceCubeMap,
 		specularPreConvolvedCubeMap);
 
-	for (CommandListRecorders::value_type& recorder : mRecorders) {
+	for (CommandListRecorders::value_type& recorder : mCommandListRecorders) {
 		ASSERT(recorder.get() != nullptr);
 		recorder->SetOutputColorBufferCpuDescriptor(outputColorBufferCpuDesc);
 	}
@@ -86,14 +61,14 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 
 	// Total tasks = Light tasks + 1 ambient pass task + 1 environment light pass task
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
-	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mRecorders.size())};
+	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mCommandListRecorders.size())};
 	
 	// Execute light pass tasks
 	const std::uint32_t grainSize(max(1U, lightTaskCount / SettingsManager::sCpuProcessorCount));
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, lightTaskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
+			mCommandListRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
 	}
 	);
 	
@@ -112,16 +87,8 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 }
 
 bool LightingPass::IsDataValid() const noexcept {
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCmdAllocatorsBegin[i] == nullptr) {
-			return false;
-		}
-	}
-
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCmdAllocatorsFinal[i] == nullptr) {
-			return false;
-		}
+	if (mGeometryBuffers == nullptr) {
+		return false;
 	}
 
 	for (std::uint32_t i = 0U; i < GeometryPass::BUFFERS_COUNT; ++i) {
@@ -131,8 +98,7 @@ bool LightingPass::IsDataValid() const noexcept {
 	}
 
 	const bool b =
-		mCommandList != nullptr &&
-		mOutputColorBufferCpuDesc.ptr != 0UL &&
+		mOutputColorBufferCpuDescriptor.ptr != 0UL &&
 		mDepthBuffer != nullptr;
 
 	return b;
@@ -153,17 +119,11 @@ void LightingPass::ExecuteBeginTask() noexcept {
 	// - Depth buffer was used for depth testing in geometry pass, so it must be in depth write state
 	ASSERT(ResourceStateManager::GetResourceState(*mDepthBuffer) == D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
-	// Used to choose a different command list allocator each call.
-	static std::uint32_t cmdAllocIndex{ 0U };
-
-	ID3D12CommandAllocator* cmdAllocBegin{ mCmdAllocatorsBegin[cmdAllocIndex] };
-	cmdAllocIndex = (cmdAllocIndex + 1U) % _countof(mCmdAllocatorsBegin);
-
-	CHECK_HR(cmdAllocBegin->Reset());
-	CHECK_HR(mCommandList->Reset(cmdAllocBegin, nullptr));
+	ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
 	// GetResource barriers
-	CD3DX12_RESOURCE_BARRIER barriers[]{
+	CD3DX12_RESOURCE_BARRIER barriers[]
+	{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(
 			*mGeometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(), 
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
@@ -176,16 +136,15 @@ void LightingPass::ExecuteBeginTask() noexcept {
 			*mDepthBuffer, 
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 	};
+
 	const std::uint32_t barriersCount = _countof(barriers);
 	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 1UL);
-	mCommandList->ResourceBarrier(barriersCount, barriers);
+	commandList.ResourceBarrier(barriersCount, barriers);
 
-	// Clear render targets
-	mCommandList->ClearRenderTargetView(mOutputColorBufferCpuDesc, DirectX::Colors::Black, 0U, nullptr);
-	CHECK_HR(mCommandList->Close());
+	commandList.ClearRenderTargetView(mOutputColorBufferCpuDescriptor, DirectX::Colors::Black, 0U, nullptr);
 
-	// Execute preliminary task
-	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mCommandList);
+	CHECK_HR(commandList.Close());
+	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
 
 void LightingPass::ExecuteFinalTask() noexcept {
@@ -203,26 +162,18 @@ void LightingPass::ExecuteFinalTask() noexcept {
 	// - Depth buffer must be in pixel shader resource because it was used by lighting pass shader.
 	ASSERT(ResourceStateManager::GetResourceState(*mDepthBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-	// Used to choose a different command list allocator each call.
-	static std::uint32_t commandAllocatorIndex{ 0U };
-
-	ID3D12CommandAllocator* commandAllocatorEnd{ mCmdAllocatorsFinal[commandAllocatorIndex] };
-	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCmdAllocatorsBegin);
-
-	// Prepare end task
-	CHECK_HR(commandAllocatorEnd->Reset());
-	CHECK_HR(mCommandList->Reset(commandAllocatorEnd, nullptr));
+	ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
 	// GetResource barriers
-	CD3DX12_RESOURCE_BARRIER endBarriers[]
+	CD3DX12_RESOURCE_BARRIER barriers[]
 	{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mDepthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE),
 	};
-	const std::uint32_t barriersCount = _countof(endBarriers);
-	ASSERT(barriersCount == 1UL);
-	mCommandList->ResourceBarrier(barriersCount, endBarriers);
-	CHECK_HR(mCommandList->Close());
 
-	// Execute final task
-	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mCommandList);
+	const std::uint32_t barriersCount = _countof(barriers);
+	ASSERT(barriersCount == 1UL);
+	commandList.ResourceBarrier(barriersCount, barriers);
+
+	CHECK_HR(commandList.Close());
+	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }

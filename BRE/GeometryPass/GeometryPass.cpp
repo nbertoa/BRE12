@@ -5,8 +5,6 @@
 #include <tbb/parallel_for.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
-#include <CommandManager\CommandAllocatorManager.h>
-#include <CommandManager\CommandListManager.h>
 #include <DescriptorManager\RenderTargetDescriptorManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\Recorders\ColorCmdListRecorder.h>
@@ -88,22 +86,6 @@ namespace {
 			RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &bufferRenderTargetViewCpuDescriptors[i]);
 		}
 	}
-
-	void CreateCommandObjects(
-		ID3D12CommandAllocator* commandAllocators[SettingsManager::sQueuedFrameCount],
-		ID3D12GraphicsCommandList* &commandList) noexcept {
-
-		ASSERT(SettingsManager::sQueuedFrameCount > 0U);
-		ASSERT(commandList == nullptr);
-
-		// Create command allocators and command list
-		for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-			ASSERT(commandAllocators[i] == nullptr);
-			commandAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
-		}
-		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0]);
-		commandList->Close();
-	}
 }
 
 void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept 
@@ -113,7 +95,6 @@ void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) n
 	ASSERT(mCommandListRecorders.empty() == false);
 
 	CreateGeometryBuffersAndRenderTargetViews(mGeometryBuffers, mGeometryBufferRenderTargetCpuDescriptors);
-	CreateCommandObjects(mCommandAllocators, mCommandList);
 
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
@@ -158,12 +139,6 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 }
 
 bool GeometryPass::IsDataValid() const noexcept {
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mCommandAllocators[i] == nullptr) {
-			return false;
-		}
-	}
-
 	for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
 		if (mGeometryBuffers[i].Get() == nullptr) {
 			return false;
@@ -177,7 +152,6 @@ bool GeometryPass::IsDataValid() const noexcept {
 	}
 
 	const bool b =
-		mCommandList != nullptr &&
 		mCommandListRecorders.empty() == false &&
 		mDepthBufferCpuDesc.ptr != 0UL;
 
@@ -196,24 +170,17 @@ void GeometryPass::ExecuteBeginTask() noexcept {
 	}
 #endif
 
-	// Used to choose a different command list allocator each call.
-	static std::uint32_t commandAllocatorIndex{ 0U };
+	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
-	ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[commandAllocatorIndex] };
-	commandAllocatorIndex = (commandAllocatorIndex + 1U) % _countof(mCommandAllocators);
-
-	CHECK_HR(commandAllocator->Reset());
-	CHECK_HR(mCommandList->Reset(commandAllocator, nullptr));
-
-	mCommandList->RSSetViewports(1U, &SettingsManager::sScreenViewport);
-	mCommandList->RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
+	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 
 	// Clear render targets and depth stencil
 	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	mCommandList->ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescriptors[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
-	mCommandList->ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescriptors[BASECOLOR_METALMASK], zero, 0U, nullptr);
-	mCommandList->ClearDepthStencilView(mDepthBufferCpuDesc, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0U, 0U, nullptr);
+	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescriptors[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
+	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescriptors[BASECOLOR_METALMASK], zero, 0U, nullptr);
+	commandList.ClearDepthStencilView(mDepthBufferCpuDesc, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0U, 0U, nullptr);
 
-	CHECK_HR(mCommandList->Close());
-	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*mCommandList);
+	CHECK_HR(commandList.Close());
+	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }

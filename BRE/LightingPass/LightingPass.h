@@ -5,14 +5,12 @@
 #include <wrl.h>
 
 #include <AmbientLightPass\AmbientLightPass.h>
+#include <CommandManager\CommandListPerFrame.h>
 #include <EnvironmentLightPass/EnvironmentLightPass.h>
 #include <LightingPass\LightingPassCmdListRecorder.h>
-#include <SettingsManager\SettingsManager.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 // Pass responsible to execute recorders related with deferred shading lighting pass
@@ -28,7 +26,7 @@ public:
 	LightingPass& operator=(LightingPass&&) = delete;
 
 	// You should get recorders and fill them, before calling Init()
-	__forceinline CommandListRecorders& GetCommandListRecorders() noexcept { return mRecorders; }
+	__forceinline CommandListRecorders& GetCommandListRecorders() noexcept { return mCommandListRecorders; }
 
 	// Preconditions:
 	// - "geometryBuffers" must not be nullptr
@@ -52,19 +50,17 @@ private:
 	void ExecuteBeginTask() noexcept;
 	void ExecuteFinalTask() noexcept;
 
-	// 1 command allocater per queued frame.	
-	ID3D12CommandAllocator* mCmdAllocatorsBegin[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12CommandAllocator* mCmdAllocatorsFinal[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	CommandListPerFrame mBeginCommandListPerFrame;
+	CommandListPerFrame mFinalCommandListPerFrame;
 
 	// Geometry buffers created by GeometryPass
 	Microsoft::WRL::ComPtr<ID3D12Resource>* mGeometryBuffers;
 
 	ID3D12Resource* mDepthBuffer{ nullptr };
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDescriptor{ 0UL };
 
-	CommandListRecorders mRecorders;
+	CommandListRecorders mCommandListRecorders;
 
 	AmbientLightPass mAmbientLightPass;
 	EnvironmentLightPass mEnvironmentLightPass;

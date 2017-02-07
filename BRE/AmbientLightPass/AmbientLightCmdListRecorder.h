@@ -1,17 +1,15 @@
 #pragma once
 
-#include <SettingsManager\SettingsManager.h>
+#include <CommandManager\CommandListPerFrame.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 // Responsible of command lists recording to be executed by CommandListExecutor.
 // This class has common data and functionality to record command list for ambient light pass.
 class AmbientLightCmdListRecorder {
 public:
-	AmbientLightCmdListRecorder();
+	AmbientLightCmdListRecorder() = default;
 	~AmbientLightCmdListRecorder() = default;
 	AmbientLightCmdListRecorder(const AmbientLightCmdListRecorder&) = delete;
 	const AmbientLightCmdListRecorder& operator=(const AmbientLightCmdListRecorder&) = delete;
@@ -40,8 +38,7 @@ private:
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		ID3D12Resource& ambientAccessibilityBuffer) noexcept;
 		
-	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
-	ID3D12GraphicsCommandList* mCommandList{ nullptr };
+	CommandListPerFrame mCommandListPerFrame;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetCpuDesc{ 0UL };
