@@ -90,7 +90,7 @@ void HeightCmdListRecorder::Init(
 		mGeometryDataVec.push_back(geometryDataVec[i]);
 	}
 
-	BuildBuffers(materials, textures, normals, heights, numResources);
+	InitConstantBuffers(materials, textures, normals, heights, numResources);
 
 	ASSERT(IsDataValid());
 }
@@ -181,13 +181,13 @@ bool HeightCmdListRecorder::IsDataValid() const noexcept {
 	return result;
 }
 
-void HeightCmdListRecorder::BuildBuffers(
+void HeightCmdListRecorder::InitConstantBuffers(
 	const Material* materials,
 	ID3D12Resource** textures,
 	ID3D12Resource** normals,
 	ID3D12Resource** heights,
-	const std::uint32_t dataCount) noexcept {
-
+	const std::uint32_t dataCount) noexcept 
+{
 	ASSERT(materials != nullptr);
 	ASSERT(textures != nullptr);
 	ASSERT(normals != nullptr);
@@ -263,7 +263,6 @@ void HeightCmdListRecorder::BuildBuffers(
 
 		// Texture descriptor
 		textureResVec.push_back(textures[i]);
-
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -275,7 +274,6 @@ void HeightCmdListRecorder::BuildBuffers(
 
 		// Normal descriptor
 		normalResVec.push_back(normals[i]);
-
 		srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -287,7 +285,6 @@ void HeightCmdListRecorder::BuildBuffers(
 
 		// Height descriptor
 		heightResVec.push_back(heights[i]);
-
 		srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;

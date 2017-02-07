@@ -46,7 +46,7 @@ private:
 	// - "normals" must not be nullptr
 	// - "heights" must not be nullptr
 	// - "dataCount" must be greater than zero
-	void BuildBuffers(
+	void InitConstantBuffers(
 		const Material* materials,
 		ID3D12Resource** normals,
 		ID3D12Resource** heights,

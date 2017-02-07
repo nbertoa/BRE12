@@ -162,7 +162,15 @@ void AmbientOcclusionCmdListRecorder::Init(
 	GenerateSampleKernel(mSampleKernelSize, sampleKernel);
 	std::vector<XMFLOAT4> noises;
 	GenerateNoise(mNoiseTextureDimension * mNoiseTextureDimension, noises);
-	BuildBuffers(sampleKernel.data(), noises.data(), normalSmoothnessBuffer, depthBuffer);
+
+	InitConstantBuffers();
+	CreateSampleKernelBuffer(sampleKernel.data());
+	ID3D12Resource* noiseTexture = CreateAndGetNoiseTexture(noises.data());
+	ASSERT(noiseTexture != nullptr);
+	InitShaderResourceViews(
+		normalSmoothnessBuffer,
+		depthBuffer,
+		*noiseTexture);
 
 	ASSERT(ValidateData());
 }
@@ -234,23 +242,26 @@ bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
 	return result;
 }
 
-void AmbientOcclusionCmdListRecorder::BuildBuffers(
-	const void* randomSamples, 
-	const void* noiseVectors,
-	ID3D12Resource& normalSmoothnessBuffer,
-	ID3D12Resource& depthBuffer) noexcept 
-{
+void AmbientOcclusionCmdListRecorder::InitConstantBuffers() noexcept {
 #ifdef _DEBUG
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ASSERT(mFrameCBuffer[i] == nullptr);
 	}
 #endif
+	
+	// Create frame cbuffers
+	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
+		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
+	}
+}
+
+void 
+AmbientOcclusionCmdListRecorder::CreateSampleKernelBuffer(const void* randomSamples) noexcept {
 	ASSERT(mSampleKernelBuffer == nullptr);
 	ASSERT(randomSamples != nullptr);
-	ASSERT(noiseVectors != nullptr);
 	ASSERT(mSampleKernelSize != 0U);
 
-	// Create sample kernel buffer and fill it
 	const std::size_t sampleKernelBufferElemSize{ sizeof(XMFLOAT4) };
 	mSampleKernelBuffer = &UploadBufferManager::CreateUploadBuffer(sampleKernelBufferElemSize, mSampleKernelSize);
 	const std::uint8_t* sampleKernelPtr = reinterpret_cast<const std::uint8_t*>(randomSamples);
@@ -258,33 +269,38 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 		mSampleKernelBuffer->CopyData(i, sampleKernelPtr + sampleKernelBufferElemSize * i, sampleKernelBufferElemSize);
 	}
 	mSampleKernelBufferGpuDescBegin.ptr = mSampleKernelBuffer->GetResource()->GetGPUVirtualAddress();
+}
 
+ID3D12Resource* AmbientOcclusionCmdListRecorder::CreateAndGetNoiseTexture(const void* noiseVectors) noexcept {
+	ASSERT(noiseVectors != nullptr);
 	// Kernel noise resource and fill it
-	D3D12_RESOURCE_DESC resDesc = {};
-	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	resDesc.Alignment = 0U;
-	resDesc.Width = mNoiseTextureDimension;
-	resDesc.Height = mNoiseTextureDimension;
-	resDesc.DepthOrArraySize = 1U;
-	resDesc.MipLevels = 1U;
-	resDesc.SampleDesc.Count = 1U;
-	resDesc.SampleDesc.Quality = 0U;
-	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	resDesc.Format = DXGI_FORMAT_R16G16B16A16_UNORM;
-	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+	D3D12_RESOURCE_DESC resourceDescriptor = {};
+	resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	resourceDescriptor.Alignment = 0U;
+	resourceDescriptor.Width = mNoiseTextureDimension;
+	resourceDescriptor.Height = mNoiseTextureDimension;
+	resourceDescriptor.DepthOrArraySize = 1U;
+	resourceDescriptor.MipLevels = 1U;
+	resourceDescriptor.SampleDesc.Count = 1U;
+	resourceDescriptor.SampleDesc.Quality = 0U;
+	resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	resourceDescriptor.Format = DXGI_FORMAT_R16G16B16A16_UNORM;
+	resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+	// Create noise texture and fill it.
 	ID3D12Resource* noiseTexture{ nullptr };
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 	noiseTexture = &ResourceManager::CreateCommittedResource(
-		heapProps, 
-		D3D12_HEAP_FLAG_NONE, 
-		resDesc, 
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 
+		heapProps,
+		D3D12_HEAP_FLAG_NONE,
+		resourceDescriptor,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 		nullptr,
 		L"Noise Buffer");
 
 	// In order to copy CPU memory data into our default buffer, we need to create
 	// an intermediate upload heap. 
-	const std::uint32_t num2DSubresources = resDesc.DepthOrArraySize * resDesc.MipLevels;
+	const std::uint32_t num2DSubresources = resourceDescriptor.DepthOrArraySize * resourceDescriptor.MipLevels;
 	const std::size_t uploadBufferSize = GetRequiredIntermediateSize(noiseTexture, 0, num2DSubresources);
 	ID3D12Resource* noiseTextureUploadBuffer{ nullptr };
 	noiseTextureUploadBuffer = &ResourceManager::CreateCommittedResource(
@@ -295,57 +311,57 @@ void AmbientOcclusionCmdListRecorder::BuildBuffers(
 		nullptr,
 		nullptr);
 
-	D3D12_SUBRESOURCE_DATA subResourceData = {};
-	subResourceData.pData = noiseVectors;
-	subResourceData.RowPitch = mNoiseTextureDimension * sizeof(XMFLOAT4);
-	subResourceData.SlicePitch = subResourceData.RowPitch * mNoiseTextureDimension;
+	return noiseTexture;
+}
 
-	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
-	}
+void AmbientOcclusionCmdListRecorder::InitShaderResourceViews(
+	ID3D12Resource& normalSmoothnessBuffer,
+	ID3D12Resource& depthBuffer,
+	ID3D12Resource& noiseTexture) noexcept
+{
+	ASSERT(mSampleKernelBuffer != nullptr);
+	ASSERT(mSampleKernelSize != 0U);
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc[4U]{};
-	ID3D12Resource* res[4] = {
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor[4U]{};
+	ID3D12Resource* resources[4] = {
 		&normalSmoothnessBuffer,
 		&depthBuffer,
 		mSampleKernelBuffer->GetResource(),
-		noiseTexture,
+		&noiseTexture,
 	};
 
 	// Fill normal_smoothness buffer texture descriptor
-	srvDesc[0].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc[0].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc[0].Texture2D.MostDetailedMip = 0;
-	srvDesc[0].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc[0].Format = normalSmoothnessBuffer.GetDesc().Format;
-	srvDesc[0].Texture2D.MipLevels = normalSmoothnessBuffer.GetDesc().MipLevels;
-	
+	srvDescriptor[0].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptor[0].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptor[0].Texture2D.MostDetailedMip = 0;
+	srvDescriptor[0].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptor[0].Format = normalSmoothnessBuffer.GetDesc().Format;
+	srvDescriptor[0].Texture2D.MipLevels = normalSmoothnessBuffer.GetDesc().MipLevels;
+
 	// Fill depth buffer descriptor
-	srvDesc[1].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc[1].Texture2D.MostDetailedMip = 0;
-	srvDesc[1].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc[1].Format = SettingsManager::sDepthStencilSRVFormat;
-	srvDesc[1].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
+	srvDescriptor[1].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptor[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptor[1].Texture2D.MostDetailedMip = 0;
+	srvDescriptor[1].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptor[1].Format = SettingsManager::sDepthStencilSRVFormat;
+	srvDescriptor[1].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
 
 	// Fill sample kernel buffer descriptor
-	srvDesc[2].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc[2].Format = mSampleKernelBuffer->GetResource()->GetDesc().Format;
-	srvDesc[2].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	srvDesc[2].Buffer.FirstElement = 0UL;
-	srvDesc[2].Buffer.NumElements = mSampleKernelSize;
-	srvDesc[2].Buffer.StructureByteStride = sizeof(XMFLOAT4);
+	srvDescriptor[2].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptor[2].Format = mSampleKernelBuffer->GetResource()->GetDesc().Format;
+	srvDescriptor[2].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	srvDescriptor[2].Buffer.FirstElement = 0UL;
+	srvDescriptor[2].Buffer.NumElements = mSampleKernelSize;
+	srvDescriptor[2].Buffer.StructureByteStride = sizeof(XMFLOAT4);
 
 	// Fill kernel noise texture descriptor
-	srvDesc[3].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc[3].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc[3].Texture2D.MostDetailedMip = 0;
-	srvDesc[3].Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc[3].Format = noiseTexture->GetDesc().Format;
-	srvDesc[3].Texture2D.MipLevels = noiseTexture->GetDesc().MipLevels;
+	srvDescriptor[3].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptor[3].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptor[3].Texture2D.MostDetailedMip = 0;
+	srvDescriptor[3].Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptor[3].Format = noiseTexture.GetDesc().Format;
+	srvDescriptor[3].Texture2D.MipLevels = noiseTexture.GetDesc().MipLevels;
 
 	// Create SRVs
-	mPixelShaderBuffersGpuDesc = CbvSrvUavDescriptorManager::CreateShaderResourceViews(res, srvDesc, _countof(srvDesc));
+	mPixelShaderBuffersGpuDesc = CbvSrvUavDescriptorManager::CreateShaderResourceViews(resources, srvDescriptor, _countof(srvDescriptor));
 }

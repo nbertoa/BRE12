@@ -45,8 +45,13 @@ private:
 
 	void InitPasses(Scene& scene) noexcept;
 
-	void CreateRenderTargetViewsAndDepthStencilView() noexcept;
-	void CreateIntermediateColorBuffersAndRenderTargetCpuDescriptors() noexcept;
+	void CreateRenderTargetBuffersAndViews() noexcept;
+	void CreateDepthStencilBufferAndView() noexcept;
+	void CreateIntermediateColorBufferAndRenderTargetView(
+		Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
+		D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
+		const wchar_t* resourceName,
+		const D3D12_RESOURCE_STATES initialState) noexcept;
 	void CreateFinalPassCommandObjects() noexcept;
 	
 	ID3D12Resource* CurrentFrameBuffer() const noexcept {

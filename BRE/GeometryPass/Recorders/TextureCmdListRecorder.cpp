@@ -80,7 +80,7 @@ void TextureCmdListRecorder::Init(
 		mGeometryDataVec.push_back(geometryDataVec[i]);
 	}
 
-	BuildBuffers(materials, textures, numResources);
+	InitConstantBuffers(materials, textures, numResources);
 
 	ASSERT(IsDataValid());
 }
@@ -174,11 +174,11 @@ bool TextureCmdListRecorder::IsDataValid() const noexcept {
 	return result;
 }
 
-void TextureCmdListRecorder::BuildBuffers(
+void TextureCmdListRecorder::InitConstantBuffers(
 	const Material* materials,
 	ID3D12Resource** textures, 
-	const std::uint32_t dataCount) noexcept {
-
+	const std::uint32_t dataCount) noexcept 
+{
 	ASSERT(materials != nullptr);
 	ASSERT(textures != nullptr);
 	ASSERT(dataCount != 0UL);

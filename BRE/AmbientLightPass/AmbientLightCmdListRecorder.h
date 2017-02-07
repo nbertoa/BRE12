@@ -38,7 +38,7 @@ public:
 	bool ValidateData() const noexcept;
 
 private:
-	void BuildBuffers(
+	void InitShaderResourceViews(
 		ID3D12Resource& baseColorMetalMaskBuffer,
 		ID3D12Resource& ambientAccessibilityBuffer) noexcept;
 

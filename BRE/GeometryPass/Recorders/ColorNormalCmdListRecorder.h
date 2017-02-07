@@ -43,7 +43,7 @@ private:
 	// - "materials" must not be nullptr
 	// - "normals" must not be nullptr
 	// - "dataCount" must be greater than zero
-	void BuildBuffers(
+	void InitConstantBuffers(
 		const Material* materials, 
 		ID3D12Resource** normals,
 		const std::uint32_t dataCount) noexcept;

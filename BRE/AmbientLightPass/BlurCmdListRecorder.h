@@ -31,7 +31,7 @@ public:
 	bool ValidateData() const noexcept;
 
 private:
-	void BuildBuffers(ID3D12Resource& colorBuffer) noexcept;
+	void InitShaderResourceViews(ID3D12Resource& colorBuffer) noexcept;
 
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };

@@ -84,7 +84,7 @@ void ToneMappingCmdListRecorder::Init(
 
 	mOutputColorBufferCpuDesc = outputBufferCpuDesc;
 
-	BuildBuffers(inputColorBuffer);
+	InitShaderResourceViews(inputColorBuffer);
 
 	ASSERT(IsDataValid());
 }
@@ -140,7 +140,7 @@ bool ToneMappingCmdListRecorder::IsDataValid() const noexcept {
 	return result;
 }
 
-void ToneMappingCmdListRecorder::BuildBuffers(ID3D12Resource& inputColorBuffer) noexcept {
+void ToneMappingCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor[1U]{};
 	ID3D12Resource* resources[1] = {
 		&inputColorBuffer,

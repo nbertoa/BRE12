@@ -40,11 +40,13 @@ public:
 	bool ValidateData() const noexcept;
 
 private:
-	void BuildBuffers(
-		const void* randomSamples,
-		const void* noiseVectors,
+	void InitConstantBuffers() noexcept;
+	void CreateSampleKernelBuffer(const void* randomSamples) noexcept;
+	ID3D12Resource* CreateAndGetNoiseTexture(const void* noiseVectors) noexcept;
+	void InitShaderResourceViews(
 		ID3D12Resource& normalSmoothnessBuffer,
-		ID3D12Resource& depthBuffer) noexcept;
+		ID3D12Resource& depthBuffer,
+		ID3D12Resource& noiseTexture) noexcept;
 	
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 	ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };

@@ -88,7 +88,7 @@ void AmbientLightCmdListRecorder::Init(
 	mOutputColorBufferCpuDesc = outputColorBufferCpuDesc;
 	mAmbientAccessibilityBufferRenderTargetCpuDesc = ambientAccessibilityBufferRenderTargetCpuDesc;
 
-	BuildBuffers(baseColorMetalMaskBuffer, ambientAccessibilityBuffer);
+	InitShaderResourceViews(baseColorMetalMaskBuffer, ambientAccessibilityBuffer);
 
 	ASSERT(ValidateData());
 }
@@ -145,7 +145,7 @@ bool AmbientLightCmdListRecorder::ValidateData() const noexcept {
 	return result;
 }
 
-void AmbientLightCmdListRecorder::BuildBuffers(
+void AmbientLightCmdListRecorder::InitShaderResourceViews(
 	ID3D12Resource& baseColorMetalMaskBuffer, 
 	ID3D12Resource& ambientAccessibilityBuffer) noexcept {
 

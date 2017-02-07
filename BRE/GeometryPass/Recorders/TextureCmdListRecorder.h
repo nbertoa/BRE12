@@ -43,7 +43,10 @@ private:
 	// - "materials" must not be nullptr
 	// - "textures" must not be nullptr
 	// - "dataCount" must be greater than zero
-	void BuildBuffers(const Material* materials, ID3D12Resource** textures, const std::uint32_t dataCount) noexcept;
+	void InitConstantBuffers(
+		const Material* materials, 
+		ID3D12Resource** textures, 
+		const std::uint32_t dataCount) noexcept;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorBufferGpuDescBegin;
 };

@@ -77,7 +77,7 @@ void ColorCmdListRecorder::Init(
 		mGeometryDataVec.push_back(geometryDataVec[i]);
 	}
 
-	BuildBuffers(materials, numMaterials);
+	InitConstantBuffers(materials, numMaterials);
 
 	ASSERT(IsDataValid());
 }
@@ -145,7 +145,10 @@ void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 	mCurrentFrameIndex = (mCurrentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
-void ColorCmdListRecorder::BuildBuffers(const Material* materials, const std::uint32_t numMaterials) noexcept {
+void ColorCmdListRecorder::InitConstantBuffers(
+	const Material* materials, 
+	const std::uint32_t numMaterials) noexcept 
+{
 	ASSERT(materials != nullptr);
 	ASSERT(numMaterials != 0UL);
 

@@ -38,5 +38,5 @@ private:
 	// Preconditions:
 	// - "materials" must not be nullptr
 	// - "numMaterials" must be greater than zero
-	void BuildBuffers(const Material* materials, const std::uint32_t numMaterials) noexcept;
+	void InitConstantBuffers(const Material* materials, const std::uint32_t numMaterials) noexcept;
 };

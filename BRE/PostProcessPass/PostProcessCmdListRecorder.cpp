@@ -79,7 +79,7 @@ void PostProcessCmdListRecorder::InitPSO() noexcept {
 void PostProcessCmdListRecorder::Init(ID3D12Resource& inputColorBuffer) noexcept  {
 	ASSERT(IsDataValid() == false);
 	
-	BuildBuffers(inputColorBuffer);
+	InitShaderResourceViews(inputColorBuffer);
 
 	ASSERT(IsDataValid());
 }
@@ -134,7 +134,7 @@ bool PostProcessCmdListRecorder::IsDataValid() const noexcept {
 	return result;
 }
 
-void PostProcessCmdListRecorder::BuildBuffers(ID3D12Resource& inputColorBuffer) noexcept {
+void PostProcessCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc[1U]{};
 	ID3D12Resource* resources[1] = {
 		&inputColorBuffer,

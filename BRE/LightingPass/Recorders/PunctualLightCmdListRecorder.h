@@ -35,9 +35,11 @@ public:
 	bool IsDataValid() const noexcept override;
 
 private:
+	void InitConstantBuffers() noexcept;
+
 	// Preconditions:
 	// - "lights" must not be nullptr
-	void BuildBuffers(const void* lights) noexcept;
+	void CreateLightBuffers(const void* lights) noexcept;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDesc{ 0UL };
 };

@@ -71,8 +71,8 @@ void PunctualLightCmdListRecorder::Init(
 	
 	mNumLights = numLights;
 
-	BuildBuffers(lights);
-
+	InitConstantBuffers();
+	CreateLightBuffers(lights);
 	
 	// Used to create SRV descriptors for textures (geometry buffers + depth buffer)
 	std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDescVec;
@@ -168,7 +168,7 @@ bool PunctualLightCmdListRecorder::IsDataValid() const noexcept {
 	return LightingPassCmdListRecorder::IsDataValid() && mPixelShaderBuffersGpuDesc.ptr != 0UL;
 }
 
-void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {
+void PunctualLightCmdListRecorder::CreateLightBuffers(const void* lights) noexcept {
 #ifdef _DEBUG
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
 		ASSERT(mFrameCBuffer[i] == nullptr);
@@ -185,7 +185,15 @@ void PunctualLightCmdListRecorder::BuildBuffers(const void* lights) noexcept {
 	for (std::uint32_t i = 0UL; i < mNumLights; ++i) {
 		mLightsBuffer->CopyData(i, lightsPtr + sizeof(PunctualLight) * i, sizeof(PunctualLight));
 	}
+}
 
+void PunctualLightCmdListRecorder::InitConstantBuffers() noexcept {
+#ifdef _DEBUG
+	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
+		ASSERT(mFrameCBuffer[i] == nullptr);
+	}
+#endif
+	
 	// Create frame cbuffers
 	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {

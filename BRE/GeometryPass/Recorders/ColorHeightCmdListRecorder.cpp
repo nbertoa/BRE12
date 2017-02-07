@@ -87,7 +87,7 @@ void ColorHeightCmdListRecorder::Init(
 		mGeometryDataVec.push_back(geometryDataVec[i]);
 	}
 
-	BuildBuffers(materials, normals, heights, numResources);
+	InitConstantBuffers(materials, normals, heights, numResources);
 
 	ASSERT(IsDataValid());
 }
@@ -173,12 +173,12 @@ bool ColorHeightCmdListRecorder::IsDataValid() const noexcept {
 	return result;
 }
 
-void ColorHeightCmdListRecorder::BuildBuffers(
+void ColorHeightCmdListRecorder::InitConstantBuffers(
 	const Material* materials,
 	ID3D12Resource** normals,
 	ID3D12Resource** heights,
-	const std::uint32_t dataCount) noexcept {
-
+	const std::uint32_t dataCount) noexcept 
+{
 	ASSERT(materials != nullptr);
 	ASSERT(normals != nullptr);
 	ASSERT(heights != nullptr);
@@ -248,27 +248,25 @@ void ColorHeightCmdListRecorder::BuildBuffers(
 
 		// Normal descriptor
 		normalResVec.push_back(normals[i]);
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-		srvDesc.Format = normalResVec.back()->GetDesc().Format;
-		srvDesc.Texture2D.MipLevels = normalResVec.back()->GetDesc().MipLevels;
-		normalSrvDescVec.push_back(srvDesc);
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
+		srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDescriptor.Texture2D.MostDetailedMip = 0;
+		srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+		srvDescriptor.Format = normalResVec.back()->GetDesc().Format;
+		srvDescriptor.Texture2D.MipLevels = normalResVec.back()->GetDesc().MipLevels;
+		normalSrvDescVec.push_back(srvDescriptor);
 
 		// Height descriptor
 		heightResVec.push_back(heights[i]);
-
-		srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-		srvDesc.Format = heightResVec.back()->GetDesc().Format;
-		srvDesc.Texture2D.MipLevels = heightResVec.back()->GetDesc().MipLevels;
-		heightSrvDescVec.push_back(srvDesc);
+		srvDescriptor = D3D12_SHADER_RESOURCE_VIEW_DESC{};
+		srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDescriptor.Texture2D.MostDetailedMip = 0;
+		srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+		srvDescriptor.Format = heightResVec.back()->GetDesc().Format;
+		srvDescriptor.Texture2D.MipLevels = heightResVec.back()->GetDesc().MipLevels;
+		heightSrvDescVec.push_back(srvDescriptor);
 
 		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 	}

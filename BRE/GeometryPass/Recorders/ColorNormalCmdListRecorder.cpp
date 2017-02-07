@@ -81,7 +81,7 @@ void ColorNormalCmdListRecorder::Init(
 		mGeometryDataVec.push_back(geometryDataVec[i]);
 	}
 
-	BuildBuffers(materials, normals, numResources);
+	InitConstantBuffers(materials, normals, numResources);
 
 	ASSERT(IsDataValid());
 }
@@ -161,11 +161,11 @@ bool ColorNormalCmdListRecorder::IsDataValid() const noexcept {
 	return result;
 }
 
-void ColorNormalCmdListRecorder::BuildBuffers(
+void ColorNormalCmdListRecorder::InitConstantBuffers(
 	const Material* materials, 
 	ID3D12Resource** normals,
-	const std::uint32_t dataCount) noexcept {
-
+	const std::uint32_t dataCount) noexcept 
+{
 	ASSERT(materials != nullptr);
 	ASSERT(normals != nullptr);
 	ASSERT(dataCount != 0UL);

@@ -82,7 +82,7 @@ void NormalCmdListRecorder::Init(
 		mGeometryDataVec.push_back(geometryDataVec[i]);
 	}
 
-	BuildBuffers(materials, textures, normals, numResources);
+	InitConstantBuffers(materials, textures, normals, numResources);
 
 	ASSERT(IsDataValid());
 }
@@ -167,12 +167,12 @@ bool NormalCmdListRecorder::IsDataValid() const noexcept {
 	return result;
 }
 
-void NormalCmdListRecorder::BuildBuffers(
+void NormalCmdListRecorder::InitConstantBuffers(
 	const Material* materials, 
 	ID3D12Resource** textures, 
 	ID3D12Resource** normals,
-	const std::uint32_t dataCount) noexcept {
-
+	const std::uint32_t dataCount) noexcept 
+{
 	ASSERT(materials != nullptr);
 	ASSERT(textures != nullptr);
 	ASSERT(normals != nullptr);
