@@ -18,7 +18,7 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void ToneMappingCmdListRecorder::InitPSO() noexcept {
+void ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 

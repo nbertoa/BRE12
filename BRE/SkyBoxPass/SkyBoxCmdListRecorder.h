@@ -23,11 +23,10 @@ public:
 	SkyBoxCmdListRecorder(SkyBoxCmdListRecorder&&) = delete;
 	SkyBoxCmdListRecorder& operator=(SkyBoxCmdListRecorder&&) = delete;
 
-	// This method is to initialize PSO that is a shared between all this kind
-	// of recorders.
-	// This method is initialized by its corresponding pass.
-	static void InitPSO() noexcept;
+	static void InitSharedPSOAndRootSignature() noexcept;
 
+	// Preconditions:
+	// - InitSharedPSOAndRootSignature() must be called first and once
 	void Init(
 		const VertexAndIndexBufferCreator::VertexBufferData& vertexBufferData, 
 		const VertexAndIndexBufferCreator::IndexBufferData indexBufferData,

@@ -16,7 +16,7 @@ void EnvironmentLightPass::Init(
 	ASSERT(ValidateData() == false);
 
 	// Initialize recorder's PSO
-	EnvironmentLightCmdListRecorder::InitPSO();
+	EnvironmentLightCmdListRecorder::InitSharedPSOAndRootSignature();
 
 	// Initialize recorder
 	mCommandListRecorder.reset(new EnvironmentLightCmdListRecorder());

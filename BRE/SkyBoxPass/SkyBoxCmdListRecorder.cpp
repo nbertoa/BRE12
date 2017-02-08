@@ -22,7 +22,7 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void SkyBoxCmdListRecorder::InitPSO() noexcept {
+void SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 

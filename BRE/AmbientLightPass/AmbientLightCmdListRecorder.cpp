@@ -17,7 +17,7 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void AmbientLightCmdListRecorder::InitPSO() noexcept {
+void AmbientLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 

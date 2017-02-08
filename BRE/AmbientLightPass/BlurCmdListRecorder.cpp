@@ -18,7 +18,7 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void BlurCmdListRecorder::InitPSO() noexcept {
+void BlurCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 

@@ -20,11 +20,10 @@ public:
 	EnvironmentLightCmdListRecorder(EnvironmentLightCmdListRecorder&&) = default;
 	EnvironmentLightCmdListRecorder& operator=(EnvironmentLightCmdListRecorder&&) = default;
 
-	// This method is to initialize PSO that is a shared between all this kind
-	// of recorders.
-	// This method is initialized by its corresponding pass.
-	static void InitPSO() noexcept;
+	static void InitSharedPSOAndRootSignature() noexcept;
 
+	// Preconditions:
+	// - InitSharedPSOAndRootSignature() must be called first and once
 	void Init(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,

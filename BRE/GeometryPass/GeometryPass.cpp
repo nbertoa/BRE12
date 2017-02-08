@@ -99,12 +99,12 @@ void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) n
 	mDepthBufferCpuDesc = depthBufferCpuDesc;
 
 	// Initialize recorders PSOs
-	ColorCmdListRecorder::InitPSO(sGeometryBufferFormats, BUFFERS_COUNT);
-	ColorHeightCmdListRecorder::InitPSO(sGeometryBufferFormats, BUFFERS_COUNT);
-	ColorNormalCmdListRecorder::InitPSO(sGeometryBufferFormats, BUFFERS_COUNT);
-	HeightCmdListRecorder::InitPSO(sGeometryBufferFormats, BUFFERS_COUNT);
-	NormalCmdListRecorder::InitPSO(sGeometryBufferFormats, BUFFERS_COUNT);
-	TextureCmdListRecorder::InitPSO(sGeometryBufferFormats, BUFFERS_COUNT);
+	ColorCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+	ColorHeightCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+	ColorNormalCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+	HeightCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+	NormalCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+	TextureCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
 	
 	// Init internal data for all geometry recorders
 	for (CommandListRecorders::value_type& recorder : mCommandListRecorders) {

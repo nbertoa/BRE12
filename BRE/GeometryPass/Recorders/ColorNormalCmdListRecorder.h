@@ -14,10 +14,7 @@ public:
 	ColorNormalCmdListRecorder(ColorNormalCmdListRecorder&&) = default;
 	ColorNormalCmdListRecorder& operator=(ColorNormalCmdListRecorder&&) = default;
 
-	// This method is to initialize PSO that is a shared between all this kind
-	// of recorders.
-	// This method is initialized by its corresponding pass.
-	static void InitPSO(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept;
+	static void InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept;
 
 	// Preconditions:
 	// - "geometryDataVec" must not be nullptr
@@ -25,6 +22,7 @@ public:
 	// - "materials" must not be nullptr
 	// - "normals" must not be nullptr
 	// - "numResources" must be greater than zero
+	// - InitSharedPSOAndRootSignature() must be called first and once
 	void Init(
 		const GeometryData* geometryDataVec,
 		const std::uint32_t geometryDataCount,

@@ -56,7 +56,7 @@ void SkyBoxPass::Init(
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*commandList);
 
 	// Initialize recoders's pso
-	SkyBoxCmdListRecorder::InitPSO();
+	SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature();
 
 	// Initialize recorder
 	mCommandListRecorder.reset(new SkyBoxCmdListRecorder());

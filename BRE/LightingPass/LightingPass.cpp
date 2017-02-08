@@ -27,7 +27,7 @@ void LightingPass::Init(
 	mDepthBuffer = &depthBuffer;
 
 	// Initialize recorder's pso
-	PunctualLightCmdListRecorder::InitPSO();
+	PunctualLightCmdListRecorder::InitSharedPSOAndRootSignature();
 
 	// Initialize ambient pass
 	ASSERT(geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get() != nullptr);

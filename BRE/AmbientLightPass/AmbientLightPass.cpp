@@ -62,9 +62,9 @@ void AmbientLightPass::Init(
 	ASSERT(ValidateData() == false);
 
 	// Initialize recorder's PSO
-	AmbientLightCmdListRecorder::InitPSO();
-	AmbientOcclusionCmdListRecorder::InitPSO();
-	BlurCmdListRecorder::InitPSO();
+	AmbientLightCmdListRecorder::InitSharedPSOAndRootSignature();
+	AmbientOcclusionCmdListRecorder::InitSharedPSOAndRootSignature();
+	BlurCmdListRecorder::InitSharedPSOAndRootSignature();
 
 	// Create ambient accessibility buffer and blur buffer
 	CreateResourceAndRenderTargetDescriptor(

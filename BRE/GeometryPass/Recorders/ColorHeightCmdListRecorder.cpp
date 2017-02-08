@@ -28,7 +28,7 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void ColorHeightCmdListRecorder::InitPSO(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept {
+void ColorHeightCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept {
 	ASSERT(geometryBufferFormats != nullptr);
 	ASSERT(geometryBufferCount > 0U);
 	ASSERT(sPSO == nullptr);

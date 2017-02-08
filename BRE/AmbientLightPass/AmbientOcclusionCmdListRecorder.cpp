@@ -87,7 +87,7 @@ namespace {
 	}
 }
 
-void AmbientOcclusionCmdListRecorder::InitPSO() noexcept {
+void AmbientOcclusionCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 

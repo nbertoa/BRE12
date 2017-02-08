@@ -20,7 +20,7 @@ void ToneMappingPass::Init(
 	mInputColorBuffer = &inputColorBuffer;
 	mOutputColorBuffer = &outputColorBuffer;
 
-	ToneMappingCmdListRecorder::InitPSO();
+	ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature();
 
 	mCommandListRecorder.reset(new ToneMappingCmdListRecorder());
 	mCommandListRecorder->Init(*mInputColorBuffer, outputBufferCpuDesc);
