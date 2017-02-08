@@ -22,6 +22,22 @@ namespace {
 		commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocator);
 		commandList->Close();
 	}
+
+	Model& CreateAndGetSkyBoxSphereModel(
+		ID3D12CommandAllocator& commandAllocator, 
+		ID3D12GraphicsCommandList& commandList) 
+	{
+		CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
+
+		Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
+		Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
+		Model* model = &ModelManager::CreateSphere(3000, 50, 50, commandList, uploadVertexBuffer, uploadIndexBuffer);
+		
+		commandList.Close();
+		CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+
+		return *model;
+	}
 }
 
 void SkyBoxPass::Init(
@@ -35,15 +51,8 @@ void SkyBoxPass::Init(
 	ID3D12GraphicsCommandList* commandList;
 	CreateCommandObjects(commandAllocator, commandList);
 
-	CHECK_HR(commandList->Reset(commandAllocator, nullptr));
-
-	// Create sky box sphere
-	Model* model;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-	model = &ModelManager::CreateSphere(3000, 50, 50, *commandList, uploadVertexBuffer, uploadIndexBuffer);
-	ASSERT(model != nullptr);
-	const std::vector<Mesh>& meshes(model->GetMeshes());
+	Model& model = CreateAndGetSkyBoxSphereModel(*commandAllocator, *commandList);
+	const std::vector<Mesh>& meshes(model.GetMeshes());
 	ASSERT(meshes.size() == 1UL);
 
 	// Build world matrix
@@ -51,14 +60,8 @@ void SkyBoxPass::Init(
 	DirectX::XMFLOAT4X4 worldMatrix;
 	MathUtils::ComputeMatrix(worldMatrix, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 
-	commandList->Close();
-
-	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(*commandList);
-
-	// Initialize recoders's pso
 	SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature();
 
-	// Initialize recorder
 	mCommandListRecorder.reset(new SkyBoxCmdListRecorder());
 	mCommandListRecorder->Init(
 		mesh.GetVertexBufferData(),
@@ -76,6 +79,8 @@ void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
 	mCommandListRecorder->RecordAndPushCommandLists(frameCBuffer);
+
+	// Wait until all previous tasks command lists are executed
 	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1U) {
 		Sleep(0U);
 	}

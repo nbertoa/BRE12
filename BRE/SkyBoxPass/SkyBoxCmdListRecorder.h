@@ -42,21 +42,20 @@ public:
 	bool IsDataValid() const noexcept;
 
 private:
-	void InitConstantBuffers() noexcept;
+	void InitConstantBuffers(const DirectX::XMFLOAT4X4& worldMatrix) noexcept;
 	void InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap) noexcept;
 
 	CommandListPerFrame mCommandListPerFrame;
 	
 	VertexAndIndexBufferCreator::VertexBufferData mVertexBufferData;
 	VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
-	DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::GetIdentity4x4Matrix() };
 
 	FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
 	UploadBuffer* mObjectUploadCBuffer{ nullptr };
 	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferView;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapShaderResourceView;
+	D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };

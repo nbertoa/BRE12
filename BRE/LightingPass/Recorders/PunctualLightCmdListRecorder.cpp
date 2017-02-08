@@ -30,9 +30,7 @@ void PunctualLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
-	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
-	const std::size_t rtCount{ _countof(psoData.mRenderTargetFormats) };
 	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
@@ -46,7 +44,7 @@ void PunctualLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 
 	psoData.mNumRenderTargets = 1U;
 	psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
-	for (std::size_t i = psoData.mNumRenderTargets; i < rtCount; ++i) {
+	for (std::size_t i = psoData.mNumRenderTargets; i < _countof(psoData.mRenderTargetFormats); ++i) {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
@@ -149,9 +147,8 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
-	commandList.SetGraphicsRootSignature(sRootSignature);
 
-	// Set root parameters
+	commandList.SetGraphicsRootSignature(sRootSignature);
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
 	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableUploadCBuffer->GetResource()->GetGPUVirtualAddress());
 	commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
@@ -161,8 +158,7 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	commandList.SetGraphicsRootConstantBufferView(4U, frameCBufferGpuVAddress);
 	commandList.SetGraphicsRootDescriptorTable(5U, mStartPixelShaderResourceView);
 	
-	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
-	
+	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);	
 	commandList.DrawInstanced(mNumLights, 1U, 0U, 0U);
 
 	commandList.Close();
@@ -199,7 +195,6 @@ void PunctualLightCmdListRecorder::CreateLightBuffersAndViews(const void* lights
 }
 
 void PunctualLightCmdListRecorder::InitConstantBuffers() noexcept {
-	// Create immutable cbuffer
 	const std::size_t immutableCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ImmutableCBuffer)) };
 	mImmutableUploadCBuffer = &UploadBufferManager::CreateUploadBuffer(immutableCBufferElemSize, 1U);
 	ImmutableCBuffer immutableCBuffer;

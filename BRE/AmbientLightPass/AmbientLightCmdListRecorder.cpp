@@ -21,9 +21,7 @@ void AmbientLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
-	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
-	const std::size_t renderTargetCount{ _countof(psoData.mRenderTargetFormats) };
 	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
@@ -36,7 +34,7 @@ void AmbientLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 
 	psoData.mNumRenderTargets = 1U;
 	psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
-	for (std::size_t i = psoData.mNumRenderTargets; i < renderTargetCount; ++i) {
+	for (std::size_t i = psoData.mNumRenderTargets; i < _countof(psoData.mRenderTargetFormats); ++i) {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -73,12 +71,10 @@ void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
-	commandList.SetGraphicsRootSignature(sRootSignature);
-	
-	// Set root parameters
-	commandList.SetGraphicsRootDescriptorTable(0U, mFirstPixelShaderResourceView);
 
-	// Draw
+	commandList.SetGraphicsRootSignature(sRootSignature);
+	commandList.SetGraphicsRootDescriptorTable(0U, mStartPixelShaderResourceView);
+
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList.DrawInstanced(6U, 1U, 0U, 0U);
 
@@ -89,7 +85,7 @@ void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 bool AmbientLightCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		mRenderTargetView.ptr != 0UL &&
-		mFirstPixelShaderResourceView.ptr != 0UL;
+		mStartPixelShaderResourceView.ptr != 0UL;
 
 	return result;
 }
@@ -98,7 +94,7 @@ void AmbientLightCmdListRecorder::InitShaderResourceViews(
 	ID3D12Resource& baseColorMetalMaskBuffer, 
 	ID3D12Resource& ambientAccessibilityBuffer) noexcept 
 {
-	ASSERT(mFirstPixelShaderResourceView.ptr == 0UL);
+	ASSERT(mStartPixelShaderResourceView.ptr == 0UL);
 
 	ID3D12Resource* resources[] = 
 	{
@@ -126,7 +122,7 @@ void AmbientLightCmdListRecorder::InitShaderResourceViews(
 
 	ASSERT(_countof(resources) == _countof(srvDescriptors));
 
-	mFirstPixelShaderResourceView = 
+	mStartPixelShaderResourceView = 
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			resources, 
 			srvDescriptors, 

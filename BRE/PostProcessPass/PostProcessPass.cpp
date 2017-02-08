@@ -15,10 +15,8 @@ void PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept {
 	
 	mInputColorBuffer = &inputColorBuffer;
 
-	// Initialize recorder's PSO
 	PostProcessCmdListRecorder::InitSharedPSOAndRootSignature();
 
-	// Initialize recorder
 	mCommandListRecorder.reset(new PostProcessCmdListRecorder());
 	mCommandListRecorder->Init(inputColorBuffer);
 
@@ -33,10 +31,11 @@ void PostProcessPass::Execute(
 	ASSERT(renderTargetView.ptr != 0UL);
 
 	ExecuteBeginTask(renderTargetBuffer, renderTargetView);
-
-	// Wait until all previous tasks command lists are executed
+		
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
 	mCommandListRecorder->RecordAndPushCommandLists(renderTargetView);
+
+	// Wait until all previous tasks command lists are executed
 	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
 		Sleep(0U);
 	}
@@ -65,7 +64,6 @@ void PostProcessPass::ExecuteBeginTask(
 
 	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
-	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]
 	{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mInputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),

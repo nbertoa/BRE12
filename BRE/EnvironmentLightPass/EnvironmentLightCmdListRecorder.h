@@ -52,5 +52,5 @@ private:
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mFirstPixelShaderResourceView{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
 };

@@ -70,9 +70,11 @@ private:
 	static CommandListExecutor* sExecutor;
 
 	bool mTerminate{ false };
+
 	std::uint32_t mExecutedCommandListCount{ 0U };
 	std::atomic<std::uint32_t> mPendingCommandListCount{ 0U };
 	std::uint32_t mMaxNumberOfCommandListsToExecute{ 1U };
+
 	ID3D12CommandQueue* mCommandQueue{ nullptr };
 	tbb::concurrent_queue<ID3D12CommandList*> mCommandListsToExecute;
 	ID3D12Fence* mFence{ nullptr };

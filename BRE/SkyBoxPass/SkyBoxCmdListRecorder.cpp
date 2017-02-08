@@ -26,11 +26,11 @@ void SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
-	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
-	const std::size_t renderTargetCount{ _countof(psoData.mRenderTargetFormats) };
+
 	// The camera is inside the sky sphere, so just turn off culling.
 	psoData.mRasterizerDescriptor.CullMode = D3D12_CULL_MODE_NONE;
+
 	// Make sure the depth function is LESS_EQUAL and not just GREATER.  
 	// Otherwise, the normalized depth values at z = 1 (NDC) will 
 	// fail the depth test if the depth buffer was cleared to 1.
@@ -46,7 +46,7 @@ void SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 
 	psoData.mNumRenderTargets = 1U;
 	psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
-	for (std::size_t i = psoData.mNumRenderTargets; i < renderTargetCount; ++i) {
+	for (std::size_t i = psoData.mNumRenderTargets; i < _countof(psoData.mRenderTargetFormats); ++i) {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -68,11 +68,10 @@ void SkyBoxCmdListRecorder::Init(
 
 	mVertexBufferData = vertexBufferData;
 	mIndexBufferData = indexBufferData;
-	mWorldMatrix = worldMatrix;
 	mRenderTargetView = renderTargetView;
 	mDepthBufferView = depthBufferView;
 
-	InitConstantBuffers();
+	InitConstantBuffers(worldMatrix);
 	InitShaderResourceViews(skyBoxCubeMap);
 
 	ASSERT(IsDataValid());
@@ -93,21 +92,17 @@ void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 	commandList.OMSetRenderTargets(1U, &mRenderTargetView, false, &mDepthBufferView);
 
-	commandList.IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
-	commandList.IASetIndexBuffer(&mIndexBufferData.mBufferView);
-
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
+
 	commandList.SetGraphicsRootSignature(sRootSignature);
-
-	// Set frame constants root parameters
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
-	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferView(mObjectCBufferView);
-	D3D12_GPU_DESCRIPTOR_HANDLE cubeMapBufferShaderResourceView(mCubeMapShaderResourceView);
+	commandList.SetGraphicsRootDescriptorTable(0U, mObjectCBufferView);
 	commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	commandList.SetGraphicsRootDescriptorTable(0U, objectCBufferView);
-	commandList.SetGraphicsRootDescriptorTable(2U, cubeMapBufferShaderResourceView);
+	commandList.SetGraphicsRootDescriptorTable(2U, mStartPixelShaderResourceView);
 
+	commandList.IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
+	commandList.IASetIndexBuffer(&mIndexBufferData.mBufferView);
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList.DrawIndexedInstanced(mIndexBufferData.mElementCount, 1U, 0U, 0U, 0U);
 
@@ -119,25 +114,25 @@ bool SkyBoxCmdListRecorder::IsDataValid() const noexcept {
 	const bool result =
 		mObjectUploadCBuffer != nullptr &&
 		mObjectCBufferView.ptr != 0UL &&
-		mCubeMapShaderResourceView.ptr != 0UL &&
+		mStartPixelShaderResourceView.ptr != 0UL &&
 		mRenderTargetView.ptr != 0UL &&
 		mDepthBufferView.ptr != 0UL;
 
 	return result;
 }
 
-void SkyBoxCmdListRecorder::InitConstantBuffers() noexcept {
+void SkyBoxCmdListRecorder::InitConstantBuffers(const DirectX::XMFLOAT4X4& worldMatrix) noexcept {
 	ASSERT(mObjectUploadCBuffer == nullptr);
 
 	// Create object cbuffer and fill it
 	const std::size_t objCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
 	mObjectUploadCBuffer = &UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, 1U);
 	ObjectCBuffer objCBuffer;
-	const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&mWorldMatrix));
+	const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&worldMatrix));
 	DirectX::XMStoreFloat4x4(&objCBuffer.mWorldMatrix, wMatrix);
 	mObjectUploadCBuffer->CopyData(0U, &objCBuffer, sizeof(objCBuffer));
 
-	// Create object cbuffer descriptor
+	// Create object cbufferview
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
 	const D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffer->GetResource()->GetGPUVirtualAddress() };
 	cBufferDesc.BufferLocation = objCBufferGpuAddress;
@@ -153,5 +148,5 @@ void SkyBoxCmdListRecorder::InitShaderResourceViews(ID3D12Resource& skyBoxCubeMa
 	srvDescriptor.TextureCube.MipLevels = skyBoxCubeMap.GetDesc().MipLevels;
 	srvDescriptor.TextureCube.ResourceMinLODClamp = 0.0f;
 	srvDescriptor.Format = skyBoxCubeMap.GetDesc().Format;
-	mCubeMapShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(skyBoxCubeMap, srvDescriptor);
+	mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(skyBoxCubeMap, srvDescriptor);
 }

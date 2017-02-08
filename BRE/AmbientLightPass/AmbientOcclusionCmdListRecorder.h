@@ -34,17 +34,15 @@ public:
 	bool ValidateData() const noexcept;
 
 private:
-	void CreateSampleKernelBuffer(const void* randomSamples) noexcept;
-	ID3D12Resource* CreateAndGetNoiseTexture(const void* noiseVectors) noexcept;
+	void CreateSampleKernelBuffer(const void* sampleKernel, const std::uint32_t sampleKernelSize) noexcept;
+	ID3D12Resource* CreateAndGetNoiseTexture(const void* noiseVectors, const std::uint32_t noiseTextureDimension) noexcept;
 	void InitShaderResourceViews(
 		ID3D12Resource& normalSmoothnessBuffer,
 		ID3D12Resource& depthBuffer,
-		ID3D12Resource& noiseTexture) noexcept;
+		ID3D12Resource& noiseTexture, 
+		const std::uint32_t sampleKernelSize) noexcept;
 	
 	CommandListPerFrame mCommandListPerFrame;
-
-	std::uint32_t mSampleKernelSize{ 0U };
-	std::uint32_t mNoiseTextureDimension{ 4U };
 
 	FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
@@ -52,5 +50,5 @@ private:
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mFirstPixelShaderResourceView{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
 };

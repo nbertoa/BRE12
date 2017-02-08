@@ -26,7 +26,6 @@ public:
 	void Execute(const FrameCBuffer& frameCBuffer) const noexcept;
 
 private:
-	// Method used internally for validation purposes
 	bool IsDataValid() const noexcept;
 
 	std::unique_ptr<SkyBoxCmdListRecorder> mCommandListRecorder;

@@ -32,7 +32,6 @@ public:
 	void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
-	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
 
 	void ExecuteBeginTask() noexcept;
@@ -40,16 +39,13 @@ private:
 	void ExecuteFinalTask() noexcept;
 	
 	CommandListPerFrame mBeginCommandListPerFrame;
-
 	CommandListPerFrame mMiddleCommandListPerFrame;
-
 	CommandListPerFrame mFinalCommandListPerFrame;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
 	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetView{ 0UL };
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
-	D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRenderTargetView{ 0UL };
 
 	std::unique_ptr<AmbientOcclusionCmdListRecorder> mAmbientOcclusionRecorder;
 	std::unique_ptr<AmbientLightCmdListRecorder> mAmbientLightRecorder;

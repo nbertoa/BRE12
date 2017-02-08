@@ -60,8 +60,8 @@ private:
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 
-	CommandListRecorders mCommandListRecorders;
-
 	AmbientLightPass mAmbientLightPass;
 	EnvironmentLightPass mEnvironmentLightPass;
+
+	CommandListRecorders mCommandListRecorders;
 };

@@ -70,12 +70,10 @@ void BlurCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
+
 	commandList.SetGraphicsRootSignature(sRootSignature);
+	commandList.SetGraphicsRootDescriptorTable(0U, mStartPixelShaderResourceView);
 
-	// Set root parameters
-	commandList.SetGraphicsRootDescriptorTable(0U, mInputColorBufferShaderResourceView);
-
-	// Draw object
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList.DrawInstanced(6U, 1U, 0U, 0U);
 
@@ -85,7 +83,7 @@ void BlurCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 bool BlurCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
-		mInputColorBufferShaderResourceView.ptr != 0UL && 
+		mStartPixelShaderResourceView.ptr != 0UL && 
 		mRenderTargetView.ptr != 0UL;
 
 	return result;
@@ -99,5 +97,5 @@ void BlurCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuff
 	srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
 	srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
-	mInputColorBufferShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
+	mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
 }

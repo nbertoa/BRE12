@@ -35,6 +35,8 @@ void ToneMappingPass::Execute() noexcept {
 
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
 	mCommandListRecorder->RecordAndPushCommandLists();
+
+	// Wait until all previous tasks command lists are executed
 	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
 		Sleep(0U);
 	}
@@ -60,7 +62,6 @@ void ToneMappingPass::ExecuteBeginTask() noexcept {
 
 	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
-	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]
 	{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mInputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),

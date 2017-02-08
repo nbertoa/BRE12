@@ -59,11 +59,10 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 
 	ExecuteBeginTask();
 
-	// Total tasks = Light tasks + 1 ambient pass task + 1 environment light pass task
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
 	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mCommandListRecorders.size())};
 	
-	// Execute light pass tasks
+	// Execute tasks
 	const std::uint32_t grainSize(max(1U, lightTaskCount / SettingsManager::sCpuProcessorCount));
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, lightTaskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
@@ -77,10 +76,7 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 		Sleep(0U);
 	}
 
-	// Execute ambient light pass tasks
 	mAmbientLightPass.Execute(frameCBuffer);
-
-	// Execute environment light pass tasks
 	mEnvironmentLightPass.Execute(frameCBuffer);
 
 	ExecuteFinalTask();
@@ -121,7 +117,6 @@ void LightingPass::ExecuteBeginTask() noexcept {
 
 	ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
-	// GetResource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]
 	{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(
@@ -164,15 +159,14 @@ void LightingPass::ExecuteFinalTask() noexcept {
 
 	ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
-	// GetResource barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]
 	{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mDepthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE),
 	};
 
-	const std::uint32_t barriersCount = _countof(barriers);
-	ASSERT(barriersCount == 1UL);
-	commandList.ResourceBarrier(barriersCount, barriers);
+	const std::uint32_t barrierCount = _countof(barriers);
+	ASSERT(barrierCount == 1UL);
+	commandList.ResourceBarrier(barrierCount, barriers);
 
 	CHECK_HR(commandList.Close());
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);

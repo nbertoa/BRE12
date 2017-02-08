@@ -34,6 +34,6 @@ private:
 
 	CommandListPerFrame mCommandListPerFrame;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferShaderResourceView{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
 	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 };

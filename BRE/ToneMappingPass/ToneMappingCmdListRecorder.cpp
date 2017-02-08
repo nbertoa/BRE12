@@ -22,9 +22,7 @@ void ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
-	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
-	const std::size_t rtCount{ _countof(psoData.mRenderTargetFormats) };
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
 	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ToneMappingPass/Shaders/PS.cso");
@@ -36,7 +34,7 @@ void ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 
 	psoData.mNumRenderTargets = 1U;
 	psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
-	for (std::size_t i = psoData.mNumRenderTargets; i < rtCount; ++i) {
+	for (std::size_t i = psoData.mNumRenderTargets; i < _countof(psoData.mRenderTargetFormats); ++i) {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -72,17 +70,14 @@ void ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
-	commandList.SetGraphicsRootSignature(sRootSignature);
-	
-	// Set root parameters
+
+	commandList.SetGraphicsRootSignature(sRootSignature);	
 	commandList.SetGraphicsRootDescriptorTable(0U, mStartPixelShaderResourceView);
 
-	// Draw object	
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList.DrawInstanced(6U, 1U, 0U, 0U);
 
 	commandList.Close();
-
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
@@ -102,6 +97,5 @@ void ToneMappingCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputCo
 	srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
 	srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
-
 	mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
 }

@@ -71,9 +71,9 @@ namespace {
 
 			clearValue[i].Format = resourceDescriptor.Format;
 
-			D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
-			rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-			rtvDesc.Format = resourceDescriptor.Format;
+			D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor{};
+			rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+			rtvDescriptor.Format = resourceDescriptor.Format;
 			ID3D12Resource* resource = &ResourceManager::CreateCommittedResource(
 				heapProps, 
 				D3D12_HEAP_FLAG_NONE, 
@@ -83,13 +83,12 @@ namespace {
 				resourceNames[i]);
 
 			buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
-			RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &bufferRenderTargetViews[i]);
+			RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), rtvDescriptor, &bufferRenderTargetViews[i]);
 		}
 	}
 }
 
-void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept 
-{
+void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept {
 	ASSERT(IsDataValid() == false);
 	
 	ASSERT(mCommandListRecorders.empty() == false);
@@ -98,7 +97,6 @@ void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noex
 
 	mDepthBufferView = depthBufferView;
 
-	// Initialize recorders PSOs
 	ColorCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
 	ColorHeightCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
 	ColorNormalCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
@@ -106,7 +104,7 @@ void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noex
 	NormalCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
 	TextureCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
 	
-	// Init internal data for all geometry recorders
+	// Init geometry command list recorders
 	for (CommandListRecorders::value_type& recorder : mCommandListRecorders) {
 		ASSERT(recorder.get() != nullptr);
 		recorder->Init(mGeometryBufferRenderTargetViews, BUFFERS_COUNT, mDepthBufferView);
@@ -123,7 +121,7 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	const std::uint32_t taskCount{ static_cast<std::uint32_t>(mCommandListRecorders.size()) };
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
 
-	// Execute geometry tasks
+	// Execute tasks
 	std::uint32_t grainSize{ max(1U, (taskCount) / SettingsManager::sCpuProcessorCount) };
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
@@ -175,7 +173,6 @@ void GeometryPass::ExecuteBeginTask() noexcept {
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 
-	// Clear render targets and depth stencil
 	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
 	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[BASECOLOR_METALMASK], zero, 0U, nullptr);

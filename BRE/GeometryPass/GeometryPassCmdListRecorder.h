@@ -67,5 +67,6 @@ protected:
 	
 	const D3D12_CPU_DESCRIPTOR_HANDLE* mGeometryBufferRenderTargetViews{ nullptr };
 	std::uint32_t mGeometryBufferRenderTargetViewCount{ 0U };
+
 	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
 };

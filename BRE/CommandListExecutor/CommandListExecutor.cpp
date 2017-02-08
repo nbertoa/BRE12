@@ -21,6 +21,7 @@ void CommandListExecutor::Create(const std::uint32_t maxNumCmdLists) noexcept
 
 CommandListExecutor& CommandListExecutor::Get() noexcept {
 	ASSERT(sExecutor != nullptr);
+
 	return *sExecutor;
 }
 
@@ -94,8 +95,8 @@ void CommandListExecutor::ExecuteCommandListAndWaitForCompletion(ID3D12CommandLi
 	ASSERT(mCommandQueue != nullptr);
 	ASSERT(mFence != nullptr);
 
-	ID3D12CommandList* cmdLists[1U]{ &cmdList };
-	mCommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	ID3D12CommandList* commandLists[1U]{ &cmdList };
+	mCommandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
 
 	const std::uint64_t valueToSignal = mFence->GetCompletedValue() + 1UL;
 	SignalFenceAndWaitForCompletion(*mFence, valueToSignal, valueToSignal);

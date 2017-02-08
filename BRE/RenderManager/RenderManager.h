@@ -46,13 +46,15 @@ private:
 
 	void InitPasses(Scene& scene) noexcept;
 
-	void CreateRenderTargetBuffersAndViews() noexcept;
+	void CreateFrameBuffersAndRenderTargetViews() noexcept;
+
 	void CreateDepthStencilBufferAndView() noexcept;
-	void CreateIntermediateColorBufferAndRenderTargetView(
-		Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
-		D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
+
+	void CreateIntermediateColorBufferAndRenderTargetView(		
+		const D3D12_RESOURCE_STATES initialState,
 		const wchar_t* resourceName,
-		const D3D12_RESOURCE_STATES initialState) noexcept;
+		Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
+		D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 	
 	ID3D12Resource* CurrentFrameBuffer() const noexcept {
 		ASSERT(mSwapChain != nullptr);

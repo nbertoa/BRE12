@@ -91,7 +91,6 @@ void AmbientOcclusionCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
-	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
 	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
@@ -124,20 +123,22 @@ void AmbientOcclusionCmdListRecorder::Init(
 
 	mRenderTargetView = renderTargetView;
 
-	mSampleKernelSize = 32U;
-	mNoiseTextureDimension = 4U;
-	std::vector<XMFLOAT4> sampleKernel;
-	GenerateSampleKernel(mSampleKernelSize, sampleKernel);
-	std::vector<XMFLOAT4> noises;
-	GenerateNoise(mNoiseTextureDimension * mNoiseTextureDimension, noises);
+	const std::uint32_t sampleKernelSize = 32U;
+	const std::uint32_t noiseTextureDimension = 4U;
 
-	CreateSampleKernelBuffer(sampleKernel.data());
-	ID3D12Resource* noiseTexture = CreateAndGetNoiseTexture(noises.data());
+	std::vector<XMFLOAT4> sampleKernel;
+	GenerateSampleKernel(sampleKernelSize, sampleKernel);
+	std::vector<XMFLOAT4> noises;
+	GenerateNoise(noiseTextureDimension * noiseTextureDimension, noises);
+
+	CreateSampleKernelBuffer(sampleKernel.data(), sampleKernelSize);
+	ID3D12Resource* noiseTexture = CreateAndGetNoiseTexture(noises.data(), noiseTextureDimension);
 	ASSERT(noiseTexture != nullptr);
 	InitShaderResourceViews(
 		normalSmoothnessBuffer,
 		depthBuffer,
-		*noiseTexture);
+		*noiseTexture,
+		sampleKernelSize);
 
 	ASSERT(ValidateData());
 }
@@ -159,15 +160,13 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
-	commandList.SetGraphicsRootSignature(sRootSignature);	
 
-	// Set root parameters
+	commandList.SetGraphicsRootSignature(sRootSignature);	
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
 	commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	commandList.SetGraphicsRootDescriptorTable(2U, mFirstPixelShaderResourceView);
+	commandList.SetGraphicsRootDescriptorTable(2U, mStartPixelShaderResourceView);
 
-	// Draw object
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList.DrawInstanced(6U, 1U, 0U, 0U);
 
@@ -177,36 +176,43 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
-		mSampleKernelSize != 0U &&
 		mSampleKernelUploadBuffer != nullptr &&
 		mRenderTargetView.ptr != 0UL &&
-		mFirstPixelShaderResourceView.ptr != 0UL;
+		mStartPixelShaderResourceView.ptr != 0UL;
 
 	return result;
 }
 
 void 
-AmbientOcclusionCmdListRecorder::CreateSampleKernelBuffer(const void* randomSamples) noexcept {
+AmbientOcclusionCmdListRecorder::CreateSampleKernelBuffer(
+	const void* sampleKernel, 
+	const std::uint32_t sampleKernelSize) noexcept 
+{
 	ASSERT(mSampleKernelUploadBuffer == nullptr);
-	ASSERT(randomSamples != nullptr);
-	ASSERT(mSampleKernelSize != 0U);
+	ASSERT(sampleKernel != nullptr);
+	ASSERT(sampleKernelSize > 0U);
 
 	const std::size_t sampleKernelBufferElemSize{ sizeof(XMFLOAT4) };
-	mSampleKernelUploadBuffer = &UploadBufferManager::CreateUploadBuffer(sampleKernelBufferElemSize, mSampleKernelSize);
-	const std::uint8_t* sampleKernelPtr = reinterpret_cast<const std::uint8_t*>(randomSamples);
-	for (std::uint32_t i = 0UL; i < mSampleKernelSize; ++i) {
+	mSampleKernelUploadBuffer = &UploadBufferManager::CreateUploadBuffer(sampleKernelBufferElemSize, sampleKernelSize);
+	const std::uint8_t* sampleKernelPtr = reinterpret_cast<const std::uint8_t*>(sampleKernel);
+	for (std::uint32_t i = 0UL; i < sampleKernelSize; ++i) {
 		mSampleKernelUploadBuffer->CopyData(i, sampleKernelPtr + sampleKernelBufferElemSize * i, sampleKernelBufferElemSize);
 	}
 }
 
-ID3D12Resource* AmbientOcclusionCmdListRecorder::CreateAndGetNoiseTexture(const void* noiseVectors) noexcept {
+ID3D12Resource* AmbientOcclusionCmdListRecorder::CreateAndGetNoiseTexture(
+	const void* noiseVectors,
+	const std::uint32_t noiseTextureDimension) noexcept 
+{
 	ASSERT(noiseVectors != nullptr);
+	ASSERT(noiseTextureDimension > 0U);
+
 	// Kernel noise resource and fill it
 	D3D12_RESOURCE_DESC resourceDescriptor = {};
 	resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	resourceDescriptor.Alignment = 0U;
-	resourceDescriptor.Width = mNoiseTextureDimension;
-	resourceDescriptor.Height = mNoiseTextureDimension;
+	resourceDescriptor.Width = noiseTextureDimension;
+	resourceDescriptor.Height = noiseTextureDimension;
 	resourceDescriptor.DepthOrArraySize = 1U;
 	resourceDescriptor.MipLevels = 1U;
 	resourceDescriptor.SampleDesc.Count = 1U;
@@ -245,10 +251,11 @@ ID3D12Resource* AmbientOcclusionCmdListRecorder::CreateAndGetNoiseTexture(const 
 void AmbientOcclusionCmdListRecorder::InitShaderResourceViews(
 	ID3D12Resource& normalSmoothnessBuffer,
 	ID3D12Resource& depthBuffer,
-	ID3D12Resource& noiseTexture) noexcept
+	ID3D12Resource& noiseTexture, 
+	const std::uint32_t sampleKernelSize) noexcept
 {
 	ASSERT(mSampleKernelUploadBuffer != nullptr);
-	ASSERT(mSampleKernelSize != 0U);
+	ASSERT(sampleKernelSize != 0U);
 
 	ID3D12Resource* resources[] = {
 		&normalSmoothnessBuffer,
@@ -280,7 +287,7 @@ void AmbientOcclusionCmdListRecorder::InitShaderResourceViews(
 	srvDescriptors[2].Format = mSampleKernelUploadBuffer->GetResource()->GetDesc().Format;
 	srvDescriptors[2].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	srvDescriptors[2].Buffer.FirstElement = 0UL;
-	srvDescriptors[2].Buffer.NumElements = mSampleKernelSize;
+	srvDescriptors[2].Buffer.NumElements = sampleKernelSize;
 	srvDescriptors[2].Buffer.StructureByteStride = sizeof(XMFLOAT4);
 
 	// Fill kernel noise texture descriptor
@@ -294,7 +301,7 @@ void AmbientOcclusionCmdListRecorder::InitShaderResourceViews(
 	ASSERT(_countof(resources) == _countof(srvDescriptors));
 
 	// Create SRVs
-	mFirstPixelShaderResourceView = 
+	mStartPixelShaderResourceView = 
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			resources, 
 			srvDescriptors, 

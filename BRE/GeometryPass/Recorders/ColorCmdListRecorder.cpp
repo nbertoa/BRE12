@@ -31,7 +31,6 @@ void ColorCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geom
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
-	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
 	psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
 
@@ -102,20 +101,16 @@ void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
-	commandList.SetGraphicsRootSignature(sRootSignature);
 
+	commandList.SetGraphicsRootSignature(sRootSignature);
 	const std::size_t descHandleIncSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mStartObjectCBufferView);
 	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mStartMaterialCBufferView);
-		
-	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	// Set frame constants root parameters
 	D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
 	commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
 	commandList.SetGraphicsRootConstantBufferView(3U, frameCBufferGpuVAddress);
 	
-	// Draw objects
+	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	const std::size_t geomCount{ mGeometryDataVec.size() };
 	for (std::size_t i = 0UL; i < geomCount; ++i) {
 		GeometryData& geomData{ mGeometryDataVec[i] };
@@ -134,7 +129,6 @@ void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 	}
 	
 	commandList.Close();
-
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 

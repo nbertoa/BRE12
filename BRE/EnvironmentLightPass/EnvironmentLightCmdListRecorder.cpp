@@ -25,9 +25,7 @@ void EnvironmentLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
-	// Build pso and root signature
 	PSOManager::PSOCreationData psoData{};
-	const std::size_t renderTargetCount{ _countof(psoData.mRenderTargetFormats) };
 	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
@@ -40,7 +38,7 @@ void EnvironmentLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 
 	psoData.mNumRenderTargets = 1U;
 	psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
-	for (std::size_t i = psoData.mNumRenderTargets; i < renderTargetCount; ++i) {
+	for (std::size_t i = psoData.mNumRenderTargets; i < _countof(psoData.mRenderTargetFormats); ++i) {
 		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
 	}
 	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -91,12 +89,12 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
-	commandList.SetGraphicsRootSignature(sRootSignature);
-	
+
+	commandList.SetGraphicsRootSignature(sRootSignature);	
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
 	commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	commandList.SetGraphicsRootDescriptorTable(2U, mFirstPixelShaderResourceView);
+	commandList.SetGraphicsRootDescriptorTable(2U, mStartPixelShaderResourceView);
 
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList.DrawInstanced(6U, 1U, 0U, 0U);
@@ -108,7 +106,7 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		mRenderTargetView.ptr != 0UL &&
-		mFirstPixelShaderResourceView.ptr != 0UL;
+		mStartPixelShaderResourceView.ptr != 0UL;
 
 	return result;
 }
@@ -181,7 +179,7 @@ void EnvironmentLightCmdListRecorder::InitShaderResourceViews(
 	srvDescriptors.emplace_back(srvDescriptor);
 	resources.push_back(&specularPreConvolvedCubeMap);
 
-	mFirstPixelShaderResourceView =
+	mStartPixelShaderResourceView =
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			resources.data(), 
 			srvDescriptors.data(), 
