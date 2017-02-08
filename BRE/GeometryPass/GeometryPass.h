@@ -34,7 +34,7 @@ public:
 
 	// Preconditions:
 	// - You should fill recorders with GetCommandListRecorders() before
-	void Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+	void Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 	
 	__forceinline Microsoft::WRL::ComPtr<ID3D12Resource>* GetGeometryBuffers() noexcept { return mGeometryBuffers; }
 	
@@ -52,9 +52,9 @@ private:
 
 	// Geometry buffers data
 	Microsoft::WRL::ComPtr<ID3D12Resource> mGeometryBuffers[BUFFERS_COUNT];
-	D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBufferRenderTargetCpuDescriptors[BUFFERS_COUNT];
+	D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBufferRenderTargetViews[BUFFERS_COUNT];
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDescriptor{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
 		
 	CommandListRecorders mCommandListRecorders;
 };

@@ -34,10 +34,10 @@ public:
 	void Init(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
 		const std::uint32_t geometryBuffersCount,
-		ID3D12Resource& depthBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
+		ID3D12Resource& depthBuffer,		
 		ID3D12Resource& diffuseIrradianceCubeMap,
-		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
+		ID3D12Resource& specularPreConvolvedCubeMap,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
 	// Preconditions:
 	// - Init() must be called first
@@ -58,7 +58,7 @@ private:
 
 	ID3D12Resource* mDepthBuffer{ nullptr };
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDescriptor{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 
 	CommandListRecorders mCommandListRecorders;
 

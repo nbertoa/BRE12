@@ -21,7 +21,7 @@ public:
 	// - InitSharedPSOAndRootSignature() must be called first and once
 	void Init(
 		ID3D12Resource& inputColorBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept;
+		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
 	// Preconditions:
 	// - Init() must be called first
@@ -30,10 +30,10 @@ public:
 	bool IsDataValid() const noexcept;
 
 private:
-	void InitShaderResourceViews(ID3D12Resource& colorBuffer) noexcept;
+	void InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept;
 
 	CommandListPerFrame mCommandListPerFrame;
 		
-	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferGpuDescriptor{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDescriptor{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 };

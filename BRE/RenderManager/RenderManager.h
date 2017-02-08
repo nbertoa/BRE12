@@ -60,11 +60,11 @@ private:
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentFrameBufferCpuDesc() const noexcept {
-		return mFrameBufferRTVs[mSwapChain->GetCurrentBackBufferIndex()];
+		return mFrameBufferRenderTargetViews[mSwapChain->GetCurrentBackBufferIndex()];
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilCpuDesc() const noexcept {
-		return mDepthStencilBufferRTV;
+		return mDepthBufferRenderTargetView;
 	}
 
 	void ExecuteFinalPass();
@@ -89,20 +89,18 @@ private:
 
 	CommandListPerFrame mFinalCommandListPerFrame;
 	
-	// Frame buffers
 	Microsoft::WRL::ComPtr<ID3D12Resource> mFrameBuffers[SettingsManager::sSwapChainBufferCount];
-	D3D12_CPU_DESCRIPTOR_HANDLE mFrameBufferRTVs[SettingsManager::sSwapChainBufferCount]{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mFrameBufferRenderTargetViews[SettingsManager::sSwapChainBufferCount]{ 0UL };
 
-	// Depth stencil buffer
-	ID3D12Resource* mDepthStencilBuffer{ nullptr };
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthStencilBufferRTV{ 0UL };
+	ID3D12Resource* mDepthBuffer{ nullptr };
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferRenderTargetView{ 0UL };
 
 	// Buffers used for intermediate computations.
 	// They are used as render targets (light pass) or pixel shader resources (post processing passes)
 	Microsoft::WRL::ComPtr<ID3D12Resource> mIntermediateColorBuffer1;
-	D3D12_CPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer1RTVCpuDesc;
+	D3D12_CPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer1RenderTargetView;
 	Microsoft::WRL::ComPtr<ID3D12Resource> mIntermediateColorBuffer2;
-	D3D12_CPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer2RTVCpuDesc;
+	D3D12_CPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer2RenderTargetView;
 
 	// We cache it here, as is is used by most passes.
 	FrameCBuffer mFrameCBuffer;

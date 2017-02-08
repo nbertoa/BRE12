@@ -2546,3 +2546,5 @@
 /BRE/packages/WinPixEventRuntime.1.0.170126001/WinPixEventRuntime.1.0.170126001.nupkg
 /BRE/packages/WinPixEventRuntime.1.0.170126001/build/WinPixEventRuntime.targets
 /BRE/RenderManager/x64/Release/RenderManager.Build.CppClean.log
+/BRE/CommandManager/x64/Debug/commandlistperframe.nativecodeanalysis.xml
+/BRE/ResourceManager/x64/Debug/framecbufferperframe.nativecodeanalysis.xml

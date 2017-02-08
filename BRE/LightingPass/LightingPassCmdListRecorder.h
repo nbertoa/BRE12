@@ -5,7 +5,7 @@
 
 #include <CommandManager\CommandListPerFrame.h>
 #include <DXUtils/D3DFactory.h>
-#include <ResourceManager\FrameCBufferPerFrame.h>
+#include <ResourceManager\FrameUploadCBufferPerFrame.h>
 #include <ResourceManager/VertexAndIndexBufferCreator.h>
 
 struct FrameCBuffer;
@@ -45,7 +45,7 @@ public:
 		const void* lights,
 		const std::uint32_t numLights) noexcept = 0;
 
-	void SetOutputColorBufferCpuDescriptor(const D3D12_CPU_DESCRIPTOR_HANDLE outputColorBufferCpuDesc) noexcept;
+	void SetRenderTargetView(const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetView) noexcept;
 
 	// Preconditions:
 	// - Init() must be called first
@@ -63,14 +63,14 @@ protected:
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
 	
-	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDescriptor{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 
 	std::uint32_t mNumLights{ 0U };
 
-	FrameCBufferPerFrame mFrameCBufferPerFrame;
+	FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
-	UploadBuffer* mImmutableCBuffer{ nullptr };
+	UploadBuffer* mImmutableUploadCBuffer{ nullptr };
 
-	UploadBuffer* mLightsBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mLightsBufferGpuDescriptorBegin{ 0UL };
+	UploadBuffer* mLightsUploadBuffer{ nullptr };
+	D3D12_GPU_DESCRIPTOR_HANDLE mStartLightsBufferShaderResourceView{ 0UL };
 };

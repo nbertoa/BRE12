@@ -13,7 +13,7 @@
 void ToneMappingPass::Init(
 	ID3D12Resource& inputColorBuffer,
 	ID3D12Resource& outputColorBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept 
+	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept 
 {
 	ASSERT(IsDataValid() == false);
 	
@@ -23,7 +23,7 @@ void ToneMappingPass::Init(
 	ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature();
 
 	mCommandListRecorder.reset(new ToneMappingCmdListRecorder());
-	mCommandListRecorder->Init(*mInputColorBuffer, outputBufferCpuDesc);
+	mCommandListRecorder->Init(*mInputColorBuffer, renderTargetView);
 
 	ASSERT(IsDataValid());
 }

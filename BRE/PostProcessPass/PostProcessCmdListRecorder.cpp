@@ -54,7 +54,7 @@ void PostProcessCmdListRecorder::Init(ID3D12Resource& inputColorBuffer) noexcept
 	ASSERT(IsDataValid());
 }
 
-void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept {
+void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept {
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -63,14 +63,14 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(1U, &frameBufferCpuDesc, false, nullptr);
+	commandList.OMSetRenderTargets(1U, &renderTargetView, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 	commandList.SetGraphicsRootSignature(sRootSignature);
 	
 	// Set root parameters
-	commandList.SetGraphicsRootDescriptorTable(0U, mInputColorBufferGpuDescriptor);
+	commandList.SetGraphicsRootDescriptorTable(0U, mStartPixelShaderResourceView);
 
 	// Draw object	
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -82,7 +82,7 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 }
 
 bool PostProcessCmdListRecorder::IsDataValid() const noexcept {
-	const bool result =	mInputColorBufferGpuDescriptor.ptr != 0UL;
+	const bool result = mStartPixelShaderResourceView.ptr != 0UL;
 
 	return result;
 }
@@ -96,5 +96,5 @@ void PostProcessCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputCo
 	srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
 	srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
 
-	mInputColorBufferGpuDescriptor = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
+	mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
 }

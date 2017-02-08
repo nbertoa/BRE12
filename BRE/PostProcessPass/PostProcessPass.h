@@ -23,20 +23,20 @@ public:
 	// Preconditions:
 	// - Init() must be called first
 	void Execute(
-		ID3D12Resource& outputColorBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDescriptor) noexcept;
+		ID3D12Resource& renderTargetBuffer,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
 private:
 	// Method used internally for validation purposes
 	bool IsDataValid() const noexcept;
 
 	void ExecuteBeginTask(
-		ID3D12Resource& frameBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
+		ID3D12Resource& renderTargetBuffer,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
 	CommandListPerFrame mCommandListPerFrame;
 	
-	ID3D12Resource* mColorBuffer{ nullptr };
+	ID3D12Resource* mInputColorBuffer{ nullptr };
 
 	std::unique_ptr<PostProcessCmdListRecorder> mCommandListRecorder;
 };

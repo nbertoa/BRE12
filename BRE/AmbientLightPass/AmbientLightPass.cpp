@@ -56,8 +56,8 @@ namespace {
 void AmbientLightPass::Init(
 	ID3D12Resource& baseColorMetalMaskBuffer,
 	ID3D12Resource& normalSmoothnessBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& colorBufferCpuDesc,
-	ID3D12Resource& depthBuffer) noexcept 
+	ID3D12Resource& depthBuffer,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
 	ASSERT(ValidateData() == false);
 
@@ -69,35 +69,35 @@ void AmbientLightPass::Init(
 	// Create ambient accessibility buffer and blur buffer
 	CreateResourceAndRenderTargetDescriptor(
 		mAmbientAccessibilityBuffer, 
-		mAmbientAccessibilityBufferRenderTargetCpuDescriptor,
+		mAmbientAccessibilityBufferRenderTargetView,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 		L"Ambient Accessibility Buffer");
+
 	CreateResourceAndRenderTargetDescriptor(
 		mBlurBuffer, 
-		mBlurBufferRenderTargetCpuDescriptor,
+		mBlurBufferRenderTargetView,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 		L"Blur Buffer");
 	
 	// Initialize ambient occlusion recorder
 	mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder());
 	mAmbientOcclusionRecorder->Init(
-		normalSmoothnessBuffer,
-		mAmbientAccessibilityBufferRenderTargetCpuDescriptor,
-		depthBuffer);
+		normalSmoothnessBuffer,		
+		depthBuffer,
+		mAmbientAccessibilityBufferRenderTargetView);
 
 	// Initialize blur recorder
 	mBlurRecorder.reset(new BlurCmdListRecorder());
 	mBlurRecorder->Init(
 		*mAmbientAccessibilityBuffer.Get(),
-		mBlurBufferRenderTargetCpuDescriptor);
+		mBlurBufferRenderTargetView);
 
 	// Initialize ambient light recorder
 	mAmbientLightRecorder.reset(new AmbientLightCmdListRecorder());
 	mAmbientLightRecorder->Init(
-		baseColorMetalMaskBuffer,
-		colorBufferCpuDesc,
+		baseColorMetalMaskBuffer,		
 		*mBlurBuffer.Get(),
-		mBlurBufferRenderTargetCpuDescriptor);
+		renderTargetView);
 
 	ASSERT(ValidateData());
 }
@@ -126,9 +126,9 @@ bool AmbientLightPass::ValidateData() const noexcept {
 		mAmbientOcclusionRecorder.get() != nullptr &&
 		mAmbientLightRecorder.get() != nullptr &&
 		mAmbientAccessibilityBuffer.Get() != nullptr &&
-		mAmbientAccessibilityBufferRenderTargetCpuDescriptor.ptr != 0UL &&
+		mAmbientAccessibilityBufferRenderTargetView.ptr != 0UL &&
 		mBlurBuffer.Get() != nullptr &&
-		mBlurBufferRenderTargetCpuDescriptor.ptr != 0UL;
+		mBlurBufferRenderTargetView.ptr != 0UL;
 
 	return b;
 }
@@ -158,7 +158,7 @@ void AmbientLightPass::ExecuteBeginTask() noexcept {
 	commandList.ResourceBarrier(barriersCount, barriers);
 
 	float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	commandList.ClearRenderTargetView(mAmbientAccessibilityBufferRenderTargetCpuDescriptor, clearColor, 0U, nullptr);
+	commandList.ClearRenderTargetView(mAmbientAccessibilityBufferRenderTargetView, clearColor, 0U, nullptr);
 
 	CHECK_HR(commandList.Close());
 	CommandListExecutor::Get().AddCommandList(commandList);

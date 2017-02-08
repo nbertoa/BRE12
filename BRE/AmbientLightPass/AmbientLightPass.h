@@ -23,9 +23,9 @@ public:
 
 	void Init(
 		ID3D12Resource& baseColorMetalMaskBuffer,
-		ID3D12Resource& normalSmoothnessBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
-		ID3D12Resource& depthBuffer) noexcept;
+		ID3D12Resource& normalSmoothnessBuffer,		
+		ID3D12Resource& depthBuffer,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
 	// Preconditions:
 	// - Init() must be called first
@@ -46,10 +46,10 @@ private:
 	CommandListPerFrame mFinalCommandListPerFrame;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
-	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetCpuDescriptor{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetView{ 0UL };
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
-	D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRenderTargetCpuDescriptor{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRenderTargetView{ 0UL };
 
 	std::unique_ptr<AmbientOcclusionCmdListRecorder> mAmbientOcclusionRecorder;
 	std::unique_ptr<AmbientLightCmdListRecorder> mAmbientLightRecorder;

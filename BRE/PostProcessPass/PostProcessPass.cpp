@@ -13,7 +13,7 @@
 void PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept {
 	ASSERT(IsDataValid() == false);
 	
-	mColorBuffer = &inputColorBuffer;
+	mInputColorBuffer = &inputColorBuffer;
 
 	// Initialize recorder's PSO
 	PostProcessCmdListRecorder::InitSharedPSOAndRootSignature();
@@ -26,17 +26,17 @@ void PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept {
 }
 
 void PostProcessPass::Execute(
-	ID3D12Resource& outputColorBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDescriptor) noexcept 
+	ID3D12Resource& renderTargetBuffer,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept 
 {
 	ASSERT(IsDataValid());
-	ASSERT(outputColorBufferCpuDescriptor.ptr != 0UL);
+	ASSERT(renderTargetView.ptr != 0UL);
 
-	ExecuteBeginTask(outputColorBuffer, outputColorBufferCpuDescriptor);
+	ExecuteBeginTask(renderTargetBuffer, renderTargetView);
 
 	// Wait until all previous tasks command lists are executed
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
-	mCommandListRecorder->RecordAndPushCommandLists(outputColorBufferCpuDescriptor);
+	mCommandListRecorder->RecordAndPushCommandLists(renderTargetView);
 	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
 		Sleep(0U);
 	}
@@ -45,35 +45,35 @@ void PostProcessPass::Execute(
 bool PostProcessPass::IsDataValid() const noexcept {
 	const bool b =
 		mCommandListRecorder.get() != nullptr &&
-		mColorBuffer != nullptr;
+		mInputColorBuffer != nullptr;
 
 	return b;
 }
 
 void PostProcessPass::ExecuteBeginTask(
-	ID3D12Resource& outputColorBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDescriptor) noexcept {
+	ID3D12Resource& renderTargetBuffer,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept {
 
 	ASSERT(IsDataValid());
-	ASSERT(outputColorBufferCpuDescriptor.ptr != 0UL);
+	ASSERT(renderTargetView.ptr != 0UL);
 
 	// Check resource states:
 	// - Input color buffer was used as render target in previous pass
 	// - Output color buffer is the frame buffer, so it was used to present before.
-	ASSERT(ResourceStateManager::GetResourceState(*mColorBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
-	ASSERT(ResourceStateManager::GetResourceState(outputColorBuffer) == D3D12_RESOURCE_STATE_PRESENT);
+	ASSERT(ResourceStateManager::GetResourceState(*mInputColorBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+	ASSERT(ResourceStateManager::GetResourceState(renderTargetBuffer) == D3D12_RESOURCE_STATE_PRESENT);
 
 	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
 	// Set barriers
 	CD3DX12_RESOURCE_BARRIER barriers[]
 	{
-		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		ResourceStateManager::ChangeResourceStateAndGetBarrier(outputColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),		
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mInputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+		ResourceStateManager::ChangeResourceStateAndGetBarrier(renderTargetBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),		
 	};
 	commandList.ResourceBarrier(_countof(barriers), barriers);
 
-	commandList.ClearRenderTargetView(outputColorBufferCpuDescriptor, DirectX::Colors::Black, 0U, nullptr);
+	commandList.ClearRenderTargetView(renderTargetView, DirectX::Colors::Black, 0U, nullptr);
 
 	CHECK_HR(commandList.Close());
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);

@@ -16,14 +16,14 @@ void LightingPass::Init(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
 	ID3D12Resource& diffuseIrradianceCubeMap,
-	ID3D12Resource& specularPreConvolvedCubeMap) noexcept 
+	ID3D12Resource& specularPreConvolvedCubeMap,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
 	ASSERT(IsDataValid() == false);
 
 	mGeometryBuffers = geometryBuffers;
-	mOutputColorBufferCpuDescriptor = outputColorBufferCpuDesc;
+	mRenderTargetView = renderTargetView;
 	mDepthBuffer = &depthBuffer;
 
 	// Initialize recorder's pso
@@ -33,22 +33,22 @@ void LightingPass::Init(
 	ASSERT(geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get() != nullptr);
 	mAmbientLightPass.Init(
 		*geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(),
-		*geometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(),
-		outputColorBufferCpuDesc,
-		depthBuffer);
+		*geometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(),		
+		depthBuffer,
+		renderTargetView);
 
 	// Initialize environment light pass
 	mEnvironmentLightPass.Init(
 		geometryBuffers, 
 		geometryBuffersCount,
-		*mDepthBuffer,
-		outputColorBufferCpuDesc, 
+		*mDepthBuffer,		
 		diffuseIrradianceCubeMap,
-		specularPreConvolvedCubeMap);
+		specularPreConvolvedCubeMap,
+		renderTargetView);
 
 	for (CommandListRecorders::value_type& recorder : mCommandListRecorders) {
 		ASSERT(recorder.get() != nullptr);
-		recorder->SetOutputColorBufferCpuDescriptor(outputColorBufferCpuDesc);
+		recorder->SetRenderTargetView(renderTargetView);
 	}
 
 	ASSERT(IsDataValid());
@@ -98,7 +98,7 @@ bool LightingPass::IsDataValid() const noexcept {
 	}
 
 	const bool b =
-		mOutputColorBufferCpuDescriptor.ptr != 0UL &&
+		mRenderTargetView.ptr != 0UL &&
 		mDepthBuffer != nullptr;
 
 	return b;
@@ -141,7 +141,7 @@ void LightingPass::ExecuteBeginTask() noexcept {
 	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 1UL);
 	commandList.ResourceBarrier(barriersCount, barriers);
 
-	commandList.ClearRenderTargetView(mOutputColorBufferCpuDescriptor, DirectX::Colors::Black, 0U, nullptr);
+	commandList.ClearRenderTargetView(mRenderTargetView, DirectX::Colors::Black, 0U, nullptr);
 
 	CHECK_HR(commandList.Close());
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);

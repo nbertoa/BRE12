@@ -20,7 +20,7 @@ public:
 	void Init(
 		ID3D12Resource& inputColorBuffer,
 		ID3D12Resource& outputColorBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc) noexcept;
+		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
 	// Preconditions:
 	// - Init() must be called before

@@ -5,14 +5,14 @@
 bool LightingPassCmdListRecorder::IsDataValid() const noexcept {
 	return
 		mNumLights != 0UL &&
-		mImmutableCBuffer != nullptr &&
-		mLightsBuffer != nullptr &&
-		mLightsBufferGpuDescriptorBegin.ptr != 0UL;
+		mImmutableUploadCBuffer != nullptr &&
+		mLightsUploadBuffer != nullptr &&
+		mStartLightsBufferShaderResourceView.ptr != 0UL;
 }
 
-void LightingPassCmdListRecorder::SetOutputColorBufferCpuDescriptor(
-	const D3D12_CPU_DESCRIPTOR_HANDLE outputColorBufferCpuDesc) noexcept
+void LightingPassCmdListRecorder::SetRenderTargetView(
+	const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetView) noexcept
 {
-	ASSERT(outputColorBufferCpuDesc.ptr != 0UL);
-	mOutputColorBufferCpuDescriptor = outputColorBufferCpuDesc;
+	ASSERT(renderTargetView.ptr != 0UL);
+	mRenderTargetView = renderTargetView;
 }

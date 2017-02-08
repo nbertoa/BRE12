@@ -13,23 +13,23 @@ bool GeometryPassCmdListRecorder::IsDataValid() const noexcept {
 	}
 
 	return
-		mObjectCBuffer != nullptr &&
-		mObjectCBufferGpuDescriptorsBegin.ptr != 0UL &&
+		mObjectUploadCBuffers != nullptr &&
+		mStartObjectCBufferView.ptr != 0UL &&
 		geometryDataCount != 0UL &&
-		mMaterialsCBuffer != nullptr &&
-		mMaterialsCBufferGpuDescriptorsBegin.ptr != 0UL;
+		mMaterialUploadCBuffers != nullptr &&
+		mStartMaterialCBufferView.ptr != 0UL;
 }
 
 void GeometryPassCmdListRecorder::Init(
-	const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBuffersCpuDescs,
-	const std::uint32_t geometryBuffersCpuDescCount,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept
+	const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBufferRenderTargetViews,
+	const std::uint32_t geometryBufferRenderTargetViewCount,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 {
-	ASSERT(geometryBuffersCpuDescs != nullptr);
-	ASSERT(geometryBuffersCpuDescCount != 0U);
-	ASSERT(depthBufferCpuDesc.ptr != 0UL);
+	ASSERT(geometryBufferRenderTargetViews != nullptr);
+	ASSERT(geometryBufferRenderTargetViewCount != 0U);
+	ASSERT(depthBufferView.ptr != 0UL);
 
-	mGeometryBufferCpuDescriptors = geometryBuffersCpuDescs;
-	mGeometryBufferCpuDescriptorCount = geometryBuffersCpuDescCount;
-	mDepthBufferCpuDescriptor = depthBufferCpuDesc;
+	mGeometryBufferRenderTargetViews = geometryBufferRenderTargetViews;
+	mGeometryBufferRenderTargetViewCount = geometryBufferRenderTargetViewCount;
+	mDepthBufferView = depthBufferView;
 }

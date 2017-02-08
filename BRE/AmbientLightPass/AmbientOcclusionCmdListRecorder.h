@@ -1,7 +1,7 @@
 #pragma once
 
 #include <CommandManager\CommandListPerFrame.h>
-#include <ResourceManager\FrameCBufferPerFrame.h>
+#include <ResourceManager\FrameUploadCBufferPerFrame.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
@@ -23,9 +23,9 @@ public:
 	// Preconditions:
 	// - InitSharedPSOAndRootSignature() must be called first and once
 	void Init(
-		ID3D12Resource& normalSmoothnessBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferCpuDesc,
-		ID3D12Resource& depthBuffer) noexcept;
+		ID3D12Resource& normalSmoothnessBuffer,		
+		ID3D12Resource& depthBuffer,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
 	// Preconditions:
 	// - Init() must be called first
@@ -46,12 +46,11 @@ private:
 	std::uint32_t mSampleKernelSize{ 0U };
 	std::uint32_t mNoiseTextureDimension{ 4U };
 
-	FrameCBufferPerFrame mFrameCBufferPerFrame;
+	FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
-	UploadBuffer* mSampleKernelBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mSampleKernelBufferGpuDescriptor{ 0UL };
+	UploadBuffer* mSampleKernelUploadBuffer{ nullptr };
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferCpuDescriptor{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDescriptor{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mFirstPixelShaderResourceView{ 0UL };
 };

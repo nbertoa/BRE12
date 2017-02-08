@@ -124,7 +124,7 @@ void PunctualLightCmdListRecorder::InitShaderResourceViews(
 	resources.push_back(&depthBuffer);
 
 	// Create pixel shader SRV descriptors
-	mPixelShaderBufferGpuDescriptorsBegin =
+	mStartPixelShaderResourceView =
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			resources.data(),
 			srvDescriptors.data(),
@@ -135,17 +135,17 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
-	ASSERT(mOutputColorBufferCpuDescriptor.ptr != 0UL);
+	ASSERT(mRenderTargetView.ptr != 0UL);
 
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(mFrameCBufferPerFrame.GetNextFrameCBuffer());
+	UploadBuffer& uploadFrameCBuffer(mFrameUploadCBufferPerFrame.GetNextFrameCBuffer());
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDescriptor, false, nullptr);
+	commandList.OMSetRenderTargets(1U, &mRenderTargetView, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
@@ -153,13 +153,13 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 
 	// Set root parameters
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
-	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->GetResource()->GetGPUVirtualAddress());
+	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableUploadCBuffer->GetResource()->GetGPUVirtualAddress());
 	commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
-	commandList.SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescriptorBegin);
+	commandList.SetGraphicsRootDescriptorTable(1U, mStartLightsBufferShaderResourceView);
 	commandList.SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
 	commandList.SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
 	commandList.SetGraphicsRootConstantBufferView(4U, frameCBufferGpuVAddress);
-	commandList.SetGraphicsRootDescriptorTable(5U, mPixelShaderBufferGpuDescriptorsBegin);
+	commandList.SetGraphicsRootDescriptorTable(5U, mStartPixelShaderResourceView);
 	
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	
@@ -170,37 +170,38 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 }
 
 bool PunctualLightCmdListRecorder::IsDataValid() const noexcept {
-	return LightingPassCmdListRecorder::IsDataValid() && mPixelShaderBufferGpuDescriptorsBegin.ptr != 0UL;
+	return LightingPassCmdListRecorder::IsDataValid() && mStartPixelShaderResourceView.ptr != 0UL;
 }
 
 void PunctualLightCmdListRecorder::CreateLightBuffersAndViews(const void* lights) noexcept {
-	ASSERT(mLightsBuffer == nullptr);
+	ASSERT(mLightsUploadBuffer == nullptr);
 	ASSERT(lights != nullptr);
 	ASSERT(mNumLights != 0U);
 
 	// Create lights buffer and fill it
 	const std::size_t lightBufferElemSize{ sizeof(PunctualLight) };
-	mLightsBuffer = &UploadBufferManager::CreateUploadBuffer(lightBufferElemSize, mNumLights);
+	mLightsUploadBuffer = &UploadBufferManager::CreateUploadBuffer(lightBufferElemSize, mNumLights);
 	const std::uint8_t* lightsPtr = reinterpret_cast<const std::uint8_t*>(lights);
 	for (std::uint32_t i = 0UL; i < mNumLights; ++i) {
-		mLightsBuffer->CopyData(i, lightsPtr + sizeof(PunctualLight) * i, sizeof(PunctualLight));
+		mLightsUploadBuffer->CopyData(i, lightsPtr + sizeof(PunctualLight) * i, sizeof(PunctualLight));
 	}
 
 	// Create lights buffer SRV	descriptor
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
 	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDescriptor.Format = mLightsBuffer->GetResource()->GetDesc().Format;
+	srvDescriptor.Format = mLightsUploadBuffer->GetResource()->GetDesc().Format;
 	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	srvDescriptor.Buffer.FirstElement = 0UL;
 	srvDescriptor.Buffer.NumElements = mNumLights;
 	srvDescriptor.Buffer.StructureByteStride = sizeof(PunctualLight);
-	mLightsBufferGpuDescriptorBegin = CbvSrvUavDescriptorManager::CreateShaderResourceView(*mLightsBuffer->GetResource(), srvDescriptor);
+	mStartLightsBufferShaderResourceView = 
+		CbvSrvUavDescriptorManager::CreateShaderResourceView(*mLightsUploadBuffer->GetResource(), srvDescriptor);
 }
 
 void PunctualLightCmdListRecorder::InitConstantBuffers() noexcept {
 	// Create immutable cbuffer
 	const std::size_t immutableCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ImmutableCBuffer)) };
-	mImmutableCBuffer = &UploadBufferManager::CreateUploadBuffer(immutableCBufferElemSize, 1U);
+	mImmutableUploadCBuffer = &UploadBufferManager::CreateUploadBuffer(immutableCBufferElemSize, 1U);
 	ImmutableCBuffer immutableCBuffer;
-	mImmutableCBuffer->CopyData(0U, &immutableCBuffer, sizeof(immutableCBuffer));
+	mImmutableUploadCBuffer->CopyData(0U, &immutableCBuffer, sizeof(immutableCBuffer));
 }

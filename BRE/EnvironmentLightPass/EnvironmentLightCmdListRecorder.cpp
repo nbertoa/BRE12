@@ -53,18 +53,23 @@ void EnvironmentLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 void EnvironmentLightCmdListRecorder::Init(
 	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 	const std::uint32_t geometryBuffersCount,
-	ID3D12Resource& depthBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
+	ID3D12Resource& depthBuffer,	
 	ID3D12Resource& diffuseIrradianceCubeMap,
-	ID3D12Resource& specularPreConvolvedCubeMap) noexcept
+	ID3D12Resource& specularPreConvolvedCubeMap,
+	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
 	ASSERT(ValidateData() == false);
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(geometryBuffersCount > 0U);
 
-	mOutputColorBufferCpuDescriptor = outputColorBufferCpuDesc;
+	mRenderTargetView = renderTargetView;
 
-	InitShaderResourceViews(geometryBuffers, geometryBuffersCount, depthBuffer, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
+	InitShaderResourceViews(
+		geometryBuffers, 
+		geometryBuffersCount, 
+		depthBuffer, 
+		diffuseIrradianceCubeMap, 
+		specularPreConvolvedCubeMap);
 
 	ASSERT(ValidateData());
 }
@@ -75,38 +80,35 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	ASSERT(sRootSignature != nullptr);
 
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(mFrameCBufferPerFrame.GetNextFrameCBuffer());
+	UploadBuffer& uploadFrameCBuffer(mFrameUploadCBufferPerFrame.GetNextFrameCBuffer());
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 	
 	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDescriptor, false, nullptr);
+	commandList.OMSetRenderTargets(1U, &mRenderTargetView, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 	commandList.SetGraphicsRootSignature(sRootSignature);
 	
-	// Set root parameters
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
 	commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	commandList.SetGraphicsRootDescriptorTable(2U, mPixelShaderBuffersGpuDescriptor);
+	commandList.SetGraphicsRootDescriptorTable(2U, mFirstPixelShaderResourceView);
 
-	// Draw object
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList.DrawInstanced(6U, 1U, 0U, 0U);
 
 	commandList.Close();
-
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
 bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
-		mOutputColorBufferCpuDescriptor.ptr != 0UL &&
-		mPixelShaderBuffersGpuDescriptor.ptr != 0UL;
+		mRenderTargetView.ptr != 0UL &&
+		mFirstPixelShaderResourceView.ptr != 0UL;
 
 	return result;
 }
@@ -179,7 +181,7 @@ void EnvironmentLightCmdListRecorder::InitShaderResourceViews(
 	srvDescriptors.emplace_back(srvDescriptor);
 	resources.push_back(&specularPreConvolvedCubeMap);
 
-	mPixelShaderBuffersGpuDescriptor = 
+	mFirstPixelShaderResourceView =
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			resources.data(), 
 			srvDescriptors.data(), 

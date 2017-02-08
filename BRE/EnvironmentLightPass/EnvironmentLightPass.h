@@ -21,10 +21,10 @@ public:
 	void Init(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
-		ID3D12Resource& depthBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
+		ID3D12Resource& depthBuffer,		
 		ID3D12Resource& diffuseIrradianceCubeMap,
-		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
+		ID3D12Resource& specularPreConvolvedCubeMap,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc) noexcept;
 
 	// Preconditions:
 	// - Init() must be called first

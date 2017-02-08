@@ -91,27 +91,27 @@ void NormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
-	ASSERT(mGeometryBufferCpuDescriptors != nullptr);
-	ASSERT(mGeometryBufferCpuDescriptorCount != 0U);
-	ASSERT(mDepthBufferCpuDescriptor.ptr != 0U);
+	ASSERT(mGeometryBufferRenderTargetViews != nullptr);
+	ASSERT(mGeometryBufferRenderTargetViewCount != 0U);
+	ASSERT(mDepthBufferView.ptr != 0U);
 	
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(mFrameCBufferPerFrame.GetNextFrameCBuffer());
+	UploadBuffer& uploadFrameCBuffer(mFrameUploadCBufferPerFrame.GetNextFrameCBuffer());
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(mGeometryBufferCpuDescriptorCount, mGeometryBufferCpuDescriptors, false, &mDepthBufferCpuDescriptor);
+	commandList.OMSetRenderTargets(mGeometryBufferRenderTargetViewCount, mGeometryBufferRenderTargetViews, false, &mDepthBufferView);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 	commandList.SetGraphicsRootSignature(sRootSignature);
 
 	const std::size_t descHandleIncSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescriptorsBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mMaterialsCBufferGpuDescriptorsBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mStartObjectCBufferView);
+	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mStartMaterialCBufferView);
 	D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDesc(mBaseColorBufferGpuDescriptorsBegin);
 	D3D12_GPU_DESCRIPTOR_HANDLE normalsBufferGpuDesc(mNormalBufferGpuDescriptorsBegin);
 
@@ -170,12 +170,12 @@ void NormalCmdListRecorder::InitConstantBuffers(
 	ASSERT(textures != nullptr);
 	ASSERT(normals != nullptr);
 	ASSERT(dataCount != 0UL);
-	ASSERT(mObjectCBuffer == nullptr);
-	ASSERT(mMaterialsCBuffer == nullptr);
+	ASSERT(mObjectUploadCBuffers == nullptr);
+	ASSERT(mMaterialUploadCBuffers == nullptr);
 
 	// Create object cbuffer and fill it
 	const std::size_t objCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
-	mObjectCBuffer = &UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, dataCount);
+	mObjectUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, dataCount);
 	std::uint32_t k = 0U;
 	const std::size_t geometryDataCount{ mGeometryDataVec.size() };
 	ObjectCBuffer objCBuffer;
@@ -185,7 +185,7 @@ void NormalCmdListRecorder::InitConstantBuffers(
 		for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
 			const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&geomData.mWorldMatrices[j]));
 			DirectX::XMStoreFloat4x4(&objCBuffer.mWorldMatrix, wMatrix);
-			mObjectCBuffer->CopyData(k + j, &objCBuffer, sizeof(objCBuffer));
+			mObjectUploadCBuffers->CopyData(k + j, &objCBuffer, sizeof(objCBuffer));
 		}
 
 		k += worldMatsCount;
@@ -193,10 +193,10 @@ void NormalCmdListRecorder::InitConstantBuffers(
 
 	// Create materials cbuffer		
 	const std::size_t matCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(Material)) };
-	mMaterialsCBuffer = &UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, dataCount);
+	mMaterialUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, dataCount);
 
-	D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialsCBuffer->GetResource()->GetGPUVirtualAddress() };
-	D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->GetResource()->GetGPUVirtualAddress() };
+	D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialUploadCBuffers->GetResource()->GetGPUVirtualAddress() };
+	D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffers->GetResource()->GetGPUVirtualAddress() };
 
 	// Create object / materials cbuffers descriptors
 	// Create textures SRV descriptors
@@ -251,13 +251,13 @@ void NormalCmdListRecorder::InitConstantBuffers(
 		srvDesc.Texture2D.MipLevels = normalResVec.back()->GetDesc().MipLevels;
 		normalSrvDescVec.push_back(srvDesc);
 
-		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
+		mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 	}
-	mObjectCBufferGpuDescriptorsBegin =
+	mStartObjectCBufferView =
 		CbvSrvUavDescriptorManager::CreateConstantBufferViews(
 			objectCbufferViewDescVec.data(), 
 			static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-	mMaterialsCBufferGpuDescriptorsBegin =
+	mStartMaterialCBufferView =
 		CbvSrvUavDescriptorManager::CreateConstantBufferViews(
 			materialCbufferViewDescVec.data(), 
 			static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));

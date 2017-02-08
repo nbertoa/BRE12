@@ -33,8 +33,8 @@ namespace {
 
 	void CreateGeometryBuffersAndRenderTargetViews(
 		Microsoft::WRL::ComPtr<ID3D12Resource> buffers[GeometryPass::BUFFERS_COUNT],
-		D3D12_CPU_DESCRIPTOR_HANDLE bufferRenderTargetViewCpuDescriptors[GeometryPass::BUFFERS_COUNT]) noexcept {
-
+		D3D12_CPU_DESCRIPTOR_HANDLE bufferRenderTargetViews[GeometryPass::BUFFERS_COUNT]) noexcept 
+	{
 		// Set shared buffers properties
 		D3D12_RESOURCE_DESC resourceDescriptor = {};
 		resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -83,20 +83,20 @@ namespace {
 				resourceNames[i]);
 
 			buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
-			RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &bufferRenderTargetViewCpuDescriptors[i]);
+			RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), rtvDesc, &bufferRenderTargetViews[i]);
 		}
 	}
 }
 
-void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept 
+void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept 
 {
 	ASSERT(IsDataValid() == false);
 	
 	ASSERT(mCommandListRecorders.empty() == false);
 
-	CreateGeometryBuffersAndRenderTargetViews(mGeometryBuffers, mGeometryBufferRenderTargetCpuDescriptors);
+	CreateGeometryBuffersAndRenderTargetViews(mGeometryBuffers, mGeometryBufferRenderTargetViews);
 
-	mDepthBufferCpuDescriptor = depthBufferCpuDesc;
+	mDepthBufferView = depthBufferView;
 
 	// Initialize recorders PSOs
 	ColorCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
@@ -109,7 +109,7 @@ void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) n
 	// Init internal data for all geometry recorders
 	for (CommandListRecorders::value_type& recorder : mCommandListRecorders) {
 		ASSERT(recorder.get() != nullptr);
-		recorder->Init(mGeometryBufferRenderTargetCpuDescriptors, BUFFERS_COUNT, mDepthBufferCpuDescriptor);
+		recorder->Init(mGeometryBufferRenderTargetViews, BUFFERS_COUNT, mDepthBufferView);
 	}
 
 	ASSERT(IsDataValid());
@@ -146,14 +146,14 @@ bool GeometryPass::IsDataValid() const noexcept {
 	}
 
 	for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
-		if (mGeometryBufferRenderTargetCpuDescriptors[i].ptr == 0UL) {
+		if (mGeometryBufferRenderTargetViews[i].ptr == 0UL) {
 			return false;
 		}
 	}
 
 	const bool b =
 		mCommandListRecorders.empty() == false &&
-		mDepthBufferCpuDescriptor.ptr != 0UL;
+		mDepthBufferView.ptr != 0UL;
 
 		return b;
 }
@@ -177,9 +177,9 @@ void GeometryPass::ExecuteBeginTask() noexcept {
 
 	// Clear render targets and depth stencil
 	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescriptors[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
-	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescriptors[BASECOLOR_METALMASK], zero, 0U, nullptr);
-	commandList.ClearDepthStencilView(mDepthBufferCpuDescriptor, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0U, 0U, nullptr);
+	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
+	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[BASECOLOR_METALMASK], zero, 0U, nullptr);
+	commandList.ClearDepthStencilView(mDepthBufferView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0U, 0U, nullptr);
 
 	CHECK_HR(commandList.Close());
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);

@@ -160,13 +160,13 @@ RenderManager::RenderManager(Scene& scene) {
 
 	CreateIntermediateColorBufferAndRenderTargetView(
 		mIntermediateColorBuffer1,
-		mIntermediateColorBuffer1RTVCpuDesc,
+		mIntermediateColorBuffer1RenderTargetView,
 		L"Intermediate Color Buffer 1",
 		D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	CreateIntermediateColorBufferAndRenderTargetView(
 		mIntermediateColorBuffer2,
-		mIntermediateColorBuffer2RTVCpuDesc,
+		mIntermediateColorBuffer2RenderTargetView,
 		L"Intermediate Color Buffer 2",
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
@@ -200,26 +200,26 @@ void RenderManager::InitPasses(Scene& scene) noexcept {
 	scene.CreateLightingPassRecorders(
 		mGeometryPass.GetGeometryBuffers(), 
 		GeometryPass::BUFFERS_COUNT, 
-		*mDepthStencilBuffer, 
+		*mDepthBuffer, 
 		mLightingPass.GetCommandListRecorders());
 
 	mLightingPass.Init(
 		mGeometryPass.GetGeometryBuffers(),
 		GeometryPass::BUFFERS_COUNT,
-		*mDepthStencilBuffer,
-		mIntermediateColorBuffer1RTVCpuDesc, 
+		*mDepthBuffer,		
 		*diffuseIrradianceCubeMap,
-		*specularPreConvolvedCubeMap);
+		*specularPreConvolvedCubeMap,
+		mIntermediateColorBuffer1RenderTargetView);
 
 	mSkyBoxPass.Init(
 		*skyBoxCubeMap, 
-		mIntermediateColorBuffer1RTVCpuDesc,
+		mIntermediateColorBuffer1RenderTargetView,
 		DepthStencilCpuDesc());
 
 	mToneMappingPass.Init(
 		*mIntermediateColorBuffer1.Get(), 
 		*mIntermediateColorBuffer2.Get(),
-		mIntermediateColorBuffer2RTVCpuDesc);
+		mIntermediateColorBuffer2RenderTargetView);
 
 	mPostProcessPass.Init(*mIntermediateColorBuffer2.Get());
 		
@@ -305,7 +305,7 @@ void RenderManager::CreateRenderTargetBuffersAndViews() noexcept {
 	const std::size_t rtvDescSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
 	for (std::uint32_t i = 0U; i < SettingsManager::sSwapChainBufferCount; ++i) {
 		CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
-		RenderTargetDescriptorManager::CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDescriptor, &mFrameBufferRTVs[i]);
+		RenderTargetDescriptorManager::CreateRenderTargetView(*mFrameBuffers[i].Get(), rtvDescriptor, &mFrameBufferRenderTargetViews[i]);
 		ResourceStateManager::AddResource(*mFrameBuffers[i].Get(), D3D12_RESOURCE_STATE_PRESENT);
 	}
 }
@@ -331,7 +331,7 @@ void RenderManager::CreateDepthStencilBufferAndView() noexcept {
 	clearValue.DepthStencil.Stencil = 0U;
 
 	CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	mDepthStencilBuffer = &ResourceManager::CreateCommittedResource(
+	mDepthBuffer = &ResourceManager::CreateCommittedResource(
 		heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		depthStencilDesc,
@@ -344,7 +344,7 @@ void RenderManager::CreateDepthStencilBufferAndView() noexcept {
 	depthStencilViewDesc.Format = SettingsManager::sDepthStencilViewFormat;
 	depthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
-	DepthStencilDescriptorManager::CreateDepthStencilView(*mDepthStencilBuffer, depthStencilViewDesc, &mDepthStencilBufferRTV);
+	DepthStencilDescriptorManager::CreateDepthStencilView(*mDepthBuffer, depthStencilViewDesc, &mDepthBufferRenderTargetView);
 }
 
 void RenderManager::CreateIntermediateColorBufferAndRenderTargetView(

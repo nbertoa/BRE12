@@ -4,8 +4,6 @@
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct D3D12_GPU_DESCRIPTOR_HANDLE;
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 // To record command list for post processing effects (anti aliasing, color grading, etc).
@@ -26,7 +24,7 @@ public:
 
 	// Preconditions:
 	// - Init() must be called first
-	void RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferCpuDesc) noexcept;
+	void RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
 	bool IsDataValid() const noexcept;
 
@@ -35,5 +33,5 @@ private:
 
 	CommandListPerFrame mCommandListPerFrame;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferGpuDescriptor{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
 };

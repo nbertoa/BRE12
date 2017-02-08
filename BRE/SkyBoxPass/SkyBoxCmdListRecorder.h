@@ -4,7 +4,7 @@
 
 #include <CommandManager\CommandListPerFrame.h>
 #include <MathUtils\MathUtils.h>
-#include <ResourceManager\FrameCBufferPerFrame.h>
+#include <ResourceManager\FrameUploadCBufferPerFrame.h>
 #include <ResourceManager/VertexAndIndexBufferCreator.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
@@ -32,8 +32,8 @@ public:
 		const VertexAndIndexBufferCreator::IndexBufferData indexBufferData,
 		const DirectX::XMFLOAT4X4& worldMatrix,
 		ID3D12Resource& skyBoxCubeMap,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferCpuDesc,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 
 	// Preconditions:
 	// - Init() must be called first
@@ -51,13 +51,13 @@ private:
 	VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
 	DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::GetIdentity4x4Matrix() };
 
-	FrameCBufferPerFrame mFrameCBufferPerFrame;
+	FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
-	UploadBuffer* mObjectCBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescriptor;
+	UploadBuffer* mObjectUploadCBuffer{ nullptr };
+	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferView;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapBufferGpuDescriptor;
+	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapShaderResourceView;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDescriptor{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDescriptor{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
 };

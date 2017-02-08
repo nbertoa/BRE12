@@ -5,7 +5,7 @@
 
 #include <CommandManager\CommandListPerFrame.h>
 #include <DXUtils/D3DFactory.h>
-#include <ResourceManager\FrameCBufferPerFrame.h>
+#include <ResourceManager\FrameUploadCBufferPerFrame.h>
 #include <ResourceManager/VertexAndIndexBufferCreator.h>
 
 struct FrameCBuffer;
@@ -33,12 +33,12 @@ public:
 	GeometryPassCmdListRecorder& operator=(GeometryPassCmdListRecorder&&) = default;
 
 	// Preconditions:
-	// - "geometryBuffersCpuDescs" must not be nullptr
-	// - "geometryBuffersCpuDescCount" must be greater than zero
+	// - "geometryBufferRenderTargetViews" must not be nullptr
+	// - "geometryBufferRenderTargetViewCount" must be greater than zero
 	void Init(
-		const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBuffersCpuDescs,
-		const std::uint32_t geometryBuffersCpuDescCount,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+		const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBufferRenderTargetViews,
+		const std::uint32_t geometryBufferRenderTargetViewCount,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 		
 	// Preconditions:
 	// - Init() must be called before
@@ -57,18 +57,15 @@ protected:
 
 	std::vector<GeometryData> mGeometryDataVec;
 
-	FrameCBufferPerFrame mFrameCBufferPerFrame;
+	FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
-	// Object CBuffer info
-	UploadBuffer* mObjectCBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescriptorsBegin;
+	UploadBuffer* mObjectUploadCBuffers{ nullptr };
+	D3D12_GPU_DESCRIPTOR_HANDLE mStartObjectCBufferView;
 
-	// Material CBuffer info
-	D3D12_GPU_DESCRIPTOR_HANDLE mMaterialsCBufferGpuDescriptorsBegin;
-	UploadBuffer* mMaterialsCBuffer{ nullptr };
+	D3D12_GPU_DESCRIPTOR_HANDLE mStartMaterialCBufferView;
+	UploadBuffer* mMaterialUploadCBuffers{ nullptr };
 	
-	// Geometry & depth buffers cpu descriptors
-	const D3D12_CPU_DESCRIPTOR_HANDLE* mGeometryBufferCpuDescriptors{ nullptr };
-	std::uint32_t mGeometryBufferCpuDescriptorCount{ 0U };
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDescriptor{ 0UL };
+	const D3D12_CPU_DESCRIPTOR_HANDLE* mGeometryBufferRenderTargetViews{ nullptr };
+	std::uint32_t mGeometryBufferRenderTargetViewCount{ 0U };
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
 };

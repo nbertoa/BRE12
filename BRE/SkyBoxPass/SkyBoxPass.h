@@ -18,8 +18,8 @@ public:
 
 	void Init(
 		ID3D12Resource& skyBoxCubeMap,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) noexcept;
+		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
+		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 
 	// Preconditions:
 	// - Init() must be called first

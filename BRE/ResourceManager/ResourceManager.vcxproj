@@ -119,7 +119,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="FrameCBufferPerFrame.h" />
+    <ClInclude Include="FrameUploadCBufferPerFrame.h" />
     <ClInclude Include="VertexAndIndexBufferCreator.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="ResourceManager.h" />
@@ -127,7 +127,7 @@
     <ClInclude Include="UploadBufferManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FrameCBufferPerFrame.cpp" />
+    <ClCompile Include="FrameUploadCBufferPerFrame.cpp" />
     <ClCompile Include="VertexAndIndexBufferCreator.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
