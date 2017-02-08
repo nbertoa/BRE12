@@ -2549,3 +2549,8 @@
 /BRE/CommandManager/x64/Debug/commandlistperframe.nativecodeanalysis.xml
 /BRE/ResourceManager/x64/Debug/framecbufferperframe.nativecodeanalysis.xml
 /BRE/Main/x64/Release/Main.tlog/unsuccessfulbuild
+/BRE/Main/x64/Debug/Main.tlog/link-cvtres.read.1.tlog
+/BRE/Main/x64/Debug/Main.tlog/link-cvtres.write.1.tlog
+/BRE/Main/x64/Debug/Main.tlog/link-rc.read.1.tlog
+/BRE/Main/x64/Debug/Main.tlog/link-rc.write.1.tlog
+/BRE/Main/x64/Debug/Main.tlog/unsuccessfulbuild
