@@ -52,7 +52,7 @@ void BlurCmdListRecorder::Init(
 {
 	ASSERT(ValidateData() == false);
 
-	mOutputColorBufferCpuDesc = outputColorBufferCpuDesc;
+	mOutputColorBufferCpuDescriptor = outputColorBufferCpuDesc;
 
 	InitShaderResourceViews(inputColorBuffer);
 
@@ -68,14 +68,14 @@ void BlurCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, nullptr);
+	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDescriptor, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 	commandList.SetGraphicsRootSignature(sRootSignature);
 
 	// Set root parameters
-	commandList.SetGraphicsRootDescriptorTable(0U, mInputColorBufferGpuDesc);
+	commandList.SetGraphicsRootDescriptorTable(0U, mInputColorBufferGpuDescriptor);
 
 	// Draw object
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -88,8 +88,8 @@ void BlurCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 bool BlurCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
-		mInputColorBufferGpuDesc.ptr != 0UL && 
-		mOutputColorBufferCpuDesc.ptr != 0UL;
+		mInputColorBufferGpuDescriptor.ptr != 0UL && 
+		mOutputColorBufferCpuDescriptor.ptr != 0UL;
 
 	return result;
 }
@@ -102,5 +102,5 @@ void BlurCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuff
 	srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
 	srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
-	mInputColorBufferGpuDesc = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
+	mInputColorBufferGpuDescriptor = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
 }

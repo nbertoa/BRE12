@@ -99,9 +99,9 @@ void HeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
-	ASSERT(mGeometryBuffersCpuDescs != nullptr);
-	ASSERT(mGeometryBuffersCpuDescCount != 0U);
-	ASSERT(mDepthBufferCpuDesc.ptr != 0U);
+	ASSERT(mGeometryBufferCpuDescriptors != nullptr);
+	ASSERT(mGeometryBufferCpuDescriptorCount != 0U);
+	ASSERT(mDepthBufferCpuDescriptor.ptr != 0U);
 	
 	// Update frame constants
 	UploadBuffer& uploadFrameCBuffer(mFrameCBufferPerFrame.GetNextFrameCBuffer());
@@ -111,18 +111,18 @@ void HeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
+	commandList.OMSetRenderTargets(mGeometryBufferCpuDescriptorCount, mGeometryBufferCpuDescriptors, false, &mDepthBufferCpuDescriptor);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 	commandList.SetGraphicsRootSignature(sRootSignature);
 
 	const std::size_t descHandleIncSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mMaterialsCBufferGpuDescBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDesc(mBaseColorBufferGpuDescBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE normalsBufferGpuDesc(mNormalsBufferGpuDescBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE heightsBufferGpuDesc(mHeightsBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescriptorsBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mMaterialsCBufferGpuDescriptorsBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDesc(mBaseColorBufferGpuDescriptorsBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE normalsBufferGpuDesc(mNormalBufferGpuDescriptorsBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE heightsBufferGpuDesc(mHeightBufferGpuDescriptorsBegin);
 
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
@@ -167,9 +167,9 @@ void HeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 bool HeightCmdListRecorder::IsDataValid() const noexcept {
 	const bool result =
 		GeometryPassCmdListRecorder::IsDataValid() &&
-		mBaseColorBufferGpuDescBegin.ptr != 0UL &&
-		mNormalsBufferGpuDescBegin.ptr != 0UL &&
-		mHeightsBufferGpuDescBegin.ptr != 0UL;
+		mBaseColorBufferGpuDescriptorsBegin.ptr != 0UL &&
+		mNormalBufferGpuDescriptorsBegin.ptr != 0UL &&
+		mHeightBufferGpuDescriptorsBegin.ptr != 0UL;
 
 	return result;
 }
@@ -283,25 +283,25 @@ void HeightCmdListRecorder::InitConstantBuffers(
 
 		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 	}
-	mObjectCBufferGpuDescBegin =
+	mObjectCBufferGpuDescriptorsBegin =
 		CbvSrvUavDescriptorManager::CreateConstantBufferViews(
 			objectCbufferViewDescVec.data(), 
 			static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-	mMaterialsCBufferGpuDescBegin =
+	mMaterialsCBufferGpuDescriptorsBegin =
 		CbvSrvUavDescriptorManager::CreateConstantBufferViews(
 			materialCbufferViewDescVec.data(), 
 			static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
-	mBaseColorBufferGpuDescBegin =
+	mBaseColorBufferGpuDescriptorsBegin =
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			textureResVec.data(), 
 			textureSrvDescVec.data(), 
 			static_cast<std::uint32_t>(textureSrvDescVec.size()));
-	mNormalsBufferGpuDescBegin =
+	mNormalBufferGpuDescriptorsBegin =
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			normalResVec.data(), 
 			normalSrvDescVec.data(), 
 			static_cast<std::uint32_t>(normalSrvDescVec.size()));
-	mHeightsBufferGpuDescBegin =
+	mHeightBufferGpuDescriptorsBegin =
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			heightResVec.data(), 
 			heightSrvDescVec.data(), 

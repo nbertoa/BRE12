@@ -48,5 +48,5 @@ private:
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer) noexcept;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDesc{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBufferGpuDescriptorsBegin{ 0UL };
 };

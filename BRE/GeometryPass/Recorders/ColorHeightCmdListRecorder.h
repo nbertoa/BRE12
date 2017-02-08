@@ -50,6 +50,6 @@ private:
 		ID3D12Resource** heights,
 		const std::uint32_t dataCount) noexcept;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mNormalsBufferGpuDescBegin;
-	D3D12_GPU_DESCRIPTOR_HANDLE mHeightsBufferGpuDescBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mNormalBufferGpuDescriptorsBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mHeightBufferGpuDescriptorsBegin;
 };

@@ -54,7 +54,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> mGeometryBuffers[BUFFERS_COUNT];
 	D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBufferRenderTargetCpuDescriptors[BUFFERS_COUNT];
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDescriptor{ 0UL };
 		
 	CommandListRecorders mCommandListRecorders;
 };

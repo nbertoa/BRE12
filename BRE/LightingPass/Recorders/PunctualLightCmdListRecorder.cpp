@@ -124,7 +124,7 @@ void PunctualLightCmdListRecorder::InitShaderResourceViews(
 	resources.push_back(&depthBuffer);
 
 	// Create pixel shader SRV descriptors
-	mPixelShaderBuffersGpuDesc =
+	mPixelShaderBufferGpuDescriptorsBegin =
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			resources.data(),
 			srvDescriptors.data(),
@@ -135,7 +135,7 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
-	ASSERT(mOutputColorBufferCpuDesc.ptr != 0UL);
+	ASSERT(mOutputColorBufferCpuDescriptor.ptr != 0UL);
 
 	// Update frame constants
 	UploadBuffer& uploadFrameCBuffer(mFrameCBufferPerFrame.GetNextFrameCBuffer());
@@ -145,7 +145,7 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, nullptr);
+	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDescriptor, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
@@ -155,11 +155,11 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
 	const D3D12_GPU_VIRTUAL_ADDRESS immutableCBufferGpuVAddress(mImmutableCBuffer->GetResource()->GetGPUVirtualAddress());
 	commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
-	commandList.SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescBegin);
+	commandList.SetGraphicsRootDescriptorTable(1U, mLightsBufferGpuDescriptorBegin);
 	commandList.SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
 	commandList.SetGraphicsRootConstantBufferView(3U, immutableCBufferGpuVAddress);
 	commandList.SetGraphicsRootConstantBufferView(4U, frameCBufferGpuVAddress);
-	commandList.SetGraphicsRootDescriptorTable(5U, mPixelShaderBuffersGpuDesc);
+	commandList.SetGraphicsRootDescriptorTable(5U, mPixelShaderBufferGpuDescriptorsBegin);
 	
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	
@@ -170,7 +170,7 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 }
 
 bool PunctualLightCmdListRecorder::IsDataValid() const noexcept {
-	return LightingPassCmdListRecorder::IsDataValid() && mPixelShaderBuffersGpuDesc.ptr != 0UL;
+	return LightingPassCmdListRecorder::IsDataValid() && mPixelShaderBufferGpuDescriptorsBegin.ptr != 0UL;
 }
 
 void PunctualLightCmdListRecorder::CreateLightBuffersAndViews(const void* lights) noexcept {
@@ -194,7 +194,7 @@ void PunctualLightCmdListRecorder::CreateLightBuffersAndViews(const void* lights
 	srvDescriptor.Buffer.FirstElement = 0UL;
 	srvDescriptor.Buffer.NumElements = mNumLights;
 	srvDescriptor.Buffer.StructureByteStride = sizeof(PunctualLight);
-	mLightsBufferGpuDescBegin = CbvSrvUavDescriptorManager::CreateShaderResourceView(*mLightsBuffer->GetResource(), srvDescriptor);
+	mLightsBufferGpuDescriptorBegin = CbvSrvUavDescriptorManager::CreateShaderResourceView(*mLightsBuffer->GetResource(), srvDescriptor);
 }
 
 void PunctualLightCmdListRecorder::InitConstantBuffers() noexcept {

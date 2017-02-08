@@ -52,7 +52,7 @@ void ToneMappingCmdListRecorder::Init(
 {
 	ASSERT(IsDataValid() == false);
 
-	mOutputColorBufferCpuDesc = outputBufferCpuDesc;
+	mOutputColorBufferCpuDescriptor = outputBufferCpuDesc;
 
 	InitShaderResourceViews(inputColorBuffer);
 
@@ -68,14 +68,14 @@ void ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, nullptr);
+	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDescriptor, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 	commandList.SetGraphicsRootSignature(sRootSignature);
 	
 	// Set root parameters
-	commandList.SetGraphicsRootDescriptorTable(0U, mInputColorBufferGpuDesc);
+	commandList.SetGraphicsRootDescriptorTable(0U, mInputColorBufferGpuDescriptor);
 
 	// Draw object	
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -88,8 +88,8 @@ void ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 bool ToneMappingCmdListRecorder::IsDataValid() const noexcept {
 	const bool result =
-		mInputColorBufferGpuDesc.ptr != 0UL &&
-		mOutputColorBufferCpuDesc.ptr != 0UL;
+		mInputColorBufferGpuDescriptor.ptr != 0UL &&
+		mOutputColorBufferCpuDescriptor.ptr != 0UL;
 
 	return result;
 }
@@ -103,5 +103,5 @@ void ToneMappingCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputCo
 	srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
 	srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
 
-	mInputColorBufferGpuDesc = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
+	mInputColorBufferGpuDescriptor = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
 }

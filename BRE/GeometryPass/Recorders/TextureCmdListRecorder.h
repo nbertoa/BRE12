@@ -46,5 +46,5 @@ private:
 		ID3D12Resource** textures, 
 		const std::uint32_t dataCount) noexcept;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorBufferGpuDescBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorBufferGpuDescriptorsBegin;
 };

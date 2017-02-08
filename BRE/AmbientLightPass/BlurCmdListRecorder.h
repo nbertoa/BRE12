@@ -34,7 +34,7 @@ private:
 
 	CommandListPerFrame mCommandListPerFrame;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferGpuDesc{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferGpuDescriptor{ 0UL };
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDescriptor{ 0UL };
 };

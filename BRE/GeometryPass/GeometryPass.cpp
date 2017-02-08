@@ -96,7 +96,7 @@ void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) n
 
 	CreateGeometryBuffersAndRenderTargetViews(mGeometryBuffers, mGeometryBufferRenderTargetCpuDescriptors);
 
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
+	mDepthBufferCpuDescriptor = depthBufferCpuDesc;
 
 	// Initialize recorders PSOs
 	ColorCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
@@ -109,7 +109,7 @@ void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferCpuDesc) n
 	// Init internal data for all geometry recorders
 	for (CommandListRecorders::value_type& recorder : mCommandListRecorders) {
 		ASSERT(recorder.get() != nullptr);
-		recorder->Init(mGeometryBufferRenderTargetCpuDescriptors, BUFFERS_COUNT, mDepthBufferCpuDesc);
+		recorder->Init(mGeometryBufferRenderTargetCpuDescriptors, BUFFERS_COUNT, mDepthBufferCpuDescriptor);
 	}
 
 	ASSERT(IsDataValid());
@@ -153,7 +153,7 @@ bool GeometryPass::IsDataValid() const noexcept {
 
 	const bool b =
 		mCommandListRecorders.empty() == false &&
-		mDepthBufferCpuDesc.ptr != 0UL;
+		mDepthBufferCpuDescriptor.ptr != 0UL;
 
 		return b;
 }
@@ -179,7 +179,7 @@ void GeometryPass::ExecuteBeginTask() noexcept {
 	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescriptors[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
 	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetCpuDescriptors[BASECOLOR_METALMASK], zero, 0U, nullptr);
-	commandList.ClearDepthStencilView(mDepthBufferCpuDesc, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0U, 0U, nullptr);
+	commandList.ClearDepthStencilView(mDepthBufferCpuDescriptor, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0U, 0U, nullptr);
 
 	CHECK_HR(commandList.Close());
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);

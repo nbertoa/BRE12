@@ -70,7 +70,7 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 	commandList.SetGraphicsRootSignature(sRootSignature);
 	
 	// Set root parameters
-	commandList.SetGraphicsRootDescriptorTable(0U, mInputColorBufferGpuDesc);
+	commandList.SetGraphicsRootDescriptorTable(0U, mInputColorBufferGpuDescriptor);
 
 	// Draw object	
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -82,7 +82,7 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 }
 
 bool PostProcessCmdListRecorder::IsDataValid() const noexcept {
-	const bool result =	mInputColorBufferGpuDesc.ptr != 0UL;
+	const bool result =	mInputColorBufferGpuDescriptor.ptr != 0UL;
 
 	return result;
 }
@@ -96,5 +96,5 @@ void PostProcessCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputCo
 	srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
 	srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
 
-	mInputColorBufferGpuDesc = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
+	mInputColorBufferGpuDescriptor = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
 }

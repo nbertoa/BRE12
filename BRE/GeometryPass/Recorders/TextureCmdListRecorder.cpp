@@ -89,9 +89,9 @@ void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frame
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
-	ASSERT(mGeometryBuffersCpuDescs != nullptr);
-	ASSERT(mGeometryBuffersCpuDescCount != 0U);
-	ASSERT(mDepthBufferCpuDesc.ptr != 0U);
+	ASSERT(mGeometryBufferCpuDescriptors != nullptr);
+	ASSERT(mGeometryBufferCpuDescriptorCount != 0U);
+	ASSERT(mDepthBufferCpuDescriptor.ptr != 0U);
 	
 	// Update frame constants
 	UploadBuffer& uploadFrameCBuffer(mFrameCBufferPerFrame.GetNextFrameCBuffer());
@@ -101,16 +101,16 @@ void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frame
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(mGeometryBuffersCpuDescCount, mGeometryBuffersCpuDescs, false, &mDepthBufferCpuDesc);
+	commandList.OMSetRenderTargets(mGeometryBufferCpuDescriptorCount, mGeometryBufferCpuDescriptors, false, &mDepthBufferCpuDescriptor);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 	commandList.SetGraphicsRootSignature(sRootSignature);
 
 	const std::size_t descHandleIncSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mMaterialsCBufferGpuDescBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDesc(mBaseColorBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescriptorsBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mMaterialsCBufferGpuDescriptorsBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDesc(mBaseColorBufferGpuDescriptorsBegin);
 
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -155,7 +155,7 @@ bool TextureCmdListRecorder::IsDataValid() const noexcept {
 
 	const bool result =
 		GeometryPassCmdListRecorder::IsDataValid() &&
-		mBaseColorBufferGpuDescBegin.ptr != 0UL;
+		mBaseColorBufferGpuDescriptorsBegin.ptr != 0UL;
 
 	return result;
 }
@@ -233,15 +233,15 @@ void TextureCmdListRecorder::InitConstantBuffers(
 
 		mMaterialsCBuffer->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
 	}
-	mObjectCBufferGpuDescBegin =
+	mObjectCBufferGpuDescriptorsBegin =
 		CbvSrvUavDescriptorManager::CreateConstantBufferViews(
 			objectCbufferViewDescVec.data(), 
 			static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-	mMaterialsCBufferGpuDescBegin =
+	mMaterialsCBufferGpuDescriptorsBegin =
 		CbvSrvUavDescriptorManager::CreateConstantBufferViews(
 			materialCbufferViewDescVec.data(), 
 			static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
-	mBaseColorBufferGpuDescBegin =
+	mBaseColorBufferGpuDescriptorsBegin =
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			resVec.data(), 
 			srvDescVec.data(), 

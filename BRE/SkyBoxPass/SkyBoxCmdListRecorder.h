@@ -54,10 +54,10 @@ private:
 	FrameCBufferPerFrame mFrameCBufferPerFrame;
 
 	UploadBuffer* mObjectCBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescriptor;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapBufferGpuDescBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapBufferGpuDescriptor;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDescriptor{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDescriptor{ 0UL };
 };

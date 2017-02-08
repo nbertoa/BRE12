@@ -61,14 +61,14 @@ protected:
 
 	// Object CBuffer info
 	UploadBuffer* mObjectCBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescriptorsBegin;
 
 	// Material CBuffer info
-	D3D12_GPU_DESCRIPTOR_HANDLE mMaterialsCBufferGpuDescBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mMaterialsCBufferGpuDescriptorsBegin;
 	UploadBuffer* mMaterialsCBuffer{ nullptr };
 	
 	// Geometry & depth buffers cpu descriptors
-	const D3D12_CPU_DESCRIPTOR_HANDLE* mGeometryBuffersCpuDescs{ nullptr };
-	std::uint32_t mGeometryBuffersCpuDescCount{ 0U };
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDesc{ 0UL };
+	const D3D12_CPU_DESCRIPTOR_HANDLE* mGeometryBufferCpuDescriptors{ nullptr };
+	std::uint32_t mGeometryBufferCpuDescriptorCount{ 0U };
+	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferCpuDescriptor{ 0UL };
 };

@@ -14,10 +14,10 @@ bool GeometryPassCmdListRecorder::IsDataValid() const noexcept {
 
 	return
 		mObjectCBuffer != nullptr &&
-		mObjectCBufferGpuDescBegin.ptr != 0UL &&
+		mObjectCBufferGpuDescriptorsBegin.ptr != 0UL &&
 		geometryDataCount != 0UL &&
 		mMaterialsCBuffer != nullptr &&
-		mMaterialsCBufferGpuDescBegin.ptr != 0UL;
+		mMaterialsCBufferGpuDescriptorsBegin.ptr != 0UL;
 }
 
 void GeometryPassCmdListRecorder::Init(
@@ -29,7 +29,7 @@ void GeometryPassCmdListRecorder::Init(
 	ASSERT(geometryBuffersCpuDescCount != 0U);
 	ASSERT(depthBufferCpuDesc.ptr != 0UL);
 
-	mGeometryBuffersCpuDescs = geometryBuffersCpuDescs;
-	mGeometryBuffersCpuDescCount = geometryBuffersCpuDescCount;
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
+	mGeometryBufferCpuDescriptors = geometryBuffersCpuDescs;
+	mGeometryBufferCpuDescriptorCount = geometryBuffersCpuDescCount;
+	mDepthBufferCpuDescriptor = depthBufferCpuDesc;
 }

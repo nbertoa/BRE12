@@ -63,7 +63,7 @@ protected:
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
 	
-	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDescriptor{ 0UL };
 
 	std::uint32_t mNumLights{ 0U };
 
@@ -72,5 +72,5 @@ protected:
 	UploadBuffer* mImmutableCBuffer{ nullptr };
 
 	UploadBuffer* mLightsBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mLightsBufferGpuDescBegin{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mLightsBufferGpuDescriptorBegin{ 0UL };
 };

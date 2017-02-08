@@ -54,8 +54,8 @@ void AmbientLightCmdListRecorder::Init(
 {
 	ASSERT(ValidateData() == false);
 
-	mOutputColorBufferCpuDesc = outputColorBufferCpuDesc;
-	mAmbientAccessibilityBufferRenderTargetCpuDesc = ambientAccessibilityBufferRenderTargetCpuDesc;
+	mOutputColorBufferCpuDescriptor = outputColorBufferCpuDesc;
+	mAmbientAccessibilityBufferRenderTargetCpuDescriptor = ambientAccessibilityBufferRenderTargetCpuDesc;
 
 	InitShaderResourceViews(baseColorMetalMaskBuffer, ambientAccessibilityBuffer);
 
@@ -71,14 +71,14 @@ void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, nullptr);
+	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDescriptor, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 	commandList.SetGraphicsRootSignature(sRootSignature);
 	
 	// Set root parameters
-	commandList.SetGraphicsRootDescriptorTable(0U, mBaseColor_MetalMaskGpuDesc);
+	commandList.SetGraphicsRootDescriptorTable(0U, mBaseColor_MetalMaskGpuDescriptor);
 
 	// Draw
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -91,9 +91,9 @@ void AmbientLightCmdListRecorder::RecordAndPushCommandLists() noexcept {
 
 bool AmbientLightCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
-		mOutputColorBufferCpuDesc.ptr != 0UL &&
-		mAmbientAccessibilityBufferRenderTargetCpuDesc.ptr != 0UL &&
-		mBaseColor_MetalMaskGpuDesc.ptr != 0UL;
+		mOutputColorBufferCpuDescriptor.ptr != 0UL &&
+		mAmbientAccessibilityBufferRenderTargetCpuDescriptor.ptr != 0UL &&
+		mBaseColor_MetalMaskGpuDescriptor.ptr != 0UL;
 
 	return result;
 }
@@ -102,7 +102,7 @@ void AmbientLightCmdListRecorder::InitShaderResourceViews(
 	ID3D12Resource& baseColorMetalMaskBuffer, 
 	ID3D12Resource& ambientAccessibilityBuffer) noexcept 
 {
-	ASSERT(mBaseColor_MetalMaskGpuDesc.ptr == 0UL);
+	ASSERT(mBaseColor_MetalMaskGpuDescriptor.ptr == 0UL);
 
 	ID3D12Resource* resources[] = 
 	{
@@ -130,7 +130,7 @@ void AmbientLightCmdListRecorder::InitShaderResourceViews(
 
 	ASSERT(_countof(resources) == _countof(srvDescriptors));
 
-	mBaseColor_MetalMaskGpuDesc = 
+	mBaseColor_MetalMaskGpuDescriptor = 
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			resources, 
 			srvDescriptors, 

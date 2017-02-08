@@ -49,9 +49,9 @@ private:
 	FrameCBufferPerFrame mFrameCBufferPerFrame;
 
 	UploadBuffer* mSampleKernelBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mSampleKernelBufferGpuDescBegin{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mSampleKernelBufferGpuDescriptor{ 0UL };
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferCpuDescriptor{ 0UL };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDesc{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDescriptor{ 0UL };
 };

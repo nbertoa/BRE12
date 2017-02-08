@@ -50,9 +50,9 @@ private:
 
 	FrameCBufferPerFrame mFrameCBufferPerFrame;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapsBufferGpuDescBegin;
+	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapBufferGpuDescriptorsBegin;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDescriptor{ 0UL };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDesc{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderBuffersGpuDescriptor{ 0UL };
 };

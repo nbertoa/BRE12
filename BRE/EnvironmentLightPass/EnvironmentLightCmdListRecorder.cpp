@@ -62,7 +62,7 @@ void EnvironmentLightCmdListRecorder::Init(
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(geometryBuffersCount > 0U);
 
-	mOutputColorBufferCpuDesc = outputColorBufferCpuDesc;
+	mOutputColorBufferCpuDescriptor = outputColorBufferCpuDesc;
 
 	InitShaderResourceViews(geometryBuffers, geometryBuffersCount, depthBuffer, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
 
@@ -82,7 +82,7 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, nullptr);
+	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDescriptor, false, nullptr);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
@@ -92,7 +92,7 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
 	commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
 	commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-	commandList.SetGraphicsRootDescriptorTable(2U, mPixelShaderBuffersGpuDesc);
+	commandList.SetGraphicsRootDescriptorTable(2U, mPixelShaderBuffersGpuDescriptor);
 
 	// Draw object
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -105,8 +105,8 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 
 bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
-		mOutputColorBufferCpuDesc.ptr != 0UL &&
-		mPixelShaderBuffersGpuDesc.ptr != 0UL;
+		mOutputColorBufferCpuDescriptor.ptr != 0UL &&
+		mPixelShaderBuffersGpuDescriptor.ptr != 0UL;
 
 	return result;
 }
@@ -179,7 +179,7 @@ void EnvironmentLightCmdListRecorder::InitShaderResourceViews(
 	srvDescriptors.emplace_back(srvDescriptor);
 	resources.push_back(&specularPreConvolvedCubeMap);
 
-	mPixelShaderBuffersGpuDesc = 
+	mPixelShaderBuffersGpuDescriptor = 
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 			resources.data(), 
 			srvDescriptors.data(), 

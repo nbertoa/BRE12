@@ -39,8 +39,8 @@ private:
 		
 	CommandListPerFrame mCommandListPerFrame;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDesc{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetCpuDesc{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferCpuDescriptor{ 0UL };
+	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetCpuDescriptor{ 0UL };
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mBaseColor_MetalMaskGpuDesc{ 0UL };
+	D3D12_GPU_DESCRIPTOR_HANDLE mBaseColor_MetalMaskGpuDescriptor{ 0UL };
 };

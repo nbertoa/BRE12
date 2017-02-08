@@ -69,8 +69,8 @@ void SkyBoxCmdListRecorder::Init(
 	mVertexBufferData = vertexBufferData;
 	mIndexBufferData = indexBufferData;
 	mWorldMatrix = worldMatrix;
-	mOutputColorBufferCpuDesc = outputColorBufferCpuDesc;
-	mDepthBufferCpuDesc = depthBufferCpuDesc;
+	mOutputColorBufferCpuDescriptor = outputColorBufferCpuDesc;
+	mDepthBufferCpuDescriptor = depthBufferCpuDesc;
 
 	InitConstantBuffers();
 	InitShaderResourceViews(skyBoxCubeMap);
@@ -91,14 +91,14 @@ void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDesc, false, &mDepthBufferCpuDesc);
+	commandList.OMSetRenderTargets(1U, &mOutputColorBufferCpuDescriptor, false, &mDepthBufferCpuDescriptor);
 
 	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
 	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 	commandList.SetGraphicsRootSignature(sRootSignature);
 
-	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescBegin);
-	D3D12_GPU_DESCRIPTOR_HANDLE cubeMapBufferGpuDesc(mCubeMapBufferGpuDescBegin);
+	D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mObjectCBufferGpuDescriptor);
+	D3D12_GPU_DESCRIPTOR_HANDLE cubeMapBufferGpuDesc(mCubeMapBufferGpuDescriptor);
 
 	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -122,10 +122,10 @@ void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 bool SkyBoxCmdListRecorder::IsDataValid() const noexcept {
 	const bool result =
 		mObjectCBuffer != nullptr &&
-		mObjectCBufferGpuDescBegin.ptr != 0UL &&
-		mCubeMapBufferGpuDescBegin.ptr != 0UL &&
-		mOutputColorBufferCpuDesc.ptr != 0UL &&
-		mDepthBufferCpuDesc.ptr != 0UL;
+		mObjectCBufferGpuDescriptor.ptr != 0UL &&
+		mCubeMapBufferGpuDescriptor.ptr != 0UL &&
+		mOutputColorBufferCpuDescriptor.ptr != 0UL &&
+		mDepthBufferCpuDescriptor.ptr != 0UL;
 
 	return result;
 }
@@ -146,7 +146,7 @@ void SkyBoxCmdListRecorder::InitConstantBuffers() noexcept {
 	const D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectCBuffer->GetResource()->GetGPUVirtualAddress() };
 	cBufferDesc.BufferLocation = objCBufferGpuAddress;
 	cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(objCBufferElemSize);
-	mObjectCBufferGpuDescBegin = CbvSrvUavDescriptorManager::CreateConstantBufferView(cBufferDesc);
+	mObjectCBufferGpuDescriptor = CbvSrvUavDescriptorManager::CreateConstantBufferView(cBufferDesc);
 }
 
 void SkyBoxCmdListRecorder::InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap) noexcept {	
@@ -157,5 +157,5 @@ void SkyBoxCmdListRecorder::InitShaderResourceViews(ID3D12Resource& skyBoxCubeMa
 	srvDescriptor.TextureCube.MipLevels = skyBoxCubeMap.GetDesc().MipLevels;
 	srvDescriptor.TextureCube.ResourceMinLODClamp = 0.0f;
 	srvDescriptor.Format = skyBoxCubeMap.GetDesc().Format;
-	mCubeMapBufferGpuDescBegin = CbvSrvUavDescriptorManager::CreateShaderResourceView(skyBoxCubeMap, srvDescriptor);
+	mCubeMapBufferGpuDescriptor = CbvSrvUavDescriptorManager::CreateShaderResourceView(skyBoxCubeMap, srvDescriptor);
 }
