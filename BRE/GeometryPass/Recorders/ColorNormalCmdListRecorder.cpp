@@ -95,7 +95,7 @@ void ColorNormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 	ASSERT(mDepthBufferCpuDesc.ptr != 0U);
 
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrentFrameIndex]);
+	UploadBuffer& uploadFrameCBuffer(mFrameCBufferPerFrame.GetNextFrameCBuffer());
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
@@ -144,9 +144,6 @@ void ColorNormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 	commandList.Close();
 
 	CommandListExecutor::Get().AddCommandList(commandList);
-
-	// Next frame
-	mCurrentFrameIndex = (mCurrentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 bool ColorNormalCmdListRecorder::IsDataValid() const noexcept {
@@ -165,12 +162,6 @@ void ColorNormalCmdListRecorder::InitConstantBuffers(
 	ASSERT(materials != nullptr);
 	ASSERT(normals != nullptr);
 	ASSERT(dataCount != 0UL);
-
-#ifdef _DEBUG
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		ASSERT(mFrameCBuffer[i] == nullptr);
-	}
-#endif
 	ASSERT(mObjectCBuffer == nullptr);
 	ASSERT(mMaterialsCBuffer == nullptr);
 
@@ -249,10 +240,4 @@ void ColorNormalCmdListRecorder::InitConstantBuffers(
 			normalResVec.data(), 
 			normalSrvDescVec.data(), 
 			static_cast<std::uint32_t>(normalSrvDescVec.size()));
-
-	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
-	}
 }

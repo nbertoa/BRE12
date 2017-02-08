@@ -6,6 +6,7 @@
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="UploadBufferManager.h" />
     <ClInclude Include="VertexAndIndexBufferCreator.h" />
+    <ClInclude Include="FrameCBufferPerFrame.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ResourceManager.cpp" />
@@ -13,5 +14,6 @@
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="UploadBufferManager.cpp" />
     <ClCompile Include="VertexAndIndexBufferCreator.cpp" />
+    <ClCompile Include="FrameCBufferPerFrame.cpp" />
   </ItemGroup>
 </Project>

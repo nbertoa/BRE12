@@ -4,6 +4,7 @@
 
 #include <CommandManager\CommandListPerFrame.h>
 #include <MathUtils\MathUtils.h>
+#include <ResourceManager\FrameCBufferPerFrame.h>
 #include <ResourceManager/VertexAndIndexBufferCreator.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
@@ -12,7 +13,6 @@ struct FrameCBuffer;
 struct ID3D12CommandAllocator;
 struct ID3D12Resource;
 struct ID3D12GraphicsCommandList;
-class UploadBuffer;
 
 class SkyBoxCmdListRecorder {
 public:
@@ -52,7 +52,7 @@ private:
 	VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
 	DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::GetIdentity4x4Matrix() };
 
-	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
+	FrameCBufferPerFrame mFrameCBufferPerFrame;
 
 	UploadBuffer* mObjectCBuffer{ nullptr };
 	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferGpuDescBegin;

@@ -94,7 +94,7 @@ void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frame
 	ASSERT(mDepthBufferCpuDesc.ptr != 0U);
 	
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrentFrameIndex]);
+	UploadBuffer& uploadFrameCBuffer(mFrameCBufferPerFrame.GetNextFrameCBuffer());
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
@@ -142,23 +142,13 @@ void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frame
 
 	commandList.Close();
 
-	CommandListExecutor::Get().AddCommandList(commandList);
-
-	// Next frame
-	mCurrentFrameIndex = (mCurrentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
-}
+	CommandListExecutor::Get().AddCommandList(commandList);}
 
 bool TextureCmdListRecorder::IsDataValid() const noexcept {
 	const std::size_t geometryDataCount{ mGeometryDataVec.size() };
 	for (std::size_t i = 0UL; i < geometryDataCount; ++i) {
 		const std::size_t numMatrices{ mGeometryDataVec[i].mWorldMatrices.size() };
 		if (numMatrices == 0UL) {
-			return false;
-		}
-	}
-
-	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mFrameCBuffer[i] == nullptr) {
 			return false;
 		}
 	}
@@ -178,11 +168,6 @@ void TextureCmdListRecorder::InitConstantBuffers(
 	ASSERT(materials != nullptr);
 	ASSERT(textures != nullptr);
 	ASSERT(dataCount != 0UL);
-#ifdef _DEBUG
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		ASSERT(mFrameCBuffer[i] == nullptr);
-	}
-#endif
 	ASSERT(mObjectCBuffer == nullptr);
 	ASSERT(mMaterialsCBuffer == nullptr);
 
@@ -261,10 +246,4 @@ void TextureCmdListRecorder::InitConstantBuffers(
 			resVec.data(), 
 			srvDescVec.data(), 
 			static_cast<std::uint32_t>(srvDescVec.size()));
-
-	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
-	}
 }

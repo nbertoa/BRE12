@@ -5,10 +5,10 @@
 
 #include <CommandManager\CommandListPerFrame.h>
 #include <DXUtils/D3DFactory.h>
+#include <ResourceManager\FrameCBufferPerFrame.h>
 #include <ResourceManager/VertexAndIndexBufferCreator.h>
 
 struct FrameCBuffer;
-class UploadBuffer;
 
 // Responsible of command lists recording to be executed by CommandListExecutor.
 // This class has common data and functionality to record command lists for deferred shading light pass.
@@ -67,7 +67,8 @@ protected:
 
 	std::uint32_t mNumLights{ 0U };
 
-	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
+	FrameCBufferPerFrame mFrameCBufferPerFrame;
+
 	UploadBuffer* mImmutableCBuffer{ nullptr };
 
 	UploadBuffer* mLightsBuffer{ nullptr };

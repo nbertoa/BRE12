@@ -91,7 +91,7 @@ void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 	ASSERT(mDepthBufferCpuDesc.ptr != 0U);
 		
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrentFrameIndex]);
+	UploadBuffer& uploadFrameCBuffer(mFrameCBufferPerFrame.GetNextFrameCBuffer());
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
@@ -136,9 +136,6 @@ void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 	commandList.Close();
 
 	CommandListExecutor::Get().AddCommandList(commandList);
-
-	// Next frame
-	mCurrentFrameIndex = (mCurrentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 void ColorCmdListRecorder::InitConstantBuffers(
@@ -147,12 +144,6 @@ void ColorCmdListRecorder::InitConstantBuffers(
 {
 	ASSERT(materials != nullptr);
 	ASSERT(numMaterials != 0UL);
-
-#ifdef _DEBUG
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		ASSERT(mFrameCBuffer[i] == nullptr);
-	}
-#endif
 	ASSERT(mObjectCBuffer == nullptr);
 	ASSERT(mMaterialsCBuffer == nullptr);
 
@@ -210,10 +201,4 @@ void ColorCmdListRecorder::InitConstantBuffers(
 		CbvSrvUavDescriptorManager::CreateConstantBufferViews(
 			materialCbufferViewDescVec.data(), 
 			static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
-
-	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
-	}
 }

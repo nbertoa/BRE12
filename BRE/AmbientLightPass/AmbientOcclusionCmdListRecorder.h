@@ -1,11 +1,11 @@
 #pragma once
 
 #include <CommandManager\CommandListPerFrame.h>
+#include <ResourceManager\FrameCBufferPerFrame.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 struct ID3D12Resource;
-class UploadBuffer;
 
 // Responsible of command lists recording to be executed by CommandListExecutor.
 // This class has common data and functionality to record command list for ambient occlusion pass.
@@ -35,7 +35,6 @@ public:
 	bool ValidateData() const noexcept;
 
 private:
-	void InitConstantBuffers() noexcept;
 	void CreateSampleKernelBuffer(const void* randomSamples) noexcept;
 	ID3D12Resource* CreateAndGetNoiseTexture(const void* noiseVectors) noexcept;
 	void InitShaderResourceViews(
@@ -48,7 +47,7 @@ private:
 	std::uint32_t mSampleKernelSize{ 0U };
 	std::uint32_t mNoiseTextureDimension{ 4U };
 
-	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
+	FrameCBufferPerFrame mFrameCBufferPerFrame;
 
 	UploadBuffer* mSampleKernelBuffer{ nullptr };
 	D3D12_GPU_DESCRIPTOR_HANDLE mSampleKernelBufferGpuDescBegin{ 0UL };

@@ -125,14 +125,13 @@ void AmbientOcclusionCmdListRecorder::Init(
 
 	mAmbientAccessibilityBufferCpuDesc = ambientAccessBufferCpuDesc;
 
-	mSampleKernelSize = 128U;
+	mSampleKernelSize = 32U;
 	mNoiseTextureDimension = 4U;
 	std::vector<XMFLOAT4> sampleKernel;
 	GenerateSampleKernel(mSampleKernelSize, sampleKernel);
 	std::vector<XMFLOAT4> noises;
 	GenerateNoise(mNoiseTextureDimension * mNoiseTextureDimension, noises);
 
-	InitConstantBuffers();
 	CreateSampleKernelBuffer(sampleKernel.data());
 	ID3D12Resource* noiseTexture = CreateAndGetNoiseTexture(noises.data());
 	ASSERT(noiseTexture != nullptr);
@@ -148,13 +147,11 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	ASSERT(ValidateData());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
-
-	static std::uint32_t currentFrameIndex = 0U;
-
+	
 	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
 
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[currentFrameIndex]);
+	UploadBuffer& uploadFrameCBuffer(mFrameCBufferPerFrame.GetNextFrameCBuffer());
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
@@ -178,18 +175,9 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	commandList.Close();
 
 	CommandListExecutor::Get().AddCommandList(commandList);
-
-	// Next frame
-	currentFrameIndex = (currentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
-	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mFrameCBuffer[i] == nullptr) {
-			return false;
-		}
-	}
-
 	const bool result =
 		mSampleKernelSize != 0U &&
 		mSampleKernelBuffer != nullptr &&
@@ -198,20 +186,6 @@ bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
 		mPixelShaderBuffersGpuDesc.ptr != 0UL;
 
 	return result;
-}
-
-void AmbientOcclusionCmdListRecorder::InitConstantBuffers() noexcept {
-#ifdef _DEBUG
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		ASSERT(mFrameCBuffer[i] == nullptr);
-	}
-#endif
-	
-	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
-	}
 }
 
 void 

@@ -12,12 +12,6 @@ bool GeometryPassCmdListRecorder::IsDataValid() const noexcept {
 		}
 	}
 
-	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mFrameCBuffer[i] == nullptr) {
-			return false;
-		}
-	}
-
 	return
 		mObjectCBuffer != nullptr &&
 		mObjectCBufferGpuDescBegin.ptr != 0UL &&

@@ -137,11 +137,8 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 	ASSERT(sRootSignature != nullptr);
 	ASSERT(mOutputColorBufferCpuDesc.ptr != 0UL);
 
-	// Used to choose a different command list allocator each call.
-	static std::uint32_t commandAllocatorIndex{ 0U };
-
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[commandAllocatorIndex]);
+	UploadBuffer& uploadFrameCBuffer(mFrameCBufferPerFrame.GetNextFrameCBuffer());
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
@@ -170,8 +167,6 @@ void PunctualLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
 
 	commandList.Close();
 	CommandListExecutor::Get().AddCommandList(commandList);
-
-	commandAllocatorIndex = (commandAllocatorIndex + 1U) % SettingsManager::sQueuedFrameCount;
 }
 
 bool PunctualLightCmdListRecorder::IsDataValid() const noexcept {
@@ -179,11 +174,6 @@ bool PunctualLightCmdListRecorder::IsDataValid() const noexcept {
 }
 
 void PunctualLightCmdListRecorder::CreateLightBuffersAndViews(const void* lights) noexcept {
-#ifdef _DEBUG
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		ASSERT(mFrameCBuffer[i] == nullptr);
-	}
-#endif
 	ASSERT(mLightsBuffer == nullptr);
 	ASSERT(lights != nullptr);
 	ASSERT(mNumLights != 0U);
@@ -208,18 +198,6 @@ void PunctualLightCmdListRecorder::CreateLightBuffersAndViews(const void* lights
 }
 
 void PunctualLightCmdListRecorder::InitConstantBuffers() noexcept {
-#ifdef _DEBUG
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		ASSERT(mFrameCBuffer[i] == nullptr);
-	}
-#endif
-	
-	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
-	}
-
 	// Create immutable cbuffer
 	const std::size_t immutableCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ImmutableCBuffer)) };
 	mImmutableCBuffer = &UploadBufferManager::CreateUploadBuffer(immutableCBufferElemSize, 1U);

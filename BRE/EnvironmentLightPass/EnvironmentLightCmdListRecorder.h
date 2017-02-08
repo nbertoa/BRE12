@@ -3,8 +3,8 @@
 #include <wrl.h>
 
 #include <CommandManager\CommandListPerFrame.h>
+#include <ResourceManager\FrameCBufferPerFrame.h>
 
-class UploadBuffer;
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
 struct ID3D12Resource;
@@ -40,7 +40,6 @@ public:
 	bool ValidateData() const noexcept;
 
 private:
-	void InitConstantBuffers() noexcept;
 	void InitShaderResourceViews(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
 		const std::uint32_t geometryBuffersCount,
@@ -50,7 +49,7 @@ private:
 		
 	CommandListPerFrame mCommandListPerFrame;
 
-	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
+	FrameCBufferPerFrame mFrameCBufferPerFrame;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE mCubeMapsBufferGpuDescBegin;
 

@@ -101,7 +101,7 @@ void ColorHeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 	ASSERT(mDepthBufferCpuDesc.ptr != 0U);
 	
 	// Update frame constants
-	UploadBuffer& uploadFrameCBuffer(*mFrameCBuffer[mCurrentFrameIndex]);
+	UploadBuffer& uploadFrameCBuffer(mFrameCBufferPerFrame.GetNextFrameCBuffer());
 	uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
 	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
@@ -155,9 +155,6 @@ void ColorHeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 	commandList.Close();
 
 	CommandListExecutor::Get().AddCommandList(commandList);
-
-	// Next frame
-	mCurrentFrameIndex = (mCurrentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 }
 
 bool ColorHeightCmdListRecorder::IsDataValid() const noexcept {
@@ -179,12 +176,6 @@ void ColorHeightCmdListRecorder::InitConstantBuffers(
 	ASSERT(normals != nullptr);
 	ASSERT(heights != nullptr);
 	ASSERT(dataCount != 0UL);
-
-#ifdef _DEBUG
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		ASSERT(mFrameCBuffer[i] == nullptr);
-	}
-#endif
 	ASSERT(mObjectCBuffer == nullptr);
 	ASSERT(mMaterialsCBuffer == nullptr);
 
@@ -284,10 +275,4 @@ void ColorHeightCmdListRecorder::InitConstantBuffers(
 			heightResVec.data(), 
 			heightSrvDescVec.data(), 
 			static_cast<std::uint32_t>(heightSrvDescVec.size()));
-
-	// Create frame cbuffers
-	const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
-	for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-		mFrameCBuffer[i] = &UploadBufferManager::CreateUploadBuffer(frameCBufferElemSize, 1U);
-	}
 }

@@ -3,12 +3,6 @@
 #include <Utils/DebugUtils.h>
 
 bool LightingPassCmdListRecorder::IsDataValid() const noexcept {
-	for (std::uint32_t i = 0UL; i < SettingsManager::sQueuedFrameCount; ++i) {
-		if (mFrameCBuffer[i] == nullptr) {
-			return false;
-		}
-	}
-
 	return
 		mNumLights != 0UL &&
 		mImmutableCBuffer != nullptr &&

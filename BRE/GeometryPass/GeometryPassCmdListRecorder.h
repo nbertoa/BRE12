@@ -5,10 +5,10 @@
 
 #include <CommandManager\CommandListPerFrame.h>
 #include <DXUtils/D3DFactory.h>
+#include <ResourceManager\FrameCBufferPerFrame.h>
 #include <ResourceManager/VertexAndIndexBufferCreator.h>
 
 struct FrameCBuffer;
-class UploadBuffer;
 
 // To record command lists for deferred shading geometry pass.
 // Steps:
@@ -52,15 +52,12 @@ public:
 protected:
 	CommandListPerFrame mCommandListPerFrame;
 
-	std::uint32_t mCurrentFrameIndex{ 0U };
-
 	// Base command data. Once you inherits from this class, you should add
 	// more class members that represent the extra information you need (like resources, for example)
 
 	std::vector<GeometryData> mGeometryDataVec;
 
-	// Frame CBuffer info per queued frame.
-	UploadBuffer* mFrameCBuffer[SettingsManager::sQueuedFrameCount]{ nullptr };
+	FrameCBufferPerFrame mFrameCBufferPerFrame;
 
 	// Object CBuffer info
 	UploadBuffer* mObjectCBuffer{ nullptr };
