@@ -6,11 +6,10 @@
 CommandAllocatorManager::CommandAllocators CommandAllocatorManager::mCommandAllocators;
 std::mutex CommandAllocatorManager::mMutex;
 
-CommandAllocatorManager::~CommandAllocatorManager() {
+void CommandAllocatorManager::EraseAll() noexcept {
 	for (ID3D12CommandAllocator* commandAllocator : mCommandAllocators) {
 		ASSERT(commandAllocator != nullptr);
 		commandAllocator->Release();
-		delete commandAllocator;
 	}
 }
 

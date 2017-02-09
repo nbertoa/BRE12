@@ -7,11 +7,10 @@
 PSOManager::PSOs PSOManager::mPSOs;
 std::mutex PSOManager::mMutex;
 
-PSOManager::~PSOManager() {
+void PSOManager::EraseAll() noexcept {
 	for (ID3D12PipelineState* pso : mPSOs) {
 		ASSERT(pso != nullptr);
 		pso->Release();
-		delete pso;
 	}
 }
 

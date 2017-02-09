@@ -11,11 +11,10 @@
 ResourceManager::Resources ResourceManager::mResources;
 std::mutex ResourceManager::mMutex;
 
-ResourceManager::~ResourceManager() {
+void ResourceManager::EraseAll() noexcept {
 	for (ID3D12Resource* resource : mResources) {
 		ASSERT(resource != nullptr);
 		resource->Release();
-		delete resource;
 	}
 }
 

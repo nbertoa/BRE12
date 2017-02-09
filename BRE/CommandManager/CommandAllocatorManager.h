@@ -8,11 +8,13 @@
 class CommandAllocatorManager {
 public:
 	CommandAllocatorManager() = delete;
-	~CommandAllocatorManager();
+	~CommandAllocatorManager() = delete;
 	CommandAllocatorManager(const CommandAllocatorManager&) = delete;
 	const CommandAllocatorManager& operator=(const CommandAllocatorManager&) = delete;
 	CommandAllocatorManager(CommandAllocatorManager&&) = delete;
 	CommandAllocatorManager& operator=(CommandAllocatorManager&&) = delete;
+
+	static void EraseAll() noexcept;
 
 	static ID3D12CommandAllocator& CreateCommandAllocator(const D3D12_COMMAND_LIST_TYPE& commandListType) noexcept;
 

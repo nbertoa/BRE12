@@ -8,11 +8,10 @@
 RootSignatureManager::RootSignatures RootSignatureManager::mRootSignatures;
 std::mutex RootSignatureManager::mMutex;
 
-RootSignatureManager::~RootSignatureManager() {
+void RootSignatureManager::EraseAll() noexcept {
 	for (ID3D12RootSignature* rootSignature : mRootSignatures) {
 		ASSERT(rootSignature != nullptr);
 		rootSignature->Release();
-		delete rootSignature;
 	}
 }
 

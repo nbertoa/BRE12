@@ -2,6 +2,10 @@
 
 #include <memory>
 
+#include <CommandManager\CommandAllocatorManager.h>
+#include <CommandManager/CommandListManager.h>
+#include <CommandManager\CommandQueueManager.h>
+#include <CommandManager\FenceManager.h>
 #include <DescriptorManager/CbvSrvUavDescriptorManager.h>
 #include <DescriptorManager/DepthStencilDescriptorManager.h>
 #include <DescriptorManager/RenderTargetDescriptorManager.h>
@@ -9,7 +13,12 @@
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <MaterialManager/MaterialManager.h>
+#include <PSOManager\PSOManager.h>
 #include <RenderManager/RenderManager.h>
+#include <ResourceManager\ResourceManager.h>
+#include <ResourceManager\UploadBufferManager.h>
+#include <RootSignatureManager\RootSignatureManager.h>
+#include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
@@ -35,6 +44,18 @@ namespace {
 		MaterialManager::Init();
 
 		ShowCursor(false);
+	}
+
+	void FinalizeSystems() noexcept {
+		CommandAllocatorManager::EraseAll();
+		CommandListManager::EraseAll();
+		CommandQueueManager::EraseAll();
+		FenceManager::EraseAll();
+		PSOManager::EraseAll();
+		ResourceManager::EraseAll();
+		RootSignatureManager::EraseAll();
+		ShaderManager::EraseAll();
+		UploadBufferManager::EraseAll();
 	}
 
 	void UpdateKeyboardAndMouse() noexcept {
@@ -68,6 +89,8 @@ SceneExecutor::~SceneExecutor() {
 	ASSERT(mRenderManager != nullptr);
 	mRenderManager->Terminate();
 	mTaskSchedulerInit.terminate();
+
+	FinalizeSystems();
 }
 
 void SceneExecutor::Execute() noexcept {

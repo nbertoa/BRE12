@@ -10,11 +10,13 @@
 class PSOManager {
 public:
 	PSOManager() = delete;
-	~PSOManager();
+	~PSOManager() = delete;
 	PSOManager(const PSOManager&) = delete;
 	const PSOManager& operator=(const PSOManager&) = delete;
 	PSOManager(PSOManager&&) = delete;
 	PSOManager& operator=(PSOManager&&) = delete;
+
+	static void EraseAll() noexcept;
 
 	struct PSOCreationData {
 		PSOCreationData() = default;

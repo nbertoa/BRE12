@@ -8,11 +8,13 @@
 class RootSignatureManager {
 public:
 	RootSignatureManager() = delete;
-	~RootSignatureManager();
+	~RootSignatureManager() = delete;
 	RootSignatureManager(const RootSignatureManager&) = delete;
 	const RootSignatureManager& operator=(const RootSignatureManager&) = delete;
 	RootSignatureManager(RootSignatureManager&&) = delete;
 	RootSignatureManager& operator=(RootSignatureManager&&) = delete;
+
+	static void EraseAll() noexcept;
 
 	static ID3D12RootSignature& CreateRootSignatureFromBlob(ID3DBlob& blob) noexcept;
 

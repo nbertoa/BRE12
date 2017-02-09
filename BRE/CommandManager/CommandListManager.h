@@ -8,11 +8,13 @@
 class CommandListManager {
 public:
 	CommandListManager() = delete;
-	~CommandListManager();
+	~CommandListManager() = delete;
 	CommandListManager(const CommandListManager&) = delete;
 	const CommandListManager& operator=(const CommandListManager&) = delete;
 	CommandListManager(CommandListManager&&) = delete;
 	CommandListManager& operator=(CommandListManager&&) = delete;
+
+	static void EraseAll() noexcept;
 
 	static ID3D12GraphicsCommandList& CreateCommandList(
 		const D3D12_COMMAND_LIST_TYPE& commandListType,

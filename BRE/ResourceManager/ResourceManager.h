@@ -13,11 +13,13 @@
 class ResourceManager {
 public:
 	ResourceManager() = delete;
-	~ResourceManager();
+	~ResourceManager() = delete;
 	ResourceManager(const ResourceManager&) = delete;
 	const ResourceManager& operator=(const ResourceManager&) = delete;
 	ResourceManager(ResourceManager&&) = delete;
 	ResourceManager& operator=(ResourceManager&&) = delete;
+
+	static void EraseAll() noexcept;
 
 	// If resourceName is nullptr, then it will have 
 	// the default name.

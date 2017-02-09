@@ -6,7 +6,7 @@
 ModelManager::Models ModelManager::mModels;
 std::mutex ModelManager::mMutex;
 
-ModelManager::~ModelManager() {
+void ModelManager::EraseAll() noexcept {
 	for (Model* model : mModels) {
 		ASSERT(model != nullptr);
 		delete model;

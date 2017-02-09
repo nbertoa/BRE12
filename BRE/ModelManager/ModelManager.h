@@ -10,11 +10,13 @@
 class ModelManager {
 public:
 	ModelManager() = delete;
-	~ModelManager();
+	~ModelManager() = delete;
 	ModelManager(const ModelManager&) = delete;
 	const ModelManager& operator=(const ModelManager&) = delete;
 	ModelManager(ModelManager&&) = delete;
 	ModelManager& operator=(ModelManager&&) = delete;
+
+	static void EraseAll() noexcept;
 
 	static Model& LoadModel(
 		const char* modelFilename, 

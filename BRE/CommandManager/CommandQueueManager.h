@@ -8,11 +8,13 @@
 class CommandQueueManager {
 public:
 	CommandQueueManager() = delete;
-	~CommandQueueManager();
+	~CommandQueueManager() = delete;
 	CommandQueueManager(const CommandQueueManager&) = delete;
 	const CommandQueueManager& operator=(const CommandQueueManager&) = delete;
 	CommandQueueManager(CommandQueueManager&&) = delete;
 	CommandQueueManager& operator=(CommandQueueManager&&) = delete;
+
+	static void EraseAll() noexcept;
 
 	static ID3D12CommandQueue& CreateCommandQueue(const D3D12_COMMAND_QUEUE_DESC& descriptor) noexcept;
 

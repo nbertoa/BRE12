@@ -28,11 +28,10 @@ namespace {
 ShaderManager::ShaderBlobs ShaderManager::mShaderBlobs;
 std::mutex ShaderManager::mMutex;
 
-ShaderManager::~ShaderManager() {
+void ShaderManager::EraseAll() noexcept {
 	for (ID3DBlob* blob : mShaderBlobs) {
 		ASSERT(blob != nullptr);
 		blob->Release();
-		delete blob;
 	}
 }
 

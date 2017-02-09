@@ -6,7 +6,7 @@
 UploadBufferManager::UploadBuffers UploadBufferManager::mUploadBuffers;
 std::mutex UploadBufferManager::mMutex;
 
-UploadBufferManager::~UploadBufferManager() {
+void UploadBufferManager::EraseAll() noexcept {
 	for (UploadBuffer* uploadBuffer : mUploadBuffers) {
 		ASSERT(uploadBuffer != nullptr);
 		delete uploadBuffer;

@@ -9,11 +9,13 @@
 class FenceManager {
 public:
 	FenceManager() = delete;
-	~FenceManager();
+	~FenceManager() = delete;
 	FenceManager(const FenceManager&) = delete;
 	const FenceManager& operator=(const FenceManager&) = delete;
 	FenceManager(FenceManager&&) = delete;
 	FenceManager& operator=(FenceManager&&) = delete;
+
+	static void EraseAll() noexcept;
 
 	static ID3D12Fence& CreateFence(
 		const std::uint64_t fenceInitialValue,

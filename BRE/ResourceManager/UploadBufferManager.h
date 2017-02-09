@@ -10,11 +10,13 @@
 class UploadBufferManager {
 public:
 	UploadBufferManager() = delete;
-	~UploadBufferManager();
+	~UploadBufferManager() = delete;
 	UploadBufferManager(const UploadBufferManager&) = delete;
 	const UploadBufferManager& operator=(const UploadBufferManager&) = delete;
 	UploadBufferManager(UploadBufferManager&&) = delete;
 	UploadBufferManager& operator=(UploadBufferManager&&) = delete;
+
+	static void EraseAll() noexcept;
 	
 	// Preconditions:
 	// - "elementSize" must be greater than zero.

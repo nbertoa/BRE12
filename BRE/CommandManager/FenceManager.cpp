@@ -6,11 +6,10 @@
 FenceManager::Fences FenceManager::mFences;
 std::mutex FenceManager::mMutex;
 
-FenceManager::~FenceManager() {
+void FenceManager::EraseAll() noexcept {
 	for (ID3D12Fence* fence : mFences) {
 		ASSERT(fence != nullptr);
 		fence->Release();
-		delete fence;
 	}
 }
 
