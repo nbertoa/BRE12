@@ -5,11 +5,13 @@
 #define FXAA_PC 1
 #define FXAA_QUALITY__PRESET 12
 
-#define SKIP_POST_PROCESS
+//#define SKIP_POST_PROCESS
 
 #include <ShaderUtils/Fxaa.hlsli>
 
-#define RCP_FRAME float2(1.0f / 1920.0f, 1.0f / 1080.0f)
+#define SCREEN_WIDTH 1920.0f
+#define SCREEN_HEIGHT 1080.0f
+#define RCP_FRAME float2(1.0f / SCREEN_WIDTH, 1.0f / SCREEN_HEIGHT)
 #define QUALITY_SUB_PIX 1.0f
 #define QUALITY_EDGE_THRESHOLD 0.125
 #define QUALITY_EDGE_THRESHOLD_MIN 0.0625
