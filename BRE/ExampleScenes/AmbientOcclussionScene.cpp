@@ -3,7 +3,6 @@
 #include <tbb/parallel_for.h>
 
 #include <DirectXManager\DirectXManager.h>
-#include <GeometryPass/Recorders/ColorCmdListRecorder.h>
 #include <GeometryPass/Recorders/NormalCmdListRecorder.h>
 #include <MaterialManager/Material.h>
 #include <MathUtils\MathUtils.h>

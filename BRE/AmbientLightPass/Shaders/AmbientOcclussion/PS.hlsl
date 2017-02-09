@@ -4,17 +4,19 @@
 #include "RS.hlsl"
 
 #define SAMPLE_KERNEL_SIZE 32U
+#define SCREEN_TOP_LEFT_X 0.0f
+#define SCREEN_TOP_LEFT_Y 0.0f
 #define SCREEN_WIDTH 1920.0f
 #define SCREEN_HEIGHT 1080.0f
 #define NOISE_TEXTURE_DIMENSION 4.0f
 #define NOISE_SCALE float2(SCREEN_WIDTH / NOISE_TEXTURE_DIMENSION, SCREEN_HEIGHT/ NOISE_TEXTURE_DIMENSION)
-#define OCCLUSION_RADIUS 3.5f
+#define OCCLUSION_RADIUS 1.5f
 #define SSAO_POWER 2.5f
 
 //#define SKIP_AMBIENT_OCCLUSION
 
 struct Input {
-	float4 mPositionNDC : SV_POSITION;
+	float4 mPositionScreenSpace : SV_POSITION;
 	float3 mRayViewSpace : VIEW_RAY;
 	float2 mUV : TEXCOORD;
 };
@@ -39,7 +41,7 @@ Output main(const in Input input) {
 #ifdef SKIP_AMBIENT_OCCLUSION
 	output.mAmbientAccessibility = 1.0f;
 #else
-	const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
+	const int3 fragmentScreenSpace = int3(input.mPositionScreenSpace.xy, 0);
 
 	const float fragmentZNDC = DepthTexture.Load(fragmentScreenSpace);
 	const float3 rayViewSpace = normalize(input.mRayViewSpace);
@@ -65,14 +67,28 @@ Output main(const in Input input) {
 		float4 samplePositionNDC = mul(samplePositionViewSpace, gFrameCBuffer.mProjectionMatrix);
 		samplePositionNDC.xy /= samplePositionNDC.w;
 	
-		const int2 samplePositionScreenSpace = NdcToScreenCoordinates(samplePositionNDC.xy, 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
+		const int2 samplePositionScreenSpace = 
+			NdcToScreenSpace(
+				samplePositionNDC.xy, 
+				SCREEN_TOP_LEFT_X, 
+				SCREEN_TOP_LEFT_Y, 
+				SCREEN_WIDTH, 
+				SCREEN_HEIGHT);
+		
+		const bool isOutsideScreenBorders =
+			samplePositionScreenSpace.x < SCREEN_TOP_LEFT_X ||
+			samplePositionScreenSpace.x > SCREEN_WIDTH ||
+			samplePositionScreenSpace.y < SCREEN_TOP_LEFT_Y ||
+			samplePositionScreenSpace.y > SCREEN_HEIGHT;
 
-		float sampleZNDC = DepthTexture.Load(int3(samplePositionScreenSpace, 0));
+		if (isOutsideScreenBorders == false) {
+			float sampleZNDC = DepthTexture.Load(int3(samplePositionScreenSpace, 0));
 
-		const float sampleZViewSpace = NdcDepthToViewDepth(sampleZNDC, gFrameCBuffer.mProjectionMatrix);
+			const float sampleZViewSpace = NdcZToScreenSpaceZ(sampleZNDC, gFrameCBuffer.mProjectionMatrix);
 
-		const float rangeCheck = abs(fragmentPositionViewSpace.z - sampleZViewSpace) < OCCLUSION_RADIUS ? 1.0f : 0.0f;
-		occlusionSum += (sampleZViewSpace <= samplePositionViewSpace.z ? 1.0f : 0.0f) * rangeCheck;
+			const float rangeCheck = abs(sampleZViewSpace - fragmentPositionViewSpace.z) < OCCLUSION_RADIUS ? 1.0f : 0.0f;
+			occlusionSum += (sampleZViewSpace <= samplePositionViewSpace.z ? 1.0f : 0.0f) * rangeCheck;
+		}
 	}
 
 	output.mAmbientAccessibility = 1.0f - (occlusionSum / SAMPLE_KERNEL_SIZE);

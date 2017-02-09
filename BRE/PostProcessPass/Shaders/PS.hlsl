@@ -15,7 +15,7 @@
 #define QUALITY_EDGE_THRESHOLD_MIN 0.0625
 
 struct Input {
-	float4 mPositionClipSpace : SV_POSITION;
+	float4 mPositionScreenSpace : SV_POSITION;
 	float2 mUV : TEXCOORD0;
 };
 
@@ -30,7 +30,7 @@ struct Output {
 Output main(const in Input input){
 	Output output = (Output)0;
 
-	const int3 fragmentScreenSpace = int3(input.mPositionClipSpace.xy, 0);
+	const int3 fragmentScreenSpace = int3(input.mPositionScreenSpace.xy, 0);
 
 #ifdef SKIP_POST_PROCESS
 	output.mColor = ColorBufferTexture.Load(fragmentScreenSpace);
