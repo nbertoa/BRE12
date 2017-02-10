@@ -123,7 +123,7 @@ void AmbientOcclusionCmdListRecorder::Init(
 
 	mRenderTargetView = renderTargetView;
 
-	const std::uint32_t sampleKernelSize = 32U;
+	const std::uint32_t sampleKernelSize = 64U;
 	const std::uint32_t noiseTextureDimension = 4U;
 
 	std::vector<XMFLOAT4> sampleKernel;

@@ -192,7 +192,7 @@ void RenderManager::InitPasses(Scene& scene) noexcept {
 	ID3D12Resource* skyBoxCubeMap;
 	ID3D12Resource* diffuseIrradianceCubeMap;
 	ID3D12Resource* specularPreConvolvedCubeMap;
-	scene.CreateCubeMapResources(skyBoxCubeMap, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
+	scene.CreateIndirectLightingResources(skyBoxCubeMap, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
 	ASSERT(skyBoxCubeMap != nullptr);
 	ASSERT(diffuseIrradianceCubeMap != nullptr);
 	ASSERT(specularPreConvolvedCubeMap != nullptr);

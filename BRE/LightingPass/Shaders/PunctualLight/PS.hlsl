@@ -5,6 +5,8 @@
 
 #include "RS.hlsl"
 
+//#define SKIP_LIGHTING
+
 struct Input {
 	float4 mPositionClipSpace : SV_POSITION;
 	float3 mCameraToFragmentViewSpace : VIEW_RAY;
@@ -25,6 +27,9 @@ struct Output {
 Output main(const in Input input) {
 	Output output = (Output)0;
 
+#ifdef SKIP_LIGHTING
+	output.mColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+#else
 	const int3 fragmentScreenSpace = int3(input.mPositionClipSpace.xy, 0);
 	
 	const float4 normal_smoothness = Normal_SmoothnessTexture.Load(fragmentScreenSpace);
@@ -56,6 +61,8 @@ Output main(const in Input input) {
 	const float3 color = lightContribution * (fDiffuse + fSpecular);
 
 	output.mColor = float4(color, 1.0f);
+
+#endif
 
 	return output;
 }

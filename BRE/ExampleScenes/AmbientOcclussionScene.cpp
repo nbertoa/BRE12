@@ -462,7 +462,7 @@ void AmbientOcclussionScene::CreateLightingPassRecorders(
 {
 }
 
-void AmbientOcclussionScene::CreateCubeMapResources(
+void AmbientOcclussionScene::CreateIndirectLightingResources(
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept

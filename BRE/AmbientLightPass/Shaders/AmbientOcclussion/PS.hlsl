@@ -3,7 +3,7 @@
 
 #include "RS.hlsl"
 
-#define SAMPLE_KERNEL_SIZE 32U
+#define SAMPLE_KERNEL_SIZE 64U
 #define SCREEN_TOP_LEFT_X 0.0f
 #define SCREEN_TOP_LEFT_Y 0.0f
 #define SCREEN_WIDTH 1920.0f
@@ -11,7 +11,7 @@
 #define NOISE_TEXTURE_DIMENSION 4.0f
 #define NOISE_SCALE float2(SCREEN_WIDTH / NOISE_TEXTURE_DIMENSION, SCREEN_HEIGHT/ NOISE_TEXTURE_DIMENSION)
 #define OCCLUSION_RADIUS 1.5f
-#define SSAO_POWER 2.5f
+#define SSAO_POWER 1.0f
 
 //#define SKIP_AMBIENT_OCCLUSION
 
@@ -86,7 +86,7 @@ Output main(const in Input input) {
 
 			const float sampleZViewSpace = NdcZToScreenSpaceZ(sampleZNDC, gFrameCBuffer.mProjectionMatrix);
 
-			const float rangeCheck = abs(sampleZViewSpace - fragmentPositionViewSpace.z) < OCCLUSION_RADIUS ? 1.0f : 0.0f;
+			const float rangeCheck = abs(fragmentPositionViewSpace.z - sampleZViewSpace) < OCCLUSION_RADIUS ? 1.0f : 0.0f;
 			occlusionSum += (sampleZViewSpace <= samplePositionViewSpace.z ? 1.0f : 0.0f) * rangeCheck;
 		}
 	}

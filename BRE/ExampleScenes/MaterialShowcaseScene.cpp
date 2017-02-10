@@ -143,7 +143,7 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/unreal.obj",
+		"models/mitsubaSphere.obj",
 		"models/bunny.obj",
 		"models/buddha.obj",
 		"models/floor.obj",
@@ -154,7 +154,7 @@ namespace {
 	const float sFloorTy{ -20.5f };
 	const float sFloorTz{ 150.0f };
 
-	const float sModel{ 0.05f };
+	const float sModel{ 0.20f };
 	
 	const float sTx1{ 0.0f };
 	const float sTy1{ sFloorTy };
@@ -704,7 +704,7 @@ void MaterialShowcaseScene::CreateLightingPassRecorders(
 {
 }
 
-void MaterialShowcaseScene::CreateCubeMapResources(
+void MaterialShowcaseScene::CreateIndirectLightingResources(
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept

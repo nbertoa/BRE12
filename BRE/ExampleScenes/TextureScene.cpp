@@ -176,7 +176,7 @@ void TextureScene::CreateLightingPassRecorders(
 	);
 }
 
-void TextureScene::CreateCubeMapResources(
+void TextureScene::CreateIndirectLightingResources(
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept

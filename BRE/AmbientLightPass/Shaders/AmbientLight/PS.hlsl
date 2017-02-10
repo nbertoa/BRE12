@@ -1,6 +1,6 @@
 #include "RS.hlsl"
 
-#define AMBIENT_FACTOR 0.4f
+#define AMBIENT_FACTOR 0.2f
 
 //#define DEBUG_AMBIENT_ACCESIBILITY
 
@@ -21,15 +21,14 @@ Output main(const in Input input){
 
 	const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
 
-	const float3 baseColor = BaseColor_MetalMaskTexture.Load(fragmentScreenSpace).xyz;
-
 	// Ambient accessibility (1.0f - ambient occlussion factor)
 	const float ambientAccessibility = AmbientAccessibility.Load(fragmentScreenSpace);
 
-	output.mColor = float4(baseColor * AMBIENT_FACTOR * ambientAccessibility, 1.0f);
-
 #ifdef DEBUG_AMBIENT_ACCESIBILITY
 	output.mColor = float4(ambientAccessibility, ambientAccessibility, ambientAccessibility, 1.0f);
+#else 
+	const float3 baseColor = BaseColor_MetalMaskTexture.Load(fragmentScreenSpace).xyz;
+	output.mColor = float4(baseColor * AMBIENT_FACTOR * ambientAccessibility, 1.0f);
 #endif
 	
 	return output;

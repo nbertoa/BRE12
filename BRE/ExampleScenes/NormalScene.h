@@ -22,7 +22,7 @@ public:
 		ID3D12Resource& depthBuffer,
 		std::vector<std::unique_ptr<LightingPassCmdListRecorder>>& tasks) noexcept final override;
 
-	void CreateCubeMapResources(
+	void CreateIndirectLightingResources(
 		ID3D12Resource* &skyBoxCubeMap,
 		ID3D12Resource* &diffuseIrradianceCubeMap,
 		ID3D12Resource* &specularPreConvolvedCubeMap) noexcept final override;

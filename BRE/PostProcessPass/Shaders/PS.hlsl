@@ -5,7 +5,7 @@
 #define FXAA_PC 1
 #define FXAA_QUALITY__PRESET 12
 
-//#define SKIP_POST_PROCESS
+#define SKIP_POST_PROCESS
 
 #include <ShaderUtils/Fxaa.hlsli>
 

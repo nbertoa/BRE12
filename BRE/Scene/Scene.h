@@ -40,7 +40,7 @@ public:
 
 	// Preconditions:
 	// - Init() must be called before
-	virtual void CreateCubeMapResources(
+	virtual void CreateIndirectLightingResources(
 		ID3D12Resource* &skyBoxCubeMap,
 		ID3D12Resource* &diffuseIrradianceCubeMap,
 		ID3D12Resource* &specularPreConvolvedCubeMap) noexcept = 0;

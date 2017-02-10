@@ -302,7 +302,7 @@ void HeightScene::CreateLightingPassRecorders(
 	tasks[0].reset(recorder);
 }
 
-void HeightScene::CreateCubeMapResources(
+void HeightScene::CreateIndirectLightingResources(
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept

@@ -263,7 +263,7 @@ void NormalScene::CreateLightingPassRecorders(
 	tasks[0].reset(recorder);
 }
 
-void NormalScene::CreateCubeMapResources(
+void NormalScene::CreateIndirectLightingResources(
 	ID3D12Resource* &skyBoxCubeMap,
 	ID3D12Resource* &diffuseIrradianceCubeMap,
 	ID3D12Resource* &specularPreConvolvedCubeMap) noexcept
