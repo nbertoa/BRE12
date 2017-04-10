@@ -22,6 +22,7 @@ public:
 		VertexAndIndexBufferCreator::VertexBufferData mVertexBufferData;
 		VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
 		std::vector<DirectX::XMFLOAT4X4> mWorldMatrices;
+		std::vector<DirectX::XMFLOAT4X4> mInverseTransposeWorldMatrices;
 	};
 
 	GeometryPassCmdListRecorder() = default;

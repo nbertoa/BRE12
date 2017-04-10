@@ -28,6 +28,9 @@ public:
 
 	__forceinline const DirectX::XMFLOAT4X4& GetViewMatrix() const noexcept { return mViewMatrix; }
 	__forceinline const DirectX::XMFLOAT4X4& GetInverseViewMatrix() const noexcept { return mInverseViewMatrix; }
+	__forceinline DirectX::XMMATRIX GetInverseViewXMMatrix() const noexcept { 
+		return DirectX::XMLoadFloat4x4(&GetInverseViewMatrix());
+	}
 	__forceinline const DirectX::XMFLOAT4X4& GetProjectionMatrix() const noexcept { return mProjectionMatrix; }
 	__forceinline const DirectX::XMFLOAT4X4& GetInverseProjectionMatrix() const noexcept { return mInverseProjectionMatrix; }
 	

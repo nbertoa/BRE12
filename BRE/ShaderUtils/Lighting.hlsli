@@ -88,7 +88,7 @@ float Fd_Disney(const float dotVN, const float dotLN, const float dotLH, float l
 // More surface points have normals pointing "up" (towards the macroscopic surface normal n) than
 // "sideways" (away from n). 
 //
-// The statistical distribution of surface orientations is dened via the microgeometry 
+// The statistical distribution of surface orientations is defined via the microgeometry 
 // normal distribution function D(m). 
 //
 // Unlike F(), the value of D() is not restricted to lie between 0 and 1, although values must be non-negative, 
@@ -182,7 +182,6 @@ float Fr_DisneyDiffuse(const float dotNV, const float dotNL, const float dotLH, 
 //
 // BRDF
 //
-#define V_SMITH
 
 float3 DiffuseBrdf(const float3 baseColor, const float metalMask) {
 	const float3 diffuseColor = (1.0f - metalMask) * baseColor;

@@ -42,10 +42,12 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/torusKnot.obj",
+		"models/sphere.obj",
 	};
 
-	const float sS{ 4.0f };
+	const float sS3{ 10.0f };
+	const float sS2{ 5.0f };
+	const float sS1{ 8.0f };
 
 	const float sTx{ 0.0f };
 	const float sTy{ -3.5f };
@@ -100,6 +102,7 @@ namespace {
 			geomData.mVertexBufferData = mesh.GetVertexBufferData();
 			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			geomData.mWorldMatrices.reserve(numMaterials);
+			geomData.mInverseTransposeWorldMatrices.reserve(numMaterials);
 		}
 
 		std::vector<Material> materials;
@@ -108,14 +111,18 @@ namespace {
 		float ty{ initY };
 		float tz{ initZ };
 		for (std::size_t i = 0UL; i < numMaterials; ++i) {
-			DirectX::XMFLOAT4X4 w;
-			MathUtils::ComputeMatrix(w, tx, ty, tz, sS, sS, sS, DirectX::XM_PIDIV2);
+			DirectX::XMFLOAT4X4 worldMatrix;
+			MathUtils::ComputeMatrix(worldMatrix, tx, ty, tz, sS3, sS2, sS1, DirectX::XM_PIDIV2);
+
+			DirectX::XMFLOAT4X4 inverseTransposeWorldMatrix;
+			MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
 
 			Material mat(MaterialManager::GetMaterial(static_cast<MaterialManager::MaterialType>(i)));
 			for (std::size_t j = 0UL; j < numMeshes; ++j) {
 				materials[i + j * numMaterials] = mat;
 				GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[j] };
-				geomData.mWorldMatrices.push_back(w);
+				geomData.mWorldMatrices.push_back(worldMatrix);
+				geomData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
 			}
 
 			tx += offsetX;

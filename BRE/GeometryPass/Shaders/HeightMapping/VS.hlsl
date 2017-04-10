@@ -31,7 +31,7 @@ Output main(in const Input input) {
 
 	output.mPositionWorldSpace = mul(float4(input.mPositionObjectSpace, 1.0f), gObjCBuffer.mWorldMatrix).xyz;
 
-	output.mNormalWorldSpace = mul(float4(input.mNormalObjectSpace, 0.0f), gObjCBuffer.mWorldMatrix).xyz;
+	output.mNormalWorldSpace = mul(float4(input.mNormalObjectSpace, 0.0f), gObjCBuffer.mInverseTransposeWorldMatrix).xyz;
 
 	output.mTangentWorldSpace = mul(float4(input.mTangentObjectSpace, 0.0f), gObjCBuffer.mWorldMatrix).xyz;
 

@@ -77,7 +77,9 @@ namespace {
 		"models/unreal.obj",
 	};
 
-	const float sS{ 0.1f };
+	const float sS3{ 0.1f };
+	const float sS2{ 0.2f };
+	const float sS1{ 0.3f };
 
 	const float sTx1{ 0.0f };
 	const float sTy1{ -3.5f };
@@ -138,6 +140,7 @@ namespace {
 			geomData.mVertexBufferData = mesh.GetVertexBufferData();
 			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			geomData.mWorldMatrices.reserve(numMaterials);
+			geomData.mInverseTransposeWorldMatrices.reserve(numMaterials);
 		}
 
 		std::vector<Material> materialsVec;
@@ -151,8 +154,11 @@ namespace {
 		float ty{ initY };
 		float tz{ initZ };
 		for (std::size_t i = 0UL; i < numMaterials; ++i) {
-			DirectX::XMFLOAT4X4 w;
-			MathUtils::ComputeMatrix(w, tx, ty, tz, sS, sS, sS);
+			DirectX::XMFLOAT4X4 worldMatrix;
+			MathUtils::ComputeMatrix(worldMatrix, tx, ty, tz, sS3, sS2, sS1);
+
+			DirectX::XMFLOAT4X4 inverseTransposeWorldMatrix;
+			MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
 
 			Material& mat(materials[i]);
 			ID3D12Resource* texture{ textures[i] };
@@ -163,7 +169,8 @@ namespace {
 				texturesVec[index] = texture;
 				normalsVec[index] = normal;
 				GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[j] };
-				geomData.mWorldMatrices.push_back(w);
+				geomData.mWorldMatrices.push_back(worldMatrix);
+				geomData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
 			}
 
 			tx += offsetX;

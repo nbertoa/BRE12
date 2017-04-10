@@ -44,13 +44,18 @@ namespace {
 
 			frameCBuffer.mEyeWorldPosition = camera.GetPosition4f();
 
-			DirectX::XMStoreFloat4x4(&frameCBuffer.mViewMatrix, MathUtils::GetTransposeMatrix(camera.GetViewMatrix()));
-			DirectX::XMFLOAT4X4 inverse = camera.GetInverseViewMatrix();
-			DirectX::XMStoreFloat4x4(&frameCBuffer.mInverseViewMatrix, MathUtils::GetTransposeMatrix(inverse));
+			MathUtils::StoreTransposeMatrix(camera.GetViewMatrix(), frameCBuffer.mViewMatrix);
+			MathUtils::StoreInverseTransposeMatrix(camera.GetViewMatrix(), frameCBuffer.mInverseViewMatrix);
 
-			DirectX::XMStoreFloat4x4(&frameCBuffer.mProjectionMatrix, MathUtils::GetTransposeMatrix(camera.GetProjectionMatrix()));
-			inverse = camera.GetInverseProjectionMatrix();
-			DirectX::XMStoreFloat4x4(&frameCBuffer.mInverseProjectionMatrix, MathUtils::GetTransposeMatrix(inverse));
+			// Compute transpose matrices of the following:
+			// - Inverse transpose view matrix
+			// - Inverse of the inverse transpose view matrix
+			MathUtils::StoreInverseTransposeMatrix(camera.GetViewMatrix(), frameCBuffer.mInverseTransposeViewMatrix);	
+			MathUtils::StoreInverseTransposeMatrix(frameCBuffer.mInverseTransposeViewMatrix, frameCBuffer.mInverseInverseTransposeViewMatrix);
+			MathUtils::StoreTransposeMatrix(frameCBuffer.mInverseTransposeViewMatrix, frameCBuffer.mInverseTransposeViewMatrix);
+
+			MathUtils::StoreTransposeMatrix(camera.GetProjectionMatrix(), frameCBuffer.mProjectionMatrix);
+			MathUtils::StoreInverseTransposeMatrix(camera.GetProjectionMatrix(), frameCBuffer.mInverseProjectionMatrix);
 
 			// Update camera based on keyboard
 			const float offset = translationDelta * (Keyboard::Get().IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f);

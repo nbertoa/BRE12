@@ -45,7 +45,7 @@ Output main(const in Input input){
 	
 	const float2 encodedNormal = normal_smoothness.xy;
 	const float3 normalViewSpace = normalize(Decode(encodedNormal));
-	const float3 normalWorldSpace = normalize(mul(float4(normalViewSpace, 0.0f), gFrameCBuffer.mInverseViewMatrix).xyz);
+	const float3 normalWorldSpace = normalize(mul(float4(normalViewSpace, 0.0f), gFrameCBuffer.mInverseInverseTransposeViewMatrix).xyz);
 
 	const float4 baseColor_metalmask = BaseColor_MetalMaskTexture.Load(fragmentScreenSpace);
 	const float3 baseColor = baseColor_metalmask.xyz;

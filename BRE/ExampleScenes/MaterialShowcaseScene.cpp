@@ -154,7 +154,9 @@ namespace {
 	const float sFloorTy{ -20.5f };
 	const float sFloorTz{ 150.0f };
 
-	const float sModel{ 0.20f };
+	const float sModel3{ 0.40f };
+	const float sModel2{ 0.20f };
+	const float sModel1{ 0.70f };
 	
 	const float sTx1{ 0.0f };
 	const float sTy1{ sFloorTy };
@@ -193,7 +195,7 @@ namespace {
 		const float offsetX,
 		const float offsetY,
 		const float offsetZ,
-		const float scaleFactor,
+		const float ,//scaleFactor,
 		const std::vector<Mesh>& meshes,
 		ID3D12Resource** textures,
 		ID3D12Resource** normals,
@@ -215,6 +217,7 @@ namespace {
 			geomData.mVertexBufferData = mesh.GetVertexBufferData();
 			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			geomData.mWorldMatrices.reserve(numMaterials);
+			geomData.mInverseTransposeWorldMatrices.reserve(numMaterials);
 		}
 
 		// Fill material and textures
@@ -229,8 +232,11 @@ namespace {
 		float ty{ initY };
 		float tz{ initZ };
 		for (std::size_t i = 0UL; i < numMaterials; ++i) {
-			DirectX::XMFLOAT4X4 w;
-			MathUtils::ComputeMatrix(w, tx, ty, tz, scaleFactor, scaleFactor, scaleFactor);
+			DirectX::XMFLOAT4X4 worldMatrix;
+			MathUtils::ComputeMatrix(worldMatrix, tx, ty, tz, sModel3, sModel2, sModel1);
+
+			DirectX::XMFLOAT4X4 inverseTransposeWorldMatrix;
+			MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
 
 			Material& mat(materials[i]);
 			ID3D12Resource* texture{ textures[i] };
@@ -241,7 +247,8 @@ namespace {
 				texturesVec[index] = texture;
 				normalsVec[index] = normal;
 				GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[j] };
-				geomData.mWorldMatrices.push_back(w);
+				geomData.mWorldMatrices.push_back(worldMatrix);
+				geomData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
 			}
 
 			tx += offsetX;
@@ -284,6 +291,7 @@ namespace {
 			geomData.mVertexBufferData = mesh.GetVertexBufferData();
 			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			geomData.mWorldMatrices.reserve(numMaterials);
+			geomData.mInverseTransposeWorldMatrices.reserve(numMaterials);
 		}
 
 		// Fill material and textures
@@ -294,15 +302,20 @@ namespace {
 		float ty{ initY };
 		float tz{ initZ };
 		for (std::size_t i = 0UL; i < numMaterials; ++i) {
-			DirectX::XMFLOAT4X4 w;
-			MathUtils::ComputeMatrix(w, tx, ty, tz, scaleFactor, scaleFactor, scaleFactor);
+			DirectX::XMFLOAT4X4 worldMatrix;
+			MathUtils::ComputeMatrix(worldMatrix, tx, ty, tz, scaleFactor, scaleFactor, scaleFactor);
+
+			DirectX::XMFLOAT4X4 inverseTransposeWorldMatrix;
+			MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
 
 			Material& mat(materials[i]);
 			for (std::size_t j = 0UL; j < numMeshes; ++j) {
 				const std::size_t index{ i + j * numMaterials };
 				materialsVec[index] = mat;
 				GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[j] };
-				geomData.mWorldMatrices.push_back(w);
+				geomData.mWorldMatrices.push_back(worldMatrix);
+				geomData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
+
 			}
 
 			tx += offsetX;
@@ -329,8 +342,11 @@ namespace {
 		ASSERT(normal != nullptr);
 
 		// Compute world matrix
-		DirectX::XMFLOAT4X4 w;
-		MathUtils::ComputeMatrix(w, sFloorTx, sFloorTy, sFloorTz, sFloorScale, sFloorScale, sFloorScale);
+		DirectX::XMFLOAT4X4 worldMatrix;
+		MathUtils::ComputeMatrix(worldMatrix, sFloorTx, sFloorTy, sFloorTz, sFloorScale, sFloorScale, sFloorScale);
+
+		DirectX::XMFLOAT4X4 inverseTransposeWorldMatrix;
+		MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
 
 		const std::size_t numMeshes{ meshes.size() };
 		ASSERT(numMeshes > 0UL);
@@ -345,7 +361,8 @@ namespace {
 			geomData.mVertexBufferData = mesh.GetVertexBufferData();
 			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			
-			geomData.mWorldMatrices.push_back(w);
+			geomData.mWorldMatrices.push_back(worldMatrix);
+			geomData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
 		}
 
 		// Fill material
@@ -449,7 +466,7 @@ void MaterialShowcaseScene::CreateGeometryPassRecorders(
 		sOffsetX2, 
 		0.0f, 
 		0.0f, 
-		sModel, 
+		sModel3, 
 		model.GetMeshes(), 
 		diffuses.data(), 
 		normals.data(), 
@@ -494,7 +511,7 @@ void MaterialShowcaseScene::CreateGeometryPassRecorders(
 		sOffsetX3,
 		0.0f,
 		0.0f,
-		sModel,
+		sModel3,
 		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
@@ -563,7 +580,7 @@ void MaterialShowcaseScene::CreateGeometryPassRecorders(
 		sOffsetX1,
 		0.0f,
 		0.0f,
-		sModel,
+		sModel3,
 		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),
@@ -632,7 +649,7 @@ void MaterialShowcaseScene::CreateGeometryPassRecorders(
 		sOffsetX4,
 		0.0f,
 		0.0f,
-		sModel,
+		sModel3,
 		model.GetMeshes(),
 		diffuses.data(),
 		normals.data(),

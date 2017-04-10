@@ -128,8 +128,7 @@ void SkyBoxCmdListRecorder::InitConstantBuffers(const DirectX::XMFLOAT4X4& world
 	const std::size_t objCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
 	mObjectUploadCBuffer = &UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, 1U);
 	ObjectCBuffer objCBuffer;
-	const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&worldMatrix));
-	DirectX::XMStoreFloat4x4(&objCBuffer.mWorldMatrix, wMatrix);
+	MathUtils::StoreTransposeMatrix(worldMatrix, objCBuffer.mWorldMatrix);
 	mObjectUploadCBuffer->CopyData(0U, &objCBuffer, sizeof(objCBuffer));
 
 	// Create object cbufferview

@@ -121,6 +121,7 @@ namespace {
 			geomData.mVertexBufferData = mesh.GetVertexBufferData();
 			geomData.mIndexBufferData = mesh.GetIndexBufferData();
 			geomData.mWorldMatrices.reserve(numMaterials);
+			geomData.mInverseTransposeWorldMatrices.reserve(numMaterials);
 		}
 
 		std::vector<Material> materialsVec;
@@ -134,8 +135,11 @@ namespace {
 		float ty{ initY };
 		float tz{ initZ };
 		for (std::size_t i = 0UL; i < numMaterials; ++i) {
-			DirectX::XMFLOAT4X4 w;
-			MathUtils::ComputeMatrix(w, tx, ty, tz, sS, sS, sS);
+			DirectX::XMFLOAT4X4 worldMatrix;
+			MathUtils::ComputeMatrix(worldMatrix, tx, ty, tz, sS, sS, sS);
+			
+			DirectX::XMFLOAT4X4 inverseTransposeWorldMatrix;
+			MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
 
 			Material& mat(materials[i]);
 			ID3D12Resource* normal{ normals[i] };
@@ -144,7 +148,8 @@ namespace {
 				materialsVec[index] = mat;
 				normalsVec[index] = normal;
 				GeometryPassCmdListRecorder::GeometryData& geomData{ geomDataVec[j] };
-				geomData.mWorldMatrices.push_back(w);
+				geomData.mWorldMatrices.push_back(worldMatrix);
+				geomData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
 			}
 
 			tx += offsetX;

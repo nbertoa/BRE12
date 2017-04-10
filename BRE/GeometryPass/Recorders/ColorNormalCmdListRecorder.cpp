@@ -175,8 +175,7 @@ void ColorNormalCmdListRecorder::InitConstantBuffers(
 		GeometryData& geomData{ mGeometryDataVec[i] };
 		const std::uint32_t worldMatsCount{ static_cast<std::uint32_t>(geomData.mWorldMatrices.size()) };
 		for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
-			const DirectX::XMMATRIX wMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&geomData.mWorldMatrices[j]));
-			DirectX::XMStoreFloat4x4(&objCBuffer.mWorldMatrix, wMatrix);
+			MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j], objCBuffer.mWorldMatrix);
 			mObjectUploadCBuffers->CopyData(k + j, &objCBuffer, sizeof(objCBuffer));
 		}
 

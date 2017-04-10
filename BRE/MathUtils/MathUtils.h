@@ -50,6 +50,42 @@ public:
 		return DirectX::XMMatrixTranspose(xmMatrix);
 	}
 
+	static void StoreTransposeMatrix(
+		const DirectX::XMFLOAT4X4& sourceMatrix, 
+		DirectX::XMFLOAT4X4& destinationMatrix) noexcept 
+	{
+		const DirectX::XMMATRIX xmMatrix = GetTransposeMatrix(sourceMatrix);
+		DirectX::XMStoreFloat4x4(&destinationMatrix, xmMatrix);
+	}
+
+	static DirectX::XMMATRIX GetInverseMatrix(const DirectX::XMFLOAT4X4& matrix) noexcept {
+		const DirectX::XMMATRIX xmMatrix = XMLoadFloat4x4(&matrix);
+		return DirectX::XMMatrixInverse(nullptr, xmMatrix);
+	}
+
+	static void StoreInverseMatrix(
+		const DirectX::XMFLOAT4X4& sourceMatrix,
+		DirectX::XMFLOAT4X4& destinationMatrix) noexcept
+	{
+		const DirectX::XMMATRIX xmMatrix = GetInverseMatrix(sourceMatrix);
+		DirectX::XMStoreFloat4x4(&destinationMatrix, xmMatrix);
+	}
+
+	static DirectX::XMMATRIX GetInverseTransposeMatrix(const DirectX::XMFLOAT4X4& matrix) noexcept {
+		const DirectX::XMMATRIX xmInverseMatrix = GetInverseMatrix(matrix);
+		DirectX::XMFLOAT4X4 inverseMatrix;
+		DirectX::XMStoreFloat4x4(&inverseMatrix, xmInverseMatrix);
+		return GetTransposeMatrix(inverseMatrix);
+	}
+
+	static void StoreInverseTransposeMatrix(
+		const DirectX::XMFLOAT4X4& sourceMatrix,
+		DirectX::XMFLOAT4X4& destinationMatrix) noexcept
+	{
+		const DirectX::XMMATRIX xmMatrix = GetInverseTransposeMatrix(sourceMatrix);
+		DirectX::XMStoreFloat4x4(&destinationMatrix, xmMatrix);
+	}
+
 	static void ComputeMatrix(
 		DirectX::XMFLOAT4X4& m,
 		const float tx,

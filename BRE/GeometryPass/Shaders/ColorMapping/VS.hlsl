@@ -27,8 +27,8 @@ Output main(in const Input input) {
 	output.mPositionWorldSpace = mul(float4(input.mPositionObjectSpace, 1.0f), gObjCBuffer.mWorldMatrix).xyz;
 	output.mPositionViewSpace = mul(float4(output.mPositionWorldSpace, 1.0f), gFrameCBuffer.mViewMatrix).xyz;
 
-	output.mNormalWorldSpace = mul(float4(input.mNormalObjectSpace, 0.0f), gObjCBuffer.mWorldMatrix).xyz;
-	output.mNormalViewSpace = mul(float4(output.mNormalWorldSpace, 0.0f), gFrameCBuffer.mViewMatrix).xyz;
+	output.mNormalWorldSpace = mul(float4(input.mNormalObjectSpace, 0.0f), gObjCBuffer.mInverseTransposeWorldMatrix).xyz;
+	output.mNormalViewSpace = mul(float4(output.mNormalWorldSpace, 0.0f), gFrameCBuffer.mInverseTransposeViewMatrix).xyz;
 
 	output.mPositionClipSpace = mul(float4(output.mPositionViewSpace, 1.0f), gFrameCBuffer.mProjectionMatrix);
 
