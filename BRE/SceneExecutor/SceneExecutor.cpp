@@ -43,7 +43,7 @@ namespace {
 		RenderTargetDescriptorManager::Init();
 		MaterialManager::Init();
 
-		ShowCursor(false);
+		//ShowCursor(false);
 	}
 
 	void FinalizeSystems() noexcept {

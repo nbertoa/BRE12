@@ -20,6 +20,7 @@ Texture2D<float4> BaseColor_MetalMaskTexture : register (t1);
 Texture2D<float> DepthTexture : register (t2);
 TextureCube DiffuseCubeMapTexture : register(t3);
 TextureCube SpecularCubeMapTexture : register(t4);
+Texture2D<float> AmbientAccessibility : register (t5);
 
 struct Output {
 	float4 mColor : SV_Target0;

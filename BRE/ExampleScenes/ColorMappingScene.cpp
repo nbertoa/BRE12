@@ -42,17 +42,17 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/sphere.obj",
+		"models/unreal.obj",
 	};
 
-	const float sS3{ 10.0f };
-	const float sS2{ 5.0f };
-	const float sS1{ 8.0f };
+	const float sS3{ 0.2f };
+	const float sS2{ 0.1f };
+	const float sS1{ 0.1f };
 
 	const float sTx{ 0.0f };
 	const float sTy{ -3.5f };
 	const float sTz{ 25.0f };	
-	const float sOffsetX{ 15.0f };
+	const float sOffsetX{ 65.0f };
 
 	void GenerateRecorder(
 		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
@@ -89,7 +89,7 @@ namespace {
 		ColorCmdListRecorder* &recorder) {
 		recorder = new ColorCmdListRecorder();
 
-		const std::size_t numMaterials(MaterialManager::NUM_MATERIALS);
+		const std::size_t numMaterials = 1;//(MaterialManager::NUM_MATERIALS);
 
 		const std::size_t numMeshes{ meshes.size() };
 		ASSERT(numMeshes > 0UL);
@@ -112,7 +112,7 @@ namespace {
 		float tz{ initZ };
 		for (std::size_t i = 0UL; i < numMaterials; ++i) {
 			DirectX::XMFLOAT4X4 worldMatrix;
-			MathUtils::ComputeMatrix(worldMatrix, tx, ty, tz, sS3, sS2, sS1, DirectX::XM_PIDIV2);
+			MathUtils::ComputeMatrix(worldMatrix, tx, ty, tz, sS3, sS2, sS1);
 
 			DirectX::XMFLOAT4X4 inverseTransposeWorldMatrix;
 			MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);

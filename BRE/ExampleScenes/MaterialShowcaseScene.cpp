@@ -154,9 +154,9 @@ namespace {
 	const float sFloorTy{ -20.5f };
 	const float sFloorTz{ 150.0f };
 
-	const float sModel3{ 0.40f };
+	const float sModel3{ 0.20f };
 	const float sModel2{ 0.20f };
-	const float sModel1{ 0.70f };
+	const float sModel1{ 0.20f };
 	
 	const float sTx1{ 0.0f };
 	const float sTy1{ sFloorTy };
