@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <Utils\DebugUtils.h>
+
 using namespace DirectX;
 
 namespace {
@@ -303,6 +305,9 @@ namespace GeometryGenerator {
 		const std::uint32_t stackCount, 
 		MeshData& meshData) noexcept 
 	{
+		ASSERT(stackCount >= 2);
+		ASSERT(sliceCount >= 1);
+
 		//
 		// Compute the vertices stating at the top pole and moving down the stacks.
 		//

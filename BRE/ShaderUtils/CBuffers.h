@@ -28,9 +28,7 @@ struct FrameCBuffer {
 	FrameCBuffer& operator=(FrameCBuffer&&) = default;
 		
 	DirectX::XMFLOAT4X4 mViewMatrix{ MathUtils::GetIdentity4x4Matrix() };
-	DirectX::XMFLOAT4X4 mInverseTransposeViewMatrix{ MathUtils::GetIdentity4x4Matrix() };
 	DirectX::XMFLOAT4X4 mInverseViewMatrix{ MathUtils::GetIdentity4x4Matrix() };
-	DirectX::XMFLOAT4X4 mInverseInverseTransposeViewMatrix{ MathUtils::GetIdentity4x4Matrix() };
 	DirectX::XMFLOAT4X4 mProjectionMatrix{ MathUtils::GetIdentity4x4Matrix() };
 	DirectX::XMFLOAT4X4 mInverseProjectionMatrix{ MathUtils::GetIdentity4x4Matrix() };	
 	DirectX::XMFLOAT4 mEyeWorldPosition{ 0.0f, 0.0f, 0.0f, 1.0f };

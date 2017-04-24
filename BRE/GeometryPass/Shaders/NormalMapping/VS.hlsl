@@ -35,7 +35,7 @@ Output main(in const Input input) {
 	output.mUV = gObjCBuffer.mTexTransform * input.mUV;
 
 	output.mNormalWorldSpace = mul(float4(input.mNormalObjectSpace, 0.0f), gObjCBuffer.mInverseTransposeWorldMatrix).xyz;
-	output.mNormalViewSpace = mul(float4(output.mNormalWorldSpace, 0.0f), gFrameCBuffer.mInverseTransposeViewMatrix).xyz;
+	output.mNormalViewSpace = mul(float4(output.mNormalWorldSpace, 0.0f), gFrameCBuffer.mViewMatrix).xyz;
 
 	output.mTangentWorldSpace = mul(float4(input.mTangentObjectSpace, 0.0f), gObjCBuffer.mWorldMatrix).xyz;
 	output.mTangentViewSpace = mul(float4(output.mTangentWorldSpace, 0.0f), gFrameCBuffer.mViewMatrix).xyz;

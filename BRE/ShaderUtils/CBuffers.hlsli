@@ -11,9 +11,7 @@ struct ObjectCBuffer {
 // Per frame constant buffer data
 struct FrameCBuffer {	
 	float4x4 mViewMatrix;
-	float4x4 mInverseTransposeViewMatrix;
-	float4x4 mInverseViewMatrix;	
-	float4x4 mInverseInverseTransposeViewMatrix;
+	float4x4 mInverseViewMatrix;
 	float4x4 mProjectionMatrix;
 	float4x4 mInverseProjectionMatrix;	
 	float4 mEyePositionWorldSpace;

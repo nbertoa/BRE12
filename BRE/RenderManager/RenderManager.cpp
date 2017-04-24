@@ -47,13 +47,6 @@ namespace {
 			MathUtils::StoreTransposeMatrix(camera.GetViewMatrix(), frameCBuffer.mViewMatrix);
 			MathUtils::StoreInverseTransposeMatrix(camera.GetViewMatrix(), frameCBuffer.mInverseViewMatrix);
 
-			// Compute transpose matrices of the following:
-			// - Inverse transpose view matrix
-			// - Inverse of the inverse transpose view matrix
-			MathUtils::StoreInverseTransposeMatrix(camera.GetViewMatrix(), frameCBuffer.mInverseTransposeViewMatrix);	
-			MathUtils::StoreInverseTransposeMatrix(frameCBuffer.mInverseTransposeViewMatrix, frameCBuffer.mInverseInverseTransposeViewMatrix);
-			MathUtils::StoreTransposeMatrix(frameCBuffer.mInverseTransposeViewMatrix, frameCBuffer.mInverseTransposeViewMatrix);
-
 			MathUtils::StoreTransposeMatrix(camera.GetProjectionMatrix(), frameCBuffer.mProjectionMatrix);
 			MathUtils::StoreInverseTransposeMatrix(camera.GetProjectionMatrix(), frameCBuffer.mInverseProjectionMatrix);
 

@@ -46,7 +46,7 @@ Output main(const HullShaderConstantOutput HSConstantOutput, const float3 uvw : 
 	// Get normal
 	const float3 normalWorldSpace = normalize(uvw.x * patch[0].mNormalWorldSpace + uvw.y * patch[1].mNormalWorldSpace + uvw.z * patch[2].mNormalWorldSpace);
 	output.mNormalWorldSpace = normalize(normalWorldSpace);
-	output.mNormalViewSpace = normalize(mul(float4(output.mNormalWorldSpace, 0.0f), gFrameCBuffer.mInverseTransposeViewMatrix).xyz);
+	output.mNormalViewSpace = normalize(mul(float4(output.mNormalWorldSpace, 0.0f), gFrameCBuffer.mViewMatrix).xyz);
 
 	// Get position
 	float3 positionWorldSpace = uvw.x * patch[0].mPositionWorldSpace + uvw.y * patch[1].mPositionWorldSpace + uvw.z * patch[2].mPositionWorldSpace;
