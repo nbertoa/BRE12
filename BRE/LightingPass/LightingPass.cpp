@@ -31,6 +31,7 @@ void LightingPass::Init(
 
 	// Initialize ambient pass
 	ASSERT(geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get() != nullptr);
+	ASSERT(geometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get() != nullptr);
 	mAmbientLightPass.Init(
 		*geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(),
 		*geometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(),		

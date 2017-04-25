@@ -165,7 +165,7 @@ RenderManager::RenderManager(Scene& scene) {
 	CreateIntermediateColorBufferAndRenderTargetView(
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 		L"Intermediate Color Buffer 2",
-		mIntermediateColorBuffer2,\
+		mIntermediateColorBuffer2,
 		mIntermediateColorBuffer2RenderTargetView);
 
 	mCamera.SetFrustum(

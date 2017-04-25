@@ -54,6 +54,7 @@ void EnvironmentLightCmdListRecorder::Init(
 	ID3D12Resource& depthBuffer,	
 	ID3D12Resource& diffuseIrradianceCubeMap,
 	ID3D12Resource& specularPreConvolvedCubeMap,
+	ID3D12Resource& ambientAccessibilityBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
 	ASSERT(ValidateData() == false);
@@ -66,7 +67,8 @@ void EnvironmentLightCmdListRecorder::Init(
 		geometryBuffers, 
 		geometryBuffersCount, 
 		depthBuffer, 
-		diffuseIrradianceCubeMap, 
+		diffuseIrradianceCubeMap,
+		ambientAccessibilityBuffer,
 		specularPreConvolvedCubeMap);
 
 	ASSERT(ValidateData());
@@ -116,13 +118,14 @@ void EnvironmentLightCmdListRecorder::InitShaderResourceViews(
 	const std::uint32_t geometryBuffersCount,
 	ID3D12Resource& depthBuffer,
 	ID3D12Resource& diffuseIrradianceCubeMap,
+	ID3D12Resource& ambientAccessibilityBuffer,
 	ID3D12Resource& specularPreConvolvedCubeMap) noexcept
 {
 	ASSERT(geometryBuffers != nullptr);
 	ASSERT(geometryBuffersCount > 0U);
 
-	// Number of geometry buffers + depth buffer + 2 cube maps
-	const std::uint32_t numResources = geometryBuffersCount + 3U;
+	// Number of geometry buffers + depth buffer + 2 cube maps + ambient accessibility buffer
+	const std::uint32_t numResources = geometryBuffersCount + 4U;
 
 	std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDescriptors;
 	srvDescriptors.reserve(numResources);
@@ -178,6 +181,17 @@ void EnvironmentLightCmdListRecorder::InitShaderResourceViews(
 	srvDescriptor.Format = specularPreConvolvedCubeMap.GetDesc().Format;
 	srvDescriptors.emplace_back(srvDescriptor);
 	resources.push_back(&specularPreConvolvedCubeMap);
+
+	// Ambient accessibility buffer
+	srvDescriptor = D3D12_SHADER_RESOURCE_VIEW_DESC{};
+	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptor.Texture2D.MostDetailedMip = 0;
+	srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptor.Format = ambientAccessibilityBuffer.GetDesc().Format;
+	srvDescriptor.Texture2D.MipLevels = ambientAccessibilityBuffer.GetDesc().MipLevels;
+	srvDescriptors.emplace_back(srvDescriptor);
+	resources.push_back(&ambientAccessibilityBuffer);
 
 	mStartPixelShaderResourceView =
 		CbvSrvUavDescriptorManager::CreateShaderResourceViews(

@@ -30,6 +30,7 @@ public:
 		ID3D12Resource& depthBuffer,		
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap,
+		ID3D12Resource& ambientAccessibilityBuffer,
 		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
 	// Preconditions:
@@ -44,6 +45,7 @@ private:
 		const std::uint32_t geometryBuffersCount,
 		ID3D12Resource& depthBuffer,
 		ID3D12Resource& diffuseIrradianceCubeMap,
+		ID3D12Resource& ambientAccessibilityBuffer,
 		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 		
 	CommandListPerFrame mCommandListPerFrame;
