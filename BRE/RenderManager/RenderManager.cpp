@@ -202,8 +202,8 @@ void RenderManager::InitPasses(Scene& scene) noexcept {
 		mLightingPass.GetCommandListRecorders());
 
 	mLightingPass.Init(
-		mGeometryPass.GetGeometryBuffers(),
-		GeometryPass::BUFFERS_COUNT,
+		*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(),
+		*mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(),
 		*mDepthBuffer,		
 		*diffuseIrradianceCubeMap,
 		*specularPreConvolvedCubeMap,

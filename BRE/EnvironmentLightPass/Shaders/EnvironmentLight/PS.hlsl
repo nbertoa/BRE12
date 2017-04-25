@@ -5,6 +5,7 @@
 #include "RS.hlsl"
 
 //#define SKIP_ENVIRONMENT_LIGHT
+//#define DEBUG_AMBIENT_ACCESIBILITY
 
 struct Input {
 	float4 mPositionNDC : SV_POSITION;
@@ -34,6 +35,9 @@ Output main(const in Input input){
 	output.mColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 #else
 	const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
+
+	// Ambient accessibility (1.0f - ambient occlussion factor)
+	const float ambientAccessibility = AmbientAccessibility.Load(fragmentScreenSpace);
 
 	const float4 normal_smoothness = Normal_SmoothnessTexture.Load(fragmentScreenSpace);
 
@@ -80,7 +84,11 @@ Output main(const in Input input){
 
 	const float3 color = indirectFDiffuse + indirectFSpecular;
 
-	output.mColor = float4(color, 1.0f);
+#ifdef DEBUG_AMBIENT_ACCESIBILITY
+	output.mColor = float4(ambientAccessibility, ambientAccessibility, ambientAccessibility, 1.0f);
+#else 
+	output.mColor = float4(color * ambientAccessibility, 1.0f);
+#endif
 #endif
 	
 	return output;

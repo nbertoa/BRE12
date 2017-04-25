@@ -42,10 +42,10 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/unreal.obj",
+		"models/mitsubaSphere.obj",
 	};
 
-	const float sS3{ 0.2f };
+	const float sS3{ 0.1f };
 	const float sS2{ 0.1f };
 	const float sS1{ 0.1f };
 

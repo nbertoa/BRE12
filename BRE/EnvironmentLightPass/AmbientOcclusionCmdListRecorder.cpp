@@ -95,10 +95,10 @@ void AmbientOcclusionCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("AmbientLightPass/Shaders/AmbientOcclusion/PS.cso");
-	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("AmbientLightPass/Shaders/AmbientOcclusion/VS.cso");
+	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("EnvironmentLightPass/Shaders/AmbientOcclusion/PS.cso");
+	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("EnvironmentLightPass/Shaders/AmbientOcclusion/VS.cso");
 
-	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("AmbientLightPass/Shaders/AmbientOcclusion/RS.cso");
+	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("EnvironmentLightPass/Shaders/AmbientOcclusion/RS.cso");
 	psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
 	sRootSignature = psoData.mRootSignature;
 

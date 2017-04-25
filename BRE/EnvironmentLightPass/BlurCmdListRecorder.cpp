@@ -25,10 +25,10 @@ void BlurCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	PSOManager::PSOCreationData psoData{};
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("AmbientLightPass/Shaders/Blur/PS.cso");
-	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("AmbientLightPass/Shaders/Blur/VS.cso");
+	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("EnvironmentLightPass/Shaders/Blur/PS.cso");
+	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("EnvironmentLightPass/Shaders/Blur/VS.cso");
 
-	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("AmbientLightPass/Shaders/Blur/RS.cso");
+	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("EnvironmentLightPass/Shaders/Blur/RS.cso");
 	psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
 	sRootSignature = psoData.mRootSignature;
 

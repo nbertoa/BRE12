@@ -1,14 +1,17 @@
 #pragma once
 
 #include <memory>
+#include <wrl.h>
 
+#include <EnvironmentLightPass\AmbientOcclusionCmdListRecorder.h>
+#include <EnvironmentLightPass\BlurCmdListRecorder.h>
 #include <EnvironmentLightPass\EnvironmentLightCmdListRecorder.h>
+#include <CommandManager\CommandListPerFrame.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct FrameCBuffer;
 struct ID3D12Resource;
 
-// Pass responsible to apply diffuse irradiance & specular pre-convolved environment cube maps
+// Pass responsible to apply ambient lighting and ambient occlusion
 class EnvironmentLightPass {
 public:
 	EnvironmentLightPass() = default;
@@ -19,20 +22,34 @@ public:
 	EnvironmentLightPass& operator=(EnvironmentLightPass&&) = delete;
 
 	void Init(
-		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
-		const std::uint32_t geometryBuffersCount,
-		ID3D12Resource& depthBuffer,		
+		ID3D12Resource& baseColorMetalMaskBuffer,
+		ID3D12Resource& normalSmoothnessBuffer,		
+		ID3D12Resource& depthBuffer,
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferCpuDesc) noexcept;
+		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
 	// Preconditions:
 	// - Init() must be called first
-	void Execute(const FrameCBuffer& frameCBuffer) const noexcept;
+	void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
-	// Method used internally for validation purposes
 	bool ValidateData() const noexcept;
 
-	std::unique_ptr<EnvironmentLightCmdListRecorder> mCommandListRecorder;
+	void ExecuteBeginTask() noexcept;
+	void ExecuteMiddleTask() noexcept;
+	void ExecuteFinalTask() noexcept;
+	
+	CommandListPerFrame mBeginCommandListPerFrame;
+	CommandListPerFrame mMiddleCommandListPerFrame;
+	CommandListPerFrame mFinalCommandListPerFrame;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
+	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetView{ 0UL };
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
+
+	std::unique_ptr<AmbientOcclusionCmdListRecorder> mAmbientOcclusionRecorder;	
+	std::unique_ptr<BlurCmdListRecorder> mBlurRecorder;
+	std::unique_ptr<EnvironmentLightCmdListRecorder> mEnvironmentLightRecorder;
 };

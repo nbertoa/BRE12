@@ -6,15 +6,14 @@
 
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <DXUtils/d3dx12.h>
-#include <GeometryPass\GeometryPass.h>
 #include <LightingPass\Recorders\PunctualLightCmdListRecorder.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
 void LightingPass::Init(
-	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
-	const std::uint32_t geometryBuffersCount,
+	ID3D12Resource& baseColorMetalMaskBuffer,
+	ID3D12Resource& normalSmoothnessBuffer,
 	ID3D12Resource& depthBuffer,
 	ID3D12Resource& diffuseIrradianceCubeMap,
 	ID3D12Resource& specularPreConvolvedCubeMap,
@@ -22,7 +21,8 @@ void LightingPass::Init(
 {
 	ASSERT(IsDataValid() == false);
 
-	mGeometryBuffers = geometryBuffers;
+	mBaseColorMetalMaskBuffer = &baseColorMetalMaskBuffer;
+	mNormalSmoothnessBuffer = &normalSmoothnessBuffer;
 	mRenderTargetView = renderTargetView;
 	mDepthBuffer = &depthBuffer;
 
@@ -30,19 +30,10 @@ void LightingPass::Init(
 	PunctualLightCmdListRecorder::InitSharedPSOAndRootSignature();
 
 	// Initialize ambient pass
-	ASSERT(geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get() != nullptr);
-	ASSERT(geometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get() != nullptr);
-	mAmbientLightPass.Init(
-		*geometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(),
-		*geometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(),		
-		depthBuffer,
-		renderTargetView);
-
-	// Initialize environment light pass
 	mEnvironmentLightPass.Init(
-		geometryBuffers, 
-		geometryBuffersCount,
-		*mDepthBuffer,		
+		*mBaseColorMetalMaskBuffer,
+		*mNormalSmoothnessBuffer,
+		depthBuffer,
 		diffuseIrradianceCubeMap,
 		specularPreConvolvedCubeMap,
 		renderTargetView);
@@ -77,24 +68,16 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 		Sleep(0U);
 	}
 
-	mAmbientLightPass.Execute(frameCBuffer);
 	mEnvironmentLightPass.Execute(frameCBuffer);
 
 	ExecuteFinalTask();
 }
 
 bool LightingPass::IsDataValid() const noexcept {
-	if (mGeometryBuffers == nullptr) {
-		return false;
-	}
-
-	for (std::uint32_t i = 0U; i < GeometryPass::BUFFERS_COUNT; ++i) {
-		if (mGeometryBuffers[i].Get() == nullptr) {
-			return false;
-		}
-	}
 
 	const bool b =
+		mBaseColorMetalMaskBuffer != nullptr &&
+		mNormalSmoothnessBuffer != nullptr &&
 		mRenderTargetView.ptr != 0UL &&
 		mDepthBuffer != nullptr;
 
@@ -108,9 +91,8 @@ void LightingPass::ExecuteBeginTask() noexcept {
 	// - All geometry shaders must be in render target state because they were output
 	// of the geometry pass.
 #ifdef _DEBUG
-	for (std::uint32_t i = 0U; i < GeometryPass::BUFFERS_COUNT; ++i) {
-		ASSERT(ResourceStateManager::GetResourceState(*mGeometryBuffers[i].Get()) == D3D12_RESOURCE_STATE_RENDER_TARGET);
-	}
+	ASSERT(ResourceStateManager::GetResourceState(*mBaseColorMetalMaskBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+	ASSERT(ResourceStateManager::GetResourceState(*mNormalSmoothnessBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
 #endif
 
 	// - Depth buffer was used for depth testing in geometry pass, so it must be in depth write state
@@ -121,11 +103,11 @@ void LightingPass::ExecuteBeginTask() noexcept {
 	CD3DX12_RESOURCE_BARRIER barriers[]
 	{
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(
-			*mGeometryBuffers[GeometryPass::NORMAL_SMOOTHNESS].Get(), 
+			*mBaseColorMetalMaskBuffer, 
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(
-			*mGeometryBuffers[GeometryPass::BASECOLOR_METALMASK].Get(), 
+			*mNormalSmoothnessBuffer, 
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 
 		ResourceStateManager::ChangeResourceStateAndGetBarrier(
@@ -134,7 +116,7 @@ void LightingPass::ExecuteBeginTask() noexcept {
 	};
 
 	const std::uint32_t barriersCount = _countof(barriers);
-	ASSERT(barriersCount == GeometryPass::BUFFERS_COUNT + 1UL);
+	ASSERT(barriersCount == 3UL);
 	commandList.ResourceBarrier(barriersCount, barriers);
 
 	commandList.ClearRenderTargetView(mRenderTargetView, DirectX::Colors::Black, 0U, nullptr);
@@ -150,9 +132,8 @@ void LightingPass::ExecuteFinalTask() noexcept {
 	// - All geometry shaders must be in pixel shader resource state because they were used
 	// by lighting pass shaders.
 #ifdef _DEBUG
-	for (std::uint32_t i = 0U; i < GeometryPass::BUFFERS_COUNT; ++i) {
-		ASSERT(ResourceStateManager::GetResourceState(*mGeometryBuffers[i].Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-	}
+	ASSERT(ResourceStateManager::GetResourceState(*mBaseColorMetalMaskBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	ASSERT(ResourceStateManager::GetResourceState(*mNormalSmoothnessBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 #endif
 
 	// - Depth buffer must be in pixel shader resource because it was used by lighting pass shader.

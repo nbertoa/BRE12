@@ -29,10 +29,10 @@ void EnvironmentLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
 	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("EnvironmentLightPass/Shaders/PS.cso");
-	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("EnvironmentLightPass/Shaders/VS.cso");
+	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("EnvironmentLightPass/Shaders/EnvironmentLight/PS.cso");
+	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("EnvironmentLightPass/Shaders/EnvironmentLight/VS.cso");
 
-	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("EnvironmentLightPass/Shaders/RS.cso");
+	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("EnvironmentLightPass/Shaders/EnvironmentLight/RS.cso");
 	psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
 	sRootSignature = psoData.mRootSignature;
 
@@ -49,8 +49,8 @@ void EnvironmentLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 }
 
 void EnvironmentLightCmdListRecorder::Init(
-	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
-	const std::uint32_t geometryBuffersCount,
+	ID3D12Resource& normalSmoothnessBuffer,
+	ID3D12Resource& baseColorMetalMaskBuffer,	
 	ID3D12Resource& depthBuffer,	
 	ID3D12Resource& diffuseIrradianceCubeMap,
 	ID3D12Resource& specularPreConvolvedCubeMap,
@@ -58,14 +58,12 @@ void EnvironmentLightCmdListRecorder::Init(
 	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
 	ASSERT(ValidateData() == false);
-	ASSERT(geometryBuffers != nullptr);
-	ASSERT(geometryBuffersCount > 0U);
 
 	mRenderTargetView = renderTargetView;
 
-	InitShaderResourceViews(
-		geometryBuffers, 
-		geometryBuffersCount, 
+	InitShaderResourceViews(		
+		normalSmoothnessBuffer,
+		baseColorMetalMaskBuffer,
 		depthBuffer, 
 		diffuseIrradianceCubeMap,
 		ambientAccessibilityBuffer,
@@ -114,18 +112,15 @@ bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 }
 
 void EnvironmentLightCmdListRecorder::InitShaderResourceViews(
-	Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
-	const std::uint32_t geometryBuffersCount,
+	ID3D12Resource& normalSmoothnessBuffer,
+	ID3D12Resource& baseColorMetalMaskBuffer,	
 	ID3D12Resource& depthBuffer,
 	ID3D12Resource& diffuseIrradianceCubeMap,
 	ID3D12Resource& ambientAccessibilityBuffer,
 	ID3D12Resource& specularPreConvolvedCubeMap) noexcept
 {
-	ASSERT(geometryBuffers != nullptr);
-	ASSERT(geometryBuffersCount > 0U);
-
 	// Number of geometry buffers + depth buffer + 2 cube maps + ambient accessibility buffer
-	const std::uint32_t numResources = geometryBuffersCount + 4U;
+	const std::uint32_t numResources = 6U;
 
 	std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDescriptors;
 	srvDescriptors.reserve(numResources);
@@ -133,25 +128,30 @@ void EnvironmentLightCmdListRecorder::InitShaderResourceViews(
 	std::vector<ID3D12Resource*> resources;
 	resources.reserve(numResources);
 
-	// Fill geometry buffers SRV descriptors
-	for (std::uint32_t i = 0U; i < geometryBuffersCount; ++i) {
-		ASSERT(geometryBuffers[i].Get() != nullptr);
+	// Normal and smoothness geometry buffer
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};	
+	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptor.Texture2D.MostDetailedMip = 0;
+	srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptor.Format = normalSmoothnessBuffer.GetDesc().Format;
+	srvDescriptor.Texture2D.MipLevels = normalSmoothnessBuffer.GetDesc().MipLevels;
+	srvDescriptors.emplace_back(srvDescriptor);
+	resources.push_back(&normalSmoothnessBuffer);
 
-		resources.push_back(geometryBuffers[i].Get());
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
-		srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDescriptor.Texture2D.MostDetailedMip = 0;
-		srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
-		srvDescriptor.Format = resources.back()->GetDesc().Format;
-		srvDescriptor.Texture2D.MipLevels = resources.back()->GetDesc().MipLevels;
-
-		srvDescriptors.emplace_back(srvDescriptor);
-	}
+	// Base color and metal mask geometry buffer
+	srvDescriptor = D3D12_SHADER_RESOURCE_VIEW_DESC{};
+	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescriptor.Texture2D.MostDetailedMip = 0;
+	srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDescriptor.Format = baseColorMetalMaskBuffer.GetDesc().Format;
+	srvDescriptor.Texture2D.MipLevels = baseColorMetalMaskBuffer.GetDesc().MipLevels;
+	srvDescriptors.emplace_back(srvDescriptor);
+	resources.push_back(&baseColorMetalMaskBuffer);
 
 	// Fill depth buffer descriptor
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
+	srvDescriptor = D3D12_SHADER_RESOURCE_VIEW_DESC{};
 	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDescriptor.Texture2D.MostDetailedMip = 0;

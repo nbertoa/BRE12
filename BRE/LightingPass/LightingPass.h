@@ -4,9 +4,8 @@
 #include <vector>
 #include <wrl.h>
 
-#include <AmbientLightPass\AmbientLightPass.h>
+#include <EnvironmentLightPass\EnvironmentLightPass.h>
 #include <CommandManager\CommandListPerFrame.h>
-#include <EnvironmentLightPass/EnvironmentLightPass.h>
 #include <LightingPass\LightingPassCmdListRecorder.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
@@ -32,8 +31,8 @@ public:
 	// - "geometryBuffers" must not be nullptr
 	// - "geometryBuffersCount" must be greater than zero
 	void Init(
-		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers, 
-		const std::uint32_t geometryBuffersCount,
+		ID3D12Resource& baseColorMetalMaskBuffer,
+		ID3D12Resource& normalSmoothnessBuffer,
 		ID3D12Resource& depthBuffer,		
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap,
@@ -56,11 +55,12 @@ private:
 	// Geometry buffers created by GeometryPass
 	Microsoft::WRL::ComPtr<ID3D12Resource>* mGeometryBuffers;
 
+	ID3D12Resource* mBaseColorMetalMaskBuffer{ nullptr };
+	ID3D12Resource* mNormalSmoothnessBuffer{ nullptr };
 	ID3D12Resource* mDepthBuffer{ nullptr };
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 
-	AmbientLightPass mAmbientLightPass;
 	EnvironmentLightPass mEnvironmentLightPass;
 
 	CommandListRecorders mCommandListRecorders;

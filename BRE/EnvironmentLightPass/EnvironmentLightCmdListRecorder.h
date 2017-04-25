@@ -24,9 +24,9 @@ public:
 
 	// Preconditions:
 	// - InitSharedPSOAndRootSignature() must be called first and once
-	void Init(
-		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
-		const std::uint32_t geometryBuffersCount,
+	void Init(		
+		ID3D12Resource& normalSmoothnessBuffer,
+		ID3D12Resource& baseColorMetalMaskBuffer,
 		ID3D12Resource& depthBuffer,		
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& specularPreConvolvedCubeMap,
@@ -41,8 +41,8 @@ public:
 
 private:
 	void InitShaderResourceViews(
-		Microsoft::WRL::ComPtr<ID3D12Resource>* geometryBuffers,
-		const std::uint32_t geometryBuffersCount,
+		ID3D12Resource& normalSmoothnessBuffer,
+		ID3D12Resource& baseColorMetalMaskBuffer,		
 		ID3D12Resource& depthBuffer,
 		ID3D12Resource& diffuseIrradianceCubeMap,
 		ID3D12Resource& ambientAccessibilityBuffer,
