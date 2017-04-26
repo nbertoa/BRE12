@@ -27,9 +27,7 @@ ID3D12Resource& ResourceManager::LoadTextureFromFile(
 	ID3D12Resource* resource{ nullptr };
 
 	ASSERT(textureFilename != nullptr);
-	std::string filePath(SettingsManager::sResourcesPath);
-	filePath += textureFilename;
-
+	const std::string filePath(textureFilename);
 	const std::wstring filePathW(StringUtils::ToWideString(filePath));
 	
 	Microsoft::WRL::ComPtr<ID3D12Resource> resourcePtr;

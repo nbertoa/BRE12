@@ -77,58 +77,58 @@ namespace {
 	std::vector<std::string> sTexFiles =
 	{
 		// Metal
-		"textures/metal/metal.dds",
-		"textures/metal/metal_normal.dds",
-		"textures/metal/metal2.dds",
-		"textures/metal/metal2_normal.dds",
-		"textures/metal/metal3.dds",
-		"textures/metal/metal3_normal.dds",
+		"resources/textures/metal/metal.dds",
+		"resources/textures/metal/metal_normal.dds",
+		"resources/textures/metal/metal2.dds",
+		"resources/textures/metal/metal2_normal.dds",
+		"resources/textures/metal/metal3.dds",
+		"resources/textures/metal/metal3_normal.dds",
 
 		// Brick
-		"textures/brick/brick.dds",
-		"textures/brick/brick_height.dds",
-		"textures/brick/brick_normal.dds",
-		"textures/brick/brick2.dds",
-		"textures/brick/brick2_height.dds",
-		"textures/brick/brick2_normal.dds",
-		"textures/brick/brick3.dds",
-		"textures/brick/brick3_height.dds",
-		"textures/brick/brick3_normal.dds",
+		"resources/textures/brick/brick.dds",
+		"resources/textures/brick/brick_height.dds",
+		"resources/textures/brick/brick_normal.dds",
+		"resources/textures/brick/brick2.dds",
+		"resources/textures/brick/brick2_height.dds",
+		"resources/textures/brick/brick2_normal.dds",
+		"resources/textures/brick/brick3.dds",
+		"resources/textures/brick/brick3_height.dds",
+		"resources/textures/brick/brick3_normal.dds",
 
 		// Wood
-		"textures/wood/wood.dds",
-		"textures/wood/wood_height.dds",
-		"textures/wood/wood_normal.dds",
+		"resources/textures/wood/wood.dds",
+		"resources/textures/wood/wood_height.dds",
+		"resources/textures/wood/wood_normal.dds",
 
 		// Rock
-		"textures/rock/rock.dds",
-		"textures/rock/rock_height.dds",
-		"textures/rock/rock_normal.dds",
-		"textures/rock/rock2.dds",
-		"textures/rock/rock2_height.dds",
-		"textures/rock/rock2_normal.dds",
-		"textures/rock/rock3.dds",
-		"textures/rock/rock3_normal.dds",
-		"textures/rock/rock4.dds",
-		"textures/rock/rock4_normal.dds",
-		"textures/rock/rock5.dds",
-		"textures/rock/rock5_normal.dds",
-		"textures/rock/rock6.dds",
-		"textures/rock/rock6_height.dds",
-		"textures/rock/rock6_normal.dds",
+		"resources/textures/rock/rock.dds",
+		"resources/textures/rock/rock_height.dds",
+		"resources/textures/rock/rock_normal.dds",
+		"resources/textures/rock/rock2.dds",
+		"resources/textures/rock/rock2_height.dds",
+		"resources/textures/rock/rock2_normal.dds",
+		"resources/textures/rock/rock3.dds",
+		"resources/textures/rock/rock3_normal.dds",
+		"resources/textures/rock/rock4.dds",
+		"resources/textures/rock/rock4_normal.dds",
+		"resources/textures/rock/rock5.dds",
+		"resources/textures/rock/rock5_normal.dds",
+		"resources/textures/rock/rock6.dds",
+		"resources/textures/rock/rock6_height.dds",
+		"resources/textures/rock/rock6_normal.dds",
 
 		// Cobblestone
-		"textures/cobblestone/cobblestone.dds",
-		"textures/cobblestone/cobblestone_height.dds",
-		"textures/cobblestone/cobblestone_normal.dds",
-		"textures/cobblestone/cobblestone2.dds",
-		"textures/cobblestone/cobblestone2_height.dds",
-		"textures/cobblestone/cobblestone2_normal.dds",
+		"resources/textures/cobblestone/cobblestone.dds",
+		"resources/textures/cobblestone/cobblestone_height.dds",
+		"resources/textures/cobblestone/cobblestone_normal.dds",
+		"resources/textures/cobblestone/cobblestone2.dds",
+		"resources/textures/cobblestone/cobblestone2_height.dds",
+		"resources/textures/cobblestone/cobblestone2_normal.dds",
 
 		// Environment
-		"textures/cubeMaps/milkmill_cube_map.dds",
-		"textures/cubeMaps/milkmill_diffuse_cube_map.dds",
-		"textures/cubeMaps/milkmill_specular_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_specular_cube_map.dds",
 	};
 
 	enum Models {
@@ -143,10 +143,10 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/mitsubaSphere.obj",
-		"models/bunny.obj",
-		"models/buddha.obj",
-		"models/floor.obj",
+		"resources/models/mitsubaSphere.obj",
+		"resources/models/bunny.obj",
+		"resources/models/buddha.obj",
+		"resources/models/floor.obj",
 	};
 
 	const float sFloorScale{ 1.0f };

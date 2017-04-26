@@ -38,17 +38,17 @@ namespace {
 	{
 
 		// Normal
-		"textures/rock/rock_normal.dds",
-		"textures/rock/rock2_normal.dds",
-		"textures/wood/wood_normal.dds",
-		"textures/floor_normal.dds",
-		"textures/sand/sand_normal.dds",
-		"textures/cobblestone/cobblestone_normal.dds",
+		"resources/textures/rock/rock_normal.dds",
+		"resources/textures/rock/rock2_normal.dds",
+		"resources/textures/wood/wood_normal.dds",
+		"resources/textures/floor_normal.dds",
+		"resources/textures/sand/sand_normal.dds",
+		"resources/textures/cobblestone/cobblestone_normal.dds",
 
 		// Environment
-		"textures/cubeMaps/milkmill_cube_map.dds",
-		"textures/cubeMaps/milkmill_diffuse_cube_map.dds",
-		"textures/cubeMaps/milkmill_specular_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_specular_cube_map.dds",
 	};
 
 	enum Models {
@@ -59,7 +59,7 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/mitsubaFloor.obj",
+		"resources/models/mitsubaFloor.obj",
 	};
 
 	const float sS{ 2.0f };

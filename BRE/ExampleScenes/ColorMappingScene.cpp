@@ -29,9 +29,9 @@ namespace {
 	std::vector<std::string> sTexFiles =
 	{
 		// Environment
-		"textures/cubeMaps/milkmill_cube_map.dds",
-		"textures/cubeMaps/milkmill_diffuse_cube_map.dds",
-		"textures/cubeMaps/milkmill_specular_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_specular_cube_map.dds",
 	};
 
 	enum Models {
@@ -42,7 +42,7 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/mitsubaSphere.obj",
+		"resources/models/mitsubaSphere.obj",
 	};
 
 	const float sS3{ 0.1f };

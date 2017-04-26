@@ -53,33 +53,33 @@ namespace {
 	std::vector<std::string> sTexFiles =
 	{
 		// Diffuse
-		"textures/brick/brick2.dds",
-		"textures/brick/brick3.dds",
-		"textures/cobblestone/cobblestone2.dds",
-		"textures/cobblestone/cobblestone.dds",
-		"textures/rock/rock3.dds",
-		"textures/wood/wood2.dds",
+		"resources/textures/brick/brick2.dds",
+		"resources/textures/brick/brick3.dds",
+		"resources/textures/cobblestone/cobblestone2.dds",
+		"resources/textures/cobblestone/cobblestone.dds",
+		"resources/textures/rock/rock3.dds",
+		"resources/textures/wood/wood2.dds",
 
 		// Normal
-		"textures/brick/brick2_normal.dds",
-		"textures/brick/brick3_normal.dds",
-		"textures/cobblestone/cobblestone2_normal.dds",
-		"textures/cobblestone/cobblestone_normal.dds",
-		"textures/rock/rock3_normal.dds",
-		"textures/wood/wood2_normal.dds",
+		"resources/textures/brick/brick2_normal.dds",
+		"resources/textures/brick/brick3_normal.dds",
+		"resources/textures/cobblestone/cobblestone2_normal.dds",
+		"resources/textures/cobblestone/cobblestone_normal.dds",
+		"resources/textures/rock/rock3_normal.dds",
+		"resources/textures/wood/wood2_normal.dds",
 
 		// Height
-		"textures/brick/brick2_height.dds",
-		"textures/brick/brick3_height.dds",
-		"textures/cobblestone/cobblestone2_height.dds",
-		"textures/cobblestone/cobblestone_height.dds",
-		"textures/black.dds",
-		"textures/wood/wood2_height.dds",
+		"resources/textures/brick/brick2_height.dds",
+		"resources/textures/brick/brick3_height.dds",
+		"resources/textures/cobblestone/cobblestone2_height.dds",
+		"resources/textures/cobblestone/cobblestone_height.dds",
+		"resources/textures/black.dds",
+		"resources/textures/wood/wood2_height.dds",
 
 		// Environment
-		"textures/cubeMaps/milkmill_cube_map.dds",
-		"textures/cubeMaps/milkmill_diffuse_cube_map.dds",
-		"textures/cubeMaps/milkmill_specular_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_specular_cube_map.dds",
 	};
 
 	enum Models {
@@ -90,7 +90,7 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/unreal.obj",
+		"resources/models/unreal.obj",
 	};
 
 	const float sS{ 0.05f };

@@ -45,25 +45,25 @@ namespace {
 	std::vector<std::string> sTexFiles =
 	{
 		// Diffuse
-		"textures/rock/rock.dds",
-		"textures/rock/rock2.dds",
-		"textures/wood/wood.dds",
-		"textures/floor.dds",
-		"textures/sand/sand.dds",
-		"textures/cobblestone/cobblestone.dds",
+		"resources/textures/rock/rock.dds",
+		"resources/textures/rock/rock2.dds",
+		"resources/textures/wood/wood.dds",
+		"resources/textures/floor.dds",
+		"resources/textures/sand/sand.dds",
+		"resources/textures/cobblestone/cobblestone.dds",
 
 		// Normal
-		"textures/rock/rock_normal.dds",
-		"textures/rock/rock2_normal.dds",
-		"textures/wood/wood_normal.dds",
-		"textures/floor_normal.dds",
-		"textures/sand/sand_normal.dds",
-		"textures/cobblestone/cobblestone_normal.dds",
+		"resources/textures/rock/rock_normal.dds",
+		"resources/textures/rock/rock2_normal.dds",
+		"resources/textures/wood/wood_normal.dds",
+		"resources/textures/floor_normal.dds",
+		"resources/textures/sand/sand_normal.dds",
+		"resources/textures/cobblestone/cobblestone_normal.dds",
 
 		// Environment
-		"textures/cubeMaps/milkmill_cube_map.dds",
-		"textures/cubeMaps/milkmill_diffuse_cube_map.dds",
-		"textures/cubeMaps/milkmill_specular_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_specular_cube_map.dds",
 	};
 
 	enum Models {
@@ -74,7 +74,7 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/unreal.obj",
+		"resources/models/unreal.obj",
 	};
 
 	const float sS3{ 0.1f };

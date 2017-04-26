@@ -31,13 +31,13 @@ namespace {
 	// Textures to load
 	std::vector<std::string> sTexFiles =
 	{
-		"textures/brick/brick.dds",
-		"textures/brick/brick3.dds",
+		"resources/textures/brick/brick.dds",
+		"resources/textures/brick/brick3.dds",
 
 		// Environment
-		"textures/cubeMaps/milkmill_cube_map.dds",
-		"textures/cubeMaps/milkmill_diffuse_cube_map.dds",
-		"textures/cubeMaps/milkmill_specular_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_specular_cube_map.dds",
 	};
 
 	enum Models {
@@ -48,7 +48,7 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/unreal.obj",
+		"resources/models/unreal.obj",
 	};
 }
 

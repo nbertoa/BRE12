@@ -16,26 +16,17 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{232d2a1f-fec8-493d-bdc7-7417280cf705}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\AmbientOcclussion">
-      <UniqueIdentifier>{3fc3e9c7-8d6c-4aad-92bf-097fb3be4c0f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\Blur">
       <UniqueIdentifier>{d7cb2ea0-7805-46ae-a513-d6569845f4e8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shaders\EnvironmentLight">
       <UniqueIdentifier>{fbd017a0-8d44-4c4f-b0e8-461a4b9db079}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\AmbientOcclusion">
+      <UniqueIdentifier>{3fc3e9c7-8d6c-4aad-92bf-097fb3be4c0f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\AmbientOcclussion\PS.hlsl">
-      <Filter>Shaders\AmbientOcclussion</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\AmbientOcclussion\RS.hlsl">
-      <Filter>Shaders\AmbientOcclussion</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\AmbientOcclussion\VS.hlsl">
-      <Filter>Shaders\AmbientOcclussion</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\Blur\PS.hlsl">
       <Filter>Shaders\Blur</Filter>
     </FxCompile>
@@ -53,6 +44,15 @@
     </FxCompile>
     <FxCompile Include="Shaders\EnvironmentLight\VS.hlsl">
       <Filter>Shaders\EnvironmentLight</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\AmbientOcclusion\PS.hlsl">
+      <Filter>Shaders\AmbientOcclusion</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\AmbientOcclusion\RS.hlsl">
+      <Filter>Shaders\AmbientOcclusion</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\AmbientOcclusion\VS.hlsl">
+      <Filter>Shaders\AmbientOcclusion</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

@@ -15,8 +15,7 @@ Model::Model(
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) 
 {
 	ASSERT(modelFilename != nullptr);
-	std::string filePath(SettingsManager::sResourcesPath);
-	filePath += modelFilename;
+	const std::string filePath(modelFilename);
 
 	Assimp::Importer importer;
 	const std::uint32_t flags{ aiProcessPreset_TargetRealtime_Fast | aiProcess_ConvertToLeftHanded };

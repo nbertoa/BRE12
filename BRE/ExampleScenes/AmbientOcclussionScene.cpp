@@ -35,17 +35,17 @@ namespace {
 	std::vector<std::string> sTexFiles =
 	{
 		// Brick
-		"textures/brick/brick2.dds",
-		"textures/brick/brick2_normal.dds",
+		"resources/textures/brick/brick2.dds",
+		"resources/textures/brick/brick2_normal.dds",
 
 		// Wood
-		"textures/wood/wood.dds",
-		"textures/wood/wood_normal.dds",
+		"resources/textures/wood/wood.dds",
+		"resources/textures/wood/wood_normal.dds",
 
 		// Environment
-		"textures/cubeMaps/milkmill_cube_map.dds",
-		"textures/cubeMaps/milkmill_diffuse_cube_map.dds",
-		"textures/cubeMaps/milkmill_specular_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds",
+		"resources/textures/cubeMaps/milkmill_specular_cube_map.dds",
 	};
 
 	enum Models {
@@ -58,8 +58,8 @@ namespace {
 	// Models to load
 	std::vector<std::string> sModelFiles =
 	{
-		"models/mitsubaSphere.obj",
-		"models/floor.obj",
+		"resources/models/mitsubaSphere.obj",
+		"resources/models/floor.obj",
 	};
 
 	const float sFloorScale{ 1.0f };
