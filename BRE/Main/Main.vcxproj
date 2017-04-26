@@ -89,12 +89,12 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..\external\tbb\include;$(SolutionDir)\..\external\assimp-3.1.1\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..\external\tbb\include;$(SolutionDir)\..\external\assimp-3.1.1\include;$(SolutionDir)\..\external\yaml-cpp\include</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)\..\external\tbb\lib;$(SolutionDir)\..\external\assimp-3.1.1\lib;$(OutDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Camerad.lib;CommandManagerd.lib;CommandListExecutord.lib;DescriptorManagerd.lib;DirectXManagerd.lib;DXUtilsd.lib;EnvironmentLightPassd.lib;ExampleScenesd.lib;GeometryGeneratord.lib;GeometryPassd.lib;Inputd.lib;LightingPassd.lib;MaterialManagerd.lib;MathUtilsd.lib;ModelManagerd.lib;PostProcessPassd.lib;PSOManagerd.lib;RenderManagerd.lib;ResourceManagerd.lib;ResourceStateManagerd.lib;RootSignatureManagerd.lib;Scened.lib;SceneExecutord.lib;SettingsManagerd.lib;ShaderManagerd.lib;ShaderUtilsd.lib;SkyBoxPassd.lib;Timerd.lib;ToneMappingPassd.lib;Utilsd.lib;assimp.lib;d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb_debug.lib;tbb_preview_debug.lib;tbbmalloc_debug.lib;tbbproxy_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\external\yaml-cpp\lib;$(SolutionDir)\..\external\tbb\lib;$(SolutionDir)\..\external\assimp-3.1.1\lib;$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Camerad.lib;CommandManagerd.lib;CommandListExecutord.lib;DescriptorManagerd.lib;DirectXManagerd.lib;DXUtilsd.lib;EnvironmentLightPassd.lib;ExampleScenesd.lib;GeometryGeneratord.lib;GeometryPassd.lib;Inputd.lib;LightingPassd.lib;MaterialManagerd.lib;MathUtilsd.lib;ModelManagerd.lib;PostProcessPassd.lib;PSOManagerd.lib;RenderManagerd.lib;ResourceManagerd.lib;ResourceStateManagerd.lib;RootSignatureManagerd.lib;Scened.lib;SceneExecutord.lib;SettingsManagerd.lib;ShaderManagerd.lib;ShaderUtilsd.lib;SkyBoxPassd.lib;Timerd.lib;ToneMappingPassd.lib;Utilsd.lib;assimp.lib;d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb_debug.lib;tbb_preview_debug.lib;tbbmalloc_debug.lib;tbbproxy_debug.lib;yaml-cppd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -117,14 +117,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..\external\tbb\include;$(SolutionDir)\..\external\assimp-3.1.1\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..\external\tbb\include;$(SolutionDir)\..\external\assimp-3.1.1\include;$(SolutionDir)\..\external\yaml-cpp\include</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)\..\external\tbb\lib;$(SolutionDir)\..\external\assimp-3.1.1\lib;$(OutDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Camera.lib;CommandManager.lib;CommandListExecutor.lib;DescriptorManager.lib;DirectXManager.lib;DXUtils.lib;EnvironmentLightPass.lib;ExampleScenes.lib;GeometryGenerator.lib;GeometryPass.lib;Input.lib;LightingPass.lib;MaterialManager.lib;MathUtils.lib;ModelManager.lib;PostProcessPass.lib;PSOManager.lib;RenderManager.lib;ResourceManager.lib;ResourceStateManager.lib;RootSignatureManager.lib;Scene.lib;SceneExecutor.lib;SettingsManager.lib;ShaderManager.lib;ShaderUtils.lib;SkyBoxPass.lib;Timer.lib;ToneMappingPass.lib;Utils.lib;assimp.lib;d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb.lib;tbb_preview.lib;tbbmalloc.lib;tbbproxy.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\external\yaml-cpp\lib;$(SolutionDir)\..\external\tbb\lib;$(SolutionDir)\..\external\assimp-3.1.1\lib;$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Camera.lib;CommandManager.lib;CommandListExecutor.lib;DescriptorManager.lib;DirectXManager.lib;DXUtils.lib;EnvironmentLightPass.lib;ExampleScenes.lib;GeometryGenerator.lib;GeometryPass.lib;Input.lib;LightingPass.lib;MaterialManager.lib;MathUtils.lib;ModelManager.lib;PostProcessPass.lib;PSOManager.lib;RenderManager.lib;ResourceManager.lib;ResourceStateManager.lib;RootSignatureManager.lib;Scene.lib;SceneExecutor.lib;SettingsManager.lib;ShaderManager.lib;ShaderUtils.lib;SkyBoxPass.lib;Timer.lib;ToneMappingPass.lib;Utils.lib;assimp.lib;d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb.lib;tbb_preview.lib;tbbmalloc.lib;tbbproxy.lib;yaml-cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
