@@ -12,12 +12,12 @@ void Camera::SetFrustum(const float verticalFieldOfView,
 {
 	const XMMATRIX projectionMatrix{ XMMatrixPerspectiveFovLH(verticalFieldOfView, aspectRatio, nearPlaneZ, farPlaneZ) };
 	XMStoreFloat4x4(&mProjectionMatrix, projectionMatrix);
-	XMStoreFloat4x4(&mInverseProjectionMatrix, DirectX::XMMatrixInverse(nullptr, projectionMatrix));
+	MathUtils::StoreInverseMatrix(mProjectionMatrix, mInverseProjectionMatrix);
 }
 
-void Camera::SetLookAndUpVectors(const DirectX::XMFLOAT3& cameraPosition,
-								 const DirectX::XMFLOAT3& targetPosition,
-								 const DirectX::XMFLOAT3& upVector) noexcept 
+void Camera::SetLookAndUpVectors(const XMFLOAT3& cameraPosition,
+								 const XMFLOAT3& targetPosition,
+								 const XMFLOAT3& upVector) noexcept 
 {
 	const XMVECTOR xmCameraPosition( XMLoadFloat3(&cameraPosition) );
 	const XMVECTOR xmTargetPosition( XMLoadFloat3(&targetPosition) );
@@ -36,19 +36,19 @@ void Camera::SetLookAndUpVectors(const DirectX::XMFLOAT3& cameraPosition,
 void Camera::Strafe(const float distance) noexcept {
 	// velocity += right * dist 
 	XMVECTOR rightVector(XMLoadFloat3(&mRightVector));
-	rightVector = DirectX::XMVectorScale(rightVector, distance);
-	DirectX::XMVECTOR velocityVector = DirectX::XMLoadFloat3(&mVelocityVector);
-	velocityVector = DirectX::XMVectorAdd(velocityVector, rightVector);
-	DirectX::XMStoreFloat3(&mVelocityVector, velocityVector);
+	rightVector = XMVectorScale(rightVector, distance);
+	XMVECTOR velocityVector = XMLoadFloat3(&mVelocityVector);
+	velocityVector = XMVectorAdd(velocityVector, rightVector);
+	XMStoreFloat3(&mVelocityVector, velocityVector);
 }
 
 void Camera::Walk(const float distance) noexcept {
 	// velocity += look * dist 
 	XMVECTOR lookVector(XMLoadFloat3(&mLookVector));
-	lookVector = DirectX::XMVectorScale(lookVector, distance);
-	DirectX::XMVECTOR velocityVector = DirectX::XMLoadFloat3(&mVelocityVector);
-	velocityVector = DirectX::XMVectorAdd(velocityVector, lookVector);
-	DirectX::XMStoreFloat3(&mVelocityVector, velocityVector);
+	lookVector = XMVectorScale(lookVector, distance);
+	XMVECTOR velocityVector = XMLoadFloat3(&mVelocityVector);
+	velocityVector = XMVectorAdd(velocityVector, lookVector);
+	XMStoreFloat3(&mVelocityVector, velocityVector);
 }
 
 void Camera::Pitch(const float angleInRadians) noexcept {
@@ -104,5 +104,5 @@ void Camera::UpdateViewMatrix() noexcept {
 
 	XMMATRIX viewMatrix = XMMatrixLookToLH(position, lookVector, upVector);
 	XMStoreFloat4x4(&mViewMatrix, viewMatrix);
-	XMStoreFloat4x4(&mInverseViewMatrix, DirectX::XMMatrixInverse(nullptr, viewMatrix));
+	MathUtils::StoreInverseMatrix(mViewMatrix, mInverseViewMatrix);
 }

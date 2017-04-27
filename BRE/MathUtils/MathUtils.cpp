@@ -9,7 +9,7 @@ const float MathUtils::Infinity{ FLT_MAX };
 const float MathUtils::Pi{ 3.1415926535f };
 
 void MathUtils::ComputeMatrix(
-	DirectX::XMFLOAT4X4& m,
+	XMFLOAT4X4& m,
 	const float tx,
 	const float ty,
 	const float tz,
@@ -20,10 +20,10 @@ void MathUtils::ComputeMatrix(
 	const float ry,
 	const float rz) noexcept
 {
-	DirectX::XMStoreFloat4x4(&m, 
-		DirectX::XMMatrixScaling(sx, sy, sz) *  
-		DirectX::XMMatrixRotationX(rx) * 
-		DirectX::XMMatrixRotationY(ry) * 
-		DirectX::XMMatrixRotationZ(rz) *
-		DirectX::XMMatrixTranslation(tx, ty, tz));
+	XMStoreFloat4x4(&m, 
+		XMMatrixScaling(sx, sy, sz) *  
+		XMMatrixRotationX(rx) * 
+		XMMatrixRotationY(ry) * 
+		XMMatrixRotationZ(rz) *
+		XMMatrixTranslation(tx, ty, tz));
 }

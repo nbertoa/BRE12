@@ -10,6 +10,8 @@
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
+using namespace DirectX;
+
 void PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept {
 	ASSERT(IsDataValid() == false);
 	
@@ -71,7 +73,7 @@ void PostProcessPass::ExecuteBeginTask(
 	};
 	commandList.ResourceBarrier(_countof(barriers), barriers);
 
-	commandList.ClearRenderTargetView(renderTargetView, DirectX::Colors::Black, 0U, nullptr);
+	commandList.ClearRenderTargetView(renderTargetView, Colors::Black, 0U, nullptr);
 
 	CHECK_HR(commandList.Close());
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);

@@ -18,6 +18,8 @@
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
+using namespace DirectX;
+
 namespace {
 	// Geometry buffer formats
 	const DXGI_FORMAT sGeometryBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{
@@ -174,7 +176,7 @@ void GeometryPass::ExecuteBeginTask() noexcept {
 	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
 
 	float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[NORMAL_SMOOTHNESS], DirectX::Colors::Black, 0U, nullptr);
+	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[NORMAL_SMOOTHNESS], Colors::Black, 0U, nullptr);
 	commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[BASECOLOR_METALMASK], zero, 0U, nullptr);
 	commandList.ClearDepthStencilView(mDepthBufferView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0U, 0U, nullptr);
 

@@ -12,6 +12,8 @@
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
+using namespace DirectX;
+
 namespace {
 	void CreateCommandObjects(
 		ID3D12CommandAllocator* &commandAllocator,
@@ -57,7 +59,7 @@ void SkyBoxPass::Init(
 
 	// Build world matrix
 	const Mesh& mesh{ meshes[0] };
-	DirectX::XMFLOAT4X4 worldMatrix;
+	XMFLOAT4X4 worldMatrix;
 	MathUtils::ComputeMatrix(worldMatrix, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 
 	SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature();

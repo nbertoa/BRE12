@@ -13,6 +13,8 @@
 #include <ResourceManager\ResourceManager.h>
 #include <Scene/SceneUtils.h>
 
+using namespace DirectX;
+
 namespace {
 	SceneUtils::SceneResources sResourceContainer;
 
@@ -111,10 +113,10 @@ namespace {
 		float ty{ initY };
 		float tz{ initZ };
 		for (std::size_t i = 0UL; i < numMaterials; ++i) {
-			DirectX::XMFLOAT4X4 worldMatrix;
+			XMFLOAT4X4 worldMatrix;
 			MathUtils::ComputeMatrix(worldMatrix, tx, ty, tz, sS3, sS2, sS1);
 
-			DirectX::XMFLOAT4X4 inverseTransposeWorldMatrix;
+			XMFLOAT4X4 inverseTransposeWorldMatrix;
 			MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
 
 			Material mat(MaterialManager::GetMaterial(static_cast<MaterialManager::MaterialType>(i)));

@@ -17,6 +17,8 @@
 // "CBV(b1, visibility = SHADER_VISIBILITY_VERTEX), " \ 1 > Frame CBuffer
 // "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Cube Map texture
 
+using namespace DirectX;
+
 namespace {
 	ID3D12PipelineState* sPSO{ nullptr };
 	ID3D12RootSignature* sRootSignature{ nullptr };
@@ -59,7 +61,7 @@ void SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 void SkyBoxCmdListRecorder::Init(
 	const VertexAndIndexBufferCreator::VertexBufferData& vertexBufferData,
 	const VertexAndIndexBufferCreator::IndexBufferData indexBufferData, 
-	const DirectX::XMFLOAT4X4& worldMatrix,
+	const XMFLOAT4X4& worldMatrix,
 	ID3D12Resource& skyBoxCubeMap,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
@@ -121,7 +123,7 @@ bool SkyBoxCmdListRecorder::IsDataValid() const noexcept {
 	return result;
 }
 
-void SkyBoxCmdListRecorder::InitConstantBuffers(const DirectX::XMFLOAT4X4& worldMatrix) noexcept {
+void SkyBoxCmdListRecorder::InitConstantBuffers(const XMFLOAT4X4& worldMatrix) noexcept {
 	ASSERT(mObjectUploadCBuffer == nullptr);
 
 	// Create object cbuffer and fill it

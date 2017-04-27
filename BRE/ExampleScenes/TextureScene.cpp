@@ -13,6 +13,8 @@
 #include <ResourceManager\ResourceManager.h>
 #include <Scene/SceneUtils.h>
 
+using namespace DirectX;
+
 namespace {
 	SceneUtils::SceneResources sResourceContainer;
 
@@ -102,8 +104,8 @@ void TextureScene::CreateGeometryPassRecorders(
 
 				const float s{ scaleFactor };
 
-				DirectX::XMFLOAT4X4 world;
-				DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixScaling(s, s, s) * DirectX::XMMatrixTranslation(tx, ty, tz));
+				XMFLOAT4X4 world;
+				XMStoreFloat4x4(&world, XMMatrixScaling(s, s, s) * XMMatrixTranslation(tx, ty, tz));
 				currGeomData.mWorldMatrices.push_back(world);
 			}
 

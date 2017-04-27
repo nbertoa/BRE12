@@ -11,6 +11,8 @@
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
+using namespace DirectX;
+
 void LightingPass::Init(
 	ID3D12Resource& baseColorMetalMaskBuffer,
 	ID3D12Resource& normalSmoothnessBuffer,
@@ -119,7 +121,7 @@ void LightingPass::ExecuteBeginTask() noexcept {
 	ASSERT(barriersCount == 3UL);
 	commandList.ResourceBarrier(barriersCount, barriers);
 
-	commandList.ClearRenderTargetView(mRenderTargetView, DirectX::Colors::Black, 0U, nullptr);
+	commandList.ClearRenderTargetView(mRenderTargetView, Colors::Black, 0U, nullptr);
 
 	CHECK_HR(commandList.Close());
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
