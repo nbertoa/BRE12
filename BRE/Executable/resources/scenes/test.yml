@@ -1,0 +1,33 @@
+models:
+  unreal: resources/models/unreal.obj
+  mitsubaSphere: resources/models/mitsubaSphere.obj
+  torusKnot: resources/models/torusKnot.obj
+  
+textures:
+  brick_diffuse: resources/textures/brick/brick.dds
+  brick_height: resources/textures/brick/brick_height.dds
+  brick_normal: resources/textures/brick/brick_normal.dds
+  
+material properties:
+  - name: material1
+    base color: [1.0, 0.0, 0.5]
+    smoothness: 0.0
+    metal mask: 1.0
+  - name: material2
+    base color: [1.0, 0.0, 0.5]
+    smoothness: 0.0
+    metal mask: 1.0
+    
+material techniques:
+  - name: color mapping
+  - name: brick
+    diffuse texture: brick_diffuse
+    normal texture: brick_normal
+    height texture: brick_height
+    
+drawable objects:
+  - model: unreal
+    material properties: material1
+    material technique: brick
+    translation: [1.0, 2.0, 3.0]
+    
