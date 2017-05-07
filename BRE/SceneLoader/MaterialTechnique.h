@@ -1,16 +1,19 @@
 #pragma once
 
+#include <Utils\DebugUtils.h>
+
 struct ID3D12Resource;
 
 class MaterialTechnique {
 public:
-	enum class TechniqueType {
+	enum TechniqueType {
 		COLOR_MAPPING = 0,
 		COLOR_NORMAL_MAPPING,
 		COLOR_HEIGHT_MAPPING,
 		TEXTURE_MAPPING,
 		NORMAL_MAPPING,
 		HEIGHT_MAPPING,	
+		NUM_TECHNIQUES,
 	};
 
 	MaterialTechnique(
@@ -22,9 +25,41 @@ public:
 		, mHeightTexture(heightTexture)
 	{}
 
-	ID3D12Resource* &GetDiffuseTexture() noexcept { return mDiffuseTexture; }
-	ID3D12Resource* &GetNormalTexture() noexcept { return mNormalTexture; }
-	ID3D12Resource* &GetHeightTexture() noexcept { return mHeightTexture; }
+	ID3D12Resource& GetDiffuseTexture() const noexcept 
+	{ 
+		ASSERT(mDiffuseTexture != nullptr);
+		return *mDiffuseTexture; 
+	}
+
+	void SetDiffuseTexture(ID3D12Resource* texture) noexcept
+	{
+		ASSERT(texture != nullptr);
+		mDiffuseTexture = texture;
+	}
+
+	ID3D12Resource& GetNormalTexture() const noexcept
+	{
+		ASSERT(mNormalTexture != nullptr);
+		return *mNormalTexture;
+	}
+
+	void SetNormalTexture(ID3D12Resource* texture) noexcept
+	{
+		ASSERT(texture != nullptr);
+		mNormalTexture = texture;
+	}
+
+	ID3D12Resource& GetHeightTexture() const noexcept
+	{
+		ASSERT(mHeightTexture != nullptr);
+		return *mHeightTexture;
+	}
+
+	void SetHeightTexture(ID3D12Resource* texture) noexcept
+	{
+		ASSERT(texture != nullptr);
+		mHeightTexture = texture;
+	}
 
 	TechniqueType GetType() const noexcept;
 

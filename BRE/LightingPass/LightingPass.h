@@ -6,7 +6,6 @@
 
 #include <EnvironmentLightPass\EnvironmentLightPass.h>
 #include <CommandManager\CommandListPerFrame.h>
-#include <LightingPass\LightingPassCmdListRecorder.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct FrameCBuffer;
@@ -15,18 +14,13 @@ struct ID3D12Resource;
 // Pass responsible to execute recorders related with deferred shading lighting pass
 class LightingPass {
 public:
-	using CommandListRecorders = std::vector<std::unique_ptr<LightingPassCmdListRecorder>>;
-
 	LightingPass() = default;
 	~LightingPass() = default;
 	LightingPass(const LightingPass&) = delete;
 	const LightingPass& operator=(const LightingPass&) = delete;
 	LightingPass(LightingPass&&) = delete;
 	LightingPass& operator=(LightingPass&&) = delete;
-
-	// You should get recorders and fill them, before calling Init()
-	__forceinline CommandListRecorders& GetCommandListRecorders() noexcept { return mCommandListRecorders; }
-
+	
 	// Preconditions:
 	// - "geometryBuffers" must not be nullptr
 	// - "geometryBuffersCount" must be greater than zero
@@ -62,6 +56,4 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 
 	EnvironmentLightPass mEnvironmentLightPass;
-
-	CommandListRecorders mCommandListRecorders;
 };

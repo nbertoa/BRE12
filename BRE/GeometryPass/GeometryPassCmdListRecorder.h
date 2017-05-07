@@ -24,6 +24,7 @@ public:
 		std::vector<DirectX::XMFLOAT4X4> mWorldMatrices;
 		std::vector<DirectX::XMFLOAT4X4> mInverseTransposeWorldMatrices;
 	};
+	using GeometryDataVector = std::vector<GeometryData>;
 
 	GeometryPassCmdListRecorder() = default;
 	virtual ~GeometryPassCmdListRecorder() {}

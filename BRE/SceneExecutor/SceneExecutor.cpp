@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <CommandListExecutor\CommandListExecutor.h>
 #include <CommandManager\CommandAllocatorManager.h>
 #include <CommandManager/CommandListManager.h>
 #include <CommandManager\CommandQueueManager.h>
@@ -18,6 +19,7 @@
 #include <ResourceManager\ResourceManager.h>
 #include <ResourceManager\UploadBufferManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
+#include <SceneLoader\SceneLoader.h>
 #include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
@@ -25,6 +27,8 @@
 using namespace DirectX;
 
 namespace {
+	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
+
 	void InitSystems(const HINSTANCE moduleInstanceHandle) noexcept 
 	{
 		const HWND windowHandle = DirectXManager::GetWindowHandle();
@@ -42,6 +46,8 @@ namespace {
 		DepthStencilDescriptorManager::Init();
 		RenderTargetDescriptorManager::Init();
 		MaterialManager::Init();
+
+		CommandListExecutor::Create(MAX_NUM_CMD_LISTS);
 
 		//ShowCursor(false);
 	}
@@ -91,18 +97,25 @@ SceneExecutor::~SceneExecutor() {
 	mTaskSchedulerInit.terminate();
 
 	FinalizeSystems();
+
+	delete mScene;
 }
 
 void SceneExecutor::Execute() noexcept {
 	RunMessageLoop();
 }
 
-SceneExecutor::SceneExecutor(HINSTANCE moduleInstanceHandle, Scene* scene)
+SceneExecutor::SceneExecutor(HINSTANCE moduleInstanceHandle, const char* sceneFilePath)
 	: mTaskSchedulerInit()
-	, mScene(scene)
 {
-	ASSERT(scene != nullptr);
+	ASSERT(sceneFilePath != nullptr);
+
 	DirectXManager::Init(moduleInstanceHandle);
 	InitSystems(moduleInstanceHandle);
-	mRenderManager = &RenderManager::Create(*mScene.get());
+
+	SceneLoader sceneLoader;
+	mScene = sceneLoader.LoadScene(sceneFilePath);
+	ASSERT(mScene != nullptr);
+
+	mRenderManager = &RenderManager::Create(*mScene);
 }

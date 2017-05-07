@@ -123,11 +123,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="SceneUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="SceneUtils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

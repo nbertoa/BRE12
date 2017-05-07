@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <SceneLoader/MaterialProperties.h>
+#include <ShaderUtils/MaterialProperties.h>
 
 namespace YAML {
 	class Node;

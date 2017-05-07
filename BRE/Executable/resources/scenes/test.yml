@@ -7,6 +7,9 @@ textures:
   brick_diffuse: resources/textures/brick/brick.dds
   brick_height: resources/textures/brick/brick_height.dds
   brick_normal: resources/textures/brick/brick_normal.dds
+  sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
+  cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
+  cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds
   
 material properties:
   - name: material1
@@ -14,20 +17,34 @@ material properties:
     smoothness: 0.0
     metal mask: 1.0
   - name: material2
-    base color: [1.0, 0.0, 0.5]
-    smoothness: 0.0
-    metal mask: 1.0
+    base color: [1.0, 1.0, 1.0]
+    smoothness: 0.6
+    metal mask: 0.0
     
 material techniques:
   - name: color mapping
   - name: brick
     diffuse texture: brick_diffuse
-    normal texture: brick_normal
-    height texture: brick_height
     
 drawable objects:
   - model: unreal
     material properties: material1
     material technique: brick
-    translation: [1.0, 2.0, 3.0]
+    translation: [0.0, 0.0, 50.0]
+    scale: [0.2, 0.2, 0.2]
+  - model: unreal
+    material properties: material1
+    material technique: brick
+    translation: [50.0, 0.0, 50.0]
+    scale: [0.2, 0.2, 0.2]
+  - model: unreal
+    material properties: material2
+    material technique: brick
+    translation: [100.0, 0.0, 50.0]
+    scale: [0.2, 0.2, 0.2]
+    
+environment:
+  - sky box texture: sky map
+    diffuse irradiance texture: cube map diffuse
+    specular pre convolved environment texture: cube map specular
     

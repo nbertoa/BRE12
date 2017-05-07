@@ -1,41 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <FxCompile Include="Shaders\PunctualLight\PS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\PunctualLight\RS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\PunctualLight\VS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\PunctualLight\GS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="LightingPass.cpp" />
-    <ClCompile Include="LightingPassCmdListRecorder.cpp" />
-    <ClCompile Include="PunctualLight.cpp" />
-    <ClCompile Include="Recorders\PunctualLightCmdListRecorder.cpp">
-      <Filter>Recorders</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LightingPass.h" />
-    <ClInclude Include="LightingPassCmdListRecorder.h" />
-    <ClInclude Include="PunctualLight.h" />
-    <ClInclude Include="Recorders\PunctualLightCmdListRecorder.h">
-      <Filter>Recorders</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{ae977a0a-5111-427e-b4c8-e0927049108d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Recorders">
-      <UniqueIdentifier>{816a2ae2-4059-435d-a44c-862b3ef2b857}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
 </Project>

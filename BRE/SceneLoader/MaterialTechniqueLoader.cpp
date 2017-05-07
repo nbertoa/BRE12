@@ -69,16 +69,13 @@ void MaterialTechniqueLoader::UpdateMaterialTechnique(
 {
 	ID3D12Resource& texture = mTextureLoader.GetTexture(materialTechniqueTextureName);
 	if (materialTechniquePropertyName == "diffuse texture") {
-		ASSERT(materialTechnique.GetDiffuseTexture() == nullptr);
-		materialTechnique.GetDiffuseTexture() = &texture;
+		materialTechnique.SetDiffuseTexture(&texture);
 	}
 	else if (materialTechniquePropertyName == "normal texture") {
-		ASSERT(materialTechnique.GetNormalTexture() == nullptr);
-		materialTechnique.GetNormalTexture() = &texture;
+		materialTechnique.SetNormalTexture(&texture);
 	}
 	else if (materialTechniquePropertyName == "height texture") {
-		ASSERT(materialTechnique.GetHeightTexture() == nullptr);
-		materialTechnique.GetHeightTexture() = &texture;
+		materialTechnique.SetHeightTexture(&texture);
 	}
 	else {
 		ASSERT(false);

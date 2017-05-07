@@ -90,10 +90,14 @@ namespace {
 	}
 }
 
+GeometryPass::GeometryPass(GeometryPassCommandListRecorders& geometryPassCommandListRecorders)
+	: mGeometryPassCommandListRecorders(geometryPassCommandListRecorders)
+{}
+
 void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept {
 	ASSERT(IsDataValid() == false);
 	
-	ASSERT(mCommandListRecorders.empty() == false);
+	ASSERT(mGeometryPassCommandListRecorders.empty() == false);
 
 	CreateGeometryBuffersAndRenderTargetViews(mGeometryBuffers, mGeometryBufferRenderTargetViews);
 
@@ -107,7 +111,7 @@ void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noex
 	TextureCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
 	
 	// Init geometry command list recorders
-	for (CommandListRecorders::value_type& recorder : mCommandListRecorders) {
+	for (GeometryPassCommandListRecorders::value_type& recorder : mGeometryPassCommandListRecorders) {
 		ASSERT(recorder.get() != nullptr);
 		recorder->Init(mGeometryBufferRenderTargetViews, BUFFERS_COUNT, mDepthBufferView);
 	}
@@ -120,7 +124,7 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 
 	ExecuteBeginTask();
 
-	const std::uint32_t taskCount{ static_cast<std::uint32_t>(mCommandListRecorders.size()) };
+	const std::uint32_t taskCount{ static_cast<std::uint32_t>(mGeometryPassCommandListRecorders.size()) };
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
 
 	// Execute tasks
@@ -128,7 +132,7 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
 		[&](const tbb::blocked_range<size_t>& r) {
 		for (size_t i = r.begin(); i != r.end(); ++i)
-			mCommandListRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
+			mGeometryPassCommandListRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
 	}
 	);
 
@@ -152,7 +156,7 @@ bool GeometryPass::IsDataValid() const noexcept {
 	}
 
 	const bool b =
-		mCommandListRecorders.empty() == false &&
+		mGeometryPassCommandListRecorders.empty() == false &&
 		mDepthBufferView.ptr != 0UL;
 
 		return b;

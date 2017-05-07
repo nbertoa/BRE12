@@ -1,6 +1,11 @@
 #pragma once
 
+#include <memory>
+
+#include <GeometryPass\GeometryPassCmdListRecorder.h>
+#include <Scene\Scene.h>
 #include <SceneLoader\DrawableObjectLoader.h>
+#include <SceneLoader\EnvironmentLoader.h>
 #include <SceneLoader\MaterialPropertiesLoader.h>
 #include <SceneLoader\MaterialTechniqueLoader.h>
 #include <SceneLoader\ModelLoader.h>
@@ -17,9 +22,13 @@ public:
 	SceneLoader(SceneLoader&&) = delete;
 	SceneLoader& operator=(SceneLoader&&) = delete;
 
-	void LoadScene(const char* sceneFilePath) noexcept;
+	Scene* LoadScene(const char* sceneFilePath) noexcept;
 
 private:
+	void GenerateGeometryPassRecorders(Scene& scene) noexcept;
+	void GenerateGeometryPassRecordersForTextureMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+
+
 	ID3D12CommandAllocator* mCommandAllocator{ nullptr };
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };
 	ModelLoader mModelLoader;
@@ -27,4 +36,5 @@ private:
 	MaterialPropertiesLoader mMaterialPropertiesLoader;
 	MaterialTechniqueLoader mMaterialTechniqueLoader;
 	DrawableObjectLoader mDrawableObjectLoader;
+	EnvironmentLoader mEnvironmentLoader;
 };

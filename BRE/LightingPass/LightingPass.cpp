@@ -6,7 +6,6 @@
 
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <DXUtils/d3dx12.h>
-#include <LightingPass\Recorders\PunctualLightCmdListRecorder.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
@@ -27,10 +26,7 @@ void LightingPass::Init(
 	mNormalSmoothnessBuffer = &normalSmoothnessBuffer;
 	mRenderTargetView = renderTargetView;
 	mDepthBuffer = &depthBuffer;
-
-	// Initialize recorder's pso
-	PunctualLightCmdListRecorder::InitSharedPSOAndRootSignature();
-
+	
 	// Initialize ambient pass
 	mEnvironmentLightPass.Init(
 		*mBaseColorMetalMaskBuffer,
@@ -40,11 +36,6 @@ void LightingPass::Init(
 		specularPreConvolvedCubeMap,
 		renderTargetView);
 
-	for (CommandListRecorders::value_type& recorder : mCommandListRecorders) {
-		ASSERT(recorder.get() != nullptr);
-		recorder->SetRenderTargetView(renderTargetView);
-	}
-
 	ASSERT(IsDataValid());
 }
 
@@ -52,23 +43,6 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(IsDataValid());
 
 	ExecuteBeginTask();
-
-	CommandListExecutor::Get().ResetExecutedCommandListCount();
-	const std::uint32_t lightTaskCount{ static_cast<std::uint32_t>(mCommandListRecorders.size())};
-	
-	// Execute tasks
-	const std::uint32_t grainSize(max(1U, lightTaskCount / SettingsManager::sCpuProcessorCount));
-	tbb::parallel_for(tbb::blocked_range<std::size_t>(0, lightTaskCount, grainSize),
-		[&](const tbb::blocked_range<size_t>& r) {
-		for (size_t i = r.begin(); i != r.end(); ++i)
-			mCommandListRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
-	}
-	);
-	
-	// Wait until all previous tasks command lists are executed
-	while (CommandListExecutor::Get().GetExecutedCommandListCount() < lightTaskCount) {
-		Sleep(0U);
-	}
 
 	mEnvironmentLightPass.Execute(frameCBuffer);
 

@@ -126,8 +126,8 @@
   <ItemGroup>
     <ClInclude Include="DrawableObject.h" />
     <ClInclude Include="DrawableObjectLoader.h" />
+    <ClInclude Include="EnvironmentLoader.h" />
     <ClInclude Include="MaterialPropertiesLoader.h" />
-    <ClInclude Include="MaterialProperties.h" />
     <ClInclude Include="MaterialTechnique.h" />
     <ClInclude Include="MaterialTechniqueLoader.h" />
     <ClInclude Include="ModelLoader.h" />
@@ -137,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DrawableObjectLoader.cpp" />
+    <ClCompile Include="EnvironmentLoader.cpp" />
     <ClCompile Include="MaterialPropertiesLoader.cpp" />
     <ClCompile Include="MaterialTechniqueLoader.cpp" />
     <ClCompile Include="MaterialTechnique.cpp" />

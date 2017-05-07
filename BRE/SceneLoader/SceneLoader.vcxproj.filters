@@ -5,12 +5,12 @@
     <ClInclude Include="SceneLoader.h" />
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="TextureLoader.h" />
-    <ClInclude Include="MaterialProperties.h" />
     <ClInclude Include="MaterialPropertiesLoader.h" />
     <ClInclude Include="MaterialTechniqueLoader.h" />
     <ClInclude Include="MaterialTechnique.h" />
     <ClInclude Include="DrawableObject.h" />
     <ClInclude Include="DrawableObjectLoader.h" />
+    <ClInclude Include="EnvironmentLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="YamlUtils.cpp" />
@@ -21,5 +21,6 @@
     <ClCompile Include="MaterialTechniqueLoader.cpp" />
     <ClCompile Include="DrawableObjectLoader.cpp" />
     <ClCompile Include="MaterialTechnique.cpp" />
+    <ClCompile Include="EnvironmentLoader.cpp" />
   </ItemGroup>
 </Project>

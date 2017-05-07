@@ -19,8 +19,6 @@
 using namespace DirectX;
 
 namespace {
-	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };	
-	
 	void UpdateCameraAndFrameCBuffer(
 		const float elapsedFrameTime,
 		Camera& camera,		
@@ -147,9 +145,9 @@ RenderManager& RenderManager::Create(Scene& scene) noexcept {
 	return *sRenderManager;
 }
 
-RenderManager::RenderManager(Scene& scene) {
-	CommandListExecutor::Create(MAX_NUM_CMD_LISTS);
-
+RenderManager::RenderManager(Scene& scene) 
+	: mGeometryPass(scene.GetGeometryPassCommandListRecorders())
+{
 	mFence = &FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE);
 
 	CreateFrameBuffersAndRenderTargetViews();
@@ -180,26 +178,22 @@ RenderManager::RenderManager(Scene& scene) {
 	parent()->spawn(*this);
 }
 
-void RenderManager::InitPasses(Scene& scene) noexcept {
-	scene.Init();
-	
+void RenderManager::InitPasses(Scene& scene) noexcept {	
 	// Generate recorders for all the passes
-	scene.CreateGeometryPassRecorders(mGeometryPass.GetCommandListRecorders());
 	mGeometryPass.Init(DepthStencilCpuDesc());
 
-	ID3D12Resource* skyBoxCubeMap;
-	ID3D12Resource* diffuseIrradianceCubeMap;
-	ID3D12Resource* specularPreConvolvedCubeMap;
-	scene.CreateIndirectLightingResources(skyBoxCubeMap, diffuseIrradianceCubeMap, specularPreConvolvedCubeMap);
+	ID3D12Resource* skyBoxCubeMap = scene.GetSkyBoxCubeMap();
+	ID3D12Resource* diffuseIrradianceCubeMap = scene.GetDiffuseIrradianceCubeMap();
+	ID3D12Resource* specularPreConvolvedCubeMap = scene.GetSpecularPreConvolvedCubeMap();
 	ASSERT(skyBoxCubeMap != nullptr);
 	ASSERT(diffuseIrradianceCubeMap != nullptr);
 	ASSERT(specularPreConvolvedCubeMap != nullptr);
 
-	scene.CreateLightingPassRecorders(
+	/*scene.CreateLightingPassRecorders(
 		mGeometryPass.GetGeometryBuffers(), 
 		GeometryPass::BUFFERS_COUNT, 
 		*mDepthBuffer, 
-		mLightingPass.GetCommandListRecorders());
+		mLightingPass.GetCommandListRecorders());*/
 
 	mLightingPass.Init(
 		*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(),

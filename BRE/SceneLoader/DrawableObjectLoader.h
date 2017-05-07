@@ -1,9 +1,11 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <SceneLoader\DrawableObject.h>
+#include <SceneLoader\MaterialTechnique.h>
 
 namespace YAML {
 	class Node;
@@ -15,6 +17,8 @@ class ModelLoader;
 
 class DrawableObjectLoader {
 public:
+	using DrawableObjectsByModelName = std::unordered_map<std::string, std::vector<DrawableObject>>;
+
 	DrawableObjectLoader(
 		const MaterialPropertiesLoader& materialPropertiesLoader,
 		const MaterialTechniqueLoader& materialTechniqueLoader,
@@ -31,10 +35,14 @@ public:
 
 	void LoadDrawableObjects(const YAML::Node& rootNode) noexcept;
 
-	const std::vector<DrawableObject>& GetDrawableObjects() const noexcept { return mDrawableObjects; }
+	const DrawableObjectsByModelName& GetDrawableObjectsByModelNameByTechniqueType(
+		const MaterialTechnique::TechniqueType techniqueType) const noexcept
+	{
+		return mDrawableObjectsByModelName[techniqueType];
+	}
 
 private:
-	std::vector<DrawableObject> mDrawableObjects;
+	DrawableObjectsByModelName mDrawableObjectsByModelName[MaterialTechnique::NUM_TECHNIQUES];
 
 	const MaterialPropertiesLoader& mMaterialPropertiesLoader;
 	const MaterialTechniqueLoader& mMaterialTechniqueLoader;

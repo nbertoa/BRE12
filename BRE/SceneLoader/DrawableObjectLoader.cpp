@@ -33,6 +33,8 @@ void DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexc
 	ASSERT(drawableObjectsNode.IsDefined());
 	ASSERT(drawableObjectsNode.IsSequence());
 
+	// We need model name to fill mDrawableObjectsByModelName
+	std::string modelName;
 	std::string pairFirstValue;
 	std::string pairSecondValue;
 	for (YAML::const_iterator seqIt = drawableObjectsNode.begin(); seqIt != drawableObjectsNode.end(); ++seqIt) {
@@ -53,6 +55,7 @@ void DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexc
 			if (pairFirstValue == "model") {
 				ASSERT(model == nullptr);
 				pairSecondValue = mapIt->second.as<std::string>();
+				modelName = pairSecondValue;
 				model = &mModelLoader.GetModel(pairSecondValue);
 			}
 			else if (pairFirstValue == "material properties") {
@@ -104,6 +107,8 @@ void DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexc
 			*materialProperties,
 			*materialTechnique,
 			worldMatrix);
-		mDrawableObjects.emplace_back(drawableObject);
+
+		DrawableObjectsByModelName& drawableObjectsByModelName = mDrawableObjectsByModelName[materialTechnique->GetType()];
+		drawableObjectsByModelName[modelName].emplace_back(drawableObject);
 	}
 }
