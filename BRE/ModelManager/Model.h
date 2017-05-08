@@ -9,6 +9,7 @@
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
+namespace BRE {
 // - To load model data from a filepath.
 // - To get meshes 
 class Model {
@@ -45,3 +46,6 @@ public:
 private:
     std::vector<Mesh> mMeshes;
 };
+
+}
+

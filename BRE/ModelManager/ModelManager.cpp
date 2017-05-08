@@ -3,6 +3,7 @@
 #include <GeometryGenerator\GeometryGenerator.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 ModelManager::Models ModelManager::mModels;
 std::mutex ModelManager::mMutex;
 
@@ -10,7 +11,7 @@ void
 ModelManager::EraseAll() noexcept
 {
     for (Model* model : mModels) {
-        ASSERT(model != nullptr);
+        BRE_ASSERT(model != nullptr);
         delete model;
     }
 }
@@ -21,7 +22,7 @@ ModelManager::LoadModel(const char* modelFilename,
                         Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
                         Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
 {
-    ASSERT(modelFilename != nullptr);
+    BRE_ASSERT(modelFilename != nullptr);
 
     Model* model{ nullptr };
 
@@ -29,7 +30,7 @@ ModelManager::LoadModel(const char* modelFilename,
     model = new Model(modelFilename, commandList, uploadVertexBuffer, uploadIndexBuffer);
     mMutex.unlock();
 
-    ASSERT(model != nullptr);
+    BRE_ASSERT(model != nullptr);
     mModels.insert(model);
 
     return *model;
@@ -53,7 +54,7 @@ ModelManager::CreateBox(const float width,
     model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
     mMutex.unlock();
 
-    ASSERT(model != nullptr);
+    BRE_ASSERT(model != nullptr);
     mModels.insert(model);
 
     return *model;
@@ -76,7 +77,7 @@ ModelManager::CreateSphere(const float radius,
     model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
     mMutex.unlock();
 
-    ASSERT(model != nullptr);
+    BRE_ASSERT(model != nullptr);
     mModels.insert(model);
 
     return *model;
@@ -98,7 +99,7 @@ ModelManager::CreateGeosphere(const float radius,
     model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
     mMutex.unlock();
 
-    ASSERT(model != nullptr);
+    BRE_ASSERT(model != nullptr);
     mModels.insert(model);
 
     return *model;
@@ -123,7 +124,7 @@ ModelManager::CreateCylinder(const float bottomRadius,
     model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
     mMutex.unlock();
 
-    ASSERT(model != nullptr);
+    BRE_ASSERT(model != nullptr);
     mModels.insert(model);
 
     return *model;
@@ -147,8 +148,10 @@ ModelManager::CreateGrid(const float width,
     model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
     mMutex.unlock();
 
-    ASSERT(model != nullptr);
+    BRE_ASSERT(model != nullptr);
     mModels.insert(model);
 
     return *model;
 }
+}
+

@@ -7,6 +7,7 @@
 
 struct ID3D12Resource;
 
+namespace BRE {
 // To track resource states.
 // Its functionality includes:
 // - GetResource state registration
@@ -39,3 +40,5 @@ private:
     using StateByResource = tbb::concurrent_hash_map<ID3D12Resource*, D3D12_RESOURCE_STATES>;
     static StateByResource mStateByResource;
 };
+}
+

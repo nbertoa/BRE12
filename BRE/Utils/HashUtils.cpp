@@ -2,10 +2,11 @@
 
 #include "DebugUtils.h"
 
+namespace BRE {
 namespace HashUtils {
 std::size_t HashCString(const char* str) noexcept
 {
-    ASSERT(str != nullptr);
+    BRE_ASSERT(str != nullptr);
     std::size_t hashValue = 0UL;
     while (*str != '\0') {
         hashValue ^= *str + 0x9e3779b9 + (hashValue << 6UL) + (hashValue >> 2UL);
@@ -15,3 +16,6 @@ std::size_t HashCString(const char* str) noexcept
     return hashValue;
 }
 }
+}
+
+

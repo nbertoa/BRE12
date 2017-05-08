@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+namespace BRE {
 class MaterialProperties {
 public:
     MaterialProperties() = default;
@@ -39,3 +40,5 @@ private:
     float mSmoothness{ 1.0f };
     float mPadding[3U];
 };
+}
+

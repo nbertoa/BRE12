@@ -18,10 +18,12 @@
 #include <GeometryPass\Recorders\TextureCmdListRecorder.h>
 #include <MathUtils\MathUtils.h>
 #include <ModelManager\Model.h>
+#include <Scene\Scene.h>
 #include <Utils/DebugUtils.h>
 
 using namespace DirectX;
 
+namespace BRE {
 SceneLoader::SceneLoader()
     : mMaterialTechniqueLoader(mTextureLoader)
     , mDrawableObjectLoader(mMaterialPropertiesLoader, mMaterialTechniqueLoader, mModelLoader)
@@ -36,10 +38,10 @@ SceneLoader::SceneLoader()
 Scene*
 SceneLoader::LoadScene(const char* sceneFilePath) noexcept
 {
-    ASSERT(sceneFilePath != nullptr);
+    BRE_ASSERT(sceneFilePath != nullptr);
 
     const YAML::Node rootNode = YAML::LoadFile(sceneFilePath);
-    ASSERT_MSG(rootNode.IsDefined(), L"Failed to open yaml file");
+    BRE_ASSERT_MSG(rootNode.IsDefined(), L"Failed to open yaml file");
 
     mModelLoader.LoadModels(rootNode, *mCommandAllocator, *mCommandList);
     mTextureLoader.LoadTextures(rootNode, *mCommandAllocator, *mCommandList);
@@ -70,7 +72,7 @@ SceneLoader::GenerateGeometryPassRecorders(Scene& scene) noexcept
 }
 
 void
-SceneLoader::GenerateGeometryPassRecordersForColorMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept
+SceneLoader::GenerateGeometryPassRecordersForColorMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept
 {
     const DrawableObjectLoader::DrawableObjectsByModelName& drawableObjectsByModelName =
         mDrawableObjectLoader.GetDrawableObjectsByModelNameByTechniqueType(MaterialTechnique::COLOR_MAPPING);
@@ -88,7 +90,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorMapping(Scene::GeometryPassCom
     std::size_t geometryDataVectorOffset = 0;
     for (const DrawableObjectLoader::DrawableObjectsByModelName::value_type& pair : drawableObjectsByModelName) {
         const std::vector<DrawableObject>& drawableObjects = pair.second;
-        ASSERT(drawableObjects.empty() == false);
+        BRE_ASSERT(drawableObjects.empty() == false);
 
         // Build geometry data vertex and index buffers for all meshes
         const Model& model = drawableObjects[0].GetModel();
@@ -133,7 +135,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorMapping(Scene::GeometryPassCom
 }
 
 void
-SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept
+SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept
 {
     const DrawableObjectLoader::DrawableObjectsByModelName& drawableObjectsByModelName =
         mDrawableObjectLoader.GetDrawableObjectsByModelNameByTechniqueType(MaterialTechnique::COLOR_NORMAL_MAPPING);
@@ -152,7 +154,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(Scene::GeometryP
     std::size_t geometryDataVectorOffset = 0;
     for (const DrawableObjectLoader::DrawableObjectsByModelName::value_type& pair : drawableObjectsByModelName) {
         const std::vector<DrawableObject>& drawableObjects = pair.second;
-        ASSERT(drawableObjects.empty() == false);
+        BRE_ASSERT(drawableObjects.empty() == false);
 
         // Build geometry data vertex and index buffers for all meshes
         const Model& model = drawableObjects[0].GetModel();
@@ -202,7 +204,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(Scene::GeometryP
 }
 
 void
-SceneLoader::GenerateGeometryPassRecordersForColorHeightMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept
+SceneLoader::GenerateGeometryPassRecordersForColorHeightMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept
 {
     const DrawableObjectLoader::DrawableObjectsByModelName& drawableObjectsByModelName =
         mDrawableObjectLoader.GetDrawableObjectsByModelNameByTechniqueType(MaterialTechnique::COLOR_HEIGHT_MAPPING);
@@ -222,7 +224,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorHeightMapping(Scene::GeometryP
     std::size_t geometryDataVectorOffset = 0;
     for (const DrawableObjectLoader::DrawableObjectsByModelName::value_type& pair : drawableObjectsByModelName) {
         const std::vector<DrawableObject>& drawableObjects = pair.second;
-        ASSERT(drawableObjects.empty() == false);
+        BRE_ASSERT(drawableObjects.empty() == false);
 
         // Build geometry data vertex and index buffers for all meshes
         const Model& model = drawableObjects[0].GetModel();
@@ -277,7 +279,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorHeightMapping(Scene::GeometryP
 }
 
 void
-SceneLoader::GenerateGeometryPassRecordersForTextureMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept
+SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept
 {
     const DrawableObjectLoader::DrawableObjectsByModelName& drawableObjectsByModelName =
         mDrawableObjectLoader.GetDrawableObjectsByModelNameByTechniqueType(MaterialTechnique::TEXTURE_MAPPING);
@@ -296,7 +298,7 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(Scene::GeometryPassC
     std::size_t geometryDataVectorOffset = 0;
     for (const DrawableObjectLoader::DrawableObjectsByModelName::value_type& pair : drawableObjectsByModelName) {
         const std::vector<DrawableObject>& drawableObjects = pair.second;
-        ASSERT(drawableObjects.empty() == false);
+        BRE_ASSERT(drawableObjects.empty() == false);
 
         // Build geometry data vertex and index buffers for all meshes
         const Model& model = drawableObjects[0].GetModel();
@@ -346,7 +348,7 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(Scene::GeometryPassC
 }
 
 void
-SceneLoader::GenerateGeometryPassRecordersForNormalMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept
+SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept
 {
     const DrawableObjectLoader::DrawableObjectsByModelName& drawableObjectsByModelName =
         mDrawableObjectLoader.GetDrawableObjectsByModelNameByTechniqueType(MaterialTechnique::NORMAL_MAPPING);
@@ -366,7 +368,7 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(Scene::GeometryPassCo
     std::size_t geometryDataVectorOffset = 0;
     for (const DrawableObjectLoader::DrawableObjectsByModelName::value_type& pair : drawableObjectsByModelName) {
         const std::vector<DrawableObject>& drawableObjects = pair.second;
-        ASSERT(drawableObjects.empty() == false);
+        BRE_ASSERT(drawableObjects.empty() == false);
 
         // Build geometry data vertex and index buffers for all meshes
         const Model& model = drawableObjects[0].GetModel();
@@ -418,7 +420,7 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(Scene::GeometryPassCo
 }
 
 void
-SceneLoader::GenerateGeometryPassRecordersForHeightMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept
+SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept
 {
     const DrawableObjectLoader::DrawableObjectsByModelName& drawableObjectsByModelName =
         mDrawableObjectLoader.GetDrawableObjectsByModelNameByTechniqueType(MaterialTechnique::HEIGHT_MAPPING);
@@ -439,7 +441,7 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(Scene::GeometryPassCo
     std::size_t geometryDataVectorOffset = 0;
     for (const DrawableObjectLoader::DrawableObjectsByModelName::value_type& pair : drawableObjectsByModelName) {
         const std::vector<DrawableObject>& drawableObjects = pair.second;
-        ASSERT(drawableObjects.empty() == false);
+        BRE_ASSERT(drawableObjects.empty() == false);
 
         // Build geometry data vertex and index buffers for all meshes
         const Model& model = drawableObjects[0].GetModel();
@@ -495,3 +497,5 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(Scene::GeometryPassCo
 
     commandListRecorders.push_back(std::unique_ptr<GeometryPassCmdListRecorder>(commandListRecorder));
 }
+}
+

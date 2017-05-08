@@ -4,6 +4,7 @@
 #include <SettingsManager\SettingsManager.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 PSOManager::PSOs PSOManager::mPSOs;
 std::mutex PSOManager::mMutex;
 
@@ -11,7 +12,7 @@ void
 PSOManager::EraseAll() noexcept
 {
     for (ID3D12PipelineState* pso : mPSOs) {
-        ASSERT(pso != nullptr);
+        BRE_ASSERT(pso != nullptr);
         pso->Release();
     }
 }
@@ -37,7 +38,7 @@ PSOManager::PSOCreationData::IsDataValid() const noexcept
 ID3D12PipelineState&
 PSOManager::CreateGraphicsPSO(const PSOManager::PSOCreationData& psoData) noexcept
 {
-    ASSERT(psoData.IsDataValid());
+    BRE_ASSERT(psoData.IsDataValid());
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDescriptor = {};
     psoDescriptor.BlendState = psoData.mBlendDescriptor;
@@ -71,11 +72,13 @@ PSOManager::CreateGraphicsPSOByDescriptor(const D3D12_GRAPHICS_PIPELINE_STATE_DE
     ID3D12PipelineState* pso{ nullptr };
 
     mMutex.lock();
-    CHECK_HR(DirectXManager::GetDevice().CreateGraphicsPipelineState(&psoDescriptor, IID_PPV_ARGS(&pso)));
+    BRE_CHECK_HR(DirectXManager::GetDevice().CreateGraphicsPipelineState(&psoDescriptor, IID_PPV_ARGS(&pso)));
     mMutex.unlock();
 
-    ASSERT(pso != nullptr);
+    BRE_ASSERT(pso != nullptr);
     mPSOs.insert(pso);
 
     return *pso;
 }
+}
+

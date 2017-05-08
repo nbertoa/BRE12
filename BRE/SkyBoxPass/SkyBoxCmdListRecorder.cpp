@@ -12,12 +12,13 @@
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
+using namespace DirectX;
+
+namespace BRE {
 // Root Signature:
 // "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Object CBuffers
 // "CBV(b1, visibility = SHADER_VISIBILITY_VERTEX), " \ 1 > Frame CBuffer
 // "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Cube Map texture
-
-using namespace DirectX;
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -27,8 +28,8 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 void
 SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature() noexcept
 {
-    ASSERT(sPSO == nullptr);
-    ASSERT(sRootSignature == nullptr);
+    BRE_ASSERT(sPSO == nullptr);
+    BRE_ASSERT(sRootSignature == nullptr);
 
     PSOManager::PSOCreationData psoData{};
 
@@ -56,8 +57,8 @@ SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature() noexcept
     psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
-    ASSERT(sPSO != nullptr);
-    ASSERT(sRootSignature != nullptr);
+    BRE_ASSERT(sPSO != nullptr);
+    BRE_ASSERT(sRootSignature != nullptr);
 }
 
 void
@@ -68,7 +69,7 @@ SkyBoxCmdListRecorder::Init(const VertexAndIndexBufferCreator::VertexBufferData&
                             const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
                             const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 {
-    ASSERT(IsDataValid() == false);
+    BRE_ASSERT(IsDataValid() == false);
 
     mVertexBufferData = vertexBufferData;
     mIndexBufferData = indexBufferData;
@@ -78,15 +79,15 @@ SkyBoxCmdListRecorder::Init(const VertexAndIndexBufferCreator::VertexBufferData&
     InitConstantBuffers(worldMatrix);
     InitShaderResourceViews(skyBoxCubeMap);
 
-    ASSERT(IsDataValid());
+    BRE_ASSERT(IsDataValid());
 }
 
 void
 SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
-    ASSERT(IsDataValid());
-    ASSERT(sPSO != nullptr);
-    ASSERT(sRootSignature != nullptr);
+    BRE_ASSERT(IsDataValid());
+    BRE_ASSERT(sPSO != nullptr);
+    BRE_ASSERT(sRootSignature != nullptr);
 
     // Update frame constants
     UploadBuffer& uploadFrameCBuffer(mFrameUploadCBufferPerFrame.GetNextFrameCBuffer());
@@ -132,7 +133,7 @@ SkyBoxCmdListRecorder::IsDataValid() const noexcept
 void
 SkyBoxCmdListRecorder::InitConstantBuffers(const XMFLOAT4X4& worldMatrix) noexcept
 {
-    ASSERT(mObjectUploadCBuffer == nullptr);
+    BRE_ASSERT(mObjectUploadCBuffer == nullptr);
 
     // Create object cbuffer and fill it
     const std::size_t objCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
@@ -161,3 +162,5 @@ SkyBoxCmdListRecorder::InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap) no
     srvDescriptor.Format = skyBoxCubeMap.GetDesc().Format;
     mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(skyBoxCubeMap, srvDescriptor);
 }
+}
+

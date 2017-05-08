@@ -5,6 +5,7 @@
 #include <MathUtils\MathUtils.h>
 #include <Utils\DebugUtils.h>
 
+namespace BRE {
 class MaterialProperties;
 class MaterialTechnique;
 class Model;
@@ -23,19 +24,19 @@ public:
 
     const Model& GetModel() const noexcept
     {
-        ASSERT(mModel != nullptr);
+        BRE_ASSERT(mModel != nullptr);
         return *mModel;
     }
 
     const MaterialProperties& GetMaterialProperties() const noexcept
     {
-        ASSERT(mMaterialProperties != nullptr);
+        BRE_ASSERT(mMaterialProperties != nullptr);
         return *mMaterialProperties;
     }
 
     const MaterialTechnique& GetMaterialTechnique() const noexcept
     {
-        ASSERT(mMaterialTechnique != nullptr);
+        BRE_ASSERT(mMaterialTechnique != nullptr);
         return *mMaterialTechnique;
     }
 
@@ -50,3 +51,6 @@ private:
     const MaterialTechnique* mMaterialTechnique{ nullptr };
     DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::GetIdentity4x4Matrix() };
 };
+
+}
+

@@ -3,29 +3,30 @@
 #include <DxUtils/d3dx12.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 UploadBuffer::UploadBuffer(ID3D12Device& device,
                            const std::size_t elementSize,
                            const std::uint32_t elementCount)
     : mElementSize(elementSize)
 {
-    ASSERT(elementSize > 0);
-    ASSERT(elementCount > 0);
+    BRE_ASSERT(elementSize > 0);
+    BRE_ASSERT(elementCount > 0);
 
     CD3DX12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_UPLOAD };
     CD3DX12_RESOURCE_DESC resourceDescriptor{ CD3DX12_RESOURCE_DESC::Buffer(mElementSize * elementCount) };
-    CHECK_HR(device.CreateCommittedResource(&heapProperties,
+    BRE_CHECK_HR(device.CreateCommittedResource(&heapProperties,
                                             D3D12_HEAP_FLAG_NONE,
                                             &resourceDescriptor,
                                             D3D12_RESOURCE_STATE_GENERIC_READ,
                                             nullptr,
                                             IID_PPV_ARGS(&mBuffer)));
-    CHECK_HR(mBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mMappedData)));
+    BRE_CHECK_HR(mBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mMappedData)));
 }
 
 UploadBuffer::~UploadBuffer()
 {
-    ASSERT(mBuffer);
-    ASSERT(mElementSize > 0);
+    BRE_ASSERT(mBuffer);
+    BRE_ASSERT(mElementSize > 0);
     mBuffer->Unmap(0, nullptr);
     mMappedData = nullptr;
 }
@@ -35,7 +36,7 @@ UploadBuffer::CopyData(const std::uint32_t elementIndex,
                        const void* sourceData,
                        const std::size_t sourceDataSize) const noexcept
 {
-    ASSERT(sourceData);
+    BRE_ASSERT(sourceData);
     memcpy(mMappedData + elementIndex * mElementSize, sourceData, sourceDataSize);
 }
 
@@ -55,3 +56,5 @@ UploadBuffer::GetRoundedConstantBufferSizeInBytes(const std::size_t sizeInBytes)
     // 512
     return (sizeInBytes + 255U) & ~255U;
 }
+}
+

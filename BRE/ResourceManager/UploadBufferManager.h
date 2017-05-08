@@ -6,6 +6,7 @@
 
 #include <ResourceManager/UploadBuffer.h>
 
+namespace BRE {
 // This class is responsible to create/get upload buffers
 class UploadBufferManager {
 public:
@@ -30,3 +31,6 @@ private:
 
     static std::mutex mMutex;
 };
+
+}
+

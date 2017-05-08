@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <dinput.h>
 
+namespace BRE {
 class Mouse {
 public:
     // Preconditions:
@@ -89,3 +90,5 @@ private:
     std::int32_t mY{ 0 };
     std::int32_t mWheel{ 0 };
 };
+}
+

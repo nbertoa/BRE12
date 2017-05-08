@@ -8,6 +8,7 @@
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12Resource;
 
+namespace BRE {
 // Pass that applies post processing effects (anti aliasing, color grading, etc)
 class PostProcessPass {
 public:
@@ -38,3 +39,6 @@ private:
 
     std::unique_ptr<PostProcessCmdListRecorder> mCommandListRecorder;
 };
+
+}
+

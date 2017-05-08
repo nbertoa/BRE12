@@ -6,6 +6,7 @@
 
 using namespace DirectX;
 
+namespace BRE {
 namespace {
 GeometryGenerator::Vertex GetMiddlePoint(const GeometryGenerator::Vertex& vertex0,
                                          const GeometryGenerator::Vertex& vertex1) noexcept
@@ -49,7 +50,7 @@ void Subdivide(GeometryGenerator::MeshData& meshData) noexcept
     //       v1
     //       *
     //      / \
-        		//     /   \
+            		//     /   \
 		//  m0*-----*m1
 //   / \   / \
 		//  /   \ /   \
@@ -300,8 +301,8 @@ void GeometryGenerator::CreateSphere(const float radius,
                                      const std::uint32_t stackCount,
                                      MeshData& meshData) noexcept
 {
-    ASSERT(stackCount >= 2);
-    ASSERT(sliceCount >= 1);
+    BRE_ASSERT(stackCount >= 2);
+    BRE_ASSERT(sliceCount >= 1);
 
     //
     // Compute the vertices stating at the top pole and moving down the stacks.
@@ -633,3 +634,6 @@ void CreateGrid(const float width,
     }
 }
 }
+
+}
+

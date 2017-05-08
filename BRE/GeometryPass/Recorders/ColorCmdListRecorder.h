@@ -2,6 +2,7 @@
 
 #include <GeometryPass/GeometryPassCmdListRecorder.h>
 
+namespace BRE {
 class MaterialProperties;
 
 // CommandListRecorders that does color mapping
@@ -31,3 +32,4 @@ private:
     // - All containers must not be empty
     void InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties) noexcept;
 };
+}

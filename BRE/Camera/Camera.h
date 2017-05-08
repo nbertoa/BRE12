@@ -4,6 +4,8 @@
 
 #include <MathUtils\MathUtils.h>
 
+namespace BRE {
+
 class Camera {
 public:
     Camera() = default;
@@ -79,3 +81,4 @@ private:
     DirectX::XMFLOAT4X4 mProjectionMatrix{ MathUtils::GetIdentity4x4Matrix() };
     DirectX::XMFLOAT4X4 mInverseProjectionMatrix{ MathUtils::GetIdentity4x4Matrix() };
 };
+}

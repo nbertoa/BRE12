@@ -3,6 +3,7 @@
 #include <DirectXManager/DirectXManager.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 FenceManager::Fences FenceManager::mFences;
 std::mutex FenceManager::mMutex;
 
@@ -10,7 +11,7 @@ void
 FenceManager::EraseAll() noexcept
 {
     for (ID3D12Fence* fence : mFences) {
-        ASSERT(fence != nullptr);
+        BRE_ASSERT(fence != nullptr);
         fence->Release();
     }
 }
@@ -23,13 +24,15 @@ FenceManager::CreateFence(
     ID3D12Fence* fence{ nullptr };
 
     mMutex.lock();
-    CHECK_HR(DirectXManager::GetDevice().CreateFence(fenceInitialValue, 
-                                                     flags, 
+    BRE_CHECK_HR(DirectXManager::GetDevice().CreateFence(fenceInitialValue,
+                                                     flags,
                                                      IID_PPV_ARGS(&fence)));
     mMutex.unlock();
 
-    ASSERT(fence != nullptr);
+    BRE_ASSERT(fence != nullptr);
     mFences.insert(fence);
 
     return *fence;
 }
+}
+

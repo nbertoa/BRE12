@@ -5,6 +5,8 @@
 
 using namespace DirectX;
 
+namespace BRE {
+
 void
 Camera::SetFrustum(const float verticalFieldOfView,
                    const float aspectRatio,
@@ -117,4 +119,5 @@ Camera::UpdateViewMatrix() noexcept
     XMMATRIX viewMatrix = XMMatrixLookToLH(position, lookVector, upVector);
     XMStoreFloat4x4(&mViewMatrix, viewMatrix);
     MathUtils::StoreInverseMatrix(mViewMatrix, mInverseViewMatrix);
+}
 }

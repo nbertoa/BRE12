@@ -9,6 +9,7 @@ namespace YAML {
 class Node;
 }
 
+namespace BRE {
 class TextureLoader;
 
 class MaterialTechniqueLoader {
@@ -34,3 +35,5 @@ private:
     std::unordered_map<std::string, MaterialTechnique> mMaterialTechniqueByName;
     TextureLoader& mTextureLoader;
 };
+}
+

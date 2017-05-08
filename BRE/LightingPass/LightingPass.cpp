@@ -12,6 +12,7 @@
 
 using namespace DirectX;
 
+namespace BRE {
 void
 LightingPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
                    ID3D12Resource& normalSmoothnessBuffer,
@@ -20,7 +21,7 @@ LightingPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
                    ID3D12Resource& specularPreConvolvedCubeMap,
                    const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
-    ASSERT(IsDataValid() == false);
+    BRE_ASSERT(IsDataValid() == false);
 
     mBaseColorMetalMaskBuffer = &baseColorMetalMaskBuffer;
     mNormalSmoothnessBuffer = &normalSmoothnessBuffer;
@@ -35,13 +36,13 @@ LightingPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
                                specularPreConvolvedCubeMap,
                                renderTargetView);
 
-    ASSERT(IsDataValid());
+    BRE_ASSERT(IsDataValid());
 }
 
 void
 LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 {
-    ASSERT(IsDataValid());
+    BRE_ASSERT(IsDataValid());
 
     ExecuteBeginTask();
 
@@ -66,18 +67,18 @@ LightingPass::IsDataValid() const noexcept
 void
 LightingPass::ExecuteBeginTask() noexcept
 {
-    ASSERT(IsDataValid());
+    BRE_ASSERT(IsDataValid());
 
     // Check resource states:
     // - All geometry shaders must be in render target state because they were output
     // of the geometry pass.
 #ifdef _DEBUG
-    ASSERT(ResourceStateManager::GetResourceState(*mBaseColorMetalMaskBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
-    ASSERT(ResourceStateManager::GetResourceState(*mNormalSmoothnessBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+    BRE_ASSERT(ResourceStateManager::GetResourceState(*mBaseColorMetalMaskBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+    BRE_ASSERT(ResourceStateManager::GetResourceState(*mNormalSmoothnessBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
 #endif
 
     // - Depth buffer was used for depth testing in geometry pass, so it must be in depth write state
-    ASSERT(ResourceStateManager::GetResourceState(*mDepthBuffer) == D3D12_RESOURCE_STATE_DEPTH_WRITE);
+    BRE_ASSERT(ResourceStateManager::GetResourceState(*mDepthBuffer) == D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
     ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
@@ -94,30 +95,30 @@ LightingPass::ExecuteBeginTask() noexcept
     };
 
     const std::uint32_t barriersCount = _countof(barriers);
-    ASSERT(barriersCount == 3UL);
+    BRE_ASSERT(barriersCount == 3UL);
     commandList.ResourceBarrier(barriersCount, barriers);
 
     commandList.ClearRenderTargetView(mRenderTargetView, Colors::Black, 0U, nullptr);
 
-    CHECK_HR(commandList.Close());
+    BRE_CHECK_HR(commandList.Close());
     CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
 
 void
 LightingPass::ExecuteFinalTask() noexcept
 {
-    ASSERT(IsDataValid());
+    BRE_ASSERT(IsDataValid());
 
     // Check resource states:
     // - All geometry shaders must be in pixel shader resource state because they were used
     // by lighting pass shaders.
 #ifdef _DEBUG
-    ASSERT(ResourceStateManager::GetResourceState(*mBaseColorMetalMaskBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-    ASSERT(ResourceStateManager::GetResourceState(*mNormalSmoothnessBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+    BRE_ASSERT(ResourceStateManager::GetResourceState(*mBaseColorMetalMaskBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+    BRE_ASSERT(ResourceStateManager::GetResourceState(*mNormalSmoothnessBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 #endif
 
     // - Depth buffer must be in pixel shader resource because it was used by lighting pass shader.
-    ASSERT(ResourceStateManager::GetResourceState(*mDepthBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+    BRE_ASSERT(ResourceStateManager::GetResourceState(*mDepthBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
     ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
@@ -127,9 +128,11 @@ LightingPass::ExecuteFinalTask() noexcept
     };
 
     const std::uint32_t barrierCount = _countof(barriers);
-    ASSERT(barrierCount == 1UL);
+    BRE_ASSERT(barrierCount == 1UL);
     commandList.ResourceBarrier(barrierCount, barriers);
 
-    CHECK_HR(commandList.Close());
+    BRE_CHECK_HR(commandList.Close());
     CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
+}
+

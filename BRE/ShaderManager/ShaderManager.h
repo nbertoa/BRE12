@@ -5,6 +5,7 @@
 #include <mutex>
 #include <tbb\concurrent_unordered_set.h>
 
+namespace BRE {
 // Too load/get shaders
 class ShaderManager {
 public:
@@ -28,3 +29,6 @@ private:
 
     static std::mutex mMutex;
 };
+
+}
+

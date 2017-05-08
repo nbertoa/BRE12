@@ -3,6 +3,7 @@
 #include <ResourceManager/ResourceManager.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 VertexAndIndexBufferCreator::BufferCreationData::BufferCreationData(const void* data,
                                                                     const std::uint32_t elementCount,
                                                                     const std::size_t elementSize)
@@ -50,7 +51,7 @@ VertexAndIndexBufferCreator::CreateVertexBuffer(ID3D12GraphicsCommandList& comma
                                                 VertexBufferData& vertexBufferData,
                                                 Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept
 {
-    ASSERT(bufferCreationData.IsDataValid());
+    BRE_ASSERT(bufferCreationData.IsDataValid());
 
     // Create buffer
     const std::uint32_t bufferSize{
@@ -69,7 +70,7 @@ VertexAndIndexBufferCreator::CreateVertexBuffer(ID3D12GraphicsCommandList& comma
     vertexBufferData.mBufferView.SizeInBytes = bufferSize;
     vertexBufferData.mBufferView.StrideInBytes = static_cast<std::uint32_t>(bufferCreationData.mElementSize);
 
-    ASSERT(vertexBufferData.IsDataValid());
+    BRE_ASSERT(vertexBufferData.IsDataValid());
 }
 
 const VertexAndIndexBufferCreator::IndexBufferData&
@@ -105,7 +106,7 @@ VertexAndIndexBufferCreator::CreateIndexBuffer(ID3D12GraphicsCommandList& comman
                                                IndexBufferData& indexBufferData,
                                                Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept
 {
-    ASSERT(bufferCreationData.IsDataValid());
+    BRE_ASSERT(bufferCreationData.IsDataValid());
 
     // Create buffer
     const std::uint32_t elementSize{ static_cast<std::uint32_t>(bufferCreationData.mElementSize) };
@@ -133,15 +134,14 @@ VertexAndIndexBufferCreator::CreateIndexBuffer(ID3D12GraphicsCommandList& comman
     default:
         break;
     }
-    ASSERT(format != DXGI_FORMAT_UNKNOWN);
+    BRE_ASSERT(format != DXGI_FORMAT_UNKNOWN);
 
     // Fill view
     indexBufferData.mBufferView.BufferLocation = indexBufferData.mBuffer->GetGPUVirtualAddress();
     indexBufferData.mBufferView.Format = format;
     indexBufferData.mBufferView.SizeInBytes = bufferSize;
 
-    ASSERT(indexBufferData.IsDataValid());
+    BRE_ASSERT(indexBufferData.IsDataValid());
 }
-
-
+}
 

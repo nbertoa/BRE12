@@ -12,10 +12,11 @@
 
 using namespace DirectX;
 
+namespace BRE {
 void
 PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept
 {
-    ASSERT(IsDataValid() == false);
+    BRE_ASSERT(IsDataValid() == false);
 
     mInputColorBuffer = &inputColorBuffer;
 
@@ -24,15 +25,15 @@ PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept
     mCommandListRecorder.reset(new PostProcessCmdListRecorder());
     mCommandListRecorder->Init(inputColorBuffer);
 
-    ASSERT(IsDataValid());
+    BRE_ASSERT(IsDataValid());
 }
 
 void
 PostProcessPass::Execute(ID3D12Resource& renderTargetBuffer,
                          const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
-    ASSERT(IsDataValid());
-    ASSERT(renderTargetView.ptr != 0UL);
+    BRE_ASSERT(IsDataValid());
+    BRE_ASSERT(renderTargetView.ptr != 0UL);
 
     ExecuteBeginTask(renderTargetBuffer, renderTargetView);
 
@@ -59,14 +60,14 @@ void
 PostProcessPass::ExecuteBeginTask(ID3D12Resource& renderTargetBuffer,
                                   const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
-    ASSERT(IsDataValid());
-    ASSERT(renderTargetView.ptr != 0UL);
+    BRE_ASSERT(IsDataValid());
+    BRE_ASSERT(renderTargetView.ptr != 0UL);
 
     // Check resource states:
     // - Input color buffer was used as render target in previous pass
     // - Output color buffer is the frame buffer, so it was used to present before.
-    ASSERT(ResourceStateManager::GetResourceState(*mInputColorBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
-    ASSERT(ResourceStateManager::GetResourceState(renderTargetBuffer) == D3D12_RESOURCE_STATE_PRESENT);
+    BRE_ASSERT(ResourceStateManager::GetResourceState(*mInputColorBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+    BRE_ASSERT(ResourceStateManager::GetResourceState(renderTargetBuffer) == D3D12_RESOURCE_STATE_PRESENT);
 
     ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
@@ -79,6 +80,8 @@ PostProcessPass::ExecuteBeginTask(ID3D12Resource& renderTargetBuffer,
 
     commandList.ClearRenderTargetView(renderTargetView, Colors::Black, 0U, nullptr);
 
-    CHECK_HR(commandList.Close());
+    BRE_CHECK_HR(commandList.Close());
     CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
+}
+

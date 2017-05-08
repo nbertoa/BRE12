@@ -1,5 +1,6 @@
 #include "CBuffers.h"
 
+namespace BRE {
 const FrameCBuffer&
 FrameCBuffer::operator=(const FrameCBuffer& instance)
 {
@@ -15,3 +16,5 @@ FrameCBuffer::operator=(const FrameCBuffer& instance)
 
     return *this;
 }
+}
+

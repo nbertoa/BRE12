@@ -6,6 +6,7 @@
 
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 // To create Constant Buffer / Shader GetResource / Unordered Access Views descriptor heaps
 // To create Constant Buffer / Shader GetResource / Unordered Access descriptors
 class CbvSrvUavDescriptorManager {
@@ -59,7 +60,7 @@ public:
 
     static ID3D12DescriptorHeap& GetDescriptorHeap() noexcept
     {
-        ASSERT(mCbvSrvUavDescriptorHeap.Get() != nullptr);
+        BRE_ASSERT(mCbvSrvUavDescriptorHeap.Get() != nullptr);
         return *mCbvSrvUavDescriptorHeap.Get();
     }
 
@@ -71,3 +72,6 @@ private:
 
     static std::mutex mMutex;
 };
+
+}
+

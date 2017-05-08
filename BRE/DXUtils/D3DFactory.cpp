@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+namespace BRE {
 namespace D3DFactory {
 D3D12_RASTERIZER_DESC GetDefaultRasterizerDesc() noexcept
 {
@@ -167,3 +168,5 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> GetPosTexCoordInputLayout() noexcept
     return inputElementDesc;
 }
 }
+}
+

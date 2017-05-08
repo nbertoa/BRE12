@@ -6,10 +6,10 @@
 
 #include <Utils\StringUtils.h>
 
-#define ASSERT(condition) assert(condition)
+#define BRE_ASSERT(condition) assert(condition)
 
 #if defined(DEBUG) || defined(_DEBUG)
-#define ASSERT_MSG(condition, msg) \
+#define BRE_ASSERT_MSG(condition, msg) \
 { \
 	if ((condition) == false) { \
 		MessageBox(0, msg, 0, 0); \
@@ -17,11 +17,11 @@
 	} \
 }
 #else
-#define ASSERT_MSG(condition, msg) (assert(condition))
+#define BRE_ASSERT_MSG(condition, msg) (assert(condition))
 #endif
 
-#ifndef CHECK_HR
-#define CHECK_HR(x) \
+#ifndef BRE_CHECK_HR
+#define BRE_CHECK_HR(x) \
 { \
     const HRESULT __hr__ = (x); \
 	if (FAILED(__hr__)) { \

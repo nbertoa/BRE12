@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <d3d12.h>
 
+namespace BRE {
 class SettingsManager {
 public:
     SettingsManager() = delete;
@@ -52,3 +53,6 @@ public:
     // 60 FPS, then you should store 1.0f / 60.0f here
     static const float sSecondsPerFrame;
 };
+}
+
+

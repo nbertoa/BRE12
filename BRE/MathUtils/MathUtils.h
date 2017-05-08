@@ -6,6 +6,7 @@
 
 #include <Utils\DebugUtils.h>
 
+namespace BRE {
 class MathUtils {
 public:
     MathUtils() = delete;
@@ -18,7 +19,7 @@ public:
     static float RandomFloatInInverval(const float bottomValue,
                                        const float topValue) noexcept
     {
-        ASSERT(bottomValue < topValue);
+        BRE_ASSERT(bottomValue < topValue);
         const float randomBetweenZeroAndOne = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
         return bottomValue + randomBetweenZeroAndOne * (topValue - bottomValue);
     }
@@ -125,4 +126,7 @@ public:
     static const float Infinity;
     static const float Pi;
 };
+
+
+}
 

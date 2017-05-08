@@ -8,6 +8,7 @@
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12Resource;
 
+namespace BRE {
 class ToneMappingPass {
 public:
     ToneMappingPass() = default;
@@ -37,3 +38,6 @@ private:
 
     std::unique_ptr<ToneMappingCmdListRecorder> mCommandListRecorder;
 };
+
+}
+

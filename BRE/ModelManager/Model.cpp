@@ -8,12 +8,13 @@
 #include <SettingsManager\SettingsManager.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 Model::Model(const char* modelFilename,
              ID3D12GraphicsCommandList& commandList,
              Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
              Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer)
 {
-    ASSERT(modelFilename != nullptr);
+    BRE_ASSERT(modelFilename != nullptr);
     const std::string filePath(modelFilename);
 
     Assimp::Importer importer;
@@ -23,14 +24,14 @@ Model::Model(const char* modelFilename,
         const std::string errorMessage{ importer.GetErrorString() };
         const std::wstring wideErrorMessage = StringUtils::AnsiToWString(errorMessage);
         MessageBox(nullptr, wideErrorMessage.c_str(), nullptr, 0);
-        ASSERT(scene != nullptr);
+        BRE_ASSERT(scene != nullptr);
     }
 
-    ASSERT(scene->HasMeshes());
+    BRE_ASSERT(scene->HasMeshes());
 
     for (std::uint32_t i = 0U; i < scene->mNumMeshes; ++i) {
         aiMesh* mesh{ scene->mMeshes[i] };
-        ASSERT(mesh != nullptr);
+        BRE_ASSERT(mesh != nullptr);
         mMeshes.push_back(Mesh(*mesh, commandList, uploadVertexBuffer, uploadIndexBuffer));
     }
 }
@@ -42,3 +43,5 @@ Model::Model(const GeometryGenerator::MeshData& meshData,
 {
     mMeshes.push_back(Mesh(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer));
 }
+}
+

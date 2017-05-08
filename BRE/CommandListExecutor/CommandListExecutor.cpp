@@ -5,12 +5,13 @@
 #include <CommandManager\CommandQueueManager.h>
 #include <CommandManager\FenceManager.h>
 
+namespace BRE {
 CommandListExecutor* CommandListExecutor::sExecutor{ nullptr };
 
 void
 CommandListExecutor::Create(const std::uint32_t maxNumCmdLists) noexcept
 {
-    ASSERT(sExecutor == nullptr);
+    BRE_ASSERT(sExecutor == nullptr);
 
     tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
 
@@ -23,7 +24,7 @@ CommandListExecutor::Create(const std::uint32_t maxNumCmdLists) noexcept
 CommandListExecutor&
 CommandListExecutor::Get() noexcept
 {
-    ASSERT(sExecutor != nullptr);
+    BRE_ASSERT(sExecutor != nullptr);
 
     return *sExecutor;
 }
@@ -31,13 +32,13 @@ CommandListExecutor::Get() noexcept
 CommandListExecutor::CommandListExecutor(const std::uint32_t maxNumberOfCommandListsToExecute)
     : mMaxNumberOfCommandListsToExecute(maxNumberOfCommandListsToExecute)
 {
-    ASSERT(maxNumberOfCommandListsToExecute > 0U);
+    BRE_ASSERT(maxNumberOfCommandListsToExecute > 0U);
 
     D3D12_COMMAND_QUEUE_DESC commandQueueDescriptor = {};
     commandQueueDescriptor.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
     commandQueueDescriptor.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
     mCommandQueue = &CommandQueueManager::CreateCommandQueue(commandQueueDescriptor);
-    ASSERT(mCommandQueue != nullptr);
+    BRE_ASSERT(mCommandQueue != nullptr);
 
     mFence = &FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE);
 
@@ -47,7 +48,7 @@ CommandListExecutor::CommandListExecutor(const std::uint32_t maxNumberOfCommandL
 tbb::task*
 CommandListExecutor::execute()
 {
-    ASSERT(mMaxNumberOfCommandListsToExecute > 0);
+    BRE_ASSERT(mMaxNumberOfCommandListsToExecute > 0);
 
     ID3D12CommandList* *pendingCommandLists{ new ID3D12CommandList*[mMaxNumberOfCommandListsToExecute] };
     while (mTerminate == false) {
@@ -79,15 +80,15 @@ CommandListExecutor::SignalFenceAndWaitForCompletion(
     const std::uint64_t valueToWaitFor) noexcept
 {
     const std::uint64_t completedFenceValue = fence.GetCompletedValue();
-    CHECK_HR(mCommandQueue->Signal(&fence, valueToSignal));
+    BRE_CHECK_HR(mCommandQueue->Signal(&fence, valueToSignal));
 
     // Wait until the GPU has completed commands up to this fence point.
     if (completedFenceValue < valueToWaitFor) {
         const HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
-        ASSERT(eventHandle);
+        BRE_ASSERT(eventHandle);
 
         // Fire event when GPU hits current fence.  
-        CHECK_HR(fence.SetEventOnCompletion(valueToWaitFor, eventHandle));
+        BRE_CHECK_HR(fence.SetEventOnCompletion(valueToWaitFor, eventHandle));
 
         // Wait until the GPU hits current fence event is fired.
         WaitForSingleObject(eventHandle, INFINITE);
@@ -98,8 +99,8 @@ CommandListExecutor::SignalFenceAndWaitForCompletion(
 void
 CommandListExecutor::ExecuteCommandListAndWaitForCompletion(ID3D12CommandList& cmdList) noexcept
 {
-    ASSERT(mCommandQueue != nullptr);
-    ASSERT(mFence != nullptr);
+    BRE_ASSERT(mCommandQueue != nullptr);
+    BRE_ASSERT(mFence != nullptr);
 
     ID3D12CommandList* commandLists[1U]{ &cmdList };
     mCommandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
@@ -113,4 +114,5 @@ CommandListExecutor::Terminate() noexcept
 {
     mTerminate = true;
     parent()->wait_for_all();
+}
 }

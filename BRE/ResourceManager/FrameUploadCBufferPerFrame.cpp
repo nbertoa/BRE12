@@ -4,6 +4,7 @@
 #include <ResourceManager\UploadBufferManager.h>
 #include <Utils\DebugUtils.h>
 
+namespace BRE {
 FrameUploadCBufferPerFrame::FrameUploadCBufferPerFrame()
 {
     const std::size_t frameCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(FrameCBuffer)) };
@@ -16,9 +17,11 @@ UploadBuffer&
 FrameUploadCBufferPerFrame::GetNextFrameCBuffer() noexcept
 {
     UploadBuffer* frameCBuffer{ mFrameCBuffers[mCurrentFrameIndex] };
-    ASSERT(frameCBuffer != nullptr);
+    BRE_ASSERT(frameCBuffer != nullptr);
 
     mCurrentFrameIndex = (mCurrentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 
     return *frameCBuffer;
 }
+}
+

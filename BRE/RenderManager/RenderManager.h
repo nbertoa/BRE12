@@ -15,6 +15,7 @@
 #include <ToneMappingPass\ToneMappingPass.h>
 #include <Timer/Timer.h>
 
+namespace BRE {
 class CommandListExecutor;
 class Scene;
 
@@ -57,7 +58,7 @@ private:
 
     ID3D12Resource* CurrentFrameBuffer() const noexcept
     {
-        ASSERT(mSwapChain != nullptr);
+        BRE_ASSERT(mSwapChain != nullptr);
         return mFrameBuffers[mSwapChain->GetCurrentBackBufferIndex()].Get();
     }
 
@@ -115,3 +116,6 @@ private:
     // When it is true, master render thread is destroyed.
     bool mTerminate{ false };
 };
+
+}
+

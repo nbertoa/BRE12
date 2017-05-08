@@ -791,7 +791,7 @@ static HRESULT FillInitData(_In_ std::size_t width,
                     tdepth = d;
                 }
 
-                ASSERT(index < mipCount * arraySize);
+                BRE_ASSERT(index < mipCount * arraySize);
                 _Analysis_assume_(index < mipCount * arraySize);
                 initData[index].pSysMem = reinterpret_cast<const void*>(pSrcBits);
                 initData[index].SysMemPitch = static_cast<UINT>(RowBytes);
@@ -877,7 +877,7 @@ static HRESULT FillInitData12(_In_ std::size_t width,
                     tdepth = d;
                 }
 
-                ASSERT(index < mipCount * arraySize);
+                BRE_ASSERT(index < mipCount * arraySize);
                 _Analysis_assume_(index < mipCount * arraySize);
                 initData[index]./*pSysMem*/pData = reinterpret_cast<const void*>(pSrcBits);
                 initData[index]./*SysMemPitch*/RowPitch = static_cast<UINT>(RowBytes);
@@ -1134,7 +1134,7 @@ static HRESULT CreateD3DResources12(
     ComPtr<ID3D12Resource>& textureUploadHeap
 )
 {
-    ASSERT(initData != nullptr);
+    BRE_ASSERT(initData != nullptr);
 
     if (device == nullptr)
         return E_POINTER;
@@ -1323,7 +1323,7 @@ static HRESULT CreateTextureFromDDS(_In_ ID3D11Device* d3dDevice,
             // Note there's no way for a legacy Direct3D 9 DDS to express a '1D' texture
         }
 
-        ASSERT(BitsPerPixel(format) != 0);
+        BRE_ASSERT(BitsPerPixel(format) != 0);
     }
 
     // Bound sizes (for security purposes we don't trust DDS file metadata larger than the D3D 11.x hardware requirements)
@@ -1616,7 +1616,7 @@ static HRESULT CreateTextureFromDDS12(
             resDim = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         }
 
-        ASSERT(BitsPerPixel(format) != 0);
+        BRE_ASSERT(BitsPerPixel(format) != 0);
     }
 
     // Bound sizes (for security purposes we don't trust DDS file metadata larger than the D3D 11.x hardware requirements)

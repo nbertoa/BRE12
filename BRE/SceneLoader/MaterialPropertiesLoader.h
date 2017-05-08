@@ -9,6 +9,7 @@ namespace YAML {
 class Node;
 }
 
+namespace BRE {
 class MaterialPropertiesLoader {
 public:
     MaterialPropertiesLoader()
@@ -25,3 +26,5 @@ public:
 private:
     std::unordered_map<std::string, MaterialProperties> mMaterialPropertiesByName;
 };
+}
+

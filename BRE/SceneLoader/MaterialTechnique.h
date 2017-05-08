@@ -4,6 +4,7 @@
 
 struct ID3D12Resource;
 
+namespace BRE {
 class MaterialTechnique {
 public:
     enum TechniqueType {
@@ -26,37 +27,37 @@ public:
 
     ID3D12Resource& GetDiffuseTexture() const noexcept
     {
-        ASSERT(mDiffuseTexture != nullptr);
+        BRE_ASSERT(mDiffuseTexture != nullptr);
         return *mDiffuseTexture;
     }
 
     void SetDiffuseTexture(ID3D12Resource* texture) noexcept
     {
-        ASSERT(texture != nullptr);
+        BRE_ASSERT(texture != nullptr);
         mDiffuseTexture = texture;
     }
 
     ID3D12Resource& GetNormalTexture() const noexcept
     {
-        ASSERT(mNormalTexture != nullptr);
+        BRE_ASSERT(mNormalTexture != nullptr);
         return *mNormalTexture;
     }
 
     void SetNormalTexture(ID3D12Resource* texture) noexcept
     {
-        ASSERT(texture != nullptr);
+        BRE_ASSERT(texture != nullptr);
         mNormalTexture = texture;
     }
 
     ID3D12Resource& GetHeightTexture() const noexcept
     {
-        ASSERT(mHeightTexture != nullptr);
+        BRE_ASSERT(mHeightTexture != nullptr);
         return *mHeightTexture;
     }
 
     void SetHeightTexture(ID3D12Resource* texture) noexcept
     {
-        ASSERT(texture != nullptr);
+        BRE_ASSERT(texture != nullptr);
         mHeightTexture = texture;
     }
 
@@ -67,3 +68,5 @@ private:
     ID3D12Resource* mNormalTexture{ nullptr };
     ID3D12Resource* mHeightTexture{ nullptr };
 };
+}
+

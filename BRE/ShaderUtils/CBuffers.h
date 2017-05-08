@@ -5,6 +5,7 @@
 #include <MathUtils\MathUtils.h>
 #include <SettingsManager\SettingsManager.h>
 
+namespace BRE {
 // Per object constant buffer data
 struct ObjectCBuffer {
     ObjectCBuffer() = default;
@@ -49,3 +50,6 @@ struct ImmutableCBuffer {
         static_cast<float>(SettingsManager::sWindowHeight)
     };
 };
+
+}
+

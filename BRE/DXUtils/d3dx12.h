@@ -719,7 +719,7 @@ struct CD3DX12_ROOT_DESCRIPTOR_TABLE : public D3D12_ROOT_DESCRIPTOR_TABLE
         UINT numDescriptorRanges,
         _In_reads_opt_(numDescriptorRanges) const D3D12_DESCRIPTOR_RANGE* _pDescriptorRanges)
     {
-		ASSERT(_pDescriptorRanges != nullptr);
+		BRE_ASSERT(_pDescriptorRanges != nullptr);
         Init(numDescriptorRanges, _pDescriptorRanges);
     }
     
@@ -727,7 +727,7 @@ struct CD3DX12_ROOT_DESCRIPTOR_TABLE : public D3D12_ROOT_DESCRIPTOR_TABLE
         UINT numDescriptorRanges,
         _In_reads_(numDescriptorRanges) const D3D12_DESCRIPTOR_RANGE* _pDescriptorRanges)
     {
-		ASSERT(_pDescriptorRanges != nullptr);
+		BRE_ASSERT(_pDescriptorRanges != nullptr);
         Init(*this, numDescriptorRanges, _pDescriptorRanges);
     }
     
@@ -736,7 +736,7 @@ struct CD3DX12_ROOT_DESCRIPTOR_TABLE : public D3D12_ROOT_DESCRIPTOR_TABLE
         UINT numDescriptorRanges,
         _In_reads_opt_(numDescriptorRanges) const D3D12_DESCRIPTOR_RANGE* _pDescriptorRanges)
     {
-		ASSERT(_pDescriptorRanges != nullptr);
+		BRE_ASSERT(_pDescriptorRanges != nullptr);
         rootDescriptorTable.NumDescriptorRanges = numDescriptorRanges;
         rootDescriptorTable.pDescriptorRanges = _pDescriptorRanges;
     }

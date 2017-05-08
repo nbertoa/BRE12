@@ -5,6 +5,7 @@
 #include <d3d12.h>
 #include <wrl.h>
 
+namespace BRE {
 class UploadBuffer {
 public:
     explicit UploadBuffer(ID3D12Device& device,
@@ -36,3 +37,5 @@ private:
     std::uint8_t* mMappedData{ nullptr };
     std::size_t mElementSize{ 0U };
 };
+}
+

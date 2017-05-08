@@ -6,6 +6,7 @@
 #include <DXUtils/d3dx12.h>
 #include <SettingsManager\SettingsManager.h>
 
+namespace BRE {
 Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> RenderTargetDescriptorManager::mRenderTargetViewDescriptorHeap;
 D3D12_GPU_DESCRIPTOR_HANDLE RenderTargetDescriptorManager::mCurrentRenderTargetViewDescriptorHandle{ 0UL };
 D3D12_CPU_DESCRIPTOR_HANDLE RenderTargetDescriptorManager::mCurrentRenderTargetViewCpuDescriptorHandle{ 0UL };
@@ -21,7 +22,7 @@ RenderTargetDescriptorManager::Init() noexcept
     renderTargetViewDescriptorHeapDescriptor.NodeMask = 0;
 
     mMutex.lock();
-    CHECK_HR(DirectXManager::GetDevice().CreateDescriptorHeap(&renderTargetViewDescriptorHeapDescriptor,
+    BRE_CHECK_HR(DirectXManager::GetDevice().CreateDescriptorHeap(&renderTargetViewDescriptorHeapDescriptor,
                                                               IID_PPV_ARGS(mRenderTargetViewDescriptorHeap.GetAddressOf())));
     mMutex.unlock();
 
@@ -58,9 +59,9 @@ RenderTargetDescriptorManager::CreateRenderTargetViews(ID3D12Resource* *resource
                                                        const std::uint32_t descriptorCount,
                                                        D3D12_CPU_DESCRIPTOR_HANDLE* firstViewCpuDescriptorHandle) noexcept
 {
-    ASSERT(resources != nullptr);
-    ASSERT(descriptors != nullptr);
-    ASSERT(descriptorCount > 0U);
+    BRE_ASSERT(resources != nullptr);
+    BRE_ASSERT(descriptors != nullptr);
+    BRE_ASSERT(descriptorCount > 0U);
 
     D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandle{};
 
@@ -72,7 +73,7 @@ RenderTargetDescriptorManager::CreateRenderTargetViews(ID3D12Resource* *resource
     }
 
     for (std::uint32_t i = 0U; i < descriptorCount; ++i) {
-        ASSERT(resources[i] != nullptr);
+        BRE_ASSERT(resources[i] != nullptr);
         DirectXManager::GetDevice().CreateRenderTargetView(resources[i], &descriptors[i], mCurrentRenderTargetViewCpuDescriptorHandle);
         mCurrentRenderTargetViewCpuDescriptorHandle.ptr += DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     }
@@ -83,3 +84,5 @@ RenderTargetDescriptorManager::CreateRenderTargetViews(ID3D12Resource* *resource
 
     return gpuDescriptorHandle;
 }
+}
+

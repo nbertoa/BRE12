@@ -7,9 +7,11 @@ namespace YAML {
 class Node;
 }
 
-class Model;
 struct ID3D12CommandAllocator;
 struct ID3D12GraphicsCommandList;
+
+namespace BRE {
+class Model;
 
 class ModelLoader {
 public:
@@ -29,3 +31,5 @@ public:
 private:
     std::unordered_map<std::string, Model*> mModelByName;
 };
+}
+

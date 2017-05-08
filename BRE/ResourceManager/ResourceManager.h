@@ -6,6 +6,7 @@
 
 #include <ResourceManager/UploadBuffer.h>
 
+namespace BRE {
 // This class is responsible to create/get:
 // - Textures
 // - Buffers
@@ -58,3 +59,6 @@ private:
 
     static std::mutex mMutex;
 };
+
+}
+

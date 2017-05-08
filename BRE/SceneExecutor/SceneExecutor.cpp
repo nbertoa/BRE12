@@ -25,6 +25,7 @@
 
 using namespace DirectX;
 
+namespace BRE {
 namespace {
 const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
 
@@ -33,7 +34,7 @@ void InitSystems(const HINSTANCE moduleInstanceHandle) noexcept
     const HWND windowHandle = DirectXManager::GetWindowHandle();
 
     LPDIRECTINPUT8 directInput;
-    CHECK_HR(DirectInput8Create(moduleInstanceHandle,
+    BRE_CHECK_HR(DirectInput8Create(moduleInstanceHandle,
                                 DIRECTINPUT_VERSION,
                                 IID_IDirectInput8,
                                 reinterpret_cast<LPVOID*>(&directInput),
@@ -93,7 +94,7 @@ using namespace DirectX;
 
 SceneExecutor::~SceneExecutor()
 {
-    ASSERT(mRenderManager != nullptr);
+    BRE_ASSERT(mRenderManager != nullptr);
     mRenderManager->Terminate();
     mTaskSchedulerInit.terminate();
 
@@ -112,14 +113,16 @@ SceneExecutor::SceneExecutor(HINSTANCE moduleInstanceHandle,
                              const char* sceneFilePath)
     : mTaskSchedulerInit()
 {
-    ASSERT(sceneFilePath != nullptr);
+    BRE_ASSERT(sceneFilePath != nullptr);
 
     DirectXManager::Init(moduleInstanceHandle);
     InitSystems(moduleInstanceHandle);
 
     SceneLoader sceneLoader;
     mScene = sceneLoader.LoadScene(sceneFilePath);
-    ASSERT(mScene != nullptr);
+    BRE_ASSERT(mScene != nullptr);
 
     mRenderManager = &RenderManager::Create(*mScene);
 }
+}
+

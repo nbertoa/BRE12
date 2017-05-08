@@ -6,6 +6,7 @@ struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct D3D12_GPU_DESCRIPTOR_HANDLE;
 struct ID3D12Resource;
 
+namespace BRE {
 // To record command list for post processing effects (anti aliasing, color grading, etc).
 class PostProcessCmdListRecorder {
 public:
@@ -35,3 +36,5 @@ private:
 
     D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
 };
+}
+

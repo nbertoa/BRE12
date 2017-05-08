@@ -5,6 +5,7 @@
 #include <ResourceManager\UploadBuffer.h>
 #include <SettingsManager\SettingsManager.h>
 
+namespace BRE {
 // We support to have different number of queued frames.
 // This class provides a frame constant buffer per frame.
 class FrameUploadCBufferPerFrame {
@@ -22,3 +23,6 @@ private:
     UploadBuffer* mFrameCBuffers[SettingsManager::sQueuedFrameCount];
     std::uint32_t mCurrentFrameIndex{ 0U };
 };
+
+}
+

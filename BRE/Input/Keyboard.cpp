@@ -4,6 +4,7 @@
 
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 namespace {
 std::unique_ptr<Keyboard> gKeyboard{ nullptr };
 }
@@ -11,7 +12,7 @@ std::unique_ptr<Keyboard> gKeyboard{ nullptr };
 Keyboard&
 Keyboard::Create(IDirectInput8& directInput, const HWND windowHandle) noexcept
 {
-    ASSERT(gKeyboard == nullptr);
+    BRE_ASSERT(gKeyboard == nullptr);
     gKeyboard.reset(new Keyboard(directInput, windowHandle));
     return *gKeyboard.get();
 }
@@ -19,7 +20,7 @@ Keyboard::Create(IDirectInput8& directInput, const HWND windowHandle) noexcept
 Keyboard&
 Keyboard::Get() noexcept
 {
-    ASSERT(gKeyboard != nullptr);
+    BRE_ASSERT(gKeyboard != nullptr);
     return *gKeyboard.get();
 }
 
@@ -27,12 +28,12 @@ Keyboard::Keyboard(IDirectInput8& directInput,
                    const HWND windowHandle)
     : mDirectInput(directInput)
 {
-    ASSERT(gKeyboard == nullptr);
+    BRE_ASSERT(gKeyboard == nullptr);
 
-    CHECK_HR(mDirectInput.CreateDevice(GUID_SysKeyboard, &mDevice, nullptr));
-    ASSERT(mDevice != nullptr);
-    CHECK_HR(mDevice->SetDataFormat(&c_dfDIKeyboard));
-    CHECK_HR(mDevice->SetCooperativeLevel(windowHandle, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
+    BRE_CHECK_HR(mDirectInput.CreateDevice(GUID_SysKeyboard, &mDevice, nullptr));
+    BRE_ASSERT(mDevice != nullptr);
+    BRE_CHECK_HR(mDevice->SetDataFormat(&c_dfDIKeyboard));
+    BRE_CHECK_HR(mDevice->SetCooperativeLevel(windowHandle, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
     mDevice->Acquire();
 }
 
@@ -45,7 +46,7 @@ Keyboard::~Keyboard()
 void
 Keyboard::Update() noexcept
 {
-    ASSERT(mDevice != nullptr);
+    BRE_ASSERT(mDevice != nullptr);
 
     memcpy(mKeysLastState, mKeysCurrentState, sizeof(mKeysCurrentState));
     if (FAILED(mDevice->GetDeviceState(sizeof(mKeysCurrentState), reinterpret_cast<LPVOID>(mKeysCurrentState))) &&
@@ -53,3 +54,5 @@ Keyboard::Update() noexcept
         mDevice->GetDeviceState(sizeof(mKeysCurrentState), reinterpret_cast<LPVOID>(mKeysCurrentState));
     }
 }
+}
+

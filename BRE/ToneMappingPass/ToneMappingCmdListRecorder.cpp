@@ -10,6 +10,7 @@
 #include <ShaderManager\ShaderManager.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 // Root Signature:
 // "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)" 0 -> Color Buffer Texture
 
@@ -21,8 +22,8 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 void
 ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature() noexcept
 {
-    ASSERT(sPSO == nullptr);
-    ASSERT(sRootSignature == nullptr);
+    BRE_ASSERT(sPSO == nullptr);
+    BRE_ASSERT(sRootSignature == nullptr);
 
     PSOManager::PSOCreationData psoData{};
     psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
@@ -42,29 +43,29 @@ ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature() noexcept
     psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
-    ASSERT(sPSO != nullptr);
-    ASSERT(sRootSignature != nullptr);
+    BRE_ASSERT(sPSO != nullptr);
+    BRE_ASSERT(sRootSignature != nullptr);
 }
 
 void
 ToneMappingCmdListRecorder::Init(ID3D12Resource& inputColorBuffer,
                                  const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
-    ASSERT(IsDataValid() == false);
+    BRE_ASSERT(IsDataValid() == false);
 
     mRenderTargetView = renderTargetView;
 
     InitShaderResourceViews(inputColorBuffer);
 
-    ASSERT(IsDataValid());
+    BRE_ASSERT(IsDataValid());
 }
 
 void
 ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept
 {
-    ASSERT(IsDataValid());
-    ASSERT(sPSO != nullptr);
-    ASSERT(sRootSignature != nullptr);
+    BRE_ASSERT(IsDataValid());
+    BRE_ASSERT(sPSO != nullptr);
+    BRE_ASSERT(sRootSignature != nullptr);
 
     ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
 
@@ -107,3 +108,5 @@ ToneMappingCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBu
     srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
     mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
 }
+}
+

@@ -5,6 +5,7 @@
 #include <DirectXManager/DirectXManager.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 RootSignatureManager::RootSignatures RootSignatureManager::mRootSignatures;
 std::mutex RootSignatureManager::mMutex;
 
@@ -12,7 +13,7 @@ void
 RootSignatureManager::EraseAll() noexcept
 {
     for (ID3D12RootSignature* rootSignature : mRootSignatures) {
-        ASSERT(rootSignature != nullptr);
+        BRE_ASSERT(rootSignature != nullptr);
         rootSignature->Release();
     }
 }
@@ -29,8 +30,10 @@ RootSignatureManager::CreateRootSignatureFromBlob(ID3DBlob& blob) noexcept
                                                     IID_PPV_ARGS(&rootSignature));
     mMutex.unlock();
 
-    ASSERT(rootSignature != nullptr);
+    BRE_ASSERT(rootSignature != nullptr);
     mRootSignatures.insert(rootSignature);
 
     return *rootSignature;
 }
+}
+

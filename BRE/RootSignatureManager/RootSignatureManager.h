@@ -4,6 +4,7 @@
 #include <mutex>
 #include <tbb\concurrent_unordered_set.h>
 
+namespace BRE {
 // This class is responsible to create/get/erase root signatures
 class RootSignatureManager {
 public:
@@ -24,3 +25,6 @@ private:
 
     static std::mutex mMutex;
 };
+
+}
+

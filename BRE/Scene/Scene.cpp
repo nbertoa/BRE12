@@ -1,6 +1,7 @@
 #include "Scene.h"
 
-Scene::GeometryPassCommandListRecorders&
+namespace BRE {
+GeometryPassCommandListRecorders&
 Scene::GetGeometryPassCommandListRecorders() noexcept
 {
     return mGeometryCommandListRecorders;
@@ -23,3 +24,5 @@ ID3D12Resource*
 {
     return mSpecularPreConvolvedCubeMap;
 }
+}
+

@@ -6,6 +6,7 @@
 
 #include <ModelManager/Model.h>
 
+namespace BRE {
 // To create/get models or built-in geometry.
 class ModelManager {
 public:
@@ -73,3 +74,6 @@ private:
 
     static std::mutex mMutex;
 };
+
+}
+

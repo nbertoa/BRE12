@@ -5,15 +5,16 @@
 #include <CommandManager/CommandAllocatorManager.h>
 #include <CommandManager/CommandListManager.h>
 
+namespace BRE {
 namespace {
 void BuildCommandObjects(ID3D12GraphicsCommandList* &commandList,
                          ID3D12CommandAllocator* commandAllocators[]) noexcept
 {
-    ASSERT(commandList == nullptr);
+    BRE_ASSERT(commandList == nullptr);
 
 #ifdef _DEBUG
     for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-        ASSERT(commandAllocators[i] == nullptr);
+        BRE_ASSERT(commandAllocators[i] == nullptr);
     }
 #endif
 
@@ -39,13 +40,14 @@ ID3D12GraphicsCommandList&
 CommandListPerFrame::ResetWithNextCommandAllocator(ID3D12PipelineState* pso) noexcept
 {
     ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[mCurrentFrameIndex] };
-    ASSERT(commandAllocator != nullptr);
-    ASSERT(mCommandList != nullptr);
+    BRE_ASSERT(commandAllocator != nullptr);
+    BRE_ASSERT(mCommandList != nullptr);
 
-    CHECK_HR(commandAllocator->Reset());
-    CHECK_HR(mCommandList->Reset(commandAllocator, pso));
+    BRE_CHECK_HR(commandAllocator->Reset());
+    BRE_CHECK_HR(mCommandList->Reset(commandAllocator, pso));
 
     mCurrentFrameIndex = (mCurrentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
 
     return *mCommandList;
+}
 }

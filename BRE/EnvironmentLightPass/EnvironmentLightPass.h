@@ -11,6 +11,7 @@
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12Resource;
 
+namespace BRE {
 // Pass responsible to apply ambient lighting and ambient occlusion
 class EnvironmentLightPass {
 public:
@@ -52,3 +53,6 @@ private:
     std::unique_ptr<BlurCmdListRecorder> mBlurRecorder;
     std::unique_ptr<EnvironmentLightCmdListRecorder> mEnvironmentLightRecorder;
 };
+
+}
+

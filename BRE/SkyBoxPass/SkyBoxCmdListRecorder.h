@@ -9,10 +9,12 @@
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct D3D12_GPU_DESCRIPTOR_HANDLE;
-struct FrameCBuffer;
 struct ID3D12CommandAllocator;
 struct ID3D12Resource;
 struct ID3D12GraphicsCommandList;
+
+namespace BRE {
+struct FrameCBuffer;
 
 class SkyBoxCmdListRecorder {
 public:
@@ -59,3 +61,5 @@ private:
     D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
     D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
 };
+}
+

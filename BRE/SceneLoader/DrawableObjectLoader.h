@@ -11,6 +11,7 @@ namespace YAML {
 class Node;
 }
 
+namespace BRE {
 class MaterialPropertiesLoader;
 class MaterialTechniqueLoader;
 class ModelLoader;
@@ -47,3 +48,5 @@ private:
     const MaterialTechniqueLoader& mMaterialTechniqueLoader;
     const ModelLoader& mModelLoader;
 };
+}
+

@@ -8,8 +8,11 @@
 #include <CommandManager\CommandListPerFrame.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct FrameCBuffer;
+
 struct ID3D12Resource;
+
+namespace BRE {
+struct FrameCBuffer;
 
 // Pass responsible to execute recorders related with deferred shading lighting pass
 class LightingPass {
@@ -56,3 +59,6 @@ private:
 
     EnvironmentLightPass mEnvironmentLightPass;
 };
+
+}
+

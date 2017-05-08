@@ -5,6 +5,7 @@
 #include <d3d12.h>
 #include <wrl.h>
 
+namespace BRE {
 class VertexAndIndexBufferCreator {
 public:
     VertexAndIndexBufferCreator() = delete;
@@ -76,3 +77,5 @@ public:
                                   IndexBufferData& indexBufferData,
                                   Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
 };
+}
+

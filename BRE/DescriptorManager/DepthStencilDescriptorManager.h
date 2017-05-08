@@ -6,6 +6,7 @@
 
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 // To create depth stencil descriptor heaps
 // To create depth stencil descriptors
 class DepthStencilDescriptorManager {
@@ -52,3 +53,6 @@ private:
 
     static std::mutex mMutex;
 };
+
+}
+

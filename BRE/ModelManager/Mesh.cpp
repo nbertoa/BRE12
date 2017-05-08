@@ -6,6 +6,7 @@
 
 using namespace DirectX;
 
+namespace BRE {
 namespace {
 void CalculateTangentArray(GeometryGenerator::MeshData& meshData,
                            const std::size_t triangleCount) noexcept
@@ -63,8 +64,8 @@ void CreateVertexAndIndexBufferData(VertexAndIndexBufferCreator::VertexBufferDat
                                     Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
                                     Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
 {
-    ASSERT(vertexBufferData.IsDataValid() == false);
-    ASSERT(indexBufferData.IsDataValid() == false);
+    BRE_ASSERT(vertexBufferData.IsDataValid() == false);
+    BRE_ASSERT(indexBufferData.IsDataValid() == false);
 
     // Create vertex buffer
     VertexAndIndexBufferCreator::BufferCreationData vertexBufferParams(meshData.mVertices.data(),
@@ -86,8 +87,8 @@ void CreateVertexAndIndexBufferData(VertexAndIndexBufferCreator::VertexBufferDat
                                                    indexBufferData,
                                                    uploadIndexBuffer);
 
-    ASSERT(vertexBufferData.IsDataValid());
-    ASSERT(indexBufferData.IsDataValid());
+    BRE_ASSERT(vertexBufferData.IsDataValid());
+    BRE_ASSERT(indexBufferData.IsDataValid());
 }
 }
 
@@ -100,8 +101,8 @@ Mesh::Mesh(const aiMesh& mesh,
 
     // Positions and Normals
     const std::size_t numVertices{ mesh.mNumVertices };
-    ASSERT(numVertices > 0U);
-    ASSERT(mesh.HasNormals());
+    BRE_ASSERT(numVertices > 0U);
+    BRE_ASSERT(mesh.HasNormals());
     meshData.mVertices.resize(numVertices);
     for (std::uint32_t i = 0U; i < numVertices; ++i) {
         meshData.mVertices[i].mPosition = XMFLOAT3(reinterpret_cast<const float*>(&mesh.mVertices[i]));
@@ -110,22 +111,22 @@ Mesh::Mesh(const aiMesh& mesh,
 
     // Texture Coordinates (if any)
     if (mesh.HasTextureCoords(0U)) {
-        ASSERT(mesh.GetNumUVChannels() == 1U);
+        BRE_ASSERT(mesh.GetNumUVChannels() == 1U);
         const aiVector3D* aiTextureCoordinates{ mesh.mTextureCoords[0U] };
-        ASSERT(aiTextureCoordinates != nullptr);
+        BRE_ASSERT(aiTextureCoordinates != nullptr);
         for (std::uint32_t i = 0U; i < numVertices; i++) {
             meshData.mVertices[i].mUV = XMFLOAT2(reinterpret_cast<const float*>(&aiTextureCoordinates[i]));
         }
     }
 
     // Indices
-    ASSERT(mesh.HasFaces());
+    BRE_ASSERT(mesh.HasFaces());
     const std::uint32_t numFaces{ mesh.mNumFaces };
     for (std::uint32_t i = 0U; i < numFaces; ++i) {
         const aiFace* face = &mesh.mFaces[i];
-        ASSERT(face != nullptr);
+        BRE_ASSERT(face != nullptr);
         // We only allow triangles
-        ASSERT(face->mNumIndices == 3U);
+        BRE_ASSERT(face->mNumIndices == 3U);
 
         meshData.mIndices32.push_back(face->mIndices[0U]);
         meshData.mIndices32.push_back(face->mIndices[1U]);
@@ -148,8 +149,8 @@ Mesh::Mesh(const aiMesh& mesh,
                                    uploadVertexBuffer,
                                    uploadIndexBuffer);
 
-    ASSERT(mVertexBufferData.IsDataValid());
-    ASSERT(mIndexBufferData.IsDataValid());
+    BRE_ASSERT(mVertexBufferData.IsDataValid());
+    BRE_ASSERT(mIndexBufferData.IsDataValid());
 }
 
 Mesh::Mesh(const GeometryGenerator::MeshData& meshData,
@@ -164,6 +165,8 @@ Mesh::Mesh(const GeometryGenerator::MeshData& meshData,
                                    uploadVertexBuffer,
                                    uploadIndexBuffer);
 
-    ASSERT(mVertexBufferData.IsDataValid());
-    ASSERT(mIndexBufferData.IsDataValid());
+    BRE_ASSERT(mVertexBufferData.IsDataValid());
+    BRE_ASSERT(mIndexBufferData.IsDataValid());
 }
+}
+

@@ -7,8 +7,10 @@
 #include <GeometryPass\GeometryPassCmdListRecorder.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct FrameCBuffer;
 struct ID3D12Resource;
+
+namespace BRE {
+struct FrameCBuffer;
 
 // Pass responsible to execute recorders related with deferred shading geometry pass
 class GeometryPass {
@@ -19,8 +21,6 @@ public:
         BASECOLOR_METALMASK, // 3 base color + 1 metal mask
         BUFFERS_COUNT
     };
-
-    using GeometryPassCommandListRecorders = std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>;
 
     GeometryPass(GeometryPassCommandListRecorders& geometryPassCommandListRecorders);
     ~GeometryPass() = default;
@@ -58,3 +58,6 @@ private:
 
     GeometryPassCommandListRecorders& mGeometryPassCommandListRecorders;
 };
+
+}
+

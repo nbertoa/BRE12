@@ -8,6 +8,7 @@
 
 #include <Utils\DebugUtils.h>
 
+namespace BRE {
 class YamlUtils {
 public:
     YamlUtils() = delete;
@@ -24,10 +25,10 @@ public:
     static T GetScalar(const YAML::Node& node,
                        const char* key)
     {
-        ASSERT(key != nullptr);
+        BRE_ASSERT(key != nullptr);
         YAML::Node attr = node[key];
-        ASSERT(attr.IsDefined());
-        ASSERT(attr.IsScalar());
+        BRE_ASSERT(attr.IsDefined());
+        BRE_ASSERT(attr.IsScalar());
         return std::to_string(attr.as<std::string>());
     }
 
@@ -35,10 +36,10 @@ public:
     static std::string GetScalar(const YAML::Node& node,
                                  const char* key)
     {
-        ASSERT(key != nullptr);
+        BRE_ASSERT(key != nullptr);
         YAML::Node attr = node[key];
-        ASSERT(attr.IsDefined());
-        ASSERT(attr.IsScalar());
+        BRE_ASSERT(attr.IsDefined());
+        BRE_ASSERT(attr.IsScalar());
         return attr.as<std::string>();
     }
 
@@ -47,16 +48,19 @@ public:
                             T* const sequenceOutput,
                             const size_t numElems)
     {
-        ASSERT(sequenceOutput != nullptr);
-        ASSERT(node.IsDefined());
-        ASSERT(node.IsSequence());
+        BRE_ASSERT(sequenceOutput != nullptr);
+        BRE_ASSERT(node.IsDefined());
+        BRE_ASSERT(node.IsSequence());
         size_t currentNumElems = 0;
         for (const YAML::Node& seqNode : node) {
-            ASSERT(seqNode.IsScalar());
-            ASSERT(currentNumElems < numElems);
+            BRE_ASSERT(seqNode.IsScalar());
+            BRE_ASSERT(currentNumElems < numElems);
             sequenceOutput[currentNumElems] = seqNode.as<T>();
             ++currentNumElems;
         }
-        ASSERT(currentNumElems == numElems);
+        BRE_ASSERT(currentNumElems == numElems);
     }
 };
+
+}
+

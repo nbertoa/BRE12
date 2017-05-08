@@ -20,6 +20,7 @@
 
 using namespace DirectX;
 
+namespace BRE {
 namespace {
 // Geometry buffer formats
 const DXGI_FORMAT sGeometryBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{
@@ -54,7 +55,7 @@ void CreateGeometryBuffersAndRenderTargetViews(Microsoft::WRL::ComPtr<ID3D12Reso
         { DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 1.0f },
         { DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 0.0f },
     };
-    ASSERT(_countof(clearValue) == GeometryPass::BUFFERS_COUNT);
+    BRE_ASSERT(_countof(clearValue) == GeometryPass::BUFFERS_COUNT);
 
     buffers[GeometryPass::NORMAL_SMOOTHNESS].Reset();
     buffers[GeometryPass::BASECOLOR_METALMASK].Reset();
@@ -95,9 +96,9 @@ GeometryPass::GeometryPass(GeometryPassCommandListRecorders& geometryPassCommand
 void
 GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 {
-    ASSERT(IsDataValid() == false);
+    BRE_ASSERT(IsDataValid() == false);
 
-    ASSERT(mGeometryPassCommandListRecorders.empty() == false);
+    BRE_ASSERT(mGeometryPassCommandListRecorders.empty() == false);
 
     CreateGeometryBuffersAndRenderTargetViews(mGeometryBuffers, mGeometryBufferRenderTargetViews);
 
@@ -112,17 +113,17 @@ GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 
     // Init geometry command list recorders
     for (GeometryPassCommandListRecorders::value_type& recorder : mGeometryPassCommandListRecorders) {
-        ASSERT(recorder.get() != nullptr);
+        BRE_ASSERT(recorder.get() != nullptr);
         recorder->Init(mGeometryBufferRenderTargetViews, BUFFERS_COUNT, mDepthBufferView);
     }
 
-    ASSERT(IsDataValid());
+    BRE_ASSERT(IsDataValid());
 }
 
 void
 GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 {
-    ASSERT(IsDataValid());
+    BRE_ASSERT(IsDataValid());
 
     ExecuteBeginTask();
 
@@ -169,14 +170,14 @@ GeometryPass::IsDataValid() const noexcept
 void
 GeometryPass::ExecuteBeginTask() noexcept
 {
-    ASSERT(IsDataValid());
+    BRE_ASSERT(IsDataValid());
 
     // Check resource states:
     // As geometry pass is the first pass, then all geometry buffers must be 
     // in render target state because final pass changed them.
 #ifdef _DEBUG
     for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
-        ASSERT(ResourceStateManager::GetResourceState(*mGeometryBuffers[i].Get()) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+        BRE_ASSERT(ResourceStateManager::GetResourceState(*mGeometryBuffers[i].Get()) == D3D12_RESOURCE_STATE_RENDER_TARGET);
     }
 #endif
 
@@ -190,6 +191,8 @@ GeometryPass::ExecuteBeginTask() noexcept
     commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[BASECOLOR_METALMASK], zero, 0U, nullptr);
     commandList.ClearDepthStencilView(mDepthBufferView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0U, 0U, nullptr);
 
-    CHECK_HR(commandList.Close());
+    BRE_CHECK_HR(commandList.Close());
     CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
+}
+

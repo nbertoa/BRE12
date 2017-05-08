@@ -8,7 +8,7 @@ WINAPI WinMain(_In_ HINSTANCE moduleInstanceHandle,
                _In_ LPSTR /*commandLine*/,
                _In_ int /*showCommand*/)
 {
-    SceneExecutor sceneExecutor(moduleInstanceHandle, "resources/scenes/test.yml");
+    BRE::SceneExecutor sceneExecutor(moduleInstanceHandle, "resources/scenes/test.yml");
     sceneExecutor.Execute();
 
     return 0;

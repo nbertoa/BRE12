@@ -2,6 +2,7 @@
 
 #include <windows.h>
 
+namespace BRE {
 Timer::Timer()
 {
     std::int64_t countsPerSecond;
@@ -37,5 +38,6 @@ Timer::Tick() noexcept
     if (mDeltaTimeInSeconds < 0.0) {
         mDeltaTimeInSeconds = 0.0;
     }
+}
 }
 

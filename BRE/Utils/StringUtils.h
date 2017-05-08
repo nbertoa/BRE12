@@ -2,6 +2,7 @@
 
 #include <codecvt>
 
+namespace BRE {
 namespace StringUtils {
 inline void ToWideString(const std::string& source,
                          std::wstring& destination) noexcept
@@ -31,3 +32,5 @@ inline std::wstring AnsiToWString(const std::string& str) noexcept
     return std::wstring(buffer);
 }
 }
+}
+

@@ -4,6 +4,7 @@
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
+namespace BRE {
 class Keyboard {
 public:
     // Preconditions:
@@ -69,3 +70,5 @@ private:
     std::uint8_t mKeysCurrentState[sNumKeys] = {};
     std::uint8_t mKeysLastState[sNumKeys] = {};
 };
+}
+

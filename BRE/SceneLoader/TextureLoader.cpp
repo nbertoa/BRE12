@@ -11,12 +11,13 @@
 #include <ResourceManager\ResourceManager.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 void
 TextureLoader::LoadTextures(const YAML::Node& rootNode,
                             ID3D12CommandAllocator& commandAllocator,
                             ID3D12GraphicsCommandList& commandList) noexcept
 {
-    ASSERT(rootNode.IsDefined());
+    BRE_ASSERT(rootNode.IsDefined());
 
     // Get the "textures" node. It is a map and its sintax is:
     // textures:
@@ -24,11 +25,11 @@ TextureLoader::LoadTextures(const YAML::Node& rootNode,
     //   textureName2: texturePath2
     //   textureName3: texturePath3
     const YAML::Node texturesNode = rootNode["textures"];
-    ASSERT_MSG(texturesNode.IsDefined(), L"'textures' node is not found");
-    ASSERT_MSG(texturesNode.IsMap(), L"'textures' node must be a map");
+    BRE_ASSERT_MSG(texturesNode.IsDefined(), L"'textures' node is not found");
+    BRE_ASSERT_MSG(texturesNode.IsMap(), L"'textures' node must be a map");
 
     std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadBuffers;
-    CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
+    BRE_CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
 
     // Iterate "textureName: texturePath" pairs and create textures.
     std::string textureName;
@@ -37,7 +38,7 @@ TextureLoader::LoadTextures(const YAML::Node& rootNode,
         textureName = it->first.as<std::string>();
         texturePath = it->second.as<std::string>();
 
-        ASSERT_MSG(mTextureByName.find(textureName) == mTextureByName.end(), L"Texture name is not unique");
+        BRE_ASSERT_MSG(mTextureByName.find(textureName) == mTextureByName.end(), L"Texture name is not unique");
 
         uploadBuffers.resize(uploadBuffers.size() + 1);
 
@@ -59,8 +60,10 @@ ID3D12Resource&
 TextureLoader::GetTexture(const std::string& name) noexcept
 {
     std::unordered_map<std::string, ID3D12Resource*>::iterator findIt = mTextureByName.find(name);
-    ASSERT_MSG(findIt != mTextureByName.end(), L"Texture name not found");
-    ASSERT(findIt->second != nullptr);
+    BRE_ASSERT_MSG(findIt != mTextureByName.end(), L"Texture name not found");
+    BRE_ASSERT(findIt->second != nullptr);
 
     return *findIt->second;
 }
+}
+

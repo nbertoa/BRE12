@@ -11,6 +11,7 @@ struct ID3D12CommandAllocator;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
+namespace BRE {
 class TextureLoader {
 public:
     TextureLoader()
@@ -29,3 +30,5 @@ public:
 private:
     std::unordered_map<std::string, ID3D12Resource*> mTextureByName;
 };
+}
+

@@ -14,6 +14,7 @@
 #include <ShaderUtils\MaterialProperties.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 // Root signature:
 // "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Object CBuffers
 // "CBV(b1, visibility = SHADER_VISIBILITY_VERTEX), " \ 1 -> Frame CBuffer
@@ -29,10 +30,10 @@ void
 ColorCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
                                                     const std::uint32_t geometryBufferCount) noexcept
 {
-    ASSERT(geometryBufferFormats != nullptr);
-    ASSERT(geometryBufferCount > 0U);
-    ASSERT(sPSO == nullptr);
-    ASSERT(sRootSignature == nullptr);
+    BRE_ASSERT(geometryBufferFormats != nullptr);
+    BRE_ASSERT(geometryBufferCount > 0U);
+    BRE_ASSERT(sPSO == nullptr);
+    BRE_ASSERT(sRootSignature == nullptr);
 
     PSOManager::PSOCreationData psoData{};
     psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
@@ -48,16 +49,16 @@ ColorCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryB
     memcpy(psoData.mRenderTargetFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
     sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
-    ASSERT(sPSO != nullptr);
-    ASSERT(sRootSignature != nullptr);
+    BRE_ASSERT(sPSO != nullptr);
+    BRE_ASSERT(sRootSignature != nullptr);
 }
 
 void
 ColorCmdListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
                            const std::vector<MaterialProperties>& materialProperties) noexcept
 {
-    ASSERT(IsDataValid() == false);
-    ASSERT(materialProperties.empty() == false);
+    BRE_ASSERT(IsDataValid() == false);
+    BRE_ASSERT(materialProperties.empty() == false);
 
     const std::size_t numResources = materialProperties.size();
     const std::size_t geometryDataCount = geometryDataVector.size();
@@ -68,9 +69,9 @@ ColorCmdListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
     for (std::size_t i = 0UL; i < geometryDataCount; ++i) {
         const std::size_t numMatrices{ geometryDataVector[i].mWorldMatrices.size() };
         totalNumMatrices += numMatrices;
-        ASSERT(numMatrices != 0UL);
+        BRE_ASSERT(numMatrices != 0UL);
     }
-    ASSERT(totalNumMatrices == numResources);
+    BRE_ASSERT(totalNumMatrices == numResources);
 #endif
     mGeometryDataVec.reserve(geometryDataCount);
     for (std::uint32_t i = 0U; i < geometryDataCount; ++i) {
@@ -79,18 +80,18 @@ ColorCmdListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
 
     InitConstantBuffers(materialProperties);
 
-    ASSERT(IsDataValid());
+    BRE_ASSERT(IsDataValid());
 }
 
 void
 ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
-    ASSERT(IsDataValid());
-    ASSERT(sPSO != nullptr);
-    ASSERT(sRootSignature != nullptr);
-    ASSERT(mGeometryBufferRenderTargetViews != nullptr);
-    ASSERT(mGeometryBufferRenderTargetViewCount != 0U);
-    ASSERT(mDepthBufferView.ptr != 0U);
+    BRE_ASSERT(IsDataValid());
+    BRE_ASSERT(sPSO != nullptr);
+    BRE_ASSERT(sRootSignature != nullptr);
+    BRE_ASSERT(mGeometryBufferRenderTargetViews != nullptr);
+    BRE_ASSERT(mGeometryBufferRenderTargetViewCount != 0U);
+    BRE_ASSERT(mDepthBufferView.ptr != 0U);
 
     // Update frame constants
     UploadBuffer& uploadFrameCBuffer(mFrameUploadCBufferPerFrame.GetNextFrameCBuffer());
@@ -138,9 +139,9 @@ ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer
 void
 ColorCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties) noexcept
 {
-    ASSERT(materialProperties.empty() == false);
-    ASSERT(mObjectUploadCBuffers == nullptr);
-    ASSERT(mMaterialUploadCBuffers == nullptr);
+    BRE_ASSERT(materialProperties.empty() == false);
+    BRE_ASSERT(mObjectUploadCBuffers == nullptr);
+    BRE_ASSERT(mMaterialUploadCBuffers == nullptr);
 
     const std::uint32_t numResources = static_cast<std::uint32_t>(materialProperties.size());
 
@@ -195,3 +196,5 @@ ColorCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>&
     mStartMaterialCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferViews(materialCbufferViewDescVec.data(),
                                                                                       static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
 }
+}
+

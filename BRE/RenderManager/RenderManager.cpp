@@ -18,6 +18,7 @@
 
 using namespace DirectX;
 
+namespace BRE {
 namespace {
 void UpdateCameraAndFrameCBuffer(const float elapsedFrameTime,
                                  Camera& camera,
@@ -102,27 +103,27 @@ void CreateSwapChain(const HWND windowHandle,
     swapChainDescriptor.Stereo = false;
     swapChainDescriptor.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
-    CHECK_HR(DirectXManager::GetIDXGIFactory().CreateSwapChainForHwnd(&CommandListExecutor::Get().GetCommandQueue(),
+    BRE_CHECK_HR(DirectXManager::GetIDXGIFactory().CreateSwapChainForHwnd(&CommandListExecutor::Get().GetCommandQueue(),
                                                                       windowHandle,
                                                                       &swapChainDescriptor,
                                                                       nullptr,
                                                                       nullptr,
                                                                       &baseSwapChain));
-    CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain.GetAddressOf())));
+    BRE_CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain.GetAddressOf())));
 
-    CHECK_HR(swapChain->ResizeBuffers(SettingsManager::sSwapChainBufferCount,
+    BRE_CHECK_HR(swapChain->ResizeBuffers(SettingsManager::sSwapChainBufferCount,
                                       SettingsManager::sWindowWidth,
                                       SettingsManager::sWindowHeight,
                                       frameBufferFormat,
                                       swapChainDescriptor.Flags));
 
     // Make window association
-    CHECK_HR(DirectXManager::GetIDXGIFactory().MakeWindowAssociation(
+    BRE_CHECK_HR(DirectXManager::GetIDXGIFactory().MakeWindowAssociation(
         windowHandle,
         DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
 
 #ifdef V_SYNC
-    CHECK_HR(swapChain3->SetMaximumFrameLatency(SettingsManager::sQueuedFrameCount));
+    BRE_CHECK_HR(swapChain3->SetMaximumFrameLatency(SettingsManager::sQueuedFrameCount));
 #endif
 }
 }
@@ -134,7 +135,7 @@ RenderManager* RenderManager::sRenderManager{ nullptr };
 RenderManager&
 RenderManager::Create(Scene& scene) noexcept
 {
-    ASSERT(sRenderManager == nullptr);
+    BRE_ASSERT(sRenderManager == nullptr);
 
     tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
     // Reference count is 2: 1 parent task + 1 master render task
@@ -183,9 +184,9 @@ RenderManager::InitPasses(Scene& scene) noexcept
     ID3D12Resource* skyBoxCubeMap = scene.GetSkyBoxCubeMap();
     ID3D12Resource* diffuseIrradianceCubeMap = scene.GetDiffuseIrradianceCubeMap();
     ID3D12Resource* specularPreConvolvedCubeMap = scene.GetSpecularPreConvolvedCubeMap();
-    ASSERT(skyBoxCubeMap != nullptr);
-    ASSERT(diffuseIrradianceCubeMap != nullptr);
-    ASSERT(specularPreConvolvedCubeMap != nullptr);
+    BRE_ASSERT(skyBoxCubeMap != nullptr);
+    BRE_ASSERT(diffuseIrradianceCubeMap != nullptr);
+    BRE_ASSERT(specularPreConvolvedCubeMap != nullptr);
 
     mLightingPass.Init(*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(),
                        *mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(),
@@ -225,7 +226,7 @@ RenderManager::execute()
         mTimer.Tick();
         UpdateCameraAndFrameCBuffer(mTimer.DeltaTimeInSeconds(), mCamera, mFrameCBuffer);
 
-        ASSERT(CommandListExecutor::Get().AreTherePendingCommandListsToExecute());
+        BRE_ASSERT(CommandListExecutor::Get().AreTherePendingCommandListsToExecute());
 
         mGeometryPass.Execute(mFrameCBuffer);
         mLightingPass.Execute(mFrameCBuffer);
@@ -264,10 +265,10 @@ RenderManager::ExecuteFinalPass()
         D3D12_RESOURCE_STATE_RENDER_TARGET),
     };
     const std::size_t barrierCount = _countof(barriers);
-    ASSERT(barrierCount == GeometryPass::BUFFERS_COUNT + 2UL);
+    BRE_ASSERT(barrierCount == GeometryPass::BUFFERS_COUNT + 2UL);
     commandList.ResourceBarrier(_countof(barriers), barriers);
 
-    CHECK_HR(commandList.Close());
+    BRE_CHECK_HR(commandList.Close());
     CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
 
@@ -280,7 +281,7 @@ RenderManager::CreateFrameBuffersAndRenderTargetViews() noexcept
     rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
     // Create swap chain and frame buffers
-    ASSERT(mSwapChain == nullptr);
+    BRE_ASSERT(mSwapChain == nullptr);
     CreateSwapChain(DirectXManager::GetWindowHandle(),
                     SettingsManager::sFrameBufferFormat,
                     mSwapChain);
@@ -288,7 +289,7 @@ RenderManager::CreateFrameBuffersAndRenderTargetViews() noexcept
     // Create frame buffer render target views
     const std::size_t rtvDescriptorSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
     for (std::uint32_t i = 0U; i < SettingsManager::sSwapChainBufferCount; ++i) {
-        CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
+        BRE_CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
 
         RenderTargetDescriptorManager::CreateRenderTargetView(*mFrameBuffers[i].Get(),
                                                               rtvDescriptor,
@@ -342,7 +343,7 @@ RenderManager::CreateIntermediateColorBufferAndRenderTargetView(const D3D12_RESO
                                                                 Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
                                                                 D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
-    ASSERT(resourceName != nullptr);
+    BRE_ASSERT(resourceName != nullptr);
 
     // Fill resource description
     D3D12_RESOURCE_DESC resourceDescriptor = {};
@@ -389,14 +390,14 @@ RenderManager::FlushCommandQueue() noexcept
 void
 RenderManager::SignalFenceAndPresent() noexcept
 {
-    ASSERT(mSwapChain != nullptr);
+    BRE_ASSERT(mSwapChain != nullptr);
 
 #ifdef V_SYNC
     static const HANDLE frameLatencyWaitableObj(mSwapChain->GetFrameLatencyWaitableObject());
     WaitForSingleObjectEx(frameLatencyWaitableObj, INFINITE, true);
-    CHECK_HR(mSwapChain->Present(1U, 0U));
+    BRE_CHECK_HR(mSwapChain->Present(1U, 0U));
 #else
-    CHECK_HR(mSwapChain->Present(0U, 0U));
+    BRE_CHECK_HR(mSwapChain->Present(0U, 0U));
 #endif
 
     // Add an instruction to the command queue to set a new fence point.  Because we 
@@ -412,3 +413,6 @@ RenderManager::SignalFenceAndPresent() noexcept
                                                                mCurrentFenceValue,
                                                                oldestFence);
 }
+
+}
+

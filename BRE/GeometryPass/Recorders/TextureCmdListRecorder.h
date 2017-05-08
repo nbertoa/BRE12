@@ -2,6 +2,7 @@
 
 #include <GeometryPass/GeometryPassCmdListRecorder.h>
 
+namespace BRE {
 class MaterialProperties;
 
 // CommandListRecorders that does texture mapping
@@ -37,3 +38,5 @@ private:
 
     D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorBufferGpuDescriptorsBegin;
 };
+}
+

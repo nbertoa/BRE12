@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 #include <vector>
 
+namespace BRE {
 // To generate procedurally the geometry of 
 // common mathematical objects.
 //
@@ -72,5 +73,6 @@ void CreateGrid(const float width,
                 const std::uint32_t rows,
                 const std::uint32_t columns,
                 MeshData& meshData) noexcept;
+}
 }
 

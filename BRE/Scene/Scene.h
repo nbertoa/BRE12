@@ -5,10 +5,9 @@
 
 #include <GeometryPass/GeometryPassCmdListRecorder.h>
 
+namespace BRE {
 class Scene {
 public:
-    using GeometryPassCommandListRecorders = std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>;
-
     Scene() = default;
     Scene(const Scene&) = delete;
     const Scene& operator=(const Scene&) = delete;
@@ -28,3 +27,6 @@ private:
     ID3D12Resource* mDiffuseIrradianceCubeMap{ nullptr };
     ID3D12Resource* mSpecularPreConvolvedCubeMap{ nullptr };
 };
+}
+
+

@@ -6,8 +6,10 @@
 #include <ResourceManager\FrameUploadCBufferPerFrame.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct FrameCBuffer;
 struct ID3D12Resource;
+
+namespace BRE {
+struct FrameCBuffer;
 
 // Responsible of command lists recording to be executed by CommandListExecutor.
 // This class has common data and functionality to record command list for environment light pass.
@@ -54,3 +56,5 @@ private:
 
     D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
 };
+}
+

@@ -9,6 +9,7 @@ struct ID3D12CommandAllocator;
 struct ID3D12GraphicsCommandList;
 struct ID3D12PipelinesState;
 
+namespace BRE {
 // We support to have different number of queued frames.
 // This class provides a command list that can be reset
 // with a different command allocator per queued frame.
@@ -24,7 +25,7 @@ public:
     ID3D12GraphicsCommandList& ResetWithNextCommandAllocator(ID3D12PipelineState* pso) noexcept;
     __forceinline ID3D12GraphicsCommandList& GetCommandList() noexcept
     {
-        ASSERT(mCommandList != nullptr);
+        BRE_ASSERT(mCommandList != nullptr);
         return *mCommandList;
     }
 
@@ -33,3 +34,5 @@ private:
     ID3D12GraphicsCommandList* mCommandList{ nullptr };
     std::uint32_t mCurrentFrameIndex{ 0U };
 };
+}
+

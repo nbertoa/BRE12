@@ -2,6 +2,7 @@
 
 #include <SettingsManager\SettingsManager.h>
 
+namespace BRE {
 namespace {
 void InitMainWindow(HWND& windowHandle, const HINSTANCE moduleInstanceHandle) noexcept
 {
@@ -17,7 +18,7 @@ void InitMainWindow(HWND& windowHandle, const HINSTANCE moduleInstanceHandle) no
     windowClass.lpszMenuName = nullptr;
     windowClass.lpszClassName = L"MainWnd";
 
-    ASSERT(RegisterClass(&windowClass));
+    BRE_ASSERT(RegisterClass(&windowClass));
 
     // Compute window rectangle dimensions based on requested client area dimensions.
     RECT rect = { 0, 0, static_cast<long>(SettingsManager::sWindowWidth), static_cast<long>(SettingsManager::sWindowHeight) };
@@ -42,7 +43,7 @@ void InitMainWindow(HWND& windowHandle, const HINSTANCE moduleInstanceHandle) no
         moduleInstanceHandle,
         nullptr);
 
-    ASSERT(windowHandle);
+    BRE_ASSERT(windowHandle);
 
     ShowWindow(windowHandle, SW_SHOW);
     UpdateWindow(windowHandle);
@@ -62,12 +63,14 @@ DirectXManager::Init(const HINSTANCE moduleInstanceHandle) noexcept
     // Enable the D3D12 debug layer.
     {
         Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
-        CHECK_HR(D3D12GetDebugInterface(IID_PPV_ARGS(debugController.GetAddressOf())));
+        BRE_CHECK_HR(D3D12GetDebugInterface(IID_PPV_ARGS(debugController.GetAddressOf())));
         debugController->EnableDebugLayer();
     }
 #endif
 
     // Create device
-    CHECK_HR(CreateDXGIFactory1(IID_PPV_ARGS(mDxgiFactory.GetAddressOf())));
-    CHECK_HR(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(mDevice.GetAddressOf())));
+    BRE_CHECK_HR(CreateDXGIFactory1(IID_PPV_ARGS(mDxgiFactory.GetAddressOf())));
+    BRE_CHECK_HR(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(mDevice.GetAddressOf())));
 }
+}
+

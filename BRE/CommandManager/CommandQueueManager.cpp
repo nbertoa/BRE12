@@ -3,6 +3,7 @@
 #include <DirectXManager/DirectXManager.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 CommandQueueManager::CommandQueues CommandQueueManager::mCommandQueues;
 std::mutex CommandQueueManager::mMutex;
 
@@ -10,7 +11,7 @@ void
 CommandQueueManager::EraseAll() noexcept
 {
     for (ID3D12CommandQueue* commandQueue : mCommandQueues) {
-        ASSERT(commandQueue != nullptr);
+        BRE_ASSERT(commandQueue != nullptr);
         commandQueue->Release();
     }
 }
@@ -21,11 +22,12 @@ CommandQueueManager::CreateCommandQueue(const D3D12_COMMAND_QUEUE_DESC& descript
     ID3D12CommandQueue* commandQueue{ nullptr };
 
     mMutex.lock();
-    CHECK_HR(DirectXManager::GetDevice().CreateCommandQueue(&descriptor, IID_PPV_ARGS(&commandQueue)));
+    BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommandQueue(&descriptor, IID_PPV_ARGS(&commandQueue)));
     mMutex.unlock();
 
-    ASSERT(commandQueue != nullptr);
+    BRE_ASSERT(commandQueue != nullptr);
     mCommandQueues.insert(commandQueue);
 
     return *commandQueue;
+}
 }

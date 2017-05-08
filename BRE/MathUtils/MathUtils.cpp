@@ -5,6 +5,7 @@
 
 using namespace DirectX;
 
+namespace BRE {
 const float MathUtils::Infinity{ FLT_MAX };
 const float MathUtils::Pi{ 3.1415926535f };
 
@@ -27,3 +28,5 @@ MathUtils::ComputeMatrix(XMFLOAT4X4& m,
                     XMMatrixRotationZ(rz) *
                     XMMatrixTranslation(tx, ty, tz));
 }
+}
+

@@ -4,6 +4,7 @@
 
 #include <Utils\DebugUtils.h>
 
+namespace BRE {
 ResourceStateManager::StateByResource ResourceStateManager::mStateByResource;
 
 void
@@ -13,7 +14,7 @@ ResourceStateManager::AddResource(ID3D12Resource& resource,
     StateByResource::accessor accessor;
 #ifdef _DEBUG
     mStateByResource.find(accessor, &resource);
-    ASSERT(accessor.empty());
+    BRE_ASSERT(accessor.empty());
 #endif
     mStateByResource.insert(accessor, &resource);
     accessor->second = initialState;
@@ -26,10 +27,10 @@ ResourceStateManager::ChangeResourceStateAndGetBarrier(ID3D12Resource& resource,
 {
     StateByResource::accessor accessor;
     mStateByResource.find(accessor, &resource);
-    ASSERT(accessor.empty() == false);
+    BRE_ASSERT(accessor.empty() == false);
 
     const D3D12_RESOURCE_STATES oldState = accessor->second;
-    ASSERT(oldState != newState);
+    BRE_ASSERT(oldState != newState);
     accessor->second = newState;
     accessor.release();
 
@@ -41,6 +42,8 @@ ResourceStateManager::GetResourceState(ID3D12Resource& resource) noexcept
 {
     StateByResource::accessor accessor;
     mStateByResource.find(accessor, &resource);
-    ASSERT(accessor.empty() == false);
+    BRE_ASSERT(accessor.empty() == false);
     return accessor->second;
 }
+}
+

@@ -12,6 +12,7 @@
 #include <crtdbg.h>               
 #endif 
 
+namespace BRE {
 class RenderManager;
 
 // To execute a scene.
@@ -35,3 +36,5 @@ private:
 
     RenderManager* mRenderManager{ nullptr };
 };
+}
+

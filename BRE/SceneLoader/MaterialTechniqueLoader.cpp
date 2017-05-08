@@ -9,10 +9,11 @@
 #include <SceneLoader\YamlUtils.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 void
 MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noexcept
 {
-    ASSERT(rootNode.IsDefined());
+    BRE_ASSERT(rootNode.IsDefined());
 
     // Get the "material techniques" node. It is a sequence of maps and its sintax is:
     // material techniques:
@@ -24,23 +25,23 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
     //     diffuse texture: diffuseTextureName
     //     normal texture: normalTextureName
     const YAML::Node materialTechniquesNode = rootNode["material techniques"];
-    ASSERT_MSG(materialTechniquesNode.IsDefined(), L"'material techniques' node is not defined");
-    ASSERT_MSG(materialTechniquesNode.IsSequence(), L"'material techniques' node must be a map");
+    BRE_ASSERT_MSG(materialTechniquesNode.IsDefined(), L"'material techniques' node is not defined");
+    BRE_ASSERT_MSG(materialTechniquesNode.IsSequence(), L"'material techniques' node must be a map");
 
     std::string pairFirstValue;
     std::string pairSecondValue;
     std::string materialTechniqueName;
     for (YAML::const_iterator seqIt = materialTechniquesNode.begin(); seqIt != materialTechniquesNode.end(); ++seqIt) {
         const YAML::Node materialMap = *seqIt;
-        ASSERT(materialMap.IsMap());
+        BRE_ASSERT(materialMap.IsMap());
 
         // Get material technique name
         YAML::const_iterator mapIt = materialMap.begin();
-        ASSERT(mapIt != materialMap.end());
+        BRE_ASSERT(mapIt != materialMap.end());
         pairFirstValue = mapIt->first.as<std::string>();
-        ASSERT(pairFirstValue == std::string("name"));
+        BRE_ASSERT(pairFirstValue == std::string("name"));
         materialTechniqueName = mapIt->second.as<std::string>();
-        ASSERT_MSG(mMaterialTechniqueByName.find(materialTechniqueName) == mMaterialTechniqueByName.end(),
+        BRE_ASSERT_MSG(mMaterialTechniqueByName.find(materialTechniqueName) == mMaterialTechniqueByName.end(),
                    L"Material technique name must be unique");
         ++mapIt;
 
@@ -60,7 +61,7 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
 const MaterialTechnique& MaterialTechniqueLoader::GetMaterialTechnique(const std::string& name) const noexcept
 {
     std::unordered_map<std::string, MaterialTechnique>::const_iterator findIt = mMaterialTechniqueByName.find(name);
-    ASSERT_MSG(findIt != mMaterialTechniqueByName.end(), L"Material technique name not found");
+    BRE_ASSERT_MSG(findIt != mMaterialTechniqueByName.end(), L"Material technique name not found");
 
     return findIt->second;
 }
@@ -77,6 +78,8 @@ void MaterialTechniqueLoader::UpdateMaterialTechnique(const std::string& materia
     } else if (materialTechniquePropertyName == "height texture") {
         materialTechnique.SetHeightTexture(&texture);
     } else {
-        ASSERT(false);
+        BRE_ASSERT(false);
     }
 }
+}
+

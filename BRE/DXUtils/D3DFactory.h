@@ -3,6 +3,7 @@
 #include <d3d12.h>
 #include <vector>
 
+namespace BRE {
 // To generate common used D3D data 
 namespace D3DFactory {
 // FillMode = D3D12_FILL_MODE_SOLID;
@@ -32,3 +33,5 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> GetPosInputLayout() noexcept;
 std::vector<D3D12_INPUT_ELEMENT_DESC> GetPosNormalTangentTexCoordInputLayout() noexcept;
 std::vector<D3D12_INPUT_ELEMENT_DESC> GetPosTexCoordInputLayout() noexcept;
 }
+}
+

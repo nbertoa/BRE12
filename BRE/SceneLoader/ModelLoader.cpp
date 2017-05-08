@@ -12,12 +12,13 @@
 #include <ModelManager\ModelManager.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 void
 ModelLoader::LoadModels(const YAML::Node& rootNode,
                         ID3D12CommandAllocator& commandAllocator,
                         ID3D12GraphicsCommandList& commandList) noexcept
 {
-    ASSERT(rootNode.IsDefined());
+    BRE_ASSERT(rootNode.IsDefined());
 
     // Get the "models" node. It is a map and its sintax is:
     // models:
@@ -25,12 +26,12 @@ ModelLoader::LoadModels(const YAML::Node& rootNode,
     //   modelName2: modelPath2
     //   modelName3: modelPath3
     const YAML::Node modelsNode = rootNode["models"];
-    ASSERT_MSG(modelsNode.IsDefined(), L"'models' node not found");
-    ASSERT_MSG(modelsNode.IsMap(), L"'models' node must be a map");
+    BRE_ASSERT_MSG(modelsNode.IsDefined(), L"'models' node not found");
+    BRE_ASSERT_MSG(modelsNode.IsMap(), L"'models' node must be a map");
 
     std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadVertexBuffers;
     std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadIndexBuffers;
-    CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
+    BRE_CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
 
     // Iterate "modelName: modelPath" pairs and create models.
     std::string modelName;
@@ -39,7 +40,7 @@ ModelLoader::LoadModels(const YAML::Node& rootNode,
         modelName = it->first.as<std::string>();
         modelPath = it->second.as<std::string>();
 
-        ASSERT_MSG(mModelByName.find(modelName) == mModelByName.end(), L"Model name must be unique");
+        BRE_ASSERT_MSG(mModelByName.find(modelName) == mModelByName.end(), L"Model name must be unique");
 
         uploadVertexBuffers.resize(uploadVertexBuffers.size() + 1);
         uploadIndexBuffers.resize(uploadIndexBuffers.size() + 1);
@@ -60,8 +61,10 @@ ModelLoader::LoadModels(const YAML::Node& rootNode,
 const Model& ModelLoader::GetModel(const std::string& name) const noexcept
 {
     std::unordered_map<std::string, Model*>::const_iterator findIt = mModelByName.find(name);
-    ASSERT_MSG(findIt != mModelByName.end(), L"Model name not found");
-    ASSERT(findIt->second != nullptr);
+    BRE_ASSERT_MSG(findIt != mModelByName.end(), L"Model name not found");
+    BRE_ASSERT(findIt->second != nullptr);
 
     return *findIt->second;
 }
+}
+

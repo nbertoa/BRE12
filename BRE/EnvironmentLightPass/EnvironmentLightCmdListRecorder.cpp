@@ -11,6 +11,7 @@
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 // Root Signature:
 // "CBV(b0, visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Frame CBuffer
 // "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 1 -> Frame CBuffer
@@ -24,8 +25,8 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 void
 EnvironmentLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept
 {
-    ASSERT(sPSO == nullptr);
-    ASSERT(sRootSignature == nullptr);
+    BRE_ASSERT(sPSO == nullptr);
+    BRE_ASSERT(sRootSignature == nullptr);
 
     PSOManager::PSOCreationData psoData{};
     psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
@@ -46,8 +47,8 @@ EnvironmentLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept
     psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
-    ASSERT(sPSO != nullptr);
-    ASSERT(sRootSignature != nullptr);
+    BRE_ASSERT(sPSO != nullptr);
+    BRE_ASSERT(sRootSignature != nullptr);
 }
 
 void
@@ -59,7 +60,7 @@ EnvironmentLightCmdListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer,
                                       ID3D12Resource& ambientAccessibilityBuffer,
                                       const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
-    ASSERT(ValidateData() == false);
+    BRE_ASSERT(ValidateData() == false);
 
     mRenderTargetView = renderTargetView;
 
@@ -71,15 +72,15 @@ EnvironmentLightCmdListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer,
         ambientAccessibilityBuffer,
         specularPreConvolvedCubeMap);
 
-    ASSERT(ValidateData());
+    BRE_ASSERT(ValidateData());
 }
 
 void
 EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
-    ASSERT(ValidateData());
-    ASSERT(sPSO != nullptr);
-    ASSERT(sRootSignature != nullptr);
+    BRE_ASSERT(ValidateData());
+    BRE_ASSERT(sPSO != nullptr);
+    BRE_ASSERT(sRootSignature != nullptr);
 
     // Update frame constants
     UploadBuffer& uploadFrameCBuffer(mFrameUploadCBufferPerFrame.GetNextFrameCBuffer());
@@ -204,3 +205,5 @@ EnvironmentLightCmdListRecorder::InitShaderResourceViews(ID3D12Resource& normalS
                                                               srvDescriptors.data(),
                                                               numResources);
 }
+}
+

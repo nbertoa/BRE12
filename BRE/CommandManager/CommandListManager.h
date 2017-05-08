@@ -4,25 +4,28 @@
 #include <mutex>
 #include <tbb/concurrent_unordered_set.h>
 
+namespace BRE {
 // To create/get command lists
 class CommandListManager {
 public:
-	CommandListManager() = delete;
-	~CommandListManager() = delete;
-	CommandListManager(const CommandListManager&) = delete;
-	const CommandListManager& operator=(const CommandListManager&) = delete;
-	CommandListManager(CommandListManager&&) = delete;
-	CommandListManager& operator=(CommandListManager&&) = delete;
+    CommandListManager() = delete;
+    ~CommandListManager() = delete;
+    CommandListManager(const CommandListManager&) = delete;
+    const CommandListManager& operator=(const CommandListManager&) = delete;
+    CommandListManager(CommandListManager&&) = delete;
+    CommandListManager& operator=(CommandListManager&&) = delete;
 
-	static void EraseAll() noexcept;
+    static void EraseAll() noexcept;
 
-	static ID3D12GraphicsCommandList& CreateCommandList(
-		const D3D12_COMMAND_LIST_TYPE& commandListType,
-		ID3D12CommandAllocator& commandAllocator) noexcept;
+    static ID3D12GraphicsCommandList& CreateCommandList(
+        const D3D12_COMMAND_LIST_TYPE& commandListType,
+        ID3D12CommandAllocator& commandAllocator) noexcept;
 
 private:
-	using CommandLists = tbb::concurrent_unordered_set<ID3D12GraphicsCommandList*>;
-	static CommandLists mCommandLists;
+    using CommandLists = tbb::concurrent_unordered_set<ID3D12GraphicsCommandList*>;
+    static CommandLists mCommandLists;
 
-	static std::mutex mMutex;
+    static std::mutex mMutex;
 };
+
+}

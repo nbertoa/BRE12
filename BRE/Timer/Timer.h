@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+namespace BRE {
 class Timer {
 public:
     Timer();
@@ -33,3 +34,5 @@ private:
     std::int64_t mPreviousTime{ 0 };
     std::int64_t mCurrentTime{ 0 };
 };
+}
+

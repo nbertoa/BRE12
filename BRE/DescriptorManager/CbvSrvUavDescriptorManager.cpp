@@ -6,6 +6,7 @@
 #include <DXUtils/d3dx12.h>
 #include <SettingsManager\SettingsManager.h>
 
+namespace BRE {
 Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CbvSrvUavDescriptorManager::mCbvSrvUavDescriptorHeap;
 D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::mCurrentCbvSrvUavGpuDescriptorHandle{ 0UL };
 D3D12_CPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::mCurrentCbvSrvUavCpuDescriptorHandle{ 0UL };
@@ -21,7 +22,7 @@ CbvSrvUavDescriptorManager::Init() noexcept
     cbvSrvUavDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 
     mMutex.lock();
-    CHECK_HR(DirectXManager::GetDevice().CreateDescriptorHeap(&cbvSrvUavDescriptorHeapDescriptor,
+    BRE_CHECK_HR(DirectXManager::GetDevice().CreateDescriptorHeap(&cbvSrvUavDescriptorHeapDescriptor,
                                                               IID_PPV_ARGS(mCbvSrvUavDescriptorHeap.GetAddressOf())));
     mMutex.unlock();
 
@@ -50,8 +51,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE
 CbvSrvUavDescriptorManager::CreateConstantBufferViews(const D3D12_CONSTANT_BUFFER_VIEW_DESC* descriptors,
                                                       const std::uint32_t descriptorCount) noexcept
 {
-    ASSERT(descriptors != nullptr);
-    ASSERT(descriptorCount > 0U);
+    BRE_ASSERT(descriptors != nullptr);
+    BRE_ASSERT(descriptorCount > 0U);
 
     D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandle{};
 
@@ -93,9 +94,9 @@ CbvSrvUavDescriptorManager::CreateShaderResourceViews(ID3D12Resource* *resources
                                                       const D3D12_SHADER_RESOURCE_VIEW_DESC* descriptors,
                                                       const std::uint32_t descriptorCount) noexcept
 {
-    ASSERT(resources != nullptr);
-    ASSERT(descriptors != nullptr);
-    ASSERT(descriptorCount > 0U);
+    BRE_ASSERT(resources != nullptr);
+    BRE_ASSERT(descriptors != nullptr);
+    BRE_ASSERT(descriptorCount > 0U);
 
     D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandle{};
 
@@ -103,7 +104,7 @@ CbvSrvUavDescriptorManager::CreateShaderResourceViews(ID3D12Resource* *resources
     gpuDescriptorHandle = mCurrentCbvSrvUavGpuDescriptorHandle;
 
     for (std::uint32_t i = 0U; i < descriptorCount; ++i) {
-        ASSERT(resources[i] != nullptr);
+        BRE_ASSERT(resources[i] != nullptr);
         DirectXManager::GetDevice().CreateShaderResourceView(resources[i], &descriptors[i], mCurrentCbvSrvUavCpuDescriptorHandle);
         mCurrentCbvSrvUavCpuDescriptorHandle.ptr += DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     }
@@ -138,9 +139,9 @@ CbvSrvUavDescriptorManager::CreateUnorderedAccessViews(ID3D12Resource* *resource
                                                        const D3D12_UNORDERED_ACCESS_VIEW_DESC* descriptors,
                                                        const std::uint32_t descriptorCount) noexcept
 {
-    ASSERT(resources != nullptr);
-    ASSERT(descriptors != nullptr);
-    ASSERT(descriptorCount > 0U);
+    BRE_ASSERT(resources != nullptr);
+    BRE_ASSERT(descriptors != nullptr);
+    BRE_ASSERT(descriptorCount > 0U);
 
     D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandle{};
 
@@ -148,7 +149,7 @@ CbvSrvUavDescriptorManager::CreateUnorderedAccessViews(ID3D12Resource* *resource
     gpuDescriptorHandle = mCurrentCbvSrvUavGpuDescriptorHandle;
 
     for (std::uint32_t i = 0U; i < descriptorCount; ++i) {
-        ASSERT(resources[i] != nullptr);
+        BRE_ASSERT(resources[i] != nullptr);
         DirectXManager::GetDevice().CreateUnorderedAccessView(resources[i], nullptr, &descriptors[i], mCurrentCbvSrvUavCpuDescriptorHandle);
         mCurrentCbvSrvUavCpuDescriptorHandle.ptr += DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     }
@@ -159,3 +160,5 @@ CbvSrvUavDescriptorManager::CreateUnorderedAccessViews(ID3D12Resource* *resource
 
     return gpuDescriptorHandle;
 }
+}
+

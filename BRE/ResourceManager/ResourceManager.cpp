@@ -8,6 +8,7 @@
 #include <Utils/DebugUtils.h>
 #include <Utils\StringUtils.h>
 
+namespace BRE {
 ResourceManager::Resources ResourceManager::mResources;
 std::mutex ResourceManager::mMutex;
 
@@ -15,7 +16,7 @@ void
 ResourceManager::EraseAll() noexcept
 {
     for (ID3D12Resource* resource : mResources) {
-        ASSERT(resource != nullptr);
+        BRE_ASSERT(resource != nullptr);
         resource->Release();
     }
 }
@@ -28,13 +29,13 @@ ResourceManager::LoadTextureFromFile(const char* textureFilename,
 {
     ID3D12Resource* resource{ nullptr };
 
-    ASSERT(textureFilename != nullptr);
+    BRE_ASSERT(textureFilename != nullptr);
     const std::string filePath(textureFilename);
     const std::wstring filePathW(StringUtils::ToWideString(filePath));
 
     Microsoft::WRL::ComPtr<ID3D12Resource> resourcePtr;
     mMutex.lock();
-    CHECK_HR(DirectX::CreateDDSTextureFromFile12(&DirectXManager::GetDevice(),
+    BRE_CHECK_HR(DirectX::CreateDDSTextureFromFile12(&DirectXManager::GetDevice(),
                                                  &commandList,
                                                  filePathW.c_str(),
                                                  resourcePtr,
@@ -43,7 +44,7 @@ ResourceManager::LoadTextureFromFile(const char* textureFilename,
 
     resource = resourcePtr.Detach();
 
-    ASSERT(resource != nullptr);
+    BRE_ASSERT(resource != nullptr);
     mResources.insert(resource);
 
     if (resourceName != nullptr) {
@@ -60,8 +61,8 @@ ResourceManager::CreateDefaultBuffer(ID3D12GraphicsCommandList& commandList,
                                      Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
                                      const wchar_t* resourceName) noexcept
 {
-    ASSERT(sourceData != nullptr);
-    ASSERT(sourceDataSize > 0);
+    BRE_ASSERT(sourceData != nullptr);
+    BRE_ASSERT(sourceDataSize > 0);
 
     ID3D12Resource* resource{ nullptr };
 
@@ -75,7 +76,7 @@ ResourceManager::CreateDefaultBuffer(ID3D12GraphicsCommandList& commandList,
 
     CD3DX12_RESOURCE_DESC resDesc{ CD3DX12_RESOURCE_DESC::Buffer(sourceDataSize) };
     mMutex.lock();
-    CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProps,
+    BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProps,
                                                                  D3D12_HEAP_FLAG_NONE,
                                                                  &resDesc,
                                                                  D3D12_RESOURCE_STATE_COMMON,
@@ -92,7 +93,7 @@ ResourceManager::CreateDefaultBuffer(ID3D12GraphicsCommandList& commandList,
     heapProps.VisibleNodeMask = 1U;
     resDesc = CD3DX12_RESOURCE_DESC::Buffer(sourceDataSize);
 
-    CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProps,
+    BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProps,
                                                                  D3D12_HEAP_FLAG_NONE,
                                                                  &resDesc,
                                                                  D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -116,7 +117,7 @@ ResourceManager::CreateDefaultBuffer(ID3D12GraphicsCommandList& commandList,
     resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(resource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
     commandList.ResourceBarrier(1, &resBarrier);
 
-    ASSERT(resource != nullptr);
+    BRE_ASSERT(resource != nullptr);
     mResources.insert(resource);
 
     if (resourceName != nullptr) {
@@ -137,7 +138,7 @@ ResourceManager::CreateCommittedResource(const D3D12_HEAP_PROPERTIES& heapProper
     ID3D12Resource* resource{ nullptr };
 
     mMutex.lock();
-    CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProperties,
+    BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProperties,
                                                                  heapFlags,
                                                                  &resourceDescriptor,
                                                                  resourceStates,
@@ -147,7 +148,7 @@ ResourceManager::CreateCommittedResource(const D3D12_HEAP_PROPERTIES& heapProper
 
     ResourceStateManager::AddResource(*resource, resourceStates);
 
-    ASSERT(resource != nullptr);
+    BRE_ASSERT(resource != nullptr);
     mResources.insert(resource);
 
     if (resourceName != nullptr) {
@@ -156,3 +157,6 @@ ResourceManager::CreateCommittedResource(const D3D12_HEAP_PROPERTIES& heapProper
 
     return *resource;
 }
+
+}
+

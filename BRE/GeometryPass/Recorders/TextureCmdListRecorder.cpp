@@ -14,6 +14,7 @@
 #include <ShaderUtils\MaterialProperties.h>
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 // Root Signature:
 // "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Object CBuffers
 // "CBV(b1, visibility = SHADER_VISIBILITY_VERTEX), " \ 1 -> Frame CBuffer
@@ -30,10 +31,10 @@ void
 TextureCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
                                                       const std::uint32_t geometryBufferCount) noexcept
 {
-    ASSERT(geometryBufferFormats != nullptr);
-    ASSERT(geometryBufferCount > 0U);
-    ASSERT(sPSO == nullptr);
-    ASSERT(sRootSignature == nullptr);
+    BRE_ASSERT(geometryBufferFormats != nullptr);
+    BRE_ASSERT(geometryBufferCount > 0U);
+    BRE_ASSERT(sPSO == nullptr);
+    BRE_ASSERT(sRootSignature == nullptr);
 
     // Build pso and root signature
     PSOManager::PSOCreationData psoData{};
@@ -50,8 +51,8 @@ TextureCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometr
     memcpy(psoData.mRenderTargetFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
     sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
-    ASSERT(sPSO != nullptr);
-    ASSERT(sRootSignature != nullptr);
+    BRE_ASSERT(sPSO != nullptr);
+    BRE_ASSERT(sRootSignature != nullptr);
 }
 
 void
@@ -59,10 +60,10 @@ TextureCmdListRecorder::Init(const std::vector<GeometryData>& geometryDataVector
                              const std::vector<MaterialProperties>& materialProperties,
                              const std::vector<ID3D12Resource*>& diffuseTextures) noexcept
 {
-    ASSERT(geometryDataVector.empty() == false);
-    ASSERT(materialProperties.empty() == false);
-    ASSERT(materialProperties.size() == diffuseTextures.size());
-    ASSERT(IsDataValid() == false);
+    BRE_ASSERT(geometryDataVector.empty() == false);
+    BRE_ASSERT(materialProperties.empty() == false);
+    BRE_ASSERT(materialProperties.size() == diffuseTextures.size());
+    BRE_ASSERT(IsDataValid() == false);
 
     const std::size_t numResources = materialProperties.size();
     const std::size_t geometryDataCount = geometryDataVector.size();
@@ -73,9 +74,9 @@ TextureCmdListRecorder::Init(const std::vector<GeometryData>& geometryDataVector
     for (std::size_t i = 0UL; i < geometryDataCount; ++i) {
         const std::size_t numMatrices{ geometryDataVector[i].mWorldMatrices.size() };
         totalNumMatrices += numMatrices;
-        ASSERT(numMatrices != 0UL);
+        BRE_ASSERT(numMatrices != 0UL);
     }
-    ASSERT(totalNumMatrices == numResources);
+    BRE_ASSERT(totalNumMatrices == numResources);
 #endif
     mGeometryDataVec.reserve(geometryDataCount);
     for (std::uint32_t i = 0U; i < geometryDataCount; ++i) {
@@ -84,18 +85,18 @@ TextureCmdListRecorder::Init(const std::vector<GeometryData>& geometryDataVector
 
     InitConstantBuffers(materialProperties, diffuseTextures);
 
-    ASSERT(IsDataValid());
+    BRE_ASSERT(IsDataValid());
 }
 
 void
 TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
-    ASSERT(IsDataValid());
-    ASSERT(sPSO != nullptr);
-    ASSERT(sRootSignature != nullptr);
-    ASSERT(mGeometryBufferRenderTargetViews != nullptr);
-    ASSERT(mGeometryBufferRenderTargetViewCount != 0U);
-    ASSERT(mDepthBufferView.ptr != 0U);
+    BRE_ASSERT(IsDataValid());
+    BRE_ASSERT(sPSO != nullptr);
+    BRE_ASSERT(sRootSignature != nullptr);
+    BRE_ASSERT(mGeometryBufferRenderTargetViews != nullptr);
+    BRE_ASSERT(mGeometryBufferRenderTargetViewCount != 0U);
+    BRE_ASSERT(mDepthBufferView.ptr != 0U);
 
     // Update frame constants
     UploadBuffer& uploadFrameCBuffer(mFrameUploadCBufferPerFrame.GetNextFrameCBuffer());
@@ -171,10 +172,10 @@ void
 TextureCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
                                             const std::vector<ID3D12Resource*>& diffuseTextures) noexcept
 {
-    ASSERT(materialProperties.empty() == false);
-    ASSERT(materialProperties.size() == diffuseTextures.size());
-    ASSERT(mObjectUploadCBuffers == nullptr);
-    ASSERT(mMaterialUploadCBuffers == nullptr);
+    BRE_ASSERT(materialProperties.empty() == false);
+    BRE_ASSERT(materialProperties.size() == diffuseTextures.size());
+    BRE_ASSERT(mObjectUploadCBuffers == nullptr);
+    BRE_ASSERT(mMaterialUploadCBuffers == nullptr);
 
     const std::uint32_t numResources = static_cast<std::uint32_t>(materialProperties.size());
 
@@ -247,3 +248,5 @@ TextureCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProperties
                                                                                                 srvDescVec.data(),
                                                                                                 static_cast<std::uint32_t>(srvDescVec.size()));
 }
+}
+

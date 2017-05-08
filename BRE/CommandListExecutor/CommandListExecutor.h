@@ -7,6 +7,8 @@
 
 #include <Utils\DebugUtils.h>
 
+namespace BRE {
+
 // To check for new command lists and execute them.
 // Steps:
 // - Use CommandListExecutor::Create() to create and spawn an instance.
@@ -59,7 +61,7 @@ public:
 
     __forceinline ID3D12CommandQueue& GetCommandQueue() noexcept
     {
-        ASSERT(mCommandQueue != nullptr);
+        BRE_ASSERT(mCommandQueue != nullptr);
         return *mCommandQueue;
     }
 
@@ -89,3 +91,5 @@ private:
     tbb::concurrent_queue<ID3D12CommandList*> mCommandListsToExecute;
     ID3D12Fence* mFence{ nullptr };
 };
+
+}

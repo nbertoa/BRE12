@@ -2,12 +2,15 @@
 
 #include <d3d12.h>
 #include <DirectXMath.h>
+#include <memory>
+#include <vector>
 
 #include <CommandManager\CommandListPerFrame.h>
 #include <DXUtils/D3DFactory.h>
 #include <ResourceManager\FrameUploadCBufferPerFrame.h>
 #include <ResourceManager/VertexAndIndexBufferCreator.h>
 
+namespace BRE {
 struct FrameCBuffer;
 
 // To record command lists for deferred shading geometry pass.
@@ -72,3 +75,7 @@ protected:
 
     D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
 };
+
+using GeometryPassCommandListRecorders = std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>;
+}
+

@@ -2,6 +2,7 @@
 
 #include <Utils\DebugUtils.h>
 
+namespace BRE {
 MaterialTechnique::TechniqueType
 MaterialTechnique::GetType() const noexcept
 {
@@ -13,7 +14,7 @@ MaterialTechnique::GetType() const noexcept
                 return TechniqueType::NORMAL_MAPPING;
             }
         } else {
-            ASSERT_MSG(mHeightTexture == nullptr, L"There is no technique with diffuse and height texture but no normal texture");
+            BRE_ASSERT_MSG(mHeightTexture == nullptr, L"There is no technique with diffuse and height texture but no normal texture");
             return TechniqueType::TEXTURE_MAPPING;
         }
     } else if (mNormalTexture != nullptr) {
@@ -23,7 +24,10 @@ MaterialTechnique::GetType() const noexcept
             return TechniqueType::COLOR_NORMAL_MAPPING;
         }
     } else {
-        ASSERT_MSG(mHeightTexture == nullptr, L"There is no technique with height texture only");
+        BRE_ASSERT_MSG(mHeightTexture == nullptr, L"There is no technique with height texture only");
         return TechniqueType::COLOR_MAPPING;
     }
 }
+
+}
+

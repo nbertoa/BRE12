@@ -6,18 +6,19 @@
 
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 namespace {
 ID3DBlob* LoadBlob(const std::string& filename) noexcept
 {
     std::ifstream fileStream{ filename, std::ios::binary };
-    ASSERT(fileStream);
+    BRE_ASSERT(fileStream);
 
     fileStream.seekg(0, std::ios_base::end);
     std::ifstream::pos_type size{ static_cast<std::int32_t>(fileStream.tellg()) };
     fileStream.seekg(0, std::ios_base::beg);
 
     ID3DBlob* blob;
-    CHECK_HR(D3DCreateBlob(size, &blob));
+    BRE_CHECK_HR(D3DCreateBlob(size, &blob));
 
     fileStream.read(reinterpret_cast<char*>(blob->GetBufferPointer()), size);
     fileStream.close();
@@ -33,7 +34,7 @@ void
 ShaderManager::EraseAll() noexcept
 {
     for (ID3DBlob* blob : mShaderBlobs) {
-        ASSERT(blob != nullptr);
+        BRE_ASSERT(blob != nullptr);
         blob->Release();
     }
 }
@@ -41,7 +42,7 @@ ShaderManager::EraseAll() noexcept
 ID3DBlob&
 ShaderManager::LoadShaderFileAndGetBlob(const char* filename) noexcept
 {
-    ASSERT(filename != nullptr);
+    BRE_ASSERT(filename != nullptr);
 
     ID3DBlob* blob{ nullptr };
 
@@ -49,7 +50,7 @@ ShaderManager::LoadShaderFileAndGetBlob(const char* filename) noexcept
     blob = LoadBlob(filename);
     mMutex.unlock();
 
-    ASSERT(blob != nullptr);
+    BRE_ASSERT(blob != nullptr);
     mShaderBlobs.insert(blob);
 
     return *blob;
@@ -58,7 +59,7 @@ ShaderManager::LoadShaderFileAndGetBlob(const char* filename) noexcept
 D3D12_SHADER_BYTECODE
 ShaderManager::LoadShaderFileAndGetBytecode(const char* filename) noexcept
 {
-    ASSERT(filename != nullptr);
+    BRE_ASSERT(filename != nullptr);
 
     ID3DBlob* blob{ nullptr };
 
@@ -66,7 +67,7 @@ ShaderManager::LoadShaderFileAndGetBytecode(const char* filename) noexcept
     blob = LoadBlob(filename);
     mMutex.unlock();
 
-    ASSERT(blob != nullptr);
+    BRE_ASSERT(blob != nullptr);
     mShaderBlobs.insert(blob);
 
     D3D12_SHADER_BYTECODE shaderByteCode
@@ -77,3 +78,5 @@ ShaderManager::LoadShaderFileAndGetBytecode(const char* filename) noexcept
 
     return shaderByteCode;
 }
+}
+

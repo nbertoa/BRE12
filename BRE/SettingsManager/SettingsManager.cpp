@@ -4,6 +4,7 @@
 
 #include <MathUtils/MathUtils.h>
 
+namespace BRE {
 const bool SettingsManager::sIsFullscreenWindow{ true };
 const std::uint32_t SettingsManager::sCpuProcessorCount{ 4U }; // This should be changed according your processor
 const std::uint32_t SettingsManager::sWindowWidth{ 1920U };
@@ -25,3 +26,5 @@ const D3D12_VIEWPORT SettingsManager::sScreenViewport{ 0.0f, 0.0f, SettingsManag
 const D3D12_RECT SettingsManager::sScissorRect{ 0, 0, SettingsManager::sWindowWidth, SettingsManager::sWindowHeight };
 
 const float SettingsManager::sSecondsPerFrame{ 1.0f / 60.0f };
+}
+

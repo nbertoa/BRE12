@@ -17,6 +17,7 @@
 
 using namespace DirectX;
 
+namespace BRE {
 // Root Signature:
 // "CBV(b0, visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Frame CBuffer
 // "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 1 -> Frame CBuffer
@@ -35,7 +36,7 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 //   to a point occlude it more than samples further away).
 void GenerateSampleKernel(const std::uint32_t sampleKernelSize, std::vector<XMFLOAT4>& sampleKernel)
 {
-    ASSERT(sampleKernelSize > 0U);
+    BRE_ASSERT(sampleKernelSize > 0U);
 
     sampleKernel.reserve(sampleKernelSize);
     const float sampleKernelSizeFloat = static_cast<float>(sampleKernelSize);
@@ -64,7 +65,7 @@ void GenerateSampleKernel(const std::uint32_t sampleKernelSize, std::vector<XMFL
 // the 'banding' artifacts.
 void GenerateNoise(const std::uint32_t numSamples, std::vector<XMFLOAT4>& noiseVectors)
 {
-    ASSERT(numSamples > 0U);
+    BRE_ASSERT(numSamples > 0U);
 
     noiseVectors.reserve(numSamples);
     XMVECTOR vec;
@@ -92,8 +93,8 @@ void GenerateNoise(const std::uint32_t numSamples, std::vector<XMFLOAT4>& noiseV
 void
 AmbientOcclusionCmdListRecorder::InitSharedPSOAndRootSignature() noexcept
 {
-    ASSERT(sPSO == nullptr);
-    ASSERT(sRootSignature == nullptr);
+    BRE_ASSERT(sPSO == nullptr);
+    BRE_ASSERT(sRootSignature == nullptr);
 
     PSOManager::PSOCreationData psoData{};
     psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
@@ -114,8 +115,8 @@ AmbientOcclusionCmdListRecorder::InitSharedPSOAndRootSignature() noexcept
     psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
-    ASSERT(sPSO != nullptr);
-    ASSERT(sRootSignature != nullptr);
+    BRE_ASSERT(sPSO != nullptr);
+    BRE_ASSERT(sRootSignature != nullptr);
 }
 
 void
@@ -123,7 +124,7 @@ AmbientOcclusionCmdListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer,
                                       ID3D12Resource& depthBuffer,
                                       const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
-    ASSERT(ValidateData() == false);
+    BRE_ASSERT(ValidateData() == false);
 
     mRenderTargetView = renderTargetView;
 
@@ -137,22 +138,22 @@ AmbientOcclusionCmdListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer,
 
     CreateSampleKernelBuffer(sampleKernel.data(), sampleKernelSize);
     ID3D12Resource* noiseTexture = CreateAndGetNoiseTexture(noises.data(), noiseTextureDimension);
-    ASSERT(noiseTexture != nullptr);
+    BRE_ASSERT(noiseTexture != nullptr);
     InitShaderResourceViews(
         normalSmoothnessBuffer,
         depthBuffer,
         *noiseTexture,
         sampleKernelSize);
 
-    ASSERT(ValidateData());
+    BRE_ASSERT(ValidateData());
 }
 
 void
 AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
-    ASSERT(ValidateData());
-    ASSERT(sPSO != nullptr);
-    ASSERT(sRootSignature != nullptr);
+    BRE_ASSERT(ValidateData());
+    BRE_ASSERT(sPSO != nullptr);
+    BRE_ASSERT(sRootSignature != nullptr);
 
     ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
 
@@ -195,9 +196,9 @@ void
 AmbientOcclusionCmdListRecorder::CreateSampleKernelBuffer(const void* sampleKernel,
                                                           const std::uint32_t sampleKernelSize) noexcept
 {
-    ASSERT(mSampleKernelUploadBuffer == nullptr);
-    ASSERT(sampleKernel != nullptr);
-    ASSERT(sampleKernelSize > 0U);
+    BRE_ASSERT(mSampleKernelUploadBuffer == nullptr);
+    BRE_ASSERT(sampleKernel != nullptr);
+    BRE_ASSERT(sampleKernelSize > 0U);
 
     const std::size_t sampleKernelBufferElemSize{ sizeof(XMFLOAT4) };
     mSampleKernelUploadBuffer = &UploadBufferManager::CreateUploadBuffer(sampleKernelBufferElemSize, sampleKernelSize);
@@ -211,8 +212,8 @@ ID3D12Resource*
 AmbientOcclusionCmdListRecorder::CreateAndGetNoiseTexture(const void* noiseVectors,
                                                           const std::uint32_t noiseTextureDimension) noexcept
 {
-    ASSERT(noiseVectors != nullptr);
-    ASSERT(noiseTextureDimension > 0U);
+    BRE_ASSERT(noiseVectors != nullptr);
+    BRE_ASSERT(noiseTextureDimension > 0U);
 
     // Kernel noise resource and fill it
     D3D12_RESOURCE_DESC resourceDescriptor = {};
@@ -261,8 +262,8 @@ AmbientOcclusionCmdListRecorder::InitShaderResourceViews(ID3D12Resource& normalS
                                                          ID3D12Resource& noiseTexture,
                                                          const std::uint32_t sampleKernelSize) noexcept
 {
-    ASSERT(mSampleKernelUploadBuffer != nullptr);
-    ASSERT(sampleKernelSize != 0U);
+    BRE_ASSERT(mSampleKernelUploadBuffer != nullptr);
+    BRE_ASSERT(sampleKernelSize != 0U);
 
     ID3D12Resource* resources[] = {
         &normalSmoothnessBuffer,
@@ -305,12 +306,13 @@ AmbientOcclusionCmdListRecorder::InitShaderResourceViews(ID3D12Resource& normalS
     srvDescriptors[3].Format = noiseTexture.GetDesc().Format;
     srvDescriptors[3].Texture2D.MipLevels = noiseTexture.GetDesc().MipLevels;
 
-    ASSERT(_countof(resources) == _countof(srvDescriptors));
+    BRE_ASSERT(_countof(resources) == _countof(srvDescriptors));
 
     // Create SRVs
     mStartPixelShaderResourceView =
-        CbvSrvUavDescriptorManager::CreateShaderResourceViews(
-            resources,
-            srvDescriptors,
-            _countof(srvDescriptors));
+        CbvSrvUavDescriptorManager::CreateShaderResourceViews(resources,
+                                                              srvDescriptors,
+                                                              _countof(srvDescriptors));
 }
+}
+

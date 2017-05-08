@@ -6,6 +6,7 @@
 
 #include <Utils/DebugUtils.h>
 
+namespace BRE {
 // To create render target descriptor heaps
 // To create render target descriptors
 class RenderTargetDescriptorManager {
@@ -52,3 +53,6 @@ private:
 
     static std::mutex mMutex;
 };
+
+}
+

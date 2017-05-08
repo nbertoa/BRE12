@@ -4,6 +4,7 @@
 #include <mutex>
 #include <tbb/concurrent_unordered_set.h>
 
+namespace BRE {
 // To create/get command queues
 class CommandQueueManager {
 public:
@@ -24,3 +25,6 @@ private:
 
     static std::mutex mMutex;
 };
+}
+
+

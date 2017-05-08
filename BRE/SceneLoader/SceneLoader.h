@@ -3,7 +3,6 @@
 #include <memory>
 
 #include <GeometryPass\GeometryPassCmdListRecorder.h>
-#include <Scene\Scene.h>
 #include <SceneLoader\DrawableObjectLoader.h>
 #include <SceneLoader\EnvironmentLoader.h>
 #include <SceneLoader\MaterialPropertiesLoader.h>
@@ -13,6 +12,9 @@
 
 struct ID3D12CommandAllocator;
 struct ID3D12GraphicsCommandList;
+
+namespace BRE {
+class Scene;
 
 class SceneLoader {
 public:
@@ -26,12 +28,12 @@ public:
 
 private:
     void GenerateGeometryPassRecorders(Scene& scene) noexcept;
-    void GenerateGeometryPassRecordersForColorMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
-    void GenerateGeometryPassRecordersForColorNormalMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
-    void GenerateGeometryPassRecordersForColorHeightMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
-    void GenerateGeometryPassRecordersForTextureMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
-    void GenerateGeometryPassRecordersForNormalMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
-    void GenerateGeometryPassRecordersForHeightMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+    void GenerateGeometryPassRecordersForColorMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+    void GenerateGeometryPassRecordersForColorNormalMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+    void GenerateGeometryPassRecordersForColorHeightMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+    void GenerateGeometryPassRecordersForTextureMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+    void GenerateGeometryPassRecordersForNormalMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+    void GenerateGeometryPassRecordersForHeightMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept;
 
     ID3D12CommandAllocator* mCommandAllocator{ nullptr };
     ID3D12GraphicsCommandList* mCommandList{ nullptr };
@@ -42,3 +44,5 @@ private:
     DrawableObjectLoader mDrawableObjectLoader;
     EnvironmentLoader mEnvironmentLoader;
 };
+}
+

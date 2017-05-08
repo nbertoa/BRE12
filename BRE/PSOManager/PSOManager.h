@@ -6,6 +6,7 @@
 
 #include <DXUtils/D3DFactory.h>
 
+namespace BRE {
 // To create/get/erase pipeline state objects
 class PSOManager {
 public:
@@ -61,3 +62,6 @@ private:
 
     static std::mutex mMutex;
 };
+
+}
+
