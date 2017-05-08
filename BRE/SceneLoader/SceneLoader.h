@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <GeometryPass\GeometryPassCmdListRecorder.h>
+#include <GeometryPass\GeometryPassCommandListRecorder.h>
 #include <SceneLoader\DrawableObjectLoader.h>
 #include <SceneLoader\EnvironmentLoader.h>
 #include <SceneLoader\MaterialPropertiesLoader.h>

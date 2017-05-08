@@ -1,11 +1,11 @@
-#include "GeometryPassCmdListRecorder.h"
+#include "GeometryPassCommandListRecorder.h"
 
 #include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
 namespace BRE {
 bool
-GeometryPassCmdListRecorder::IsDataValid() const noexcept
+GeometryPassCommandListRecorder::IsDataValid() const noexcept
 {
     const std::size_t geometryDataCount{ mGeometryDataVec.size() };
     for (std::size_t i = 0UL; i < geometryDataCount; ++i) {
@@ -24,9 +24,9 @@ GeometryPassCmdListRecorder::IsDataValid() const noexcept
 }
 
 void
-GeometryPassCmdListRecorder::Init(const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBufferRenderTargetViews,
-                                  const std::uint32_t geometryBufferRenderTargetViewCount,
-                                  const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
+GeometryPassCommandListRecorder::Init(const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBufferRenderTargetViews,
+                                      const std::uint32_t geometryBufferRenderTargetViewCount,
+                                      const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 {
     BRE_ASSERT(geometryBufferRenderTargetViews != nullptr);
     BRE_ASSERT(geometryBufferRenderTargetViewCount != 0U);

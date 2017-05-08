@@ -1,19 +1,19 @@
 #pragma once
 
-#include <GeometryPass/GeometryPassCmdListRecorder.h>
+#include <GeometryPass/GeometryPassCommandListRecorder.h>
 
 namespace BRE {
 class MaterialProperties;
 
 // CommandListRecorders that does color mapping + normal mapping + height mapping
-class ColorHeightCmdListRecorder : public GeometryPassCmdListRecorder {
+class ColorHeightCommandListRecorder : public GeometryPassCommandListRecorder {
 public:
-    ColorHeightCmdListRecorder() = default;
-    ~ColorHeightCmdListRecorder() = default;
-    ColorHeightCmdListRecorder(const ColorHeightCmdListRecorder&) = delete;
-    const ColorHeightCmdListRecorder& operator=(const ColorHeightCmdListRecorder&) = delete;
-    ColorHeightCmdListRecorder(ColorHeightCmdListRecorder&&) = default;
-    ColorHeightCmdListRecorder& operator=(ColorHeightCmdListRecorder&&) = default;
+    ColorHeightCommandListRecorder() = default;
+    ~ColorHeightCommandListRecorder() = default;
+    ColorHeightCommandListRecorder(const ColorHeightCommandListRecorder&) = delete;
+    const ColorHeightCommandListRecorder& operator=(const ColorHeightCommandListRecorder&) = delete;
+    ColorHeightCommandListRecorder(ColorHeightCommandListRecorder&&) = default;
+    ColorHeightCommandListRecorder& operator=(ColorHeightCommandListRecorder&&) = default;
 
     static void InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept;
 

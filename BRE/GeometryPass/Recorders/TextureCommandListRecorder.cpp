@@ -1,4 +1,4 @@
-#include "ColorCmdListRecorder.h"
+#include "TextureCommandListRecorder.h"
 
 #include <DirectXMath.h>
 
@@ -15,11 +15,12 @@
 #include <Utils/DebugUtils.h>
 
 namespace BRE {
-// Root signature:
+// Root Signature:
 // "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Object CBuffers
 // "CBV(b1, visibility = SHADER_VISIBILITY_VERTEX), " \ 1 -> Frame CBuffer
 // "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Material CBuffers
 // "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 3 -> Frame CBuffer
+// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 4 -> Diffuse Texture
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -27,21 +28,22 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
 void
-ColorCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
-                                                    const std::uint32_t geometryBufferCount) noexcept
+TextureCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
+                                                          const std::uint32_t geometryBufferCount) noexcept
 {
     BRE_ASSERT(geometryBufferFormats != nullptr);
     BRE_ASSERT(geometryBufferCount > 0U);
     BRE_ASSERT(sPSO == nullptr);
     BRE_ASSERT(sRootSignature == nullptr);
 
+    // Build pso and root signature
     PSOManager::PSOCreationData psoData{};
     psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
 
-    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("GeometryPass/Shaders/ColorMapping/PS.cso");
-    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("GeometryPass/Shaders/ColorMapping/VS.cso");
+    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("GeometryPass/Shaders/TextureMapping/PS.cso");
+    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("GeometryPass/Shaders/TextureMapping/VS.cso");
 
-    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("GeometryPass/Shaders/ColorMapping/RS.cso");
+    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("GeometryPass/Shaders/TextureMapping/RS.cso");
     psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
     sRootSignature = psoData.mRootSignature;
 
@@ -54,11 +56,14 @@ ColorCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryB
 }
 
 void
-ColorCmdListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
-                           const std::vector<MaterialProperties>& materialProperties) noexcept
+TextureCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
+                                 const std::vector<MaterialProperties>& materialProperties,
+                                 const std::vector<ID3D12Resource*>& diffuseTextures) noexcept
 {
-    BRE_ASSERT(IsDataValid() == false);
+    BRE_ASSERT(geometryDataVector.empty() == false);
     BRE_ASSERT(materialProperties.empty() == false);
+    BRE_ASSERT(materialProperties.size() == diffuseTextures.size());
+    BRE_ASSERT(IsDataValid() == false);
 
     const std::size_t numResources = materialProperties.size();
     const std::size_t geometryDataCount = geometryDataVector.size();
@@ -78,13 +83,13 @@ ColorCmdListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
         mGeometryDataVec.push_back(geometryDataVector[i]);
     }
 
-    InitConstantBuffers(materialProperties);
+    InitConstantBuffers(materialProperties, diffuseTextures);
 
     BRE_ASSERT(IsDataValid());
 }
 
 void
-ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
+TextureCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(sPSO != nullptr);
@@ -105,16 +110,21 @@ ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
-
     commandList.SetGraphicsRootSignature(sRootSignature);
+
     const std::size_t descHandleIncSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
     D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mStartObjectCBufferView);
     D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mStartMaterialCBufferView);
+    D3D12_GPU_DESCRIPTOR_HANDLE texturesBufferGpuDesc(mBaseColorBufferGpuDescriptorsBegin);
+
+    commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    // Set frame constants root parameters
     D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(3U, frameCBufferGpuVAddress);
 
-    commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    // Draw objects
     const std::size_t geomCount{ mGeometryDataVec.size() };
     for (std::size_t i = 0UL; i < geomCount; ++i) {
         GeometryData& geomData{ mGeometryDataVec[i] };
@@ -128,18 +138,42 @@ ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer
             commandList.SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDesc);
             materialsCBufferGpuDesc.ptr += descHandleIncSize;
 
+            commandList.SetGraphicsRootDescriptorTable(4U, texturesBufferGpuDesc);
+            texturesBufferGpuDesc.ptr += descHandleIncSize;
+
             commandList.DrawIndexedInstanced(geomData.mIndexBufferData.mElementCount, 1U, 0U, 0U, 0U);
         }
     }
 
     commandList.Close();
+
     CommandListExecutor::Get().AddCommandList(commandList);
 }
 
+bool
+TextureCommandListRecorder::IsDataValid() const noexcept
+{
+    const std::size_t geometryDataCount{ mGeometryDataVec.size() };
+    for (std::size_t i = 0UL; i < geometryDataCount; ++i) {
+        const std::size_t numMatrices{ mGeometryDataVec[i].mWorldMatrices.size() };
+        if (numMatrices == 0UL) {
+            return false;
+        }
+    }
+
+    const bool result =
+        GeometryPassCommandListRecorder::IsDataValid() &&
+        mBaseColorBufferGpuDescriptorsBegin.ptr != 0UL;
+
+    return result;
+}
+
 void
-ColorCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties) noexcept
+TextureCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
+                                                const std::vector<ID3D12Resource*>& diffuseTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
+    BRE_ASSERT(materialProperties.size() == diffuseTextures.size());
     BRE_ASSERT(mObjectUploadCBuffers == nullptr);
     BRE_ASSERT(mMaterialUploadCBuffers == nullptr);
 
@@ -156,14 +190,13 @@ ColorCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>&
         const std::uint32_t worldMatsCount{ static_cast<std::uint32_t>(geomData.mWorldMatrices.size()) };
         for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
             MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j], objCBuffer.mWorldMatrix);
-            MathUtils::StoreTransposeMatrix(geomData.mInverseTransposeWorldMatrices[j], objCBuffer.mInverseTransposeWorldMatrix);
             mObjectUploadCBuffers->CopyData(k + j, &objCBuffer, sizeof(objCBuffer));
         }
 
         k += worldMatsCount;
     }
 
-    // Create materials cbuffer		
+    // Create material properties cbuffer		
     const std::size_t matCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(MaterialProperties)) };
     mMaterialUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, numResources);
 
@@ -174,9 +207,13 @@ ColorCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>&
     // Create textures SRV descriptors
     std::vector<D3D12_CONSTANT_BUFFER_VIEW_DESC> objectCbufferViewDescVec;
     objectCbufferViewDescVec.reserve(numResources);
-
     std::vector<D3D12_CONSTANT_BUFFER_VIEW_DESC> materialCbufferViewDescVec;
     materialCbufferViewDescVec.reserve(numResources);
+
+    std::vector<ID3D12Resource*> resVec;
+    resVec.reserve(numResources);
+    std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> srvDescVec;
+    srvDescVec.reserve(numResources);
     for (std::size_t i = 0UL; i < numResources; ++i) {
         // Object cbuffer desc
         D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
@@ -189,12 +226,27 @@ ColorCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>&
         cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(matCBufferElemSize);
         materialCbufferViewDescVec.push_back(cBufferDesc);
 
+        // Texture descriptor
+        resVec.push_back(diffuseTextures[i]);
+
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MostDetailedMip = 0;
+        srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+        srvDesc.Format = resVec.back()->GetDesc().Format;
+        srvDesc.Texture2D.MipLevels = resVec.back()->GetDesc().MipLevels;
+        srvDescVec.push_back(srvDesc);
+
         mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i), &materialProperties[i], sizeof(MaterialProperties));
     }
     mStartObjectCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),
                                                                                     static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
     mStartMaterialCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferViews(materialCbufferViewDescVec.data(),
                                                                                       static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
+    mBaseColorBufferGpuDescriptorsBegin = CbvSrvUavDescriptorManager::CreateShaderResourceViews(resVec.data(),
+                                                                                                srvDescVec.data(),
+                                                                                                static_cast<std::uint32_t>(srvDescVec.size()));
 }
 }
 

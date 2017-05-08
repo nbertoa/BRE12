@@ -17,7 +17,7 @@ struct FrameCBuffer;
 // Steps:
 // - Inherit from it and reimplement RecordAndPushCommandLists() method
 // - Call RecordAndPushCommandLists() to create command lists to execute in the GPU
-class GeometryPassCmdListRecorder {
+class GeometryPassCommandListRecorder {
 public:
     struct GeometryData {
         GeometryData() = default;
@@ -29,14 +29,14 @@ public:
     };
     using GeometryDataVector = std::vector<GeometryData>;
 
-    GeometryPassCmdListRecorder() = default;
-    virtual ~GeometryPassCmdListRecorder()
+    GeometryPassCommandListRecorder() = default;
+    virtual ~GeometryPassCommandListRecorder()
     {}
 
-    GeometryPassCmdListRecorder(const GeometryPassCmdListRecorder&) = delete;
-    const GeometryPassCmdListRecorder& operator=(const GeometryPassCmdListRecorder&) = delete;
-    GeometryPassCmdListRecorder(GeometryPassCmdListRecorder&&) = default;
-    GeometryPassCmdListRecorder& operator=(GeometryPassCmdListRecorder&&) = default;
+    GeometryPassCommandListRecorder(const GeometryPassCommandListRecorder&) = delete;
+    const GeometryPassCommandListRecorder& operator=(const GeometryPassCommandListRecorder&) = delete;
+    GeometryPassCommandListRecorder(GeometryPassCommandListRecorder&&) = default;
+    GeometryPassCommandListRecorder& operator=(GeometryPassCommandListRecorder&&) = default;
 
     // Preconditions:
     // - "geometryBufferRenderTargetViews" must not be nullptr
@@ -76,6 +76,6 @@ protected:
     D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
 };
 
-using GeometryPassCommandListRecorders = std::vector<std::unique_ptr<GeometryPassCmdListRecorder>>;
+using GeometryPassCommandListRecorders = std::vector<std::unique_ptr<GeometryPassCommandListRecorder>>;
 }
 

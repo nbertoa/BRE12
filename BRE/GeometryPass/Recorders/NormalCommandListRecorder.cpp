@@ -1,4 +1,4 @@
-#include "NormalCmdListRecorder.h"
+#include "NormalCommandListRecorder.h"
 
 #include <DirectXMath.h>
 
@@ -29,7 +29,7 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
 void
-NormalCmdListRecorder::InitSharedPSOAndRootSignature(
+NormalCommandListRecorder::InitSharedPSOAndRootSignature(
     const DXGI_FORMAT* geometryBufferFormats,
     const std::uint32_t geometryBufferCount) noexcept
 {
@@ -57,10 +57,10 @@ NormalCmdListRecorder::InitSharedPSOAndRootSignature(
 }
 
 void
-NormalCmdListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
-                            const std::vector<MaterialProperties>& materialProperties,
-                            const std::vector<ID3D12Resource*>& diffuseTextures,
-                            const std::vector<ID3D12Resource*>& normalTextures) noexcept
+NormalCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
+                                const std::vector<MaterialProperties>& materialProperties,
+                                const std::vector<ID3D12Resource*>& diffuseTextures,
+                                const std::vector<ID3D12Resource*>& normalTextures) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
     BRE_ASSERT(geometryDataVector.empty() == false);
@@ -92,7 +92,7 @@ NormalCmdListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
 }
 
 void
-NormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
+NormalCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(sPSO != nullptr);
@@ -158,10 +158,10 @@ NormalCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffe
 }
 
 bool
-NormalCmdListRecorder::IsDataValid() const noexcept
+NormalCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
-        GeometryPassCmdListRecorder::IsDataValid() &&
+        GeometryPassCommandListRecorder::IsDataValid() &&
         mBaseColorBufferGpuDescriptorsBegin.ptr != 0UL &&
         mNormalBufferGpuDescriptorsBegin.ptr != 0UL;
 
@@ -169,9 +169,9 @@ NormalCmdListRecorder::IsDataValid() const noexcept
 }
 
 void
-NormalCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                                           const std::vector<ID3D12Resource*>& diffuseTextures,
-                                           const std::vector<ID3D12Resource*>& normalTextures) noexcept
+NormalCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
+                                               const std::vector<ID3D12Resource*>& diffuseTextures,
+                                               const std::vector<ID3D12Resource*>& normalTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == diffuseTextures.size());

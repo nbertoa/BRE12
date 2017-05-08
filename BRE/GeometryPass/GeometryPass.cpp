@@ -7,12 +7,12 @@
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <DescriptorManager\RenderTargetDescriptorManager.h>
 #include <DXUtils/d3dx12.h>
-#include <GeometryPass\Recorders\ColorCmdListRecorder.h>
-#include <GeometryPass\Recorders\ColorHeightCmdListRecorder.h>
-#include <GeometryPass\Recorders\ColorNormalCmdListRecorder.h>
-#include <GeometryPass\Recorders\HeightCmdListRecorder.h>
-#include <GeometryPass\Recorders\NormalCmdListRecorder.h>
-#include <GeometryPass\Recorders\TextureCmdListRecorder.h>
+#include <GeometryPass\Recorders\ColorCommandListRecorder.h>
+#include <GeometryPass\Recorders\ColorHeightCommandListRecorder.h>
+#include <GeometryPass\Recorders\ColorNormalCommandListRecorder.h>
+#include <GeometryPass\Recorders\HeightCommandListRecorder.h>
+#include <GeometryPass\Recorders\NormalCommandListRecorder.h>
+#include <GeometryPass\Recorders\TextureCommandListRecorder.h>
 #include <ResourceManager\ResourceManager.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <ShaderUtils\CBuffers.h>
@@ -104,12 +104,12 @@ GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 
     mDepthBufferView = depthBufferView;
 
-    ColorCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
-    ColorHeightCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
-    ColorNormalCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
-    HeightCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
-    NormalCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
-    TextureCmdListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+    ColorCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+    ColorHeightCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+    ColorNormalCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+    HeightCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+    NormalCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+    TextureCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
 
     // Init geometry command list recorders
     for (GeometryPassCommandListRecorders::value_type& recorder : mGeometryPassCommandListRecorders) {

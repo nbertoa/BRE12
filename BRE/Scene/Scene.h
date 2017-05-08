@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <GeometryPass/GeometryPassCmdListRecorder.h>
+#include <GeometryPass/GeometryPassCommandListRecorder.h>
 
 namespace BRE {
 class Scene {

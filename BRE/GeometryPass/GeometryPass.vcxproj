@@ -122,23 +122,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="GeometryPass.h" />
-    <ClInclude Include="GeometryPassCmdListRecorder.h" />
-    <ClInclude Include="Recorders\ColorCmdListRecorder.h" />
-    <ClInclude Include="Recorders\ColorHeightCmdListRecorder.h" />
-    <ClInclude Include="Recorders\ColorNormalCmdListRecorder.h" />
-    <ClInclude Include="Recorders\HeightCmdListRecorder.h" />
-    <ClInclude Include="Recorders\NormalCmdListRecorder.h" />
-    <ClInclude Include="Recorders\TextureCmdListRecorder.h" />
+    <ClInclude Include="GeometryPassCommandListRecorder.h" />
+    <ClInclude Include="Recorders\ColorCommandListRecorder.h" />
+    <ClInclude Include="Recorders\ColorHeightCommandListRecorder.h" />
+    <ClInclude Include="Recorders\ColorNormalCommandListRecorder.h" />
+    <ClInclude Include="Recorders\HeightCommandListRecorder.h" />
+    <ClInclude Include="Recorders\NormalCommandListRecorder.h" />
+    <ClInclude Include="Recorders\TextureCommandListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeometryPass.cpp" />
-    <ClCompile Include="GeometryPassCmdListRecorder.cpp" />
-    <ClCompile Include="Recorders\ColorCmdListRecorder.cpp" />
-    <ClCompile Include="Recorders\ColorHeightCmdListRecorder.cpp" />
-    <ClCompile Include="Recorders\ColorNormalCmdListRecorder.cpp" />
-    <ClCompile Include="Recorders\HeightCmdListRecorder.cpp" />
-    <ClCompile Include="Recorders\NormalCmdListRecorder.cpp" />
-    <ClCompile Include="Recorders\TextureCmdListRecorder.cpp" />
+    <ClCompile Include="GeometryPassCommandListRecorder.cpp" />
+    <ClCompile Include="Recorders\ColorCommandListRecorder.cpp" />
+    <ClCompile Include="Recorders\ColorHeightCommandListRecorder.cpp" />
+    <ClCompile Include="Recorders\ColorNormalCommandListRecorder.cpp" />
+    <ClCompile Include="Recorders\HeightCommandListRecorder.cpp" />
+    <ClCompile Include="Recorders\NormalCommandListRecorder.cpp" />
+    <ClCompile Include="Recorders\TextureCommandListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\ColorHeightMapping\DS.hlsl">

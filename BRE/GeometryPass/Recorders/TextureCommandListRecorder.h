@@ -1,19 +1,19 @@
 #pragma once
 
-#include <GeometryPass/GeometryPassCmdListRecorder.h>
+#include <GeometryPass/GeometryPassCommandListRecorder.h>
 
 namespace BRE {
 class MaterialProperties;
 
 // CommandListRecorders that does texture mapping
-class TextureCmdListRecorder : public GeometryPassCmdListRecorder {
+class TextureCommandListRecorder : public GeometryPassCommandListRecorder {
 public:
-    TextureCmdListRecorder() = default;
-    ~TextureCmdListRecorder() = default;
-    TextureCmdListRecorder(const TextureCmdListRecorder&) = delete;
-    const TextureCmdListRecorder& operator=(const TextureCmdListRecorder&) = delete;
-    TextureCmdListRecorder(TextureCmdListRecorder&&) = default;
-    TextureCmdListRecorder& operator=(TextureCmdListRecorder&&) = default;
+    TextureCommandListRecorder() = default;
+    ~TextureCommandListRecorder() = default;
+    TextureCommandListRecorder(const TextureCommandListRecorder&) = delete;
+    const TextureCommandListRecorder& operator=(const TextureCommandListRecorder&) = delete;
+    TextureCommandListRecorder(TextureCommandListRecorder&&) = default;
+    TextureCommandListRecorder& operator=(TextureCommandListRecorder&&) = default;
 
     static void InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept;
 

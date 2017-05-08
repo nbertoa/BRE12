@@ -1,4 +1,4 @@
-#include "ColorHeightCmdListRecorder.h"
+#include "ColorCommandListRecorder.h"
 
 #include <DirectXMath.h>
 
@@ -18,11 +18,8 @@ namespace BRE {
 // Root signature:
 // "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Object CBuffers
 // "CBV(b1, visibility = SHADER_VISIBILITY_VERTEX), " \ 1 -> Frame CBuffer
-// "CBV(b0, visibility = SHADER_VISIBILITY_DOMAIN), " \ 2 -> Frame CBuffer
-// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_DOMAIN), " \ 3 -> Height Texture
-// "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_PIXEL), " \ 4 -> Material CBuffers
-// "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 5 -> Frame CBuffer
-// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 6 -> Normal Texture
+// "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Material CBuffers
+// "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 3 -> Frame CBuffer
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -30,28 +27,24 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
 void
-ColorHeightCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
-                                                          const std::uint32_t geometryBufferCount) noexcept
+ColorCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
+                                                        const std::uint32_t geometryBufferCount) noexcept
 {
     BRE_ASSERT(geometryBufferFormats != nullptr);
     BRE_ASSERT(geometryBufferCount > 0U);
     BRE_ASSERT(sPSO == nullptr);
     BRE_ASSERT(sRootSignature == nullptr);
 
-    // Build pso and root signature
     PSOManager::PSOCreationData psoData{};
     psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
 
-    psoData.mDomainShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("GeometryPass/Shaders/ColorHeightMapping/DS.cso");
-    psoData.mHullShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("GeometryPass/Shaders/ColorHeightMapping/HS.cso");
-    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("GeometryPass/Shaders/ColorHeightMapping/PS.cso");
-    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("GeometryPass/Shaders/ColorHeightMapping/VS.cso");
+    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("GeometryPass/Shaders/ColorMapping/PS.cso");
+    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("GeometryPass/Shaders/ColorMapping/VS.cso");
 
-    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("GeometryPass/Shaders/ColorHeightMapping/RS.cso");
+    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("GeometryPass/Shaders/ColorMapping/RS.cso");
     psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
     sRootSignature = psoData.mRootSignature;
 
-    psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
     psoData.mNumRenderTargets = geometryBufferCount;
     memcpy(psoData.mRenderTargetFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
     sPSO = &PSOManager::CreateGraphicsPSO(psoData);
@@ -61,16 +54,11 @@ ColorHeightCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geo
 }
 
 void
-ColorHeightCmdListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
-                                 const std::vector<MaterialProperties>& materialProperties,
-                                 const std::vector<ID3D12Resource*>& normalTextures,
-                                 const std::vector<ID3D12Resource*>& heightTextures) noexcept
+ColorCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
+                               const std::vector<MaterialProperties>& materialProperties) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
-    BRE_ASSERT(geometryDataVector.empty() == false);
     BRE_ASSERT(materialProperties.empty() == false);
-    BRE_ASSERT(materialProperties.size() == normalTextures.size());
-    BRE_ASSERT(normalTextures.size() == heightTextures.size());
 
     const std::size_t numResources = materialProperties.size();
     const std::size_t geometryDataCount = geometryDataVector.size();
@@ -90,13 +78,13 @@ ColorHeightCmdListRecorder::Init(const std::vector<GeometryData>& geometryDataVe
         mGeometryDataVec.push_back(geometryDataVector[i]);
     }
 
-    InitConstantBuffers(materialProperties, normalTextures, heightTextures);
+    InitConstantBuffers(materialProperties);
 
     BRE_ASSERT(IsDataValid());
 }
 
 void
-ColorHeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
+ColorCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(sPSO != nullptr);
@@ -117,23 +105,16 @@ ColorHeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
-    commandList.SetGraphicsRootSignature(sRootSignature);
 
+    commandList.SetGraphicsRootSignature(sRootSignature);
     const std::size_t descHandleIncSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
     D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mStartObjectCBufferView);
     D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mStartMaterialCBufferView);
-    D3D12_GPU_DESCRIPTOR_HANDLE normalsBufferGpuDesc(mNormalBufferGpuDescriptorsBegin);
-    D3D12_GPU_DESCRIPTOR_HANDLE heightsBufferGpuDesc(mHeightBufferGpuDescriptorsBegin);
-
-    commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
-
-    // Set frame constants root parameters
     D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-    commandList.SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
-    commandList.SetGraphicsRootConstantBufferView(5U, frameCBufferGpuVAddress);
+    commandList.SetGraphicsRootConstantBufferView(3U, frameCBufferGpuVAddress);
 
-    // Draw objects
+    commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     const std::size_t geomCount{ mGeometryDataVec.size() };
     for (std::size_t i = 0UL; i < geomCount; ++i) {
         GeometryData& geomData{ mGeometryDataVec[i] };
@@ -144,43 +125,21 @@ ColorHeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
             commandList.SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
             objectCBufferGpuDesc.ptr += descHandleIncSize;
 
-            commandList.SetGraphicsRootDescriptorTable(3U, heightsBufferGpuDesc);
-            heightsBufferGpuDesc.ptr += descHandleIncSize;
-
-            commandList.SetGraphicsRootDescriptorTable(4U, materialsCBufferGpuDesc);
+            commandList.SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDesc);
             materialsCBufferGpuDesc.ptr += descHandleIncSize;
-
-            commandList.SetGraphicsRootDescriptorTable(6U, normalsBufferGpuDesc);
-            normalsBufferGpuDesc.ptr += descHandleIncSize;
 
             commandList.DrawIndexedInstanced(geomData.mIndexBufferData.mElementCount, 1U, 0U, 0U, 0U);
         }
     }
 
     commandList.Close();
-
     CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-bool
-ColorHeightCmdListRecorder::IsDataValid() const noexcept
-{
-    const bool result =
-        GeometryPassCmdListRecorder::IsDataValid() &&
-        mNormalBufferGpuDescriptorsBegin.ptr != 0UL &&
-        mHeightBufferGpuDescriptorsBegin.ptr != 0UL;
-
-    return result;
-}
-
 void
-ColorHeightCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                                                const std::vector<ID3D12Resource*>& normalTextures,
-                                                const std::vector<ID3D12Resource*>& heightTextures) noexcept
+ColorCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
-    BRE_ASSERT(materialProperties.size() == normalTextures.size());
-    BRE_ASSERT(normalTextures.size() == heightTextures.size());
     BRE_ASSERT(mObjectUploadCBuffers == nullptr);
     BRE_ASSERT(mMaterialUploadCBuffers == nullptr);
 
@@ -197,6 +156,7 @@ ColorHeightCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProper
         const std::uint32_t worldMatsCount{ static_cast<std::uint32_t>(geomData.mWorldMatrices.size()) };
         for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
             MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j], objCBuffer.mWorldMatrix);
+            MathUtils::StoreTransposeMatrix(geomData.mInverseTransposeWorldMatrices[j], objCBuffer.mInverseTransposeWorldMatrix);
             mObjectUploadCBuffers->CopyData(k + j, &objCBuffer, sizeof(objCBuffer));
         }
 
@@ -217,16 +177,6 @@ ColorHeightCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProper
 
     std::vector<D3D12_CONSTANT_BUFFER_VIEW_DESC> materialCbufferViewDescVec;
     materialCbufferViewDescVec.reserve(numResources);
-
-    std::vector<ID3D12Resource*> normalResVec;
-    normalResVec.reserve(numResources);
-    std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> normalSrvDescVec;
-    normalSrvDescVec.reserve(numResources);
-
-    std::vector<ID3D12Resource*> heightResVec;
-    heightResVec.reserve(numResources);
-    std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> heightSrvDescVec;
-    heightSrvDescVec.reserve(numResources);
     for (std::size_t i = 0UL; i < numResources; ++i) {
         // Object cbuffer desc
         D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
@@ -239,40 +189,12 @@ ColorHeightCmdListRecorder::InitConstantBuffers(const std::vector<MaterialProper
         cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(matCBufferElemSize);
         materialCbufferViewDescVec.push_back(cBufferDesc);
 
-        // Normal descriptor
-        normalResVec.push_back(normalTextures[i]);
-        D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
-        srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-        srvDescriptor.Texture2D.MostDetailedMip = 0;
-        srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
-        srvDescriptor.Format = normalResVec.back()->GetDesc().Format;
-        srvDescriptor.Texture2D.MipLevels = normalResVec.back()->GetDesc().MipLevels;
-        normalSrvDescVec.push_back(srvDescriptor);
-
-        // Height descriptor
-        heightResVec.push_back(heightTextures[i]);
-        srvDescriptor = D3D12_SHADER_RESOURCE_VIEW_DESC{};
-        srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-        srvDescriptor.Texture2D.MostDetailedMip = 0;
-        srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
-        srvDescriptor.Format = heightResVec.back()->GetDesc().Format;
-        srvDescriptor.Texture2D.MipLevels = heightResVec.back()->GetDesc().MipLevels;
-        heightSrvDescVec.push_back(srvDescriptor);
-
         mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i), &materialProperties[i], sizeof(MaterialProperties));
     }
     mStartObjectCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),
                                                                                     static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
     mStartMaterialCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferViews(materialCbufferViewDescVec.data(),
                                                                                       static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
-    mNormalBufferGpuDescriptorsBegin = CbvSrvUavDescriptorManager::CreateShaderResourceViews(normalResVec.data(),
-                                                                                             normalSrvDescVec.data(),
-                                                                                             static_cast<std::uint32_t>(normalSrvDescVec.size()));
-    mHeightBufferGpuDescriptorsBegin = CbvSrvUavDescriptorManager::CreateShaderResourceViews(heightResVec.data(),
-                                                                                             heightSrvDescVec.data(),
-                                                                                             static_cast<std::uint32_t>(heightSrvDescVec.size()));
 }
 }
 
