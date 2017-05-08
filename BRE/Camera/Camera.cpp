@@ -5,19 +5,23 @@
 
 using namespace DirectX;
 
-void Camera::SetFrustum(const float verticalFieldOfView,
-						const float aspectRatio,
-						const float nearPlaneZ,
-						const float farPlaneZ) noexcept 
+void 
+Camera::SetFrustum(
+	const float verticalFieldOfView,
+	const float aspectRatio,						
+	const float nearPlaneZ,
+	const float farPlaneZ) noexcept 
 {
 	const XMMATRIX projectionMatrix{ XMMatrixPerspectiveFovLH(verticalFieldOfView, aspectRatio, nearPlaneZ, farPlaneZ) };
 	XMStoreFloat4x4(&mProjectionMatrix, projectionMatrix);
 	MathUtils::StoreInverseMatrix(mProjectionMatrix, mInverseProjectionMatrix);
 }
 
-void Camera::SetLookAndUpVectors(const XMFLOAT3& cameraPosition,
-								 const XMFLOAT3& targetPosition,
-								 const XMFLOAT3& upVector) noexcept 
+void 
+Camera::SetLookAndUpVectors(
+	const XMFLOAT3& cameraPosition,
+	const XMFLOAT3& targetPosition,
+	const XMFLOAT3& upVector) noexcept 
 {
 	const XMVECTOR xmCameraPosition( XMLoadFloat3(&cameraPosition) );
 	const XMVECTOR xmTargetPosition( XMLoadFloat3(&targetPosition) );
@@ -33,7 +37,8 @@ void Camera::SetLookAndUpVectors(const XMFLOAT3& cameraPosition,
 	XMStoreFloat3(&mUpVector, xmUpVector);
 }
 
-void Camera::Strafe(const float distance) noexcept {
+void 
+Camera::Strafe(const float distance) noexcept {
 	// velocity += right * dist 
 	XMVECTOR rightVector(XMLoadFloat3(&mRightVector));
 	rightVector = XMVectorScale(rightVector, distance);
@@ -42,7 +47,8 @@ void Camera::Strafe(const float distance) noexcept {
 	XMStoreFloat3(&mVelocityVector, velocityVector);
 }
 
-void Camera::Walk(const float distance) noexcept {
+void 
+Camera::Walk(const float distance) noexcept {
 	// velocity += look * dist 
 	XMVECTOR lookVector(XMLoadFloat3(&mLookVector));
 	lookVector = XMVectorScale(lookVector, distance);
@@ -51,14 +57,16 @@ void Camera::Walk(const float distance) noexcept {
 	XMStoreFloat3(&mVelocityVector, velocityVector);
 }
 
-void Camera::Pitch(const float angleInRadians) noexcept {
+void 
+Camera::Pitch(const float angleInRadians) noexcept {
 	// Rotate up and look vector about the right vector.
 	const XMMATRIX rightVector(XMMatrixRotationAxis(XMLoadFloat3(&mRightVector), angleInRadians));
 	XMStoreFloat3(&mUpVector, XMVector3TransformNormal(XMLoadFloat3(&mUpVector), rightVector));
 	XMStoreFloat3(&mLookVector, XMVector3TransformNormal(XMLoadFloat3(&mLookVector), rightVector));
 }
 
-void Camera::RotateY(const float angleInRadians) noexcept {
+void 
+Camera::RotateY(const float angleInRadians) noexcept {
 	// Rotate the basis vectors about the world y-axis.
 	const XMMATRIX rotationYMatrix(XMMatrixRotationY(angleInRadians));
 	XMStoreFloat3(&mRightVector, XMVector3TransformNormal(XMLoadFloat3(&mRightVector), rotationYMatrix));
@@ -66,7 +74,8 @@ void Camera::RotateY(const float angleInRadians) noexcept {
 	XMStoreFloat3(&mLookVector, XMVector3TransformNormal(XMLoadFloat3(&mLookVector), rotationYMatrix));
 }
 
-void Camera::UpdateViewMatrix() noexcept {
+void 
+Camera::UpdateViewMatrix() noexcept {
 	static float maxVelocitySpeed{ 100.0f }; // speed = velocity magnitude
 	static float velocityDamp{ 0.1f }; // fraction of velocity retained per second
 

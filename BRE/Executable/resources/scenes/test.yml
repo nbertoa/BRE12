@@ -25,22 +25,49 @@ material techniques:
   - name: color mapping
   - name: brick
     diffuse texture: brick_diffuse
+  - name: brick normal
+    diffuse texture: brick_diffuse
+    normal texture: brick_normal
+  - name: brick height
+    diffuse texture: brick_diffuse
+    normal texture: brick_normal   
+    height texture: brick_height
+  - name: brick color normal
+    normal texture: brick_normal 
+  - name: brick color height
+    normal texture: brick_normal   
+    height texture: brick_height
     
 drawable objects:
-  - model: unreal
+  - model: mitsubaSphere
     material properties: material1
-    material technique: brick
+    material technique: brick height
     translation: [0.0, 0.0, 50.0]
     scale: [0.2, 0.2, 0.2]
-  - model: unreal
+  - model: mitsubaSphere
     material properties: material1
-    material technique: brick
+    material technique: brick normal
     translation: [50.0, 0.0, 50.0]
     scale: [0.2, 0.2, 0.2]
-  - model: unreal
+  - model: mitsubaSphere
     material properties: material2
     material technique: brick
     translation: [100.0, 0.0, 50.0]
+    scale: [0.2, 0.2, 0.2]
+  - model: mitsubaSphere
+    material properties: material2
+    material technique: color mapping
+    translation: [150.0, 0.0, 50.0]
+    scale: [0.2, 0.2, 0.2]
+  - model: mitsubaSphere
+    material properties: material1
+    material technique: brick color normal
+    translation: [200.0, 0.0, 50.0]
+    scale: [0.2, 0.2, 0.2]
+  - model: mitsubaSphere
+    material properties: material1
+    material technique: brick color height
+    translation: [250.0, 0.0, 50.0]
     scale: [0.2, 0.2, 0.2]
     
 environment:

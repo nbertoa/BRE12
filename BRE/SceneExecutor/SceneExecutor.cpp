@@ -13,7 +13,6 @@
 #include <DirectXManager\DirectXManager.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
-#include <MaterialManager/MaterialManager.h>
 #include <PSOManager\PSOManager.h>
 #include <RenderManager/RenderManager.h>
 #include <ResourceManager\ResourceManager.h>
@@ -45,7 +44,6 @@ namespace {
 		CbvSrvUavDescriptorManager::Init();
 		DepthStencilDescriptorManager::Init();
 		RenderTargetDescriptorManager::Init();
-		MaterialManager::Init();
 
 		CommandListExecutor::Create(MAX_NUM_CMD_LISTS);
 
@@ -101,7 +99,8 @@ SceneExecutor::~SceneExecutor() {
 	delete mScene;
 }
 
-void SceneExecutor::Execute() noexcept {
+void 
+SceneExecutor::Execute() noexcept {
 	RunMessageLoop();
 }
 

@@ -7,14 +7,16 @@
 PSOManager::PSOs PSOManager::mPSOs;
 std::mutex PSOManager::mMutex;
 
-void PSOManager::EraseAll() noexcept {
+void 
+PSOManager::EraseAll() noexcept {
 	for (ID3D12PipelineState* pso : mPSOs) {
 		ASSERT(pso != nullptr);
 		pso->Release();
 	}
 }
 
-bool PSOManager::PSOCreationData::IsDataValid() const noexcept {
+bool 
+PSOManager::PSOCreationData::IsDataValid() const noexcept {
 	if (mNumRenderTargets == 0 || 
 		mNumRenderTargets > D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT || 
 		mRootSignature == nullptr) {
@@ -30,7 +32,8 @@ bool PSOManager::PSOCreationData::IsDataValid() const noexcept {
 	return true;
 }
 
-ID3D12PipelineState& PSOManager::CreateGraphicsPSO(const PSOManager::PSOCreationData& psoData) noexcept {
+ID3D12PipelineState& 
+PSOManager::CreateGraphicsPSO(const PSOManager::PSOCreationData& psoData) noexcept {
 	ASSERT(psoData.IsDataValid());
 		
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDescriptor = {};
@@ -59,7 +62,8 @@ ID3D12PipelineState& PSOManager::CreateGraphicsPSO(const PSOManager::PSOCreation
 	return CreateGraphicsPSOByDescriptor(psoDescriptor);
 }
 
-ID3D12PipelineState& PSOManager::CreateGraphicsPSOByDescriptor(
+ID3D12PipelineState& 
+PSOManager::CreateGraphicsPSOByDescriptor(
 	const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDescriptor) noexcept 
 {
 	ID3D12PipelineState* pso{ nullptr };

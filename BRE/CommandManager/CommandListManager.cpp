@@ -6,14 +6,16 @@
 CommandListManager::CommandLists CommandListManager::mCommandLists;
 std::mutex CommandListManager::mMutex;
 
-void CommandListManager::EraseAll() noexcept {
+void 
+CommandListManager::EraseAll() noexcept {
 	for (ID3D12GraphicsCommandList* commandList : mCommandLists) {
 		ASSERT(commandList != nullptr);
 		commandList->Release();
 	}
 }
 
-ID3D12GraphicsCommandList& CommandListManager::CreateCommandList(
+ID3D12GraphicsCommandList& 
+CommandListManager::CreateCommandList(
 	const D3D12_COMMAND_LIST_TYPE& commandListType,
 	ID3D12CommandAllocator& commandAllocator) noexcept
 {

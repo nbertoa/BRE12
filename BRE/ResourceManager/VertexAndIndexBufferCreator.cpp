@@ -13,7 +13,8 @@ VertexAndIndexBufferCreator::BufferCreationData::BufferCreationData(
 {
 }
 
-bool VertexAndIndexBufferCreator::BufferCreationData::IsDataValid() const noexcept {
+bool 
+VertexAndIndexBufferCreator::BufferCreationData::IsDataValid() const noexcept {
 	return mData != nullptr && mElementCount != 0U && mElementSize != 0UL;
 }
 
@@ -32,7 +33,8 @@ VertexAndIndexBufferCreator::VertexBufferData::operator=(
 	return *this;
 }
 
-bool VertexAndIndexBufferCreator::VertexBufferData::IsDataValid() const noexcept {
+bool 
+VertexAndIndexBufferCreator::VertexBufferData::IsDataValid() const noexcept {
 	D3D12_VERTEX_BUFFER_VIEW invalidView{};
 
 	return
@@ -43,7 +45,8 @@ bool VertexAndIndexBufferCreator::VertexBufferData::IsDataValid() const noexcept
 		mBufferView.StrideInBytes != invalidView.StrideInBytes;
 }
 
-void VertexAndIndexBufferCreator::CreateVertexBuffer(
+void 
+VertexAndIndexBufferCreator::CreateVertexBuffer(
 	ID3D12GraphicsCommandList& commandList,
 	const BufferCreationData& bufferCreationData,
 	VertexBufferData& vertexBufferData,
@@ -86,7 +89,8 @@ VertexAndIndexBufferCreator::IndexBufferData::operator=(
 	return *this;
 }
 
-bool VertexAndIndexBufferCreator::IndexBufferData::IsDataValid() const noexcept {
+bool 
+VertexAndIndexBufferCreator::IndexBufferData::IsDataValid() const noexcept {
 	D3D12_INDEX_BUFFER_VIEW invalidView{};
 
 	return
@@ -97,7 +101,8 @@ bool VertexAndIndexBufferCreator::IndexBufferData::IsDataValid() const noexcept 
 		mBufferView.SizeInBytes != invalidView.SizeInBytes;
 }
 
-void VertexAndIndexBufferCreator::CreateIndexBuffer(
+void 
+VertexAndIndexBufferCreator::CreateIndexBuffer(
 	ID3D12GraphicsCommandList& commandList,
 	const BufferCreationData& bufferCreationData,
 	IndexBufferData& indexBufferData,

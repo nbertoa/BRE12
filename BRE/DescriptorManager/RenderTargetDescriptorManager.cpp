@@ -11,7 +11,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE RenderTargetDescriptorManager::mCurrentRenderTargetV
 D3D12_CPU_DESCRIPTOR_HANDLE RenderTargetDescriptorManager::mCurrentRenderTargetViewCpuDescriptorHandle{ 0UL };
 std::mutex RenderTargetDescriptorManager::mMutex;
 
-void RenderTargetDescriptorManager::Init() noexcept {
+void 
+RenderTargetDescriptorManager::Init() noexcept {
 	D3D12_DESCRIPTOR_HEAP_DESC renderTargetViewDescriptorHeapDescriptor{};
 	renderTargetViewDescriptorHeapDescriptor.NumDescriptors = 10U;
 	renderTargetViewDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -28,7 +29,8 @@ void RenderTargetDescriptorManager::Init() noexcept {
 	mCurrentRenderTargetViewCpuDescriptorHandle = mRenderTargetViewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE RenderTargetDescriptorManager::CreateRenderTargetView(
+D3D12_GPU_DESCRIPTOR_HANDLE 
+RenderTargetDescriptorManager::CreateRenderTargetView(
 	ID3D12Resource& resource,
 	const D3D12_RENDER_TARGET_VIEW_DESC& descriptor,
 	D3D12_CPU_DESCRIPTOR_HANDLE* firstViewCpuDescriptorHandle) noexcept
@@ -51,7 +53,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE RenderTargetDescriptorManager::CreateRenderTargetVie
 	return gpuDescriptorHandle;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE RenderTargetDescriptorManager::CreateRenderTargetViews(
+D3D12_GPU_DESCRIPTOR_HANDLE 
+RenderTargetDescriptorManager::CreateRenderTargetViews(
 	ID3D12Resource* *resources,
 	const D3D12_RENDER_TARGET_VIEW_DESC* descriptors,
 	const std::uint32_t descriptorCount,

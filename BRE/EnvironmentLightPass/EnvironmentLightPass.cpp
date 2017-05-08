@@ -53,7 +53,8 @@ namespace {
 	}
 }
 
-void EnvironmentLightPass::Init(
+void 
+EnvironmentLightPass::Init(
 	ID3D12Resource& baseColorMetalMaskBuffer,
 	ID3D12Resource& normalSmoothnessBuffer,
 	ID3D12Resource& depthBuffer,
@@ -108,7 +109,8 @@ void EnvironmentLightPass::Init(
 	ASSERT(ValidateData());
 }
 
-void EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
+void 
+EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(ValidateData());
 
 	const std::uint32_t taskCount{ 5U };
@@ -129,7 +131,8 @@ void EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	}
 }
 
-bool EnvironmentLightPass::ValidateData() const noexcept {
+bool 
+EnvironmentLightPass::ValidateData() const noexcept {
 	const bool b =
 		mAmbientOcclusionRecorder.get() != nullptr &&
 		mEnvironmentLightRecorder.get() != nullptr &&
@@ -139,7 +142,8 @@ bool EnvironmentLightPass::ValidateData() const noexcept {
 	return b;
 }
 
-void EnvironmentLightPass::ExecuteBeginTask() noexcept {
+void 
+EnvironmentLightPass::ExecuteBeginTask() noexcept {
 	ASSERT(ValidateData());
 
 	// Check resource states:
@@ -167,7 +171,8 @@ void EnvironmentLightPass::ExecuteBeginTask() noexcept {
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-void EnvironmentLightPass::ExecuteMiddleTask() noexcept {
+void 
+EnvironmentLightPass::ExecuteMiddleTask() noexcept {
 	ASSERT(ValidateData());
 
 	// Check resource states:
@@ -196,7 +201,8 @@ void EnvironmentLightPass::ExecuteMiddleTask() noexcept {
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-void EnvironmentLightPass::ExecuteFinalTask() noexcept {
+void 
+EnvironmentLightPass::ExecuteFinalTask() noexcept {
 	ASSERT(ValidateData());
 
 	// Check resource states:

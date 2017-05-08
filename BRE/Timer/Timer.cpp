@@ -9,7 +9,8 @@ Timer::Timer() {
 	Reset();
 }
 
-void Timer::Reset() noexcept {
+void 
+Timer::Reset() noexcept {
 	std::int64_t currentTime;
 	QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&currentTime));
 
@@ -17,7 +18,8 @@ void Timer::Reset() noexcept {
 	mPreviousTime = currentTime;
 }
 
-void Timer::Tick() noexcept {
+void 
+Timer::Tick() noexcept {
 	std::int64_t currentTime;
 	QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&currentTime));
 	mCurrentTime = currentTime;

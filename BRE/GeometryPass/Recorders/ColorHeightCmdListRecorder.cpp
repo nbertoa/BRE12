@@ -5,13 +5,13 @@
 #include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
-#include <MaterialManager/Material.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager/UploadBufferManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>
+#include <ShaderUtils\MaterialProperties.h>
 #include <Utils/DebugUtils.h>
 
 // Root signature:
@@ -28,7 +28,11 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void ColorHeightCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept {
+void 
+ColorHeightCmdListRecorder::InitSharedPSOAndRootSignature(
+	const DXGI_FORMAT* geometryBufferFormats, 
+	const std::uint32_t geometryBufferCount) noexcept
+{
 	ASSERT(geometryBufferFormats != nullptr);
 	ASSERT(geometryBufferCount > 0U);
 	ASSERT(sPSO == nullptr);
@@ -56,27 +60,27 @@ void ColorHeightCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT
 	ASSERT(sRootSignature != nullptr);
 }
 
-void ColorHeightCmdListRecorder::Init(
-	const GeometryData* geometryDataVec,
-	const std::uint32_t geometryDataCount,
-	const Material* materials,
-	ID3D12Resource** normals,
-	ID3D12Resource** heights,
-	const std::uint32_t numResources) noexcept
+void 
+ColorHeightCmdListRecorder::Init(
+	const std::vector<GeometryData>& geometryDataVector,
+	const std::vector<MaterialProperties>& materialProperties,
+	const std::vector<ID3D12Resource*>& normalTextures,
+	const std::vector<ID3D12Resource*>& heightTextures) noexcept
 {
 	ASSERT(IsDataValid() == false);
-	ASSERT(geometryDataVec != nullptr);
-	ASSERT(geometryDataCount != 0U);
-	ASSERT(materials != nullptr);
-	ASSERT(numResources > 0UL);
-	ASSERT(normals != nullptr);
-	ASSERT(heights != nullptr);
+	ASSERT(geometryDataVector.empty() == false);
+	ASSERT(materialProperties.empty() == false);
+	ASSERT(materialProperties.size() == normalTextures.size());
+	ASSERT(normalTextures.size() == heightTextures.size());
+
+	const std::size_t numResources = materialProperties.size();
+	const std::size_t geometryDataCount = geometryDataVector.size();
 
 	// Check that the total number of matrices (geometry to be drawn) will be equal to available materials
 #ifdef _DEBUG
 	std::size_t totalNumMatrices{ 0UL };
 	for (std::size_t i = 0UL; i < geometryDataCount; ++i) {
-		const std::size_t numMatrices{ geometryDataVec[i].mWorldMatrices.size() };
+		const std::size_t numMatrices{ geometryDataVector[i].mWorldMatrices.size() };
 		totalNumMatrices += numMatrices;
 		ASSERT(numMatrices != 0UL);
 	}
@@ -84,15 +88,16 @@ void ColorHeightCmdListRecorder::Init(
 #endif
 	mGeometryDataVec.reserve(geometryDataCount);
 	for (std::uint32_t i = 0U; i < geometryDataCount; ++i) {
-		mGeometryDataVec.push_back(geometryDataVec[i]);
+		mGeometryDataVec.push_back(geometryDataVector[i]);
 	}
 
-	InitConstantBuffers(materials, normals, heights, numResources);
+	InitConstantBuffers(materialProperties, normalTextures, heightTextures);
 
 	ASSERT(IsDataValid());
 }
 
-void ColorHeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
+void 
+ColorHeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -157,7 +162,8 @@ void ColorHeightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-bool ColorHeightCmdListRecorder::IsDataValid() const noexcept {
+bool 
+ColorHeightCmdListRecorder::IsDataValid() const noexcept {
 	const bool result =
 		GeometryPassCmdListRecorder::IsDataValid() &&
 		mNormalBufferGpuDescriptorsBegin.ptr != 0UL &&
@@ -166,22 +172,23 @@ bool ColorHeightCmdListRecorder::IsDataValid() const noexcept {
 	return result;
 }
 
-void ColorHeightCmdListRecorder::InitConstantBuffers(
-	const Material* materials,
-	ID3D12Resource** normals,
-	ID3D12Resource** heights,
-	const std::uint32_t dataCount) noexcept 
+void 
+ColorHeightCmdListRecorder::InitConstantBuffers(
+	const std::vector<MaterialProperties>& materialProperties,
+	const std::vector<ID3D12Resource*>& normalTextures,
+	const std::vector<ID3D12Resource*>& heightTextures) noexcept
 {
-	ASSERT(materials != nullptr);
-	ASSERT(normals != nullptr);
-	ASSERT(heights != nullptr);
-	ASSERT(dataCount != 0UL);
+	ASSERT(materialProperties.empty() == false);
+	ASSERT(materialProperties.size() == normalTextures.size());
+	ASSERT(normalTextures.size() == heightTextures.size());
 	ASSERT(mObjectUploadCBuffers == nullptr);
 	ASSERT(mMaterialUploadCBuffers == nullptr);
 
+	const std::uint32_t numResources = static_cast<std::uint32_t>(materialProperties.size());
+
 	// Create object cbuffer and fill it
 	const std::size_t objCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
-	mObjectUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, dataCount);
+	mObjectUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, numResources);
 	std::uint32_t k = 0U;
 	const std::size_t geometryDataCount{ mGeometryDataVec.size() };
 	ObjectCBuffer objCBuffer;
@@ -197,8 +204,8 @@ void ColorHeightCmdListRecorder::InitConstantBuffers(
 	}
 
 	// Create materials cbuffer		
-	const std::size_t matCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(Material)) };
-	mMaterialUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, dataCount);
+	const std::size_t matCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(MaterialProperties)) };
+	mMaterialUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, numResources);
 
 	D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialUploadCBuffers->GetResource()->GetGPUVirtualAddress() };
 	D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffers->GetResource()->GetGPUVirtualAddress() };
@@ -206,21 +213,21 @@ void ColorHeightCmdListRecorder::InitConstantBuffers(
 	// Create object / materials cbuffers descriptors
 	// Create textures SRV descriptors
 	std::vector<D3D12_CONSTANT_BUFFER_VIEW_DESC> objectCbufferViewDescVec;
-	objectCbufferViewDescVec.reserve(dataCount);
+	objectCbufferViewDescVec.reserve(numResources);
 
 	std::vector<D3D12_CONSTANT_BUFFER_VIEW_DESC> materialCbufferViewDescVec;
-	materialCbufferViewDescVec.reserve(dataCount);
+	materialCbufferViewDescVec.reserve(numResources);
 
 	std::vector<ID3D12Resource*> normalResVec;
-	normalResVec.reserve(dataCount);
+	normalResVec.reserve(numResources);
 	std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> normalSrvDescVec;
-	normalSrvDescVec.reserve(dataCount);
+	normalSrvDescVec.reserve(numResources);
 
 	std::vector<ID3D12Resource*> heightResVec;
-	heightResVec.reserve(dataCount);
+	heightResVec.reserve(numResources);
 	std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> heightSrvDescVec;
-	heightSrvDescVec.reserve(dataCount);
-	for (std::size_t i = 0UL; i < dataCount; ++i) {
+	heightSrvDescVec.reserve(numResources);
+	for (std::size_t i = 0UL; i < numResources; ++i) {
 		// Object cbuffer desc
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
 		cBufferDesc.BufferLocation = objCBufferGpuAddress + i * objCBufferElemSize;
@@ -233,7 +240,7 @@ void ColorHeightCmdListRecorder::InitConstantBuffers(
 		materialCbufferViewDescVec.push_back(cBufferDesc);
 
 		// Normal descriptor
-		normalResVec.push_back(normals[i]);
+		normalResVec.push_back(normalTextures[i]);
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
 		srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -244,7 +251,7 @@ void ColorHeightCmdListRecorder::InitConstantBuffers(
 		normalSrvDescVec.push_back(srvDescriptor);
 
 		// Height descriptor
-		heightResVec.push_back(heights[i]);
+		heightResVec.push_back(heightTextures[i]);
 		srvDescriptor = D3D12_SHADER_RESOURCE_VIEW_DESC{};
 		srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -254,7 +261,7 @@ void ColorHeightCmdListRecorder::InitConstantBuffers(
 		srvDescriptor.Texture2D.MipLevels = heightResVec.back()->GetDesc().MipLevels;
 		heightSrvDescVec.push_back(srvDescriptor);
 
-		mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
+		mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i), &materialProperties[i], sizeof(MaterialProperties));
 	}
 	mStartObjectCBufferView =
 		CbvSrvUavDescriptorManager::CreateConstantBufferViews(

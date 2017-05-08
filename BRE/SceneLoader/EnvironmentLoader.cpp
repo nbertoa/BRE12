@@ -7,7 +7,8 @@
 
 #include <SceneLoader\TextureLoader.h>
 
-void EnvironmentLoader::LoadEnvironment(const YAML::Node& rootNode) noexcept {
+void 
+EnvironmentLoader::LoadEnvironment(const YAML::Node& rootNode) noexcept {
 	ASSERT(rootNode.IsDefined());
 
 	// Get the "environment" node. It is a single sequence of maps and its sintax is:

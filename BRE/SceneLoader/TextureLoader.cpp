@@ -11,7 +11,8 @@
 #include <ResourceManager\ResourceManager.h>
 #include <Utils/DebugUtils.h>
 
-void TextureLoader::LoadTextures(
+void 
+TextureLoader::LoadTextures(
 	const YAML::Node& rootNode,
 	ID3D12CommandAllocator& commandAllocator,
 	ID3D12GraphicsCommandList& commandList) noexcept
@@ -55,7 +56,8 @@ void TextureLoader::LoadTextures(
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
 
-ID3D12Resource& TextureLoader::GetTexture(const std::string& name) noexcept {
+ID3D12Resource& 
+TextureLoader::GetTexture(const std::string& name) noexcept {
 	std::unordered_map<std::string, ID3D12Resource*>::iterator findIt = mTextureByName.find(name);
 	ASSERT(findIt != mTextureByName.end());
 	ASSERT(findIt->second != nullptr);

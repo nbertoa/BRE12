@@ -31,7 +31,8 @@ UploadBuffer::~UploadBuffer() {
 	mMappedData = nullptr;
 }
 
-void UploadBuffer::CopyData(
+void 
+UploadBuffer::CopyData(
 	const std::uint32_t elementIndex, 
 	const void* sourceData, 
 	const std::size_t sourceDataSize) const noexcept 
@@ -40,7 +41,8 @@ void UploadBuffer::CopyData(
 	memcpy(mMappedData + elementIndex * mElementSize, sourceData, sourceDataSize);
 }
 
-std::size_t UploadBuffer::GetRoundedConstantBufferSizeInBytes(const std::size_t sizeInBytes) {
+std::size_t 
+UploadBuffer::GetRoundedConstantBufferSizeInBytes(const std::size_t sizeInBytes) {
 	// Constant buffers must be a multiple of the minimum hardware
 	// allocation size (usually 256 bytes).  So round up to nearest
 	// multiple of 256.  We do this by adding 255 and then masking off

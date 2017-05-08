@@ -1,6 +1,7 @@
 #include "CBuffers.h"
 
-const FrameCBuffer& FrameCBuffer::operator=(const FrameCBuffer& instance) {
+const FrameCBuffer& 
+FrameCBuffer::operator=(const FrameCBuffer& instance) {
 	if (this == &instance) {
 		return *this;
 	}

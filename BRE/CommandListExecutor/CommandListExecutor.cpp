@@ -7,7 +7,8 @@
 
 CommandListExecutor* CommandListExecutor::sExecutor{ nullptr };
 
-void CommandListExecutor::Create(const std::uint32_t maxNumCmdLists) noexcept 
+void
+CommandListExecutor::Create(const std::uint32_t maxNumCmdLists) noexcept 
 {
 	ASSERT(sExecutor == nullptr);
 
@@ -19,7 +20,8 @@ void CommandListExecutor::Create(const std::uint32_t maxNumCmdLists) noexcept
 	sExecutor = new (parent->allocate_child()) CommandListExecutor(maxNumCmdLists);
 }
 
-CommandListExecutor& CommandListExecutor::Get() noexcept {
+CommandListExecutor& 
+CommandListExecutor::Get() noexcept {
 	ASSERT(sExecutor != nullptr);
 
 	return *sExecutor;
@@ -41,7 +43,8 @@ CommandListExecutor::CommandListExecutor(const std::uint32_t maxNumberOfCommandL
 	parent()->spawn(*this);
 }
 
-tbb::task* CommandListExecutor::execute() {
+tbb::task* 
+CommandListExecutor::execute() {
 	ASSERT(mMaxNumberOfCommandListsToExecute > 0);
 
 	ID3D12CommandList* *pendingCommandLists{ new ID3D12CommandList*[mMaxNumberOfCommandListsToExecute] };
@@ -69,7 +72,8 @@ tbb::task* CommandListExecutor::execute() {
 	return nullptr;
 }
 
-void CommandListExecutor::SignalFenceAndWaitForCompletion(
+void 
+CommandListExecutor::SignalFenceAndWaitForCompletion(
 	ID3D12Fence& fence,
 	const std::uint64_t valueToSignal,
 	const std::uint64_t valueToWaitFor) noexcept
@@ -91,7 +95,8 @@ void CommandListExecutor::SignalFenceAndWaitForCompletion(
 	}
 }
 
-void CommandListExecutor::ExecuteCommandListAndWaitForCompletion(ID3D12CommandList& cmdList) noexcept {
+void 
+CommandListExecutor::ExecuteCommandListAndWaitForCompletion(ID3D12CommandList& cmdList) noexcept {
 	ASSERT(mCommandQueue != nullptr);
 	ASSERT(mFence != nullptr);
 
@@ -102,7 +107,8 @@ void CommandListExecutor::ExecuteCommandListAndWaitForCompletion(ID3D12CommandLi
 	SignalFenceAndWaitForCompletion(*mFence, valueToSignal, valueToSignal);
 }
 
-void CommandListExecutor::Terminate() noexcept {
+void 
+CommandListExecutor::Terminate() noexcept {
 	mTerminate = true;
 	parent()->wait_for_all();
 }

@@ -2,7 +2,8 @@
 
 #include <Utils\DebugUtils.h>
 
-MaterialTechnique::TechniqueType MaterialTechnique::GetType() const noexcept {
+MaterialTechnique::TechniqueType 
+MaterialTechnique::GetType() const noexcept {
 	if (mDiffuseTexture != nullptr) {
 		if (mNormalTexture != nullptr) {
 			if (mHeightTexture != nullptr) {

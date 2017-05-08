@@ -8,12 +8,14 @@ namespace {
 	std::unique_ptr<Mouse> gMouse{ nullptr };
 }
 
-Mouse& Mouse::Create(IDirectInput8& directInput, const HWND windowHandle) noexcept {
+Mouse& 
+Mouse::Create(IDirectInput8& directInput, const HWND windowHandle) noexcept {
 	ASSERT(gMouse == nullptr);
 	gMouse.reset(new Mouse(directInput, windowHandle));
 	return *gMouse.get();
 }
-Mouse& Mouse::Get() noexcept {
+Mouse& 
+Mouse::Get() noexcept {
 	ASSERT(gMouse != nullptr);
 	return *gMouse.get();
 }
@@ -37,7 +39,8 @@ Mouse::~Mouse() {
 	mDevice->Release();
 }
 
-void Mouse::Update() {
+void 
+Mouse::Update() {
 	ASSERT(mDevice != nullptr);
 
 	memcpy(&mLastState, &mCurrentState, sizeof(mCurrentState));

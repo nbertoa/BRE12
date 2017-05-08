@@ -21,7 +21,8 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void EnvironmentLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
+void 
+EnvironmentLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
@@ -48,7 +49,8 @@ void EnvironmentLightCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sRootSignature != nullptr);
 }
 
-void EnvironmentLightCmdListRecorder::Init(
+void 
+EnvironmentLightCmdListRecorder::Init(
 	ID3D12Resource& normalSmoothnessBuffer,
 	ID3D12Resource& baseColorMetalMaskBuffer,	
 	ID3D12Resource& depthBuffer,	
@@ -72,7 +74,8 @@ void EnvironmentLightCmdListRecorder::Init(
 	ASSERT(ValidateData());
 }
 
-void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
+void 
+EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(ValidateData());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -103,7 +106,8 @@ void EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
+bool 
+EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		mRenderTargetView.ptr != 0UL &&
 		mStartPixelShaderResourceView.ptr != 0UL;
@@ -111,7 +115,8 @@ bool EnvironmentLightCmdListRecorder::ValidateData() const noexcept {
 	return result;
 }
 
-void EnvironmentLightCmdListRecorder::InitShaderResourceViews(
+void 
+EnvironmentLightCmdListRecorder::InitShaderResourceViews(
 	ID3D12Resource& normalSmoothnessBuffer,
 	ID3D12Resource& baseColorMetalMaskBuffer,	
 	ID3D12Resource& depthBuffer,

@@ -6,14 +6,16 @@
 FenceManager::Fences FenceManager::mFences;
 std::mutex FenceManager::mMutex;
 
-void FenceManager::EraseAll() noexcept {
+void 
+FenceManager::EraseAll() noexcept {
 	for (ID3D12Fence* fence : mFences) {
 		ASSERT(fence != nullptr);
 		fence->Release();
 	}
 }
 
-ID3D12Fence& FenceManager::CreateFence(
+ID3D12Fence& 
+FenceManager::CreateFence(
 	const std::uint64_t fenceInitialValue,
 	const D3D12_FENCE_FLAGS& flags) noexcept
 {

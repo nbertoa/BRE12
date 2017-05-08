@@ -13,7 +13,8 @@ void CommandAllocatorManager::EraseAll() noexcept {
 	}
 }
 
-ID3D12CommandAllocator& CommandAllocatorManager::CreateCommandAllocator(
+ID3D12CommandAllocator& 
+CommandAllocatorManager::CreateCommandAllocator(
 	const D3D12_COMMAND_LIST_TYPE& commandListType) noexcept 
 {
 	ID3D12CommandAllocator* commandAllocator{ nullptr };

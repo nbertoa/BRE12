@@ -8,14 +8,16 @@
 RootSignatureManager::RootSignatures RootSignatureManager::mRootSignatures;
 std::mutex RootSignatureManager::mMutex;
 
-void RootSignatureManager::EraseAll() noexcept {
+void 
+RootSignatureManager::EraseAll() noexcept {
 	for (ID3D12RootSignature* rootSignature : mRootSignatures) {
 		ASSERT(rootSignature != nullptr);
 		rootSignature->Release();
 	}
 }
 
-ID3D12RootSignature& RootSignatureManager::CreateRootSignatureFromBlob(ID3DBlob& blob) noexcept {
+ID3D12RootSignature& 
+RootSignatureManager::CreateRootSignatureFromBlob(ID3DBlob& blob) noexcept {
 	ID3D12RootSignature* rootSignature{ nullptr };
 
 	mMutex.lock();

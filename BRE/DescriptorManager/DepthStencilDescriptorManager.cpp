@@ -11,7 +11,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE DepthStencilDescriptorManager::mCurrentDepthStencilV
 D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilDescriptorManager::mCurrentDepthStencilCpuDescriptorHandle{ 0UL };
 std::mutex DepthStencilDescriptorManager::mMutex;
 
-void DepthStencilDescriptorManager::Init() noexcept {
+void 
+DepthStencilDescriptorManager::Init() noexcept {
 	D3D12_DESCRIPTOR_HEAP_DESC depthStencilViewDescriptorHeapDescriptor{};
 	depthStencilViewDescriptorHeapDescriptor.NumDescriptors = 1U;
 	depthStencilViewDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
@@ -28,7 +29,8 @@ void DepthStencilDescriptorManager::Init() noexcept {
 	mCurrentDepthStencilCpuDescriptorHandle = mDepthStencilViewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE DepthStencilDescriptorManager::CreateDepthStencilView(
+D3D12_GPU_DESCRIPTOR_HANDLE 
+DepthStencilDescriptorManager::CreateDepthStencilView(
 	ID3D12Resource& resource,
 	const D3D12_DEPTH_STENCIL_VIEW_DESC& descriptor,
 	D3D12_CPU_DESCRIPTOR_HANDLE* firstViewCpuDescriptorHandle) noexcept
@@ -51,7 +53,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE DepthStencilDescriptorManager::CreateDepthStencilVie
 	return gpuDescriptorHandle;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE DepthStencilDescriptorManager::CreateDepthStencilViews(
+D3D12_GPU_DESCRIPTOR_HANDLE 
+DepthStencilDescriptorManager::CreateDepthStencilViews(
 	ID3D12Resource* *resources,
 	const D3D12_DEPTH_STENCIL_VIEW_DESC* descriptors,
 	const std::uint32_t descriptorCount,

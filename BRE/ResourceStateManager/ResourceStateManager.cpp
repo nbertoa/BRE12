@@ -6,7 +6,8 @@
 
 ResourceStateManager::StateByResource ResourceStateManager::mStateByResource;
 
-void ResourceStateManager::AddResource(ID3D12Resource& resource, const D3D12_RESOURCE_STATES initialState) noexcept {
+void 
+ResourceStateManager::AddResource(ID3D12Resource& resource, const D3D12_RESOURCE_STATES initialState) noexcept {
 	StateByResource::accessor accessor;
 #ifdef _DEBUG
 	mStateByResource.find(accessor, &resource);
@@ -17,7 +18,8 @@ void ResourceStateManager::AddResource(ID3D12Resource& resource, const D3D12_RES
 	accessor.release();
 }
 
-CD3DX12_RESOURCE_BARRIER ResourceStateManager::ChangeResourceStateAndGetBarrier(
+CD3DX12_RESOURCE_BARRIER 
+ResourceStateManager::ChangeResourceStateAndGetBarrier(
 	ID3D12Resource& resource, 
 	const D3D12_RESOURCE_STATES newState) noexcept 
 {
@@ -33,7 +35,8 @@ CD3DX12_RESOURCE_BARRIER ResourceStateManager::ChangeResourceStateAndGetBarrier(
 	return CD3DX12_RESOURCE_BARRIER::Transition(&resource, oldState, newState);
 }
 
-D3D12_RESOURCE_STATES ResourceStateManager::GetResourceState(ID3D12Resource& resource) noexcept {
+D3D12_RESOURCE_STATES 
+ResourceStateManager::GetResourceState(ID3D12Resource& resource) noexcept {
 	StateByResource::accessor accessor;
 	mStateByResource.find(accessor, &resource);
 	ASSERT(accessor.empty() == false);

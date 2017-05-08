@@ -12,7 +12,8 @@
 
 using namespace DirectX;
 
-void PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept {
+void 
+PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept {
 	ASSERT(IsDataValid() == false);
 	
 	mInputColorBuffer = &inputColorBuffer;
@@ -25,7 +26,8 @@ void PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept {
 	ASSERT(IsDataValid());
 }
 
-void PostProcessPass::Execute(
+void 
+PostProcessPass::Execute(
 	ID3D12Resource& renderTargetBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept 
 {
@@ -43,7 +45,8 @@ void PostProcessPass::Execute(
 	}
 }
 
-bool PostProcessPass::IsDataValid() const noexcept {
+bool 
+PostProcessPass::IsDataValid() const noexcept {
 	const bool b =
 		mCommandListRecorder.get() != nullptr &&
 		mInputColorBuffer != nullptr;
@@ -51,10 +54,11 @@ bool PostProcessPass::IsDataValid() const noexcept {
 	return b;
 }
 
-void PostProcessPass::ExecuteBeginTask(
+void 
+PostProcessPass::ExecuteBeginTask(
 	ID3D12Resource& renderTargetBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept {
-
+	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept 
+{
 	ASSERT(IsDataValid());
 	ASSERT(renderTargetView.ptr != 0UL);
 

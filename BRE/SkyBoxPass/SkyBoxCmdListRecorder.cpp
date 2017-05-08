@@ -24,7 +24,8 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
+void 
+SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
@@ -58,7 +59,8 @@ void SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sRootSignature != nullptr);
 }
 
-void SkyBoxCmdListRecorder::Init(
+void 
+SkyBoxCmdListRecorder::Init(
 	const VertexAndIndexBufferCreator::VertexBufferData& vertexBufferData,
 	const VertexAndIndexBufferCreator::IndexBufferData indexBufferData, 
 	const XMFLOAT4X4& worldMatrix,
@@ -79,7 +81,8 @@ void SkyBoxCmdListRecorder::Init(
 	ASSERT(IsDataValid());
 }
 
-void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
+void 
+SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -112,7 +115,8 @@ void SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameC
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-bool SkyBoxCmdListRecorder::IsDataValid() const noexcept {
+bool 
+SkyBoxCmdListRecorder::IsDataValid() const noexcept {
 	const bool result =
 		mObjectUploadCBuffer != nullptr &&
 		mObjectCBufferView.ptr != 0UL &&
@@ -123,7 +127,8 @@ bool SkyBoxCmdListRecorder::IsDataValid() const noexcept {
 	return result;
 }
 
-void SkyBoxCmdListRecorder::InitConstantBuffers(const XMFLOAT4X4& worldMatrix) noexcept {
+void 
+SkyBoxCmdListRecorder::InitConstantBuffers(const XMFLOAT4X4& worldMatrix) noexcept {
 	ASSERT(mObjectUploadCBuffer == nullptr);
 
 	// Create object cbuffer and fill it
@@ -141,7 +146,8 @@ void SkyBoxCmdListRecorder::InitConstantBuffers(const XMFLOAT4X4& worldMatrix) n
 	mObjectCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferView(cBufferDesc);
 }
 
-void SkyBoxCmdListRecorder::InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap) noexcept {	
+void 
+SkyBoxCmdListRecorder::InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap) noexcept {	
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
 	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;

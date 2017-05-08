@@ -2,7 +2,7 @@
 
 #include <GeometryPass/GeometryPassCmdListRecorder.h>
 
-struct Material;
+class MaterialProperties;
 
 // CommandListRecorders that does color mapping
 class ColorCmdListRecorder : public GeometryPassCmdListRecorder {
@@ -17,16 +17,11 @@ public:
 	static void InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept;
 
 	// Preconditions:
-	// - "geometryDataVec" must not be nullptr
-	// - "geometryDataCount" must be greater than zero
-	// - "materials" must not be nullptr
-	// - "numMaterials" must be greater than zero
+	// - All containers must not be empty
 	// - InitSharedPSOAndRootSignature() must be called first and once
 	void Init(
-		const GeometryData* geometryDataVec,
-		const std::uint32_t geometryDataCount,
-		const Material* materials,
-		const std::uint32_t numMaterials) noexcept;
+		const std::vector<GeometryData>& geometryDataVector,
+		const std::vector<MaterialProperties>& materialProperties) noexcept;
 
 	// Preconditions:
 	// - Init() must be called first
@@ -34,7 +29,7 @@ public:
 
 private:
 	// Preconditions:
-	// - "materials" must not be nullptr
-	// - "numMaterials" must be greater than zero
-	void InitConstantBuffers(const Material* materials, const std::uint32_t numMaterials) noexcept;
+	// - All containers must not be empty
+	void InitConstantBuffers(
+		const std::vector<MaterialProperties>& materialProperties) noexcept;
 };

@@ -6,14 +6,16 @@
 CommandQueueManager::CommandQueues CommandQueueManager::mCommandQueues;
 std::mutex CommandQueueManager::mMutex;
 
-void CommandQueueManager::EraseAll() noexcept {
+void 
+CommandQueueManager::EraseAll() noexcept {
 	for (ID3D12CommandQueue* commandQueue : mCommandQueues) {
 		ASSERT(commandQueue != nullptr);
 		commandQueue->Release();
 	}
 }
 
-ID3D12CommandQueue& CommandQueueManager::CreateCommandQueue(const D3D12_COMMAND_QUEUE_DESC& descriptor) noexcept {
+ID3D12CommandQueue& 
+CommandQueueManager::CreateCommandQueue(const D3D12_COMMAND_QUEUE_DESC& descriptor) noexcept {
 	ID3D12CommandQueue* commandQueue{ nullptr };
 
 	mMutex.lock();

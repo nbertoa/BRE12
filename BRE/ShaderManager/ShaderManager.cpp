@@ -28,14 +28,16 @@ namespace {
 ShaderManager::ShaderBlobs ShaderManager::mShaderBlobs;
 std::mutex ShaderManager::mMutex;
 
-void ShaderManager::EraseAll() noexcept {
+void 
+ShaderManager::EraseAll() noexcept {
 	for (ID3DBlob* blob : mShaderBlobs) {
 		ASSERT(blob != nullptr);
 		blob->Release();
 	}
 }
 
-ID3DBlob& ShaderManager::LoadShaderFileAndGetBlob(const char* filename) noexcept {
+ID3DBlob& 
+ShaderManager::LoadShaderFileAndGetBlob(const char* filename) noexcept {
 	ASSERT(filename != nullptr);
 	
 	ID3DBlob* blob{ nullptr };
@@ -50,7 +52,8 @@ ID3DBlob& ShaderManager::LoadShaderFileAndGetBlob(const char* filename) noexcept
 	return *blob;
 }
 
-D3D12_SHADER_BYTECODE ShaderManager::LoadShaderFileAndGetBytecode(const char* filename) noexcept {
+D3D12_SHADER_BYTECODE 
+ShaderManager::LoadShaderFileAndGetBytecode(const char* filename) noexcept {
 	ASSERT(filename != nullptr);
 
 	ID3DBlob* blob{ nullptr };

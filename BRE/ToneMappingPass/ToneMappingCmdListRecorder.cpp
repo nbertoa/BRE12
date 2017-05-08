@@ -18,7 +18,8 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
+void 
+ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
@@ -44,7 +45,8 @@ void ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sRootSignature != nullptr);
 }
 
-void ToneMappingCmdListRecorder::Init(
+void 
+ToneMappingCmdListRecorder::Init(
 	ID3D12Resource& inputColorBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
@@ -57,7 +59,8 @@ void ToneMappingCmdListRecorder::Init(
 	ASSERT(IsDataValid());
 }
 
-void ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
+void 
+ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -81,7 +84,8 @@ void ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-bool ToneMappingCmdListRecorder::IsDataValid() const noexcept {
+bool 
+ToneMappingCmdListRecorder::IsDataValid() const noexcept {
 	const bool result =
 		mStartPixelShaderResourceView.ptr != 0UL &&
 		mRenderTargetView.ptr != 0UL;
@@ -89,7 +93,8 @@ bool ToneMappingCmdListRecorder::IsDataValid() const noexcept {
 	return result;
 }
 
-void ToneMappingCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept {
+void 
+ToneMappingCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
 	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;

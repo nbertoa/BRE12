@@ -8,13 +8,15 @@ namespace {
 	std::unique_ptr<Keyboard> gKeyboard{ nullptr };
 }
 
-Keyboard& Keyboard::Create(IDirectInput8& directInput, const HWND windowHandle) noexcept {
+Keyboard& 
+Keyboard::Create(IDirectInput8& directInput, const HWND windowHandle) noexcept {
 	ASSERT(gKeyboard == nullptr);
 	gKeyboard.reset(new Keyboard(directInput, windowHandle));
 	return *gKeyboard.get();
 }
 
-Keyboard& Keyboard::Get() noexcept {
+Keyboard& 
+Keyboard::Get() noexcept {
 	ASSERT(gKeyboard != nullptr);
 	return *gKeyboard.get();
 }
@@ -36,7 +38,8 @@ Keyboard::~Keyboard() {
 	mDevice->Release();
 }
 
-void Keyboard::Update() noexcept {
+void 
+Keyboard::Update() noexcept {
 	ASSERT(mDevice != nullptr);
 
 	memcpy(mKeysLastState, mKeysCurrentState, sizeof(mKeysCurrentState));

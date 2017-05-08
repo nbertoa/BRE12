@@ -18,7 +18,8 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void PostProcessCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
+void 
+PostProcessCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
@@ -44,7 +45,8 @@ void PostProcessCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sRootSignature != nullptr);
 }
 
-void PostProcessCmdListRecorder::Init(ID3D12Resource& inputColorBuffer) noexcept  {
+void 
+PostProcessCmdListRecorder::Init(ID3D12Resource& inputColorBuffer) noexcept  {
 	ASSERT(IsDataValid() == false);
 	
 	InitShaderResourceViews(inputColorBuffer);
@@ -52,7 +54,8 @@ void PostProcessCmdListRecorder::Init(ID3D12Resource& inputColorBuffer) noexcept
 	ASSERT(IsDataValid());
 }
 
-void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept {
+void 
+PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept {
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -76,13 +79,15 @@ void PostProcessCmdListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCR
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-bool PostProcessCmdListRecorder::IsDataValid() const noexcept {
+bool 
+PostProcessCmdListRecorder::IsDataValid() const noexcept {
 	const bool result = mStartPixelShaderResourceView.ptr != 0UL;
 
 	return result;
 }
 
-void PostProcessCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept {
+void 
+PostProcessCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
 	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;

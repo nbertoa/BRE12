@@ -26,7 +26,11 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void TextureCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept {
+void 
+TextureCmdListRecorder::InitSharedPSOAndRootSignature(
+	const DXGI_FORMAT* geometryBufferFormats, 
+	const std::uint32_t geometryBufferCount) noexcept 
+{
 	ASSERT(geometryBufferFormats != nullptr);
 	ASSERT(geometryBufferCount > 0U);
 	ASSERT(sPSO == nullptr);
@@ -51,7 +55,8 @@ void TextureCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* ge
 	ASSERT(sRootSignature != nullptr);
 }
 
-void TextureCmdListRecorder::Init(
+void 
+TextureCmdListRecorder::Init(
 	const std::vector<GeometryData>& geometryDataVector,
 	const std::vector<MaterialProperties>& materialProperties,
 	const std::vector<ID3D12Resource*>& diffuseTextures) noexcept
@@ -84,7 +89,8 @@ void TextureCmdListRecorder::Init(
 	ASSERT(IsDataValid());
 }
 
-void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
+void 
+TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -143,7 +149,8 @@ void TextureCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frame
 
 	CommandListExecutor::Get().AddCommandList(commandList);}
 
-bool TextureCmdListRecorder::IsDataValid() const noexcept {
+bool 
+TextureCmdListRecorder::IsDataValid() const noexcept {
 	const std::size_t geometryDataCount{ mGeometryDataVec.size() };
 	for (std::size_t i = 0UL; i < geometryDataCount; ++i) {
 		const std::size_t numMatrices{ mGeometryDataVec[i].mWorldMatrices.size() };
@@ -159,7 +166,8 @@ bool TextureCmdListRecorder::IsDataValid() const noexcept {
 	return result;
 }
 
-void TextureCmdListRecorder::InitConstantBuffers(
+void 
+TextureCmdListRecorder::InitConstantBuffers(
 	const std::vector<MaterialProperties>& materialProperties,
 	const std::vector<ID3D12Resource*>& diffuseTextures) noexcept
 {

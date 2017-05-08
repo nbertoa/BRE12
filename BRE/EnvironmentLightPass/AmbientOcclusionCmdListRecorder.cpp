@@ -87,7 +87,8 @@ namespace {
 	}
 }
 
-void AmbientOcclusionCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
+void 
+AmbientOcclusionCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
@@ -114,7 +115,8 @@ void AmbientOcclusionCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sRootSignature != nullptr);
 }
 
-void AmbientOcclusionCmdListRecorder::Init(
+void 
+AmbientOcclusionCmdListRecorder::Init(
 	ID3D12Resource& normalSmoothnessBuffer,	
 	ID3D12Resource& depthBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
@@ -143,7 +145,8 @@ void AmbientOcclusionCmdListRecorder::Init(
 	ASSERT(ValidateData());
 }
 
-void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
+void 
+AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(ValidateData());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -174,7 +177,8 @@ void AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuff
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-bool AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
+bool 
+AmbientOcclusionCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		mSampleKernelUploadBuffer != nullptr &&
 		mRenderTargetView.ptr != 0UL &&
@@ -200,7 +204,8 @@ AmbientOcclusionCmdListRecorder::CreateSampleKernelBuffer(
 	}
 }
 
-ID3D12Resource* AmbientOcclusionCmdListRecorder::CreateAndGetNoiseTexture(
+ID3D12Resource* 
+AmbientOcclusionCmdListRecorder::CreateAndGetNoiseTexture(
 	const void* noiseVectors,
 	const std::uint32_t noiseTextureDimension) noexcept 
 {
@@ -248,7 +253,8 @@ ID3D12Resource* AmbientOcclusionCmdListRecorder::CreateAndGetNoiseTexture(
 	return noiseTexture;
 }
 
-void AmbientOcclusionCmdListRecorder::InitShaderResourceViews(
+void 
+AmbientOcclusionCmdListRecorder::InitShaderResourceViews(
 	ID3D12Resource& normalSmoothnessBuffer,
 	ID3D12Resource& depthBuffer,
 	ID3D12Resource& noiseTexture, 

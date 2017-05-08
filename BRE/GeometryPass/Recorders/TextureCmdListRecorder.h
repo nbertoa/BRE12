@@ -17,11 +17,7 @@ public:
 	static void InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept;
 
 	// Preconditions:
-	// - "geometryDataVec" must not be nullptr
-	// - "geometryDataCount" must be greater than zero
-	// - "materials" must not be nullptr
-	// - "textures" must not be nullptr
-	// - "numResources" must be greater than zero
+	// - All containers must not be empty
 	// - InitSharedPSOAndRootSignature() must be called first and once
 	void Init(
 		const std::vector<GeometryData>& geometryDataVector,
@@ -36,9 +32,7 @@ public:
 
 private:
 	// Preconditions:
-	// - "materials" must not be nullptr
-	// - "textures" must not be nullptr
-	// - "dataCount" must be greater than zero
+	// - All containers must not be empty
 	void InitConstantBuffers(
 		const std::vector<MaterialProperties>& materialProperties,
 		const std::vector<ID3D12Resource*>& diffuseTextures) noexcept;

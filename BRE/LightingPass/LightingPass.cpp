@@ -12,7 +12,8 @@
 
 using namespace DirectX;
 
-void LightingPass::Init(
+void 
+LightingPass::Init(
 	ID3D12Resource& baseColorMetalMaskBuffer,
 	ID3D12Resource& normalSmoothnessBuffer,
 	ID3D12Resource& depthBuffer,
@@ -39,7 +40,8 @@ void LightingPass::Init(
 	ASSERT(IsDataValid());
 }
 
-void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
+void 
+LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(IsDataValid());
 
 	ExecuteBeginTask();
@@ -49,7 +51,8 @@ void LightingPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ExecuteFinalTask();
 }
 
-bool LightingPass::IsDataValid() const noexcept {
+bool 
+LightingPass::IsDataValid() const noexcept {
 
 	const bool b =
 		mBaseColorMetalMaskBuffer != nullptr &&
@@ -60,7 +63,8 @@ bool LightingPass::IsDataValid() const noexcept {
 	return b;
 }
 
-void LightingPass::ExecuteBeginTask() noexcept {
+void 
+LightingPass::ExecuteBeginTask() noexcept {
 	ASSERT(IsDataValid());
 
 	// Check resource states:
@@ -101,7 +105,8 @@ void LightingPass::ExecuteBeginTask() noexcept {
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
 
-void LightingPass::ExecuteFinalTask() noexcept {
+void 
+LightingPass::ExecuteFinalTask() noexcept {
 	ASSERT(IsDataValid());
 
 	// Check resource states:

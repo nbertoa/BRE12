@@ -11,7 +11,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::mCurrentCbvSrvUavGpuDesc
 D3D12_CPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::mCurrentCbvSrvUavCpuDescriptorHandle{ 0UL };
 std::mutex CbvSrvUavDescriptorManager::mMutex;
 
-void CbvSrvUavDescriptorManager::Init() noexcept {
+void 
+CbvSrvUavDescriptorManager::Init() noexcept {
 	D3D12_DESCRIPTOR_HEAP_DESC cbvSrvUavDescriptorHeapDescriptor{};
 	cbvSrvUavDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvSrvUavDescriptorHeapDescriptor.NodeMask = 0U;
@@ -28,7 +29,8 @@ void CbvSrvUavDescriptorManager::Init() noexcept {
 	mCurrentCbvSrvUavCpuDescriptorHandle = mCbvSrvUavDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::CreateConstantBufferView(
+D3D12_GPU_DESCRIPTOR_HANDLE 
+CbvSrvUavDescriptorManager::CreateConstantBufferView(
 	const D3D12_CONSTANT_BUFFER_VIEW_DESC& descriptor) noexcept 
 {
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandle{};
@@ -45,7 +47,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::CreateConstantBufferView
 	return gpuDescriptorHandle;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::CreateConstantBufferViews(
+D3D12_GPU_DESCRIPTOR_HANDLE 
+CbvSrvUavDescriptorManager::CreateConstantBufferViews(
 	const D3D12_CONSTANT_BUFFER_VIEW_DESC* descriptors,
 	const std::uint32_t descriptorCount) noexcept
 {
@@ -69,7 +72,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::CreateConstantBufferView
 	return gpuDescriptorHandle;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::CreateShaderResourceView(
+D3D12_GPU_DESCRIPTOR_HANDLE 
+CbvSrvUavDescriptorManager::CreateShaderResourceView(
 	ID3D12Resource& resource,
 	const D3D12_SHADER_RESOURCE_VIEW_DESC& descriptor) noexcept
 {
@@ -87,7 +91,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::CreateShaderResourceView
 	return gpuDescriptorHandle;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::CreateShaderResourceViews(
+D3D12_GPU_DESCRIPTOR_HANDLE 
+CbvSrvUavDescriptorManager::CreateShaderResourceViews(
 	ID3D12Resource* *resources,
 	const D3D12_SHADER_RESOURCE_VIEW_DESC* descriptors,
 	const std::uint32_t descriptorCount) noexcept
@@ -114,7 +119,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::CreateShaderResourceView
 	return gpuDescriptorHandle;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::CreateUnorderedAccessView(
+D3D12_GPU_DESCRIPTOR_HANDLE 
+CbvSrvUavDescriptorManager::CreateUnorderedAccessView(
 	ID3D12Resource& resource,
 	const D3D12_UNORDERED_ACCESS_VIEW_DESC& descriptor) noexcept
 {
@@ -132,7 +138,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::CreateUnorderedAccessVie
 	return gpuDescriptorHandle;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::CreateUnorderedAccessViews(
+D3D12_GPU_DESCRIPTOR_HANDLE 
+CbvSrvUavDescriptorManager::CreateUnorderedAccessViews(
 	ID3D12Resource* *resources,
 	const D3D12_UNORDERED_ACCESS_VIEW_DESC* descriptors,
 	const std::uint32_t descriptorCount) noexcept

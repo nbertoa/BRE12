@@ -5,13 +5,13 @@
 #include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
-#include <MaterialManager/Material.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager/UploadBufferManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>
+#include <ShaderUtils\MaterialProperties.h>
 #include <Utils/DebugUtils.h>
 
 // Root signature:
@@ -25,7 +25,11 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void ColorCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept {
+void 
+ColorCmdListRecorder::InitSharedPSOAndRootSignature(
+	const DXGI_FORMAT* geometryBufferFormats, 
+	const std::uint32_t geometryBufferCount) noexcept 
+{
 	ASSERT(geometryBufferFormats != nullptr);
 	ASSERT(geometryBufferCount > 0U);
 	ASSERT(sPSO == nullptr);
@@ -49,39 +53,39 @@ void ColorCmdListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geom
 	ASSERT(sRootSignature != nullptr);
 }
 
-void ColorCmdListRecorder::Init(
-	const GeometryData* geometryDataVec,
-	const std::uint32_t geometryDataCount,
-	const Material* materials,
-	const std::uint32_t numMaterials) noexcept
+void 
+ColorCmdListRecorder::Init(
+	const std::vector<GeometryData>& geometryDataVector,
+	const std::vector<MaterialProperties>& materialProperties) noexcept
 {
 	ASSERT(IsDataValid() == false);
-	ASSERT(geometryDataVec != nullptr);
-	ASSERT(geometryDataCount != 0U);
-	ASSERT(materials != nullptr);
-	ASSERT(numMaterials > 0UL);
+	ASSERT(materialProperties.empty() == false);
+
+	const std::size_t numResources = materialProperties.size();
+	const std::size_t geometryDataCount = geometryDataVector.size();
 
 	// Check that the total number of matrices (geometry to be drawn) will be equal to available materials
 #ifdef _DEBUG
 	std::size_t totalNumMatrices{ 0UL };
 	for (std::size_t i = 0UL; i < geometryDataCount; ++i) {
-		const std::size_t numMatrices{ geometryDataVec[i].mWorldMatrices.size() };
+		const std::size_t numMatrices{ geometryDataVector[i].mWorldMatrices.size() };
 		totalNumMatrices += numMatrices;
 		ASSERT(numMatrices != 0UL);
 	}
-	ASSERT(totalNumMatrices == numMaterials);
+	ASSERT(totalNumMatrices == numResources);
 #endif
 	mGeometryDataVec.reserve(geometryDataCount);
 	for (std::uint32_t i = 0U; i < geometryDataCount; ++i) {
-		mGeometryDataVec.push_back(geometryDataVec[i]);
+		mGeometryDataVec.push_back(geometryDataVector[i]);
 	}
 
-	InitConstantBuffers(materials, numMaterials);
+	InitConstantBuffers(materialProperties);
 
 	ASSERT(IsDataValid());
 }
 
-void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
+void
+ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(IsDataValid());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -132,18 +136,19 @@ void ColorCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-void ColorCmdListRecorder::InitConstantBuffers(
-	const Material* materials, 
-	const std::uint32_t numMaterials) noexcept 
+void 
+ColorCmdListRecorder::InitConstantBuffers(
+	const std::vector<MaterialProperties>& materialProperties) noexcept
 {
-	ASSERT(materials != nullptr);
-	ASSERT(numMaterials != 0UL);
+	ASSERT(materialProperties.empty() == false);
 	ASSERT(mObjectUploadCBuffers == nullptr);
 	ASSERT(mMaterialUploadCBuffers == nullptr);
 
+	const std::uint32_t numResources = static_cast<std::uint32_t>(materialProperties.size());
+	
 	// Create object cbuffer and fill it
 	const std::size_t objCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(ObjectCBuffer)) };
-	mObjectUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, numMaterials);
+	mObjectUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(objCBufferElemSize, numResources);
 	std::uint32_t k = 0U;
 	const std::size_t geometryDataCount{ mGeometryDataVec.size() };
 	ObjectCBuffer objCBuffer;
@@ -160,8 +165,8 @@ void ColorCmdListRecorder::InitConstantBuffers(
 	}
 
 	// Create materials cbuffer		
-	const std::size_t matCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(Material)) };
-	mMaterialUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, numMaterials);
+	const std::size_t matCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(MaterialProperties)) };
+	mMaterialUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, numResources);
 
 	D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialUploadCBuffers->GetResource()->GetGPUVirtualAddress() };
 	D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffers->GetResource()->GetGPUVirtualAddress() };
@@ -169,11 +174,11 @@ void ColorCmdListRecorder::InitConstantBuffers(
 	// Create object / materials cbuffers descriptors
 	// Create textures SRV descriptors
 	std::vector<D3D12_CONSTANT_BUFFER_VIEW_DESC> objectCbufferViewDescVec;
-	objectCbufferViewDescVec.reserve(numMaterials);
+	objectCbufferViewDescVec.reserve(numResources);
 
 	std::vector<D3D12_CONSTANT_BUFFER_VIEW_DESC> materialCbufferViewDescVec;
-	materialCbufferViewDescVec.reserve(numMaterials);
-	for (std::size_t i = 0UL; i < numMaterials; ++i) {
+	materialCbufferViewDescVec.reserve(numResources);
+	for (std::size_t i = 0UL; i < numResources; ++i) {
 		// Object cbuffer desc
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
 		cBufferDesc.BufferLocation = objCBufferGpuAddress + i * objCBufferElemSize;
@@ -185,7 +190,7 @@ void ColorCmdListRecorder::InitConstantBuffers(
 		cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(matCBufferElemSize);
 		materialCbufferViewDescVec.push_back(cBufferDesc);
 
-		mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i), &materials[i], sizeof(Material));
+		mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i), &materialProperties[i], sizeof(MaterialProperties));
 	}
 	mStartObjectCBufferView =
 		CbvSrvUavDescriptorManager::CreateConstantBufferViews(

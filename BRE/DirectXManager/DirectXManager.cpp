@@ -52,7 +52,8 @@ HWND DirectXManager::mWindowHandle;
 Microsoft::WRL::ComPtr<IDXGIFactory4> DirectXManager::mDxgiFactory{ nullptr };
 Microsoft::WRL::ComPtr<ID3D12Device> DirectXManager::mDevice{ nullptr };
 
-void DirectXManager::Init(const HINSTANCE moduleInstanceHandle) noexcept {
+void 
+DirectXManager::Init(const HINSTANCE moduleInstanceHandle) noexcept {
 	InitMainWindow(mWindowHandle, moduleInstanceHandle);
 
 #if defined(DEBUG) || defined(_DEBUG) 

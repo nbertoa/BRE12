@@ -18,7 +18,8 @@ namespace {
 	ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void BlurCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
+void 
+BlurCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sPSO == nullptr);
 	ASSERT(sRootSignature == nullptr);
 
@@ -44,7 +45,8 @@ void BlurCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
 	ASSERT(sRootSignature != nullptr);
 }
 
-void BlurCmdListRecorder::Init(
+void 
+BlurCmdListRecorder::Init(
 	ID3D12Resource& inputColorBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
@@ -57,7 +59,8 @@ void BlurCmdListRecorder::Init(
 	ASSERT(ValidateData());
 }
 
-void BlurCmdListRecorder::RecordAndPushCommandLists() noexcept {
+void 
+BlurCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	ASSERT(ValidateData());
 	ASSERT(sPSO != nullptr);
 	ASSERT(sRootSignature != nullptr);
@@ -81,7 +84,8 @@ void BlurCmdListRecorder::RecordAndPushCommandLists() noexcept {
 	CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-bool BlurCmdListRecorder::ValidateData() const noexcept {
+bool 
+BlurCmdListRecorder::ValidateData() const noexcept {
 	const bool result =
 		mStartPixelShaderResourceView.ptr != 0UL && 
 		mRenderTargetView.ptr != 0UL;
@@ -89,7 +93,8 @@ bool BlurCmdListRecorder::ValidateData() const noexcept {
 	return result;
 }
 
-void BlurCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept {
+void 
+BlurCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
 	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;

@@ -13,7 +13,8 @@
 
 using namespace DirectX;
 
-void DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
+void 
+DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
 {
 	ASSERT(rootNode.IsDefined());
 

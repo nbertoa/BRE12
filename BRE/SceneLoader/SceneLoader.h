@@ -26,8 +26,12 @@ public:
 
 private:
 	void GenerateGeometryPassRecorders(Scene& scene) noexcept;
+	void GenerateGeometryPassRecordersForColorMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+	void GenerateGeometryPassRecordersForColorNormalMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+	void GenerateGeometryPassRecordersForColorHeightMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
 	void GenerateGeometryPassRecordersForTextureMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
-
+	void GenerateGeometryPassRecordersForNormalMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+	void GenerateGeometryPassRecordersForHeightMapping(Scene::GeometryPassCommandListRecorders& commandListRecorders) noexcept;
 
 	ID3D12CommandAllocator* mCommandAllocator{ nullptr };
 	ID3D12GraphicsCommandList* mCommandList{ nullptr };

@@ -11,7 +11,8 @@ FrameUploadCBufferPerFrame::FrameUploadCBufferPerFrame() {
 	}
 }
 
-UploadBuffer& FrameUploadCBufferPerFrame::GetNextFrameCBuffer() noexcept {
+UploadBuffer& 
+FrameUploadCBufferPerFrame::GetNextFrameCBuffer() noexcept {
 	UploadBuffer* frameCBuffer{ mFrameCBuffers[mCurrentFrameIndex] };
 	ASSERT(frameCBuffer != nullptr);
 

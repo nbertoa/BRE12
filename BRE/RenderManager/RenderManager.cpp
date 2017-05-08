@@ -134,7 +134,8 @@ using namespace DirectX;
 
 RenderManager* RenderManager::sRenderManager{ nullptr };
 
-RenderManager& RenderManager::Create(Scene& scene) noexcept {
+RenderManager& 
+RenderManager::Create(Scene& scene) noexcept {
 	ASSERT(sRenderManager == nullptr);
 
 	tbb::empty_task* parent{ new (tbb::task::allocate_root()) tbb::empty_task };
@@ -178,7 +179,8 @@ RenderManager::RenderManager(Scene& scene)
 	parent()->spawn(*this);
 }
 
-void RenderManager::InitPasses(Scene& scene) noexcept {	
+void 
+RenderManager::InitPasses(Scene& scene) noexcept {	
 	// Generate recorders for all the passes
 	mGeometryPass.Init(DepthStencilCpuDesc());
 
@@ -188,12 +190,6 @@ void RenderManager::InitPasses(Scene& scene) noexcept {
 	ASSERT(skyBoxCubeMap != nullptr);
 	ASSERT(diffuseIrradianceCubeMap != nullptr);
 	ASSERT(specularPreConvolvedCubeMap != nullptr);
-
-	/*scene.CreateLightingPassRecorders(
-		mGeometryPass.GetGeometryBuffers(), 
-		GeometryPass::BUFFERS_COUNT, 
-		*mDepthBuffer, 
-		mLightingPass.GetCommandListRecorders());*/
 
 	mLightingPass.Init(
 		*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(),
@@ -222,12 +218,14 @@ void RenderManager::InitPasses(Scene& scene) noexcept {
 	}
 }
 
-void RenderManager::Terminate() noexcept {
+void 
+RenderManager::Terminate() noexcept {
 	mTerminate = true;
 	parent()->wait_for_all();
 }
 
-tbb::task* RenderManager::execute() {
+tbb::task* 
+RenderManager::execute() {
 	while (!mTerminate) {
 		mTimer.Tick();
 		UpdateCameraAndFrameCBuffer(mTimer.DeltaTimeInSeconds(), mCamera, mFrameCBuffer);
@@ -252,7 +250,8 @@ tbb::task* RenderManager::execute() {
 	return nullptr;
 }
 
-void RenderManager::ExecuteFinalPass() {
+void 
+RenderManager::ExecuteFinalPass() {
 	ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
 
 	CD3DX12_RESOURCE_BARRIER barriers[]{
@@ -280,7 +279,8 @@ void RenderManager::ExecuteFinalPass() {
 	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
 
-void RenderManager::CreateFrameBuffersAndRenderTargetViews() noexcept {
+void 
+RenderManager::CreateFrameBuffersAndRenderTargetViews() noexcept {
 	// Setup render target view
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor = {};
 	rtvDescriptor.Format = SettingsManager::sFrameBufferRTFormat;
@@ -307,7 +307,8 @@ void RenderManager::CreateFrameBuffersAndRenderTargetViews() noexcept {
 	}
 }
 
-void RenderManager::CreateDepthStencilBufferAndView() noexcept {
+void 
+RenderManager::CreateDepthStencilBufferAndView() noexcept {
 	// Create the depth/stencil buffer and view.
 	D3D12_RESOURCE_DESC depthStencilDesc = {};
 	depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -344,7 +345,8 @@ void RenderManager::CreateDepthStencilBufferAndView() noexcept {
 	DepthStencilDescriptorManager::CreateDepthStencilView(*mDepthBuffer, depthStencilViewDesc, &mDepthBufferRenderTargetView);
 }
 
-void RenderManager::CreateIntermediateColorBufferAndRenderTargetView(
+void 
+RenderManager::CreateIntermediateColorBufferAndRenderTargetView(
 	const D3D12_RESOURCE_STATES initialState,
 	const wchar_t* resourceName,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
@@ -387,7 +389,8 @@ void RenderManager::CreateIntermediateColorBufferAndRenderTargetView(
 		&renderTargetView);
 }
 
-void RenderManager::FlushCommandQueue() noexcept {
+void 
+RenderManager::FlushCommandQueue() noexcept {
 	++mCurrentFenceValue;
 	CommandListExecutor::Get().SignalFenceAndWaitForCompletion(
 		*mFence,
@@ -395,7 +398,8 @@ void RenderManager::FlushCommandQueue() noexcept {
 		mCurrentFenceValue);
 }
 
-void RenderManager::SignalFenceAndPresent() noexcept {
+void 
+RenderManager::SignalFenceAndPresent() noexcept {
 	ASSERT(mSwapChain != nullptr);
 
 #ifdef V_SYNC

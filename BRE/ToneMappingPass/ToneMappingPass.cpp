@@ -10,7 +10,8 @@
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
-void ToneMappingPass::Init(
+void 
+ToneMappingPass::Init(
 	ID3D12Resource& inputColorBuffer,
 	ID3D12Resource& outputColorBuffer,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept 
@@ -28,7 +29,8 @@ void ToneMappingPass::Init(
 	ASSERT(IsDataValid());
 }
 
-void ToneMappingPass::Execute() noexcept {
+void 
+ToneMappingPass::Execute() noexcept {
 	ASSERT(IsDataValid());
 
 	ExecuteBeginTask();
@@ -42,7 +44,8 @@ void ToneMappingPass::Execute() noexcept {
 	}
 }
 
-bool ToneMappingPass::IsDataValid() const noexcept {
+bool 
+ToneMappingPass::IsDataValid() const noexcept {
 	const bool b =
 		mCommandListRecorder.get() != nullptr &&
 		mInputColorBuffer != nullptr &&
@@ -51,7 +54,8 @@ bool ToneMappingPass::IsDataValid() const noexcept {
 	return b;
 }
 
-void ToneMappingPass::ExecuteBeginTask() noexcept {
+void 
+ToneMappingPass::ExecuteBeginTask() noexcept {
 	ASSERT(IsDataValid());
 
 	// Check resource states:

@@ -6,14 +6,16 @@
 UploadBufferManager::UploadBuffers UploadBufferManager::mUploadBuffers;
 std::mutex UploadBufferManager::mMutex;
 
-void UploadBufferManager::EraseAll() noexcept {
+void 
+UploadBufferManager::EraseAll() noexcept {
 	for (UploadBuffer* uploadBuffer : mUploadBuffers) {
 		ASSERT(uploadBuffer != nullptr);
 		delete uploadBuffer;
 	}
 }
 
-UploadBuffer& UploadBufferManager::CreateUploadBuffer(
+UploadBuffer& 
+UploadBufferManager::CreateUploadBuffer(
 	const std::size_t elementSize,
 	const std::uint32_t elementCount) noexcept
 {

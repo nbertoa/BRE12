@@ -42,7 +42,8 @@ namespace {
 	}
 }
 
-void SkyBoxPass::Init(
+void 
+SkyBoxPass::Init(
 	ID3D12Resource& skyBoxCubeMap,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
 	const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept 
@@ -76,7 +77,8 @@ void SkyBoxPass::Init(
 	ASSERT(IsDataValid());
 }
 
-void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
+void 
+SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 	ASSERT(IsDataValid());
 
 	CommandListExecutor::Get().ResetExecutedCommandListCount();
@@ -88,7 +90,8 @@ void SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept {
 	}
 }
 
-bool SkyBoxPass::IsDataValid() const noexcept {
+bool 
+SkyBoxPass::IsDataValid() const noexcept {
 	const bool b = mCommandListRecorder.get() != nullptr;
 
 	return b;

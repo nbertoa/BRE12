@@ -8,7 +8,8 @@ using namespace DirectX;
 const float MathUtils::Infinity{ FLT_MAX };
 const float MathUtils::Pi{ 3.1415926535f };
 
-void MathUtils::ComputeMatrix(
+void 
+MathUtils::ComputeMatrix(
 	XMFLOAT4X4& m,
 	const float tx,
 	const float ty,

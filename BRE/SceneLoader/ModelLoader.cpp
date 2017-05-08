@@ -12,7 +12,8 @@
 #include <ModelManager\ModelManager.h>
 #include <Utils/DebugUtils.h>
 
-void ModelLoader::LoadModels(
+void 
+ModelLoader::LoadModels(
 	const YAML::Node& rootNode,
 	ID3D12CommandAllocator& commandAllocator,
 	ID3D12GraphicsCommandList& commandList) noexcept

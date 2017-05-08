@@ -11,14 +11,16 @@
 ResourceManager::Resources ResourceManager::mResources;
 std::mutex ResourceManager::mMutex;
 
-void ResourceManager::EraseAll() noexcept {
+void 
+ResourceManager::EraseAll() noexcept {
 	for (ID3D12Resource* resource : mResources) {
 		ASSERT(resource != nullptr);
 		resource->Release();
 	}
 }
 
-ID3D12Resource& ResourceManager::LoadTextureFromFile(
+ID3D12Resource& 
+ResourceManager::LoadTextureFromFile(
 	const char* textureFilename, 
 	ID3D12GraphicsCommandList& commandList,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
@@ -52,7 +54,8 @@ ID3D12Resource& ResourceManager::LoadTextureFromFile(
 	return *resource;
 }
 
-ID3D12Resource& ResourceManager::CreateDefaultBuffer(
+ID3D12Resource& 
+ResourceManager::CreateDefaultBuffer(
 	ID3D12GraphicsCommandList& commandList,
 	const void* sourceData,
 	const std::size_t sourceDataSize,
@@ -128,7 +131,8 @@ ID3D12Resource& ResourceManager::CreateDefaultBuffer(
 	return *resource;
 }
 
-ID3D12Resource& ResourceManager::CreateCommittedResource(
+ID3D12Resource& 
+ResourceManager::CreateCommittedResource(
 	const D3D12_HEAP_PROPERTIES& heapProperties,
 	const D3D12_HEAP_FLAGS& heapFlags,
 	const D3D12_RESOURCE_DESC& resourceDescriptor,

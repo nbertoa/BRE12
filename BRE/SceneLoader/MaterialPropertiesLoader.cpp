@@ -9,7 +9,8 @@
 #include <SceneLoader\YamlUtils.h>
 #include <Utils/DebugUtils.h>
 
-void MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) noexcept
+void 
+MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) noexcept
 {
 	ASSERT(rootNode.IsDefined());
 

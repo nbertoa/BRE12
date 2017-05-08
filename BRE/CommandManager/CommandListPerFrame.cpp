@@ -35,7 +35,8 @@ CommandListPerFrame::CommandListPerFrame() {
 	BuildCommandObjects(mCommandList, mCommandAllocators);
 }
 
-ID3D12GraphicsCommandList& CommandListPerFrame::ResetWithNextCommandAllocator(ID3D12PipelineState* pso) noexcept {
+ID3D12GraphicsCommandList& 
+CommandListPerFrame::ResetWithNextCommandAllocator(ID3D12PipelineState* pso) noexcept {
 	ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[mCurrentFrameIndex] };
 	ASSERT(commandAllocator != nullptr);
 	ASSERT(mCommandList != nullptr);

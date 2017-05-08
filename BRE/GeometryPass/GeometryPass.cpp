@@ -94,7 +94,8 @@ GeometryPass::GeometryPass(GeometryPassCommandListRecorders& geometryPassCommand
 	: mGeometryPassCommandListRecorders(geometryPassCommandListRecorders)
 {}
 
-void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept {
+void 
+GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept {
 	ASSERT(IsDataValid() == false);
 	
 	ASSERT(mGeometryPassCommandListRecorders.empty() == false);
@@ -119,7 +120,8 @@ void GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noex
 	ASSERT(IsDataValid());
 }
 
-void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
+void
+GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	ASSERT(IsDataValid());
 
 	ExecuteBeginTask();
@@ -142,7 +144,8 @@ void GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept {
 	}
 }
 
-bool GeometryPass::IsDataValid() const noexcept {
+bool 
+GeometryPass::IsDataValid() const noexcept {
 	for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
 		if (mGeometryBuffers[i].Get() == nullptr) {
 			return false;
@@ -162,7 +165,8 @@ bool GeometryPass::IsDataValid() const noexcept {
 		return b;
 }
 
-void GeometryPass::ExecuteBeginTask() noexcept {
+void
+GeometryPass::ExecuteBeginTask() noexcept {
 	ASSERT(IsDataValid());
 
 	// Check resource states:

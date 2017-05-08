@@ -6,14 +6,16 @@
 ModelManager::Models ModelManager::mModels;
 std::mutex ModelManager::mMutex;
 
-void ModelManager::EraseAll() noexcept {
+void 
+ModelManager::EraseAll() noexcept {
 	for (Model* model : mModels) {
 		ASSERT(model != nullptr);
 		delete model;
 	}
 }
 
-Model& ModelManager::LoadModel(
+Model& 
+ModelManager::LoadModel(
 	const char* modelFilename, 
 	ID3D12GraphicsCommandList& commandList,
 	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
@@ -33,7 +35,8 @@ Model& ModelManager::LoadModel(
 	return *model;
 }
 
-Model& ModelManager::CreateBox(
+Model& 
+ModelManager::CreateBox(
 	const float width, 
 	const float height, 
 	const float depth, 
@@ -57,7 +60,8 @@ Model& ModelManager::CreateBox(
 	return *model;
 }
 
-Model& ModelManager::CreateSphere(
+Model& 
+ModelManager::CreateSphere(
 	const float radius, 
 	const std::uint32_t sliceCount, 
 	const std::uint32_t stackCount, 
@@ -80,7 +84,8 @@ Model& ModelManager::CreateSphere(
 	return *model;
 }
 
-Model& ModelManager::CreateGeosphere(
+Model& 
+ModelManager::CreateGeosphere(
 	const float radius, 
 	const std::uint32_t numSubdivisions, 
 	ID3D12GraphicsCommandList& commandList,
@@ -102,7 +107,8 @@ Model& ModelManager::CreateGeosphere(
 	return *model;
 }
 
-Model& ModelManager::CreateCylinder(
+Model& 
+ModelManager::CreateCylinder(
 	const float bottomRadius,
 	const float topRadius,
 	const float height, 
@@ -127,7 +133,8 @@ Model& ModelManager::CreateCylinder(
 	return *model;
 }
 
-Model& ModelManager::CreateGrid(
+Model& 
+ModelManager::CreateGrid(
 	const float width, 
 	const float depth, 
 	const std::uint32_t rows, 
