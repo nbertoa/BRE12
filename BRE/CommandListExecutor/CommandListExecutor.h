@@ -15,67 +15,77 @@
 // - When you want to terminate this task, you should call CommandListExecutor::Terminate() 
 class CommandListExecutor : public tbb::task {
 public:
-	// maxNumberOfCommandListsToExecute is the maximum number of command lists to execute 
-	// by ID3D12CommandQueue::ExecuteCommandLists() operation.
-	// Preconditions:
-	// - Create() must be called once
-	// - "maxNumberOfCommandListsToExecute" must be greater than zero
-	static void Create(const std::uint32_t maxNumberOfCommandListsToExecute) noexcept;
+    // maxNumberOfCommandListsToExecute is the maximum number of command lists to execute 
+    // by ID3D12CommandQueue::ExecuteCommandLists() operation.
+    // Preconditions:
+    // - Create() must be called once
+    // - "maxNumberOfCommandListsToExecute" must be greater than zero
+    static void Create(const std::uint32_t maxNumberOfCommandListsToExecute) noexcept;
 
-	// Preconditions:
-	// - Create() must be called before this method
-	static CommandListExecutor& CommandListExecutor::Get() noexcept;
-	
-	~CommandListExecutor() = default;
-	CommandListExecutor(const CommandListExecutor&) = delete;
-	const CommandListExecutor& operator=(const CommandListExecutor&) = delete;
-	CommandListExecutor(CommandListExecutor&&) = delete;
-	CommandListExecutor& operator=(CommandListExecutor&&) = delete;
+    // Preconditions:
+    // - Create() must be called before this method
+    static CommandListExecutor& CommandListExecutor::Get() noexcept;
 
-	// As I did not discover yet, why it is not thread safe, then I only use it for debugging purposes.
-	__forceinline bool AreTherePendingCommandListsToExecute() const noexcept { 
-		return mCommandListsToExecute.empty() && mPendingCommandListCount == 0; 
-	}
+    ~CommandListExecutor() = default;
+    CommandListExecutor(const CommandListExecutor&) = delete;
+    const CommandListExecutor& operator=(const CommandListExecutor&) = delete;
+    CommandListExecutor(CommandListExecutor&&) = delete;
+    CommandListExecutor& operator=(CommandListExecutor&&) = delete;
 
-	// A thread safe way to know if CommandListExecutor finished processing and executing all the command lists.
-	// If you are going to execute N command lists, then you should:
-	// - Call ResetExecutedCommandListCount()
-	// - Fill queue through GetCommandListQueue()
-	// - Check if GetExecutedCommandListCount() is equal to N, to be sure all was executed properly (sent to GPU)
-	__forceinline void ResetExecutedCommandListCount() noexcept { mExecutedCommandListCount = 0U; }
-	__forceinline std::uint32_t GetExecutedCommandListCount() const noexcept { return mExecutedCommandListCount; }
-	
-	__forceinline void AddCommandList(ID3D12CommandList& commandList) noexcept { mCommandListsToExecute.push(&commandList); }
+    // As I did not discover yet, why it is not thread safe, then I only use it for debugging purposes.
+    __forceinline bool AreTherePendingCommandListsToExecute() const noexcept
+    {
+        return mCommandListsToExecute.empty() && mPendingCommandListCount == 0;
+    }
 
-	__forceinline ID3D12CommandQueue& GetCommandQueue() noexcept {
-		ASSERT(mCommandQueue != nullptr);
-		return *mCommandQueue;
-	}
+    // A thread safe way to know if CommandListExecutor finished processing and executing all the command lists.
+    // If you are going to execute N command lists, then you should:
+    // - Call ResetExecutedCommandListCount()
+    // - Fill queue through GetCommandListQueue()
+    // - Check if GetExecutedCommandListCount() is equal to N, to be sure all was executed properly (sent to GPU)
+    __forceinline void ResetExecutedCommandListCount() noexcept
+    {
+        mExecutedCommandListCount = 0U;
+    }
+    __forceinline std::uint32_t GetExecutedCommandListCount() const noexcept
+    {
+        return mExecutedCommandListCount;
+    }
 
-	void SignalFenceAndWaitForCompletion(
-		ID3D12Fence& fence, 
-		const std::uint64_t valueToSignal,
-		const std::uint64_t valueToWaitFor) noexcept;
+    __forceinline void AddCommandList(ID3D12CommandList& commandList) noexcept
+    {
+        mCommandListsToExecute.push(&commandList);
+    }
 
-	void ExecuteCommandListAndWaitForCompletion(ID3D12CommandList& cmdList) noexcept;
-		
-	void Terminate() noexcept;	
+    __forceinline ID3D12CommandQueue& GetCommandQueue() noexcept
+    {
+        ASSERT(mCommandQueue != nullptr);
+        return *mCommandQueue;
+    }
+
+    void SignalFenceAndWaitForCompletion(ID3D12Fence& fence,
+                                         const std::uint64_t valueToSignal,
+                                         const std::uint64_t valueToWaitFor) noexcept;
+
+    void ExecuteCommandListAndWaitForCompletion(ID3D12CommandList& cmdList) noexcept;
+
+    void Terminate() noexcept;
 
 private:
-	explicit CommandListExecutor(const std::uint32_t maxNumCmdLists);
+    explicit CommandListExecutor(const std::uint32_t maxNumCmdLists);
 
-	// Called when tbb::task is spawned
-	tbb::task* execute() final override;
+    // Called when tbb::task is spawned
+    tbb::task* execute() final override;
 
-	static CommandListExecutor* sExecutor;
+    static CommandListExecutor* sExecutor;
 
-	bool mTerminate{ false };
+    bool mTerminate{ false };
 
-	std::uint32_t mExecutedCommandListCount{ 0U };
-	std::atomic<std::uint32_t> mPendingCommandListCount{ 0U };
-	std::uint32_t mMaxNumberOfCommandListsToExecute{ 1U };
+    std::uint32_t mExecutedCommandListCount{ 0U };
+    std::atomic<std::uint32_t> mPendingCommandListCount{ 0U };
+    std::uint32_t mMaxNumberOfCommandListsToExecute{ 1U };
 
-	ID3D12CommandQueue* mCommandQueue{ nullptr };
-	tbb::concurrent_queue<ID3D12CommandList*> mCommandListsToExecute;
-	ID3D12Fence* mFence{ nullptr };
+    ID3D12CommandQueue* mCommandQueue{ nullptr };
+    tbb::concurrent_queue<ID3D12CommandList*> mCommandListsToExecute;
+    ID3D12Fence* mFence{ nullptr };
 };

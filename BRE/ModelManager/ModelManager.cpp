@@ -6,154 +6,149 @@
 ModelManager::Models ModelManager::mModels;
 std::mutex ModelManager::mMutex;
 
-void 
-ModelManager::EraseAll() noexcept {
-	for (Model* model : mModels) {
-		ASSERT(model != nullptr);
-		delete model;
-	}
+void
+ModelManager::EraseAll() noexcept
+{
+    for (Model* model : mModels) {
+        ASSERT(model != nullptr);
+        delete model;
+    }
 }
 
-Model& 
-ModelManager::LoadModel(
-	const char* modelFilename, 
-	ID3D12GraphicsCommandList& commandList,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept 
+Model&
+ModelManager::LoadModel(const char* modelFilename,
+                        ID3D12GraphicsCommandList& commandList,
+                        Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+                        Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
 {
-	ASSERT(modelFilename != nullptr);
+    ASSERT(modelFilename != nullptr);
 
-	Model* model{ nullptr };
+    Model* model{ nullptr };
 
-	mMutex.lock();
-	model = new Model(modelFilename, commandList, uploadVertexBuffer, uploadIndexBuffer);
-	mMutex.unlock();
+    mMutex.lock();
+    model = new Model(modelFilename, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    mMutex.unlock();
 
-	ASSERT(model != nullptr);
-	mModels.insert(model);
+    ASSERT(model != nullptr);
+    mModels.insert(model);
 
-	return *model;
+    return *model;
 }
 
-Model& 
-ModelManager::CreateBox(
-	const float width, 
-	const float height, 
-	const float depth, 
-	const std::uint32_t numSubdivisions,
-	ID3D12GraphicsCommandList& commandList,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept 
+Model&
+ModelManager::CreateBox(const float width,
+                        const float height,
+                        const float depth,
+                        const std::uint32_t numSubdivisions,
+                        ID3D12GraphicsCommandList& commandList,
+                        Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+                        Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
 {
-	Model* model{ nullptr };
+    Model* model{ nullptr };
 
-	GeometryGenerator::MeshData meshData;
-	GeometryGenerator::CreateBox(width, height, depth, numSubdivisions, meshData);
+    GeometryGenerator::MeshData meshData;
+    GeometryGenerator::CreateBox(width, height, depth, numSubdivisions, meshData);
 
-	mMutex.lock();
-	model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
-	mMutex.unlock();
+    mMutex.lock();
+    model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    mMutex.unlock();
 
-	ASSERT(model != nullptr);
-	mModels.insert(model);
+    ASSERT(model != nullptr);
+    mModels.insert(model);
 
-	return *model;
+    return *model;
 }
 
-Model& 
-ModelManager::CreateSphere(
-	const float radius, 
-	const std::uint32_t sliceCount, 
-	const std::uint32_t stackCount, 
-	ID3D12GraphicsCommandList& commandList,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
+Model&
+ModelManager::CreateSphere(const float radius,
+                           const std::uint32_t sliceCount,
+                           const std::uint32_t stackCount,
+                           ID3D12GraphicsCommandList& commandList,
+                           Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+                           Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
 {
-	Model* model{ nullptr };
+    Model* model{ nullptr };
 
-	GeometryGenerator::MeshData meshData;
-	GeometryGenerator::CreateSphere(radius, sliceCount, stackCount, meshData);
+    GeometryGenerator::MeshData meshData;
+    GeometryGenerator::CreateSphere(radius, sliceCount, stackCount, meshData);
 
-	mMutex.lock();
-	model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
-	mMutex.unlock();
+    mMutex.lock();
+    model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    mMutex.unlock();
 
-	ASSERT(model != nullptr);
-	mModels.insert(model);
+    ASSERT(model != nullptr);
+    mModels.insert(model);
 
-	return *model;
+    return *model;
 }
 
-Model& 
-ModelManager::CreateGeosphere(
-	const float radius, 
-	const std::uint32_t numSubdivisions, 
-	ID3D12GraphicsCommandList& commandList,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept 
+Model&
+ModelManager::CreateGeosphere(const float radius,
+                              const std::uint32_t numSubdivisions,
+                              ID3D12GraphicsCommandList& commandList,
+                              Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+                              Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
 {
-	Model* model{ nullptr };
+    Model* model{ nullptr };
 
-	GeometryGenerator::MeshData meshData;
-	GeometryGenerator::CreateGeosphere(radius, numSubdivisions, meshData);
+    GeometryGenerator::MeshData meshData;
+    GeometryGenerator::CreateGeosphere(radius, numSubdivisions, meshData);
 
-	mMutex.lock();
-	model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
-	mMutex.unlock();
+    mMutex.lock();
+    model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    mMutex.unlock();
 
-	ASSERT(model != nullptr);
-	mModels.insert(model);
+    ASSERT(model != nullptr);
+    mModels.insert(model);
 
-	return *model;
+    return *model;
 }
 
-Model& 
-ModelManager::CreateCylinder(
-	const float bottomRadius,
-	const float topRadius,
-	const float height, 
-	const std::uint32_t sliceCount,
-	const std::uint32_t stackCount,
-	ID3D12GraphicsCommandList& commandList,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept 
+Model&
+ModelManager::CreateCylinder(const float bottomRadius,
+                             const float topRadius,
+                             const float height,
+                             const std::uint32_t sliceCount,
+                             const std::uint32_t stackCount,
+                             ID3D12GraphicsCommandList& commandList,
+                             Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+                             Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
 {
-	Model* model{ nullptr };
+    Model* model{ nullptr };
 
-	GeometryGenerator::MeshData meshData;
-	GeometryGenerator::CreateCylinder(bottomRadius, topRadius, height, sliceCount, stackCount, meshData);
+    GeometryGenerator::MeshData meshData;
+    GeometryGenerator::CreateCylinder(bottomRadius, topRadius, height, sliceCount, stackCount, meshData);
 
-	mMutex.lock();
-	model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
-	mMutex.unlock();
+    mMutex.lock();
+    model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    mMutex.unlock();
 
-	ASSERT(model != nullptr);
-	mModels.insert(model);
+    ASSERT(model != nullptr);
+    mModels.insert(model);
 
-	return *model;
+    return *model;
 }
 
-Model& 
-ModelManager::CreateGrid(
-	const float width, 
-	const float depth, 
-	const std::uint32_t rows, 
-	const std::uint32_t columns, 
-	ID3D12GraphicsCommandList& commandList,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-	Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept 
+Model&
+ModelManager::CreateGrid(const float width,
+                         const float depth,
+                         const std::uint32_t rows,
+                         const std::uint32_t columns,
+                         ID3D12GraphicsCommandList& commandList,
+                         Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+                         Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
 {
-	Model* model{ nullptr };
+    Model* model{ nullptr };
 
-	GeometryGenerator::MeshData meshData;
-	GeometryGenerator::CreateGrid(width, depth, rows, columns, meshData);
+    GeometryGenerator::MeshData meshData;
+    GeometryGenerator::CreateGrid(width, depth, rows, columns, meshData);
 
-	mMutex.lock();
-	model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
-	mMutex.unlock();
+    mMutex.lock();
+    model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    mMutex.unlock();
 
-	ASSERT(model != nullptr);
-	mModels.insert(model);
+    ASSERT(model != nullptr);
+    mModels.insert(model);
 
-	return *model;
+    return *model;
 }

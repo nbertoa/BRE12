@@ -5,52 +5,58 @@
 #include <Utils/DebugUtils.h>
 
 namespace {
-	std::unique_ptr<Mouse> gMouse{ nullptr };
+std::unique_ptr<Mouse> gMouse{ nullptr };
 }
 
-Mouse& 
-Mouse::Create(IDirectInput8& directInput, const HWND windowHandle) noexcept {
-	ASSERT(gMouse == nullptr);
-	gMouse.reset(new Mouse(directInput, windowHandle));
-	return *gMouse.get();
-}
-Mouse& 
-Mouse::Get() noexcept {
-	ASSERT(gMouse != nullptr);
-	return *gMouse.get();
-}
-
-Mouse::Mouse(IDirectInput8& directInput, const HWND windowHandle)
-	: mDirectInput(directInput)
+Mouse&
+Mouse::Create(IDirectInput8& directInput,
+              const HWND windowHandle) noexcept
 {
-	ASSERT(gMouse == nullptr);
-
-	CHECK_HR(mDirectInput.CreateDevice(GUID_SysMouse, &mDevice, nullptr));
-	ASSERT(mDevice != nullptr);
-	CHECK_HR(mDevice->SetDataFormat(&c_dfDIMouse));
-	CHECK_HR(mDevice->SetCooperativeLevel(windowHandle, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
-	mDevice->Acquire();
+    ASSERT(gMouse == nullptr);
+    gMouse.reset(new Mouse(directInput, windowHandle));
+    return *gMouse.get();
+}
+Mouse&
+Mouse::Get() noexcept
+{
+    ASSERT(gMouse != nullptr);
+    return *gMouse.get();
 }
 
-Mouse::~Mouse() {
-	ASSERT(mDevice != nullptr);
+Mouse::Mouse(IDirectInput8& directInput,
+             const HWND windowHandle)
+    : mDirectInput(directInput)
+{
+    ASSERT(gMouse == nullptr);
 
-	mDevice->Unacquire();
-	mDevice->Release();
+    CHECK_HR(mDirectInput.CreateDevice(GUID_SysMouse, &mDevice, nullptr));
+    ASSERT(mDevice != nullptr);
+    CHECK_HR(mDevice->SetDataFormat(&c_dfDIMouse));
+    CHECK_HR(mDevice->SetCooperativeLevel(windowHandle, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
+    mDevice->Acquire();
 }
 
-void 
-Mouse::Update() {
-	ASSERT(mDevice != nullptr);
+Mouse::~Mouse()
+{
+    ASSERT(mDevice != nullptr);
 
-	memcpy(&mLastState, &mCurrentState, sizeof(mCurrentState));
-	if (FAILED(mDevice->GetDeviceState(sizeof(mCurrentState), &mCurrentState)) && 
-		SUCCEEDED(mDevice->Acquire()) && 
-		FAILED(mDevice->GetDeviceState(sizeof(mCurrentState), &mCurrentState))) {
-		return;
-	}
+    mDevice->Unacquire();
+    mDevice->Release();
+}
 
-	mX += mCurrentState.lX;
-	mY += mCurrentState.lY;
-	mWheel += mCurrentState.lZ;
+void
+Mouse::Update()
+{
+    ASSERT(mDevice != nullptr);
+
+    memcpy(&mLastState, &mCurrentState, sizeof(mCurrentState));
+    if (FAILED(mDevice->GetDeviceState(sizeof(mCurrentState), &mCurrentState)) &&
+        SUCCEEDED(mDevice->Acquire()) &&
+        FAILED(mDevice->GetDeviceState(sizeof(mCurrentState), &mCurrentState))) {
+        return;
+    }
+
+    mX += mCurrentState.lX;
+    mY += mCurrentState.lY;
+    mWheel += mCurrentState.lZ;
 }

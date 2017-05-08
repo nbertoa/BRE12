@@ -38,8 +38,7 @@ public:
 	}
 
 private:
-	void UpdateEnvironmentTexture(
-		const std::string& environmentName,
+	void UpdateEnvironmentTexture(		const std::string& environmentName,
 		const std::string& environmentTextureName) noexcept;
 
 	TextureLoader& mTextureLoader;

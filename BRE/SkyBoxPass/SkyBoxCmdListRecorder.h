@@ -16,47 +16,46 @@ struct ID3D12GraphicsCommandList;
 
 class SkyBoxCmdListRecorder {
 public:
-	SkyBoxCmdListRecorder() = default;
-	~SkyBoxCmdListRecorder() = default;
-	SkyBoxCmdListRecorder(const SkyBoxCmdListRecorder&) = delete;
-	const SkyBoxCmdListRecorder& operator=(const SkyBoxCmdListRecorder&) = delete;
-	SkyBoxCmdListRecorder(SkyBoxCmdListRecorder&&) = delete;
-	SkyBoxCmdListRecorder& operator=(SkyBoxCmdListRecorder&&) = delete;
+    SkyBoxCmdListRecorder() = default;
+    ~SkyBoxCmdListRecorder() = default;
+    SkyBoxCmdListRecorder(const SkyBoxCmdListRecorder&) = delete;
+    const SkyBoxCmdListRecorder& operator=(const SkyBoxCmdListRecorder&) = delete;
+    SkyBoxCmdListRecorder(SkyBoxCmdListRecorder&&) = delete;
+    SkyBoxCmdListRecorder& operator=(SkyBoxCmdListRecorder&&) = delete;
 
-	static void InitSharedPSOAndRootSignature() noexcept;
+    static void InitSharedPSOAndRootSignature() noexcept;
 
-	// Preconditions:
-	// - InitSharedPSOAndRootSignature() must be called first and once
-	void Init(
-		const VertexAndIndexBufferCreator::VertexBufferData& vertexBufferData, 
-		const VertexAndIndexBufferCreator::IndexBufferData indexBufferData,
-		const DirectX::XMFLOAT4X4& worldMatrix,
-		ID3D12Resource& skyBoxCubeMap,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
+    // Preconditions:
+    // - InitSharedPSOAndRootSignature() must be called first and once
+    void Init(const VertexAndIndexBufferCreator::VertexBufferData& vertexBufferData,
+              const VertexAndIndexBufferCreator::IndexBufferData indexBufferData,
+              const DirectX::XMFLOAT4X4& worldMatrix,
+              ID3D12Resource& skyBoxCubeMap,
+              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
+              const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 
-	// Preconditions:
-	// - Init() must be called first
-	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
+    // Preconditions:
+    // - Init() must be called first
+    void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
 
-	bool IsDataValid() const noexcept;
+    bool IsDataValid() const noexcept;
 
 private:
-	void InitConstantBuffers(const DirectX::XMFLOAT4X4& worldMatrix) noexcept;
-	void InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap) noexcept;
+    void InitConstantBuffers(const DirectX::XMFLOAT4X4& worldMatrix) noexcept;
+    void InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap) noexcept;
 
-	CommandListPerFrame mCommandListPerFrame;
-	
-	VertexAndIndexBufferCreator::VertexBufferData mVertexBufferData;
-	VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
+    CommandListPerFrame mCommandListPerFrame;
 
-	FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
+    VertexAndIndexBufferCreator::VertexBufferData mVertexBufferData;
+    VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
 
-	UploadBuffer* mObjectUploadCBuffer{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferView;
+    FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView;
+    UploadBuffer* mObjectUploadCBuffer{ nullptr };
+    D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferView;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
+    D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView;
+
+    D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
+    D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
 };

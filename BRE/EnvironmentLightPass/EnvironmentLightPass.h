@@ -14,42 +14,41 @@ struct ID3D12Resource;
 // Pass responsible to apply ambient lighting and ambient occlusion
 class EnvironmentLightPass {
 public:
-	EnvironmentLightPass() = default;
-	~EnvironmentLightPass() = default;
-	EnvironmentLightPass(const EnvironmentLightPass&) = delete;
-	const EnvironmentLightPass& operator=(const EnvironmentLightPass&) = delete;
-	EnvironmentLightPass(EnvironmentLightPass&&) = delete;
-	EnvironmentLightPass& operator=(EnvironmentLightPass&&) = delete;
+    EnvironmentLightPass() = default;
+    ~EnvironmentLightPass() = default;
+    EnvironmentLightPass(const EnvironmentLightPass&) = delete;
+    const EnvironmentLightPass& operator=(const EnvironmentLightPass&) = delete;
+    EnvironmentLightPass(EnvironmentLightPass&&) = delete;
+    EnvironmentLightPass& operator=(EnvironmentLightPass&&) = delete;
 
-	void Init(
-		ID3D12Resource& baseColorMetalMaskBuffer,
-		ID3D12Resource& normalSmoothnessBuffer,		
-		ID3D12Resource& depthBuffer,
-		ID3D12Resource& diffuseIrradianceCubeMap,
-		ID3D12Resource& specularPreConvolvedCubeMap,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    void Init(ID3D12Resource& baseColorMetalMaskBuffer,
+              ID3D12Resource& normalSmoothnessBuffer,
+              ID3D12Resource& depthBuffer,
+              ID3D12Resource& diffuseIrradianceCubeMap,
+              ID3D12Resource& specularPreConvolvedCubeMap,
+              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
-	// Preconditions:
-	// - Init() must be called first
-	void Execute(const FrameCBuffer& frameCBuffer) noexcept;
+    // Preconditions:
+    // - Init() must be called first
+    void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
-	bool ValidateData() const noexcept;
+    bool ValidateData() const noexcept;
 
-	void ExecuteBeginTask() noexcept;
-	void ExecuteMiddleTask() noexcept;
-	void ExecuteFinalTask() noexcept;
-	
-	CommandListPerFrame mBeginCommandListPerFrame;
-	CommandListPerFrame mMiddleCommandListPerFrame;
-	CommandListPerFrame mFinalCommandListPerFrame;
+    void ExecuteBeginTask() noexcept;
+    void ExecuteMiddleTask() noexcept;
+    void ExecuteFinalTask() noexcept;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
-	D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetView{ 0UL };
+    CommandListPerFrame mBeginCommandListPerFrame;
+    CommandListPerFrame mMiddleCommandListPerFrame;
+    CommandListPerFrame mFinalCommandListPerFrame;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
+    Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
+    D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetView{ 0UL };
 
-	std::unique_ptr<AmbientOcclusionCmdListRecorder> mAmbientOcclusionRecorder;	
-	std::unique_ptr<BlurCmdListRecorder> mBlurRecorder;
-	std::unique_ptr<EnvironmentLightCmdListRecorder> mEnvironmentLightRecorder;
+    Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
+
+    std::unique_ptr<AmbientOcclusionCmdListRecorder> mAmbientOcclusionRecorder;
+    std::unique_ptr<BlurCmdListRecorder> mBlurRecorder;
+    std::unique_ptr<EnvironmentLightCmdListRecorder> mEnvironmentLightRecorder;
 };

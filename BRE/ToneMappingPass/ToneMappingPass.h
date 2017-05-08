@@ -10,31 +10,30 @@ struct ID3D12Resource;
 
 class ToneMappingPass {
 public:
-	ToneMappingPass() = default;
-	~ToneMappingPass() = default; 
-	ToneMappingPass(const ToneMappingPass&) = delete;
-	const ToneMappingPass& operator=(const ToneMappingPass&) = delete;
-	ToneMappingPass(ToneMappingPass&&) = delete;
-	ToneMappingPass& operator=(ToneMappingPass&&) = delete;
+    ToneMappingPass() = default;
+    ~ToneMappingPass() = default;
+    ToneMappingPass(const ToneMappingPass&) = delete;
+    const ToneMappingPass& operator=(const ToneMappingPass&) = delete;
+    ToneMappingPass(ToneMappingPass&&) = delete;
+    ToneMappingPass& operator=(ToneMappingPass&&) = delete;
 
-	void Init(
-		ID3D12Resource& inputColorBuffer,
-		ID3D12Resource& outputColorBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    void Init(ID3D12Resource& inputColorBuffer,
+              ID3D12Resource& outputColorBuffer,
+              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
-	// Preconditions:
-	// - Init() must be called before
-	void Execute() noexcept;
+    // Preconditions:
+    // - Init() must be called before
+    void Execute() noexcept;
 
 private:
-	bool IsDataValid() const noexcept;
+    bool IsDataValid() const noexcept;
 
-	void ExecuteBeginTask() noexcept;
+    void ExecuteBeginTask() noexcept;
 
-	CommandListPerFrame mCommandListPerFrame;
-	
-	ID3D12Resource* mInputColorBuffer{ nullptr };
-	ID3D12Resource* mOutputColorBuffer{ nullptr };
+    CommandListPerFrame mCommandListPerFrame;
 
-	std::unique_ptr<ToneMappingCmdListRecorder> mCommandListRecorder;
+    ID3D12Resource* mInputColorBuffer{ nullptr };
+    ID3D12Resource* mOutputColorBuffer{ nullptr };
+
+    std::unique_ptr<ToneMappingCmdListRecorder> mCommandListRecorder;
 };

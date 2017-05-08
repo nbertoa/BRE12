@@ -13,46 +13,44 @@ struct ID3D12Resource;
 // This class has common data and functionality to record command list for environment light pass.
 class EnvironmentLightCmdListRecorder {
 public:
-	EnvironmentLightCmdListRecorder() = default;
-	~EnvironmentLightCmdListRecorder() = default;
-	EnvironmentLightCmdListRecorder(const EnvironmentLightCmdListRecorder&) = delete;
-	const EnvironmentLightCmdListRecorder& operator=(const EnvironmentLightCmdListRecorder&) = delete;
-	EnvironmentLightCmdListRecorder(EnvironmentLightCmdListRecorder&&) = default;
-	EnvironmentLightCmdListRecorder& operator=(EnvironmentLightCmdListRecorder&&) = default;
+    EnvironmentLightCmdListRecorder() = default;
+    ~EnvironmentLightCmdListRecorder() = default;
+    EnvironmentLightCmdListRecorder(const EnvironmentLightCmdListRecorder&) = delete;
+    const EnvironmentLightCmdListRecorder& operator=(const EnvironmentLightCmdListRecorder&) = delete;
+    EnvironmentLightCmdListRecorder(EnvironmentLightCmdListRecorder&&) = default;
+    EnvironmentLightCmdListRecorder& operator=(EnvironmentLightCmdListRecorder&&) = default;
 
-	static void InitSharedPSOAndRootSignature() noexcept;
+    static void InitSharedPSOAndRootSignature() noexcept;
 
-	// Preconditions:
-	// - InitSharedPSOAndRootSignature() must be called first and once
-	void Init(		
-		ID3D12Resource& normalSmoothnessBuffer,
-		ID3D12Resource& baseColorMetalMaskBuffer,
-		ID3D12Resource& depthBuffer,		
-		ID3D12Resource& diffuseIrradianceCubeMap,
-		ID3D12Resource& specularPreConvolvedCubeMap,
-		ID3D12Resource& ambientAccessibilityBuffer,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    // Preconditions:
+    // - InitSharedPSOAndRootSignature() must be called first and once
+    void Init(ID3D12Resource& normalSmoothnessBuffer,
+              ID3D12Resource& baseColorMetalMaskBuffer,
+              ID3D12Resource& depthBuffer,
+              ID3D12Resource& diffuseIrradianceCubeMap,
+              ID3D12Resource& specularPreConvolvedCubeMap,
+              ID3D12Resource& ambientAccessibilityBuffer,
+              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
-	// Preconditions:
-	// - Init() must be called first
-	void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
+    // Preconditions:
+    // - Init() must be called first
+    void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
 
-	bool ValidateData() const noexcept;
+    bool ValidateData() const noexcept;
 
 private:
-	void InitShaderResourceViews(
-		ID3D12Resource& normalSmoothnessBuffer,
-		ID3D12Resource& baseColorMetalMaskBuffer,		
-		ID3D12Resource& depthBuffer,
-		ID3D12Resource& diffuseIrradianceCubeMap,
-		ID3D12Resource& ambientAccessibilityBuffer,
-		ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
-		
-	CommandListPerFrame mCommandListPerFrame;
+    void InitShaderResourceViews(ID3D12Resource& normalSmoothnessBuffer,
+                                 ID3D12Resource& baseColorMetalMaskBuffer,
+                                 ID3D12Resource& depthBuffer,
+                                 ID3D12Resource& diffuseIrradianceCubeMap,
+                                 ID3D12Resource& ambientAccessibilityBuffer,
+                                 ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
-	FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
+    CommandListPerFrame mCommandListPerFrame;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
+    FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
+    D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
+
+    D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
 };

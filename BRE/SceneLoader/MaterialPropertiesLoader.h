@@ -6,21 +6,22 @@
 #include <ShaderUtils/MaterialProperties.h>
 
 namespace YAML {
-	class Node;
+class Node;
 }
 
 class MaterialPropertiesLoader {
 public:
-	MaterialPropertiesLoader() {}
-	MaterialPropertiesLoader(const MaterialPropertiesLoader&) = delete;
-	const MaterialPropertiesLoader& operator=(const MaterialPropertiesLoader&) = delete;
-	MaterialPropertiesLoader(MaterialPropertiesLoader&&) = delete;
-	MaterialPropertiesLoader& operator=(MaterialPropertiesLoader&&) = delete;
+    MaterialPropertiesLoader()
+    {}
+    MaterialPropertiesLoader(const MaterialPropertiesLoader&) = delete;
+    const MaterialPropertiesLoader& operator=(const MaterialPropertiesLoader&) = delete;
+    MaterialPropertiesLoader(MaterialPropertiesLoader&&) = delete;
+    MaterialPropertiesLoader& operator=(MaterialPropertiesLoader&&) = delete;
 
-	void LoadMaterialsProperties(const YAML::Node& rootNode) noexcept;
+    void LoadMaterialsProperties(const YAML::Node& rootNode) noexcept;
 
-	const MaterialProperties& GetMaterialProperties(const std::string& name) const noexcept;
+    const MaterialProperties& GetMaterialProperties(const std::string& name) const noexcept;
 
 private:
-	std::unordered_map<std::string, MaterialProperties> mMaterialPropertiesByName;
+    std::unordered_map<std::string, MaterialProperties> mMaterialPropertiesByName;
 };

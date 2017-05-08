@@ -17,22 +17,21 @@ class RenderManager;
 // To execute a scene.
 class SceneExecutor {
 public:
-	explicit SceneExecutor(
-		HINSTANCE moduleInstanceHandle, 
-		const char* sceneFilePath);	
-	~SceneExecutor();
-	SceneExecutor(const SceneExecutor&) = delete;
-	const SceneExecutor& operator=(const SceneExecutor&) = delete;
-	SceneExecutor(SceneExecutor&&) = delete;
-	SceneExecutor& operator=(SceneExecutor&&) = delete;
+    explicit SceneExecutor(HINSTANCE moduleInstanceHandle,
+                           const char* sceneFilePath);
+    ~SceneExecutor();
+    SceneExecutor(const SceneExecutor&) = delete;
+    const SceneExecutor& operator=(const SceneExecutor&) = delete;
+    SceneExecutor(SceneExecutor&&) = delete;
+    SceneExecutor& operator=(SceneExecutor&&) = delete;
 
-	void Execute() noexcept;
-	
-private:	
-	// Needed by Intel TBB
-	tbb::task_scheduler_init mTaskSchedulerInit;
+    void Execute() noexcept;
 
-	Scene* mScene;
+private:
+    // Needed by Intel TBB
+    tbb::task_scheduler_init mTaskSchedulerInit;
 
-	RenderManager* mRenderManager{ nullptr };
+    Scene* mScene;
+
+    RenderManager* mRenderManager{ nullptr };
 };

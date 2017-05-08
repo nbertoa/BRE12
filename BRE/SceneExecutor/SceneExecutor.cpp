@@ -26,95 +26,100 @@
 using namespace DirectX;
 
 namespace {
-	const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
+const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
 
-	void InitSystems(const HINSTANCE moduleInstanceHandle) noexcept 
-	{
-		const HWND windowHandle = DirectXManager::GetWindowHandle();
+void InitSystems(const HINSTANCE moduleInstanceHandle) noexcept
+{
+    const HWND windowHandle = DirectXManager::GetWindowHandle();
 
-		LPDIRECTINPUT8 directInput;
-		CHECK_HR(DirectInput8Create(moduleInstanceHandle, 
-									DIRECTINPUT_VERSION, 
-									IID_IDirectInput8, 
-									reinterpret_cast<LPVOID*>(&directInput), 
-									nullptr));
-		Keyboard::Create(*directInput, windowHandle);
-		Mouse::Create(*directInput, windowHandle);
+    LPDIRECTINPUT8 directInput;
+    CHECK_HR(DirectInput8Create(moduleInstanceHandle,
+                                DIRECTINPUT_VERSION,
+                                IID_IDirectInput8,
+                                reinterpret_cast<LPVOID*>(&directInput),
+                                nullptr));
+    Keyboard::Create(*directInput, windowHandle);
+    Mouse::Create(*directInput, windowHandle);
 
-		CbvSrvUavDescriptorManager::Init();
-		DepthStencilDescriptorManager::Init();
-		RenderTargetDescriptorManager::Init();
+    CbvSrvUavDescriptorManager::Init();
+    DepthStencilDescriptorManager::Init();
+    RenderTargetDescriptorManager::Init();
 
-		CommandListExecutor::Create(MAX_NUM_CMD_LISTS);
+    CommandListExecutor::Create(MAX_NUM_CMD_LISTS);
 
-		//ShowCursor(false);
-	}
+    //ShowCursor(false);
+}
 
-	void FinalizeSystems() noexcept {
-		CommandAllocatorManager::EraseAll();
-		CommandListManager::EraseAll();
-		CommandQueueManager::EraseAll();
-		FenceManager::EraseAll();
-		PSOManager::EraseAll();
-		ResourceManager::EraseAll();
-		RootSignatureManager::EraseAll();
-		ShaderManager::EraseAll();
-		UploadBufferManager::EraseAll();
-	}
+void FinalizeSystems() noexcept
+{
+    CommandAllocatorManager::EraseAll();
+    CommandListManager::EraseAll();
+    CommandQueueManager::EraseAll();
+    FenceManager::EraseAll();
+    PSOManager::EraseAll();
+    ResourceManager::EraseAll();
+    RootSignatureManager::EraseAll();
+    ShaderManager::EraseAll();
+    UploadBufferManager::EraseAll();
+}
 
-	void UpdateKeyboardAndMouse() noexcept {
-		Keyboard::Get().Update();
-		Mouse::Get().Update();
-		if (Keyboard::Get().IsKeyDown(DIK_ESCAPE)) {
-			PostQuitMessage(0);
-		}
-	}
+void UpdateKeyboardAndMouse() noexcept
+{
+    Keyboard::Get().Update();
+    Mouse::Get().Update();
+    if (Keyboard::Get().IsKeyDown(DIK_ESCAPE)) {
+        PostQuitMessage(0);
+    }
+}
 
-	// Runs program until Escape key is pressed.
-	std::int32_t RunMessageLoop() noexcept {
-		MSG message{ nullptr };
-		while (message.message != WM_QUIT) {
-			if (PeekMessage(&message, nullptr, 0U, 0U, PM_REMOVE)) {
-				TranslateMessage(&message);
-				DispatchMessage(&message);
-			}
-			else {
-				UpdateKeyboardAndMouse();
-			}
-		}
+// Runs program until Escape key is pressed.
+std::int32_t RunMessageLoop() noexcept
+{
+    MSG message{ nullptr };
+    while (message.message != WM_QUIT) {
+        if (PeekMessage(&message, nullptr, 0U, 0U, PM_REMOVE)) {
+            TranslateMessage(&message);
+            DispatchMessage(&message);
+        } else {
+            UpdateKeyboardAndMouse();
+        }
+    }
 
-		return static_cast<std::int32_t>(message.wParam);
-	}
+    return static_cast<std::int32_t>(message.wParam);
+}
 }
 
 using namespace DirectX;
 
-SceneExecutor::~SceneExecutor() {
-	ASSERT(mRenderManager != nullptr);
-	mRenderManager->Terminate();
-	mTaskSchedulerInit.terminate();
-
-	FinalizeSystems();
-
-	delete mScene;
-}
-
-void 
-SceneExecutor::Execute() noexcept {
-	RunMessageLoop();
-}
-
-SceneExecutor::SceneExecutor(HINSTANCE moduleInstanceHandle, const char* sceneFilePath)
-	: mTaskSchedulerInit()
+SceneExecutor::~SceneExecutor()
 {
-	ASSERT(sceneFilePath != nullptr);
+    ASSERT(mRenderManager != nullptr);
+    mRenderManager->Terminate();
+    mTaskSchedulerInit.terminate();
 
-	DirectXManager::Init(moduleInstanceHandle);
-	InitSystems(moduleInstanceHandle);
+    FinalizeSystems();
 
-	SceneLoader sceneLoader;
-	mScene = sceneLoader.LoadScene(sceneFilePath);
-	ASSERT(mScene != nullptr);
+    delete mScene;
+}
 
-	mRenderManager = &RenderManager::Create(*mScene);
+void
+SceneExecutor::Execute() noexcept
+{
+    RunMessageLoop();
+}
+
+SceneExecutor::SceneExecutor(HINSTANCE moduleInstanceHandle,
+                             const char* sceneFilePath)
+    : mTaskSchedulerInit()
+{
+    ASSERT(sceneFilePath != nullptr);
+
+    DirectXManager::Init(moduleInstanceHandle);
+    InitSystems(moduleInstanceHandle);
+
+    SceneLoader sceneLoader;
+    mScene = sceneLoader.LoadScene(sceneFilePath);
+    ASSERT(mScene != nullptr);
+
+    mRenderManager = &RenderManager::Create(*mScene);
 }

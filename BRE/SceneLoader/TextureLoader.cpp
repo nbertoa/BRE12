@@ -11,56 +11,56 @@
 #include <ResourceManager\ResourceManager.h>
 #include <Utils/DebugUtils.h>
 
-void 
-TextureLoader::LoadTextures(
-	const YAML::Node& rootNode,
-	ID3D12CommandAllocator& commandAllocator,
-	ID3D12GraphicsCommandList& commandList) noexcept
+void
+TextureLoader::LoadTextures(const YAML::Node& rootNode,
+                            ID3D12CommandAllocator& commandAllocator,
+                            ID3D12GraphicsCommandList& commandList) noexcept
 {
-	ASSERT(rootNode.IsDefined());
+    ASSERT(rootNode.IsDefined());
 
-	// Get the "textures" node. It is a map and its sintax is:
-	// textures:
-	//   textureName1: texturePath1
-	//   textureName2: texturePath2
-	//   textureName3: texturePath3
-	const YAML::Node texturesNode = rootNode["textures"];
-	ASSERT(texturesNode.IsDefined());
-	ASSERT(texturesNode.IsMap());
+    // Get the "textures" node. It is a map and its sintax is:
+    // textures:
+    //   textureName1: texturePath1
+    //   textureName2: texturePath2
+    //   textureName3: texturePath3
+    const YAML::Node texturesNode = rootNode["textures"];
+    ASSERT_MSG(texturesNode.IsDefined(), L"'textures' node is not found");
+    ASSERT_MSG(texturesNode.IsMap(), L"'textures' node must be a map");
 
-	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadBuffers;
-	CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
+    std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadBuffers;
+    CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
 
-	// Iterate "textureName: texturePath" pairs and create textures.
-	std::string textureName;
-	std::string texturePath;
-	for (YAML::const_iterator it = texturesNode.begin(); it != texturesNode.end(); ++it) {
-		textureName = it->first.as<std::string>();
-		texturePath = it->second.as<std::string>();
+    // Iterate "textureName: texturePath" pairs and create textures.
+    std::string textureName;
+    std::string texturePath;
+    for (YAML::const_iterator it = texturesNode.begin(); it != texturesNode.end(); ++it) {
+        textureName = it->first.as<std::string>();
+        texturePath = it->second.as<std::string>();
 
-		ASSERT(mTextureByName.find(textureName) == mTextureByName.end());
+        ASSERT_MSG(mTextureByName.find(textureName) == mTextureByName.end(), L"Texture name is not unique");
 
-		uploadBuffers.resize(uploadBuffers.size() + 1);
+        uploadBuffers.resize(uploadBuffers.size() + 1);
 
-		ID3D12Resource& texture = ResourceManager::LoadTextureFromFile(
-			texturePath.c_str(),
-			commandList,
-			uploadBuffers.back(),
-			nullptr);
+        ID3D12Resource& texture = ResourceManager::LoadTextureFromFile(
+            texturePath.c_str(),
+            commandList,
+            uploadBuffers.back(),
+            nullptr);
 
-		mTextureByName[textureName] = &texture;
-	}
+        mTextureByName[textureName] = &texture;
+    }
 
-	commandList.Close();
+    commandList.Close();
 
-	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+    CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
 
-ID3D12Resource& 
-TextureLoader::GetTexture(const std::string& name) noexcept {
-	std::unordered_map<std::string, ID3D12Resource*>::iterator findIt = mTextureByName.find(name);
-	ASSERT(findIt != mTextureByName.end());
-	ASSERT(findIt->second != nullptr);
+ID3D12Resource&
+TextureLoader::GetTexture(const std::string& name) noexcept
+{
+    std::unordered_map<std::string, ID3D12Resource*>::iterator findIt = mTextureByName.find(name);
+    ASSERT_MSG(findIt != mTextureByName.end(), L"Texture name not found");
+    ASSERT(findIt->second != nullptr);
 
-	return *findIt->second;
+    return *findIt->second;
 }

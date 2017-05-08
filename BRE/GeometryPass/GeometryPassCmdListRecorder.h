@@ -16,59 +16,59 @@ struct FrameCBuffer;
 // - Call RecordAndPushCommandLists() to create command lists to execute in the GPU
 class GeometryPassCmdListRecorder {
 public:
-	struct GeometryData {
-		GeometryData() = default;
+    struct GeometryData {
+        GeometryData() = default;
 
-		VertexAndIndexBufferCreator::VertexBufferData mVertexBufferData;
-		VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
-		std::vector<DirectX::XMFLOAT4X4> mWorldMatrices;
-		std::vector<DirectX::XMFLOAT4X4> mInverseTransposeWorldMatrices;
-	};
-	using GeometryDataVector = std::vector<GeometryData>;
+        VertexAndIndexBufferCreator::VertexBufferData mVertexBufferData;
+        VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
+        std::vector<DirectX::XMFLOAT4X4> mWorldMatrices;
+        std::vector<DirectX::XMFLOAT4X4> mInverseTransposeWorldMatrices;
+    };
+    using GeometryDataVector = std::vector<GeometryData>;
 
-	GeometryPassCmdListRecorder() = default;
-	virtual ~GeometryPassCmdListRecorder() {}
+    GeometryPassCmdListRecorder() = default;
+    virtual ~GeometryPassCmdListRecorder()
+    {}
 
-	GeometryPassCmdListRecorder(const GeometryPassCmdListRecorder&) = delete;
-	const GeometryPassCmdListRecorder& operator=(const GeometryPassCmdListRecorder&) = delete;
-	GeometryPassCmdListRecorder(GeometryPassCmdListRecorder&&) = default;
-	GeometryPassCmdListRecorder& operator=(GeometryPassCmdListRecorder&&) = default;
+    GeometryPassCmdListRecorder(const GeometryPassCmdListRecorder&) = delete;
+    const GeometryPassCmdListRecorder& operator=(const GeometryPassCmdListRecorder&) = delete;
+    GeometryPassCmdListRecorder(GeometryPassCmdListRecorder&&) = default;
+    GeometryPassCmdListRecorder& operator=(GeometryPassCmdListRecorder&&) = default;
 
-	// Preconditions:
-	// - "geometryBufferRenderTargetViews" must not be nullptr
-	// - "geometryBufferRenderTargetViewCount" must be greater than zero
-	void Init(
-		const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBufferRenderTargetViews,
-		const std::uint32_t geometryBufferRenderTargetViewCount,
-		const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
-		
-	// Preconditions:
-	// - Init() must be called before
-	virtual void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept = 0;
+    // Preconditions:
+    // - "geometryBufferRenderTargetViews" must not be nullptr
+    // - "geometryBufferRenderTargetViewCount" must be greater than zero
+    void Init(const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBufferRenderTargetViews,
+              const std::uint32_t geometryBufferRenderTargetViewCount,
+              const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 
-	// This method validates all data (nullptr's, etc)
-	// When you inherit from this class, you should reimplement it to include
-	// new members
-	virtual bool IsDataValid() const noexcept;
+    // Preconditions:
+    // - Init() must be called before
+    virtual void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept = 0;
+
+    // This method validates all data (nullptr's, etc)
+    // When you inherit from this class, you should reimplement it to include
+    // new members
+    virtual bool IsDataValid() const noexcept;
 
 protected:
-	CommandListPerFrame mCommandListPerFrame;
+    CommandListPerFrame mCommandListPerFrame;
 
-	// Base command data. Once you inherits from this class, you should add
-	// more class members that represent the extra information you need (like resources, for example)
+    // Base command data. Once you inherits from this class, you should add
+    // more class members that represent the extra information you need (like resources, for example)
 
-	std::vector<GeometryData> mGeometryDataVec;
+    std::vector<GeometryData> mGeometryDataVec;
 
-	FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
+    FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
-	UploadBuffer* mObjectUploadCBuffers{ nullptr };
-	D3D12_GPU_DESCRIPTOR_HANDLE mStartObjectCBufferView;
+    UploadBuffer* mObjectUploadCBuffers{ nullptr };
+    D3D12_GPU_DESCRIPTOR_HANDLE mStartObjectCBufferView;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE mStartMaterialCBufferView;
-	UploadBuffer* mMaterialUploadCBuffers{ nullptr };
-	
-	const D3D12_CPU_DESCRIPTOR_HANDLE* mGeometryBufferRenderTargetViews{ nullptr };
-	std::uint32_t mGeometryBufferRenderTargetViewCount{ 0U };
+    D3D12_GPU_DESCRIPTOR_HANDLE mStartMaterialCBufferView;
+    UploadBuffer* mMaterialUploadCBuffers{ nullptr };
 
-	D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
+    const D3D12_CPU_DESCRIPTOR_HANDLE* mGeometryBufferRenderTargetViews{ nullptr };
+    std::uint32_t mGeometryBufferRenderTargetViewCount{ 0U };
+
+    D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
 };

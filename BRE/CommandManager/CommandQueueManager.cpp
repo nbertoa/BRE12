@@ -6,24 +6,26 @@
 CommandQueueManager::CommandQueues CommandQueueManager::mCommandQueues;
 std::mutex CommandQueueManager::mMutex;
 
-void 
-CommandQueueManager::EraseAll() noexcept {
-	for (ID3D12CommandQueue* commandQueue : mCommandQueues) {
-		ASSERT(commandQueue != nullptr);
-		commandQueue->Release();
-	}
+void
+CommandQueueManager::EraseAll() noexcept
+{
+    for (ID3D12CommandQueue* commandQueue : mCommandQueues) {
+        ASSERT(commandQueue != nullptr);
+        commandQueue->Release();
+    }
 }
 
-ID3D12CommandQueue& 
-CommandQueueManager::CreateCommandQueue(const D3D12_COMMAND_QUEUE_DESC& descriptor) noexcept {
-	ID3D12CommandQueue* commandQueue{ nullptr };
+ID3D12CommandQueue&
+CommandQueueManager::CreateCommandQueue(const D3D12_COMMAND_QUEUE_DESC& descriptor) noexcept
+{
+    ID3D12CommandQueue* commandQueue{ nullptr };
 
-	mMutex.lock();
-	CHECK_HR(DirectXManager::GetDevice().CreateCommandQueue(&descriptor, IID_PPV_ARGS(&commandQueue)));
-	mMutex.unlock();
+    mMutex.lock();
+    CHECK_HR(DirectXManager::GetDevice().CreateCommandQueue(&descriptor, IID_PPV_ARGS(&commandQueue)));
+    mMutex.unlock();
 
-	ASSERT(commandQueue != nullptr);
-	mCommandQueues.insert(commandQueue);
+    ASSERT(commandQueue != nullptr);
+    mCommandQueues.insert(commandQueue);
 
-	return *commandQueue;
+    return *commandQueue;
 }

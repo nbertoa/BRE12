@@ -6,24 +6,28 @@
 
 #include <Utils\StringUtils.h>
 
+#define ASSERT(condition) assert(condition)
+
 #if defined(DEBUG) || defined(_DEBUG)
-#define ASSERT(condition) \
-	assert(condition);
+#define ASSERT_MSG(condition, msg) \
+{ \
+	if ((condition) == false) { \
+		MessageBox(0, msg, 0, 0); \
+		abort(); \
+	} \
+}
 #else
-#define ASSERT(condition) (condition)
+#define ASSERT_MSG(condition, msg) (assert(condition))
 #endif
 
 #ifndef CHECK_HR
 #define CHECK_HR(x) \
 { \
-    const HRESULT __hr__ = (x);                                               \
+    const HRESULT __hr__ = (x); \
 	if (FAILED(__hr__)) { \
-		const std::wstring fileName = StringUtils::AnsiToWString(__FILE__); \
 		_com_error err(__hr__); \
-		const std::wstring lineNumberString = std::to_wstring(__LINE__); \
 		const std::wstring errorMessage = err.ErrorMessage(); \
-		const std::wstring outputMessage = L" failed in " + fileName + L"; line " + lineNumberString + L"; error: " + errorMessage; \
-		MessageBox(0, outputMessage.c_str(), 0, 0); \
+		MessageBox(0, errorMessage.c_str(), 0, 0); \
 		abort(); \
 	} \
 }

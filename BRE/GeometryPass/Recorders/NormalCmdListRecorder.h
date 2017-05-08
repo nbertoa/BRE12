@@ -19,8 +19,7 @@ public:
 	// Preconditions:
 	// - All containers must not be empty
 	// - InitSharedPSOAndRootSignature() must be called first and once
-	void Init(
-		const std::vector<GeometryData>& geometryDataVector,
+	void Init(		const std::vector<GeometryData>& geometryDataVector,
 		const std::vector<MaterialProperties>& materialProperties,
 		const std::vector<ID3D12Resource*>& diffuseTextures,
 		const std::vector<ID3D12Resource*>& normalTextures) noexcept;
@@ -34,8 +33,7 @@ public:
 private:
 	// Preconditions:
 	// - All containers must not be empty
-	void InitConstantBuffers(
-		const std::vector<MaterialProperties>& materialProperties,
+	void InitConstantBuffers(		const std::vector<MaterialProperties>& materialProperties,
 		const std::vector<ID3D12Resource*>& diffuseTextures,
 		const std::vector<ID3D12Resource*>& normalTextures) noexcept;
 

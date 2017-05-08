@@ -14,93 +14,96 @@
 // "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)" 0 -> Color Buffer Texture
 
 namespace {
-	ID3D12PipelineState* sPSO{ nullptr };
-	ID3D12RootSignature* sRootSignature{ nullptr };
+ID3D12PipelineState* sPSO{ nullptr };
+ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
-void 
-ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature() noexcept {
-	ASSERT(sPSO == nullptr);
-	ASSERT(sRootSignature == nullptr);
-
-	PSOManager::PSOCreationData psoData{};
-	psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
-
-	psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ToneMappingPass/Shaders/PS.cso");
-	psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ToneMappingPass/Shaders/VS.cso");
-
-	ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("ToneMappingPass/Shaders/RS.cso");
-	psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
-	sRootSignature = psoData.mRootSignature;
-
-	psoData.mNumRenderTargets = 1U;
-	psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
-	for (std::size_t i = psoData.mNumRenderTargets; i < _countof(psoData.mRenderTargetFormats); ++i) {
-		psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
-	}
-	psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	sPSO = &PSOManager::CreateGraphicsPSO(psoData);
-
-	ASSERT(sPSO != nullptr);
-	ASSERT(sRootSignature != nullptr);
-}
-
-void 
-ToneMappingCmdListRecorder::Init(
-	ID3D12Resource& inputColorBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+void
+ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature() noexcept
 {
-	ASSERT(IsDataValid() == false);
+    ASSERT(sPSO == nullptr);
+    ASSERT(sRootSignature == nullptr);
 
-	mRenderTargetView = renderTargetView;
+    PSOManager::PSOCreationData psoData{};
+    psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-	InitShaderResourceViews(inputColorBuffer);
+    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ToneMappingPass/Shaders/PS.cso");
+    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ToneMappingPass/Shaders/VS.cso");
 
-	ASSERT(IsDataValid());
+    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("ToneMappingPass/Shaders/RS.cso");
+    psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
+    sRootSignature = psoData.mRootSignature;
+
+    psoData.mNumRenderTargets = 1U;
+    psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
+    for (std::size_t i = psoData.mNumRenderTargets; i < _countof(psoData.mRenderTargetFormats); ++i) {
+        psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
+    }
+    psoData.mPrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    sPSO = &PSOManager::CreateGraphicsPSO(psoData);
+
+    ASSERT(sPSO != nullptr);
+    ASSERT(sRootSignature != nullptr);
 }
 
-void 
-ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept {
-	ASSERT(IsDataValid());
-	ASSERT(sPSO != nullptr);
-	ASSERT(sRootSignature != nullptr);
+void
+ToneMappingCmdListRecorder::Init(ID3D12Resource& inputColorBuffer,
+                                 const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+{
+    ASSERT(IsDataValid() == false);
 
-	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
+    mRenderTargetView = renderTargetView;
 
-	commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
-	commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-	commandList.OMSetRenderTargets(1U, &mRenderTargetView, false, nullptr);
+    InitShaderResourceViews(inputColorBuffer);
 
-	ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
-	commandList.SetDescriptorHeaps(_countof(heaps), heaps);
-
-	commandList.SetGraphicsRootSignature(sRootSignature);	
-	commandList.SetGraphicsRootDescriptorTable(0U, mStartPixelShaderResourceView);
-
-	commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	commandList.DrawInstanced(6U, 1U, 0U, 0U);
-
-	commandList.Close();
-	CommandListExecutor::Get().AddCommandList(commandList);
+    ASSERT(IsDataValid());
 }
 
-bool 
-ToneMappingCmdListRecorder::IsDataValid() const noexcept {
-	const bool result =
-		mStartPixelShaderResourceView.ptr != 0UL &&
-		mRenderTargetView.ptr != 0UL;
+void
+ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept
+{
+    ASSERT(IsDataValid());
+    ASSERT(sPSO != nullptr);
+    ASSERT(sRootSignature != nullptr);
 
-	return result;
+    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
+
+    commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
+    commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+    commandList.OMSetRenderTargets(1U, &mRenderTargetView, false, nullptr);
+
+    ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
+    commandList.SetDescriptorHeaps(_countof(heaps), heaps);
+
+    commandList.SetGraphicsRootSignature(sRootSignature);
+    commandList.SetGraphicsRootDescriptorTable(0U, mStartPixelShaderResourceView);
+
+    commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    commandList.DrawInstanced(6U, 1U, 0U, 0U);
+
+    commandList.Close();
+    CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-void 
-ToneMappingCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept {
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
-	srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDescriptor.Texture2D.MostDetailedMip = 0;
-	srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
-	srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
-	mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
+bool
+ToneMappingCmdListRecorder::IsDataValid() const noexcept
+{
+    const bool result =
+        mStartPixelShaderResourceView.ptr != 0UL &&
+        mRenderTargetView.ptr != 0UL;
+
+    return result;
+}
+
+void
+ToneMappingCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept
+{
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
+    srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDescriptor.Texture2D.MostDetailedMip = 0;
+    srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+    srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
+    srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
+    mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
 }

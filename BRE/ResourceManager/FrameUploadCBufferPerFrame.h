@@ -9,16 +9,16 @@
 // This class provides a frame constant buffer per frame.
 class FrameUploadCBufferPerFrame {
 public:
-	FrameUploadCBufferPerFrame();
-	~FrameUploadCBufferPerFrame() = default;
-	FrameUploadCBufferPerFrame(const FrameUploadCBufferPerFrame&) = delete;
-	const FrameUploadCBufferPerFrame& operator=(const FrameUploadCBufferPerFrame&) = delete;
-	FrameUploadCBufferPerFrame(FrameUploadCBufferPerFrame&&) = default;
-	FrameUploadCBufferPerFrame& operator=(FrameUploadCBufferPerFrame&&) = default;
+    FrameUploadCBufferPerFrame();
+    ~FrameUploadCBufferPerFrame() = default;
+    FrameUploadCBufferPerFrame(const FrameUploadCBufferPerFrame&) = delete;
+    const FrameUploadCBufferPerFrame& operator=(const FrameUploadCBufferPerFrame&) = delete;
+    FrameUploadCBufferPerFrame(FrameUploadCBufferPerFrame&&) = default;
+    FrameUploadCBufferPerFrame& operator=(FrameUploadCBufferPerFrame&&) = default;
 
-	UploadBuffer& GetNextFrameCBuffer() noexcept;
+    UploadBuffer& GetNextFrameCBuffer() noexcept;
 
 private:
-	UploadBuffer* mFrameCBuffers[SettingsManager::sQueuedFrameCount];
-	std::uint32_t mCurrentFrameIndex{ 0U };
+    UploadBuffer* mFrameCBuffers[SettingsManager::sQueuedFrameCount];
+    std::uint32_t mCurrentFrameIndex{ 0U };
 };

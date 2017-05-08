@@ -12,73 +12,73 @@
 
 using namespace DirectX;
 
-void 
-PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept {
-	ASSERT(IsDataValid() == false);
-	
-	mInputColorBuffer = &inputColorBuffer;
-
-	PostProcessCmdListRecorder::InitSharedPSOAndRootSignature();
-
-	mCommandListRecorder.reset(new PostProcessCmdListRecorder());
-	mCommandListRecorder->Init(inputColorBuffer);
-
-	ASSERT(IsDataValid());
-}
-
-void 
-PostProcessPass::Execute(
-	ID3D12Resource& renderTargetBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept 
+void
+PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept
 {
-	ASSERT(IsDataValid());
-	ASSERT(renderTargetView.ptr != 0UL);
+    ASSERT(IsDataValid() == false);
 
-	ExecuteBeginTask(renderTargetBuffer, renderTargetView);
-		
-	CommandListExecutor::Get().ResetExecutedCommandListCount();
-	mCommandListRecorder->RecordAndPushCommandLists(renderTargetView);
+    mInputColorBuffer = &inputColorBuffer;
 
-	// Wait until all previous tasks command lists are executed
-	while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
-		Sleep(0U);
-	}
+    PostProcessCmdListRecorder::InitSharedPSOAndRootSignature();
+
+    mCommandListRecorder.reset(new PostProcessCmdListRecorder());
+    mCommandListRecorder->Init(inputColorBuffer);
+
+    ASSERT(IsDataValid());
 }
 
-bool 
-PostProcessPass::IsDataValid() const noexcept {
-	const bool b =
-		mCommandListRecorder.get() != nullptr &&
-		mInputColorBuffer != nullptr;
-
-	return b;
-}
-
-void 
-PostProcessPass::ExecuteBeginTask(
-	ID3D12Resource& renderTargetBuffer,
-	const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept 
+void
+PostProcessPass::Execute(ID3D12Resource& renderTargetBuffer,
+                         const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
-	ASSERT(IsDataValid());
-	ASSERT(renderTargetView.ptr != 0UL);
+    ASSERT(IsDataValid());
+    ASSERT(renderTargetView.ptr != 0UL);
 
-	// Check resource states:
-	// - Input color buffer was used as render target in previous pass
-	// - Output color buffer is the frame buffer, so it was used to present before.
-	ASSERT(ResourceStateManager::GetResourceState(*mInputColorBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
-	ASSERT(ResourceStateManager::GetResourceState(renderTargetBuffer) == D3D12_RESOURCE_STATE_PRESENT);
+    ExecuteBeginTask(renderTargetBuffer, renderTargetView);
 
-	ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
+    CommandListExecutor::Get().ResetExecutedCommandListCount();
+    mCommandListRecorder->RecordAndPushCommandLists(renderTargetView);
 
-	CD3DX12_RESOURCE_BARRIER barriers[]
-	{
-		ResourceStateManager::ChangeResourceStateAndGetBarrier(*mInputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-		ResourceStateManager::ChangeResourceStateAndGetBarrier(renderTargetBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),		
-	};
-	commandList.ResourceBarrier(_countof(barriers), barriers);
+    // Wait until all previous tasks command lists are executed
+    while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
+        Sleep(0U);
+    }
+}
 
-	commandList.ClearRenderTargetView(renderTargetView, Colors::Black, 0U, nullptr);
+bool
+PostProcessPass::IsDataValid() const noexcept
+{
+    const bool b =
+        mCommandListRecorder.get() != nullptr &&
+        mInputColorBuffer != nullptr;
 
-	CHECK_HR(commandList.Close());
-	CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+    return b;
+}
+
+void
+PostProcessPass::ExecuteBeginTask(ID3D12Resource& renderTargetBuffer,
+                                  const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+{
+    ASSERT(IsDataValid());
+    ASSERT(renderTargetView.ptr != 0UL);
+
+    // Check resource states:
+    // - Input color buffer was used as render target in previous pass
+    // - Output color buffer is the frame buffer, so it was used to present before.
+    ASSERT(ResourceStateManager::GetResourceState(*mInputColorBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+    ASSERT(ResourceStateManager::GetResourceState(renderTargetBuffer) == D3D12_RESOURCE_STATE_PRESENT);
+
+    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
+
+    CD3DX12_RESOURCE_BARRIER barriers[]
+    {
+        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mInputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+        ResourceStateManager::ChangeResourceStateAndGetBarrier(renderTargetBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),
+    };
+    commandList.ResourceBarrier(_countof(barriers), barriers);
+
+    commandList.ClearRenderTargetView(renderTargetView, Colors::Black, 0U, nullptr);
+
+    CHECK_HR(commandList.Close());
+    CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
