@@ -84,7 +84,9 @@ void CreateGeometryBuffersAndRenderTargetViews(Microsoft::WRL::ComPtr<ID3D12Reso
                                                                              resourceNames[i]);
 
         buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
-        RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), rtvDescriptor, &bufferRenderTargetViews[i]);
+        RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), 
+        rtvDescriptor, 
+        &bufferRenderTargetViews[i]);
     }
 }
 }

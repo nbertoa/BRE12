@@ -35,10 +35,10 @@ void InitSystems(const HINSTANCE moduleInstanceHandle) noexcept
 
     LPDIRECTINPUT8 directInput;
     BRE_CHECK_HR(DirectInput8Create(moduleInstanceHandle,
-                                DIRECTINPUT_VERSION,
-                                IID_IDirectInput8,
-                                reinterpret_cast<LPVOID*>(&directInput),
-                                nullptr));
+                                    DIRECTINPUT_VERSION,
+                                    IID_IDirectInput8,
+                                    reinterpret_cast<LPVOID*>(&directInput),
+                                    nullptr));
     Keyboard::Create(*directInput, windowHandle);
     Mouse::Create(*directInput, windowHandle);
 

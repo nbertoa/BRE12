@@ -1,5 +1,8 @@
 #pragma once
 
+#include <DirectXMath.h>
+#include <vector>
+
 #include <CommandManager\CommandListPerFrame.h>
 #include <ResourceManager\FrameUploadCBufferPerFrame.h>
 
@@ -35,8 +38,8 @@ public:
     bool ValidateData() const noexcept;
 
 private:
-    void CreateSampleKernelBuffer(const void* sampleKernel, const std::uint32_t sampleKernelSize) noexcept;
-    ID3D12Resource* CreateAndGetNoiseTexture(const void* noiseVectors, const std::uint32_t noiseTextureDimension) noexcept;
+    void CreateSampleKernelBuffer(const std::vector<DirectX::XMFLOAT4>& sampleKernel) noexcept;
+    ID3D12Resource* CreateAndGetNoiseTexture(const std::vector<DirectX::XMFLOAT4>& noiseVector) noexcept;
     void InitShaderResourceViews(ID3D12Resource& normalSmoothnessBuffer,
                                  ID3D12Resource& depthBuffer,
                                  ID3D12Resource& noiseTexture,

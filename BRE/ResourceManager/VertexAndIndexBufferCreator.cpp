@@ -57,12 +57,11 @@ VertexAndIndexBufferCreator::CreateVertexBuffer(ID3D12GraphicsCommandList& comma
     const std::uint32_t bufferSize{
         bufferCreationData.mElementCount * static_cast<std::uint32_t>(bufferCreationData.mElementSize)
     };
-    vertexBufferData.mBuffer = &ResourceManager::CreateDefaultBuffer(
-        commandList,
-        bufferCreationData.mData,
-        bufferSize,
-        uploadBuffer,
-        nullptr);
+    vertexBufferData.mBuffer = &ResourceManager::CreateDefaultBuffer(commandList,
+                                                                     bufferCreationData.mData,
+                                                                     bufferSize,
+                                                                     uploadBuffer,
+                                                                     nullptr);
     vertexBufferData.mElementCount = bufferCreationData.mElementCount;
 
     // Fill view
@@ -111,12 +110,11 @@ VertexAndIndexBufferCreator::CreateIndexBuffer(ID3D12GraphicsCommandList& comman
     // Create buffer
     const std::uint32_t elementSize{ static_cast<std::uint32_t>(bufferCreationData.mElementSize) };
     const std::uint32_t bufferSize{ bufferCreationData.mElementCount * elementSize };
-    indexBufferData.mBuffer = &ResourceManager::CreateDefaultBuffer(
-        commandList,
-        bufferCreationData.mData,
-        bufferSize,
-        uploadBuffer,
-        nullptr);
+    indexBufferData.mBuffer = &ResourceManager::CreateDefaultBuffer(commandList,
+                                                                    bufferCreationData.mData,
+                                                                    bufferSize,
+                                                                    uploadBuffer,
+                                                                    nullptr);
     indexBufferData.mElementCount = bufferCreationData.mElementCount;
 
     // Set index format

@@ -29,21 +29,20 @@ void InitMainWindow(HWND& windowHandle, const HINSTANCE moduleInstanceHandle) no
     const std::uint32_t windowStyle =
         SettingsManager::sIsFullscreenWindow ? WS_POPUP
         : WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
-    windowHandle = CreateWindowEx(
-        WS_EX_APPWINDOW,
-        L"MainWnd",
-        L"App",
-        windowStyle,
-        CW_USEDEFAULT,
-        CW_USEDEFAULT,
-        width,
-        height,
-        nullptr,
-        nullptr,
-        moduleInstanceHandle,
-        nullptr);
+    windowHandle = CreateWindowEx(WS_EX_APPWINDOW,
+                                  L"MainWnd",
+                                  L"App",
+                                  windowStyle,
+                                  CW_USEDEFAULT,
+                                  CW_USEDEFAULT,
+                                  width,
+                                  height,
+                                  nullptr,
+                                  nullptr,
+                                  moduleInstanceHandle,
+                                  nullptr);
 
-    BRE_ASSERT(windowHandle);
+    BRE_ASSERT_MSG(windowHandle, L"Window creation failed");
 
     ShowWindow(windowHandle, SW_SHOW);
     UpdateWindow(windowHandle);

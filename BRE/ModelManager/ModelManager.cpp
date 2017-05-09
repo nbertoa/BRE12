@@ -27,7 +27,10 @@ ModelManager::LoadModel(const char* modelFilename,
     Model* model{ nullptr };
 
     mMutex.lock();
-    model = new Model(modelFilename, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    model = new Model(modelFilename,
+                      commandList,
+                      uploadVertexBuffer,
+                      uploadIndexBuffer);
     mMutex.unlock();
 
     BRE_ASSERT(model != nullptr);
@@ -48,10 +51,16 @@ ModelManager::CreateBox(const float width,
     Model* model{ nullptr };
 
     GeometryGenerator::MeshData meshData;
-    GeometryGenerator::CreateBox(width, height, depth, numSubdivisions, meshData);
+    GeometryGenerator::CreateBox(width,
+                                 height,
+                                 depth,
+                                 numSubdivisions, meshData);
 
     mMutex.lock();
-    model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    model = new Model(meshData,
+                      commandList,
+                      uploadVertexBuffer,
+                      uploadIndexBuffer);
     mMutex.unlock();
 
     BRE_ASSERT(model != nullptr);
@@ -71,10 +80,16 @@ ModelManager::CreateSphere(const float radius,
     Model* model{ nullptr };
 
     GeometryGenerator::MeshData meshData;
-    GeometryGenerator::CreateSphere(radius, sliceCount, stackCount, meshData);
+    GeometryGenerator::CreateSphere(radius,
+                                    sliceCount,
+                                    stackCount,
+                                    meshData);
 
     mMutex.lock();
-    model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    model = new Model(meshData,
+                      commandList,
+                      uploadVertexBuffer,
+                      uploadIndexBuffer);
     mMutex.unlock();
 
     BRE_ASSERT(model != nullptr);
@@ -93,10 +108,15 @@ ModelManager::CreateGeosphere(const float radius,
     Model* model{ nullptr };
 
     GeometryGenerator::MeshData meshData;
-    GeometryGenerator::CreateGeosphere(radius, numSubdivisions, meshData);
+    GeometryGenerator::CreateGeosphere(radius,
+                                       numSubdivisions,
+                                       meshData);
 
     mMutex.lock();
-    model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    model = new Model(meshData,
+                      commandList,
+                      uploadVertexBuffer,
+                      uploadIndexBuffer);
     mMutex.unlock();
 
     BRE_ASSERT(model != nullptr);
@@ -118,10 +138,18 @@ ModelManager::CreateCylinder(const float bottomRadius,
     Model* model{ nullptr };
 
     GeometryGenerator::MeshData meshData;
-    GeometryGenerator::CreateCylinder(bottomRadius, topRadius, height, sliceCount, stackCount, meshData);
+    GeometryGenerator::CreateCylinder(bottomRadius,
+                                      topRadius,
+                                      height,
+                                      sliceCount,
+                                      stackCount,
+                                      meshData);
 
     mMutex.lock();
-    model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    model = new Model(meshData,
+                      commandList,
+                      uploadVertexBuffer,
+                      uploadIndexBuffer);
     mMutex.unlock();
 
     BRE_ASSERT(model != nullptr);
@@ -142,10 +170,17 @@ ModelManager::CreateGrid(const float width,
     Model* model{ nullptr };
 
     GeometryGenerator::MeshData meshData;
-    GeometryGenerator::CreateGrid(width, depth, rows, columns, meshData);
+    GeometryGenerator::CreateGrid(width,
+                                  depth,
+                                  rows,
+                                  columns,
+                                  meshData);
 
     mMutex.lock();
-    model = new Model(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    model = new Model(meshData,
+                      commandList,
+                      uploadVertexBuffer,
+                      uploadIndexBuffer);
     mMutex.unlock();
 
     BRE_ASSERT(model != nullptr);

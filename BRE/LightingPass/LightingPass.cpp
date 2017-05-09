@@ -84,14 +84,11 @@ LightingPass::ExecuteBeginTask() noexcept
 
     CD3DX12_RESOURCE_BARRIER barriers[]
     {
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBaseColorMetalMaskBuffer,
-        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBaseColorMetalMaskBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mNormalSmoothnessBuffer,
-        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mNormalSmoothnessBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mDepthBuffer,
-        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mDepthBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
     };
 
     const std::uint32_t barriersCount = _countof(barriers);

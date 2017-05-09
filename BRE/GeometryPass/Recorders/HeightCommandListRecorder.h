@@ -15,7 +15,8 @@ public:
     HeightCommandListRecorder(HeightCommandListRecorder&&) = default;
     HeightCommandListRecorder& operator=(HeightCommandListRecorder&&) = default;
 
-    static void InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept;
+    static void InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, 
+    const std::uint32_t geometryBufferCount) noexcept;
 
     // Preconditions:
     // - All containers must not be empty

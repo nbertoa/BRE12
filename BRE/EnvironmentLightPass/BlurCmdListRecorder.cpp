@@ -10,8 +10,6 @@
 #include <ShaderManager\ShaderManager.h>
 #include <Utils/DebugUtils.h>
 
-
-
 namespace BRE {
 // Root Signature:
 // "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)" 0 -> Color Buffer Texture

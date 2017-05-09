@@ -23,7 +23,7 @@ DepthStencilDescriptorManager::Init() noexcept
 
     mMutex.lock();
     BRE_CHECK_HR(DirectXManager::GetDevice().CreateDescriptorHeap(&depthStencilViewDescriptorHeapDescriptor,
-                                                              IID_PPV_ARGS(mDepthStencilViewDescriptorHeap.GetAddressOf())));
+                                                                  IID_PPV_ARGS(mDepthStencilViewDescriptorHeap.GetAddressOf())));
     mMutex.unlock();
 
     mCurrentDepthStencilViewGpuDescriptorHandle = mDepthStencilViewDescriptorHeap->GetGPUDescriptorHandleForHeapStart();

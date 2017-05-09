@@ -36,10 +36,10 @@ ResourceManager::LoadTextureFromFile(const char* textureFilename,
     Microsoft::WRL::ComPtr<ID3D12Resource> resourcePtr;
     mMutex.lock();
     BRE_CHECK_HR(DirectX::CreateDDSTextureFromFile12(&DirectXManager::GetDevice(),
-                                                 &commandList,
-                                                 filePathW.c_str(),
-                                                 resourcePtr,
-                                                 uploadBuffer));
+                                                     &commandList,
+                                                     filePathW.c_str(),
+                                                     resourcePtr,
+                                                     uploadBuffer));
     mMutex.unlock();
 
     resource = resourcePtr.Detach();
@@ -77,11 +77,11 @@ ResourceManager::CreateDefaultBuffer(ID3D12GraphicsCommandList& commandList,
     CD3DX12_RESOURCE_DESC resDesc{ CD3DX12_RESOURCE_DESC::Buffer(sourceDataSize) };
     mMutex.lock();
     BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProps,
-                                                                 D3D12_HEAP_FLAG_NONE,
-                                                                 &resDesc,
-                                                                 D3D12_RESOURCE_STATE_COMMON,
-                                                                 nullptr,
-                                                                 IID_PPV_ARGS(&resource)));
+                                                                     D3D12_HEAP_FLAG_NONE,
+                                                                     &resDesc,
+                                                                     D3D12_RESOURCE_STATE_COMMON,
+                                                                     nullptr,
+                                                                     IID_PPV_ARGS(&resource)));
 
     // In order to copy CPU memory data into our default buffer, we need to create
     // an intermediate upload heap. 
@@ -94,11 +94,11 @@ ResourceManager::CreateDefaultBuffer(ID3D12GraphicsCommandList& commandList,
     resDesc = CD3DX12_RESOURCE_DESC::Buffer(sourceDataSize);
 
     BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProps,
-                                                                 D3D12_HEAP_FLAG_NONE,
-                                                                 &resDesc,
-                                                                 D3D12_RESOURCE_STATE_GENERIC_READ,
-                                                                 nullptr,
-                                                                 IID_PPV_ARGS(uploadBuffer.GetAddressOf())));
+                                                                     D3D12_HEAP_FLAG_NONE,
+                                                                     &resDesc,
+                                                                     D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                                     nullptr,
+                                                                     IID_PPV_ARGS(uploadBuffer.GetAddressOf())));
     mMutex.unlock();
 
     // Describe the data we want to copy into the default buffer.
@@ -139,11 +139,11 @@ ResourceManager::CreateCommittedResource(const D3D12_HEAP_PROPERTIES& heapProper
 
     mMutex.lock();
     BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProperties,
-                                                                 heapFlags,
-                                                                 &resourceDescriptor,
-                                                                 resourceStates,
-                                                                 clearValue,
-                                                                 IID_PPV_ARGS(&resource)));
+                                                                     heapFlags,
+                                                                     &resourceDescriptor,
+                                                                     resourceStates,
+                                                                     clearValue,
+                                                                     IID_PPV_ARGS(&resource)));
     mMutex.unlock();
 
     ResourceStateManager::AddResource(*resource, resourceStates);

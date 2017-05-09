@@ -23,7 +23,7 @@ RenderTargetDescriptorManager::Init() noexcept
 
     mMutex.lock();
     BRE_CHECK_HR(DirectXManager::GetDevice().CreateDescriptorHeap(&renderTargetViewDescriptorHeapDescriptor,
-                                                              IID_PPV_ARGS(mRenderTargetViewDescriptorHeap.GetAddressOf())));
+                                                                  IID_PPV_ARGS(mRenderTargetViewDescriptorHeap.GetAddressOf())));
     mMutex.unlock();
 
     mCurrentRenderTargetViewDescriptorHandle = mRenderTargetViewDescriptorHeap->GetGPUDescriptorHandleForHeapStart();

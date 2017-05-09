@@ -64,13 +64,12 @@ EnvironmentLightCmdListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer,
 
     mRenderTargetView = renderTargetView;
 
-    InitShaderResourceViews(
-        normalSmoothnessBuffer,
-        baseColorMetalMaskBuffer,
-        depthBuffer,
-        diffuseIrradianceCubeMap,
-        ambientAccessibilityBuffer,
-        specularPreConvolvedCubeMap);
+    InitShaderResourceViews(normalSmoothnessBuffer,
+                            baseColorMetalMaskBuffer,
+                            depthBuffer,
+                            diffuseIrradianceCubeMap,
+                            ambientAccessibilityBuffer,
+                            specularPreConvolvedCubeMap);
 
     BRE_ASSERT(ValidateData());
 }
@@ -200,10 +199,9 @@ EnvironmentLightCmdListRecorder::InitShaderResourceViews(ID3D12Resource& normalS
     srvDescriptors.emplace_back(srvDescriptor);
     resources.push_back(&ambientAccessibilityBuffer);
 
-    mStartPixelShaderResourceView =
-        CbvSrvUavDescriptorManager::CreateShaderResourceViews(resources.data(),
-                                                              srvDescriptors.data(),
-                                                              numResources);
+    mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceViews(resources.data(),
+                                                                                          srvDescriptors.data(),
+                                                                                          numResources);
 }
 }
 

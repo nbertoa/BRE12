@@ -9,7 +9,8 @@ class Mouse {
 public:
     // Preconditions:
     // - Create() must be called once
-    static Mouse& Create(IDirectInput8& directInput, const HWND windowHandle) noexcept;
+    static Mouse& Create(IDirectInput8& directInput,
+                         const HWND windowHandle) noexcept;
 
     // Preconditions:
     // - Create() method must be called before

@@ -23,7 +23,7 @@ CbvSrvUavDescriptorManager::Init() noexcept
 
     mMutex.lock();
     BRE_CHECK_HR(DirectXManager::GetDevice().CreateDescriptorHeap(&cbvSrvUavDescriptorHeapDescriptor,
-                                                              IID_PPV_ARGS(mCbvSrvUavDescriptorHeap.GetAddressOf())));
+                                                                  IID_PPV_ARGS(mCbvSrvUavDescriptorHeap.GetAddressOf())));
     mMutex.unlock();
 
     mCurrentCbvSrvUavGpuDescriptorHandle = mCbvSrvUavDescriptorHeap->GetGPUDescriptorHandleForHeapStart();

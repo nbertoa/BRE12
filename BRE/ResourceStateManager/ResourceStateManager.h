@@ -24,7 +24,8 @@ public:
 
     // Preconditions:
     // - Resource must not have been registered
-    static void AddResource(ID3D12Resource& resource, const D3D12_RESOURCE_STATES initialState) noexcept;
+    static void AddResource(ID3D12Resource& resource,
+                            const D3D12_RESOURCE_STATES initialState) noexcept;
 
     // Preconditions:
     // - Resource must have been registered

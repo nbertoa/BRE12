@@ -59,18 +59,26 @@ SkyBoxPass::Init(ID3D12Resource& skyBoxCubeMap,
     // Build world matrix
     const Mesh& mesh{ meshes[0] };
     XMFLOAT4X4 worldMatrix;
-    MathUtils::ComputeMatrix(worldMatrix, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
+    MathUtils::ComputeMatrix(worldMatrix,
+                             0.0f,
+                             0.0f,
+                             0.0f,
+                             1.0f,
+                             1.0f,
+                             1.0f,
+                             0.0f,
+                             0.0f,
+                             0.0f);
 
     SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature();
 
     mCommandListRecorder.reset(new SkyBoxCmdListRecorder());
-    mCommandListRecorder->Init(
-        mesh.GetVertexBufferData(),
-        mesh.GetIndexBufferData(),
-        worldMatrix,
-        skyBoxCubeMap,
-        renderTargetView,
-        depthBufferView);
+    mCommandListRecorder->Init(mesh.GetVertexBufferData(),
+                               mesh.GetIndexBufferData(),
+                               worldMatrix,
+                               skyBoxCubeMap,
+                               renderTargetView,
+                               depthBufferView);
 
     BRE_ASSERT(IsDataValid());
 }

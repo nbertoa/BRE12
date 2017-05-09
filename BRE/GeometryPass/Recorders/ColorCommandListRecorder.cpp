@@ -101,7 +101,10 @@ ColorCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBu
 
     commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
     commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
-    commandList.OMSetRenderTargets(mGeometryBufferRenderTargetViewCount, mGeometryBufferRenderTargetViews, false, &mDepthBufferView);
+    commandList.OMSetRenderTargets(mGeometryBufferRenderTargetViewCount,
+                                   mGeometryBufferRenderTargetViews,
+                                   false,
+                                   &mDepthBufferView);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);

@@ -36,20 +36,21 @@ void CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceiniti
     CD3DX12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
 
     // Create buffer resource
-    ID3D12Resource* resourcePtr = &ResourceManager::CreateCommittedResource(
-        heapProperties,
-        D3D12_HEAP_FLAG_NONE,
-        resourceDescriptor,
-        resourceinitialState,
-        &clearValue,
-        resourceName);
+    ID3D12Resource* resourcePtr = &ResourceManager::CreateCommittedResource(heapProperties,
+                                                                            D3D12_HEAP_FLAG_NONE,
+                                                                            resourceDescriptor,
+                                                                            resourceinitialState,
+                                                                            &clearValue,
+                                                                            resourceName);
     resource = Microsoft::WRL::ComPtr<ID3D12Resource>(resourcePtr);
 
     // Create render target view	
     D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor{};
     rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
     rtvDescriptor.Format = resourceDescriptor.Format;
-    RenderTargetDescriptorManager::CreateRenderTargetView(*resource.Get(), rtvDescriptor, &resourceRenderTargetView);
+    RenderTargetDescriptorManager::CreateRenderTargetView(*resource.Get(),
+                                                          rtvDescriptor,
+                                                          &resourceRenderTargetView);
 }
 }
 

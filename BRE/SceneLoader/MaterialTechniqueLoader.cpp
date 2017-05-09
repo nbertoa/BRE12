@@ -42,7 +42,7 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
         BRE_ASSERT(pairFirstValue == std::string("name"));
         materialTechniqueName = mapIt->second.as<std::string>();
         BRE_ASSERT_MSG(mMaterialTechniqueByName.find(materialTechniqueName) == mMaterialTechniqueByName.end(),
-                   L"Material technique name must be unique");
+                       L"Material technique name must be unique");
         ++mapIt;
 
         // Get material techniques settings (diffuse texture, normal texture, etc)

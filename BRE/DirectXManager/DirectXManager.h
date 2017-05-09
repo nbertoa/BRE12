@@ -26,11 +26,13 @@ public:
     }
     __forceinline static IDXGIFactory4& GetIDXGIFactory() noexcept
     {
-        BRE_ASSERT(mDxgiFactory.Get() != nullptr); return *mDxgiFactory.Get();
+        BRE_ASSERT(mDxgiFactory.Get() != nullptr);
+        return *mDxgiFactory.Get();
     }
     __forceinline static ID3D12Device& GetDevice() noexcept
     {
-        BRE_ASSERT(mDevice.Get() != nullptr); return *mDevice.Get();
+        BRE_ASSERT(mDevice.Get() != nullptr);
+        return *mDevice.Get();
     }
     __forceinline static std::size_t GetDescriptorHandleIncrementSize(const D3D12_DESCRIPTOR_HEAP_TYPE descriptorHeapType)
     {

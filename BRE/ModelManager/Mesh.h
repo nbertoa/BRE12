@@ -44,17 +44,15 @@ private:
     // "commandList" must be executed after calling these methods, to create the commited resource.
     // Preconditions:
     // - "commandList" must be in recorded state before calling these method.
-    explicit Mesh(
-        const aiMesh& mesh,
-        ID3D12GraphicsCommandList& commandList,
-        Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-        Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
+    explicit Mesh(const aiMesh& mesh,
+                  ID3D12GraphicsCommandList& commandList,
+                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
 
-    explicit Mesh(
-        const GeometryGenerator::MeshData& meshData,
-        ID3D12GraphicsCommandList& commandList,
-        Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-        Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
+    explicit Mesh(const GeometryGenerator::MeshData& meshData,
+                  ID3D12GraphicsCommandList& commandList,
+                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
+                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
 
     VertexAndIndexBufferCreator::VertexBufferData mVertexBufferData;
     VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;

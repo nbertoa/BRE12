@@ -104,23 +104,22 @@ void CreateSwapChain(const HWND windowHandle,
     swapChainDescriptor.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
     BRE_CHECK_HR(DirectXManager::GetIDXGIFactory().CreateSwapChainForHwnd(&CommandListExecutor::Get().GetCommandQueue(),
-                                                                      windowHandle,
-                                                                      &swapChainDescriptor,
-                                                                      nullptr,
-                                                                      nullptr,
-                                                                      &baseSwapChain));
+                                                                          windowHandle,
+                                                                          &swapChainDescriptor,
+                                                                          nullptr,
+                                                                          nullptr,
+                                                                          &baseSwapChain));
     BRE_CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain.GetAddressOf())));
 
     BRE_CHECK_HR(swapChain->ResizeBuffers(SettingsManager::sSwapChainBufferCount,
-                                      SettingsManager::sWindowWidth,
-                                      SettingsManager::sWindowHeight,
-                                      frameBufferFormat,
-                                      swapChainDescriptor.Flags));
+                                          SettingsManager::sWindowWidth,
+                                          SettingsManager::sWindowHeight,
+                                          frameBufferFormat,
+                                          swapChainDescriptor.Flags));
 
     // Make window association
-    BRE_CHECK_HR(DirectXManager::GetIDXGIFactory().MakeWindowAssociation(
-        windowHandle,
-        DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
+    BRE_CHECK_HR(DirectXManager::GetIDXGIFactory().MakeWindowAssociation(windowHandle,
+                                                                         DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
 
 #ifdef V_SYNC
     BRE_CHECK_HR(swapChain3->SetMaximumFrameLatency(SettingsManager::sQueuedFrameCount));

@@ -29,9 +29,8 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
 void
-NormalCommandListRecorder::InitSharedPSOAndRootSignature(
-    const DXGI_FORMAT* geometryBufferFormats,
-    const std::uint32_t geometryBufferCount) noexcept
+NormalCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
+                                                         const std::uint32_t geometryBufferCount) noexcept
 {
     BRE_ASSERT(geometryBufferFormats != nullptr);
     BRE_ASSERT(geometryBufferCount > 0U);

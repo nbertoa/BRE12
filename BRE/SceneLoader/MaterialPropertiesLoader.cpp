@@ -43,7 +43,7 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
         BRE_ASSERT(pairFirstValue == std::string("name"));
         materialName = mapIt->second.as<std::string>();
         BRE_ASSERT_MSG(mMaterialPropertiesByName.find(materialName) == mMaterialPropertiesByName.end(),
-                   L"Material properties name must be unique");
+                       L"Material properties name must be unique");
         ++mapIt;
         BRE_ASSERT(mapIt != materialMap.end());
 

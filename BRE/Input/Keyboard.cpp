@@ -10,7 +10,8 @@ std::unique_ptr<Keyboard> gKeyboard{ nullptr };
 }
 
 Keyboard&
-Keyboard::Create(IDirectInput8& directInput, const HWND windowHandle) noexcept
+Keyboard::Create(IDirectInput8& directInput,
+                 const HWND windowHandle) noexcept
 {
     BRE_ASSERT(gKeyboard == nullptr);
     gKeyboard.reset(new Keyboard(directInput, windowHandle));

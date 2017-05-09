@@ -50,7 +50,7 @@ void Subdivide(GeometryGenerator::MeshData& meshData) noexcept
     //       v1
     //       *
     //      / \
-            		//     /   \
+                		//     /   \
 		//  m0*-----*m1
 //   / \   / \
 		//  /   \ /   \
@@ -123,11 +123,15 @@ void BuildCylinderTopCap(const float topRadius,
         const float u{ x / height + 0.5f };
         const float v{ z / height + 0.5f };
 
-        meshData.mVertices.push_back(GeometryGenerator::Vertex{ XMFLOAT3{ x, y, z }, XMFLOAT3{ 0.0f, 1.0f, 0.0f }, XMFLOAT3{ 1.0f, 0.0f, 0.0f }, XMFLOAT2{ u, v } });
+        meshData.mVertices.push_back(
+            GeometryGenerator::Vertex{ XMFLOAT3{ x, y, z }, XMFLOAT3{ 0.0f, 1.0f, 0.0f }, XMFLOAT3{ 1.0f, 0.0f, 0.0f }, XMFLOAT2{ u, v } }
+        );
     }
 
     // Cap center vertex.
-    meshData.mVertices.push_back(GeometryGenerator::Vertex{ XMFLOAT3{ 0.0f, y, 0.0f }, XMFLOAT3{ 0.0f, 1.0f, 0.0f }, XMFLOAT3{ 1.0f, 0.0f, 0.0f }, XMFLOAT2{ 0.5f, 0.5f } });
+    meshData.mVertices.push_back(
+        GeometryGenerator::Vertex{ XMFLOAT3{ 0.0f, y, 0.0f }, XMFLOAT3{ 0.0f, 1.0f, 0.0f }, XMFLOAT3{ 1.0f, 0.0f, 0.0f }, XMFLOAT2{ 0.5f, 0.5f } }
+    );
 
     // Index of center vertex.
     const std::uint32_t centerIndex{ static_cast<std::uint32_t>(meshData.mVertices.size()) - 1U };
@@ -162,11 +166,15 @@ void BuildCylinderBottomCap(const float bottomRadius,
         const float u{ x / height + 0.5f };
         const float v{ z / height + 0.5f };
 
-        meshData.mVertices.push_back(GeometryGenerator::Vertex{ XMFLOAT3{ x, y, z }, XMFLOAT3{ 0.0f, -1.0f, 0.0f }, XMFLOAT3{ 1.0f, 0.0f, 0.0f }, XMFLOAT2{ u, v } });
+        meshData.mVertices.push_back(
+            GeometryGenerator::Vertex{ XMFLOAT3{ x, y, z }, XMFLOAT3{ 0.0f, -1.0f, 0.0f }, XMFLOAT3{ 1.0f, 0.0f, 0.0f }, XMFLOAT2{ u, v } }
+        );
     }
 
     // Cap center vertex.
-    meshData.mVertices.push_back(GeometryGenerator::Vertex{ XMFLOAT3{ 0.0f, y, 0.0f }, XMFLOAT3{ 0.0f, -1.0f, 0.0f }, XMFLOAT3{ 1.0f, 0.0f, 0.0f }, XMFLOAT2{ 0.5f, 0.5f } });
+    meshData.mVertices.push_back(
+        GeometryGenerator::Vertex{ XMFLOAT3{ 0.0f, y, 0.0f }, XMFLOAT3{ 0.0f, -1.0f, 0.0f }, XMFLOAT3{ 1.0f, 0.0f, 0.0f }, XMFLOAT2{ 0.5f, 0.5f } }
+    );
 
     // Cache the index of center vertex.
     const std::uint32_t centerIndex{ static_cast<std::uint32_t>(meshData.mVertices.size()) - 1U };
