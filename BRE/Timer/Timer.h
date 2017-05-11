@@ -3,6 +3,9 @@
 #include <cstdint>
 
 namespace BRE {
+///
+/// @brief Timer class used mainly to get frame time.
+///
 class Timer {
 public:
     Timer();
@@ -12,27 +15,38 @@ public:
     Timer(Timer&&) = delete;
     Timer& operator=(Timer&&) = delete;
 
-    float TotalTimeInSeconds() const noexcept
-    {
-        return static_cast<float>((mCurrentTime - mBaseTime) * mSecondsPerCount);
-    }
-    float DeltaTimeInSeconds() const noexcept
+    ///
+    /// @brief Get delta time in seconds.
+    ///
+    /// Get delta time in seconds between 2 ticks, used to know the elapsed time between frames.
+    ///
+    /// @return Time in seconds
+    ///
+    __forceinline float GetDeltaTimeInSeconds() const noexcept
     {
         return static_cast<float>(mDeltaTimeInSeconds);
     }
 
-    // Call before message loop.
+    ///
+    /// @brief Reset timer
+    ///
+    /// Reset timer. This should be called exactly before the game loop.
+    ///
     void Reset() noexcept;
 
-    // Call every frame.
+    ///
+    /// @brief Ticks the timer
+    ///
+    /// Ticks the timer. This will cause that delta time in seconds is updated.
+    /// You should call it every frame.
+    ///
     void Tick() noexcept;
 
 private:
     double mSecondsPerCount{ 0.0 };
     double mDeltaTimeInSeconds{ 0.0 };
-    std::int64_t mBaseTime{ 0 };
-    std::int64_t mPreviousTime{ 0 };
-    std::int64_t mCurrentTime{ 0 };
+    std::int64_t mStartTickTime{ 0 };
+    std::int64_t mPreviousTickTime{ 0 };
 };
 }
 

@@ -223,7 +223,7 @@ RenderManager::execute()
 {
     while (!mTerminate) {
         mTimer.Tick();
-        UpdateCameraAndFrameCBuffer(mTimer.DeltaTimeInSeconds(), mCamera, mFrameCBuffer);
+        UpdateCameraAndFrameCBuffer(mTimer.GetDeltaTimeInSeconds(), mCamera, mFrameCBuffer);
 
         BRE_ASSERT(CommandListExecutor::Get().AreTherePendingCommandListsToExecute());
 

@@ -17,8 +17,8 @@ Timer::Reset() noexcept
     std::int64_t currentTime;
     QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&currentTime));
 
-    mBaseTime = currentTime;
-    mPreviousTime = currentTime;
+    mStartTickTime = currentTime;
+    mPreviousTickTime = currentTime;
 }
 
 void
@@ -26,15 +26,14 @@ Timer::Tick() noexcept
 {
     std::int64_t currentTime;
     QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&currentTime));
-    mCurrentTime = currentTime;
 
-    mDeltaTimeInSeconds = (mCurrentTime - mPreviousTime) * mSecondsPerCount;
+    mDeltaTimeInSeconds = (currentTime - mPreviousTickTime) * mSecondsPerCount;
 
-    mPreviousTime = mCurrentTime;
+    mPreviousTickTime = currentTime;
 
     // Force nonnegative. The DXSDK's CDXUTTimer mentions that if the 
     // processor goes into a power save mode or we get shuffled to another
-    // processor, then mDeltaTimeInSeconds can be negative.
+    // processor, then mGetDeltaTimeInSeconds can be negative.
     if (mDeltaTimeInSeconds < 0.0) {
         mDeltaTimeInSeconds = 0.0;
     }
