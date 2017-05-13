@@ -4,6 +4,32 @@
 
 namespace BRE {
 namespace {
+
+IDXGIAdapter1* GetSupportedAdapter(Microsoft::WRL::ComPtr<IDXGIFactory4>& dxgiFactory,
+                                   const D3D_FEATURE_LEVEL featureLevel)
+{
+    IDXGIAdapter1* adapter = nullptr;
+    for (std::uint32_t adapterIndex = 0U; ; ++adapterIndex) {
+        IDXGIAdapter1* currentAdapter = nullptr;
+        if (DXGI_ERROR_NOT_FOUND == dxgiFactory->EnumAdapters1(adapterIndex, &currentAdapter)) {
+            // No more adapters to enumerate.
+            break;
+        }
+
+        // Check to see if the adapter supports Direct3D 12, but don't create the
+        // actual device yet.
+        const HRESULT hres = D3D12CreateDevice(currentAdapter, featureLevel, _uuidof(ID3D12Device), nullptr);
+        if (SUCCEEDED(hres)) {
+            adapter = currentAdapter;
+            break;
+        }
+        
+        currentAdapter->Release();
+    }
+
+    return adapter;
+}
+
 void InitMainWindow(HWND& windowHandle, const HINSTANCE moduleInstanceHandle) noexcept
 {
     WNDCLASS windowClass = {};
@@ -67,12 +93,27 @@ DirectXManager::Init(const HINSTANCE moduleInstanceHandle) noexcept
     }
 #endif
 
-    // Get main adapter and create device
     BRE_CHECK_HR(CreateDXGIFactory1(IID_PPV_ARGS(mDxgiFactory.GetAddressOf())));
-    IDXGIAdapter* adapter = nullptr;
-    BRE_CHECK_HR(mDxgiFactory->EnumAdapters(0, &adapter));
-    LARGE_INTEGER umdVersion;
-    BRE_CHECK_HR(adapter->CheckInterfaceSupport(__uuidof(ID3D12Device), &umdVersion));
+
+    // Get the first adapter that supports ID3D12Device and a feature level of 
+    // the following list.
+    D3D_FEATURE_LEVEL featureLevels[] = 
+    {
+        D3D_FEATURE_LEVEL_12_1,
+        D3D_FEATURE_LEVEL_12_0,
+        D3D_FEATURE_LEVEL_11_1,
+        D3D_FEATURE_LEVEL_11_0,
+    };
+    IDXGIAdapter1* adapter = nullptr;
+    for (std::uint32_t i = 0U; i < _countof(featureLevels); ++i) {
+        adapter = GetSupportedAdapter(mDxgiFactory, featureLevels[i]);
+        if (adapter != nullptr) {
+            break;
+        }
+    }
+
+    BRE_ASSERT_MSG(adapter != nullptr, L"No adapter supports ID3D12Device or a feature level");
+
     BRE_CHECK_HR(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(mDevice.GetAddressOf())));
 }
 }

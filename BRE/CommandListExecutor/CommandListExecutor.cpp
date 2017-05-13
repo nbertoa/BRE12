@@ -58,7 +58,7 @@ CommandListExecutor::execute()
             ++mPendingCommandListCount;
         }
 
-        // Execute command lists (if any)
+        // Execute pending command lists (if any)
         if (mPendingCommandListCount != 0U) {
             mCommandQueue->ExecuteCommandLists(mPendingCommandListCount, pendingCommandLists);
             mExecutedCommandListCount += mPendingCommandListCount;
@@ -74,10 +74,9 @@ CommandListExecutor::execute()
 }
 
 void
-CommandListExecutor::SignalFenceAndWaitForCompletion(
-    ID3D12Fence& fence,
-    const std::uint64_t valueToSignal,
-    const std::uint64_t valueToWaitFor) noexcept
+CommandListExecutor::SignalFenceAndWaitForCompletion(ID3D12Fence& fence,
+                                                     const std::uint64_t valueToSignal,
+                                                     const std::uint64_t valueToWaitFor) noexcept
 {
     const std::uint64_t completedFenceValue = fence.GetCompletedValue();
     BRE_CHECK_HR(mCommandQueue->Signal(&fence, valueToSignal));
@@ -97,12 +96,12 @@ CommandListExecutor::SignalFenceAndWaitForCompletion(
 }
 
 void
-CommandListExecutor::ExecuteCommandListAndWaitForCompletion(ID3D12CommandList& cmdList) noexcept
+CommandListExecutor::ExecuteCommandListAndWaitForCompletion(ID3D12CommandList& commandList) noexcept
 {
     BRE_ASSERT(mCommandQueue != nullptr);
     BRE_ASSERT(mFence != nullptr);
 
-    ID3D12CommandList* commandLists[1U]{ &cmdList };
+    ID3D12CommandList* commandLists[1U]{ &commandList };
     mCommandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
 
     const std::uint64_t valueToSignal = mFence->GetCompletedValue() + 1UL;

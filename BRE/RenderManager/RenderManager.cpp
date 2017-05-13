@@ -225,8 +225,6 @@ RenderManager::execute()
         mTimer.Tick();
         UpdateCameraAndFrameCBuffer(mTimer.GetDeltaTimeInSeconds(), mCamera, mFrameCBuffer);
 
-        BRE_ASSERT(CommandListExecutor::Get().AreTherePendingCommandListsToExecute());
-
         mGeometryPass.Execute(mFrameCBuffer);
         mLightingPass.Execute(mFrameCBuffer);
         mSkyBoxPass.Execute(mFrameCBuffer);
