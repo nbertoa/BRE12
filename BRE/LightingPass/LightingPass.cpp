@@ -80,7 +80,7 @@ LightingPass::ExecuteBeginTask() noexcept
     // - Depth buffer was used for depth testing in geometry pass, so it must be in depth write state
     BRE_ASSERT(ResourceStateManager::GetResourceState(*mDepthBuffer) == D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
-    ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
+    ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
     CD3DX12_RESOURCE_BARRIER barriers[]
     {
@@ -117,7 +117,7 @@ LightingPass::ExecuteFinalTask() noexcept
     // - Depth buffer must be in pixel shader resource because it was used by lighting pass shader.
     BRE_ASSERT(ResourceStateManager::GetResourceState(*mDepthBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-    ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
+    ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
     CD3DX12_RESOURCE_BARRIER barriers[]
     {

@@ -4,15 +4,18 @@
 #include <Utils/DebugUtils.h>
 
 namespace BRE {
-CommandAllocatorManager::CommandAllocators CommandAllocatorManager::mCommandAllocators;
+tbb::concurrent_unordered_set<ID3D12CommandAllocator*> CommandAllocatorManager::mCommandAllocators;
 std::mutex CommandAllocatorManager::mMutex;
 
-void CommandAllocatorManager::EraseAll() noexcept
+void 
+CommandAllocatorManager::Clear() noexcept
 {
     for (ID3D12CommandAllocator* commandAllocator : mCommandAllocators) {
         BRE_ASSERT(commandAllocator != nullptr);
         commandAllocator->Release();
     }
+
+    mCommandAllocators.clear();
 }
 
 ID3D12CommandAllocator&

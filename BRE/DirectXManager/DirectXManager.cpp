@@ -5,8 +5,9 @@
 namespace BRE {
 namespace {
 
-IDXGIAdapter1* GetSupportedAdapter(Microsoft::WRL::ComPtr<IDXGIFactory4>& dxgiFactory,
-                                   const D3D_FEATURE_LEVEL featureLevel)
+IDXGIAdapter1*
+GetSupportedAdapter(Microsoft::WRL::ComPtr<IDXGIFactory4>& dxgiFactory,
+                    const D3D_FEATURE_LEVEL featureLevel)
 {
     IDXGIAdapter1* adapter = nullptr;
     for (std::uint32_t adapterIndex = 0U; ; ++adapterIndex) {
@@ -18,19 +19,24 @@ IDXGIAdapter1* GetSupportedAdapter(Microsoft::WRL::ComPtr<IDXGIFactory4>& dxgiFa
 
         // Check to see if the adapter supports Direct3D 12, but don't create the
         // actual device yet.
-        const HRESULT hres = D3D12CreateDevice(currentAdapter, featureLevel, _uuidof(ID3D12Device), nullptr);
+        const HRESULT hres = D3D12CreateDevice(currentAdapter,
+                                               featureLevel,
+                                               _uuidof(ID3D12Device),
+                                               nullptr);
         if (SUCCEEDED(hres)) {
             adapter = currentAdapter;
             break;
         }
-        
+
         currentAdapter->Release();
     }
 
     return adapter;
 }
 
-void InitMainWindow(HWND& windowHandle, const HINSTANCE moduleInstanceHandle) noexcept
+void
+InitMainWindow(HWND& windowHandle,
+               const HINSTANCE moduleInstanceHandle) noexcept
 {
     WNDCLASS windowClass = {};
     windowClass.style = CS_HREDRAW | CS_VREDRAW;
@@ -80,7 +86,7 @@ Microsoft::WRL::ComPtr<IDXGIFactory4> DirectXManager::mDxgiFactory{ nullptr };
 Microsoft::WRL::ComPtr<ID3D12Device> DirectXManager::mDevice{ nullptr };
 
 void
-DirectXManager::Init(const HINSTANCE moduleInstanceHandle) noexcept
+DirectXManager::InitWindowAndDevice(const HINSTANCE moduleInstanceHandle) noexcept
 {
     InitMainWindow(mWindowHandle, moduleInstanceHandle);
 
@@ -97,7 +103,7 @@ DirectXManager::Init(const HINSTANCE moduleInstanceHandle) noexcept
 
     // Get the first adapter that supports ID3D12Device and a feature level of 
     // the following list.
-    D3D_FEATURE_LEVEL featureLevels[] = 
+    D3D_FEATURE_LEVEL featureLevels[] =
     {
         D3D_FEATURE_LEVEL_12_1,
         D3D_FEATURE_LEVEL_12_0,
@@ -114,7 +120,9 @@ DirectXManager::Init(const HINSTANCE moduleInstanceHandle) noexcept
 
     BRE_ASSERT_MSG(adapter != nullptr, L"No adapter supports ID3D12Device or a feature level");
 
-    BRE_CHECK_HR(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(mDevice.GetAddressOf())));
+    BRE_CHECK_HR(D3D12CreateDevice(adapter,
+                                   D3D_FEATURE_LEVEL_12_1,
+                                   IID_PPV_ARGS(mDevice.GetAddressOf())));
 }
 }
 

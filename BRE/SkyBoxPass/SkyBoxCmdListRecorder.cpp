@@ -40,7 +40,7 @@ SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature() noexcept
     // Otherwise, the normalized depth values at z = 1 (NDC) will 
     // fail the depth test if the depth buffer was cleared to 1.
     psoData.mDepthStencilDescriptor.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-    psoData.mInputLayoutDescriptors = D3DFactory::GetPosNormalTangentTexCoordInputLayout();
+    psoData.mInputLayoutDescriptors = D3DFactory::GetPositionNormalTangentTexCoordInputLayout();
 
     psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("SkyBoxPass/Shaders/PS.cso");
     psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("SkyBoxPass/Shaders/VS.cso");
@@ -93,7 +93,7 @@ SkyBoxCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffe
     UploadBuffer& uploadFrameCBuffer(mFrameUploadCBufferPerFrame.GetNextFrameCBuffer());
     uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
-    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
+    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(sPSO);
 
     commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
     commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);

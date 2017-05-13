@@ -53,10 +53,10 @@ void InitSystems(const HINSTANCE moduleInstanceHandle) noexcept
 
 void FinalizeSystems() noexcept
 {
-    CommandAllocatorManager::EraseAll();
-    CommandListManager::EraseAll();
-    CommandQueueManager::EraseAll();
-    FenceManager::EraseAll();
+    CommandAllocatorManager::Clear();
+    CommandListManager::Clear();
+    CommandQueueManager::Clear();
+    FenceManager::Clear();
     PSOManager::EraseAll();
     ResourceManager::EraseAll();
     RootSignatureManager::EraseAll();
@@ -115,7 +115,7 @@ SceneExecutor::SceneExecutor(HINSTANCE moduleInstanceHandle,
 {
     BRE_ASSERT(sceneFilePath != nullptr);
 
-    DirectXManager::Init(moduleInstanceHandle);
+    DirectXManager::InitWindowAndDevice(moduleInstanceHandle);
     InitSystems(moduleInstanceHandle);
 
     SceneLoader sceneLoader;

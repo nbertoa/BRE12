@@ -152,7 +152,7 @@ AmbientOcclusionCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
     BRE_ASSERT(sPSO != nullptr);
     BRE_ASSERT(sRootSignature != nullptr);
 
-    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
+    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(sPSO);
 
     // Update frame constants
     UploadBuffer& uploadFrameCBuffer(mFrameUploadCBufferPerFrame.GetNextFrameCBuffer());

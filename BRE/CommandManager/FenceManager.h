@@ -5,7 +5,9 @@
 #include <tbb\concurrent_unordered_set.h>
 
 namespace BRE {
-// To create/get cfences
+///
+/// Responsible for fences creation.
+///
 class FenceManager {
 public:
     FenceManager() = delete;
@@ -15,15 +17,22 @@ public:
     FenceManager(FenceManager&&) = delete;
     FenceManager& operator=(FenceManager&&) = delete;
 
-    static void EraseAll() noexcept;
+    ///
+    /// @brief Release all the fences
+    ///
+    static void Clear() noexcept;
 
-    static ID3D12Fence& CreateFence(
-        const std::uint64_t fenceInitialValue,
-        const D3D12_FENCE_FLAGS& flags) noexcept;
+    ///
+    /// @brief Create a fence
+    /// @param fenceInitialValue Initial value at fence creation
+    /// @param flags Initial fence flags
+    /// @return The created fence
+    ///
+    static ID3D12Fence& CreateFence(const std::uint64_t fenceInitialValue,
+                                    const D3D12_FENCE_FLAGS& flags) noexcept;
 
 private:
-    using Fences = tbb::concurrent_unordered_set<ID3D12Fence*>;
-    static Fences mFences;
+    static tbb::concurrent_unordered_set<ID3D12Fence*> mFences;
 
     static std::mutex mMutex;
 };

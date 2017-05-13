@@ -13,7 +13,11 @@ Camera::SetFrustum(const float verticalFieldOfView,
                    const float nearPlaneZ,
                    const float farPlaneZ) noexcept
 {
-    const XMMATRIX projectionMatrix{ XMMatrixPerspectiveFovLH(verticalFieldOfView, aspectRatio, nearPlaneZ, farPlaneZ) };
+    const XMMATRIX projectionMatrix(XMMatrixPerspectiveFovLH(verticalFieldOfView,
+                                                             aspectRatio,
+                                                             nearPlaneZ,
+                                                             farPlaneZ));
+
     XMStoreFloat4x4(&mProjectionMatrix, projectionMatrix);
     MathUtils::StoreInverseMatrix(mProjectionMatrix, mInverseProjectionMatrix);
 }
@@ -27,8 +31,10 @@ Camera::SetLookAndUpVectors(const XMFLOAT3& cameraPosition,
     const XMVECTOR xmTargetPosition(XMLoadFloat3(&targetPosition));
     XMVECTOR xmUpVector(XMLoadFloat3(&upVector));
 
-    const XMVECTOR lookVector(XMVector3Normalize(XMVectorSubtract(xmTargetPosition, xmCameraPosition)));
-    const XMVECTOR rightVector(XMVector3Normalize(XMVector3Cross(xmUpVector, lookVector)));
+    const XMVECTOR lookVector(XMVector3Normalize(XMVectorSubtract(xmTargetPosition,
+                                                                  xmCameraPosition)));
+    const XMVECTOR rightVector(XMVector3Normalize(XMVector3Cross(xmUpVector,
+                                                                 lookVector)));
     xmUpVector = XMVector3Cross(lookVector, rightVector);
 
     XMStoreFloat3(&mPosition, xmCameraPosition);
@@ -63,9 +69,14 @@ void
 Camera::Pitch(const float angleInRadians) noexcept
 {
     // Rotate up and look vector about the right vector.
-    const XMMATRIX rightVector(XMMatrixRotationAxis(XMLoadFloat3(&mRightVector), angleInRadians));
-    XMStoreFloat3(&mUpVector, XMVector3TransformNormal(XMLoadFloat3(&mUpVector), rightVector));
-    XMStoreFloat3(&mLookVector, XMVector3TransformNormal(XMLoadFloat3(&mLookVector), rightVector));
+    const XMMATRIX rightVector(XMMatrixRotationAxis(XMLoadFloat3(&mRightVector),
+                                                    angleInRadians));
+    XMStoreFloat3(&mUpVector,
+                  XMVector3TransformNormal(XMLoadFloat3(&mUpVector),
+                                           rightVector));
+    XMStoreFloat3(&mLookVector,
+                  XMVector3TransformNormal(XMLoadFloat3(&mLookVector),
+                                           rightVector));
 }
 
 void
@@ -73,9 +84,15 @@ Camera::RotateY(const float angleInRadians) noexcept
 {
     // Rotate the basis vectors about the world y-axis.
     const XMMATRIX rotationYMatrix(XMMatrixRotationY(angleInRadians));
-    XMStoreFloat3(&mRightVector, XMVector3TransformNormal(XMLoadFloat3(&mRightVector), rotationYMatrix));
-    XMStoreFloat3(&mUpVector, XMVector3TransformNormal(XMLoadFloat3(&mUpVector), rotationYMatrix));
-    XMStoreFloat3(&mLookVector, XMVector3TransformNormal(XMLoadFloat3(&mLookVector), rotationYMatrix));
+    XMStoreFloat3(&mRightVector,
+                  XMVector3TransformNormal(XMLoadFloat3(&mRightVector),
+                                           rotationYMatrix));
+    XMStoreFloat3(&mUpVector,
+                  XMVector3TransformNormal(XMLoadFloat3(&mUpVector),
+                                           rotationYMatrix));
+    XMStoreFloat3(&mLookVector,
+                  XMVector3TransformNormal(XMLoadFloat3(&mLookVector),
+                                           rotationYMatrix));
 }
 
 void
@@ -89,7 +106,9 @@ Camera::UpdateViewMatrix() noexcept
     // Clamp velocity
     XMVECTOR velocityVector = XMLoadFloat3(&mVelocityVector);
     const float velocityLength = XMVectorGetX(XMVector3Length(velocityVector));
-    const float velocitySpeed = MathUtils::Clamp(velocityLength, 0.0f, maxVelocitySpeed);
+    const float velocitySpeed = MathUtils::Clamp(velocityLength,
+                                                 0.0f,
+                                                 maxVelocitySpeed);
     if (velocitySpeed > 0.0f) {
         velocityVector = XMVector3Normalize(velocityVector) * velocitySpeed;
     }
@@ -99,15 +118,18 @@ Camera::UpdateViewMatrix() noexcept
     position = position + velocityVector * secondsPerFrame;
 
     // Damp velocity
-    velocityVector = velocityVector * static_cast<float>(pow(velocityDamp, secondsPerFrame));
+    velocityVector = velocityVector * static_cast<float>(pow(velocityDamp,
+                                                             secondsPerFrame));
 
     // Keep camera's axes orthogonal to each other and of unit length.
     XMVECTOR rightVector(XMLoadFloat3(&mRightVector));
     XMVECTOR lookVector(XMLoadFloat3(&mLookVector));
     lookVector = XMVector3Normalize(lookVector);
-    XMVECTOR upVector = XMVector3Normalize(XMVector3Cross(lookVector, rightVector));
+    XMVECTOR upVector = XMVector3Normalize(XMVector3Cross(lookVector,
+                                                          rightVector));
 
-    // Up vector and look vector are already orthonormal, so no need to normalize cross product.
+    // Up vector and look vector are already orthonormal, 
+    // so no need to normalize cross product.
     rightVector = XMVector3Cross(upVector, lookVector);
 
     XMStoreFloat3(&mRightVector, rightVector);

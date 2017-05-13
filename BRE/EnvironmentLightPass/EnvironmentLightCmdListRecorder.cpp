@@ -85,7 +85,7 @@ EnvironmentLightCmdListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
     UploadBuffer& uploadFrameCBuffer(mFrameUploadCBufferPerFrame.GetNextFrameCBuffer());
     uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
-    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
+    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(sPSO);
 
     commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
     commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);

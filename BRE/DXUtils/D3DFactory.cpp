@@ -4,7 +4,8 @@
 
 namespace BRE {
 namespace D3DFactory {
-D3D12_RASTERIZER_DESC GetDefaultRasterizerDesc() noexcept
+D3D12_RASTERIZER_DESC
+GetDefaultRasterizerDesc() noexcept
 {
     D3D12_RASTERIZER_DESC rasterizerDesc{};
     rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
@@ -22,7 +23,8 @@ D3D12_RASTERIZER_DESC GetDefaultRasterizerDesc() noexcept
     return rasterizerDesc;
 }
 
-D3D12_DEPTH_STENCIL_DESC GetDefaultDepthStencilDesc() noexcept
+D3D12_DEPTH_STENCIL_DESC
+GetDefaultDepthStencilDesc() noexcept
 {
     D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
     depthStencilDesc.DepthEnable = true;
@@ -44,7 +46,8 @@ D3D12_DEPTH_STENCIL_DESC GetDefaultDepthStencilDesc() noexcept
     return depthStencilDesc;
 }
 
-D3D12_DEPTH_STENCIL_DESC GetReversedZDepthStencilDesc() noexcept
+D3D12_DEPTH_STENCIL_DESC
+GetReversedZDepthStencilDesc() noexcept
 {
     D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
     depthStencilDesc.DepthEnable = true;
@@ -66,7 +69,8 @@ D3D12_DEPTH_STENCIL_DESC GetReversedZDepthStencilDesc() noexcept
     return depthStencilDesc;
 }
 
-D3D12_DEPTH_STENCIL_DESC GetDisabledDepthStencilDesc() noexcept
+D3D12_DEPTH_STENCIL_DESC
+GetDisabledDepthStencilDesc() noexcept
 {
     D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
     depthStencilDesc.DepthEnable = false;
@@ -88,7 +92,8 @@ D3D12_DEPTH_STENCIL_DESC GetDisabledDepthStencilDesc() noexcept
     return depthStencilDesc;
 }
 
-D3D12_BLEND_DESC GetDisabledBlendDesc() noexcept
+D3D12_BLEND_DESC
+GetDisabledBlendDesc() noexcept
 {
     D3D12_BLEND_DESC blendDesc{};
     blendDesc.AlphaToCoverageEnable = false;
@@ -111,7 +116,8 @@ D3D12_BLEND_DESC GetDisabledBlendDesc() noexcept
     return blendDesc;
 }
 
-D3D12_BLEND_DESC GetAlwaysBlendDesc() noexcept
+D3D12_BLEND_DESC
+GetAlwaysBlendDesc() noexcept
 {
     D3D12_BLEND_DESC blendDesc{};
     blendDesc.AlphaToCoverageEnable = true;
@@ -134,7 +140,8 @@ D3D12_BLEND_DESC GetAlwaysBlendDesc() noexcept
     return blendDesc;
 }
 
-std::vector<D3D12_INPUT_ELEMENT_DESC> GetPosInputLayout() noexcept
+std::vector<D3D12_INPUT_ELEMENT_DESC>
+GetPositionInputLayout() noexcept
 {
     std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc
     {
@@ -144,7 +151,8 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> GetPosInputLayout() noexcept
     return inputElementDesc;
 }
 
-std::vector<D3D12_INPUT_ELEMENT_DESC> GetPosNormalTangentTexCoordInputLayout() noexcept
+std::vector<D3D12_INPUT_ELEMENT_DESC>
+GetPositionNormalTangentTexCoordInputLayout() noexcept
 {
     std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc
     {
@@ -157,7 +165,8 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> GetPosNormalTangentTexCoordInputLayout() n
     return inputElementDesc;
 }
 
-std::vector<D3D12_INPUT_ELEMENT_DESC> GetPosTexCoordInputLayout() noexcept
+std::vector<D3D12_INPUT_ELEMENT_DESC>
+GetPositionTexCoordInputLayout() noexcept
 {
     std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc
     {

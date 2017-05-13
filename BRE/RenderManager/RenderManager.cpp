@@ -246,7 +246,7 @@ RenderManager::execute()
 void
 RenderManager::ExecuteFinalPass()
 {
-    ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
+    ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
     CD3DX12_RESOURCE_BARRIER barriers[]{
         ResourceStateManager::ChangeResourceStateAndGetBarrier(*mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(),

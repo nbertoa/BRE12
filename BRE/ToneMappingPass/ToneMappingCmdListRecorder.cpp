@@ -67,7 +67,7 @@ ToneMappingCmdListRecorder::RecordAndPushCommandLists() noexcept
     BRE_ASSERT(sPSO != nullptr);
     BRE_ASSERT(sRootSignature != nullptr);
 
-    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(sPSO);
+    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(sPSO);
 
     commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
     commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);

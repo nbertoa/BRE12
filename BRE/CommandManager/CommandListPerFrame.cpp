@@ -7,8 +7,9 @@
 
 namespace BRE {
 namespace {
-void BuildCommandObjects(ID3D12GraphicsCommandList* &commandList,
-                         ID3D12CommandAllocator* commandAllocators[]) noexcept
+void
+BuildCommandObjects(ID3D12GraphicsCommandList* &commandList,
+                    ID3D12CommandAllocator* commandAllocators[]) noexcept
 {
     BRE_ASSERT(commandList == nullptr);
 
@@ -19,10 +20,12 @@ void BuildCommandObjects(ID3D12GraphicsCommandList* &commandList,
 #endif
 
     for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
-        commandAllocators[i] = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
+        commandAllocators[i] = 
+        &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
     }
 
-    commandList = &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0]);
+    commandList = 
+    &CommandListManager::CreateCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, *commandAllocators[0]);
 
     // Start off in a closed state.  This is because the first time we refer 
     // to the command list we will Reset it, and it needs to be closed before
@@ -37,7 +40,7 @@ CommandListPerFrame::CommandListPerFrame()
 }
 
 ID3D12GraphicsCommandList&
-CommandListPerFrame::ResetWithNextCommandAllocator(ID3D12PipelineState* pso) noexcept
+CommandListPerFrame::ResetCommandListWithNextCommandAllocator(ID3D12PipelineState* pso) noexcept
 {
     ID3D12CommandAllocator* commandAllocator{ mCommandAllocators[mCurrentFrameIndex] };
     BRE_ASSERT(commandAllocator != nullptr);

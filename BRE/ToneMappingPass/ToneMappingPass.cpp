@@ -67,7 +67,7 @@ ToneMappingPass::ExecuteBeginTask() noexcept
     BRE_ASSERT(ResourceStateManager::GetResourceState(*mInputColorBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
     BRE_ASSERT(ResourceStateManager::GetResourceState(*mOutputColorBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetWithNextCommandAllocator(nullptr);
+    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
     CD3DX12_RESOURCE_BARRIER barriers[]
     {

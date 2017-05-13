@@ -33,23 +33,27 @@ DepthStencilDescriptorManager::Init() noexcept
 D3D12_GPU_DESCRIPTOR_HANDLE
 DepthStencilDescriptorManager::CreateDepthStencilView(ID3D12Resource& resource,
                                                       const D3D12_DEPTH_STENCIL_VIEW_DESC& descriptor,
-                                                      D3D12_CPU_DESCRIPTOR_HANDLE* firstViewCpuDescriptorHandle) noexcept
+                                                      D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptorHandle) noexcept
 {
     D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandle{};
 
     mMutex.lock();
     gpuDescriptorHandle = mCurrentDepthStencilViewGpuDescriptorHandle;
 
-    if (firstViewCpuDescriptorHandle != nullptr) {
-        *firstViewCpuDescriptorHandle = mCurrentDepthStencilCpuDescriptorHandle;
+    if (cpuDescriptorHandle != nullptr) {
+        *cpuDescriptorHandle = mCurrentDepthStencilCpuDescriptorHandle;
     }
 
     DirectXManager::GetDevice().CreateDepthStencilView(&resource,
                                                        &descriptor,
                                                        mCurrentDepthStencilCpuDescriptorHandle);
 
-    mCurrentDepthStencilViewGpuDescriptorHandle.ptr += DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    mCurrentDepthStencilCpuDescriptorHandle.ptr += DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    mCurrentDepthStencilViewGpuDescriptorHandle.ptr
+        += DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+    mCurrentDepthStencilCpuDescriptorHandle.ptr +=
+        DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
     mMutex.unlock();
 
     return gpuDescriptorHandle;
@@ -76,8 +80,11 @@ DepthStencilDescriptorManager::CreateDepthStencilViews(ID3D12Resource* *resource
 
     for (std::uint32_t i = 0U; i < descriptorCount; ++i) {
         BRE_ASSERT(resources[i] != nullptr);
-        DirectXManager::GetDevice().CreateDepthStencilView(resources[i], &descriptors[i], mCurrentDepthStencilCpuDescriptorHandle);
-        mCurrentDepthStencilCpuDescriptorHandle.ptr += DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        DirectXManager::GetDevice().CreateDepthStencilView(resources[i],
+                                                           &descriptors[i],
+                                                           mCurrentDepthStencilCpuDescriptorHandle);
+        mCurrentDepthStencilCpuDescriptorHandle.ptr +=
+            DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     }
 
     mCurrentDepthStencilViewGpuDescriptorHandle.ptr +=

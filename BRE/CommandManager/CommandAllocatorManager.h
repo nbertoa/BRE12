@@ -5,7 +5,9 @@
 #include <tbb/concurrent_unordered_set.h>
 
 namespace BRE {
-// To create/get command allocators
+///
+/// Class to create command allocators
+///
 class CommandAllocatorManager {
 public:
     CommandAllocatorManager() = delete;
@@ -15,13 +17,19 @@ public:
     CommandAllocatorManager(CommandAllocatorManager&&) = delete;
     CommandAllocatorManager& operator=(CommandAllocatorManager&&) = delete;
 
-    static void EraseAll() noexcept;
+    ///
+    /// @brief Releases all ID3D12CommandAllocator's
+    ///
+    static void Clear() noexcept;
 
+    ///
+    /// @brief Create a ID3D12CommandAllocator
+    /// @param commandListType The type of the command list for this ID3D12CommandAllocator
+    ///
     static ID3D12CommandAllocator& CreateCommandAllocator(const D3D12_COMMAND_LIST_TYPE& commandListType) noexcept;
 
 private:
-    using CommandAllocators = tbb::concurrent_unordered_set<ID3D12CommandAllocator*>;
-    static CommandAllocators mCommandAllocators;
+    static tbb::concurrent_unordered_set<ID3D12CommandAllocator*> mCommandAllocators;
 
     static std::mutex mMutex;
 };
