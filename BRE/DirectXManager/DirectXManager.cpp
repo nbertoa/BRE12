@@ -67,9 +67,13 @@ DirectXManager::Init(const HINSTANCE moduleInstanceHandle) noexcept
     }
 #endif
 
-    // Create device
+    // Get main adapter and create device
     BRE_CHECK_HR(CreateDXGIFactory1(IID_PPV_ARGS(mDxgiFactory.GetAddressOf())));
-    BRE_CHECK_HR(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(mDevice.GetAddressOf())));
+    IDXGIAdapter* adapter = nullptr;
+    BRE_CHECK_HR(mDxgiFactory->EnumAdapters(0, &adapter));
+    LARGE_INTEGER umdVersion;
+    BRE_CHECK_HR(adapter->CheckInterfaceSupport(__uuidof(ID3D12Device), &umdVersion));
+    BRE_CHECK_HR(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(mDevice.GetAddressOf())));
 }
 }
 
