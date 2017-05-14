@@ -31,7 +31,6 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
 
     std::string pairFirstValue;
     std::string materialName;
-    float baseColor[3U];
     for (YAML::const_iterator seqIt = materialsNode.begin(); seqIt != materialsNode.end(); ++seqIt) {
         const YAML::Node materialMap = *seqIt;
         BRE_ASSERT(materialMap.IsMap());
@@ -40,36 +39,36 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
         YAML::const_iterator mapIt = materialMap.begin();
         BRE_ASSERT_MSG(mapIt != materialMap.end(), L"Material name not found");
         pairFirstValue = mapIt->first.as<std::string>();
-        BRE_ASSERT(pairFirstValue == std::string("name"));
+        BRE_ASSERT_MSG(pairFirstValue == std::string("name"), L"Material properties 1st parameter must be 'name'");
         materialName = mapIt->second.as<std::string>();
         BRE_ASSERT_MSG(mMaterialPropertiesByName.find(materialName) == mMaterialPropertiesByName.end(),
                        L"Material properties name must be unique");
         ++mapIt;
         BRE_ASSERT(mapIt != materialMap.end());
 
-        // Get material base color
-        pairFirstValue = mapIt->first.as<std::string>();
-        BRE_ASSERT(pairFirstValue == std::string("base color"));
-        YamlUtils::GetSequence(mapIt->second, baseColor, 3U);
-        ++mapIt;
-        BRE_ASSERT(mapIt != materialMap.end());
+        // Get material properties
+        float baseColor[3U] = { 0.0f, 0.0f, 0.0f };
+        float smoothness = 0.0f;
+        float metalMask = 0.0f;
+        while (mapIt != materialMap.end()) {
+            pairFirstValue = mapIt->first.as<std::string>();
 
-        // Get material smoothness
-        pairFirstValue = mapIt->first.as<std::string>();
-        BRE_ASSERT(pairFirstValue == std::string("smoothness"));
-        float smoothness = mapIt->second.as<float>();
-        MathUtils::Clamp(smoothness, 0.0f, 1.0f);
-        ++mapIt;
-        BRE_ASSERT(mapIt != materialMap.end());
+            if (pairFirstValue == "base color") {
+                YamlUtils::GetSequence(mapIt->second, baseColor, 3U);
+            } else if (pairFirstValue == "smoothness") {
+                smoothness = mapIt->second.as<float>();
+                MathUtils::Clamp(smoothness, 0.0f, 1.0f);
+            } else if (pairFirstValue == "metal mask") {
+                metalMask = mapIt->second.as<float>();
+                MathUtils::Clamp(metalMask, 0.0f, 1.0f);
+            } else {
+                // To avoid warning about 'conditional expression is constant'. This is the same than false
+                BRE_ASSERT_MSG(&metalMask == nullptr, L"Unknown material properties field");
+            }
 
-        // Get material metal mask
-        pairFirstValue = mapIt->first.as<std::string>();
-        BRE_ASSERT(pairFirstValue == std::string("metal mask"));
-        float metalMask = mapIt->second.as<float>();
-        MathUtils::Clamp(metalMask, 0.0f, 1.0f);
-        ++mapIt;
-        BRE_ASSERT_MSG(mapIt == materialMap.end(), L"More fields for material property than expected");
-
+            ++mapIt;
+        }
+        
         MaterialProperties materialProperties(baseColor[0],
                                               baseColor[1],
                                               baseColor[2],

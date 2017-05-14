@@ -75,3 +75,8 @@ environment:
     diffuse irradiance texture: cube map diffuse
     specular pre convolved environment texture: cube map specular
     
+camera:
+  - position: [0.0, 0.0, 0.0]
+    look vector: [0.0, 0.0, 1.0]
+    up vector: [0.0, 1.0, 0.0]
+    

@@ -24,7 +24,7 @@ CameraLoader::LoadCamera(const YAML::Node& rootNode) noexcept
     //     vertical field of view: scalar
     //     near plane z: scalar
     //     far plane z: scalar
-    const YAML::Node cameraNode = rootNode["cameraNode"];
+    const YAML::Node cameraNode = rootNode["camera"];
     if (cameraNode.IsDefined() == false) {
         return;
     }
@@ -51,7 +51,8 @@ CameraLoader::LoadCamera(const YAML::Node& rootNode) noexcept
         } else if (propertyName == "up vector") {
             YamlUtils::GetSequence(mapIt->second, upVector, 3U);
         } else {
-            BRE_ASSERT(false);
+            // To avoid warning about 'conditional expression is constant'. This is the same than false
+            BRE_ASSERT_MSG(&propertyName == nullptr, L"Unknown camera field");
         }
 
         ++mapIt;

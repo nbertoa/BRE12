@@ -39,7 +39,7 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
         YAML::const_iterator mapIt = materialMap.begin();
         BRE_ASSERT(mapIt != materialMap.end());
         pairFirstValue = mapIt->first.as<std::string>();
-        BRE_ASSERT(pairFirstValue == std::string("name"));
+        BRE_ASSERT_MSG(pairFirstValue == std::string("name"), L"Material technique 1st parameter must be 'name'");
         materialTechniqueName = mapIt->second.as<std::string>();
         BRE_ASSERT_MSG(mMaterialTechniqueByName.find(materialTechniqueName) == mMaterialTechniqueByName.end(),
                        L"Material technique name must be unique");
@@ -78,7 +78,8 @@ void MaterialTechniqueLoader::UpdateMaterialTechnique(const std::string& materia
     } else if (materialTechniquePropertyName == "height texture") {
         materialTechnique.SetHeightTexture(&texture);
     } else {
-        BRE_ASSERT(false);
+        // To avoid warning about 'conditional expression is constant'. This is the same than false
+        BRE_ASSERT_MSG(&materialTechniquePropertyName == nullptr, L"Unknown material technique field");
     }
 }
 }

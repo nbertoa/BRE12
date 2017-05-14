@@ -74,7 +74,8 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
             } else if (pairFirstValue == "scale") {
                 YamlUtils::GetSequence(mapIt->second, scale, 3U);
             } else {
-                BRE_ASSERT(false);
+                // To avoid warning about 'conditional expression is constant'. This is the same than false
+                BRE_ASSERT_MSG(&scale == nullptr, L"Unknown object field");
             }
 
             ++mapIt;
