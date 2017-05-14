@@ -34,8 +34,14 @@ const DXGI_FORMAT sGeometryBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]
     DXGI_FORMAT_UNKNOWN
 };
 
-void CreateGeometryBuffersAndRenderTargetViews(Microsoft::WRL::ComPtr<ID3D12Resource> buffers[GeometryPass::BUFFERS_COUNT],
-                                               D3D12_CPU_DESCRIPTOR_HANDLE bufferRenderTargetViews[GeometryPass::BUFFERS_COUNT]) noexcept
+///
+/// @brief Create geometry buffers and render target views
+/// @param buffers Output list of geometry buffers
+/// @param bufferRenderTargetViews Output geometry buffers render target views
+///
+void 
+CreateGeometryBuffersAndRenderTargetViews(Microsoft::WRL::ComPtr<ID3D12Resource> buffers[GeometryPass::BUFFERS_COUNT],
+                                          D3D12_CPU_DESCRIPTOR_HANDLE bufferRenderTargetViews[GeometryPass::BUFFERS_COUNT]) noexcept
 {
     // Set shared buffers properties
     D3D12_RESOURCE_DESC resourceDescriptor = {};

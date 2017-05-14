@@ -12,7 +12,9 @@ struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12Resource;
 
 namespace BRE {
-// Pass responsible to apply ambient lighting and ambient occlusion
+///
+/// @brief Pass responsible to apply ambient lighting and ambient occlusion
+/// 
 class EnvironmentLightPass {
 public:
     EnvironmentLightPass() = default;
@@ -22,6 +24,14 @@ public:
     EnvironmentLightPass(EnvironmentLightPass&&) = delete;
     EnvironmentLightPass& operator=(EnvironmentLightPass&&) = delete;
 
+    ///
+    /// @brief Initializes the pass
+    /// @param baseColorMetalMaskBuffer Geometry buffer that contains base color and metal mask.
+    /// @param normalSmoothnessBuffer Geometry buffer that contains normals and smoothness factors.
+    /// @param depthBuffer Depth buffer
+    /// @param diffuseIrradianceCubeMap Diffuse irradiance environment cube map
+    /// @param specularPreConvolvedCubeMap Specular pre convolved environment cube map
+    ///
     void Init(ID3D12Resource& baseColorMetalMaskBuffer,
               ID3D12Resource& normalSmoothnessBuffer,
               ID3D12Resource& depthBuffer,
@@ -29,15 +39,31 @@ public:
               ID3D12Resource& specularPreConvolvedCubeMap,
               const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
-    // Preconditions:
-    // - Init() must be called first
+    ///
+    /// @brief Executes the pass
+    /// @param frameCBuffer Constant buffer per frame, for current frame
+    ///
     void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
+    ///
+    /// @brief Validates internal data. Typically, used with assertions
+    ///
     bool ValidateData() const noexcept;
 
+    ///
+    /// @brief Executes begin task for the pass
+    ///
     void ExecuteBeginTask() noexcept;
+
+    ///
+    /// @brief Executes middle task for the pass
+    ///
     void ExecuteMiddleTask() noexcept;
+
+    ///
+    /// Executes final task for the pass
+    ///
     void ExecuteFinalTask() noexcept;
 
     CommandListPerFrame mBeginCommandListPerFrame;

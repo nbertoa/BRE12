@@ -84,7 +84,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorMapping(GeometryPassCommandLis
     // Iterate over Drawable objects and fill containers needed
     // to initialize the command list recorder.
     ColorCommandListRecorder* commandListRecorder = new ColorCommandListRecorder;
-    GeometryPassCommandListRecorder::GeometryDataVector geometryDataVector;
+    std::vector<GeometryPassCommandListRecorder::GeometryData> geometryDataVector;
     std::vector<MaterialProperties> materialProperties;
 
     std::size_t geometryDataVectorOffset = 0;
@@ -147,7 +147,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(GeometryPassComm
     // Iterate over Drawable objects and fill containers needed
     // to initialize the command list recorder.
     ColorNormalCommandListRecorder* commandListRecorder = new ColorNormalCommandListRecorder;
-    GeometryPassCommandListRecorder::GeometryDataVector geometryDataVector;
+    std::vector<GeometryPassCommandListRecorder::GeometryData> geometryDataVector;
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> normalTextures;
 
@@ -216,7 +216,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorHeightMapping(GeometryPassComm
     // Iterate over Drawable objects and fill containers needed
     // to initialize the command list recorder.
     ColorHeightCommandListRecorder* commandListRecorder = new ColorHeightCommandListRecorder;
-    GeometryPassCommandListRecorder::GeometryDataVector geometryDataVector;
+    std::vector<GeometryPassCommandListRecorder::GeometryData> geometryDataVector;
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> normalTextures;
     std::vector<ID3D12Resource*> heightTextures;
@@ -291,7 +291,7 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryPassCommandL
     // Iterate over Drawable objects and fill containers needed
     // to initialize the command list recorder.
     TextureCommandListRecorder* commandListRecorder = new TextureCommandListRecorder;
-    GeometryPassCommandListRecorder::GeometryDataVector geometryDataVector;
+    std::vector<GeometryPassCommandListRecorder::GeometryData> geometryDataVector;
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> diffuseTextures;
 
@@ -360,7 +360,7 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryPassCommandLi
     // Iterate over Drawable objects and fill containers needed
     // to initialize the command list recorder.
     NormalCommandListRecorder* commandListRecorder = new NormalCommandListRecorder;
-    GeometryPassCommandListRecorder::GeometryDataVector geometryDataVector;
+    std::vector<GeometryPassCommandListRecorder::GeometryData> geometryDataVector;
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> diffuseTextures;
     std::vector<ID3D12Resource*> normalTextures;
@@ -432,7 +432,7 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryPassCommandLi
     // Iterate over Drawable objects and fill containers needed
     // to initialize the command list recorder.
     HeightCommandListRecorder* commandListRecorder = new HeightCommandListRecorder;
-    GeometryPassCommandListRecorder::GeometryDataVector geometryDataVector;
+    std::vector<GeometryPassCommandListRecorder::GeometryData> geometryDataVector;
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> diffuseTextures;
     std::vector<ID3D12Resource*> normalTextures;

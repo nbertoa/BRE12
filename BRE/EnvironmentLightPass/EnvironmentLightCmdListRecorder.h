@@ -11,8 +11,9 @@ struct ID3D12Resource;
 namespace BRE {
 struct FrameCBuffer;
 
-// Responsible of command lists recording to be executed by CommandListExecutor.
-// This class has common data and functionality to record command list for environment light pass.
+///
+/// @brief Responsible of recording of command lists for environment light pass.
+///
 class EnvironmentLightCmdListRecorder {
 public:
     EnvironmentLightCmdListRecorder() = default;
@@ -22,10 +23,26 @@ public:
     EnvironmentLightCmdListRecorder(EnvironmentLightCmdListRecorder&&) = default;
     EnvironmentLightCmdListRecorder& operator=(EnvironmentLightCmdListRecorder&&) = default;
 
+    ///
+    /// @brief Initializes pipeline state object and root signature
+    ///
+    /// This method must be called at the beginning of the application, and once
+    ///
     static void InitSharedPSOAndRootSignature() noexcept;
 
-    // Preconditions:
-    // - InitSharedPSOAndRootSignature() must be called first and once
+    ///
+    /// @brief Initializes the recorder. 
+    ///
+    /// InitSharedPSOAndRootSignature() must be called first
+    ///
+    /// @param normalSmoothnessBuffer Geometry buffer that contains normals and smoothness factors.
+    /// @param baseColorMetalMaskBuffer Geometry buffer that contains base color and metal mask.
+    /// @param depthBuffer Depth buffer
+    /// @param diffuseIrradianceCubeMap Diffuse irradiance environment cube map
+    /// @param specularPreConvolvedCubeMap Specular pre convolved environment cube map
+    /// @param ambientAccessibilityBuffer Ambient accessibility buffer
+    /// @param renderTargetView Render target view
+    ///
     void Init(ID3D12Resource& normalSmoothnessBuffer,
               ID3D12Resource& baseColorMetalMaskBuffer,
               ID3D12Resource& depthBuffer,
@@ -34,13 +51,30 @@ public:
               ID3D12Resource& ambientAccessibilityBuffer,
               const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
-    // Preconditions:
-    // - Init() must be called first
+    ///
+    /// @brief Records command lists and pushes them into CommandListExecutor
+    ///
+    /// Init() must be called first
+    ///
+    /// @param frameCBuffer Constant buffer per frame, for current frame
+    ///
     void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
 
+    ///
+    /// @brief Validates internal data. Typically, used with assertions.
+    ///
     bool ValidateData() const noexcept;
 
 private:
+    ///
+    /// @brief Initializes shader resource views
+    /// @param normalSmoothnessBuffer Geometry buffer that contains normals and smoothness factors.
+    /// @param baseColorMetalMaskBuffer Geometry buffer that contains base color and metal mask.
+    /// @param depthBuffer Depth buffer
+    /// @param diffuseIrradianceCubeMap Diffuse irradiance environment cube map
+    /// @param ambientAccessibilityBuffer Ambient accessibility buffer
+    /// @param specularPreConvolvedCubeMap Specular pre convolved environment cube map
+    ///
     void InitShaderResourceViews(ID3D12Resource& normalSmoothnessBuffer,
                                  ID3D12Resource& baseColorMetalMaskBuffer,
                                  ID3D12Resource& depthBuffer,

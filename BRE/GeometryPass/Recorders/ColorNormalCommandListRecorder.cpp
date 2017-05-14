@@ -49,7 +49,9 @@ ColorNormalCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT*
     sRootSignature = psoData.mRootSignature;
 
     psoData.mNumRenderTargets = geometryBufferCount;
-    memcpy(psoData.mRenderTargetFormats, geometryBufferFormats, sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
+    memcpy(psoData.mRenderTargetFormats,
+           geometryBufferFormats,
+           sizeof(DXGI_FORMAT) * psoData.mNumRenderTargets);
     sPSO = &PSOManager::CreateGraphicsPSO(psoData);
 
     BRE_ASSERT(sPSO != nullptr);
@@ -233,15 +235,20 @@ ColorNormalCommandListRecorder::InitConstantBuffers(const std::vector<MaterialPr
         srvDesc.Texture2D.MipLevels = normalResVec.back()->GetDesc().MipLevels;
         normalSrvDescVec.push_back(srvDesc);
 
-        mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i), &materialProperties[i], sizeof(MaterialProperties));
+        mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i),
+                                          &materialProperties[i],
+                                          sizeof(MaterialProperties));
     }
-    mStartObjectCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),
-                                                                                    static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-    mStartMaterialCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferViews(materialCbufferViewDescVec.data(),
-                                                                                      static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
-    mNormalBufferGpuDescriptorsBegin = CbvSrvUavDescriptorManager::CreateShaderResourceViews(normalResVec.data(),
-                                                                                             normalSrvDescVec.data(),
-                                                                                             static_cast<std::uint32_t>(normalSrvDescVec.size()));
+    mStartObjectCBufferView =
+        CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),
+                                                              static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
+    mStartMaterialCBufferView =
+        CbvSrvUavDescriptorManager::CreateConstantBufferViews(materialCbufferViewDescVec.data(),
+                                                              static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
+    mNormalBufferGpuDescriptorsBegin =
+        CbvSrvUavDescriptorManager::CreateShaderResourceViews(normalResVec.data(),
+                                                              normalSrvDescVec.data(),
+                                                              static_cast<std::uint32_t>(normalSrvDescVec.size()));
 }
 }
 

@@ -5,15 +5,30 @@
 #include <dinput.h>
 
 namespace BRE {
+///
+/// @brief Responsible to handle keyboard updates and events
+///
 class Keyboard {
 public:
-    // Preconditions:
-    // - Create() must be called once
+    ///
+    /// @brief Create keyboard
+    ///
+    /// Must be called once
+    ///
+    /// @param directInput Direct Input
+    /// @param windowHandle Window handle
+    /// @return The created keyboard
+    ///
     static Keyboard& Create(IDirectInput8& directInput,
                             const HWND windowHandle) noexcept;
 
-    // Preconditions:
-    // - Create() method must be called before.
+    ///
+    /// @brief Get keyboard
+    ///
+    /// Create must be called first
+    ///
+    /// @return The keyboard
+    ///
     static Keyboard& Get() noexcept;
 
     ~Keyboard();
@@ -22,40 +37,96 @@ public:
     Keyboard(Keyboard&&) = delete;
     Keyboard& operator=(Keyboard&&) = delete;
 
-    void Update() noexcept;
+    ///
+    /// @brief Update keys state
+    ///
+    void UpdateKeysState() noexcept;
 
+    ///
+    /// @brief Get keys current state
+    ///
+    /// @return Pointer to the first key in the array of keys
+    ///
     __forceinline const std::uint8_t* GetKeysCurrentState() const noexcept
     {
         return mKeysCurrentState;
     }
+
+    ///
+    /// @brief Get keys last state
+    ///
+    /// @return Pointer to the first key in the array of keys
+    ///
     __forceinline const std::uint8_t* GetKeysLastState() const noexcept
     {
         return mKeysLastState;
     }
+
+    ///
+    /// @brief Checks if key is up
+    /// @param key Key to check
+    /// @return True if key is up. False, otherwise
+    ///
     __forceinline bool IsKeyUp(const std::uint8_t key) const noexcept
     {
         return (mKeysCurrentState[key] & 0x80) == 0U;
     }
+
+    ///
+    /// @brief Checks if key is down
+    /// @param key Key to check
+    /// @return True if key is down. False, otherwise
+    ///
     __forceinline bool IsKeyDown(const std::uint8_t key) const noexcept
     {
         return (mKeysCurrentState[key] & 0x80) != 0U;
     }
+
+    ///
+    /// @brief Checks if key was up
+    /// @param key Key to check
+    /// @return True if key was up. False, otherwise
+    ///
     __forceinline bool WasKeyUp(const std::uint8_t key) const noexcept
     {
         return (mKeysLastState[key] & 0x80) == 0U;
     }
+
+    ///
+    /// @brief Checks if key was down
+    /// @param key Key to check
+    /// @return True if key was down. False, otherwise
+    ///
     __forceinline bool WasKeyDown(const std::uint8_t key) const noexcept
     {
         return (mKeysLastState[key] & 0x80) != 0U;
     }
+
+    ///
+    /// @brief Checks if key was pressed this frame
+    /// @param key Key to check
+    /// @return True if key was pressed this frame. False, otherwise
+    ///
     __forceinline bool WasKeyPressedThisFrame(const std::uint8_t key) const noexcept
     {
         return IsKeyDown(key) && WasKeyUp(key);
     }
+
+    ///
+    /// @brief Checks if key was released this frame
+    /// @param key Key to check
+    /// @return True if key was released this frame. False, otherwise
+    ///
     __forceinline bool WasKeyReleasedThisFrame(const std::uint8_t key) const noexcept
     {
         return IsKeyUp(key) && WasKeyDown(key);
     }
+
+    ///
+    /// @brief Checks if key is held down
+    /// @param key Key to check
+    /// @return True if key is held down. False, otherwise
+    ///
     __forceinline bool IsKeyHeldDown(const std::uint8_t key) const noexcept
     {
         return IsKeyDown(key) && WasKeyDown(key);

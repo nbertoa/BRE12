@@ -13,10 +13,13 @@
 namespace BRE {
 struct FrameCBuffer;
 
-// To record command lists for deferred shading geometry pass.
-// Steps:
-// - Inherit from it and reimplement RecordAndPushCommandLists() method
-// - Call RecordAndPushCommandLists() to create command lists to execute in the GPU
+///
+/// @brief Responsible to record command lists for deferred shading geometry pass
+///
+/// Steps:
+/// - Inherit from it and reimplement RecordAndPushCommandLists() method
+/// - Call RecordAndPushCommandLists() to create command lists to execute in the GPU
+///
 class GeometryPassCommandListRecorder {
 public:
     struct GeometryData {
@@ -27,7 +30,6 @@ public:
         std::vector<DirectX::XMFLOAT4X4> mWorldMatrices;
         std::vector<DirectX::XMFLOAT4X4> mInverseTransposeWorldMatrices;
     };
-    using GeometryDataVector = std::vector<GeometryData>;
 
     GeometryPassCommandListRecorder() = default;
     virtual ~GeometryPassCommandListRecorder()
@@ -38,20 +40,28 @@ public:
     GeometryPassCommandListRecorder(GeometryPassCommandListRecorder&&) = default;
     GeometryPassCommandListRecorder& operator=(GeometryPassCommandListRecorder&&) = default;
 
-    // Preconditions:
-    // - "geometryBufferRenderTargetViews" must not be nullptr
-    // - "geometryBufferRenderTargetViewCount" must be greater than zero
+    ///
+    /// @brief Initializes the command list recorder
+    /// @param geometryBufferRenderTargetViews Geometry buffers render target views. Must not be nullptr
+    /// @param geometryBufferRenderTargetViewCount Geometry buffer render target views count. Must be greater than zero
+    /// @param depthBufferView Depth buffer view
+    ///
     void Init(const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBufferRenderTargetViews,
               const std::uint32_t geometryBufferRenderTargetViewCount,
               const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 
-    // Preconditions:
-    // - Init() must be called before
+    ///
+    /// @brief Records and pushes command lists to CommandListExecutor
+    ///
+    /// Init() must be called first
+    ///
+    /// @param frameCBuffer Constant buffer per frame, for current frame
+    ///
     virtual void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept = 0;
 
-    // This method validates all data (nullptr's, etc)
-    // When you inherit from this class, you should reimplement it to include
-    // new members
+    ///
+    /// @brief Checks if internal data is valid. Typically, used with assertions
+    ///
     virtual bool IsDataValid() const noexcept;
 
 protected:

@@ -8,6 +8,12 @@ using namespace DirectX;
 
 namespace BRE {
 namespace {
+///
+/// @brief Get middle point between vertices
+/// @param vertex0 First vertex
+/// @param vertex1 Second vertex
+/// @return The middle vertex
+///
 GeometryGenerator::Vertex GetMiddlePoint(const GeometryGenerator::Vertex& vertex0,
                                          const GeometryGenerator::Vertex& vertex1) noexcept
 {
@@ -39,7 +45,12 @@ GeometryGenerator::Vertex GetMiddlePoint(const GeometryGenerator::Vertex& vertex
     return middleVertex;
 }
 
-void Subdivide(GeometryGenerator::MeshData& meshData) noexcept
+///
+/// @brief Subdivide geometry
+/// @param meshData Input/Output mesh data to subdivide
+///
+void 
+Subdivide(GeometryGenerator::MeshData& meshData) noexcept
 {
     // Save a copy of the input geometry.
     GeometryGenerator::MeshData inputCopy{ meshData };
@@ -50,12 +61,12 @@ void Subdivide(GeometryGenerator::MeshData& meshData) noexcept
     //       v1
     //       *
     //      / \
-                		//     /   \
-		//  m0*-----*m1
-//   / \   / \
-		//  /   \ /   \
-		// *-----*-----*
-// v0    m2     v2
+    //     /   \
+	//  m0*-----*m1
+    //   / \   / \
+	//  /   \ /   \
+	// *-----*-----*
+    // v0    m2     v2
 
     const std::uint32_t numTriangles{ static_cast<std::uint32_t>(inputCopy.mIndices32.size()) / 3U };
     for (std::uint32_t i = 0; i < numTriangles; ++i) {
@@ -103,6 +114,13 @@ void Subdivide(GeometryGenerator::MeshData& meshData) noexcept
     }
 }
 
+///
+/// @brief Build cylinder top cap
+/// @param topRadius Top radius
+/// @param height Height
+/// @param sliceCount Slice count
+/// @param meshData Output mesh data with the cylinder top cap
+///
 void BuildCylinderTopCap(const float topRadius,
                          const float height,
                          const std::uint32_t sliceCount,
@@ -143,6 +161,13 @@ void BuildCylinderTopCap(const float topRadius,
     }
 }
 
+///
+/// @brief Build cylinder bottom cap
+/// @param bottomRadius Bottom radius
+/// @param height Height
+/// @param sliceCount Slice count
+/// @param meshData Output mesh data that includes the cylinder bottom cap
+///
 void BuildCylinderBottomCap(const float bottomRadius,
                             const float height,
                             const std::uint32_t sliceCount,
@@ -198,7 +223,8 @@ Vertex::Vertex(const XMFLOAT3& position,
     , mUV(uv)
 {}
 
-std::vector<std::uint16_t>& MeshData::GetIndices16() noexcept
+std::vector<std::uint16_t>& 
+MeshData::GetIndices16() noexcept
 {
     if (mIndices16.empty()) {
         mIndices16.resize(mIndices32.size());
@@ -210,11 +236,12 @@ std::vector<std::uint16_t>& MeshData::GetIndices16() noexcept
     return mIndices16;
 }
 
-void CreateBox(const float width,
-               const float height,
-               const float depth,
-               const std::uint32_t numSubdivisions,
-               MeshData& meshData) noexcept
+void 
+CreateBox(const float width,
+          const float height,
+          const float depth,
+          const std::uint32_t numSubdivisions,
+          MeshData& meshData) noexcept
 {
     //
     // Create the vertices.
@@ -304,10 +331,11 @@ void CreateBox(const float width,
     }
 }
 
-void GeometryGenerator::CreateSphere(const float radius,
-                                     const std::uint32_t sliceCount,
-                                     const std::uint32_t stackCount,
-                                     MeshData& meshData) noexcept
+void 
+GeometryGenerator::CreateSphere(const float radius,
+                                const std::uint32_t sliceCount,
+                                const std::uint32_t stackCount,
+                                MeshData& meshData) noexcept
 {
     BRE_ASSERT(stackCount >= 2);
     BRE_ASSERT(sliceCount >= 1);
@@ -413,9 +441,10 @@ void GeometryGenerator::CreateSphere(const float radius,
     }
 }
 
-void GeometryGenerator::CreateGeosphere(const float radius,
-                                        const std::uint32_t numSubdivisions,
-                                        MeshData& meshData) noexcept
+void 
+GeometryGenerator::CreateGeosphere(const float radius,
+                                   const std::uint32_t numSubdivisions,
+                                   MeshData& meshData) noexcept
 {
     // Put a cap on the number of subdivisions.
     const std::uint32_t clampedNumSubdivisions{ std::min<std::uint32_t>(numSubdivisions, 6U) };
@@ -488,12 +517,13 @@ void GeometryGenerator::CreateGeosphere(const float radius,
     }
 }
 
-void CreateCylinder(const float bottomRadius,
-                    const float topRadius,
-                    const float height,
-                    const std::uint32_t sliceCount,
-                    const std::uint32_t stackCount,
-                    MeshData& meshData) noexcept
+void 
+CreateCylinder(const float bottomRadius,
+               const float topRadius,
+               const float height,
+               const std::uint32_t sliceCount,
+               const std::uint32_t stackCount,
+               MeshData& meshData) noexcept
 {
     //
     // Build Stacks.
@@ -579,11 +609,12 @@ void CreateCylinder(const float bottomRadius,
     BuildCylinderBottomCap(bottomRadius, height, sliceCount, meshData);
 }
 
-void CreateGrid(const float width,
-                const float depth,
-                const std::uint32_t rows,
-                const std::uint32_t columns,
-                MeshData& meshData) noexcept
+void 
+CreateGrid(const float width,
+           const float depth,
+           const std::uint32_t rows,
+           const std::uint32_t columns,
+           MeshData& meshData) noexcept
 {
     const std::uint32_t vertexCount{ rows * columns };
     const std::uint32_t faceCount{ (rows - 1U) * (columns - 1U) * 2U };

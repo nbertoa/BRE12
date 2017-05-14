@@ -12,7 +12,9 @@ struct ID3D12Resource;
 namespace BRE {
 struct FrameCBuffer;
 
-// Pass responsible to execute recorders related with deferred shading geometry pass
+///
+/// @brief Responsible to execute command list recorders related with deferred shading geometry pass
+///
 class GeometryPass {
 public:
     // Geometry buffers
@@ -29,23 +31,39 @@ public:
     GeometryPass(GeometryPass&&) = delete;
     GeometryPass& operator=(GeometryPass&&) = delete;
 
-    // Preconditions:
-    // - You should fill recorders with GetCommandListRecorders() before
+    ///
+    /// @brief Initializes geometry pass
+    /// @param depthBufferView Dpeth buffer view
+    ///
     void Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 
+    ///
+    /// @brief Get geometry buffers
+    /// @return List of geometry buffers
+    ///
     __forceinline Microsoft::WRL::ComPtr<ID3D12Resource>* GetGeometryBuffers() noexcept
     {
         return mGeometryBuffers;
     }
 
-    // Preconditions:
-    // - Init() must be called first
+    ///
+    /// @brief Executes the geometry pass
+    ///
+    /// Init() must be called first
+    ///
+    /// @param frameCBuffer Constant buffer per frame, for current frame
+    ///
     void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
-    // Method used internally for validation purposes
+    ///
+    /// @brief Checks if the internal data is valid. Typically, used for assertions
+    ///
     bool IsDataValid() const noexcept;
 
+    ///
+    /// @brief Executes begin task for geometry pass
+    ///
     void ExecuteBeginTask() noexcept;
 
     CommandListPerFrame mCommandListPerFrame;

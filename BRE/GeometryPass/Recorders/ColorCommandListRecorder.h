@@ -5,7 +5,9 @@
 namespace BRE {
 class MaterialProperties;
 
-// CommandListRecorders that does color mapping
+///
+/// @brief Responsible to record command lists that implement color mapping
+///
 class ColorCommandListRecorder : public GeometryPassCommandListRecorder {
 public:
     ColorCommandListRecorder() = default;
@@ -15,21 +17,39 @@ public:
     ColorCommandListRecorder(ColorCommandListRecorder&&) = default;
     ColorCommandListRecorder& operator=(ColorCommandListRecorder&&) = default;
 
-    static void InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, const std::uint32_t geometryBufferCount) noexcept;
+    ///
+    /// @brief Initializes pipeline state object and root signature
+    /// @param geometryBufferFormats List of geometry buffers formats. It must be not nullptr
+    /// @param geometryBufferCount Number of geometry buffers formats in @p geometryBufferFormats
+    ///
+    static void InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, 
+                                              const std::uint32_t geometryBufferCount) noexcept;
 
-    // Preconditions:
-    // - All containers must not be empty
-    // - InitSharedPSOAndRootSignature() must be called first and once
+    ///
+    /// @brief Initializes the recorder
+    ///
+    /// InitSharedPSOAndRootSignature() must be called first
+    ///
+    /// @param geometryDataVector List of geometry data. Must not be empty
+    /// @param materialProperties List of material properties. Must not be empty.
+    ///
     void Init(const std::vector<GeometryData>& geometryDataVector,
               const std::vector<MaterialProperties>& materialProperties) noexcept;
 
-    // Preconditions:
-    // - Init() must be called first
+    ///
+    /// @brief Records and push command lists to CommandListExecutor
+    ///
+    /// Init() must be called first
+    ///
+    /// @param frameCBuffer Constant buffer per frame, for current frame
+    ///
     void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept final override;
 
 private:
-    // Preconditions:
-    // - All containers must not be empty
+    ///
+    /// @brief Initializes the constant buffers
+    /// @param materialProperties List of material properties. Must not be empty.
+    ///
     void InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties) noexcept;
 };
 }

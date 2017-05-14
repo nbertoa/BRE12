@@ -14,7 +14,9 @@ struct ID3D12Resource;
 namespace BRE {
 struct FrameCBuffer;
 
-// Pass responsible to execute recorders related with deferred shading lighting pass
+///
+/// @brief Responsible to execute command list recorders relater with deferred shading lighting pass
+///
 class LightingPass {
 public:
     LightingPass() = default;
@@ -24,9 +26,15 @@ public:
     LightingPass(LightingPass&&) = delete;
     LightingPass& operator=(LightingPass&&) = delete;
 
-    // Preconditions:
-    // - "geometryBuffers" must not be nullptr
-    // - "geometryBuffersCount" must be greater than zero
+    ///
+    /// @brief Initializes the pass
+    /// @param baseColorMetalMaskBuffer Geometry buffer that contains base color and metal mask.
+    /// @param normalSmoothnessBuffer Geometry buffer that contains normals and smoothness factors.
+    /// @param depthBuffer Depth buffer
+    /// @param diffuseIrradianceCubeMap Diffuse irradiance environment cube map
+    /// @param specularPreConvolvedCubeMap Specular pre convolved environment cube map
+    /// @param renderTargetView Render target view
+    ///
     void Init(ID3D12Resource& baseColorMetalMaskBuffer,
               ID3D12Resource& normalSmoothnessBuffer,
               ID3D12Resource& depthBuffer,
@@ -34,15 +42,26 @@ public:
               ID3D12Resource& specularPreConvolvedCubeMap,
               const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
-    // Preconditions:
-    // - Init() must be called first
+    ///
+    /// @brief Executes the pass
+    /// @param frameCBuffer Constant buffer per frame, for current frame
+    ///
     void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
-    // Method used internally for validation purposes
+    ///
+    /// @brief Validates internal data. Typically, used with assertions
+    ///
     bool IsDataValid() const noexcept;
 
+    ///
+    /// @brief Executes begin task for the pass
+    ///
     void ExecuteBeginTask() noexcept;
+
+    ///
+    /// @brief Executes final task for the pass
+    ///
     void ExecuteFinalTask() noexcept;
 
     CommandListPerFrame mBeginCommandListPerFrame;

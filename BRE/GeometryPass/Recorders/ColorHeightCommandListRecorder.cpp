@@ -90,7 +90,9 @@ ColorHeightCommandListRecorder::Init(const std::vector<GeometryData>& geometryDa
         mGeometryDataVec.push_back(geometryDataVector[i]);
     }
 
-    InitConstantBuffers(materialProperties, normalTextures, heightTextures);
+    InitConstantBuffers(materialProperties,
+                        normalTextures,
+                        heightTextures);
 
     BRE_ASSERT(IsDataValid());
 }
@@ -114,9 +116,9 @@ ColorHeightCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& fr
     commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
     commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
     commandList.OMSetRenderTargets(mGeometryBufferRenderTargetViewCount,
-     mGeometryBufferRenderTargetViews, 
-     false, 
-     &mDepthBufferView);
+                                   mGeometryBufferRenderTargetViews,
+                                   false,
+                                   &mDepthBufferView);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
@@ -266,16 +268,20 @@ ColorHeightCommandListRecorder::InitConstantBuffers(const std::vector<MaterialPr
 
         mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i), &materialProperties[i], sizeof(MaterialProperties));
     }
-    mStartObjectCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),
-                                                                                    static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-    mStartMaterialCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferViews(materialCbufferViewDescVec.data(),
-                                                                                      static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
-    mNormalBufferGpuDescriptorsBegin = CbvSrvUavDescriptorManager::CreateShaderResourceViews(normalResVec.data(),
-                                                                                             normalSrvDescVec.data(),
-                                                                                             static_cast<std::uint32_t>(normalSrvDescVec.size()));
-    mHeightBufferGpuDescriptorsBegin = CbvSrvUavDescriptorManager::CreateShaderResourceViews(heightResVec.data(),
-                                                                                             heightSrvDescVec.data(),
-                                                                                             static_cast<std::uint32_t>(heightSrvDescVec.size()));
+    mStartObjectCBufferView =
+        CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),
+                                                              static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
+    mStartMaterialCBufferView =
+        CbvSrvUavDescriptorManager::CreateConstantBufferViews(materialCbufferViewDescVec.data(),
+                                                              static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
+    mNormalBufferGpuDescriptorsBegin =
+        CbvSrvUavDescriptorManager::CreateShaderResourceViews(normalResVec.data(),
+                                                              normalSrvDescVec.data(),
+                                                              static_cast<std::uint32_t>(normalSrvDescVec.size()));
+    mHeightBufferGpuDescriptorsBegin =
+        CbvSrvUavDescriptorManager::CreateShaderResourceViews(heightResVec.data(),
+                                                              heightSrvDescVec.data(),
+                                                              static_cast<std::uint32_t>(heightSrvDescVec.size()));
 }
 }
 

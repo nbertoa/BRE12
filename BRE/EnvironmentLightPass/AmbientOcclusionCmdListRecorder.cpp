@@ -32,7 +32,23 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 //   This effectively attenuates the occlusion contribution
 //   according to distance from the sample kernel centre (samples closer
 //   to a point occlude it more than samples further away).
-void GenerateSampleKernel(const std::uint32_t sampleKernelSize, std::vector<XMFLOAT4>& sampleKernel)
+///
+/// @brief Generates sample kernel
+///
+/// Sample kernel for ambient occlusion. The requirements are that:
+/// - Sample positions fall within the unit hemisphere oriented
+///   toward positive z axis.
+/// - Sample positions are more densely clustered towards the origin.
+///   This effectively attenuates the occlusion contribution
+///   according to distance from the sample kernel centre (samples closer
+///   to a point occlude it more than samples further away).
+///
+/// @param sampleKernelSize Size of the sample kernel to generate
+/// @param sampleKernel Output sample kernel list
+///
+void
+GenerateSampleKernel(const std::uint32_t sampleKernelSize,
+                     std::vector<XMFLOAT4>& sampleKernel)
 {
     BRE_ASSERT(sampleKernelSize > 0U);
 
@@ -58,10 +74,19 @@ void GenerateSampleKernel(const std::uint32_t sampleKernelSize, std::vector<XMFL
     }
 }
 
-// Generate a set of random values used to rotate the sample kernel,
-// which will effectively increase the sample count and minimize 
-// the 'banding' artifacts.
-void GenerateNoise(const std::uint32_t numSamples, std::vector<XMFLOAT4>& noiseVector)
+///
+/// @brief Generates noise vector
+///
+/// Generate a set of random values used to rotate the sample kernel,
+/// which will effectively increase the sample count and minimize 
+/// the 'banding' artifacts.
+///
+/// @param numSamples Number of samples to generate
+/// @param noiseVector Output noise vector
+///
+void 
+GenerateNoise(const std::uint32_t numSamples, 
+              std::vector<XMFLOAT4>& noiseVector)
 {
     BRE_ASSERT(numSamples > 0U);
 

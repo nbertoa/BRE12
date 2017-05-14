@@ -106,7 +106,8 @@ BlurCmdListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) n
     srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
     srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
     srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
-    mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, srvDescriptor);
+    mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, 
+                                                                                         srvDescriptor);
 }
 }
 

@@ -11,10 +11,18 @@
 
 namespace BRE {
 namespace {
-void CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceinitialState,
-                                       const wchar_t* resourceName,
-                                       Microsoft::WRL::ComPtr<ID3D12Resource>& resource,
-                                       D3D12_CPU_DESCRIPTOR_HANDLE& resourceRenderTargetView) noexcept
+///
+/// @brief Creates resource and render target view for environment light pass
+/// @param resourceInitialState Initial statea of the resource to create
+/// @param resourceName Name of the resource
+/// @param resource Output resource
+/// @param resourceRenderTargetView Output render target view to the resource
+///
+void
+CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceInitialState,
+                                  const wchar_t* resourceName,
+                                  Microsoft::WRL::ComPtr<ID3D12Resource>& resource,
+                                  D3D12_CPU_DESCRIPTOR_HANDLE& resourceRenderTargetView) noexcept
 {
     // Set shared buffers properties
     D3D12_RESOURCE_DESC resourceDescriptor = {};
@@ -39,7 +47,7 @@ void CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceiniti
     ID3D12Resource* resourcePtr = &ResourceManager::CreateCommittedResource(heapProperties,
                                                                             D3D12_HEAP_FLAG_NONE,
                                                                             resourceDescriptor,
-                                                                            resourceinitialState,
+                                                                            resourceInitialState,
                                                                             &clearValue,
                                                                             resourceName);
     resource = Microsoft::WRL::ComPtr<ID3D12Resource>(resourcePtr);
@@ -162,7 +170,10 @@ EnvironmentLightPass::ExecuteBeginTask() noexcept
     commandList.ResourceBarrier(barrierCount, barriers);
 
     float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    commandList.ClearRenderTargetView(mAmbientAccessibilityBufferRenderTargetView, clearColor, 0U, nullptr);
+    commandList.ClearRenderTargetView(mAmbientAccessibilityBufferRenderTargetView,
+                                      clearColor,
+                                      0U,
+                                      nullptr);
 
     BRE_CHECK_HR(commandList.Close());
     CommandListExecutor::Get().AddCommandList(commandList);

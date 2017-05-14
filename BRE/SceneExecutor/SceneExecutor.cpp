@@ -66,8 +66,8 @@ void FinalizeSystems() noexcept
 
 void UpdateKeyboardAndMouse() noexcept
 {
-    Keyboard::Get().Update();
-    Mouse::Get().Update();
+    Keyboard::Get().UpdateKeysState();
+    Mouse::Get().UpdateMouseState();
     if (Keyboard::Get().IsKeyDown(DIK_ESCAPE)) {
         PostQuitMessage(0);
     }

@@ -158,9 +158,13 @@ ColorCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperti
         GeometryData& geomData{ mGeometryDataVec[i] };
         const std::uint32_t worldMatsCount{ static_cast<std::uint32_t>(geomData.mWorldMatrices.size()) };
         for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
-            MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j], objCBuffer.mWorldMatrix);
-            MathUtils::StoreTransposeMatrix(geomData.mInverseTransposeWorldMatrices[j], objCBuffer.mInverseTransposeWorldMatrix);
-            mObjectUploadCBuffers->CopyData(k + j, &objCBuffer, sizeof(objCBuffer));
+            MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j],
+                                            objCBuffer.mWorldMatrix);
+            MathUtils::StoreTransposeMatrix(geomData.mInverseTransposeWorldMatrices[j],
+                                            objCBuffer.mInverseTransposeWorldMatrix);
+            mObjectUploadCBuffers->CopyData(k + j,
+                                            &objCBuffer,
+                                            sizeof(objCBuffer));
         }
 
         k += worldMatsCount;
@@ -192,12 +196,16 @@ ColorCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperti
         cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(matCBufferElemSize);
         materialCbufferViewDescVec.push_back(cBufferDesc);
 
-        mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i), &materialProperties[i], sizeof(MaterialProperties));
+        mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i),
+                                          &materialProperties[i],
+                                          sizeof(MaterialProperties));
     }
-    mStartObjectCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),
-                                                                                    static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-    mStartMaterialCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferViews(materialCbufferViewDescVec.data(),
-                                                                                      static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
+    mStartObjectCBufferView =
+        CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),
+                                                              static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
+    mStartMaterialCBufferView =
+        CbvSrvUavDescriptorManager::CreateConstantBufferViews(materialCbufferViewDescVec.data(),
+                                                              static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
 }
 }
 
