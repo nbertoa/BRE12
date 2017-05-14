@@ -4,8 +4,6 @@
 #include <mutex>
 #include <wrl.h>
 
-#include <Utils/DebugUtils.h>
-
 namespace BRE {
 // To create render target descriptor heaps
 // To create render target descriptors

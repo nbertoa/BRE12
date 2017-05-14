@@ -114,6 +114,10 @@ public:
     void Terminate() noexcept;
 
 private:
+    ///
+    /// @brief CommandListExecutor constructor
+    /// @param maxNumCommandLists Maximum number of command lists to execute at once
+    ///
     explicit CommandListExecutor(const std::uint32_t maxNumCommandLists);
 
     // Called when tbb::task is spawned

@@ -4,7 +4,7 @@
 
 #include <DirectXManager\DirectXManager.h>
 #include <DXUtils/d3dx12.h>
-#include <SettingsManager\SettingsManager.h>
+#include <Utils/DebugUtils.h>
 
 namespace BRE {
 Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> RenderTargetDescriptorManager::mRenderTargetViewDescriptorHeap;

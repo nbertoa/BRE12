@@ -4,8 +4,6 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <ResourceManager/ResourceManager.h>
-#include <SettingsManager\SettingsManager.h>
 #include <Utils/DebugUtils.h>
 
 namespace BRE {

@@ -14,7 +14,6 @@
 #include <ResourceManager\ResourceManager.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <Scene/Scene.h>
-#include <SettingsManager\SettingsManager.h>
 
 using namespace DirectX;
 

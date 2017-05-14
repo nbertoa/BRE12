@@ -125,5 +125,8 @@
     <ClInclude Include="DebugUtils.h" />
     <ClInclude Include="StringUtils.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="StringUtils.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

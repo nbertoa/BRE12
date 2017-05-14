@@ -1,6 +1,5 @@
 #include "GeometryPassCommandListRecorder.h"
 
-#include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
 namespace BRE {

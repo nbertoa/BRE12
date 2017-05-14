@@ -6,7 +6,6 @@
 #include <vector>
 
 #include <CommandManager\CommandListPerFrame.h>
-#include <DXUtils/D3DFactory.h>
 #include <ResourceManager\FrameUploadCBufferPerFrame.h>
 #include <ResourceManager/VertexAndIndexBufferCreator.h>
 

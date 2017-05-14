@@ -1,7 +1,6 @@
 #include "Camera.h"
 
 #include <SettingsManager\SettingsManager.h>
-#include <Utils\DebugUtils.h>
 
 using namespace DirectX;
 

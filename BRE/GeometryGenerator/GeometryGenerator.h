@@ -4,10 +4,6 @@
 #include <vector>
 
 namespace BRE {
-// To generate procedurally the geometry of 
-// common mathematical objects.
-//
-// All triangles are generated "outward" facing.
 ///
 /// @brief Responsible to generate procedurally the geometry of common mathematical objects.
 ///
@@ -16,6 +12,14 @@ namespace BRE {
 namespace GeometryGenerator {
 struct Vertex {
     Vertex() = default;
+
+    ///
+    /// @brief Vertex constructor
+    /// @param position Position
+    /// @param normal Normal
+    /// @param tangent Tangent
+    /// @param uv UV
+    ///
     explicit Vertex(const DirectX::XMFLOAT3& position,
                     const DirectX::XMFLOAT3& normal,
                     const DirectX::XMFLOAT3& tangent,

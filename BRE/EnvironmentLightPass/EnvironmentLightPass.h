@@ -3,10 +3,10 @@
 #include <memory>
 #include <wrl.h>
 
+#include <CommandManager\CommandListPerFrame.h>
 #include <EnvironmentLightPass\AmbientOcclusionCommandListRecorder.h>
 #include <EnvironmentLightPass\BlurCommandListRecorder.h>
 #include <EnvironmentLightPass\EnvironmentLightCommandListRecorder.h>
-#include <CommandManager\CommandListPerFrame.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12Resource;

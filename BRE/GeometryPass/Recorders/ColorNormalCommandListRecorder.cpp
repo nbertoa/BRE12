@@ -13,7 +13,6 @@
 #include <ShaderUtils\CBuffers.h>
 #include <ShaderUtils\MaterialProperties.h>
 #include <Utils/DebugUtils.h>
-#include "NormalCommandListRecorder.h"
 
 namespace BRE {
 // Root Signature:

@@ -4,7 +4,6 @@
 
 #include <DirectXManager\DirectXManager.h>
 #include <DXUtils/d3dx12.h>
-#include <SettingsManager\SettingsManager.h>
 
 namespace BRE {
 Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CbvSrvUavDescriptorManager::mCbvSrvUavDescriptorHeap;

@@ -4,8 +4,6 @@
 #include <mutex>
 #include <wrl.h>
 
-#include <Utils/DebugUtils.h>
-
 namespace BRE {
 ///
 /// @brief Responsible to create depth stencil descriptors and heaps

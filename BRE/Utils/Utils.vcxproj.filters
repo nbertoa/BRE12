@@ -4,4 +4,7 @@
     <ClInclude Include="StringUtils.h" />
     <ClInclude Include="DebugUtils.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="StringUtils.cpp" />
+  </ItemGroup>
 </Project>

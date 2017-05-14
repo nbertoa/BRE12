@@ -5,7 +5,6 @@
 #include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <PSOManager/PSOManager.h>
-#include <ResourceManager/UploadBufferManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <ShaderUtils\CBuffers.h>

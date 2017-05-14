@@ -5,9 +5,7 @@
 
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <DXUtils/d3dx12.h>
-#include <ResourceManager\ResourceManager.h>
 #include <ResourceStateManager\ResourceStateManager.h>
-#include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
 using namespace DirectX;
