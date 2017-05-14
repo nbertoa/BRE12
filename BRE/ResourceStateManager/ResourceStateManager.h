@@ -5,8 +5,6 @@
 
 #include <DXUtils\d3dx12.h>
 
-struct ID3D12Resource;
-
 namespace BRE {
 ///
 /// @brief Responsible to track resource states.

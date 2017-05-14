@@ -4,10 +4,6 @@
 
 #include <SkyBoxPass\SkyBoxCommandListRecorder.h>
 
-struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct ID3D12Resource;
-struct D3D12_CPU_DESCRIPTOR_HANDLE;
-
 namespace BRE {
 struct FrameCBuffer;
 

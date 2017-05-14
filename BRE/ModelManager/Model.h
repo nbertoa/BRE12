@@ -6,9 +6,6 @@
 #include <GeometryGenerator/GeometryGenerator.h>
 #include <ModelManager/Mesh.h>
 
-struct ID3D12GraphicsCommandList;
-struct ID3D12Resource;
-
 namespace BRE {
 ///
 /// @brief Represents a model that can be loaded from a file

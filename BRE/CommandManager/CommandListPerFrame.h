@@ -5,10 +5,6 @@
 #include <SettingsManager\SettingsManager.h>
 #include <Utils\DebugUtils.h>
 
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
-struct ID3D12PipelinesState;
-
 namespace BRE {
 ///
 /// @brief Provides support of command lists for different frames.

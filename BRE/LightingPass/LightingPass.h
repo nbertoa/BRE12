@@ -4,12 +4,8 @@
 #include <vector>
 #include <wrl.h>
 
-#include <EnvironmentLightPass\EnvironmentLightPass.h>
 #include <CommandManager\CommandListPerFrame.h>
-
-struct D3D12_CPU_DESCRIPTOR_HANDLE;
-
-struct ID3D12Resource;
+#include <EnvironmentLightPass\EnvironmentLightPass.h>
 
 namespace BRE {
 struct FrameCBuffer;

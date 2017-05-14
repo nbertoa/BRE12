@@ -2,10 +2,6 @@
 
 #include <CommandManager\CommandListPerFrame.h>
 
-struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct D3D12_GPU_DESCRIPTOR_HANDLE;
-struct ID3D12Resource;
-
 namespace BRE {
 ///
 /// @brief Responsible of recording command lists that apply blur

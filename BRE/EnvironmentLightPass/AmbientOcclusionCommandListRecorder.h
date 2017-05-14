@@ -6,14 +6,9 @@
 #include <CommandManager\CommandListPerFrame.h>
 #include <ResourceManager\FrameUploadCBufferPerFrame.h>
 
-struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct ID3D12Resource;
-
 namespace BRE {
 struct FrameCBuffer;
 
-// Responsible of command lists recording to be executed by CommandListExecutor.
-// This class has common data and functionality to record command list for ambient occlusion pass.
 ///
 /// @brief Responsible of command list recording for ambient occlusion pass.
 ///

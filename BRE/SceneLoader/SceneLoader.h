@@ -10,8 +10,6 @@
 #include <SceneLoader\ModelLoader.h>
 #include <SceneLoader\TextureLoader.h>
 
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
 
 namespace BRE {
 class Scene;

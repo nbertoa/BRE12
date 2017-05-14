@@ -5,9 +5,6 @@
 #include <CommandManager\CommandListPerFrame.h>
 #include <ResourceManager\FrameUploadCBufferPerFrame.h>
 
-struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct ID3D12Resource;
-
 namespace BRE {
 struct FrameCBuffer;
 

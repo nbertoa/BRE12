@@ -7,7 +7,6 @@
 #include <Utils/DebugUtils.h>
 
 struct aiMesh;
-struct ID3D12GraphicsCommandList;
 
 namespace BRE {
 class Model;

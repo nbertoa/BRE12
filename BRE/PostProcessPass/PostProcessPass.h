@@ -5,9 +5,6 @@
 #include <CommandManager\CommandListPerFrame.h>
 #include <PostProcessPass\PostProcessCommandListRecorder.h>
 
-struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct ID3D12Resource;
-
 namespace BRE {
 ///
 /// @brief Pass responsible to apply post processing effects (anti aliasing, color grading, etc)

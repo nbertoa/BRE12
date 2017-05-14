@@ -7,7 +7,6 @@
 #include <ModelManager/Model.h>
 
 namespace BRE {
-// To create/get models or built-in geometry.
 ///
 /// @brief Responsible to create models or built-in geometry (box, sphere, etc)
 ///

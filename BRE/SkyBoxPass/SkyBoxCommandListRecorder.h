@@ -7,12 +7,6 @@
 #include <ResourceManager\FrameUploadCBufferPerFrame.h>
 #include <ResourceManager/VertexAndIndexBufferCreator.h>
 
-struct D3D12_CPU_DESCRIPTOR_HANDLE;
-struct D3D12_GPU_DESCRIPTOR_HANDLE;
-struct ID3D12CommandAllocator;
-struct ID3D12Resource;
-struct ID3D12GraphicsCommandList;
-
 namespace BRE {
 struct FrameCBuffer;
 
