@@ -49,9 +49,11 @@ SceneLoader::LoadScene(const char* sceneFilePath) noexcept
     mMaterialTechniqueLoader.LoadMaterialTechniques(rootNode);
     mDrawableObjectLoader.LoadDrawableObjects(rootNode);
     mEnvironmentLoader.LoadEnvironment(rootNode);
+    mCameraLoader.LoadCamera(rootNode);
 
     Scene* scene = new Scene;
     GenerateGeometryPassRecorders(*scene);
+    scene->GetCamera() = mCameraLoader.GetCamera();
 
     return scene;
 }

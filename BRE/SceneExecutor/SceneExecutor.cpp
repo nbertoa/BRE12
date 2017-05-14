@@ -28,6 +28,8 @@ using namespace DirectX;
 namespace BRE {
 namespace {
 const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
+const std::uint32_t RENDER_TARGET_DESCRIPTOR_HEAP_SIZE = 10U;
+const std::uint32_t CBV_SRV_UAV_DESCRIPTOR_HEAP_SIZE = 3000U;
 
 void InitSystems(const HINSTANCE moduleInstanceHandle) noexcept
 {
@@ -42,9 +44,9 @@ void InitSystems(const HINSTANCE moduleInstanceHandle) noexcept
     Keyboard::Create(*directInput, windowHandle);
     Mouse::Create(*directInput, windowHandle);
 
-    CbvSrvUavDescriptorManager::Init();
+    CbvSrvUavDescriptorManager::Init(CBV_SRV_UAV_DESCRIPTOR_HEAP_SIZE);
     DepthStencilDescriptorManager::Init();
-    RenderTargetDescriptorManager::Init();
+    RenderTargetDescriptorManager::Init(RENDER_TARGET_DESCRIPTOR_HEAP_SIZE);
 
     CommandListExecutor::Create(MAX_NUM_CMD_LISTS);
 

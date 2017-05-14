@@ -12,10 +12,6 @@ class Camera {
 public:
     Camera() = default;
     ~Camera() = default;
-    Camera(const Camera&) = delete;
-    const Camera& operator=(const Camera&) = delete;
-    Camera(Camera&&) = delete;
-    Camera& operator=(Camera&&) = delete;
 
     ///
     /// @brief Get the camera position
@@ -39,13 +35,17 @@ public:
                     const float farPlaneZ) noexcept;
 
     ///
-    /// @brief Set look at and up camera vectors
+    /// @brief Set camera position
     /// @param cameraPosition 3D coordinates of the camera position
-    /// @param targetPosition 3D coordinates of the target position
+    ///
+    void SetPosition(const DirectX::XMFLOAT3& cameraPosition) noexcept;
+
+    ///
+    /// @brief Set look at and up camera vectors
+    /// @param lookVector 3D coordinates of the look vector
     /// @param upVector 3D coordinates of the up vector
     ///
-    void SetLookAndUpVectors(const DirectX::XMFLOAT3& cameraPosition,
-                             const DirectX::XMFLOAT3& targetPosition,
+    void SetLookAndUpVectors(const DirectX::XMFLOAT3& lookVector,
                              const DirectX::XMFLOAT3& upVector) noexcept;
 
     ///

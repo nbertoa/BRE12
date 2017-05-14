@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <GeometryPass\GeometryPassCommandListRecorder.h>
+#include <SceneLoader\CameraLoader.h>
 #include <SceneLoader\DrawableObjectLoader.h>
 #include <SceneLoader\EnvironmentLoader.h>
 #include <SceneLoader\MaterialPropertiesLoader.h>
@@ -82,6 +83,7 @@ private:
     MaterialTechniqueLoader mMaterialTechniqueLoader;
     DrawableObjectLoader mDrawableObjectLoader;
     EnvironmentLoader mEnvironmentLoader;
+    CameraLoader mCameraLoader;
 };
 }
 

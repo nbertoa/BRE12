@@ -12,12 +12,12 @@ D3D12_CPU_DESCRIPTOR_HANDLE CbvSrvUavDescriptorManager::mCurrentCbvSrvUavCpuDesc
 std::mutex CbvSrvUavDescriptorManager::mMutex;
 
 void
-CbvSrvUavDescriptorManager::Init() noexcept
+CbvSrvUavDescriptorManager::Init(const std::uint32_t numDescriptorsInCbvSrvUavDescriptorHeap) noexcept
 {
     D3D12_DESCRIPTOR_HEAP_DESC cbvSrvUavDescriptorHeapDescriptor{};
     cbvSrvUavDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     cbvSrvUavDescriptorHeapDescriptor.NodeMask = 0U;
-    cbvSrvUavDescriptorHeapDescriptor.NumDescriptors = 3000U;
+    cbvSrvUavDescriptorHeapDescriptor.NumDescriptors = numDescriptorsInCbvSrvUavDescriptorHeap;
     cbvSrvUavDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 
     mMutex.lock();

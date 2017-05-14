@@ -161,6 +161,7 @@ RenderManager::Create(Scene& scene) noexcept
 
 RenderManager::RenderManager(Scene& scene)
     : mGeometryPass(scene.GetGeometryPassCommandListRecorders())
+    , mCamera(scene.GetCamera())
 {
     mFence = &FenceManager::CreateFence(0U, D3D12_FENCE_FLAG_NONE);
 

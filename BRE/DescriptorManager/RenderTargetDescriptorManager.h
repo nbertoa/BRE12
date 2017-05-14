@@ -21,8 +21,10 @@ public:
 
     ///
     /// @brief Initializes the manager
+    /// @param numDescriptorsInRenderTargetDescriptorHeap Number of descriptors in render target
+    /// descriptor heap.
     ///
-    static void Init() noexcept;
+    static void Init(const std::uint32_t numDescriptorsInRenderTargetDescriptorHeap) noexcept;
 
     ///
     /// @brief Create a render target view

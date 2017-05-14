@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include <Camera\Camera.h>
 #include <GeometryPass/GeometryPassCommandListRecorder.h>
 
 namespace BRE {
@@ -41,12 +42,19 @@ public:
     ///
     ID3D12Resource* &GetSpecularPreConvolvedCubeMap() noexcept;
 
+    Camera& GetCamera() noexcept
+    {
+        return mCamera;
+    }
+
 private:
     GeometryPassCommandListRecorders mGeometryCommandListRecorders;
 
     ID3D12Resource* mSkyBoxCubeMap{ nullptr };
     ID3D12Resource* mDiffuseIrradianceCubeMap{ nullptr };
     ID3D12Resource* mSpecularPreConvolvedCubeMap{ nullptr };
+
+    Camera mCamera;
 };
 }
 

@@ -22,22 +22,25 @@ Camera::SetFrustum(const float verticalFieldOfView,
 }
 
 void
-Camera::SetLookAndUpVectors(const XMFLOAT3& cameraPosition,
-                            const XMFLOAT3& targetPosition,
-                            const XMFLOAT3& upVector) noexcept
+Camera::SetPosition(const XMFLOAT3& cameraPosition) noexcept
 {
     const XMVECTOR xmCameraPosition(XMLoadFloat3(&cameraPosition));
-    const XMVECTOR xmTargetPosition(XMLoadFloat3(&targetPosition));
+    XMStoreFloat3(&mPosition, xmCameraPosition);
+}
+
+void
+Camera::SetLookAndUpVectors(const XMFLOAT3& lookVector,
+                            const XMFLOAT3& upVector) noexcept
+{
+    XMVECTOR xmLookVector(XMLoadFloat3(&lookVector));
     XMVECTOR xmUpVector(XMLoadFloat3(&upVector));
 
-    const XMVECTOR lookVector(XMVector3Normalize(XMVectorSubtract(xmTargetPosition,
-                                                                  xmCameraPosition)));
+    xmLookVector = XMVector3Normalize(xmLookVector);
     const XMVECTOR rightVector(XMVector3Normalize(XMVector3Cross(xmUpVector,
-                                                                 lookVector)));
-    xmUpVector = XMVector3Cross(lookVector, rightVector);
+                                                                 xmLookVector)));
+    xmUpVector = XMVector3Cross(xmLookVector, rightVector);
 
-    XMStoreFloat3(&mPosition, xmCameraPosition);
-    XMStoreFloat3(&mLookVector, lookVector);
+    XMStoreFloat3(&mLookVector, xmLookVector);
     XMStoreFloat3(&mRightVector, rightVector);
     XMStoreFloat3(&mUpVector, xmUpVector);
 }

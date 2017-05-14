@@ -13,10 +13,10 @@ D3D12_CPU_DESCRIPTOR_HANDLE RenderTargetDescriptorManager::mCurrentRenderTargetV
 std::mutex RenderTargetDescriptorManager::mMutex;
 
 void
-RenderTargetDescriptorManager::Init() noexcept
+RenderTargetDescriptorManager::Init(const std::uint32_t numDescriptorsInRenderTargetDescriptorHeap) noexcept
 {
     D3D12_DESCRIPTOR_HEAP_DESC renderTargetViewDescriptorHeapDescriptor{};
-    renderTargetViewDescriptorHeapDescriptor.NumDescriptors = 10U;
+    renderTargetViewDescriptorHeapDescriptor.NumDescriptors = numDescriptorsInRenderTargetDescriptorHeap;
     renderTargetViewDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
     renderTargetViewDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
     renderTargetViewDescriptorHeapDescriptor.NodeMask = 0;

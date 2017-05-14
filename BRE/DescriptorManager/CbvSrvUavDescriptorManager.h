@@ -22,8 +22,10 @@ public:
 
     ///
     /// @brief Initializes manager, for example, descriptor heap.
+    /// @param numDescriptorsInCbvSrvUavDescriptorHeap Number of descriptors in
+    /// descriptor heap of Constant Buffer Views, Shader Resource Views, and Unordered Access Views.
     ///
-    static void Init() noexcept;
+    static void Init(const std::uint32_t numDescriptorsInCbvSrvUavDescriptorHeap) noexcept;
     
     ///
     /// @brief Create a constant buffer view

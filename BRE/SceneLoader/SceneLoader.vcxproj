@@ -124,6 +124,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CameraLoader.h" />
     <ClInclude Include="DrawableObject.h" />
     <ClInclude Include="DrawableObjectLoader.h" />
     <ClInclude Include="EnvironmentLoader.h" />
@@ -136,6 +137,7 @@
     <ClInclude Include="YamlUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CameraLoader.cpp" />
     <ClCompile Include="DrawableObjectLoader.cpp" />
     <ClCompile Include="EnvironmentLoader.cpp" />
     <ClCompile Include="MaterialPropertiesLoader.cpp" />

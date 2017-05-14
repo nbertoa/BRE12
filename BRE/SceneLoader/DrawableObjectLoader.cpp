@@ -33,7 +33,7 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
     //     scale: [1, 3, 3]
     const YAML::Node drawableObjectsNode = rootNode["drawable objects"];
     BRE_ASSERT_MSG(drawableObjectsNode.IsDefined(), L"'drawable objects' node must be defined");
-    BRE_ASSERT_MSG(drawableObjectsNode.IsSequence(), L"'drawable objects' node must be a map");
+    BRE_ASSERT_MSG(drawableObjectsNode.IsSequence(), L"'drawable objects' node must be a sequence");
 
     // We need model name to fill mDrawableObjectsByModelName
     std::string modelName;
