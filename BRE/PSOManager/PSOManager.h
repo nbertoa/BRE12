@@ -7,7 +7,9 @@
 #include <DXUtils/D3DFactory.h>
 
 namespace BRE {
-// To create/get/erase pipeline state objects
+///
+/// @brief Responsible to create pipeline state objects
+///
 class PSOManager {
 public:
     PSOManager() = delete;
@@ -17,7 +19,10 @@ public:
     PSOManager(PSOManager&&) = delete;
     PSOManager& operator=(PSOManager&&) = delete;
 
-    static void EraseAll() noexcept;
+    ///
+    /// @brief Releases all pipeline state objects
+    ///
+    static void Clear() noexcept;
 
     struct PSOCreationData {
         PSOCreationData() = default;
@@ -27,6 +32,10 @@ public:
         PSOCreationData(PSOCreationData&&) = delete;
         PSOCreationData& operator=(PSOCreationData&&) = delete;
 
+        ///
+        /// @brief Checks if internal data is valid. Typically, used with assertions.
+        /// @return True if valid. Otherwise, false.
+        ///
         bool IsDataValid() const noexcept;
 
         std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayoutDescriptors{};
@@ -50,15 +59,22 @@ public:
         D3D12_PRIMITIVE_TOPOLOGY_TYPE mPrimitiveTopologyType{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE };
     };
 
-    // Preconditions:
-    // - "psoCreationData" must be valid
+    ///
+    /// @brief Create graphics pipeline state object
+    /// @param psoCreationData Pipeline state object creation data. It must be valid
+    /// @return Pipeline state object
+    ///
     static ID3D12PipelineState& CreateGraphicsPSO(const PSOManager::PSOCreationData& psoCreationData) noexcept;
 
 private:
+    ///
+    /// @brief Create graphics pipeline state object by descriptor
+    /// @param psoDescriptor Graphics pipeline state object descriptor
+    /// @return Pipeline state object
+    ///
     static ID3D12PipelineState& CreateGraphicsPSOByDescriptor(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDescriptor) noexcept;
 
-    using PSOs = tbb::concurrent_unordered_set<ID3D12PipelineState*>;
-    static PSOs mPSOs;
+    static tbb::concurrent_unordered_set<ID3D12PipelineState*> mPSOs;
 
     static std::mutex mMutex;
 };

@@ -4,16 +4,18 @@
 #include <Utils/DebugUtils.h>
 
 namespace BRE {
-ModelManager::Models ModelManager::mModels;
+tbb::concurrent_unordered_set<Model*> ModelManager::mModels;
 std::mutex ModelManager::mMutex;
 
 void
-ModelManager::EraseAll() noexcept
+ModelManager::Clear() noexcept
 {
     for (Model* model : mModels) {
         BRE_ASSERT(model != nullptr);
         delete model;
     }
+
+    mModels.clear();
 }
 
 Model&

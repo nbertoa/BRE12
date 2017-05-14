@@ -20,6 +20,12 @@ using namespace DirectX;
 
 namespace BRE {
 namespace {
+///
+/// @brief Update camera and constant buffer per frame
+/// @param elapsedFrameTime Elapsed frame time
+/// @param camera Camera
+/// @param Constant buffer per frame
+///
 void UpdateCameraAndFrameCBuffer(const float elapsedFrameTime,
                                  Camera& camera,
                                  FrameCBuffer& frameCBuffer) noexcept
@@ -42,11 +48,15 @@ void UpdateCameraAndFrameCBuffer(const float elapsedFrameTime,
 
         frameCBuffer.mEyeWorldPosition = camera.GetPosition4f();
 
-        MathUtils::StoreTransposeMatrix(camera.GetViewMatrix(), frameCBuffer.mViewMatrix);
-        MathUtils::StoreInverseTransposeMatrix(camera.GetViewMatrix(), frameCBuffer.mInverseViewMatrix);
+        MathUtils::StoreTransposeMatrix(camera.GetViewMatrix(),
+                                        frameCBuffer.mViewMatrix);
+        MathUtils::StoreInverseTransposeMatrix(camera.GetViewMatrix(),
+                                               frameCBuffer.mInverseViewMatrix);
 
-        MathUtils::StoreTransposeMatrix(camera.GetProjectionMatrix(), frameCBuffer.mProjectionMatrix);
-        MathUtils::StoreInverseTransposeMatrix(camera.GetProjectionMatrix(), frameCBuffer.mInverseProjectionMatrix);
+        MathUtils::StoreTransposeMatrix(camera.GetProjectionMatrix(),
+                                        frameCBuffer.mProjectionMatrix);
+        MathUtils::StoreInverseTransposeMatrix(camera.GetProjectionMatrix(),
+                                               frameCBuffer.mInverseProjectionMatrix);
 
         // Update camera based on keyboard
         const float offset = translationDelta * (Keyboard::Get().IsKeyDown(DIK_LSHIFT) ? sCameraMultiplier : 1.0f);
@@ -81,6 +91,12 @@ void UpdateCameraAndFrameCBuffer(const float elapsedFrameTime,
     }
 }
 
+///
+/// @brief Creates swap chain
+/// @param windowHandle Window handle
+/// @param frameBufferFormat Format of the frame buffer
+/// @param swapChain Swap chain
+///
 void CreateSwapChain(const HWND windowHandle,
                      const DXGI_FORMAT frameBufferFormat,
                      Microsoft::WRL::ComPtr<IDXGISwapChain3>& swapChain) noexcept
@@ -178,7 +194,7 @@ void
 RenderManager::InitPasses(Scene& scene) noexcept
 {
     // Generate recorders for all the passes
-    mGeometryPass.Init(DepthStencilCpuDesc());
+    mGeometryPass.Init(GetDepthStencilCpuDesc());
 
     ID3D12Resource* skyBoxCubeMap = scene.GetSkyBoxCubeMap();
     ID3D12Resource* diffuseIrradianceCubeMap = scene.GetDiffuseIrradianceCubeMap();
@@ -196,7 +212,7 @@ RenderManager::InitPasses(Scene& scene) noexcept
 
     mSkyBoxPass.Init(*skyBoxCubeMap,
                      mIntermediateColorBuffer1RenderTargetView,
-                     DepthStencilCpuDesc());
+                     GetDepthStencilCpuDesc());
 
     mToneMappingPass.Init(*mIntermediateColorBuffer1.Get(),
                           *mIntermediateColorBuffer2.Get(),
@@ -229,7 +245,7 @@ RenderManager::execute()
         mLightingPass.Execute(mFrameCBuffer);
         mSkyBoxPass.Execute(mFrameCBuffer);
         mToneMappingPass.Execute();
-        mPostProcessPass.Execute(*CurrentFrameBuffer(), CurrentFrameBufferCpuDesc());
+        mPostProcessPass.Execute(*GetCurrentFrameBuffer(), GetCurrentFrameBufferCpuDesc());
         ExecuteFinalPass();
 
         SignalFenceAndPresent();
@@ -255,7 +271,7 @@ RenderManager::ExecuteFinalPass()
         ResourceStateManager::ChangeResourceStateAndGetBarrier(*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(),
         D3D12_RESOURCE_STATE_RENDER_TARGET),
 
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*CurrentFrameBuffer(),
+        ResourceStateManager::ChangeResourceStateAndGetBarrier(*GetCurrentFrameBuffer(),
         D3D12_RESOURCE_STATE_PRESENT),
 
         ResourceStateManager::ChangeResourceStateAndGetBarrier(*mIntermediateColorBuffer1.Get(),

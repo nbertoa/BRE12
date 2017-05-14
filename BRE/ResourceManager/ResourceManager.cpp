@@ -9,16 +9,18 @@
 #include <Utils\StringUtils.h>
 
 namespace BRE {
-ResourceManager::Resources ResourceManager::mResources;
+tbb::concurrent_unordered_set<ID3D12Resource*> ResourceManager::mResources;
 std::mutex ResourceManager::mMutex;
 
 void
-ResourceManager::EraseAll() noexcept
+ResourceManager::Clear() noexcept
 {
     for (ID3D12Resource* resource : mResources) {
         BRE_ASSERT(resource != nullptr);
         resource->Release();
     }
+
+    mResources.clear();
 }
 
 ID3D12Resource&
@@ -114,7 +116,9 @@ ResourceManager::CreateDefaultBuffer(ID3D12GraphicsCommandList& commandList,
                                                                               D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST) };
     commandList.ResourceBarrier(1, &resBarrier);
     UpdateSubresources<1>(&commandList, resource, uploadBuffer.Get(), 0, 0, 1, &subResourceData);
-    resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(resource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+    resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(resource, 
+                                                      D3D12_RESOURCE_STATE_COPY_DEST, 
+                                                      D3D12_RESOURCE_STATE_GENERIC_READ);
     commandList.ResourceBarrier(1, &resBarrier);
 
     BRE_ASSERT(resource != nullptr);

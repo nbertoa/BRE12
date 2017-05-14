@@ -4,16 +4,18 @@
 #include <Utils/DebugUtils.h>
 
 namespace BRE {
-UploadBufferManager::UploadBuffers UploadBufferManager::mUploadBuffers;
+tbb::concurrent_unordered_set<UploadBuffer*> UploadBufferManager::mUploadBuffers;
 std::mutex UploadBufferManager::mMutex;
 
 void
-UploadBufferManager::EraseAll() noexcept
+UploadBufferManager::Clear() noexcept
 {
     for (UploadBuffer* uploadBuffer : mUploadBuffers) {
         BRE_ASSERT(uploadBuffer != nullptr);
         delete uploadBuffer;
     }
+
+    mUploadBuffers.clear();
 }
 
 UploadBuffer&
@@ -23,7 +25,9 @@ UploadBufferManager::CreateUploadBuffer(const std::size_t elementSize,
     BRE_ASSERT(elementSize > 0UL);
     BRE_ASSERT(elementCount > 0U);
 
-    UploadBuffer* uploadBuffer = new UploadBuffer(DirectXManager::GetDevice(), elementSize, elementCount);
+    UploadBuffer* uploadBuffer = new UploadBuffer(DirectXManager::GetDevice(),
+                                                  elementSize,
+                                                  elementCount);
     mUploadBuffers.insert(uploadBuffer);
 
     return *uploadBuffer;

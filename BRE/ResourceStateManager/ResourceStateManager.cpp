@@ -5,13 +5,13 @@
 #include <Utils\DebugUtils.h>
 
 namespace BRE {
-ResourceStateManager::StateByResource ResourceStateManager::mStateByResource;
+tbb::concurrent_hash_map<ID3D12Resource*, D3D12_RESOURCE_STATES> ResourceStateManager::mStateByResource;
 
 void
 ResourceStateManager::AddResource(ID3D12Resource& resource,
                                   const D3D12_RESOURCE_STATES initialState) noexcept
 {
-    StateByResource::accessor accessor;
+    tbb::concurrent_hash_map<ID3D12Resource*, D3D12_RESOURCE_STATES>::accessor accessor;
 #ifdef _DEBUG
     mStateByResource.find(accessor, &resource);
     BRE_ASSERT(accessor.empty());
@@ -25,7 +25,7 @@ CD3DX12_RESOURCE_BARRIER
 ResourceStateManager::ChangeResourceStateAndGetBarrier(ID3D12Resource& resource,
                                                        const D3D12_RESOURCE_STATES newState) noexcept
 {
-    StateByResource::accessor accessor;
+    tbb::concurrent_hash_map<ID3D12Resource*, D3D12_RESOURCE_STATES>::accessor accessor;
     mStateByResource.find(accessor, &resource);
     BRE_ASSERT(accessor.empty() == false);
 
@@ -40,7 +40,7 @@ ResourceStateManager::ChangeResourceStateAndGetBarrier(ID3D12Resource& resource,
 D3D12_RESOURCE_STATES
 ResourceStateManager::GetResourceState(ID3D12Resource& resource) noexcept
 {
-    StateByResource::accessor accessor;
+    tbb::concurrent_hash_map<ID3D12Resource*, D3D12_RESOURCE_STATES>::accessor accessor;
     mStateByResource.find(accessor, &resource);
     BRE_ASSERT(accessor.empty() == false);
     return accessor->second;

@@ -19,14 +19,23 @@ namespace BRE {
 class CommandListExecutor;
 class Scene;
 
-// Initializes passes (geometry, light, skybox, etc) based on a Scene.
-// Steps:
-// - Use RenderManager::Create() to create and spawn and instance. 
-// - When you want to terminate this task, you should call RenderManager::Terminate()
+///
+/// @brief Responsible to initialize passes (geometry, light, skybox, etc) based on a Scene.
+///
+/// Steps:
+/// - Use RenderManager::Create() to create and spawn and instance. 
+/// - When you want to terminate this task, you should call RenderManager::Terminate()
+///
 class RenderManager : public tbb::task {
 public:
-    // Preconditions:
-    // - Create() must be called once
+    ///
+    /// @brief Creates a RenderManager
+    ///
+    /// This mtehod must be called once.
+    ///
+    /// @param scene Scene to create the RenderManager
+    /// @return Render manager
+    ///
     static RenderManager& Create(Scene& scene) noexcept;
 
     ~RenderManager() = default;
@@ -35,46 +44,92 @@ public:
     RenderManager(RenderManager&&) = delete;
     RenderManager& operator=(RenderManager&&) = delete;
 
+    ///
+    /// @brief Terminate render manager
+    ///
     void Terminate() noexcept;
 
 private:
     explicit RenderManager(Scene& scene);
 
-    // Called when tbb::task is spawned
+    ///
+    /// @brief Executes the tbb task.
+    ///
+    /// This method is called when tbb::task is spawned
+    ///
     tbb::task* execute() final override;
 
     static RenderManager* sRenderManager;
 
+    ///
+    /// @brief Initialize passes
+    /// @param scene Scene to initialize passes
+    ///
     void InitPasses(Scene& scene) noexcept;
 
+    ///
+    /// @brief Creates frame buffers and render target views
+    ///
     void CreateFrameBuffersAndRenderTargetViews() noexcept;
 
+    ///
+    /// @brief Creates depth stencil buffer and view
+    ///
     void CreateDepthStencilBufferAndView() noexcept;
 
+    ///
+    /// @brief Creates intermediate color buffer and render target view
+    /// @param initialState Initial state of the buffers
+    /// @param resourceName Resource name
+    /// @param buffer Output color buffer
+    /// @param renderTargetView Output render target view
+    ///
     void CreateIntermediateColorBufferAndRenderTargetView(const D3D12_RESOURCE_STATES initialState,
                                                           const wchar_t* resourceName,
                                                           Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
                                                           D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
-    ID3D12Resource* CurrentFrameBuffer() const noexcept
+    ///
+    /// @brief Get current frame buffer
+    /// @return Frame buffer
+    ///
+    ID3D12Resource* GetCurrentFrameBuffer() const noexcept
     {
         BRE_ASSERT(mSwapChain != nullptr);
         return mFrameBuffers[mSwapChain->GetCurrentBackBufferIndex()].Get();
     }
 
-    D3D12_CPU_DESCRIPTOR_HANDLE CurrentFrameBufferCpuDesc() const noexcept
+    ///
+    /// @brief Get current frame buffer CPU descriptor
+    /// @return CPU descriptor
+    ///
+    D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentFrameBufferCpuDesc() const noexcept
     {
         return mFrameBufferRenderTargetViews[mSwapChain->GetCurrentBackBufferIndex()];
     }
 
-    D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilCpuDesc() const noexcept
+    ///
+    /// @brief Get depth stencil CPU descriptor
+    /// @return CPU descriptor
+    ///
+    D3D12_CPU_DESCRIPTOR_HANDLE GetDepthStencilCpuDesc() const noexcept
     {
         return mDepthBufferRenderTargetView;
     }
 
+    ///
+    /// @brief Executes final pass for render manager
+    ///
     void ExecuteFinalPass();
 
+    ///
+    /// @brief Flushes command queue
+    ///
     void FlushCommandQueue() noexcept;
+
+    ///
+    /// @brief Signals fence and presents
+    ///
     void SignalFenceAndPresent() noexcept;
 
     Microsoft::WRL::ComPtr<IDXGISwapChain3> mSwapChain{ nullptr };

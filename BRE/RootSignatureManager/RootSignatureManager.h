@@ -5,7 +5,9 @@
 #include <tbb\concurrent_unordered_set.h>
 
 namespace BRE {
-// This class is responsible to create/get/erase root signatures
+///
+/// @brief Responsible to create root signatures
+///
 class RootSignatureManager {
 public:
     RootSignatureManager() = delete;
@@ -15,13 +17,20 @@ public:
     RootSignatureManager(RootSignatureManager&&) = delete;
     RootSignatureManager& operator=(RootSignatureManager&&) = delete;
 
-    static void EraseAll() noexcept;
+    ///
+    /// @brief Releases all root signatures
+    ///
+    static void Clear() noexcept;
 
+    ///
+    /// @brief Create root signature from blob
+    /// @param blob Blob
+    /// @return Root signature
+    ///
     static ID3D12RootSignature& CreateRootSignatureFromBlob(ID3DBlob& blob) noexcept;
 
 private:
-    using RootSignatures = tbb::concurrent_unordered_set<ID3D12RootSignature*>;
-    static RootSignatures mRootSignatures;
+    static tbb::concurrent_unordered_set<ID3D12RootSignature*> mRootSignatures;
 
     static std::mutex mMutex;
 };

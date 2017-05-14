@@ -9,7 +9,9 @@ struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12Resource;
 
 namespace BRE {
-// Pass that applies post processing effects (anti aliasing, color grading, etc)
+///
+/// @brief Pass responsible to apply post processing effects (anti aliasing, color grading, etc)
+///
 class PostProcessPass {
 public:
     PostProcessPass() = default;
@@ -19,17 +21,35 @@ public:
     PostProcessPass(PostProcessPass&&) = delete;
     PostProcessPass& operator=(PostProcessPass&&) = delete;
 
+    ///
+    /// @brief Initializes post process pass
+    /// @param inputColorBuffer Input color buffer to apply post processing 
+    ///
     void Init(ID3D12Resource& inputColorBuffer) noexcept;
 
-    // Preconditions:
-    // - Init() must be called first
+    ///
+    /// @brief Execute post process pass
+    ///
+    /// Init() must be called first
+    ///
+    /// @param renderTargetBuffer Render target buffer
+    /// @param renderTargetView Render target view
+    ///
     void Execute(ID3D12Resource& renderTargetBuffer,
                  const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
 private:
-    // Method used internally for validation purposes
+    ///
+    /// @brief Checks if internal data is valid. Typically, used with assertions
+    /// @return True if valid. Otherwise, false.
+    ///
     bool IsDataValid() const noexcept;
 
+    ///
+    /// @brief Execute begin task for pass
+    /// @param renderTargetBuffer Render target buffer
+    /// @param renderTargetView Render target view
+    ///
     void ExecuteBeginTask(ID3D12Resource& renderTargetBuffer,
                           const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 

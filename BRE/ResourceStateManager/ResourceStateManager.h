@@ -8,11 +8,14 @@
 struct ID3D12Resource;
 
 namespace BRE {
-// To track resource states.
-// Its functionality includes:
-// - GetResource state registration
-// - GetResource state change
-// - GetResource unregistration
+///
+/// @brief Responsible to track resource states.
+///
+/// Its functionality includes:
+/// - GetResource state registration
+/// - GetResource state change
+/// - GetResource unregistration
+///
 class ResourceStateManager {
 public:
     ResourceStateManager() = delete;
@@ -22,24 +25,37 @@ public:
     ResourceStateManager(ResourceStateManager&&) = delete;
     ResourceStateManager& operator=(ResourceStateManager&&) = delete;
 
-    // Preconditions:
-    // - Resource must not have been registered
+    ///
+    /// @brief Add resource
+    ///
+    /// Resource must not have been registered
+    ///
+    /// @param resource Resource to add
+    /// @param initialState Initial state of the resource
+    ///
     static void AddResource(ID3D12Resource& resource,
                             const D3D12_RESOURCE_STATES initialState) noexcept;
 
-    // Preconditions:
-    // - Resource must have been registered
-    // - New state must be different than current state
+    ///
+    /// @brief Change resource state and get barrier
+    ///
+    /// Resource must have been registered. New state must be different than current state.
+    ///
+    /// @param resource Resource to change state
+    /// @param newState New resource state. It must be different than current state.
+    ///
     static CD3DX12_RESOURCE_BARRIER ChangeResourceStateAndGetBarrier(ID3D12Resource& resource,
                                                                      const D3D12_RESOURCE_STATES newState) noexcept;
 
-    // Preconditions:
-    // - Resource must have been registered
+    ///
+    /// @brief Get resource state
+    /// @param resource Resource to get state. It must have been registered.
+    /// @return Resource state
+    ///
     static D3D12_RESOURCE_STATES GetResourceState(ID3D12Resource& resource) noexcept;
 
 private:
-    using StateByResource = tbb::concurrent_hash_map<ID3D12Resource*, D3D12_RESOURCE_STATES>;
-    static StateByResource mStateByResource;
+    static tbb::concurrent_hash_map<ID3D12Resource*, D3D12_RESOURCE_STATES> mStateByResource;
 };
 }
 

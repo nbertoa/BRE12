@@ -7,10 +7,9 @@
 #include <ResourceManager/UploadBuffer.h>
 
 namespace BRE {
-// This class is responsible to create/get:
-// - Textures
-// - Buffers
-// - Resources
+///
+/// @brief Responsible to create textures, buffers and resources.
+///
 class ResourceManager {
 public:
     ResourceManager() = delete;
@@ -20,10 +19,15 @@ public:
     ResourceManager(ResourceManager&&) = delete;
     ResourceManager& operator=(ResourceManager&&) = delete;
 
-    static void EraseAll() noexcept;
+    static void Clear() noexcept;
 
-    // If resourceName is nullptr, then it will have 
-    // the default name.
+    ///
+    /// @brief Loads texture from file
+    /// @param textureFilename Texture filename. Must be not nullptr
+    /// @param commandList Command list used to create the texture
+    /// @param uploadBuffer Upload buffer to create the texture
+    /// @param resourceName Resource name. If it is nullptr, then it will have the default name.
+    ///
     static ID3D12Resource& LoadTextureFromFile(const char* textureFilename,
                                                ID3D12GraphicsCommandList& commandList,
                                                Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
@@ -33,19 +37,29 @@ public:
     // the command list has not been executed yet that performs the actual copy.
     // The caller can Release the uploadBuffer after it knows the copy has been executed.
 
-    // If resourceName is nullptr, then it will have 
-    // the default name.
-    // Preconditions:
-    // - "sourceData" must not be nullptr
-    // - "sourceDataSize" must be greater than zero
+    ///
+    /// @brief Creates default buffer
+    /// @param commandList Command list used to create the texture
+    /// @param sourceData Source data for the buffer
+    /// @param sourceDataSize Source data size for the buffer
+    /// @param uploadBuffer Upload buffer to create the texture
+    /// @param resourceName Resource name. If it is nullptr, then it will have the default name.
+    ///
     static ID3D12Resource& CreateDefaultBuffer(ID3D12GraphicsCommandList& commandList,
                                                const void* sourceData,
                                                const std::size_t sourceDataSize,
                                                Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
                                                const wchar_t* resourceName) noexcept;
 
-    // If resourceName is nullptr, then it will have 
-    // the default name.
+    ///
+    /// @brief Creates committed resource
+    /// @param heapProperties Heap properties
+    /// @param heapFlags Heap flags
+    /// @param resourceDescriptor Resource descriptor
+    /// @param resourceStates Resource states
+    /// @param clearValue Clear value
+    /// @param resourceName Resource name. If it is nullptr, then it will have the default name.
+    ///
     static ID3D12Resource& CreateCommittedResource(const D3D12_HEAP_PROPERTIES& heapProperties,
                                                    const D3D12_HEAP_FLAGS& heapFlags,
                                                    const D3D12_RESOURCE_DESC& resourceDescriptor,
@@ -54,8 +68,7 @@ public:
                                                    const wchar_t* resourceName) noexcept;
 
 private:
-    using Resources = tbb::concurrent_unordered_set<ID3D12Resource*>;
-    static Resources mResources;
+    static tbb::concurrent_unordered_set<ID3D12Resource*> mResources;
 
     static std::mutex mMutex;
 };

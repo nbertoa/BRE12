@@ -5,16 +5,18 @@
 #include <Utils/DebugUtils.h>
 
 namespace BRE {
-PSOManager::PSOs PSOManager::mPSOs;
+tbb::concurrent_unordered_set<ID3D12PipelineState*> PSOManager::mPSOs;
 std::mutex PSOManager::mMutex;
 
 void
-PSOManager::EraseAll() noexcept
+PSOManager::Clear() noexcept
 {
     for (ID3D12PipelineState* pso : mPSOs) {
         BRE_ASSERT(pso != nullptr);
         pso->Release();
     }
+
+    mPSOs.clear();
 }
 
 bool

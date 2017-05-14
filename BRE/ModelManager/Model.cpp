@@ -32,7 +32,10 @@ Model::Model(const char* modelFilename,
     for (std::uint32_t i = 0U; i < scene->mNumMeshes; ++i) {
         aiMesh* mesh{ scene->mMeshes[i] };
         BRE_ASSERT(mesh != nullptr);
-        mMeshes.push_back(Mesh(*mesh, commandList, uploadVertexBuffer, uploadIndexBuffer));
+        mMeshes.push_back(Mesh(*mesh,
+                               commandList,
+                               uploadVertexBuffer,
+                               uploadIndexBuffer));
     }
 }
 
@@ -41,7 +44,10 @@ Model::Model(const GeometryGenerator::MeshData& meshData,
              Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
              Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer)
 {
-    mMeshes.push_back(Mesh(meshData, commandList, uploadVertexBuffer, uploadIndexBuffer));
+    mMeshes.push_back(Mesh(meshData,
+                           commandList,
+                           uploadVertexBuffer,
+                           uploadIndexBuffer));
 }
 }
 

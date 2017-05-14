@@ -57,11 +57,11 @@ void FinalizeSystems() noexcept
     CommandListManager::Clear();
     CommandQueueManager::Clear();
     FenceManager::Clear();
-    PSOManager::EraseAll();
-    ResourceManager::EraseAll();
-    RootSignatureManager::EraseAll();
+    PSOManager::Clear();
+    ResourceManager::Clear();
+    RootSignatureManager::Clear();
     ShaderManager::Clear();
-    UploadBufferManager::EraseAll();
+    UploadBufferManager::Clear();
 }
 
 void UpdateKeyboardAndMouse() noexcept

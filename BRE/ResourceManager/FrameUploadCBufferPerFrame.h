@@ -6,8 +6,11 @@
 #include <SettingsManager\SettingsManager.h>
 
 namespace BRE {
-// We support to have different number of queued frames.
-// This class provides a frame constant buffer per frame.
+///
+/// @brief Provides a frame constant buffer per frame
+///
+/// We support to have different number of queued frames.
+///
 class FrameUploadCBufferPerFrame {
 public:
     FrameUploadCBufferPerFrame();
@@ -17,6 +20,10 @@ public:
     FrameUploadCBufferPerFrame(FrameUploadCBufferPerFrame&&) = default;
     FrameUploadCBufferPerFrame& operator=(FrameUploadCBufferPerFrame&&) = default;
 
+    ///
+    /// @brief Get next constant buffer per frame
+    /// @return Upload buffer
+    ///
     UploadBuffer& GetNextFrameCBuffer() noexcept;
 
 private:

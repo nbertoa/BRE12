@@ -12,7 +12,9 @@ struct ID3D12GraphicsCommandList;
 namespace BRE {
 class Model;
 
-// Stores model's mesh vertex and buffer data.
+///
+/// @brief Stores model's mesh vertex and index data.
+///
 class Mesh {
     friend class Model;
 
@@ -23,16 +25,26 @@ public:
     Mesh(Mesh&&) = default;
     Mesh& operator=(Mesh&&) = delete;
 
-    // Preconditions:
-    // - data must be valid
+    ///
+    /// @brief Get vertex buffer data
+    ///
+    /// Data must be valid
+    ///
+    /// @return Vertex buffer data
+    ///
     __forceinline const VertexAndIndexBufferCreator::VertexBufferData& GetVertexBufferData() const noexcept
     {
         BRE_ASSERT(mVertexBufferData.IsDataValid());
         return mVertexBufferData;
     }
 
-    // Preconditions:
-    // - data must be valid
+    ///
+    /// @brief Get index buffer data
+    ///
+    /// Data must be valid
+    ///
+    /// @return Index buffer data
+    ///
     __forceinline const VertexAndIndexBufferCreator::IndexBufferData& GetIndexBufferData() const noexcept
     {
         BRE_ASSERT(mIndexBufferData.IsDataValid());

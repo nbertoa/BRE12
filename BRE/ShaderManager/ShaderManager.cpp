@@ -43,6 +43,8 @@ ShaderManager::Clear() noexcept
         BRE_ASSERT(blob != nullptr);
         blob->Release();
     }
+
+    mShaderBlobs.clear();
 }
 
 ID3DBlob&

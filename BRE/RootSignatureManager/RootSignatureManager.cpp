@@ -6,11 +6,11 @@
 #include <Utils/DebugUtils.h>
 
 namespace BRE {
-RootSignatureManager::RootSignatures RootSignatureManager::mRootSignatures;
+tbb::concurrent_unordered_set<ID3D12RootSignature*> RootSignatureManager::mRootSignatures;
 std::mutex RootSignatureManager::mMutex;
 
 void
-RootSignatureManager::EraseAll() noexcept
+RootSignatureManager::Clear() noexcept
 {
     for (ID3D12RootSignature* rootSignature : mRootSignatures) {
         BRE_ASSERT(rootSignature != nullptr);

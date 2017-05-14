@@ -10,8 +10,9 @@ struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
 namespace BRE {
-// - To load model data from a filepath.
-// - To get meshes 
+///
+/// @brief Represents a model that can be loaded from a file
+///
 class Model {
 public:
     ~Model() = default;
@@ -34,10 +35,19 @@ public:
                    Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
                    Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
 
+    ///
+    /// @brief Checks if there are meshes or not
+    /// @return True if there are meshes. Otherwise, false.
+    ///
     __forceinline bool HasMeshes() const noexcept
     {
         return (mMeshes.size() > 0UL);
     }
+
+    ///
+    /// @brief Get meshes
+    /// @return List of meshes
+    ///
     __forceinline const std::vector<Mesh>& GetMeshes() const noexcept
     {
         return mMeshes;

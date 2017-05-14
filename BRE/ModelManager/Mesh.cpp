@@ -93,7 +93,7 @@ void CreateVertexAndIndexBufferData(VertexAndIndexBufferCreator::VertexBufferDat
 }
 
 Mesh::Mesh(const aiMesh& mesh,
-           ID3D12GraphicsCommandList& cmdList,
+           ID3D12GraphicsCommandList& commandList,
            Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
            Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer)
 {
@@ -145,7 +145,7 @@ Mesh::Mesh(const aiMesh& mesh,
     CreateVertexAndIndexBufferData(mVertexBufferData,
                                    mIndexBufferData,
                                    meshData,
-                                   cmdList,
+                                   commandList,
                                    uploadVertexBuffer,
                                    uploadIndexBuffer);
 
