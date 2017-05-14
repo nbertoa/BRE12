@@ -93,10 +93,9 @@ const <a class="el" href="class_b_r_e_1_1_cbv_srv_uav_descriptor_manager.html">C
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:ab31b28a4c45cba1bd4e1e3cc2b60cd24"><td class="memItemLeft" align="right" valign="top"><a id="ab31b28a4c45cba1bd4e1e3cc2b60cd24"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_cbv_srv_uav_descriptor_manager.html#ab31b28a4c45cba1bd4e1e3cc2b60cd24">Init</a> () noexcept</td></tr>
-<tr class="memdesc:ab31b28a4c45cba1bd4e1e3cc2b60cd24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes manager, for example, descriptor heap. <br /></td></tr>
-<tr class="separator:ab31b28a4c45cba1bd4e1e3cc2b60cd24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3fe60e33fbb089f956bc6051ae051f9"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_cbv_srv_uav_descriptor_manager.html#ab3fe60e33fbb089f956bc6051ae051f9">Init</a> (const std::uint32_t numDescriptorsInCbvSrvUavDescriptorHeap) noexcept</td></tr>
+<tr class="memdesc:ab3fe60e33fbb089f956bc6051ae051f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes manager, for example, descriptor heap.  <a href="#ab3fe60e33fbb089f956bc6051ae051f9">More...</a><br /></td></tr>
+<tr class="separator:ab3fe60e33fbb089f956bc6051ae051f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4348b42774e3c953a6baec49293871c5"><td class="memItemLeft" align="right" valign="top">static D3D12_GPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_cbv_srv_uav_descriptor_manager.html#a4348b42774e3c953a6baec49293871c5">CreateConstantBufferView</a> (const D3D12_CONSTANT_BUFFER_VIEW_DESC &amp;cBufferViewDescriptor) noexcept</td></tr>
 <tr class="memdesc:a4348b42774e3c953a6baec49293871c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a constant buffer view.  <a href="#a4348b42774e3c953a6baec49293871c5">More...</a><br /></td></tr>
 <tr class="separator:a4348b42774e3c953a6baec49293871c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -426,6 +425,40 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 <p>Get descriptor heap. </p>
 <dl class="section return"><dt>Returns</dt><dd>The descriptor heap </dd></dl>
+
+</div>
+</div>
+<a id="ab3fe60e33fbb089f956bc6051ae051f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3fe60e33fbb089f956bc6051ae051f9">&#9670;&nbsp;</a></span>Init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void BRE::CbvSrvUavDescriptorManager::Init </td>
+          <td>(</td>
+          <td class="paramtype">const std::uint32_t&#160;</td>
+          <td class="paramname"><em>numDescriptorsInCbvSrvUavDescriptorHeap</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Initializes manager, for example, descriptor heap. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">numDescriptorsInCbvSrvUavDescriptorHeap</td><td>Number of descriptors in descriptor heap of Constant Buffer Views, Shader Resource Views, and Unordered Access Views. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

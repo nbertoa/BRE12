@@ -19,14 +19,21 @@ Rendering:
 Lighting:
 - Physically Based Shading (PBR) based on smoothness/metalness
 - Image Based Lighting (IBL) based on diffuse irradiance environment cube map and specular pre-convolved environment cube map
-- Punctual lights
  
 Postprocessing:
 - Tone Mapping
 
+## Repository structure
+The directory structure is:
+
+	/BRE		Source code
+	/external	Third-party libraries
+	/doc		Documentation (doxygen) - Open index file.
+
 ## Examples
 
-In the Visual Studio solution, there is a project called ExampleScenes where you can see a lot of different techniques (color mapping, normal mapping, height mapping, cube mapping, etc)
+In the Visual Studio solution, you can check scene files in BRE/Executable/resources/scenes. I use YAML format for scenes.
+
 
 ## Blog
 

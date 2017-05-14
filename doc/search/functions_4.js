@@ -2,6 +2,7 @@ var searchData=
 [
   ['get',['Get',['../class_b_r_e_1_1_keyboard.html#a757052765119275964b430624a6d2a44',1,'BRE::Keyboard::Get()'],['../class_b_r_e_1_1_mouse.html#a5e0f2bdb3bc45a0e915a1e9278ecc45b',1,'BRE::Mouse::Get()']]],
   ['getaspectratio',['GetAspectRatio',['../class_b_r_e_1_1_settings_manager.html#a2584990c9284c527cfe23f2e51e0b7bb',1,'BRE::SettingsManager']]],
+  ['getcamera',['GetCamera',['../class_b_r_e_1_1_camera_loader.html#a7bb3d6ba46dcad9ddaef6aa78532d258',1,'BRE::CameraLoader']]],
   ['getcommandlist',['GetCommandList',['../class_b_r_e_1_1_command_list_per_frame.html#a720fc2d8634bd6b0f8b4be51465c119f',1,'BRE::CommandListPerFrame']]],
   ['getcommandqueue',['GetCommandQueue',['../class_b_r_e_1_1_command_list_executor.html#ac0ffe405ba8eeab52359d910821a862c',1,'BRE::CommandListExecutor']]],
   ['getcurrentstate',['GetCurrentState',['../class_b_r_e_1_1_mouse.html#ac08b5a7f601acc1e45b8ab1dc03ff0d1',1,'BRE::Mouse']]],
