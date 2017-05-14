@@ -57,7 +57,8 @@ public:
 
 private:
     ///
-    /// @brief Checks if the internal data is valid. Typically, used for assertions
+    /// @brief Checks if internal data is valid. Typically, used for assertions
+    /// @return True if valid. Otherwise, false
     ///
     bool IsDataValid() const noexcept;
 

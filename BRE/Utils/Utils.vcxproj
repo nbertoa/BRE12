@@ -123,11 +123,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DebugUtils.h" />
-    <ClInclude Include="HashUtils.h" />
     <ClInclude Include="StringUtils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="HashUtils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

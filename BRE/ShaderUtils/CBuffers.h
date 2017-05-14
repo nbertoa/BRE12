@@ -6,7 +6,9 @@
 #include <SettingsManager\SettingsManager.h>
 
 namespace BRE {
-// Per object constant buffer data
+///
+/// @brief Constant buffer per object
+///
 struct ObjectCBuffer {
     ObjectCBuffer() = default;
     ~ObjectCBuffer() = default;
@@ -19,7 +21,9 @@ struct ObjectCBuffer {
     float mTextureScaleFactor{ 2.0f };
 };
 
-// Per frame constant buffer data
+///
+/// @brief Constant buffer per frame
+///
 struct FrameCBuffer {
     FrameCBuffer() = default;
     ~FrameCBuffer() = default;
@@ -35,7 +39,9 @@ struct FrameCBuffer {
     DirectX::XMFLOAT4 mEyeWorldPosition{ 0.0f, 0.0f, 0.0f, 1.0f };
 };
 
-// Immutable constant buffer data (does not change across frames or objects) 
+///
+/// @brief Immutable constant buffer (does not change across frames or objects) 
+///
 struct ImmutableCBuffer {
     ImmutableCBuffer() = default;
     ~ImmutableCBuffer() = default;

@@ -6,6 +6,9 @@
 #include <GeometryPass/GeometryPassCommandListRecorder.h>
 
 namespace BRE {
+///
+/// @brief Represents a scene (geometry pass command list recorders, lighting configurations, camera, etc)
+///
 class Scene {
 public:
     Scene() = default;
@@ -14,10 +17,28 @@ public:
     Scene(Scene&&) = delete;
     Scene& operator=(Scene&&) = delete;
 
+    ///
+    /// @brief Get geometry pass command list recorders
+    /// @return Geometry pass command list recorders
+    ///
     GeometryPassCommandListRecorders& GetGeometryPassCommandListRecorders() noexcept;
 
+    ///
+    /// @brief Get sky box cube map resource
+    /// @return Sky box cube map resource
+    ///
     ID3D12Resource* &GetSkyBoxCubeMap() noexcept;
+
+    ///
+    /// @brief Get diffuse irradiance environment cube map
+    /// @return Diffuse irradiance environment cube map
+    ///
     ID3D12Resource* &GetDiffuseIrradianceCubeMap() noexcept;
+
+    ///
+    /// @brief Get specular pre convolved environment cube map
+    /// @return Specular pre convolved environment cube map
+    ///
     ID3D12Resource* &GetSpecularPreConvolvedCubeMap() noexcept;
 
 private:

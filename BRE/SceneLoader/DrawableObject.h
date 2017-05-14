@@ -10,6 +10,9 @@ class MaterialProperties;
 class MaterialTechnique;
 class Model;
 
+///
+/// @brief Represents the data needed to draw an object
+///
 class DrawableObject {
 public:
     DrawableObject(const Model& model,
@@ -22,24 +25,40 @@ public:
         , mWorldMatrix(worldMatrix)
     {}
 
+    ///
+    /// @brief Get model
+    /// @return Model
+    ///
     const Model& GetModel() const noexcept
     {
         BRE_ASSERT(mModel != nullptr);
         return *mModel;
     }
 
+    ///
+    /// @brief Get material properties
+    /// @return Material properties
+    ///
     const MaterialProperties& GetMaterialProperties() const noexcept
     {
         BRE_ASSERT(mMaterialProperties != nullptr);
         return *mMaterialProperties;
     }
 
+    ///
+    /// @brief Get material technique
+    /// @return Material technique
+    ///
     const MaterialTechnique& GetMaterialTechnique() const noexcept
     {
         BRE_ASSERT(mMaterialTechnique != nullptr);
         return *mMaterialTechnique;
     }
 
+    ///
+    /// @brief Get world matrix
+    /// @return World matrix
+    ///
     const DirectX::XMFLOAT4X4& GetWorldMatrix() const noexcept
     {
         return mWorldMatrix;

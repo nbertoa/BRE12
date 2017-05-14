@@ -4,12 +4,22 @@
 
 namespace BRE {
 namespace StringUtils {
-inline void ToWideString(const std::string& source,
-                         std::wstring& destination) noexcept
+///
+/// @brief Convert a string to wide string
+/// @param source Source string
+/// @param destination Destination wide string
+///
+__forceinline void ToWideString(const std::string& source,
+                                std::wstring& destination) noexcept
 {
     destination.assign(source.begin(), source.end());
 }
 
+///
+/// @brief Converts string to wide string
+/// @param source Source string
+/// @return Wide string
+///
 inline std::wstring ToWideString(const std::string& source) noexcept
 {
     std::wstring dest;
@@ -17,6 +27,11 @@ inline std::wstring ToWideString(const std::string& source) noexcept
     return dest;
 }
 
+///
+/// @brief Converts wide string to string
+/// @param source Source wide string
+/// @return Converted string
+///
 inline std::string ToString(const std::wstring& source) noexcept
 {
     using convert_type = std::codecvt_utf8<wchar_t>;
@@ -24,7 +39,12 @@ inline std::string ToString(const std::wstring& source) noexcept
     return converter.to_bytes(source);
 }
 
-inline std::wstring AnsiToWString(const std::string& str) noexcept
+///
+/// @brief Converts ANSI string to wide string
+/// @param str Source string
+/// @return Wide string
+///
+inline std::wstring AnsiToWideString(const std::string& str) noexcept
 {
     static const std::uint32_t bufferMaxSize = 512U;
     WCHAR buffer[bufferMaxSize];

@@ -164,7 +164,7 @@ RenderManager::RenderManager(Scene& scene)
                                                      mIntermediateColorBuffer2RenderTargetView);
 
     mCamera.SetFrustum(SettingsManager::sVerticalFieldOfView,
-                       SettingsManager::AspectRatio(),
+                       SettingsManager::GetAspectRatio(),
                        SettingsManager::sNearPlaneZ,
                        SettingsManager::sFarPlaneZ);
 

@@ -13,7 +13,6 @@
     <ClInclude Include="EnvironmentLoader.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="YamlUtils.cpp" />
     <ClCompile Include="SceneLoader.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="TextureLoader.cpp" />

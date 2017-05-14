@@ -3,6 +3,9 @@
 #include <cstring>
 
 namespace BRE {
+///
+/// @brief Represents material properties like base color, metal mask and smoothness.
+///
 class MaterialProperties {
 public:
     MaterialProperties() = default;

@@ -52,7 +52,8 @@ public:
     void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept final override;
 
     ///
-    /// @brief Checks if internal data is valid. Typically, used with assertions
+    /// @brief Checks if internal data is valid. Typically, used for assertions
+    /// @return True if valid. Otherwise, false
     ///
     bool IsDataValid() const noexcept final override;
 

@@ -9,6 +9,9 @@
 #include <Utils\DebugUtils.h>
 
 namespace BRE {
+///
+/// @brief Utilities to handle YAML format 
+///
 class YamlUtils {
 public:
     YamlUtils() = delete;
@@ -18,9 +21,12 @@ public:
     YamlUtils(YamlUtils&&) = delete;
     YamlUtils& operator=(YamlUtils&&) = delete;
 
-    static bool IsDefined(const YAML::Node& node,
-                          const char* key);
-
+    ///
+    /// @brief Get scalar
+    /// @param node YAML node
+    /// @param key Key to get scalar
+    /// @return Scalar value
+    ///
     template<typename T>
     static T GetScalar(const YAML::Node& node,
                        const char* key)
@@ -32,6 +38,12 @@ public:
         return std::to_string(attr.as<std::string>());
     }
 
+    ///
+    /// @brief Get string 
+    /// @param node YAML node
+    /// @param key Key to get string
+    /// @return String
+    ///
     template<>
     static std::string GetScalar(const YAML::Node& node,
                                  const char* key)
@@ -43,6 +55,12 @@ public:
         return attr.as<std::string>();
     }
 
+    ///
+    /// @brief Get sequence
+    /// @param node YAML node
+    /// @param sequenceOutput Output sequence
+    /// @param numElems Number of elements in the sequence
+    ///
     template<typename T>
     static void GetSequence(const YAML::Node& node,
                             T* const sequenceOutput,

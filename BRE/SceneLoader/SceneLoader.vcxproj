@@ -144,7 +144,6 @@
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="SceneLoader.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
-    <ClCompile Include="YamlUtils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

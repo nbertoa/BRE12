@@ -60,7 +60,7 @@ void FinalizeSystems() noexcept
     PSOManager::EraseAll();
     ResourceManager::EraseAll();
     RootSignatureManager::EraseAll();
-    ShaderManager::EraseAll();
+    ShaderManager::Clear();
     UploadBufferManager::EraseAll();
 }
 

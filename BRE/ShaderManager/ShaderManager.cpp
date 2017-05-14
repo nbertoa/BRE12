@@ -8,7 +8,13 @@
 
 namespace BRE {
 namespace {
-ID3DBlob* LoadBlob(const std::string& filename) noexcept
+///
+/// @brief Load a blob
+/// @param filename Filename. Must not be nullptr
+/// @return Loaded blob
+///
+ID3DBlob* 
+LoadBlob(const std::string& filename) noexcept
 {
     std::ifstream fileStream{ filename, std::ios::binary };
     BRE_ASSERT(fileStream);
@@ -27,11 +33,11 @@ ID3DBlob* LoadBlob(const std::string& filename) noexcept
 }
 }
 
-ShaderManager::ShaderBlobs ShaderManager::mShaderBlobs;
+tbb::concurrent_unordered_set<ID3DBlob*> ShaderManager::mShaderBlobs;
 std::mutex ShaderManager::mMutex;
 
 void
-ShaderManager::EraseAll() noexcept
+ShaderManager::Clear() noexcept
 {
     for (ID3DBlob* blob : mShaderBlobs) {
         BRE_ASSERT(blob != nullptr);

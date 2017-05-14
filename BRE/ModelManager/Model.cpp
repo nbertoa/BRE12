@@ -22,7 +22,7 @@ Model::Model(const char* modelFilename,
     const aiScene* scene{ importer.ReadFile(filePath.c_str(), flags) };
     if (scene == nullptr) {
         const std::string errorMessage{ importer.GetErrorString() };
-        const std::wstring wideErrorMessage = StringUtils::AnsiToWString(errorMessage);
+        const std::wstring wideErrorMessage = StringUtils::AnsiToWideString(errorMessage);
         MessageBox(nullptr, wideErrorMessage.c_str(), nullptr, 0);
         BRE_ASSERT(scene != nullptr);
     }

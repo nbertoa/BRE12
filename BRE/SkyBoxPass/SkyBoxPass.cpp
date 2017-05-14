@@ -16,8 +16,14 @@ using namespace DirectX;
 
 namespace BRE {
 namespace {
-void CreateCommandObjects(ID3D12CommandAllocator* &commandAllocator,
-                          ID3D12GraphicsCommandList* &commandList) noexcept
+///
+/// @brief Create command objects
+/// @param commandAllocator Output command allocator
+/// @param commandList Output command list
+///
+void 
+CreateCommandObjects(ID3D12CommandAllocator* &commandAllocator,
+                     ID3D12GraphicsCommandList* &commandList) noexcept
 {
     // Create command allocators and command list
     commandAllocator = &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
@@ -25,8 +31,15 @@ void CreateCommandObjects(ID3D12CommandAllocator* &commandAllocator,
     commandList->Close();
 }
 
-Model& CreateAndGetSkyBoxSphereModel(ID3D12CommandAllocator& commandAllocator,
-                                     ID3D12GraphicsCommandList& commandList)
+///
+/// @brief Creates and gets sky box sphere model
+/// @param commandAllocator Command allocator to use with the command list
+/// @param commandList Command list to execute the sphere model creation
+/// @return Sphere model
+///
+Model&
+CreateAndGetSkyBoxSphereModel(ID3D12CommandAllocator& commandAllocator,
+                              ID3D12GraphicsCommandList& commandList)
 {
     BRE_CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
 

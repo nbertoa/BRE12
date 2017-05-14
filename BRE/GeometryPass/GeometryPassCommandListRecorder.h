@@ -60,7 +60,8 @@ public:
     virtual void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept = 0;
 
     ///
-    /// @brief Checks if internal data is valid. Typically, used with assertions
+    /// @brief Checks if internal data is valid. Typically, used for assertions
+    /// @return True if valid. Otherwise, false
     ///
     virtual bool IsDataValid() const noexcept;
 

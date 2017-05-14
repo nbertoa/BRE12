@@ -3,9 +3,5 @@
   <ItemGroup>
     <ClInclude Include="StringUtils.h" />
     <ClInclude Include="DebugUtils.h" />
-    <ClInclude Include="HashUtils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="HashUtils.cpp" />
   </ItemGroup>
 </Project>

@@ -16,6 +16,9 @@ class MaterialPropertiesLoader;
 class MaterialTechniqueLoader;
 class ModelLoader;
 
+///
+/// @brief Responsible to load from scene file the objects configurations
+///
 class DrawableObjectLoader {
 public:
     using DrawableObjectsByModelName = std::unordered_map<std::string, std::vector<DrawableObject>>;
@@ -33,8 +36,16 @@ public:
     DrawableObjectLoader(DrawableObjectLoader&&) = delete;
     DrawableObjectLoader& operator=(DrawableObjectLoader&&) = delete;
 
+    ///
+    /// @brief Load drawable objects
+    /// @param rootNode Scene YAML file root node
+    ///
     void LoadDrawableObjects(const YAML::Node& rootNode) noexcept;
 
+    ///
+    /// @brief Get drawable objects by model name by technique
+    /// @return Drawable object by model name
+    ///
     const DrawableObjectsByModelName& GetDrawableObjectsByModelNameByTechniqueType(
         const MaterialTechnique::TechniqueType techniqueType) const noexcept
     {

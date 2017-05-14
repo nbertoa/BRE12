@@ -4,6 +4,9 @@
 #include <d3d12.h>
 
 namespace BRE {
+///
+/// @brief Responsible to handle all main settings
+///
 class SettingsManager {
 public:
     SettingsManager() = delete;
@@ -13,7 +16,11 @@ public:
     SettingsManager(SettingsManager&&) = delete;
     SettingsManager& operator=(SettingsManager&&) = delete;
 
-    __forceinline static float AspectRatio() noexcept
+    ///
+    /// @brief Get aspect ratio
+    /// @return Aspect ratio
+    ///
+    __forceinline static float GetAspectRatio() noexcept
     {
         return static_cast<float>(sWindowWidth) / sWindowHeight;
     }

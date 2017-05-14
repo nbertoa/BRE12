@@ -6,7 +6,9 @@
 #include <tbb\concurrent_unordered_set.h>
 
 namespace BRE {
-// Too load/get shaders
+///
+/// @brief Responsible to load and handle shaders
+///
 class ShaderManager {
 public:
     ShaderManager() = delete;
@@ -16,16 +18,27 @@ public:
     ShaderManager(ShaderManager&&) = delete;
     ShaderManager& operator=(ShaderManager&&) = delete;
 
-    static void EraseAll() noexcept;
+    ///
+    /// @brief Releases all shaders
+    ///
+    static void Clear() noexcept;
 
-    // Preconditions:
-    // - "filename" must not be nullptr
+    ///
+    /// @brief Load shader file and get blob
+    /// @param filename Filename. Must not be nullptr
+    /// @return Loaded blob
+    ///
     static ID3DBlob& LoadShaderFileAndGetBlob(const char* filename) noexcept;
+
+    ///
+    /// @brief Load shader file and get byte code
+    /// @param filename Filename. Must not be nullptr
+    /// @return Loaded byte code
+    ///
     static D3D12_SHADER_BYTECODE LoadShaderFileAndGetBytecode(const char* filename) noexcept;
 
 private:
-    using ShaderBlobs = tbb::concurrent_unordered_set<ID3DBlob*>;
-    static ShaderBlobs mShaderBlobs;
+    static tbb::concurrent_unordered_set<ID3DBlob*> mShaderBlobs;
 
     static std::mutex mMutex;
 };

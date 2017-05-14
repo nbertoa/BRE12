@@ -42,17 +42,17 @@ EnvironmentLoader::LoadEnvironment(const YAML::Node& rootNode) noexcept
     BRE_ASSERT(mSpecularPreConvolvedEnvironmentTexture != nullptr);
 }
 
-void EnvironmentLoader::UpdateEnvironmentTexture(const std::string& environmentName,
+void EnvironmentLoader::UpdateEnvironmentTexture(const std::string& environmentPropertyName,
                                                  const std::string& environmentTextureName) noexcept
 {
     ID3D12Resource& texture = mTextureLoader.GetTexture(environmentTextureName);
-    if (environmentName == "sky box texture") {
+    if (environmentPropertyName == "sky box texture") {
         BRE_ASSERT_MSG(mSkyBoxTexture == nullptr, L"Sky box texture must be set once");
         mSkyBoxTexture = &texture;
-    } else if (environmentName == "diffuse irradiance texture") {
+    } else if (environmentPropertyName == "diffuse irradiance texture") {
         BRE_ASSERT_MSG(mDiffuseIrradianceTexture == nullptr, L"Diffuse irradiance texture must be set once");
         mDiffuseIrradianceTexture = &texture;
-    } else if (environmentName == "specular pre convolved environment texture") {
+    } else if (environmentPropertyName == "specular pre convolved environment texture") {
         BRE_ASSERT_MSG(mSpecularPreConvolvedEnvironmentTexture == nullptr,
                    L"Specular pre convolved enviroment texture must be set once");
         mSpecularPreConvolvedEnvironmentTexture = &texture;
