@@ -9,7 +9,7 @@ namespace BRE {
 CommandListExecutor* CommandListExecutor::sExecutor{ nullptr };
 
 void
-CommandListExecutor::Create(const std::uint32_t maxNumCmdLists) noexcept
+CommandListExecutor::Create(const std::uint32_t maxNumCommandLists) noexcept
 {
     BRE_ASSERT(sExecutor == nullptr);
 
@@ -18,7 +18,7 @@ CommandListExecutor::Create(const std::uint32_t maxNumCmdLists) noexcept
     // 1 reference for the parent + 1 reference for the child
     parent->set_ref_count(2);
 
-    sExecutor = new (parent->allocate_child()) CommandListExecutor(maxNumCmdLists);
+    sExecutor = new (parent->allocate_child()) CommandListExecutor(maxNumCommandLists);
 }
 
 CommandListExecutor&

@@ -123,15 +123,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="EnvironmentLightPass.cpp" />
-    <ClCompile Include="AmbientOcclusionCmdListRecorder.cpp" />
-    <ClCompile Include="BlurCmdListRecorder.cpp" />
-    <ClCompile Include="EnvironmentLightCmdListRecorder.cpp" />
+    <ClCompile Include="AmbientOcclusionCommandListRecorder.cpp" />
+    <ClCompile Include="BlurCommandListRecorder.cpp" />
+    <ClCompile Include="EnvironmentLightCommandListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EnvironmentLightPass.h" />
-    <ClInclude Include="AmbientOcclusionCmdListRecorder.h" />
-    <ClInclude Include="BlurCmdListRecorder.h" />
-    <ClInclude Include="EnvironmentLightCmdListRecorder.h" />
+    <ClInclude Include="AmbientOcclusionCommandListRecorder.h" />
+    <ClInclude Include="BlurCommandListRecorder.h" />
+    <ClInclude Include="EnvironmentLightCommandListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\AmbientOcclusion\PS.hlsl">

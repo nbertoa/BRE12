@@ -3,9 +3,9 @@
 #include <memory>
 #include <wrl.h>
 
-#include <EnvironmentLightPass\AmbientOcclusionCmdListRecorder.h>
-#include <EnvironmentLightPass\BlurCmdListRecorder.h>
-#include <EnvironmentLightPass\EnvironmentLightCmdListRecorder.h>
+#include <EnvironmentLightPass\AmbientOcclusionCommandListRecorder.h>
+#include <EnvironmentLightPass\BlurCommandListRecorder.h>
+#include <EnvironmentLightPass\EnvironmentLightCommandListRecorder.h>
 #include <CommandManager\CommandListPerFrame.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
@@ -76,9 +76,9 @@ private:
 
     Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
 
-    std::unique_ptr<AmbientOcclusionCmdListRecorder> mAmbientOcclusionRecorder;
-    std::unique_ptr<BlurCmdListRecorder> mBlurRecorder;
-    std::unique_ptr<EnvironmentLightCmdListRecorder> mEnvironmentLightRecorder;
+    std::unique_ptr<AmbientOcclusionCommandListRecorder> mAmbientOcclusionRecorder;
+    std::unique_ptr<BlurCommandListRecorder> mBlurRecorder;
+    std::unique_ptr<EnvironmentLightCommandListRecorder> mEnvironmentLightRecorder;
 };
 
 }

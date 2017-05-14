@@ -121,11 +121,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SkyBoxCmdListRecorder.cpp" />
+    <ClCompile Include="SkyBoxCommandListRecorder.cpp" />
     <ClCompile Include="SkyBoxPass.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SkyBoxCmdListRecorder.h" />
+    <ClInclude Include="SkyBoxCommandListRecorder.h" />
     <ClInclude Include="SkyBoxPass.h" />
   </ItemGroup>
   <ItemGroup>

@@ -21,9 +21,9 @@ ToneMappingPass::Init(ID3D12Resource& inputColorBuffer,
     mInputColorBuffer = &inputColorBuffer;
     mOutputColorBuffer = &outputColorBuffer;
 
-    ToneMappingCmdListRecorder::InitSharedPSOAndRootSignature();
+    ToneMappingCommandListRecorder::InitSharedPSOAndRootSignature();
 
-    mCommandListRecorder.reset(new ToneMappingCmdListRecorder());
+    mCommandListRecorder.reset(new ToneMappingCommandListRecorder());
     mCommandListRecorder->Init(*mInputColorBuffer, renderTargetView);
 
     BRE_ASSERT(IsDataValid());

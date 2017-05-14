@@ -8,7 +8,7 @@
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
 #include <ModelManager\ModelManager.h>
-#include <SkyBoxPass\SkyBoxCmdListRecorder.h>
+#include <SkyBoxPass\SkyBoxCommandListRecorder.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
@@ -83,9 +83,9 @@ SkyBoxPass::Init(ID3D12Resource& skyBoxCubeMap,
                              0.0f,
                              0.0f);
 
-    SkyBoxCmdListRecorder::InitSharedPSOAndRootSignature();
+    SkyBoxCommandListRecorder::InitSharedPSOAndRootSignature();
 
-    mCommandListRecorder.reset(new SkyBoxCmdListRecorder());
+    mCommandListRecorder.reset(new SkyBoxCommandListRecorder());
     mCommandListRecorder->Init(mesh.GetVertexBufferData(),
                                mesh.GetIndexBufferData(),
                                worldMatrix,

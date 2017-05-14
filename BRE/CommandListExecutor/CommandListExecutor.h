@@ -114,7 +114,7 @@ public:
     void Terminate() noexcept;
 
 private:
-    explicit CommandListExecutor(const std::uint32_t maxNumCmdLists);
+    explicit CommandListExecutor(const std::uint32_t maxNumCommandLists);
 
     // Called when tbb::task is spawned
     tbb::task* execute() final override;

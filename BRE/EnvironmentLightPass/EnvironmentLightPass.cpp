@@ -72,9 +72,9 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
 {
     BRE_ASSERT(ValidateData() == false);
 
-    AmbientOcclusionCmdListRecorder::InitSharedPSOAndRootSignature();
-    BlurCmdListRecorder::InitSharedPSOAndRootSignature();
-    EnvironmentLightCmdListRecorder::InitSharedPSOAndRootSignature();
+    AmbientOcclusionCommandListRecorder::InitSharedPSOAndRootSignature();
+    BlurCommandListRecorder::InitSharedPSOAndRootSignature();
+    EnvironmentLightCommandListRecorder::InitSharedPSOAndRootSignature();
 
     // Create ambient accessibility buffer and blur buffer
     CreateResourceAndRenderTargetView(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
@@ -89,18 +89,18 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
                                       blurBufferRenderTargetView);
 
     // Initialize ambient occlusion recorder
-    mAmbientOcclusionRecorder.reset(new AmbientOcclusionCmdListRecorder());
+    mAmbientOcclusionRecorder.reset(new AmbientOcclusionCommandListRecorder());
     mAmbientOcclusionRecorder->Init(normalSmoothnessBuffer,
                                     depthBuffer,
                                     mAmbientAccessibilityBufferRenderTargetView);
 
     // Initialize blur recorder
-    mBlurRecorder.reset(new BlurCmdListRecorder());
+    mBlurRecorder.reset(new BlurCommandListRecorder());
     mBlurRecorder->Init(*mAmbientAccessibilityBuffer.Get(),
                         blurBufferRenderTargetView);
 
     // Initialize ambient light recorder
-    mEnvironmentLightRecorder.reset(new EnvironmentLightCmdListRecorder());
+    mEnvironmentLightRecorder.reset(new EnvironmentLightCommandListRecorder());
     mEnvironmentLightRecorder->Init(normalSmoothnessBuffer,
                                     baseColorMetalMaskBuffer,
                                     depthBuffer,

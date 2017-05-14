@@ -121,11 +121,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ToneMappingCmdListRecorder.cpp" />
+    <ClCompile Include="ToneMappingCommandListRecorder.cpp" />
     <ClCompile Include="ToneMappingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ToneMappingCmdListRecorder.h" />
+    <ClInclude Include="ToneMappingCommandListRecorder.h" />
     <ClInclude Include="ToneMappingPass.h" />
   </ItemGroup>
   <ItemGroup>

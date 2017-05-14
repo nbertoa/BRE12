@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="PostProcessCmdListRecorder.cpp" />
     <ClCompile Include="PostProcessPass.cpp" />
+    <ClCompile Include="PostProcessCommandListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PostProcessCmdListRecorder.h" />
     <ClInclude Include="PostProcessPass.h" />
+    <ClInclude Include="PostProcessCommandListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

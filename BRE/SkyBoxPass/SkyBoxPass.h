@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <SkyBoxPass\SkyBoxCmdListRecorder.h>
+#include <SkyBoxPass\SkyBoxCommandListRecorder.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12Resource;
@@ -46,7 +46,7 @@ private:
     ///
     bool IsDataValid() const noexcept;
 
-    std::unique_ptr<SkyBoxCmdListRecorder> mCommandListRecorder;
+    std::unique_ptr<SkyBoxCommandListRecorder> mCommandListRecorder;
 };
 
 }

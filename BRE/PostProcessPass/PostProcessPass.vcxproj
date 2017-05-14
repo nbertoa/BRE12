@@ -121,11 +121,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="PostProcessCmdListRecorder.cpp" />
+    <ClCompile Include="PostProcessCommandListRecorder.cpp" />
     <ClCompile Include="PostProcessPass.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PostProcessCmdListRecorder.h" />
+    <ClInclude Include="PostProcessCommandListRecorder.h" />
     <ClInclude Include="PostProcessPass.h" />
   </ItemGroup>
   <ItemGroup>

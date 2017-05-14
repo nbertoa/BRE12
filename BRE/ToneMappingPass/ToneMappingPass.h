@@ -3,7 +3,7 @@
 #include <memory>
 
 #include <CommandManager\CommandListPerFrame.h>
-#include <ToneMappingPass\ToneMappingCmdListRecorder.h>
+#include <ToneMappingPass\ToneMappingCommandListRecorder.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12Resource;
@@ -55,7 +55,7 @@ private:
     ID3D12Resource* mInputColorBuffer{ nullptr };
     ID3D12Resource* mOutputColorBuffer{ nullptr };
 
-    std::unique_ptr<ToneMappingCmdListRecorder> mCommandListRecorder;
+    std::unique_ptr<ToneMappingCommandListRecorder> mCommandListRecorder;
 };
 
 }

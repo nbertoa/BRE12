@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="ToneMappingCmdListRecorder.cpp" />
     <ClCompile Include="ToneMappingPass.cpp" />
+    <ClCompile Include="ToneMappingCommandListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ToneMappingCmdListRecorder.h" />
     <ClInclude Include="ToneMappingPass.h" />
+    <ClInclude Include="ToneMappingCommandListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

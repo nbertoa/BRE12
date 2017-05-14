@@ -3,7 +3,7 @@
 #include <memory>
 
 #include <CommandManager\CommandListPerFrame.h>
-#include <PostProcessPass\PostProcessCmdListRecorder.h>
+#include <PostProcessPass\PostProcessCommandListRecorder.h>
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct ID3D12Resource;
@@ -57,7 +57,7 @@ private:
 
     ID3D12Resource* mInputColorBuffer{ nullptr };
 
-    std::unique_ptr<PostProcessCmdListRecorder> mCommandListRecorder;
+    std::unique_ptr<PostProcessCommandListRecorder> mCommandListRecorder;
 };
 
 }

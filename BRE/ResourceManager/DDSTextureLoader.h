@@ -58,7 +58,7 @@ HRESULT CreateDDSTextureFromMemory(_In_ ID3D11Device* d3dDevice,
 ) noexcept;
 
 HRESULT CreateDDSTextureFromMemory12(_In_ ID3D12Device* device,
-                                     _In_ ID3D12GraphicsCommandList* cmdList,
+                                     _In_ ID3D12GraphicsCommandList* commandList,
                                      _In_reads_bytes_(ddsDataSize) const uint8_t* ddsData,
                                      _In_ std::size_t ddsDataSize,
                                      _Out_ Microsoft::WRL::ComPtr<ID3D12Resource>& texture,
@@ -76,7 +76,7 @@ HRESULT CreateDDSTextureFromFile(_In_ ID3D11Device* d3dDevice,
 ) noexcept;
 
 HRESULT CreateDDSTextureFromFile12(_In_ ID3D12Device* device,
-                                   _In_ ID3D12GraphicsCommandList* cmdList,
+                                   _In_ ID3D12GraphicsCommandList* commandList,
                                    _In_z_ const wchar_t* szFileName,
                                    _Out_ Microsoft::WRL::ComPtr<ID3D12Resource>& texture,
                                    _Out_ Microsoft::WRL::ComPtr<ID3D12Resource>& textureUploadHeap,

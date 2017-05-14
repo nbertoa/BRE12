@@ -1371,7 +1371,7 @@ inline UINT64 GetRequiredIntermediateSize(
 //------------------------------------------------------------------------------------------------
 // All arrays must be populated (e.g. by calling GetCopyableFootprints)
 inline UINT64 UpdateSubresources(
-    _In_ ID3D12GraphicsCommandList* pCmdList,
+    _In_ ID3D12GraphicsCommandList* pCommandList,
     _In_ ID3D12Resource* pDestinationResource,
     _In_ ID3D12Resource* pIntermediate,
     _In_range_(0,D3D12_REQ_SUBRESOURCES) UINT FirstSubresource,
@@ -1412,7 +1412,7 @@ inline UINT64 UpdateSubresources(
     if (DestinationDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER)
     {
         CD3DX12_BOX SrcBox( UINT( pLayouts[0].Offset ), UINT( pLayouts[0].Offset + pLayouts[0].Footprint.Width ) );
-        pCmdList->CopyBufferRegion(
+        pCommandList->CopyBufferRegion(
             pDestinationResource, 0, pIntermediate, pLayouts[0].Offset, pLayouts[0].Footprint.Width);
     }
     else
@@ -1421,7 +1421,7 @@ inline UINT64 UpdateSubresources(
         {
             CD3DX12_TEXTURE_COPY_LOCATION Dst(pDestinationResource, i + FirstSubresource);
             CD3DX12_TEXTURE_COPY_LOCATION Src(pIntermediate, pLayouts[i]);
-            pCmdList->CopyTextureRegion(&Dst, 0, 0, 0, &Src, nullptr);
+            pCommandList->CopyTextureRegion(&Dst, 0, 0, 0, &Src, nullptr);
         }
     }
     return RequiredSize;
@@ -1430,7 +1430,7 @@ inline UINT64 UpdateSubresources(
 //------------------------------------------------------------------------------------------------
 // Heap-allocating UpdateSubresources implementation
 inline UINT64 UpdateSubresources( 
-    _In_ ID3D12GraphicsCommandList* pCmdList,
+    _In_ ID3D12GraphicsCommandList* pCommandList,
     _In_ ID3D12Resource* pDestinationResource,
     _In_ ID3D12Resource* pIntermediate,
     UINT64 IntermediateOffset,
@@ -1459,7 +1459,7 @@ inline UINT64 UpdateSubresources(
     pDevice->GetCopyableFootprints(&Desc, FirstSubresource, NumSubresources, IntermediateOffset, pLayouts, pNumRows, pRowSizesInBytes, &RequiredSize);
     pDevice->Release();
     
-    UINT64 Result = UpdateSubresources(pCmdList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, pLayouts, pNumRows, pRowSizesInBytes, pSrcData);
+    UINT64 Result = UpdateSubresources(pCommandList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, pLayouts, pNumRows, pRowSizesInBytes, pSrcData);
     HeapFree(GetProcessHeap(), 0, pMem);
     return Result;
 }
@@ -1468,7 +1468,7 @@ inline UINT64 UpdateSubresources(
 // Stack-allocating UpdateSubresources implementation
 template <UINT MaxSubresources>
 inline UINT64 UpdateSubresources( 
-    _In_ ID3D12GraphicsCommandList* pCmdList,
+    _In_ ID3D12GraphicsCommandList* pCommandList,
     _In_ ID3D12Resource* pDestinationResource,
     _In_ ID3D12Resource* pIntermediate,
     UINT64 IntermediateOffset,
@@ -1487,7 +1487,7 @@ inline UINT64 UpdateSubresources(
     pDevice->GetCopyableFootprints(&Desc, FirstSubresource, NumSubresources, IntermediateOffset, Layouts, NumRows, RowSizesInBytes, &RequiredSize);
     pDevice->Release();
     
-    return UpdateSubresources(pCmdList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, Layouts, NumRows, RowSizesInBytes, pSrcData);
+    return UpdateSubresources(pCommandList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, Layouts, NumRows, RowSizesInBytes, pSrcData);
 }
 
 //------------------------------------------------------------------------------------------------

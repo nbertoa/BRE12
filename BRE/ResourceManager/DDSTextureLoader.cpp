@@ -1119,7 +1119,7 @@ static HRESULT CreateD3DResources(_In_ ID3D11Device* d3dDevice,
 
 static HRESULT CreateD3DResources12(
     ID3D12Device* device,
-    ID3D12GraphicsCommandList* cmdList,
+    ID3D12GraphicsCommandList* commandList,
     _In_ std::uint32_t resDim,
     _In_ std::size_t width,
     _In_ std::size_t height,
@@ -1191,13 +1191,13 @@ static HRESULT CreateD3DResources12(
                 return hr;
             } else {
                 CD3DX12_RESOURCE_BARRIER resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(texture.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
-                cmdList->ResourceBarrier(1, &resBarrier);
+                commandList->ResourceBarrier(1, &resBarrier);
 
                 // Use Heap-allocating UpdateSubresources implementation for variable number of subresources (which is the case for textures).
-                UpdateSubresources(cmdList, texture.Get(), textureUploadHeap.Get(), 0, 0, num2DSubresources, initData);
+                UpdateSubresources(commandList, texture.Get(), textureUploadHeap.Get(), 0, 0, num2DSubresources, initData);
 
                 resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(texture.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-                cmdList->ResourceBarrier(1, &resBarrier);
+                commandList->ResourceBarrier(1, &resBarrier);
             }
         }
     } break;
@@ -1512,7 +1512,7 @@ static HRESULT CreateTextureFromDDS(_In_ ID3D11Device* d3dDevice,
 
 static HRESULT CreateTextureFromDDS12(
     _In_ ID3D12Device* device,
-    _In_opt_ ID3D12GraphicsCommandList* cmdList,
+    _In_opt_ ID3D12GraphicsCommandList* commandList,
     _In_ const DDS_HEADER* header,
     _In_reads_bytes_(bitSize) const uint8_t* bitData,
     _In_ std::size_t bitSize,
@@ -1681,7 +1681,7 @@ static HRESULT CreateTextureFromDDS12(
 
     if (SUCCEEDED(hr)) {
         hr = CreateD3DResources12(
-            device, cmdList,
+            device, commandList,
             resDim, twidth, theight, tdepth,
             mipCount - skipMip,
             arraySize,
@@ -1740,7 +1740,7 @@ HRESULT DirectX::CreateDDSTextureFromMemory(ID3D11Device* d3dDevice,
 _Use_decl_annotations_
 HRESULT DirectX::CreateDDSTextureFromMemory12(
     ID3D12Device* device,
-    _In_ ID3D12GraphicsCommandList* cmdList,
+    _In_ ID3D12GraphicsCommandList* commandList,
     _In_reads_bytes_(ddsDataSize) const uint8_t* ddsData,
     _In_ std::size_t ddsDataSize,
     ComPtr<ID3D12Resource>& texture,
@@ -1752,7 +1752,7 @@ HRESULT DirectX::CreateDDSTextureFromMemory12(
     if (alphaMode)
         (*alphaMode) = DDS_ALPHA_MODE::DDS_ALPHA_MODE_UNKNOWN;
 
-    if (!device || !cmdList || !ddsData || !ddsDataSize) {
+    if (!device || !commandList || !ddsData || !ddsDataSize) {
         return E_INVALIDARG;
     }
 
@@ -1787,7 +1787,7 @@ HRESULT DirectX::CreateDDSTextureFromMemory12(
 
     HRESULT hr = CreateTextureFromDDS12(
         device,
-        cmdList,
+        commandList,
         header,
         ddsData + offset,
         ddsDataSize - offset,
@@ -1937,7 +1937,7 @@ HRESULT DirectX::CreateDDSTextureFromFile(ID3D11Device* d3dDevice,
 }
 
 HRESULT DirectX::CreateDDSTextureFromFile12(_In_ ID3D12Device* device,
-                                            _In_ ID3D12GraphicsCommandList* cmdList,
+                                            _In_ ID3D12GraphicsCommandList* commandList,
                                             _In_z_ const wchar_t* szFileName,
                                             _Out_ ComPtr<ID3D12Resource>& texture,
                                             _Out_ ComPtr<ID3D12Resource>& textureUploadHeap,
@@ -1964,7 +1964,7 @@ HRESULT DirectX::CreateDDSTextureFromFile12(_In_ ID3D12Device* device,
         return hr;
     }
 
-    hr = CreateTextureFromDDS12(device, cmdList, header,
+    hr = CreateTextureFromDDS12(device, commandList, header,
                                 bitData, bitSize, maxsize, false, texture, textureUploadHeap);
 
     if (SUCCEEDED(hr)) {

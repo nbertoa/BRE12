@@ -20,9 +20,9 @@ PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept
 
     mInputColorBuffer = &inputColorBuffer;
 
-    PostProcessCmdListRecorder::InitSharedPSOAndRootSignature();
+    PostProcessCommandListRecorder::InitSharedPSOAndRootSignature();
 
-    mCommandListRecorder.reset(new PostProcessCmdListRecorder());
+    mCommandListRecorder.reset(new PostProcessCommandListRecorder());
     mCommandListRecorder->Init(inputColorBuffer);
 
     BRE_ASSERT(IsDataValid());
