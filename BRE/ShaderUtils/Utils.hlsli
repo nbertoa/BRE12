@@ -5,15 +5,16 @@
 // Space transformations
 //
 
-float NdcZToScreenSpaceZ(const float depthNDC, const float4x4 projection) {
+float NdcZToScreenSpaceZ(const float depthNDC, 
+                         const float4x4 projection)
+{
 	// depthNDC = A + B / depthV, where A = projection[2, 2] and B = projection[3,2].
 	const float depthV = projection._m32 / (depthNDC - projection._m22);
 
 	return depthV;
 }
 
-int2 NdcToScreenSpace(
-	const float2 ndcPoint,
+int2 NdcToScreenSpace(	const float2 ndcPoint,
 	const float screenTopLeftX,
 	const float screenTopLeftY,
 	const float screenWidth,
@@ -28,8 +29,12 @@ int2 NdcToScreenSpace(
 	return viewportPoint;
 }
 
-float3 ViewRayToViewPosition(const float3 normalizedViewRayV, const float depthNDC, const float4x4 projection) {
-	const float depthV = NdcZToScreenSpaceZ(depthNDC, projection);
+float3 ViewRayToViewPosition(const float3 normalizedViewRayV, 
+                             const float depthNDC, 
+                             const float4x4 projection)
+{
+	const float depthV = NdcZToScreenSpaceZ(depthNDC, 
+                                            projection);
 
 	//
 	// Reconstruct full view space position (x,y,z).
