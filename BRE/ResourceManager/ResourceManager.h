@@ -19,6 +19,9 @@ public:
     ResourceManager(ResourceManager&&) = delete;
     ResourceManager& operator=(ResourceManager&&) = delete;
 
+    ///
+    /// @brief Releases all resources
+    ///
     static void Clear() noexcept;
 
     ///
