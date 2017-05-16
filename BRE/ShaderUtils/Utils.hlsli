@@ -66,14 +66,4 @@ float3 Decode(float2 encN) {
 	return n;
 }
 
-// Map vector from [-1.0f, 1.0f] to [0.0f, 1.0f]
-float3 MapF1(const float3 n) {
-	return n * 0.5f + float3(0.5f, 0.5f, 0.5f);
-}
-
-// UnMap vector from [0.0f, 1.0f] to [-1.0f, 1.0f]
-float3 UnmapF1(const float3 n) {
-	return n * 2.0f - float3(1.0f, 1.0f, 1.0f);
-}
-
 #endif

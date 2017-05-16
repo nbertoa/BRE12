@@ -34,8 +34,10 @@ Output main(const in Input input) {
 	Output output = (Output)0;
 
 	// Normal (encoded in view space) 
-	const float3 normalObjectSpace = normalize(UnmapF1(NormalTexture.Sample(TextureSampler, input.mUV).xyz));
-	const float3x3 tbnWorldSpace = float3x3(normalize(input.mTangentWorldSpace), normalize(input.mBinormalWorldSpace), normalize(input.mNormalWorldSpace));
+	const float3 normalObjectSpace = normalize(NormalTexture.Sample(TextureSampler, input.mUV).xyz * 2.0f - float3(1.0f, 1.0f, 1.0f));
+	const float3x3 tbnWorldSpace = float3x3(normalize(input.mTangentWorldSpace), 
+                                            normalize(input.mBinormalWorldSpace), 
+                                            normalize(input.mNormalWorldSpace));
 	const float3 normalWorldSpace = mul(normalObjectSpace, tbnWorldSpace);
 	const float3x3 tbnViewSpace = float3x3(normalize(input.mTangentViewSpace), normalize(input.mBinormalViewSpace), normalize(input.mNormalViewSpace));
 	output.mNormal_Smoothness.xy = Encode(normalize(mul(normalObjectSpace, tbnViewSpace)));
