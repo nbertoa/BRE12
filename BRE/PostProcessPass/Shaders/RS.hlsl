@@ -4,5 +4,4 @@
 "DENY_HULL_SHADER_ROOT_ACCESS | " \
 "DENY_DOMAIN_SHADER_ROOT_ACCESS | " \
 "DENY_GEOMETRY_SHADER_ROOT_ACCESS), " \
-"DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \
-"StaticSampler(s0, filter=FILTER_ANISOTROPIC)"
+"DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)"
