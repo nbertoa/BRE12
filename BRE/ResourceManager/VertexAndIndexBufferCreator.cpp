@@ -46,9 +46,9 @@ VertexAndIndexBufferCreator::VertexBufferData::IsDataValid() const noexcept
 }
 
 void
-VertexAndIndexBufferCreator::CreateVertexBuffer(ID3D12GraphicsCommandList& commandList,
-                                                const BufferCreationData& bufferCreationData,
+VertexAndIndexBufferCreator::CreateVertexBuffer(const BufferCreationData& bufferCreationData,
                                                 VertexBufferData& vertexBufferData,
+                                                ID3D12GraphicsCommandList& commandList,
                                                 Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept
 {
     BRE_ASSERT(bufferCreationData.IsDataValid());
@@ -57,9 +57,9 @@ VertexAndIndexBufferCreator::CreateVertexBuffer(ID3D12GraphicsCommandList& comma
     const std::uint32_t bufferSize{
         bufferCreationData.mElementCount * static_cast<std::uint32_t>(bufferCreationData.mElementSize)
     };
-    vertexBufferData.mBuffer = &ResourceManager::CreateDefaultBuffer(commandList,
-                                                                     bufferCreationData.mData,
+    vertexBufferData.mBuffer = &ResourceManager::CreateDefaultBuffer(bufferCreationData.mData,
                                                                      bufferSize,
+                                                                     commandList,
                                                                      uploadBuffer,
                                                                      nullptr);
     vertexBufferData.mElementCount = bufferCreationData.mElementCount;
@@ -100,9 +100,9 @@ VertexAndIndexBufferCreator::IndexBufferData::IsDataValid() const noexcept
 }
 
 void
-VertexAndIndexBufferCreator::CreateIndexBuffer(ID3D12GraphicsCommandList& commandList,
-                                               const BufferCreationData& bufferCreationData,
+VertexAndIndexBufferCreator::CreateIndexBuffer(const BufferCreationData& bufferCreationData,
                                                IndexBufferData& indexBufferData,
+                                               ID3D12GraphicsCommandList& commandList,
                                                Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept
 {
     BRE_ASSERT(bufferCreationData.IsDataValid());
@@ -110,9 +110,9 @@ VertexAndIndexBufferCreator::CreateIndexBuffer(ID3D12GraphicsCommandList& comman
     // Create buffer
     const std::uint32_t elementSize{ static_cast<std::uint32_t>(bufferCreationData.mElementSize) };
     const std::uint32_t bufferSize{ bufferCreationData.mElementCount * elementSize };
-    indexBufferData.mBuffer = &ResourceManager::CreateDefaultBuffer(commandList,
-                                                                    bufferCreationData.mData,
+    indexBufferData.mBuffer = &ResourceManager::CreateDefaultBuffer(bufferCreationData.mData,
                                                                     bufferSize,
+                                                                    commandList,
                                                                     uploadBuffer,
                                                                     nullptr);
     indexBufferData.mElementCount = bufferCreationData.mElementCount;

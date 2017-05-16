@@ -57,9 +57,9 @@ ResourceManager::LoadTextureFromFile(const char* textureFilename,
 }
 
 ID3D12Resource&
-ResourceManager::CreateDefaultBuffer(ID3D12GraphicsCommandList& commandList,
-                                     const void* sourceData,
+ResourceManager::CreateDefaultBuffer(const void* sourceData,
                                      const std::size_t sourceDataSize,
+                                     ID3D12GraphicsCommandList& commandList,
                                      Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
                                      const wchar_t* resourceName) noexcept
 {

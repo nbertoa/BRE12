@@ -18,15 +18,41 @@ public:
     Model(Model&&) = delete;
     Model& operator=(Model&&) = delete;
 
-    // Command lists are used to store buffers creation (vertex and index per mesh)
-    // Preconditions:
-    // - "commandList" must be in recorded state before calling these method.
-    // - "commandList" must be executed after calling these methods, to create the commited resource.
+    ///
+    /// @brief Model constructor
+    /// @param modelFilename Model filename. Must not be nullptr.
+    /// @param commandList Command list used to upload buffers content to GPU.
+    /// It must be executed after this function call to upload buffers content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadVertexBuffer Upload buffer to upload the vertex buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadVertexBuffer after it knows the copy has been executed.
+    /// @param uploadIndexBuffer Upload buffer to upload the index buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadIndexBuffer after it knows the copy has been executed.
+    ///
     explicit Model(const char* modelFilename,
                    ID3D12GraphicsCommandList& commandList,
                    Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
                    Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
 
+    ///
+    /// @brief Model constructor
+    /// @param meshData Mesh data.
+    /// @param commandList Command list used to upload buffers content to GPU.
+    /// It must be executed after this function call to upload buffers content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadVertexBuffer Upload buffer to upload the vertex buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadVertexBuffer after it knows the copy has been executed.
+    /// @param uploadIndexBuffer Upload buffer to upload the index buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadIndexBuffer after it knows the copy has been executed.
+    ///
     explicit Model(const GeometryGenerator::MeshData& meshData,
                    ID3D12GraphicsCommandList& commandList,
                    Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,

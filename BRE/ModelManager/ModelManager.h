@@ -27,9 +27,17 @@ public:
     ///
     /// @brief Load model
     /// @param modelFilename Model filename. Must be not nullptr
-    /// @param commandList Command list to use to create the model
-    /// @param uploadVertexBuffer Upload buffer for vertices
-    /// @param uploadIndexBuffer Upload buffer for indices
+    /// @param commandList Command list used to upload buffers content to GPU.
+    /// It must be executed after this function call to upload buffers content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadVertexBuffer Upload buffer to upload the vertex buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadVertexBuffer after it knows the copy has been executed.
+    /// @param uploadIndexBuffer Upload buffer to upload the index buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadIndexBuffer after it knows the copy has been executed.
     /// @return Model
     ///
     static Model& LoadModel(const char* modelFilename,
@@ -43,10 +51,18 @@ public:
     /// @param height Height
     /// @param depth Depth
     /// @param numSubdivisions Number of subdivisions. This controls tessellation.
-    /// @param commandList Command list to create the model
-    /// @param uploadVertexBuffer Upload buffer for vertices
-    /// @param uploadIndexBuffer Upload buffer for indices
-    /// @param Model
+    /// @param commandList Command list used to upload buffers content to GPU.
+    /// It must be executed after this function call to upload buffers content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadVertexBuffer Upload buffer to upload the vertex buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadVertexBuffer after it knows the copy has been executed.
+    /// @param uploadIndexBuffer Upload buffer to upload the index buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadIndexBuffer after it knows the copy has been executed.
+    /// @return Model
     ///
     static Model& CreateBox(const float width,
                             const float height,
@@ -61,10 +77,18 @@ public:
     /// @param radius Radius
     /// @param sliceCount Slice count. This controls tessellation.
     /// @param stackCount Stack count. This controls tessellation.
-    /// @param commandList Command list to create the model
-    /// @param uploadVertexBuffer Upload buffer for vertices
-    /// @param uploadIndexBuffer Upload buffer for indices
-    /// @param Model
+    /// @param commandList Command list used to upload buffers content to GPU.
+    /// It must be executed after this function call to upload buffers content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadVertexBuffer Upload buffer to upload the vertex buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadVertexBuffer after it knows the copy has been executed.
+    /// @param uploadIndexBuffer Upload buffer to upload the index buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadIndexBuffer after it knows the copy has been executed.
+    /// @return Model
     ///
     static Model& CreateSphere(const float radius,
                                const std::uint32_t sliceCount,
@@ -77,10 +101,18 @@ public:
     /// @brief Create a geosphere centered at the origin
     /// @param radius Radius
     /// @param numSubdivisions Number of subdivisions. This controls tessellation.
-    /// @param commandList Command list to create the model
-    /// @param uploadVertexBuffer Upload buffer for vertices
-    /// @param uploadIndexBuffer Upload buffer for indices
-    /// @param Model
+    /// @param commandList Command list used to upload buffers content to GPU.
+    /// It must be executed after this function call to upload buffers content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadVertexBuffer Upload buffer to upload the vertex buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadVertexBuffer after it knows the copy has been executed.
+    /// @param uploadIndexBuffer Upload buffer to upload the index buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadIndexBuffer after it knows the copy has been executed.
+    /// @return Model
     ///
     static Model& CreateGeosphere(const float radius,
                                   const std::uint32_t numSubdivisions,
@@ -95,10 +127,18 @@ public:
     /// @param height Height
     /// @param sliceCount Slice count. This controls tessellation.
     /// @param stackCount Stack count. This controls tessellation.
-    /// @param commandList Command list to create the model
-    /// @param uploadVertexBuffer Upload buffer for vertices
-    /// @param uploadIndexBuffer Upload buffer for indices
-    /// @param Model
+    /// @param commandList Command list used to upload buffers content to GPU.
+    /// It must be executed after this function call to upload buffers content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadVertexBuffer Upload buffer to upload the vertex buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadVertexBuffer after it knows the copy has been executed.
+    /// @param uploadIndexBuffer Upload buffer to upload the index buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadIndexBuffer after it knows the copy has been executed.
+    /// @return Model
     /// 
     static Model& CreateCylinder(const float bottomRadius,
                                  const float topRadius,
@@ -109,18 +149,24 @@ public:
                                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
                                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
 
-    // Creates a rows x columns grid in the xz-plane centered
-    // at the origin.
     ///
     /// @brief Create a rows X columns grid in the xz-plane centered at the origin
     /// @param width Width
     /// @param depth Depth
     /// @param rows Grid rows
     /// @param columns Grid columns
-    /// @param commandList Command list to create the box
-    /// @param uploadVertexBuffer Upload buffer for vertices
-    /// @param uploadIndexBuffer Upload buffer for indices
-    /// @param Model
+    /// @param commandList Command list used to upload buffers content to GPU.
+    /// It must be executed after this function call to upload buffers content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadVertexBuffer Upload buffer to upload the vertex buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadVertexBuffer after it knows the copy has been executed.
+    /// @param uploadIndexBuffer Upload buffer to upload the index buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadIndexBuffer after it knows the copy has been executed.
+    /// @return Model
     ///
     static Model& CreateGrid(const float width,
                              const float depth,

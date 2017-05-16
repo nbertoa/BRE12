@@ -13,9 +13,16 @@ namespace {
 /// @param vertexBufferData Vertex buffer data
 /// @param indexBufferData Index buffer data
 /// @param meshData Mesh data to get vertices and indices
-/// @param commandList Command list to create the buffers
-/// @param uploadVertexBuffer Upload vertex buffer
-/// @param uploadIndexBuffer Upload index buffer
+/// @param commandList Command list used to upload buffers content to GPU.
+/// It must be executed after this function call to upload buffers content to GPU.
+/// @param uploadVertexBuffer Upload buffer to create the buffer.
+/// It has to be kept alive after the function call because
+/// the command list has not been executed yet that performs the actual copy.
+/// The caller can Release the uploadBuffer after it knows the copy has been executed.
+/// @param uploadIndexBuffer Upload buffer to create the buffer.
+/// It has to be kept alive after the function call because
+/// the command list has not been executed yet that performs the actual copy.
+/// The caller can Release the uploadBuffer after it knows the copy has been executed.
 ///
 void CreateVertexAndIndexBufferData(VertexAndIndexBufferCreator::VertexBufferData& vertexBufferData,
                                     VertexAndIndexBufferCreator::IndexBufferData& indexBufferData,
@@ -32,9 +39,9 @@ void CreateVertexAndIndexBufferData(VertexAndIndexBufferCreator::VertexBufferDat
                                                                        static_cast<std::uint32_t>(meshData.mVertices.size()),
                                                                        sizeof(GeometryGenerator::Vertex));
 
-    VertexAndIndexBufferCreator::CreateVertexBuffer(commandList,
-                                                    vertexBufferParams,
+    VertexAndIndexBufferCreator::CreateVertexBuffer(vertexBufferParams,
                                                     vertexBufferData,
+                                                    commandList,
                                                     uploadVertexBuffer);
 
     // Create index buffer
@@ -42,9 +49,9 @@ void CreateVertexAndIndexBufferData(VertexAndIndexBufferCreator::VertexBufferDat
                                                                       static_cast<std::uint32_t>(meshData.mIndices32.size()),
                                                                       sizeof(std::uint32_t));
 
-    VertexAndIndexBufferCreator::CreateIndexBuffer(commandList,
-                                                   indexBufferParams,
+    VertexAndIndexBufferCreator::CreateIndexBuffer(indexBufferParams,
                                                    indexBufferData,
+                                                   commandList,
                                                    uploadIndexBuffer);
 
     BRE_ASSERT(vertexBufferData.IsDataValid());

@@ -27,8 +27,13 @@ public:
     ///
     /// @brief Loads texture from file
     /// @param textureFilename Texture filename. Must be not nullptr
-    /// @param commandList Command list used to create the texture
-    /// @param uploadBuffer Upload buffer to create the texture
+    /// @param commandList Command list used to upload texture content to GPU.
+    /// It must be executed after this function call to upload texture content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadBuffer Upload buffer to upload the texture content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadBuffer after it knows the copy has been executed.
     /// @param resourceName Resource name. If it is nullptr, then it will have the default name.
     ///
     static ID3D12Resource& LoadTextureFromFile(const char* textureFilename,
@@ -36,21 +41,22 @@ public:
                                                Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
                                                const wchar_t* resourceName) noexcept;
 
-    // Note: uploadBuffer has to be kept alive after the above function calls because
-    // the command list has not been executed yet that performs the actual copy.
-    // The caller can Release the uploadBuffer after it knows the copy has been executed.
-
     ///
     /// @brief Creates default buffer
-    /// @param commandList Command list used to create the texture
     /// @param sourceData Source data for the buffer
     /// @param sourceDataSize Source data size for the buffer
-    /// @param uploadBuffer Upload buffer to create the texture
+    /// @param commandList Command list used to upload buffer content to GPU.
+    /// It must be executed after this function call to upload buffer content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadBuffer Upload buffer to upload the buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadBuffer after it knows the copy has been executed.
     /// @param resourceName Resource name. If it is nullptr, then it will have the default name.
     ///
-    static ID3D12Resource& CreateDefaultBuffer(ID3D12GraphicsCommandList& commandList,
-                                               const void* sourceData,
+    static ID3D12Resource& CreateDefaultBuffer(const void* sourceData,
                                                const std::size_t sourceDataSize,
+                                               ID3D12GraphicsCommandList& commandList,
                                                Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
                                                const wchar_t* resourceName) noexcept;
 

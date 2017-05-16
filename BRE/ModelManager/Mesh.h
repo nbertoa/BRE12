@@ -54,9 +54,17 @@ private:
     ///
     /// @brief Mesh constructor
     /// @param mesh Assimp mesh
-    /// @param commandList Command list to create the vertex and index buffer for the mesh
-    /// @param uploadVertexBuffer Upload vertex buffer
-    /// @param uploadIndexBuffer Upload index buffer
+    /// @param commandList Command list used to upload buffers content to GPU.
+    /// It must be executed after this function call to upload buffers content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadVertexBuffer Upload buffer to upload the vertex buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadVertexBuffer after it knows the copy has been executed.
+    /// @param uploadIndexBuffer Upload buffer to upload the index buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadIndexBuffer after it knows the copy has been executed.
     ///
     explicit Mesh(const aiMesh& mesh,
                   ID3D12GraphicsCommandList& commandList,
@@ -66,9 +74,17 @@ private:
     ///
     /// @brief Mesh constructor
     /// @param meshData Mesh data where we extract vertex and indices
-    /// @param commandList Command list to create the vertex and index buffer
-    /// @param uploadVertexBuffer Upload vertex buffer
-    /// @param uploadIndexBuffer Upload index buffer
+    /// @param commandList Command list used to upload buffers content to GPU.
+    /// It must be executed after this function call to upload buffers content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadVertexBuffer Upload buffer to upload the vertex buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadVertexBuffer after it knows the copy has been executed.
+    /// @param uploadIndexBuffer Upload buffer to upload the index buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadIndexBuffer after it knows the copy has been executed.
     ///
     explicit Mesh(const GeometryGenerator::MeshData& meshData,
                   ID3D12GraphicsCommandList& commandList,

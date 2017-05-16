@@ -100,26 +100,36 @@ public:
 
     ///
     /// @brief Creates vertex buffer
-    /// @param commandList Command list to create the buffer
     /// @param bufferCreationData Input data for buffer creation
     /// @param vertexBufferData Output vertex buffer data
-    /// @param uploadBuffer Upload buffer
+    /// @param commandList Command list used to upload buffer content to GPU.
+    /// It must be executed after this function call to upload buffer content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadBuffer Upload buffer to upload the buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadBuffer after it knows the copy has been executed.
     ///
-    static void CreateVertexBuffer(ID3D12GraphicsCommandList& commandList,
-                                   const BufferCreationData& bufferCreationData,
+    static void CreateVertexBuffer(const BufferCreationData& bufferCreationData,
                                    VertexBufferData& vertexBufferData,
+                                   ID3D12GraphicsCommandList& commandList,
                                    Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
 
     ///
     /// @brief Creates index buffer
-    /// @param commandList Command list to create the buffer
     /// @param bufferCreationData Input data for buffer creation
     /// @param indexBufferData Output index buffer data
-    /// @param uploadBuffer Upload buffer
+    /// @param commandList Command list used to upload buffer content to GPU.
+    /// It must be executed after this function call to upload buffer content to GPU.
+    /// It must be in recording state before calling this method.
+    /// @param uploadBuffer Upload buffer to upload the buffer content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadBuffer after it knows the copy has been executed.
     ///
-    static void CreateIndexBuffer(ID3D12GraphicsCommandList& commandList,
-                                  const BufferCreationData& bufferCreationData,
+    static void CreateIndexBuffer(const BufferCreationData& bufferCreationData,
                                   IndexBufferData& indexBufferData,
+                                  ID3D12GraphicsCommandList& commandList,
                                   Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
 };
 }
