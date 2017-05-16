@@ -57,7 +57,8 @@ void EnvironmentLoader::UpdateEnvironmentTexture(const std::string& environmentP
                    L"Specular pre convolved enviroment texture must be set once");
         mSpecularPreConvolvedEnvironmentTexture = &texture;
     } else {
-        BRE_ASSERT(false);
+        // To avoid warning about 'conditional expression is constant'. This is the same than false
+        BRE_ASSERT_MSG(&texture == nullptr, L"Unknown environment field");
     }
 }
 }

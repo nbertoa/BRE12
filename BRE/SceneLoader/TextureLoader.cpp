@@ -42,11 +42,10 @@ TextureLoader::LoadTextures(const YAML::Node& rootNode,
 
         uploadBuffers.resize(uploadBuffers.size() + 1);
 
-        ID3D12Resource& texture = ResourceManager::LoadTextureFromFile(
-            texturePath.c_str(),
-            commandList,
-            uploadBuffers.back(),
-            nullptr);
+        ID3D12Resource& texture = ResourceManager::LoadTextureFromFile(texturePath.c_str(),
+                                                                       commandList,
+                                                                       uploadBuffers.back(),
+                                                                       nullptr);
 
         mTextureByName[textureName] = &texture;
     }
