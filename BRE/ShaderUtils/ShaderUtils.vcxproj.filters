@@ -3,9 +3,9 @@
   <ItemGroup>
     <None Include="CBuffers.hlsli" />
     <None Include="Lighting.hlsli" />
-    <None Include="Material.hlsli" />
     <None Include="Utils.hlsli" />
     <None Include="Fxaa.hlsli" />
+    <None Include="MaterialProperties.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CBuffers.h" />

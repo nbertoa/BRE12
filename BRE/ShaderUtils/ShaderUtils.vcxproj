@@ -124,7 +124,7 @@
     <None Include="CBuffers.hlsli" />
     <None Include="Fxaa.hlsli" />
     <None Include="Lighting.hlsli" />
-    <None Include="Material.hlsli" />
+    <None Include="MaterialProperties.hlsli" />
     <None Include="Utils.hlsli" />
   </ItemGroup>
   <ItemGroup>

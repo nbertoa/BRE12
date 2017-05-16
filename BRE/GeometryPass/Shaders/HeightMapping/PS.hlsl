@@ -1,5 +1,5 @@
 #include <ShaderUtils/CBuffers.hlsli>
-#include <ShaderUtils/Material.hlsli>
+#include <ShaderUtils/MaterialProperties.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
 #include "RS.hlsl"
@@ -17,7 +17,7 @@ struct Input {
 	float2 mUV : TEXCOORD0;
 };
 
-ConstantBuffer<Material> gMaterialCBuffer : register(b0);
+ConstantBuffer<MaterialProperties> gMaterialPropertiesCBuffer : register(b0);
 ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
 
 SamplerState TextureSampler : register (s0);
@@ -44,10 +44,10 @@ Output main(const in Input input) {
 
 	// Base color and metal mask
 	const float3 diffuseColor = DiffuseTexture.Sample(TextureSampler, input.mUV).rgb;
-	output.mBaseColor_MetalMask = float4(gMaterialCBuffer.mBaseColor_MetalMask.xyz * diffuseColor, gMaterialCBuffer.mBaseColor_MetalMask.w);
+	output.mBaseColor_MetalMask = float4(gMaterialPropertiesCBuffer.mBaseColor_MetalMask.xyz * diffuseColor, gMaterialPropertiesCBuffer.mBaseColor_MetalMask.w);
 
 	// Smoothness
-	output.mNormal_Smoothness.z = gMaterialCBuffer.mSmoothness;
+	output.mNormal_Smoothness.z = gMaterialPropertiesCBuffer.mSmoothness;
 
 	return output;
 }

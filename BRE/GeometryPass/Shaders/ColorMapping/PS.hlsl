@@ -1,5 +1,5 @@
 #include <ShaderUtils/CBuffers.hlsli>
-#include <ShaderUtils/Material.hlsli>
+#include <ShaderUtils/MaterialProperties.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
 #include "RS.hlsl"
@@ -12,7 +12,7 @@ struct Input {
 	float3 mNormalViewSpace : NORMAL_VIEW;
 };
 
-ConstantBuffer<Material> gMaterialCBuffer : register(b0);
+ConstantBuffer<MaterialProperties> gMaterialPropertiesCBuffer : register(b0);
 ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
 
 struct Output {	
@@ -29,10 +29,10 @@ Output main(const in Input input) {
 	output.mNormal_Smoothness.xy = Encode(normal);
 
 	// Metal mask
-	output.mBaseColor_MetalMask = gMaterialCBuffer.mBaseColor_MetalMask;
+	output.mBaseColor_MetalMask = gMaterialPropertiesCBuffer.mBaseColor_MetalMask;
 
 	// Smoothness
-	output.mNormal_Smoothness.z = gMaterialCBuffer.mSmoothness;
+	output.mNormal_Smoothness.z = gMaterialPropertiesCBuffer.mSmoothness;
 		
 	return output;
 }
