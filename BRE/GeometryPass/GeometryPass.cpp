@@ -47,8 +47,8 @@ CreateGeometryBuffersAndRenderTargetViews(Microsoft::WRL::ComPtr<ID3D12Resource>
     D3D12_RESOURCE_DESC resourceDescriptor = {};
     resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
     resourceDescriptor.Alignment = 0U;
-    resourceDescriptor.Width = SettingsManager::sWindowWidth;
-    resourceDescriptor.Height = SettingsManager::sWindowHeight;
+    resourceDescriptor.Width = ApplicationSettings::sWindowWidth;
+    resourceDescriptor.Height = ApplicationSettings::sWindowHeight;
     resourceDescriptor.DepthOrArraySize = 1U;
     resourceDescriptor.MipLevels = 0U;
     resourceDescriptor.SampleDesc.Count = 1U;
@@ -139,7 +139,7 @@ GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
     CommandListExecutor::Get().ResetExecutedCommandListCount();
 
     // Execute tasks
-    std::uint32_t grainSize{ max(1U, (taskCount) / SettingsManager::sCpuProcessorCount) };
+    std::uint32_t grainSize{ max(1U, (taskCount) / ApplicationSettings::sCpuProcessorCount) };
     tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
                       [&](const tbb::blocked_range<size_t>& r) {
         for (size_t i = r.begin(); i != r.end(); ++i)
@@ -191,8 +191,8 @@ GeometryPass::ExecuteBeginTask() noexcept
 
     ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
-    commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
-    commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+    commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
+    commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
 
     float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
     commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[NORMAL_SMOOTHNESS], Colors::Black, 0U, nullptr);

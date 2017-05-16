@@ -14,12 +14,12 @@ BuildCommandObjects(ID3D12GraphicsCommandList* &commandList,
     BRE_ASSERT(commandList == nullptr);
 
 #ifdef _DEBUG
-    for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
+    for (std::uint32_t i = 0U; i < ApplicationSettings::sQueuedFrameCount; ++i) {
         BRE_ASSERT(commandAllocators[i] == nullptr);
     }
 #endif
 
-    for (std::uint32_t i = 0U; i < SettingsManager::sQueuedFrameCount; ++i) {
+    for (std::uint32_t i = 0U; i < ApplicationSettings::sQueuedFrameCount; ++i) {
         commandAllocators[i] = 
         &CommandAllocatorManager::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
     }
@@ -49,7 +49,7 @@ CommandListPerFrame::ResetCommandListWithNextCommandAllocator(ID3D12PipelineStat
     BRE_CHECK_HR(commandAllocator->Reset());
     BRE_CHECK_HR(mCommandList->Reset(commandAllocator, pso));
 
-    mCurrentFrameIndex = (mCurrentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
+    mCurrentFrameIndex = (mCurrentFrameIndex + 1) % ApplicationSettings::sQueuedFrameCount;
 
     return *mCommandList;
 }

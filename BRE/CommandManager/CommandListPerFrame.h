@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include <SettingsManager\SettingsManager.h>
+#include <ApplicationSettings\ApplicationSettings.h>
 #include <Utils\DebugUtils.h>
 
 namespace BRE {
@@ -40,7 +40,7 @@ public:
     }
 
 private:
-    ID3D12CommandAllocator* mCommandAllocators[SettingsManager::sQueuedFrameCount]{ nullptr };
+    ID3D12CommandAllocator* mCommandAllocators[ApplicationSettings::sQueuedFrameCount]{ nullptr };
     ID3D12GraphicsCommandList* mCommandList{ nullptr };
     std::uint32_t mCurrentFrameIndex{ 0U };
 };

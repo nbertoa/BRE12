@@ -19,7 +19,7 @@ FrameUploadCBufferPerFrame::GetNextFrameCBuffer() noexcept
     UploadBuffer* frameCBuffer{ mFrameCBuffers[mCurrentFrameIndex] };
     BRE_ASSERT(frameCBuffer != nullptr);
 
-    mCurrentFrameIndex = (mCurrentFrameIndex + 1) % SettingsManager::sQueuedFrameCount;
+    mCurrentFrameIndex = (mCurrentFrameIndex + 1) % ApplicationSettings::sQueuedFrameCount;
 
     return *frameCBuffer;
 }

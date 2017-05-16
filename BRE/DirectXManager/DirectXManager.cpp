@@ -1,6 +1,6 @@
 #include "DirectXManager.h"
 
-#include <SettingsManager\SettingsManager.h>
+#include <ApplicationSettings\ApplicationSettings.h>
 
 namespace BRE {
 namespace {
@@ -53,13 +53,13 @@ InitMainWindow(HWND& windowHandle,
     BRE_ASSERT(RegisterClass(&windowClass));
 
     // Compute window rectangle dimensions based on requested client area dimensions.
-    RECT rect = { 0, 0, static_cast<long>(SettingsManager::sWindowWidth), static_cast<long>(SettingsManager::sWindowHeight) };
+    RECT rect = { 0, 0, static_cast<long>(ApplicationSettings::sWindowWidth), static_cast<long>(ApplicationSettings::sWindowHeight) };
     AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
     const int32_t width{ rect.right - rect.left };
     const int32_t height{ rect.bottom - rect.top };
 
     const std::uint32_t windowStyle =
-        SettingsManager::sIsFullscreenWindow ? WS_POPUP
+        ApplicationSettings::sIsFullscreenWindow ? WS_POPUP
         : WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
     windowHandle = CreateWindowEx(WS_EX_APPWINDOW,
                                   L"MainWnd",

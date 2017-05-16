@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-#include <SettingsManager\SettingsManager.h>
+#include <ApplicationSettings\ApplicationSettings.h>
 
 using namespace DirectX;
 
@@ -103,7 +103,7 @@ Camera::UpdateViewMatrix() noexcept
     static float maxVelocitySpeed{ 100.0f }; // speed = velocity magnitude
     static float velocityDamp{ 0.1f }; // fraction of velocity retained per second
 
-    const float secondsPerFrame = SettingsManager::sSecondsPerFrame;
+    const float secondsPerFrame = ApplicationSettings::sSecondsPerFrame;
 
     // Clamp velocity
     XMVECTOR velocityVector = XMLoadFloat3(&mVelocityVector);

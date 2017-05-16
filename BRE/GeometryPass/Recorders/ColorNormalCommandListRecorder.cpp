@@ -105,8 +105,8 @@ ColorNormalCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& fr
 
     ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(sPSO);
 
-    commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
-    commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+    commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
+    commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
     commandList.OMSetRenderTargets(mGeometryBufferRenderTargetViewCount,
                                    mGeometryBufferRenderTargetViews,
                                    false,

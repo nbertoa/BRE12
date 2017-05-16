@@ -7,14 +7,14 @@ namespace BRE {
 ///
 /// @brief Responsible to handle all main settings
 ///
-class SettingsManager {
+class ApplicationSettings {
 public:
-    SettingsManager() = delete;
-    ~SettingsManager() = delete;
-    SettingsManager(const SettingsManager&) = delete;
-    const SettingsManager& operator=(const SettingsManager&) = delete;
-    SettingsManager(SettingsManager&&) = delete;
-    SettingsManager& operator=(SettingsManager&&) = delete;
+    ApplicationSettings() = delete;
+    ~ApplicationSettings() = delete;
+    ApplicationSettings(const ApplicationSettings&) = delete;
+    const ApplicationSettings& operator=(const ApplicationSettings&) = delete;
+    ApplicationSettings(ApplicationSettings&&) = delete;
+    ApplicationSettings& operator=(ApplicationSettings&&) = delete;
 
     ///
     /// @brief Get aspect ratio

@@ -39,7 +39,7 @@ EnvironmentLightCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
     sRootSignature = psoData.mRootSignature;
 
     psoData.mNumRenderTargets = 1U;
-    psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
+    psoData.mRenderTargetFormats[0U] = ApplicationSettings::sColorBufferFormat;
     for (std::size_t i = psoData.mNumRenderTargets; i < _countof(psoData.mRenderTargetFormats); ++i) {
         psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
     }
@@ -86,8 +86,8 @@ EnvironmentLightCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
 
     ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(sPSO);
 
-    commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
-    commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+    commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
+    commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
     commandList.OMSetRenderTargets(1U, &mRenderTargetView, false, nullptr);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
@@ -161,7 +161,7 @@ EnvironmentLightCommandListRecorder::InitShaderResourceViews(ID3D12Resource& nor
     srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
     srvDescriptor.Texture2D.MostDetailedMip = 0;
     srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
-    srvDescriptor.Format = SettingsManager::sDepthStencilSRVFormat;
+    srvDescriptor.Format = ApplicationSettings::sDepthStencilSRVFormat;
     srvDescriptor.Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
     srvDescriptors.emplace_back(srvDescriptor);
     resources.push_back(&depthBuffer);

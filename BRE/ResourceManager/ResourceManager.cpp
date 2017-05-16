@@ -4,7 +4,7 @@
 #include <DXUtils/d3dx12.h>
 #include <ResourceManager\DDSTextureLoader.h>
 #include <ResourceStateManager\ResourceStateManager.h>
-#include <SettingsManager\SettingsManager.h>
+#include <ApplicationSettings\ApplicationSettings.h>
 #include <Utils/DebugUtils.h>
 #include <Utils\StringUtils.h>
 

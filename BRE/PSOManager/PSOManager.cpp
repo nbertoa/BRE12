@@ -1,7 +1,7 @@
 #include "PSOManager.h"
 
 #include <DirectXManager/DirectXManager.h>
-#include <SettingsManager\SettingsManager.h>
+#include <ApplicationSettings\ApplicationSettings.h>
 #include <Utils/DebugUtils.h>
 
 namespace BRE {
@@ -46,7 +46,7 @@ PSOManager::CreateGraphicsPSO(const PSOManager::PSOCreationData& psoData) noexce
     psoDescriptor.BlendState = psoData.mBlendDescriptor;
     psoDescriptor.DepthStencilState = psoData.mDepthStencilDescriptor;
     psoDescriptor.DS = psoData.mDomainShaderBytecode;
-    psoDescriptor.DSVFormat = SettingsManager::sDepthStencilViewFormat;
+    psoDescriptor.DSVFormat = ApplicationSettings::sDepthStencilViewFormat;
     psoDescriptor.GS = psoData.mGeometryShaderBytecode;
     psoDescriptor.HS = psoData.mHullShaderBytecode;
     psoDescriptor.InputLayout =

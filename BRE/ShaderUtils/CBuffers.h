@@ -3,7 +3,7 @@
 #include <DirectXMath.h>
 
 #include <MathUtils\MathUtils.h>
-#include <SettingsManager\SettingsManager.h>
+#include <ApplicationSettings\ApplicationSettings.h>
 
 namespace BRE {
 ///
@@ -50,10 +50,10 @@ struct ImmutableCBuffer {
     ImmutableCBuffer& operator=(ImmutableCBuffer&&) = default;
 
     float mNearZ_FarZ_ScreenW_ScreenH[4U]{
-        SettingsManager::sNearPlaneZ,
-        SettingsManager::sFarPlaneZ,
-        static_cast<float>(SettingsManager::sWindowWidth),
-        static_cast<float>(SettingsManager::sWindowHeight)
+        ApplicationSettings::sNearPlaneZ,
+        ApplicationSettings::sFarPlaneZ,
+        static_cast<float>(ApplicationSettings::sWindowWidth),
+        static_cast<float>(ApplicationSettings::sWindowHeight)
     };
 };
 

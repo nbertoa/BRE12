@@ -32,7 +32,7 @@ void UpdateCameraAndFrameCBuffer(const float elapsedFrameTime,
     static float elapsedFrameTimeAccumulator = 0.0f;
     elapsedFrameTimeAccumulator += elapsedFrameTime;
 
-    while (elapsedFrameTimeAccumulator >= SettingsManager::sSecondsPerFrame) {
+    while (elapsedFrameTimeAccumulator >= ApplicationSettings::sSecondsPerFrame) {
         static const float translationAcceleration = 5.0f; // rate of acceleration in units/sec
         const float translationDelta = translationAcceleration;
 
@@ -76,8 +76,8 @@ void UpdateCameraAndFrameCBuffer(const float elapsedFrameTime,
         const std::int32_t x{ Mouse::Get().GetX() };
         const std::int32_t y{ Mouse::Get().GetY() };
         if (Mouse::Get().IsButtonDown(Mouse::MouseButtonsLeft)) {
-            const float dx = static_cast<float>(x - lastXY[0]) / SettingsManager::sWindowWidth;
-            const float dy = static_cast<float>(y - lastXY[1]) / SettingsManager::sWindowHeight;
+            const float dx = static_cast<float>(x - lastXY[0]) / ApplicationSettings::sWindowWidth;
+            const float dy = static_cast<float>(y - lastXY[1]) / ApplicationSettings::sWindowHeight;
 
             camera.Pitch(dy * rotationDelta);
             camera.RotateY(dx * rotationDelta);
@@ -86,7 +86,7 @@ void UpdateCameraAndFrameCBuffer(const float elapsedFrameTime,
         lastXY[0] = x;
         lastXY[1] = y;
 
-        elapsedFrameTimeAccumulator -= SettingsManager::sSecondsPerFrame;
+        elapsedFrameTimeAccumulator -= ApplicationSettings::sSecondsPerFrame;
     }
 }
 
@@ -105,7 +105,7 @@ void CreateSwapChain(const HWND windowHandle,
 
     DXGI_SWAP_CHAIN_DESC1 swapChainDescriptor = {};
     swapChainDescriptor.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-    swapChainDescriptor.BufferCount = SettingsManager::sSwapChainBufferCount;
+    swapChainDescriptor.BufferCount = ApplicationSettings::sSwapChainBufferCount;
     swapChainDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 #ifdef V_SYNC
     sd.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
@@ -126,9 +126,9 @@ void CreateSwapChain(const HWND windowHandle,
                                                                           &baseSwapChain));
     BRE_CHECK_HR(baseSwapChain->QueryInterface(IID_PPV_ARGS(swapChain.GetAddressOf())));
 
-    BRE_CHECK_HR(swapChain->ResizeBuffers(SettingsManager::sSwapChainBufferCount,
-                                          SettingsManager::sWindowWidth,
-                                          SettingsManager::sWindowHeight,
+    BRE_CHECK_HR(swapChain->ResizeBuffers(ApplicationSettings::sSwapChainBufferCount,
+                                          ApplicationSettings::sWindowWidth,
+                                          ApplicationSettings::sWindowHeight,
                                           frameBufferFormat,
                                           swapChainDescriptor.Flags));
 
@@ -137,7 +137,7 @@ void CreateSwapChain(const HWND windowHandle,
                                                                          DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN));
 
 #ifdef V_SYNC
-    BRE_CHECK_HR(swapChain3->SetMaximumFrameLatency(SettingsManager::sQueuedFrameCount));
+    BRE_CHECK_HR(swapChain3->SetMaximumFrameLatency(ApplicationSettings::sQueuedFrameCount));
 #endif
 }
 }
@@ -179,10 +179,10 @@ RenderManager::RenderManager(Scene& scene)
                                                      mIntermediateColorBuffer2,
                                                      mIntermediateColorBuffer2RenderTargetView);
 
-    mCamera.SetFrustum(SettingsManager::sVerticalFieldOfView,
-                       SettingsManager::GetAspectRatio(),
-                       SettingsManager::sNearPlaneZ,
-                       SettingsManager::sFarPlaneZ);
+    mCamera.SetFrustum(ApplicationSettings::sVerticalFieldOfView,
+                       ApplicationSettings::GetAspectRatio(),
+                       ApplicationSettings::sNearPlaneZ,
+                       ApplicationSettings::sFarPlaneZ);
 
     InitPasses(scene);
 
@@ -290,18 +290,18 @@ RenderManager::CreateFrameBuffersAndRenderTargetViews() noexcept
 {
     // Setup render target view
     D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor = {};
-    rtvDescriptor.Format = SettingsManager::sFrameBufferRTFormat;
+    rtvDescriptor.Format = ApplicationSettings::sFrameBufferRTFormat;
     rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
     // Create swap chain and frame buffers
     BRE_ASSERT(mSwapChain == nullptr);
     CreateSwapChain(DirectXManager::GetWindowHandle(),
-                    SettingsManager::sFrameBufferFormat,
+                    ApplicationSettings::sFrameBufferFormat,
                     mSwapChain);
 
     // Create frame buffer render target views
     const std::size_t rtvDescriptorSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
-    for (std::uint32_t i = 0U; i < SettingsManager::sSwapChainBufferCount; ++i) {
+    for (std::uint32_t i = 0U; i < ApplicationSettings::sSwapChainBufferCount; ++i) {
         BRE_CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
 
         RenderTargetDescriptorManager::CreateRenderTargetView(*mFrameBuffers[i].Get(),
@@ -319,18 +319,18 @@ RenderManager::CreateDepthStencilBufferAndView() noexcept
     D3D12_RESOURCE_DESC depthStencilDesc = {};
     depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
     depthStencilDesc.Alignment = 0U;
-    depthStencilDesc.Width = SettingsManager::sWindowWidth;
-    depthStencilDesc.Height = SettingsManager::sWindowHeight;
+    depthStencilDesc.Width = ApplicationSettings::sWindowWidth;
+    depthStencilDesc.Height = ApplicationSettings::sWindowHeight;
     depthStencilDesc.DepthOrArraySize = 1U;
     depthStencilDesc.MipLevels = 1U;
-    depthStencilDesc.Format = SettingsManager::sDepthStencilFormat;
+    depthStencilDesc.Format = ApplicationSettings::sDepthStencilFormat;
     depthStencilDesc.SampleDesc.Count = 1U;
     depthStencilDesc.SampleDesc.Quality = 0U;
     depthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
     depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
     D3D12_CLEAR_VALUE clearValue = {};
-    clearValue.Format = SettingsManager::sDepthStencilViewFormat;
+    clearValue.Format = ApplicationSettings::sDepthStencilViewFormat;
     clearValue.DepthStencil.Depth = 1.0f;
     clearValue.DepthStencil.Stencil = 0U;
 
@@ -344,7 +344,7 @@ RenderManager::CreateDepthStencilBufferAndView() noexcept
 
     // Create descriptor to mip level 0 of entire resource using the format of the resource.
     D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
-    depthStencilViewDesc.Format = SettingsManager::sDepthStencilViewFormat;
+    depthStencilViewDesc.Format = ApplicationSettings::sDepthStencilViewFormat;
     depthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
     depthStencilViewDesc.Texture2D.MipSlice = 0;
     DepthStencilDescriptorManager::CreateDepthStencilView(*mDepthBuffer, depthStencilViewDesc, &mDepthBufferRenderTargetView);
@@ -362,15 +362,15 @@ RenderManager::CreateIntermediateColorBufferAndRenderTargetView(const D3D12_RESO
     D3D12_RESOURCE_DESC resourceDescriptor = {};
     resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
     resourceDescriptor.Alignment = 0U;
-    resourceDescriptor.Width = SettingsManager::sWindowWidth;
-    resourceDescriptor.Height = SettingsManager::sWindowHeight;
+    resourceDescriptor.Width = ApplicationSettings::sWindowWidth;
+    resourceDescriptor.Height = ApplicationSettings::sWindowHeight;
     resourceDescriptor.DepthOrArraySize = 1U;
     resourceDescriptor.MipLevels = 0U;
     resourceDescriptor.SampleDesc.Count = 1U;
     resourceDescriptor.SampleDesc.Quality = 0U;
     resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
     resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-    resourceDescriptor.Format = SettingsManager::sColorBufferFormat;
+    resourceDescriptor.Format = ApplicationSettings::sColorBufferFormat;
 
     // Create buffer and render target view
     D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor{};
@@ -417,7 +417,7 @@ RenderManager::SignalFenceAndPresent() noexcept
     // are on the GPU time line, the new fence point won't be set until the GPU finishes
     // processing all the commands prior to this Signal().
     mFenceValueByQueuedFrameIndex[mCurrentQueuedFrameIndex] = ++mCurrentFenceValue;
-    mCurrentQueuedFrameIndex = (mCurrentQueuedFrameIndex + 1U) % SettingsManager::sQueuedFrameCount;
+    mCurrentQueuedFrameIndex = (mCurrentQueuedFrameIndex + 1U) % ApplicationSettings::sQueuedFrameCount;
     const std::uint64_t oldestFence{ mFenceValueByQueuedFrameIndex[mCurrentQueuedFrameIndex] };
 
     // If we executed command lists for all queued frames, then we need to wait

@@ -28,8 +28,8 @@ CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceInitialSta
     D3D12_RESOURCE_DESC resourceDescriptor = {};
     resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
     resourceDescriptor.Alignment = 0U;
-    resourceDescriptor.Width = SettingsManager::sWindowWidth;
-    resourceDescriptor.Height = SettingsManager::sWindowHeight;
+    resourceDescriptor.Width = ApplicationSettings::sWindowWidth;
+    resourceDescriptor.Height = ApplicationSettings::sWindowHeight;
     resourceDescriptor.DepthOrArraySize = 1U;
     resourceDescriptor.MipLevels = 0U;
     resourceDescriptor.SampleDesc.Count = 1U;

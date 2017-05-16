@@ -9,7 +9,7 @@
 #include <GeometryPass\GeometryPass.h>
 #include <LightingPass\LightingPass.h>
 #include <PostProcesspass\PostProcesspass.h>
-#include <SettingsManager\SettingsManager.h>
+#include <ApplicationSettings\ApplicationSettings.h>
 #include <SkyBoxPass\SkyBoxPass.h>
 #include <ShaderUtils\CBuffers.h>
 #include <ToneMappingPass\ToneMappingPass.h>
@@ -137,7 +137,7 @@ private:
     // Fences data for synchronization purposes.
     ID3D12Fence* mFence{ nullptr };
     std::uint32_t mCurrentQueuedFrameIndex{ 0U };
-    std::uint64_t mFenceValueByQueuedFrameIndex[SettingsManager::sQueuedFrameCount]{ 0UL };
+    std::uint64_t mFenceValueByQueuedFrameIndex[ApplicationSettings::sQueuedFrameCount]{ 0UL };
     std::uint64_t mCurrentFenceValue{ 0UL };
 
     // Passes
@@ -149,8 +149,8 @@ private:
 
     CommandListPerFrame mFinalCommandListPerFrame;
 
-    Microsoft::WRL::ComPtr<ID3D12Resource> mFrameBuffers[SettingsManager::sSwapChainBufferCount];
-    D3D12_CPU_DESCRIPTOR_HANDLE mFrameBufferRenderTargetViews[SettingsManager::sSwapChainBufferCount]{ 0UL };
+    Microsoft::WRL::ComPtr<ID3D12Resource> mFrameBuffers[ApplicationSettings::sSwapChainBufferCount];
+    D3D12_CPU_DESCRIPTOR_HANDLE mFrameBufferRenderTargetViews[ApplicationSettings::sSwapChainBufferCount]{ 0UL };
 
     ID3D12Resource* mDepthBuffer{ nullptr };
     D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferRenderTargetView{ 0UL };

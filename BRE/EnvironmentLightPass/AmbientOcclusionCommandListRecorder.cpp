@@ -183,8 +183,8 @@ AmbientOcclusionCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
     UploadBuffer& uploadFrameCBuffer(mFrameUploadCBufferPerFrame.GetNextFrameCBuffer());
     uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
-    commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
-    commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+    commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
+    commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
     commandList.OMSetRenderTargets(1U, &mRenderTargetView, false, nullptr);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
@@ -311,7 +311,7 @@ AmbientOcclusionCommandListRecorder::InitShaderResourceViews(ID3D12Resource& nor
     srvDescriptors[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
     srvDescriptors[1].Texture2D.MostDetailedMip = 0;
     srvDescriptors[1].Texture2D.ResourceMinLODClamp = 0.0f;
-    srvDescriptors[1].Format = SettingsManager::sDepthStencilSRVFormat;
+    srvDescriptors[1].Format = ApplicationSettings::sDepthStencilSRVFormat;
     srvDescriptors[1].Texture2D.MipLevels = depthBuffer.GetDesc().MipLevels;
 
     // Fill sample kernel buffer descriptor

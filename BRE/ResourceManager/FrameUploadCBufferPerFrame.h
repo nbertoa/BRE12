@@ -3,7 +3,7 @@
 #include <cstdint>
 
 #include <ResourceManager\UploadBuffer.h>
-#include <SettingsManager\SettingsManager.h>
+#include <ApplicationSettings\ApplicationSettings.h>
 
 namespace BRE {
 ///
@@ -27,7 +27,7 @@ public:
     UploadBuffer& GetNextFrameCBuffer() noexcept;
 
 private:
-    UploadBuffer* mFrameCBuffers[SettingsManager::sQueuedFrameCount];
+    UploadBuffer* mFrameCBuffers[ApplicationSettings::sQueuedFrameCount];
     std::uint32_t mCurrentFrameIndex{ 0U };
 };
 

@@ -50,7 +50,7 @@ SkyBoxCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
     sRootSignature = psoData.mRootSignature;
 
     psoData.mNumRenderTargets = 1U;
-    psoData.mRenderTargetFormats[0U] = SettingsManager::sColorBufferFormat;
+    psoData.mRenderTargetFormats[0U] = ApplicationSettings::sColorBufferFormat;
     for (std::size_t i = psoData.mNumRenderTargets; i < _countof(psoData.mRenderTargetFormats); ++i) {
         psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
     }
@@ -95,8 +95,8 @@ SkyBoxCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 
     ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(sPSO);
 
-    commandList.RSSetViewports(1U, &SettingsManager::sScreenViewport);
-    commandList.RSSetScissorRects(1U, &SettingsManager::sScissorRect);
+    commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
+    commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
     commandList.OMSetRenderTargets(1U, &mRenderTargetView, false, &mDepthBufferView);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
