@@ -87,12 +87,11 @@ RenderTargetDescriptorManager::CreateRenderTargetViews(ID3D12Resource* *resource
             DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     }
 
-    mCurrentRenderTargetViewDescriptorHandle.ptr += 
-    descriptorCount * DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    mCurrentRenderTargetViewDescriptorHandle.ptr +=
+        descriptorCount * DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
     mMutex.unlock();
 
     return gpuDescriptorHandle;
 }
 }
-

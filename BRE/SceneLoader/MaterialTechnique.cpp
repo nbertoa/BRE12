@@ -28,6 +28,4 @@ MaterialTechnique::GetType() const noexcept
         return TechniqueType::COLOR_MAPPING;
     }
 }
-
 }
-

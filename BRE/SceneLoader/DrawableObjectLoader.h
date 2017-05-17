@@ -60,4 +60,3 @@ private:
     const ModelLoader& mModelLoader;
 };
 }
-

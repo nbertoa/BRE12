@@ -70,6 +70,4 @@ private:
     const MaterialTechnique* mMaterialTechnique{ nullptr };
     DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::GetIdentity4x4Matrix() };
 };
-
 }
-

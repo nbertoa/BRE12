@@ -57,4 +57,3 @@ UploadBuffer::GetRoundedConstantBufferSizeInBytes(const std::size_t sizeInBytes)
     return (sizeInBytes + 255U) & ~255U;
 }
 }
-

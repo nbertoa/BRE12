@@ -46,4 +46,3 @@ ResourceStateManager::GetResourceState(ID3D12Resource& resource) noexcept
     return accessor->second;
 }
 }
-

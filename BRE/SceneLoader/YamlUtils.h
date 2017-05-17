@@ -79,6 +79,4 @@ public:
         BRE_ASSERT(currentNumElems == numElems);
     }
 };
-
 }
-

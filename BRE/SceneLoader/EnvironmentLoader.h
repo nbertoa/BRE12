@@ -3,7 +3,7 @@
 #include <Utils\DebugUtils.h>
 
 namespace YAML {
-	class Node;
+class Node;
 }
 
 struct ID3D12Resource;
@@ -76,4 +76,3 @@ private:
     ID3D12Resource* mSpecularPreConvolvedEnvironmentTexture{ nullptr };
 };
 }
-

@@ -45,4 +45,3 @@ private:
     std::unordered_map<std::string, ID3D12Resource*> mTextureByName;
 };
 }
-

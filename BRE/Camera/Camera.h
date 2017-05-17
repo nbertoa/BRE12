@@ -65,7 +65,7 @@ public:
     {
         return mInverseViewMatrix;
     }
-    
+
     ///
     /// @brief Get the projection matrix
     /// @return Projection matrix as a XMFLOAT4X4
@@ -84,9 +84,6 @@ public:
         return mInverseProjectionMatrix;
     }
 
-    // If distance is positive, then we
-    // will strafe left / walk forward.
-    // Otherwise, we will strafe right / walk backward.
     ///
     /// @brief Camera strafe
     /// 
@@ -140,4 +137,3 @@ private:
     DirectX::XMFLOAT4X4 mInverseProjectionMatrix{ MathUtils::GetIdentity4x4Matrix() };
 };
 }
- 

@@ -39,4 +39,3 @@ private:
     std::unordered_map<std::string, MaterialProperties> mMaterialPropertiesByName;
 };
 }
-

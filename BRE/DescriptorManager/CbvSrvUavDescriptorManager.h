@@ -26,7 +26,7 @@ public:
     /// descriptor heap of Constant Buffer Views, Shader Resource Views, and Unordered Access Views.
     ///
     static void Init(const std::uint32_t numDescriptorsInCbvSrvUavDescriptorHeap) noexcept;
-    
+
     ///
     /// @brief Create a constant buffer view
     /// @param cBufferViewDescriptor Constant buffer view descriptor
@@ -105,6 +105,4 @@ private:
 
     static std::mutex mMutex;
 };
-
 }
-

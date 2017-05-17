@@ -100,4 +100,3 @@ private:
     ID3D12Resource* mHeightTexture{ nullptr };
 };
 }
-

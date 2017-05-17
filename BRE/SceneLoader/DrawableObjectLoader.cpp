@@ -108,4 +108,3 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
     }
 }
 }
-

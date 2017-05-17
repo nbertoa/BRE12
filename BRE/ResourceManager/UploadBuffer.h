@@ -64,4 +64,3 @@ private:
     std::size_t mElementSize{ 0U };
 };
 }
-

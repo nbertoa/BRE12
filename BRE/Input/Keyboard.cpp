@@ -50,11 +50,10 @@ Keyboard::UpdateKeysState() noexcept
     BRE_ASSERT(mDevice != nullptr);
 
     memcpy(mKeysLastState, mKeysCurrentState, sizeof(mKeysCurrentState));
-    if (FAILED(mDevice->GetDeviceState(sizeof(mKeysCurrentState), 
+    if (FAILED(mDevice->GetDeviceState(sizeof(mKeysCurrentState),
                                        reinterpret_cast<LPVOID>(mKeysCurrentState))) &&
         SUCCEEDED(mDevice->Acquire())) {
         mDevice->GetDeviceState(sizeof(mKeysCurrentState), reinterpret_cast<LPVOID>(mKeysCurrentState));
     }
 }
 }
-

@@ -178,4 +178,3 @@ private:
     std::int32_t mWheel{ 0 };
 };
 }
-

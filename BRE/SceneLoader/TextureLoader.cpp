@@ -65,4 +65,3 @@ TextureLoader::GetTexture(const std::string& name) noexcept
     return *findIt->second;
 }
 }
-

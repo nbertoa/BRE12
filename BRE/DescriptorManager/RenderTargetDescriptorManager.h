@@ -5,8 +5,6 @@
 #include <wrl.h>
 
 namespace BRE {
-// To create render target descriptor heaps
-// To create render target descriptors
 ///
 /// @brief Responsible to create render target descriptors and heaps.
 ///
@@ -62,6 +60,4 @@ private:
 
     static std::mutex mMutex;
 };
-
 }
-

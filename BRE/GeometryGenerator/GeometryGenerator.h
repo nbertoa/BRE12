@@ -125,4 +125,3 @@ void CreateGrid(const float width,
                 MeshData& meshData) noexcept;
 }
 }
-

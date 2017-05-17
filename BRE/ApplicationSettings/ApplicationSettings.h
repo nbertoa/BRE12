@@ -61,5 +61,3 @@ public:
     static const float sSecondsPerFrame;
 };
 }
-
-

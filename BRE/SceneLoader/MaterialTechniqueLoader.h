@@ -53,4 +53,3 @@ private:
     TextureLoader& mTextureLoader;
 };
 }
-

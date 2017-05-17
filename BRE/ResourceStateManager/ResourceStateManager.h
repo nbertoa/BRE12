@@ -10,9 +10,9 @@ namespace BRE {
 /// @brief Responsible to track resource states.
 ///
 /// Its functionality includes:
-/// - GetResource state registration
-/// - GetResource state change
-/// - GetResource unregistration
+/// - Resource state registration
+/// - Resource state change
+/// - Resource unregistration
 ///
 class ResourceStateManager {
 public:
@@ -56,4 +56,3 @@ private:
     static tbb::concurrent_hash_map<ID3D12Resource*, D3D12_RESOURCE_STATES> mStateByResource;
 };
 }
-

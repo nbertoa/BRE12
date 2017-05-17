@@ -17,4 +17,3 @@ FrameCBuffer::operator=(const FrameCBuffer& instance)
     return *this;
 }
 }
-

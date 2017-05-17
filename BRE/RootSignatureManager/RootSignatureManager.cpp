@@ -36,4 +36,3 @@ RootSignatureManager::CreateRootSignatureFromBlob(ID3DBlob& blob) noexcept
     return *rootSignature;
 }
 }
-

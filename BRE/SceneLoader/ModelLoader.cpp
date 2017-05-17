@@ -67,4 +67,3 @@ const Model& ModelLoader::GetModel(const std::string& name) const noexcept
     return *findIt->second;
 }
 }
-

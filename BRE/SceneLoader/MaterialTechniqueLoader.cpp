@@ -83,4 +83,3 @@ void MaterialTechniqueLoader::UpdateMaterialTechnique(const std::string& materia
     }
 }
 }
-

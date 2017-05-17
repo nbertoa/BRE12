@@ -32,6 +32,4 @@ UploadBufferManager::CreateUploadBuffer(const std::size_t elementSize,
 
     return *uploadBuffer;
 }
-
 }
-

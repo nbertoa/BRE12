@@ -83,4 +83,3 @@ PSOManager::CreateGraphicsPSOByDescriptor(const D3D12_GRAPHICS_PIPELINE_STATE_DE
     return *pso;
 }
 }
-

@@ -191,4 +191,3 @@ ModelManager::CreateGrid(const float width,
     return *model;
 }
 }
-

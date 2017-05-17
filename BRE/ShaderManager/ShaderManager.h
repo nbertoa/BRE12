@@ -42,6 +42,4 @@ private:
 
     static std::mutex mMutex;
 };
-
 }
-

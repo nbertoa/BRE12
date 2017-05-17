@@ -25,4 +25,3 @@ ID3D12Resource*
     return mSpecularPreConvolvedCubeMap;
 }
 }
-

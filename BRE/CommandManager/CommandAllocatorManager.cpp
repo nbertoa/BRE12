@@ -7,7 +7,7 @@ namespace BRE {
 tbb::concurrent_unordered_set<ID3D12CommandAllocator*> CommandAllocatorManager::mCommandAllocators;
 std::mutex CommandAllocatorManager::mMutex;
 
-void 
+void
 CommandAllocatorManager::Clear() noexcept
 {
     for (ID3D12CommandAllocator* commandAllocator : mCommandAllocators) {

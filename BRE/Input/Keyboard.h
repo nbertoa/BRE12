@@ -143,4 +143,3 @@ private:
     std::uint8_t mKeysLastState[sNumKeys] = {};
 };
 }
-

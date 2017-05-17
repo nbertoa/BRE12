@@ -46,4 +46,3 @@ private:
     std::int64_t mPreviousTickTime{ 0 };
 };
 }
-

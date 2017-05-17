@@ -39,4 +39,3 @@ Timer::Tick() noexcept
     }
 }
 }
-

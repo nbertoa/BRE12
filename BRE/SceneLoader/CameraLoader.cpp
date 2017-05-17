@@ -63,4 +63,3 @@ CameraLoader::LoadCamera(const YAML::Node& rootNode) noexcept
                                 XMFLOAT3(upVector[0U], upVector[1U], upVector[2U]));
 }
 }
-

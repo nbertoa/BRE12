@@ -1,26 +1,11 @@
 #include "SceneExecutor.h"
 
-#include <memory>
-
 #include <CommandListExecutor\CommandListExecutor.h>
-#include <CommandManager\CommandAllocatorManager.h>
-#include <CommandManager/CommandListManager.h>
-#include <CommandManager\CommandQueueManager.h>
-#include <CommandManager\FenceManager.h>
-#include <DescriptorManager/CbvSrvUavDescriptorManager.h>
-#include <DescriptorManager/DepthStencilDescriptorManager.h>
-#include <DescriptorManager/RenderTargetDescriptorManager.h>
-#include <DirectXManager\DirectXManager.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
-#include <PSOManager\PSOManager.h>
 #include <RenderManager/RenderManager.h>
-#include <ResourceManager\ResourceManager.h>
-#include <ResourceManager\UploadBufferManager.h>
-#include <RootSignatureManager\RootSignatureManager.h>
+#include <Scene/Scene.h>
 #include <SceneLoader\SceneLoader.h>
-#include <ShaderManager\ShaderManager.h>
-#include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
 using namespace DirectX;
@@ -28,43 +13,6 @@ using namespace DirectX;
 namespace BRE {
 namespace {
 const std::uint32_t MAX_NUM_CMD_LISTS{ 3U };
-const std::uint32_t RENDER_TARGET_DESCRIPTOR_HEAP_SIZE = 10U;
-const std::uint32_t CBV_SRV_UAV_DESCRIPTOR_HEAP_SIZE = 3000U;
-
-void InitSystems(const HINSTANCE moduleInstanceHandle) noexcept
-{
-    const HWND windowHandle = DirectXManager::GetWindowHandle();
-
-    LPDIRECTINPUT8 directInput;
-    BRE_CHECK_HR(DirectInput8Create(moduleInstanceHandle,
-                                    DIRECTINPUT_VERSION,
-                                    IID_IDirectInput8,
-                                    reinterpret_cast<LPVOID*>(&directInput),
-                                    nullptr));
-    Keyboard::Create(*directInput, windowHandle);
-    Mouse::Create(*directInput, windowHandle);
-
-    CbvSrvUavDescriptorManager::Init(CBV_SRV_UAV_DESCRIPTOR_HEAP_SIZE);
-    DepthStencilDescriptorManager::Init();
-    RenderTargetDescriptorManager::Init(RENDER_TARGET_DESCRIPTOR_HEAP_SIZE);
-
-    CommandListExecutor::Create(MAX_NUM_CMD_LISTS);
-
-    //ShowCursor(false);
-}
-
-void FinalizeSystems() noexcept
-{
-    CommandAllocatorManager::Clear();
-    CommandListManager::Clear();
-    CommandQueueManager::Clear();
-    FenceManager::Clear();
-    PSOManager::Clear();
-    ResourceManager::Clear();
-    RootSignatureManager::Clear();
-    ShaderManager::Clear();
-    UploadBufferManager::Clear();
-}
 
 void UpdateKeyboardAndMouse() noexcept
 {
@@ -98,9 +46,6 @@ SceneExecutor::~SceneExecutor()
 {
     BRE_ASSERT(mRenderManager != nullptr);
     mRenderManager->Terminate();
-    mTaskSchedulerInit.terminate();
-
-    FinalizeSystems();
 
     delete mScene;
 }
@@ -111,14 +56,11 @@ SceneExecutor::Execute() noexcept
     RunMessageLoop();
 }
 
-SceneExecutor::SceneExecutor(HINSTANCE moduleInstanceHandle,
-                             const char* sceneFilePath)
-    : mTaskSchedulerInit()
+SceneExecutor::SceneExecutor(const char* sceneFilePath)
 {
     BRE_ASSERT(sceneFilePath != nullptr);
 
-    DirectXManager::InitWindowAndDevice(moduleInstanceHandle);
-    InitSystems(moduleInstanceHandle);
+    CommandListExecutor::Create(MAX_NUM_CMD_LISTS);
 
     SceneLoader sceneLoader;
     mScene = sceneLoader.LoadScene(sceneFilePath);
@@ -127,4 +69,3 @@ SceneExecutor::SceneExecutor(HINSTANCE moduleInstanceHandle,
     mRenderManager = &RenderManager::Create(*mScene);
 }
 }
-

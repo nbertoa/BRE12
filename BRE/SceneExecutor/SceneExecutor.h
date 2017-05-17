@@ -1,40 +1,35 @@
 #pragma once
 
-#include <memory>
-#include <tbb/task_scheduler_init.h>
-#include <windows.h>
-
-#include <Scene\Scene.h>
-
-#if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
-#define _CRTDBG_MAP_ALLOC          
-#include <cstdlib>             
-#include <crtdbg.h>               
-#endif 
-
 namespace BRE {
 class RenderManager;
+class Scene;
 
-// To execute a scene.
+///
+/// @brief Responsible to load and execute the scene
+///
 class SceneExecutor {
 public:
-    explicit SceneExecutor(HINSTANCE moduleInstanceHandle,
-                           const char* sceneFilePath);
+    ///
+    /// @brief SceneExecutor constructor
+    /// @param sceneFilePath Scene file path. Must be not nullptr.
+    ///
+    explicit SceneExecutor(const char* sceneFilePath);
     ~SceneExecutor();
     SceneExecutor(const SceneExecutor&) = delete;
     const SceneExecutor& operator=(const SceneExecutor&) = delete;
     SceneExecutor(SceneExecutor&&) = delete;
     SceneExecutor& operator=(SceneExecutor&&) = delete;
 
+    ///
+    /// @brief Executes the scene executor.
+    ///
+    /// This method is going to load the scene and run the main loop.
+    ///
     void Execute() noexcept;
 
 private:
-    // Needed by Intel TBB
-    tbb::task_scheduler_init mTaskSchedulerInit;
-
-    Scene* mScene;
+    Scene* mScene{ nullptr };
 
     RenderManager* mRenderManager{ nullptr };
 };
 }
-

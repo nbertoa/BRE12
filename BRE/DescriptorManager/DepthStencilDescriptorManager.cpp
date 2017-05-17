@@ -95,4 +95,3 @@ DepthStencilDescriptorManager::CreateDepthStencilViews(ID3D12Resource* *resource
     return gpuDescriptorHandle;
 }
 }
-

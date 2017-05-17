@@ -36,4 +36,3 @@ FenceManager::CreateFence(const std::uint64_t fenceInitialValue,
     return *fence;
 }
 }
-

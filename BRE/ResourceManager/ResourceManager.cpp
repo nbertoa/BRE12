@@ -33,7 +33,7 @@ ResourceManager::LoadTextureFromFile(const char* textureFilename,
 
     BRE_ASSERT(textureFilename != nullptr);
     const std::string filePath(textureFilename);
-    const std::wstring filePathW(StringUtils::ToWideString(filePath));
+    const std::wstring filePathW(StringUtils::AnsiToWideString(filePath));
 
     Microsoft::WRL::ComPtr<ID3D12Resource> resourcePtr;
     mMutex.lock();
@@ -116,8 +116,8 @@ ResourceManager::CreateDefaultBuffer(const void* sourceData,
                                                                               D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST) };
     commandList.ResourceBarrier(1, &resBarrier);
     UpdateSubresources<1>(&commandList, resource, uploadBuffer.Get(), 0, 0, 1, &subResourceData);
-    resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(resource, 
-                                                      D3D12_RESOURCE_STATE_COPY_DEST, 
+    resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(resource,
+                                                      D3D12_RESOURCE_STATE_COPY_DEST,
                                                       D3D12_RESOURCE_STATE_GENERIC_READ);
     commandList.ResourceBarrier(1, &resBarrier);
 
@@ -161,6 +161,4 @@ ResourceManager::CreateCommittedResource(const D3D12_HEAP_PROPERTIES& heapProper
 
     return *resource;
 }
-
 }
-

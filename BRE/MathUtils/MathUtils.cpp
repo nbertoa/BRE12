@@ -29,4 +29,3 @@ MathUtils::ComputeMatrix(XMFLOAT4X4& m,
                     XMMatrixTranslation(tx, ty, tz));
 }
 }
-

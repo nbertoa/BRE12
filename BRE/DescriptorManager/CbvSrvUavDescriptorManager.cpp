@@ -68,8 +68,8 @@ CbvSrvUavDescriptorManager::CreateConstantBufferViews(const D3D12_CONSTANT_BUFFE
             DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     }
 
-    mCurrentCbvSrvUavGpuDescriptorHandle.ptr += 
-    descriptorCount * DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    mCurrentCbvSrvUavGpuDescriptorHandle.ptr +=
+        descriptorCount * DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
     mMutex.unlock();
 
@@ -123,8 +123,8 @@ CbvSrvUavDescriptorManager::CreateShaderResourceViews(ID3D12Resource* *resources
             DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     }
 
-    mCurrentCbvSrvUavGpuDescriptorHandle.ptr += 
-    descriptorCount * DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    mCurrentCbvSrvUavGpuDescriptorHandle.ptr +=
+        descriptorCount * DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
     mMutex.unlock();
 
@@ -180,12 +180,11 @@ CbvSrvUavDescriptorManager::CreateUnorderedAccessViews(ID3D12Resource* *resource
             DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     }
 
-    mCurrentCbvSrvUavGpuDescriptorHandle.ptr += 
-    descriptorCount * DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    mCurrentCbvSrvUavGpuDescriptorHandle.ptr +=
+        descriptorCount * DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
     mMutex.unlock();
 
     return gpuDescriptorHandle;
 }
 }
-

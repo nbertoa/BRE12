@@ -54,7 +54,7 @@ void EnvironmentLoader::UpdateEnvironmentTexture(const std::string& environmentP
         mDiffuseIrradianceTexture = &texture;
     } else if (environmentPropertyName == "specular pre convolved environment texture") {
         BRE_ASSERT_MSG(mSpecularPreConvolvedEnvironmentTexture == nullptr,
-                   L"Specular pre convolved enviroment texture must be set once");
+                       L"Specular pre convolved enviroment texture must be set once");
         mSpecularPreConvolvedEnvironmentTexture = &texture;
     } else {
         // To avoid warning about 'conditional expression is constant'. This is the same than false
@@ -62,4 +62,3 @@ void EnvironmentLoader::UpdateEnvironmentTexture(const std::string& environmentP
     }
 }
 }
-

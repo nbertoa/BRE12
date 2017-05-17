@@ -68,7 +68,7 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
 
             ++mapIt;
         }
-        
+
         MaterialProperties materialProperties(baseColor[0],
                                               baseColor[1],
                                               baseColor[2],
@@ -86,4 +86,3 @@ const MaterialProperties& MaterialPropertiesLoader::GetMaterialProperties(const 
     return findIt->second;
 }
 }
-

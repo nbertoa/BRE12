@@ -27,4 +27,3 @@ const D3D12_RECT ApplicationSettings::sScissorRect{ 0, 0, ApplicationSettings::s
 
 const float ApplicationSettings::sSecondsPerFrame{ 1.0f / 60.0f };
 }
-

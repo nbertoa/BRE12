@@ -33,7 +33,7 @@ Mouse::Mouse(IDirectInput8& directInput,
     BRE_CHECK_HR(mDirectInput.CreateDevice(GUID_SysMouse, &mDevice, nullptr));
     BRE_ASSERT(mDevice != nullptr);
     BRE_CHECK_HR(mDevice->SetDataFormat(&c_dfDIMouse));
-    BRE_CHECK_HR(mDevice->SetCooperativeLevel(windowHandle, 
+    BRE_CHECK_HR(mDevice->SetCooperativeLevel(windowHandle,
                                               DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
     mDevice->Acquire();
 }
@@ -52,10 +52,10 @@ Mouse::UpdateMouseState()
     BRE_ASSERT(mDevice != nullptr);
 
     memcpy(&mLastState, &mCurrentState, sizeof(mCurrentState));
-    if (FAILED(mDevice->GetDeviceState(sizeof(mCurrentState), 
+    if (FAILED(mDevice->GetDeviceState(sizeof(mCurrentState),
                                        &mCurrentState)) &&
         SUCCEEDED(mDevice->Acquire()) &&
-        FAILED(mDevice->GetDeviceState(sizeof(mCurrentState), 
+        FAILED(mDevice->GetDeviceState(sizeof(mCurrentState),
                                        &mCurrentState))) {
         return;
     }
@@ -65,4 +65,3 @@ Mouse::UpdateMouseState()
     mWheel += mCurrentState.lZ;
 }
 }
-

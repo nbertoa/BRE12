@@ -13,7 +13,7 @@ namespace {
 /// @param filename Filename. Must not be nullptr
 /// @return Loaded blob
 ///
-ID3DBlob* 
+ID3DBlob*
 LoadBlob(const std::string& filename) noexcept
 {
     std::ifstream fileStream{ filename, std::ios::binary };
@@ -87,4 +87,3 @@ ShaderManager::LoadShaderFileAndGetBytecode(const char* filename) noexcept
     return shaderByteCode;
 }
 }
-

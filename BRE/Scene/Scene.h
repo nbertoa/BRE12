@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <vector>
 
 #include <Camera\Camera.h>
@@ -57,5 +56,3 @@ private:
     Camera mCamera;
 };
 }
-
-
