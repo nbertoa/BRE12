@@ -54,6 +54,4 @@ private:
 
     std::unique_ptr<ToneMappingCommandListRecorder> mCommandListRecorder;
 };
-
 }
-

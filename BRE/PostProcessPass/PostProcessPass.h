@@ -56,6 +56,4 @@ private:
 
     std::unique_ptr<PostProcessCommandListRecorder> mCommandListRecorder;
 };
-
 }
-

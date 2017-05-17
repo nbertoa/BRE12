@@ -80,4 +80,3 @@ ToneMappingPass::ExecuteBeginTask() noexcept
     CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
 }
-

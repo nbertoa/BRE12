@@ -82,4 +82,3 @@ PostProcessPass::ExecuteBeginTask(ID3D12Resource& renderTargetBuffer,
     CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
 }
-

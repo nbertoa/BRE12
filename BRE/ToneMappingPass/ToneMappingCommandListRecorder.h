@@ -59,4 +59,3 @@ private:
     D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
 };
 }
-
