@@ -1,5 +1,6 @@
 #include "RenderManager.h"
 
+#include <DirectXColors.h>
 #include <tbb/parallel_for.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
@@ -174,7 +175,7 @@ RenderManager::RenderManager(Scene& scene)
                                                      mIntermediateColorBuffer1,
                                                      mIntermediateColorBuffer1RenderTargetView);
 
-    CreateIntermediateColorBufferAndRenderTargetView(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+    CreateIntermediateColorBufferAndRenderTargetView(D3D12_RESOURCE_STATE_RENDER_TARGET,
                                                      L"Intermediate Color Buffer 2",
                                                      mIntermediateColorBuffer2,
                                                      mIntermediateColorBuffer2RenderTargetView);
@@ -202,15 +203,16 @@ RenderManager::InitPasses(Scene& scene) noexcept
     BRE_ASSERT(skyBoxCubeMap != nullptr);
     BRE_ASSERT(diffuseIrradianceCubeMap != nullptr);
     BRE_ASSERT(specularPreConvolvedCubeMap != nullptr);
-
-    mLightingPass.Init(*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(),
-                       *mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(),
-                       *mDepthBuffer,
-                       *diffuseIrradianceCubeMap,
-                       *specularPreConvolvedCubeMap,
-                       mIntermediateColorBuffer1RenderTargetView);
+    
+    mEnvironmentLightPass.Init(*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(),
+                               *mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(),
+                               *mDepthBuffer,
+                               *diffuseIrradianceCubeMap,
+                               *specularPreConvolvedCubeMap,
+                               mIntermediateColorBuffer1RenderTargetView);
 
     mSkyBoxPass.Init(*skyBoxCubeMap,
+                     *mDepthBuffer,
                      mIntermediateColorBuffer1RenderTargetView,
                      GetDepthStencilCpuDesc());
 
@@ -241,11 +243,14 @@ RenderManager::execute()
         mTimer.Tick();
         UpdateCameraAndFrameCBuffer(mTimer.GetDeltaTimeInSeconds(), mCamera, mFrameCBuffer);
 
-        mGeometryPass.Execute(mFrameCBuffer);
-        mLightingPass.Execute(mFrameCBuffer);
+        ExecuteBeginPass();
+
+        mGeometryPass.Execute(mFrameCBuffer);        
+        mEnvironmentLightPass.Execute(mFrameCBuffer);
         mSkyBoxPass.Execute(mFrameCBuffer);
         mToneMappingPass.Execute();
         mPostProcessPass.Execute(*GetCurrentFrameBuffer(), GetCurrentFrameBufferCpuDesc());
+        
         ExecuteFinalPass();
 
         SignalFenceAndPresent();
@@ -260,29 +265,83 @@ RenderManager::execute()
 }
 
 void
-RenderManager::ExecuteFinalPass()
+RenderManager::ExecuteBeginPass()
 {
-    ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+    ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
-    CD3DX12_RESOURCE_BARRIER barriers[]{
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(),
-        D3D12_RESOURCE_STATE_RENDER_TARGET),
+    CD3DX12_RESOURCE_BARRIER barriers[4U];
+    std::uint32_t barrierCount = 0UL;
+    if (ResourceStateManager::GetResourceState(*GetCurrentFrameBuffer()) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*GetCurrentFrameBuffer(),
+                                                                                        D3D12_RESOURCE_STATE_RENDER_TARGET);
+        ++barrierCount;
+    }
 
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(),
-        D3D12_RESOURCE_STATE_RENDER_TARGET),
+    if (ResourceStateManager::GetResourceState(*mIntermediateColorBuffer1.Get()) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mIntermediateColorBuffer1.Get(),
+                                                                                        D3D12_RESOURCE_STATE_RENDER_TARGET);
+        ++barrierCount;
+    }
 
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*GetCurrentFrameBuffer(),
-        D3D12_RESOURCE_STATE_PRESENT),
+    if (ResourceStateManager::GetResourceState(*mIntermediateColorBuffer2.Get()) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mIntermediateColorBuffer2.Get(),
+                                                                                        D3D12_RESOURCE_STATE_RENDER_TARGET);
+        ++barrierCount;
+    }
 
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mIntermediateColorBuffer1.Get(),
-        D3D12_RESOURCE_STATE_RENDER_TARGET),
-    };
-    const std::size_t barrierCount = _countof(barriers);
-    BRE_ASSERT(barrierCount == GeometryPass::BUFFERS_COUNT + 2UL);
-    commandList.ResourceBarrier(_countof(barriers), barriers);
+    if (ResourceStateManager::GetResourceState(*mDepthBuffer) != D3D12_RESOURCE_STATE_DEPTH_WRITE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mDepthBuffer,
+                                                                                        D3D12_RESOURCE_STATE_DEPTH_WRITE);
+        ++barrierCount;
+    }
+
+    if (barrierCount > 0UL) {
+        commandList.ResourceBarrier(barrierCount, barriers);
+    }
+
+    commandList.ClearRenderTargetView(GetCurrentFrameBufferCpuDesc(),
+                                      Colors::Black,
+                                      0U,
+                                      nullptr);
+
+    commandList.ClearRenderTargetView(mIntermediateColorBuffer1RenderTargetView,
+                                      Colors::Black,
+                                      0U,
+                                      nullptr);
+
+    commandList.ClearRenderTargetView(mIntermediateColorBuffer2RenderTargetView,
+                                      Colors::Black,
+                                      0U,
+                                      nullptr);
+
+    commandList.ClearDepthStencilView(GetDepthStencilCpuDesc(), 
+                                      D3D12_CLEAR_FLAG_DEPTH, 
+                                      1.0f, 
+                                      0U, 
+                                      0U, 
+                                      nullptr);
 
     BRE_CHECK_HR(commandList.Close());
     CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+}
+
+void
+RenderManager::ExecuteFinalPass()
+{
+    CD3DX12_RESOURCE_BARRIER barriers[4U];
+    std::uint32_t barrierCount = 0UL;
+    if (ResourceStateManager::GetResourceState(*GetCurrentFrameBuffer()) != D3D12_RESOURCE_STATE_PRESENT) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*GetCurrentFrameBuffer(),
+                                                                                        D3D12_RESOURCE_STATE_PRESENT);
+        ++barrierCount;
+    }
+
+    if (barrierCount > 0UL) {
+        ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+        commandList.ResourceBarrier(barrierCount, barriers);
+        BRE_CHECK_HR(commandList.Close());
+        CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+    }
 }
 
 void

@@ -25,13 +25,6 @@ namespace {
 ID3D12PipelineState* sPSO{ nullptr };
 ID3D12RootSignature* sRootSignature{ nullptr };
 
-// Sample kernel for ambient occlusion. The requirements are that:
-// - Sample positions fall within the unit hemisphere oriented
-//   toward positive z axis.
-// - Sample positions are more densely clustered towards the origin.
-//   This effectively attenuates the occlusion contribution
-//   according to distance from the sample kernel centre (samples closer
-//   to a point occlude it more than samples further away).
 ///
 /// @brief Generates sample kernel
 ///

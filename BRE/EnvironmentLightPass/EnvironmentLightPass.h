@@ -72,10 +72,15 @@ private:
     D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetView{ 0UL };
 
     Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
+    D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRenderTargetView{ 0UL };
 
     std::unique_ptr<AmbientOcclusionCommandListRecorder> mAmbientOcclusionRecorder;
     std::unique_ptr<BlurCommandListRecorder> mBlurRecorder;
     std::unique_ptr<EnvironmentLightCommandListRecorder> mEnvironmentLightRecorder;
+
+    ID3D12Resource* mBaseColorMetalMaskBuffer{ nullptr };
+    ID3D12Resource* mNormalSmoothnessBuffer{ nullptr };
+    ID3D12Resource* mDepthBuffer{ nullptr };
 };
 
 }

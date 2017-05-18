@@ -61,22 +61,25 @@ ToneMappingPass::ExecuteBeginTask() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    // Check resource states:
-    // - Input color buffer was used as render target in previous pass
-    // - Output color buffer was used as pixel shader resource in previous pass
-    BRE_ASSERT(ResourceStateManager::GetResourceState(*mInputColorBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
-    BRE_ASSERT(ResourceStateManager::GetResourceState(*mOutputColorBuffer) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+    CD3DX12_RESOURCE_BARRIER barriers[2U];
+    std::uint32_t barrierCount = 0UL;
+    if (ResourceStateManager::GetResourceState(*mInputColorBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mInputColorBuffer,
+                                                                                        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        ++barrierCount;
+    }
 
-    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+    if (ResourceStateManager::GetResourceState(*mOutputColorBuffer) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mOutputColorBuffer,
+                                                                                        D3D12_RESOURCE_STATE_RENDER_TARGET);
+        ++barrierCount;
+    }
 
-    CD3DX12_RESOURCE_BARRIER barriers[]
-    {
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mInputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mOutputColorBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),
-    };
-    commandList.ResourceBarrier(_countof(barriers), barriers);
-
-    BRE_CHECK_HR(commandList.Close());
-    CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+    if (barrierCount > 0UL) {
+        ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+        commandList.ResourceBarrier(barrierCount, barriers);
+        BRE_CHECK_HR(commandList.Close());
+        CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+    }
 }
 }

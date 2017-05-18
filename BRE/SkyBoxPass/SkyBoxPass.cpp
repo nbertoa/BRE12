@@ -5,9 +5,11 @@
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager\CommandAllocatorManager.h>
 #include <CommandManager\CommandListManager.h>
+#include <DXUtils/d3dx12.h>
 #include <ModelManager\Mesh.h>
 #include <ModelManager\Model.h>
 #include <ModelManager\ModelManager.h>
+#include <ResourceStateManager\ResourceStateManager.h>
 #include <SkyBoxPass\SkyBoxCommandListRecorder.h>
 #include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
@@ -56,10 +58,13 @@ CreateAndGetSkyBoxSphereModel(ID3D12CommandAllocator& commandAllocator,
 
 void
 SkyBoxPass::Init(ID3D12Resource& skyBoxCubeMap,
+                 ID3D12Resource& depthBuffer,
                  const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
                  const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
+
+    mDepthBuffer = &depthBuffer;
 
     ID3D12CommandAllocator* commandAllocator;
     ID3D12GraphicsCommandList* commandList;
@@ -97,9 +102,11 @@ SkyBoxPass::Init(ID3D12Resource& skyBoxCubeMap,
 }
 
 void
-SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept
+SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
+
+    ExecuteBeginTask();
 
     CommandListExecutor::Get().ResetExecutedCommandListCount();
     mCommandListRecorder->RecordAndPushCommandLists(frameCBuffer);
@@ -113,9 +120,32 @@ SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) const noexcept
 bool
 SkyBoxPass::IsDataValid() const noexcept
 {
-    const bool b = mCommandListRecorder.get() != nullptr;
+    const bool b = 
+        mCommandListRecorder.get() != nullptr && 
+        mDepthBuffer != nullptr;
 
     return b;
+}
+
+void
+SkyBoxPass::ExecuteBeginTask() noexcept
+{
+    BRE_ASSERT(IsDataValid());
+
+    CD3DX12_RESOURCE_BARRIER barriers[1U];
+    std::uint32_t barrierCount = 0UL;
+    if (ResourceStateManager::GetResourceState(*mDepthBuffer) != D3D12_RESOURCE_STATE_DEPTH_WRITE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mDepthBuffer,
+                                                                                        D3D12_RESOURCE_STATE_DEPTH_WRITE);
+        ++barrierCount;
+    }
+
+    if (barrierCount > 0UL) {
+        ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+        commandList.ResourceBarrier(barrierCount, barriers);
+        BRE_CHECK_HR(commandList.Close());
+        CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+    }
 }
 }
 

@@ -85,8 +85,10 @@ WINAPI WinMain(_In_ HINSTANCE moduleInstanceHandle,
 
     BRE::InitSystems(moduleInstanceHandle);
 
-    BRE::SceneExecutor sceneExecutor("resources/scenes/test.yml");
-    sceneExecutor.Execute();
+    {
+        BRE::SceneExecutor sceneExecutor("resources/scenes/test.yml");
+        sceneExecutor.Execute();
+    }
 
     taskSchedulerInit.terminate();
     BRE::FinalizeSystems();

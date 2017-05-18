@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <CommandManager\CommandListPerFrame.h>
 #include <SkyBoxPass\SkyBoxCommandListRecorder.h>
 
 namespace BRE {
@@ -22,10 +23,12 @@ public:
     ///
     /// @brief Initializes the sky box pass
     /// @param skyBoxCubeMap Sky box cube map resource
+    /// @param depthBuffer Depth buffer resource
     /// @param renderTargetView Render target view
     /// @param Depth buffer view
     ///
     void Init(ID3D12Resource& skyBoxCubeMap,
+              ID3D12Resource& depthBuffer,
               const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
               const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 
@@ -33,7 +36,7 @@ public:
     /// @brief Executes the pass
     /// @param frameCBuffer Constant buffer per frame, for current frame
     ///
-    void Execute(const FrameCBuffer& frameCBuffer) const noexcept;
+    void Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
     ///
@@ -42,7 +45,16 @@ private:
     ///
     bool IsDataValid() const noexcept;
 
+    ///
+    /// @brief Execute begin task of skybox pass
+    ///
+    void ExecuteBeginTask() noexcept;
+
     std::unique_ptr<SkyBoxCommandListRecorder> mCommandListRecorder;
+
+    ID3D12Resource* mDepthBuffer{ nullptr };
+
+    CommandListPerFrame mBeginCommandListPerFrame;
 };
 
 }

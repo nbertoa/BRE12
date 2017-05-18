@@ -59,26 +59,27 @@ PostProcessPass::ExecuteBeginTask(ID3D12Resource& renderTargetBuffer,
                                   const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid());
-    BRE_ASSERT(renderTargetView.ptr != 0UL);
+    BRE_ASSERT(renderTargetView.ptr != 0UL);    
 
-    // Check resource states:
-    // - Input color buffer was used as render target in previous pass
-    // - Output color buffer is the frame buffer, so it was used to present before.
-    BRE_ASSERT(ResourceStateManager::GetResourceState(*mInputColorBuffer) == D3D12_RESOURCE_STATE_RENDER_TARGET);
-    BRE_ASSERT(ResourceStateManager::GetResourceState(renderTargetBuffer) == D3D12_RESOURCE_STATE_PRESENT);
+    CD3DX12_RESOURCE_BARRIER barriers[2U];
+    std::uint32_t barrierCount = 0UL;
+    if (ResourceStateManager::GetResourceState(*mInputColorBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mInputColorBuffer,
+                                                                                        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        ++barrierCount;
+    }
 
-    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+    if (ResourceStateManager::GetResourceState(renderTargetBuffer) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(renderTargetBuffer,
+                                                                                        D3D12_RESOURCE_STATE_RENDER_TARGET);
+        ++barrierCount;
+    }
 
-    CD3DX12_RESOURCE_BARRIER barriers[]
-    {
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mInputColorBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(renderTargetBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET),
-    };
-    commandList.ResourceBarrier(_countof(barriers), barriers);
-
-    commandList.ClearRenderTargetView(renderTargetView, Colors::Black, 0U, nullptr);
-
-    BRE_CHECK_HR(commandList.Close());
-    CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+    if (barrierCount > 0UL) {
+        ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+        commandList.ResourceBarrier(barrierCount, barriers);
+        BRE_CHECK_HR(commandList.Close());
+        CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+    }
 }
 }

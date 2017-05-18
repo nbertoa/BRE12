@@ -75,18 +75,17 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
     AmbientOcclusionCommandListRecorder::InitSharedPSOAndRootSignature();
     BlurCommandListRecorder::InitSharedPSOAndRootSignature();
     EnvironmentLightCommandListRecorder::InitSharedPSOAndRootSignature();
-
+    
     // Create ambient accessibility buffer and blur buffer
     CreateResourceAndRenderTargetView(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
                                       L"Ambient Accessibility Buffer",
                                       mAmbientAccessibilityBuffer,
                                       mAmbientAccessibilityBufferRenderTargetView);
 
-    D3D12_CPU_DESCRIPTOR_HANDLE blurBufferRenderTargetView;
     CreateResourceAndRenderTargetView(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
                                       L"Blur Buffer",
                                       mBlurBuffer,
-                                      blurBufferRenderTargetView);
+                                      mBlurBufferRenderTargetView);
 
     // Initialize ambient occlusion recorder
     mAmbientOcclusionRecorder.reset(new AmbientOcclusionCommandListRecorder());
@@ -97,7 +96,7 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
     // Initialize blur recorder
     mBlurRecorder.reset(new BlurCommandListRecorder());
     mBlurRecorder->Init(*mAmbientAccessibilityBuffer.Get(),
-                        blurBufferRenderTargetView);
+                        mBlurBufferRenderTargetView);
 
     // Initialize ambient light recorder
     mEnvironmentLightRecorder.reset(new EnvironmentLightCommandListRecorder());
@@ -108,6 +107,10 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
                                     specularPreConvolvedCubeMap,
                                     *mBlurBuffer.Get(),
                                     renderTargetView);
+
+    mBaseColorMetalMaskBuffer = &baseColorMetalMaskBuffer;
+    mNormalSmoothnessBuffer = &normalSmoothnessBuffer;
+    mDepthBuffer = &depthBuffer;
 
     BRE_ASSERT(ValidateData());
 }
@@ -142,7 +145,11 @@ EnvironmentLightPass::ValidateData() const noexcept
         mAmbientOcclusionRecorder.get() != nullptr &&
         mEnvironmentLightRecorder.get() != nullptr &&
         mAmbientAccessibilityBuffer.Get() != nullptr &&
-        mBlurBuffer.Get() != nullptr;
+        mBlurBuffer.Get() != nullptr &&
+        mBlurBufferRenderTargetView.ptr != 0UL &&
+        mBaseColorMetalMaskBuffer != nullptr &&
+        mNormalSmoothnessBuffer != nullptr &&
+        mDepthBuffer != nullptr;
 
     return b;
 }
@@ -152,22 +159,43 @@ EnvironmentLightPass::ExecuteBeginTask() noexcept
 {
     BRE_ASSERT(ValidateData());
 
-    // Check resource states:
-    // Ambient accesibility buffer was used as pixel shader resource by blur shader.
-    // Blur buffer was used as pixel shader resource by ambient light shader
-    BRE_ASSERT(ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer.Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-    BRE_ASSERT(ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
     ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
-    CD3DX12_RESOURCE_BARRIER barriers[]
-    {
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(),
-        D3D12_RESOURCE_STATE_RENDER_TARGET),
-    };
-    const std::uint32_t barrierCount = _countof(barriers);
-    BRE_ASSERT(barrierCount == 1UL);
-    commandList.ResourceBarrier(barrierCount, barriers);
+    CD3DX12_RESOURCE_BARRIER barriers[5U];
+    std::uint32_t barrierCount = 0UL;
+    if (ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer.Get()) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(),
+                                                                                        D3D12_RESOURCE_STATE_RENDER_TARGET);
+        ++barrierCount;
+    }
+
+    if (ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(),
+                                                                                        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        ++barrierCount;
+    }
+
+    if (ResourceStateManager::GetResourceState(*mBaseColorMetalMaskBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBaseColorMetalMaskBuffer,
+                                                                                        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        ++barrierCount;
+    }
+
+    if (ResourceStateManager::GetResourceState(*mNormalSmoothnessBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mNormalSmoothnessBuffer,
+                                                                                        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        ++barrierCount;
+    }
+
+    if (ResourceStateManager::GetResourceState(*mDepthBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mDepthBuffer,
+                                                                                        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        ++barrierCount;
+    }
+
+    if (barrierCount > 0UL) {
+        commandList.ResourceBarrier(barrierCount, barriers);
+    }
 
     float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
     commandList.ClearRenderTargetView(mAmbientAccessibilityBufferRenderTargetView,
@@ -192,17 +220,29 @@ EnvironmentLightPass::ExecuteMiddleTask() noexcept
 
     ID3D12GraphicsCommandList& commandList = mMiddleCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
-    CD3DX12_RESOURCE_BARRIER barriers[]
-    {
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(),
-        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+    CD3DX12_RESOURCE_BARRIER barriers[2U];
+    std::uint32_t barrierCount = 0UL;
+    if (ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer.Get()) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(),
+                                                                                        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        ++barrierCount;
+    }
 
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(),
-        D3D12_RESOURCE_STATE_RENDER_TARGET),
-    };
-    const std::uint32_t barrierCount = _countof(barriers);
-    BRE_ASSERT(barrierCount == 2UL);
-    commandList.ResourceBarrier(barrierCount, barriers);
+    if (ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(),
+                                                                                        D3D12_RESOURCE_STATE_RENDER_TARGET);
+        ++barrierCount;
+    }
+
+    if (barrierCount > 0UL) {
+        commandList.ResourceBarrier(barrierCount, barriers);
+    }
+
+    float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    commandList.ClearRenderTargetView(mBlurBufferRenderTargetView,
+                                      clearColor,
+                                      0U,
+                                      nullptr);
 
     BRE_CHECK_HR(commandList.Close());
     CommandListExecutor::Get().AddCommandList(commandList);
@@ -213,24 +253,20 @@ EnvironmentLightPass::ExecuteFinalTask() noexcept
 {
     BRE_ASSERT(ValidateData());
 
-    // Check resource states:
-    // Ambient accesibility buffer was used as pixel shader resource by blur shader.
-    // Blur buffer was used as render target resource by blur shader
-    BRE_ASSERT(ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer.Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-    BRE_ASSERT(ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) == D3D12_RESOURCE_STATE_RENDER_TARGET);
+    CD3DX12_RESOURCE_BARRIER barriers[1U];
+    std::uint32_t barrierCount = 0UL;
+    if (ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(),
+                                                                                        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        ++barrierCount;
+    }
 
-    ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
-
-    CD3DX12_RESOURCE_BARRIER barriers[]
-    {
-        ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-    };
-    const std::uint32_t barrierCount = _countof(barriers);
-    BRE_ASSERT(barrierCount == 1UL);
-    commandList.ResourceBarrier(barrierCount, barriers);
-
-    BRE_CHECK_HR(commandList.Close());
-    CommandListExecutor::Get().AddCommandList(commandList);
+    if (barrierCount > 0UL) {
+        ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+        commandList.ResourceBarrier(barrierCount, barriers);
+        BRE_CHECK_HR(commandList.Close());
+        CommandListExecutor::Get().AddCommandList(commandList);
+    }
 }
 }
 

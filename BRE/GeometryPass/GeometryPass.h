@@ -70,8 +70,6 @@ private:
     Microsoft::WRL::ComPtr<ID3D12Resource> mGeometryBuffers[BUFFERS_COUNT];
     D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBufferRenderTargetViews[BUFFERS_COUNT];
 
-    D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
-
     GeometryPassCommandListRecorders& mGeometryPassCommandListRecorders;
 };
 

@@ -6,8 +6,8 @@
 
 #include <CommandManager\CommandListPerFrame.h>
 #include <Camera/Camera.h>
+#include <EnvironmentLightPass\EnvironmentLightPass.h>
 #include <GeometryPass\GeometryPass.h>
-#include <LightingPass\LightingPass.h>
 #include <PostProcesspass\PostProcesspass.h>
 #include <ApplicationSettings\ApplicationSettings.h>
 #include <SkyBoxPass\SkyBoxPass.h>
@@ -118,6 +118,11 @@ private:
     }
 
     ///
+    /// @brief Executes begin pass for render manager
+    ///
+    void ExecuteBeginPass();
+
+    ///
     /// @brief Executes final pass for render manager
     ///
     void ExecuteFinalPass();
@@ -142,11 +147,12 @@ private:
 
     // Passes
     GeometryPass mGeometryPass;
-    LightingPass mLightingPass;
+    EnvironmentLightPass mEnvironmentLightPass;
     SkyBoxPass mSkyBoxPass;
     ToneMappingPass mToneMappingPass;
     PostProcessPass mPostProcessPass;
 
+    CommandListPerFrame mBeginCommandListPerFrame;
     CommandListPerFrame mFinalCommandListPerFrame;
 
     Microsoft::WRL::ComPtr<ID3D12Resource> mFrameBuffers[ApplicationSettings::sSwapChainBufferCount];

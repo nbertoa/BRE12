@@ -109,9 +109,7 @@ GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
     BRE_ASSERT(mGeometryPassCommandListRecorders.empty() == false);
 
     CreateGeometryBuffersAndRenderTargetViews(mGeometryBuffers, mGeometryBufferRenderTargetViews);
-
-    mDepthBufferView = depthBufferView;
-
+    
     ColorCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
     ColorHeightCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
     ColorNormalCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
@@ -122,7 +120,7 @@ GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
     // Init geometry command list recorders
     for (GeometryPassCommandListRecorders::value_type& recorder : mGeometryPassCommandListRecorders) {
         BRE_ASSERT(recorder.get() != nullptr);
-        recorder->Init(mGeometryBufferRenderTargetViews, BUFFERS_COUNT, mDepthBufferView);
+        recorder->Init(mGeometryBufferRenderTargetViews, BUFFERS_COUNT, depthBufferView);
     }
 
     BRE_ASSERT(IsDataValid());
@@ -168,11 +166,7 @@ GeometryPass::IsDataValid() const noexcept
         }
     }
 
-    const bool b =
-        mGeometryPassCommandListRecorders.empty() == false &&
-        mDepthBufferView.ptr != 0UL;
-
-    return b;
+    return mGeometryPassCommandListRecorders.empty() == false;
 }
 
 void
@@ -180,16 +174,21 @@ GeometryPass::ExecuteBeginTask() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    // Check resource states:
-    // As geometry pass is the first pass, then all geometry buffers must be 
-    // in render target state because final pass changed them.
-#ifdef _DEBUG
-    for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
-        BRE_ASSERT(ResourceStateManager::GetResourceState(*mGeometryBuffers[i].Get()) == D3D12_RESOURCE_STATE_RENDER_TARGET);
-    }
-#endif
-
     ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+
+    CD3DX12_RESOURCE_BARRIER barriers[BUFFERS_COUNT];
+    std::uint32_t barrierCount = 0UL;
+    for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
+        if (ResourceStateManager::GetResourceState(*mGeometryBuffers[i].Get()) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+            barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mGeometryBuffers[i].Get(),
+                                                                                            D3D12_RESOURCE_STATE_RENDER_TARGET);
+            ++barrierCount;
+        }
+    }
+    
+    if (barrierCount > 0UL) {
+        commandList.ResourceBarrier(barrierCount, barriers);
+    }
 
     commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
     commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
@@ -197,10 +196,8 @@ GeometryPass::ExecuteBeginTask() noexcept
     float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
     commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[NORMAL_SMOOTHNESS], Colors::Black, 0U, nullptr);
     commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[BASECOLOR_METALMASK], zero, 0U, nullptr);
-    commandList.ClearDepthStencilView(mDepthBufferView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0U, 0U, nullptr);
 
     BRE_CHECK_HR(commandList.Close());
     CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
 }
 }
-

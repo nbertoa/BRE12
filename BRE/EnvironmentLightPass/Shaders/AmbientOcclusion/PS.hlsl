@@ -3,7 +3,7 @@
 
 #include "RS.hlsl"
 
-#define SAMPLE_KERNEL_SIZE 16U
+#define SAMPLE_KERNEL_SIZE 64U
 #define SCREEN_TOP_LEFT_X 0.0f
 #define SCREEN_TOP_LEFT_Y 0.0f
 #define SCREEN_WIDTH 1920.0f
