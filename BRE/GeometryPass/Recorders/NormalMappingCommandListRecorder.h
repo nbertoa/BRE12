@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GeometryPass/GeometryPassCommandListRecorder.h>
+#include <GeometryPass/GeometryCommandListRecorder.h>
 
 namespace BRE {
 class MaterialProperties;
@@ -8,14 +8,14 @@ class MaterialProperties;
 ///
 /// @brief Responsible to record command lists that implement normal mapping
 ///
-class NormalCommandListRecorder : public GeometryPassCommandListRecorder {
+class NormalMappingCommandListRecorder : public GeometryCommandListRecorder {
 public:
-    NormalCommandListRecorder() = default;
-    ~NormalCommandListRecorder() = default;
-    NormalCommandListRecorder(const NormalCommandListRecorder&) = delete;
-    const NormalCommandListRecorder& operator=(const NormalCommandListRecorder&) = delete;
-    NormalCommandListRecorder(NormalCommandListRecorder&&) = default;
-    NormalCommandListRecorder& operator=(NormalCommandListRecorder&&) = default;
+    NormalMappingCommandListRecorder() = default;
+    ~NormalMappingCommandListRecorder() = default;
+    NormalMappingCommandListRecorder(const NormalMappingCommandListRecorder&) = delete;
+    const NormalMappingCommandListRecorder& operator=(const NormalMappingCommandListRecorder&) = delete;
+    NormalMappingCommandListRecorder(NormalMappingCommandListRecorder&&) = default;
+    NormalMappingCommandListRecorder& operator=(NormalMappingCommandListRecorder&&) = default;
 
     ///
     /// @brief Initializes pipeline state object and root signature

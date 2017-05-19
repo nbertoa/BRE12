@@ -122,23 +122,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="GeometryPass.h" />
-    <ClInclude Include="GeometryPassCommandListRecorder.h" />
-    <ClInclude Include="Recorders\ColorCommandListRecorder.h" />
-    <ClInclude Include="Recorders\ColorHeightCommandListRecorder.h" />
-    <ClInclude Include="Recorders\ColorNormalCommandListRecorder.h" />
-    <ClInclude Include="Recorders\HeightCommandListRecorder.h" />
-    <ClInclude Include="Recorders\NormalCommandListRecorder.h" />
-    <ClInclude Include="Recorders\TextureCommandListRecorder.h" />
+    <ClInclude Include="GeometryCommandListRecorder.h" />
+    <ClInclude Include="Recorders\ColorMappingCommandListRecorder.h" />
+    <ClInclude Include="Recorders\ColorHeightMappingCommandListRecorder.h" />
+    <ClInclude Include="Recorders\ColorNormalMappingCommandListRecorder.h" />
+    <ClInclude Include="Recorders\HeightMappingCommandListRecorder.h" />
+    <ClInclude Include="Recorders\NormalMappingCommandListRecorder.h" />
+    <ClInclude Include="Recorders\TextureMappingCommandListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeometryPass.cpp" />
-    <ClCompile Include="GeometryPassCommandListRecorder.cpp" />
-    <ClCompile Include="Recorders\ColorCommandListRecorder.cpp" />
-    <ClCompile Include="Recorders\ColorHeightCommandListRecorder.cpp" />
-    <ClCompile Include="Recorders\ColorNormalCommandListRecorder.cpp" />
-    <ClCompile Include="Recorders\HeightCommandListRecorder.cpp" />
-    <ClCompile Include="Recorders\NormalCommandListRecorder.cpp" />
-    <ClCompile Include="Recorders\TextureCommandListRecorder.cpp" />
+    <ClCompile Include="GeometryCommandListRecorder.cpp" />
+    <ClCompile Include="Recorders\ColorMappingCommandListRecorder.cpp" />
+    <ClCompile Include="Recorders\ColorHeightMappingCommandListRecorder.cpp" />
+    <ClCompile Include="Recorders\ColorNormalMappingandListRecorder.cpp" />
+    <ClCompile Include="Recorders\HeightMappingCommandListRecorder.cpp" />
+    <ClCompile Include="Recorders\NormalMappingCommandListRecorder.cpp" />
+    <ClCompile Include="Recorders\TextureMappingCommandListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\ColorHeightMapping\DS.hlsl">

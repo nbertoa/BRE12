@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <GeometryPass\GeometryPassCommandListRecorder.h>
+#include <GeometryPass\GeometryCommandListRecorder.h>
 #include <SceneLoader\CameraLoader.h>
 #include <SceneLoader\DrawableObjectLoader.h>
 #include <SceneLoader\EnvironmentLoader.h>
@@ -43,37 +43,37 @@ private:
     /// @brief Generate geometry pass command list recorders for color mapping
     /// @param commandListRecorders Geometry pass command list recorders
     ///
-    void GenerateGeometryPassRecordersForColorMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+    void GenerateGeometryPassRecordersForColorMapping(GeometryCommandListRecorders& commandListRecorders) noexcept;
 
     ///
     /// @brief Generate geometry pass command list recorders for color normal mapping
     /// @param commandListRecorders Geometry pass command list recorders
     ///
-    void GenerateGeometryPassRecordersForColorNormalMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+    void GenerateGeometryPassRecordersForColorNormalMapping(GeometryCommandListRecorders& commandListRecorders) noexcept;
 
     ///
     /// @brief Generate geometry pass command list recorders for color height mapping
     /// @param commandListRecorders Geometry pass command list recorders
     ///
-    void GenerateGeometryPassRecordersForColorHeightMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+    void GenerateGeometryPassRecordersForColorHeightMapping(GeometryCommandListRecorders& commandListRecorders) noexcept;
 
     ///
     /// @brief Generate geometry pass command list recorders for texture mapping
     /// @param commandListRecorders Geometry pass command list recorders
     ///
-    void GenerateGeometryPassRecordersForTextureMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+    void GenerateGeometryPassRecordersForTextureMapping(GeometryCommandListRecorders& commandListRecorders) noexcept;
 
     ///
     /// @brief Generate geometry pass command list recorders for normal mapping
     /// @param commandListRecorders Geometry pass command list recorders
     ///
-    void GenerateGeometryPassRecordersForNormalMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+    void GenerateGeometryPassRecordersForNormalMapping(GeometryCommandListRecorders& commandListRecorders) noexcept;
 
     ///
     /// @brief Generate geometry pass command list recorders for height mapping
     /// @param commandListRecorders Geometry pass command list recorders
     ///
-    void GenerateGeometryPassRecordersForHeightMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept;
+    void GenerateGeometryPassRecordersForHeightMapping(GeometryCommandListRecorders& commandListRecorders) noexcept;
 
     ID3D12CommandAllocator* mCommandAllocator{ nullptr };
     ID3D12GraphicsCommandList* mCommandList{ nullptr };

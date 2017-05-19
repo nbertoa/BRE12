@@ -1,21 +1,21 @@
 #pragma once
 
-#include <GeometryPass/GeometryPassCommandListRecorder.h>
+#include <GeometryPass/GeometryCommandListRecorder.h>
 
 namespace BRE {
 class MaterialProperties;
 
 ///
-/// @brief Responsible to record command lists that implement texture mapping
+/// @brief Responsible to record command lists that implement color normal mapping
 ///
-class TextureCommandListRecorder : public GeometryPassCommandListRecorder {
+class ColorNormalMappingCommandListRecorder : public GeometryCommandListRecorder {
 public:
-    TextureCommandListRecorder() = default;
-    ~TextureCommandListRecorder() = default;
-    TextureCommandListRecorder(const TextureCommandListRecorder&) = delete;
-    const TextureCommandListRecorder& operator=(const TextureCommandListRecorder&) = delete;
-    TextureCommandListRecorder(TextureCommandListRecorder&&) = default;
-    TextureCommandListRecorder& operator=(TextureCommandListRecorder&&) = default;
+    ColorNormalMappingCommandListRecorder() = default;
+    ~ColorNormalMappingCommandListRecorder() = default;
+    ColorNormalMappingCommandListRecorder(const ColorNormalMappingCommandListRecorder&) = delete;
+    const ColorNormalMappingCommandListRecorder& operator=(const ColorNormalMappingCommandListRecorder&) = delete;
+    ColorNormalMappingCommandListRecorder(ColorNormalMappingCommandListRecorder&&) = default;
+    ColorNormalMappingCommandListRecorder& operator=(ColorNormalMappingCommandListRecorder&&) = default;
 
     ///
     /// @brief Initializes pipeline state object and root signature
@@ -32,11 +32,11 @@ public:
     ///
     /// @param geometryDataVector List of geometry data. Must not be empty
     /// @param materialProperties List of material properties. Must not be empty.
-    /// @param diffuseTextures List of diffuse textures. Must not be empty.
+    /// @param normalTextures List of normal textures. Must not be empty.
     ///
     void Init(const std::vector<GeometryData>& geometryDataVector,
               const std::vector<MaterialProperties>& materialProperties,
-              const std::vector<ID3D12Resource*>& diffuseTextures) noexcept;
+              const std::vector<ID3D12Resource*>& normalTextures) noexcept;
 
     ///
     /// @brief Records and push command lists to CommandListExecutor
@@ -57,12 +57,12 @@ private:
     ///
     /// @brief Initializes the constant buffers
     /// @param materialProperties List of material properties. Must not be empty.
-    /// @param diffuseTextures List of diffuse textures. Must not be empty.
+    /// @param normalTextures List of normal textures. Must not be empty.
     ///
     void InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                             const std::vector<ID3D12Resource*>& diffuseTextures) noexcept;
+                             const std::vector<ID3D12Resource*>& normalTextures) noexcept;
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorBufferGpuDescriptorsBegin;
+    D3D12_GPU_DESCRIPTOR_HANDLE mNormalBufferGpuDescriptorsBegin;
 };
 }
 

@@ -2,45 +2,45 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="GeometryPass.h" />
-    <ClInclude Include="GeometryPassCommandListRecorder.h" />
-    <ClInclude Include="Recorders\ColorCommandListRecorder.h">
+    <ClInclude Include="GeometryCommandListRecorder.h" />
+    <ClInclude Include="Recorders\TextureMappingCommandListRecorder.h">
       <Filter>Recorders</Filter>
     </ClInclude>
-    <ClInclude Include="Recorders\ColorHeightCommandListRecorder.h">
+    <ClInclude Include="Recorders\NormalMappingCommandListRecorder.h">
       <Filter>Recorders</Filter>
     </ClInclude>
-    <ClInclude Include="Recorders\ColorNormalCommandListRecorder.h">
+    <ClInclude Include="Recorders\HeightMappingCommandListRecorder.h">
       <Filter>Recorders</Filter>
     </ClInclude>
-    <ClInclude Include="Recorders\HeightCommandListRecorder.h">
+    <ClInclude Include="Recorders\ColorNormalMappingCommandListRecorder.h">
       <Filter>Recorders</Filter>
     </ClInclude>
-    <ClInclude Include="Recorders\NormalCommandListRecorder.h">
+    <ClInclude Include="Recorders\ColorHeightMappingCommandListRecorder.h">
       <Filter>Recorders</Filter>
     </ClInclude>
-    <ClInclude Include="Recorders\TextureCommandListRecorder.h">
+    <ClInclude Include="Recorders\ColorMappingCommandListRecorder.h">
       <Filter>Recorders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeometryPass.cpp" />
-    <ClCompile Include="GeometryPassCommandListRecorder.cpp" />
-    <ClCompile Include="Recorders\ColorCommandListRecorder.cpp">
+    <ClCompile Include="GeometryCommandListRecorder.cpp" />
+    <ClCompile Include="Recorders\TextureMappingCommandListRecorder.cpp">
       <Filter>Recorders</Filter>
     </ClCompile>
-    <ClCompile Include="Recorders\ColorHeightCommandListRecorder.cpp">
+    <ClCompile Include="Recorders\NormalMappingCommandListRecorder.cpp">
       <Filter>Recorders</Filter>
     </ClCompile>
-    <ClCompile Include="Recorders\ColorNormalCommandListRecorder.cpp">
+    <ClCompile Include="Recorders\HeightMappingCommandListRecorder.cpp">
       <Filter>Recorders</Filter>
     </ClCompile>
-    <ClCompile Include="Recorders\HeightCommandListRecorder.cpp">
+    <ClCompile Include="Recorders\ColorNormalMappingandListRecorder.cpp">
       <Filter>Recorders</Filter>
     </ClCompile>
-    <ClCompile Include="Recorders\NormalCommandListRecorder.cpp">
+    <ClCompile Include="Recorders\ColorHeightMappingCommandListRecorder.cpp">
       <Filter>Recorders</Filter>
     </ClCompile>
-    <ClCompile Include="Recorders\TextureCommandListRecorder.cpp">
+    <ClCompile Include="Recorders\ColorMappingCommandListRecorder.cpp">
       <Filter>Recorders</Filter>
     </ClCompile>
   </ItemGroup>

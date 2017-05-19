@@ -1,4 +1,4 @@
-#include "ColorNormalCommandListRecorder.h"
+#include "ColorNormalMappingCommandListRecorder.h"
 
 #include <DirectXMath.h>
 
@@ -28,7 +28,7 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
 void
-ColorNormalCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
+ColorNormalMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
                                                               const std::uint32_t geometryBufferCount) noexcept
 {
     BRE_ASSERT(geometryBufferFormats != nullptr);
@@ -58,7 +58,7 @@ ColorNormalCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT*
 }
 
 void
-ColorNormalCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
+ColorNormalMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
                                      const std::vector<MaterialProperties>& materialProperties,
                                      const std::vector<ID3D12Resource*>& normalTexturess) noexcept
 {
@@ -90,7 +90,7 @@ ColorNormalCommandListRecorder::Init(const std::vector<GeometryData>& geometryDa
 }
 
 void
-ColorNormalCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
+ColorNormalMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(sPSO != nullptr);
@@ -155,17 +155,17 @@ ColorNormalCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& fr
 }
 
 bool
-ColorNormalCommandListRecorder::IsDataValid() const noexcept
+ColorNormalMappingCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
-        GeometryPassCommandListRecorder::IsDataValid() &&
+        GeometryCommandListRecorder::IsDataValid() &&
         mNormalBufferGpuDescriptorsBegin.ptr != 0UL;
 
     return result;
 }
 
 void
-ColorNormalCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
+ColorNormalMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
                                                     const std::vector<ID3D12Resource*>& normalTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);

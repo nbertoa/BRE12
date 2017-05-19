@@ -7,12 +7,12 @@
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <DescriptorManager\RenderTargetDescriptorManager.h>
 #include <DXUtils/d3dx12.h>
-#include <GeometryPass\Recorders\ColorCommandListRecorder.h>
-#include <GeometryPass\Recorders\ColorHeightCommandListRecorder.h>
-#include <GeometryPass\Recorders\ColorNormalCommandListRecorder.h>
-#include <GeometryPass\Recorders\HeightCommandListRecorder.h>
-#include <GeometryPass\Recorders\NormalCommandListRecorder.h>
-#include <GeometryPass\Recorders\TextureCommandListRecorder.h>
+#include <GeometryPass\Recorders\ColorMappingCommandListRecorder.h>
+#include <GeometryPass\Recorders\ColorHeightMappingCommandListRecorder.h>
+#include <GeometryPass\Recorders\ColorNormalMappingCommandListRecorder.h>
+#include <GeometryPass\Recorders\HeightMappingCommandListRecorder.h>
+#include <GeometryPass\Recorders\NormalMappingCommandListRecorder.h>
+#include <GeometryPass\Recorders\TextureMappingCommandListRecorder.h>
 #include <ResourceManager\ResourceManager.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <ShaderUtils\CBuffers.h>
@@ -97,8 +97,8 @@ CreateGeometryBuffersAndRenderTargetViews(Microsoft::WRL::ComPtr<ID3D12Resource>
 }
 }
 
-GeometryPass::GeometryPass(GeometryPassCommandListRecorders& geometryPassCommandListRecorders)
-    : mGeometryPassCommandListRecorders(geometryPassCommandListRecorders)
+GeometryPass::GeometryPass(GeometryCommandListRecorders& geometryPassCommandListRecorders)
+    : mGeometryCommandListRecorders(geometryPassCommandListRecorders)
 {}
 
 void
@@ -106,19 +106,19 @@ GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
-    BRE_ASSERT(mGeometryPassCommandListRecorders.empty() == false);
+    BRE_ASSERT(mGeometryCommandListRecorders.empty() == false);
 
     CreateGeometryBuffersAndRenderTargetViews(mGeometryBuffers, mGeometryBufferRenderTargetViews);
     
-    ColorCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
-    ColorHeightCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
-    ColorNormalCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
-    HeightCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
-    NormalCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
-    TextureCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+    ColorMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+    ColorHeightMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+    ColorNormalMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+    HeightMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+    NormalMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
+    TextureMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
 
     // Init geometry command list recorders
-    for (GeometryPassCommandListRecorders::value_type& recorder : mGeometryPassCommandListRecorders) {
+    for (GeometryCommandListRecorders::value_type& recorder : mGeometryCommandListRecorders) {
         BRE_ASSERT(recorder.get() != nullptr);
         recorder->Init(mGeometryBufferRenderTargetViews, BUFFERS_COUNT, depthBufferView);
     }
@@ -133,7 +133,7 @@ GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 
     ExecuteBeginTask();
 
-    const std::uint32_t taskCount{ static_cast<std::uint32_t>(mGeometryPassCommandListRecorders.size()) };
+    const std::uint32_t taskCount{ static_cast<std::uint32_t>(mGeometryCommandListRecorders.size()) };
     CommandListExecutor::Get().ResetExecutedCommandListCount();
 
     // Execute tasks
@@ -141,7 +141,7 @@ GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
     tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
                       [&](const tbb::blocked_range<size_t>& r) {
         for (size_t i = r.begin(); i != r.end(); ++i)
-            mGeometryPassCommandListRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
+            mGeometryCommandListRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
     }
     );
 
@@ -166,7 +166,7 @@ GeometryPass::IsDataValid() const noexcept
         }
     }
 
-    return mGeometryPassCommandListRecorders.empty() == false;
+    return mGeometryCommandListRecorders.empty() == false;
 }
 
 void

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GeometryPass/GeometryPassCommandListRecorder.h>
+#include <GeometryPass/GeometryCommandListRecorder.h>
 
 namespace BRE {
 class MaterialProperties;
@@ -8,14 +8,14 @@ class MaterialProperties;
 ///
 /// @brief Responsible to record command lists that implement color mapping
 ///
-class ColorCommandListRecorder : public GeometryPassCommandListRecorder {
+class ColorMappingCommandListRecorder : public GeometryCommandListRecorder {
 public:
-    ColorCommandListRecorder() = default;
-    ~ColorCommandListRecorder() = default;
-    ColorCommandListRecorder(const ColorCommandListRecorder&) = delete;
-    const ColorCommandListRecorder& operator=(const ColorCommandListRecorder&) = delete;
-    ColorCommandListRecorder(ColorCommandListRecorder&&) = default;
-    ColorCommandListRecorder& operator=(ColorCommandListRecorder&&) = default;
+    ColorMappingCommandListRecorder() = default;
+    ~ColorMappingCommandListRecorder() = default;
+    ColorMappingCommandListRecorder(const ColorMappingCommandListRecorder&) = delete;
+    const ColorMappingCommandListRecorder& operator=(const ColorMappingCommandListRecorder&) = delete;
+    ColorMappingCommandListRecorder(ColorMappingCommandListRecorder&&) = default;
+    ColorMappingCommandListRecorder& operator=(ColorMappingCommandListRecorder&&) = default;
 
     ///
     /// @brief Initializes pipeline state object and root signature

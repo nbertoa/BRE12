@@ -10,12 +10,12 @@
 
 #include <CommandManager\CommandAllocatorManager.h>
 #include <CommandManager\CommandListManager.h>
-#include <GeometryPass\Recorders\ColorCommandListRecorder.h>
-#include <GeometryPass\Recorders\ColorHeightCommandListRecorder.h>
-#include <GeometryPass\Recorders\ColorNormalCommandListRecorder.h>
-#include <GeometryPass\Recorders\HeightCommandListRecorder.h>
-#include <GeometryPass\Recorders\NormalCommandListRecorder.h>
-#include <GeometryPass\Recorders\TextureCommandListRecorder.h>
+#include <GeometryPass\Recorders\ColorMappingCommandListRecorder.h>
+#include <GeometryPass\Recorders\ColorHeightMappingCommandListRecorder.h>
+#include <GeometryPass\Recorders\ColorNormalMappingCommandListRecorder.h>
+#include <GeometryPass\Recorders\HeightMappingCommandListRecorder.h>
+#include <GeometryPass\Recorders\NormalMappingCommandListRecorder.h>
+#include <GeometryPass\Recorders\TextureMappingCommandListRecorder.h>
 #include <MathUtils\MathUtils.h>
 #include <ModelManager\Model.h>
 #include <Scene\Scene.h>
@@ -61,12 +61,12 @@ SceneLoader::LoadScene(const char* sceneFilePath) noexcept
 void
 SceneLoader::GenerateGeometryPassRecorders(Scene& scene) noexcept
 {
-    GenerateGeometryPassRecordersForColorMapping(scene.GetGeometryPassCommandListRecorders());
-    GenerateGeometryPassRecordersForColorNormalMapping(scene.GetGeometryPassCommandListRecorders());
-    GenerateGeometryPassRecordersForColorHeightMapping(scene.GetGeometryPassCommandListRecorders());
-    GenerateGeometryPassRecordersForTextureMapping(scene.GetGeometryPassCommandListRecorders());
-    GenerateGeometryPassRecordersForNormalMapping(scene.GetGeometryPassCommandListRecorders());
-    GenerateGeometryPassRecordersForHeightMapping(scene.GetGeometryPassCommandListRecorders());
+    GenerateGeometryPassRecordersForColorMapping(scene.GetGeometryCommandListRecorders());
+    GenerateGeometryPassRecordersForColorNormalMapping(scene.GetGeometryCommandListRecorders());
+    GenerateGeometryPassRecordersForColorHeightMapping(scene.GetGeometryCommandListRecorders());
+    GenerateGeometryPassRecordersForTextureMapping(scene.GetGeometryCommandListRecorders());
+    GenerateGeometryPassRecordersForNormalMapping(scene.GetGeometryCommandListRecorders());
+    GenerateGeometryPassRecordersForHeightMapping(scene.GetGeometryCommandListRecorders());
 
     scene.GetSkyBoxCubeMap() = &mEnvironmentLoader.GetSkyBoxTexture();
     scene.GetDiffuseIrradianceCubeMap() = &mEnvironmentLoader.GetDiffuseIrradianceTexture();
@@ -74,7 +74,7 @@ SceneLoader::GenerateGeometryPassRecorders(Scene& scene) noexcept
 }
 
 void
-SceneLoader::GenerateGeometryPassRecordersForColorMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept
+SceneLoader::GenerateGeometryPassRecordersForColorMapping(GeometryCommandListRecorders& commandListRecorders) noexcept
 {
     const DrawableObjectLoader::DrawableObjectsByModelName& drawableObjectsByModelName =
         mDrawableObjectLoader.GetDrawableObjectsByModelNameByTechniqueType(MaterialTechnique::COLOR_MAPPING);
@@ -85,8 +85,8 @@ SceneLoader::GenerateGeometryPassRecordersForColorMapping(GeometryPassCommandLis
 
     // Iterate over Drawable objects and fill containers needed
     // to initialize the command list recorder.
-    ColorCommandListRecorder* commandListRecorder = new ColorCommandListRecorder;
-    std::vector<GeometryPassCommandListRecorder::GeometryData> geometryDataVector;
+    ColorMappingCommandListRecorder* commandListRecorder = new ColorMappingCommandListRecorder;
+    std::vector<GeometryCommandListRecorder::GeometryData> geometryDataVector;
     std::vector<MaterialProperties> materialProperties;
 
     std::size_t geometryDataVectorOffset = 0;
@@ -101,7 +101,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorMapping(GeometryPassCommandLis
         geometryDataVector.reserve(geometryDataVector.size() + totalDataCount);
         for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
             const Mesh& mesh = meshes[i];
-            GeometryPassCommandListRecorder::GeometryData geometryData;
+            GeometryCommandListRecorder::GeometryData geometryData;
             geometryData.mVertexBufferData = mesh.GetVertexBufferData();
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
             geometryData.mWorldMatrices.reserve(meshes.size());
@@ -120,7 +120,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorMapping(GeometryPassCommandLis
             XMFLOAT4X4 inverseTransposeWorldMatrix;
             MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
             for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
-                GeometryPassCommandListRecorder::GeometryData& geometryData =
+                GeometryCommandListRecorder::GeometryData& geometryData =
                     geometryDataVector[geometryDataVectorOffset + i];
 
                 geometryData.mWorldMatrices.push_back(worldMatrix);
@@ -133,11 +133,11 @@ SceneLoader::GenerateGeometryPassRecordersForColorMapping(GeometryPassCommandLis
 
     commandListRecorder->Init(geometryDataVector, materialProperties);
 
-    commandListRecorders.push_back(std::unique_ptr<GeometryPassCommandListRecorder>(commandListRecorder));
+    commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
 }
 
 void
-SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept
+SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(GeometryCommandListRecorders& commandListRecorders) noexcept
 {
     const DrawableObjectLoader::DrawableObjectsByModelName& drawableObjectsByModelName =
         mDrawableObjectLoader.GetDrawableObjectsByModelNameByTechniqueType(MaterialTechnique::COLOR_NORMAL_MAPPING);
@@ -148,8 +148,8 @@ SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(GeometryPassComm
 
     // Iterate over Drawable objects and fill containers needed
     // to initialize the command list recorder.
-    ColorNormalCommandListRecorder* commandListRecorder = new ColorNormalCommandListRecorder;
-    std::vector<GeometryPassCommandListRecorder::GeometryData> geometryDataVector;
+    ColorNormalMappingCommandListRecorder* commandListRecorder = new ColorNormalMappingCommandListRecorder;
+    std::vector<GeometryCommandListRecorder::GeometryData> geometryDataVector;
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> normalTextures;
 
@@ -165,7 +165,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(GeometryPassComm
         geometryDataVector.reserve(geometryDataVector.size() + totalDataCount);
         for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
             const Mesh& mesh = meshes[i];
-            GeometryPassCommandListRecorder::GeometryData geometryData;
+            GeometryCommandListRecorder::GeometryData geometryData;
             geometryData.mVertexBufferData = mesh.GetVertexBufferData();
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
             geometryData.mWorldMatrices.reserve(meshes.size());
@@ -189,7 +189,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(GeometryPassComm
             XMFLOAT4X4 inverseTransposeWorldMatrix;
             MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
             for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
-                GeometryPassCommandListRecorder::GeometryData& geometryData =
+                GeometryCommandListRecorder::GeometryData& geometryData =
                     geometryDataVector[geometryDataVectorOffset + i];
 
                 geometryData.mWorldMatrices.push_back(worldMatrix);
@@ -202,11 +202,11 @@ SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(GeometryPassComm
 
     commandListRecorder->Init(geometryDataVector, materialProperties, normalTextures);
 
-    commandListRecorders.push_back(std::unique_ptr<GeometryPassCommandListRecorder>(commandListRecorder));
+    commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
 }
 
 void
-SceneLoader::GenerateGeometryPassRecordersForColorHeightMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept
+SceneLoader::GenerateGeometryPassRecordersForColorHeightMapping(GeometryCommandListRecorders& commandListRecorders) noexcept
 {
     const DrawableObjectLoader::DrawableObjectsByModelName& drawableObjectsByModelName =
         mDrawableObjectLoader.GetDrawableObjectsByModelNameByTechniqueType(MaterialTechnique::COLOR_HEIGHT_MAPPING);
@@ -217,8 +217,8 @@ SceneLoader::GenerateGeometryPassRecordersForColorHeightMapping(GeometryPassComm
 
     // Iterate over Drawable objects and fill containers needed
     // to initialize the command list recorder.
-    ColorHeightCommandListRecorder* commandListRecorder = new ColorHeightCommandListRecorder;
-    std::vector<GeometryPassCommandListRecorder::GeometryData> geometryDataVector;
+    ColorHeightMappingCommandListRecorder* commandListRecorder = new ColorHeightMappingCommandListRecorder;
+    std::vector<GeometryCommandListRecorder::GeometryData> geometryDataVector;
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> normalTextures;
     std::vector<ID3D12Resource*> heightTextures;
@@ -235,7 +235,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorHeightMapping(GeometryPassComm
         geometryDataVector.reserve(geometryDataVector.size() + totalDataCount);
         for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
             const Mesh& mesh = meshes[i];
-            GeometryPassCommandListRecorder::GeometryData geometryData;
+            GeometryCommandListRecorder::GeometryData geometryData;
             geometryData.mVertexBufferData = mesh.GetVertexBufferData();
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
             geometryData.mWorldMatrices.reserve(meshes.size());
@@ -261,7 +261,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorHeightMapping(GeometryPassComm
             XMFLOAT4X4 inverseTransposeWorldMatrix;
             MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
             for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
-                GeometryPassCommandListRecorder::GeometryData& geometryData =
+                GeometryCommandListRecorder::GeometryData& geometryData =
                     geometryDataVector[geometryDataVectorOffset + i];
 
                 geometryData.mWorldMatrices.push_back(worldMatrix);
@@ -277,11 +277,11 @@ SceneLoader::GenerateGeometryPassRecordersForColorHeightMapping(GeometryPassComm
                               normalTextures,
                               heightTextures);
 
-    commandListRecorders.push_back(std::unique_ptr<GeometryPassCommandListRecorder>(commandListRecorder));
+    commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
 }
 
 void
-SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept
+SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryCommandListRecorders& commandListRecorders) noexcept
 {
     const DrawableObjectLoader::DrawableObjectsByModelName& drawableObjectsByModelName =
         mDrawableObjectLoader.GetDrawableObjectsByModelNameByTechniqueType(MaterialTechnique::TEXTURE_MAPPING);
@@ -292,8 +292,8 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryPassCommandL
 
     // Iterate over Drawable objects and fill containers needed
     // to initialize the command list recorder.
-    TextureCommandListRecorder* commandListRecorder = new TextureCommandListRecorder;
-    std::vector<GeometryPassCommandListRecorder::GeometryData> geometryDataVector;
+    TextureMappingCommandListRecorder* commandListRecorder = new TextureMappingCommandListRecorder;
+    std::vector<GeometryCommandListRecorder::GeometryData> geometryDataVector;
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> diffuseTextures;
 
@@ -309,7 +309,7 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryPassCommandL
         geometryDataVector.reserve(geometryDataVector.size() + totalDataCount);
         for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
             const Mesh& mesh = meshes[i];
-            GeometryPassCommandListRecorder::GeometryData geometryData;
+            GeometryCommandListRecorder::GeometryData geometryData;
             geometryData.mVertexBufferData = mesh.GetVertexBufferData();
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
             geometryData.mWorldMatrices.reserve(meshes.size());
@@ -333,7 +333,7 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryPassCommandL
             XMFLOAT4X4 inverseTransposeWorldMatrix;
             MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
             for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
-                GeometryPassCommandListRecorder::GeometryData& geometryData =
+                GeometryCommandListRecorder::GeometryData& geometryData =
                     geometryDataVector[geometryDataVectorOffset + i];
 
                 geometryData.mWorldMatrices.push_back(worldMatrix);
@@ -346,11 +346,11 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryPassCommandL
 
     commandListRecorder->Init(geometryDataVector, materialProperties, diffuseTextures);
 
-    commandListRecorders.push_back(std::unique_ptr<GeometryPassCommandListRecorder>(commandListRecorder));
+    commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
 }
 
 void
-SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept
+SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryCommandListRecorders& commandListRecorders) noexcept
 {
     const DrawableObjectLoader::DrawableObjectsByModelName& drawableObjectsByModelName =
         mDrawableObjectLoader.GetDrawableObjectsByModelNameByTechniqueType(MaterialTechnique::NORMAL_MAPPING);
@@ -361,8 +361,8 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryPassCommandLi
 
     // Iterate over Drawable objects and fill containers needed
     // to initialize the command list recorder.
-    NormalCommandListRecorder* commandListRecorder = new NormalCommandListRecorder;
-    std::vector<GeometryPassCommandListRecorder::GeometryData> geometryDataVector;
+    NormalMappingCommandListRecorder* commandListRecorder = new NormalMappingCommandListRecorder;
+    std::vector<GeometryCommandListRecorder::GeometryData> geometryDataVector;
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> diffuseTextures;
     std::vector<ID3D12Resource*> normalTextures;
@@ -379,7 +379,7 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryPassCommandLi
         geometryDataVector.reserve(geometryDataVector.size() + totalDataCount);
         for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
             const Mesh& mesh = meshes[i];
-            GeometryPassCommandListRecorder::GeometryData geometryData;
+            GeometryCommandListRecorder::GeometryData geometryData;
             geometryData.mVertexBufferData = mesh.GetVertexBufferData();
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
             geometryData.mWorldMatrices.reserve(meshes.size());
@@ -405,7 +405,7 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryPassCommandLi
             XMFLOAT4X4 inverseTransposeWorldMatrix;
             MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
             for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
-                GeometryPassCommandListRecorder::GeometryData& geometryData =
+                GeometryCommandListRecorder::GeometryData& geometryData =
                     geometryDataVector[geometryDataVectorOffset + i];
 
                 geometryData.mWorldMatrices.push_back(worldMatrix);
@@ -418,11 +418,11 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryPassCommandLi
 
     commandListRecorder->Init(geometryDataVector, materialProperties, diffuseTextures, normalTextures);
 
-    commandListRecorders.push_back(std::unique_ptr<GeometryPassCommandListRecorder>(commandListRecorder));
+    commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
 }
 
 void
-SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryPassCommandListRecorders& commandListRecorders) noexcept
+SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryCommandListRecorders& commandListRecorders) noexcept
 {
     const DrawableObjectLoader::DrawableObjectsByModelName& drawableObjectsByModelName =
         mDrawableObjectLoader.GetDrawableObjectsByModelNameByTechniqueType(MaterialTechnique::HEIGHT_MAPPING);
@@ -433,8 +433,8 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryPassCommandLi
 
     // Iterate over Drawable objects and fill containers needed
     // to initialize the command list recorder.
-    HeightCommandListRecorder* commandListRecorder = new HeightCommandListRecorder;
-    std::vector<GeometryPassCommandListRecorder::GeometryData> geometryDataVector;
+    HeightMappingCommandListRecorder* commandListRecorder = new HeightMappingCommandListRecorder;
+    std::vector<GeometryCommandListRecorder::GeometryData> geometryDataVector;
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> diffuseTextures;
     std::vector<ID3D12Resource*> normalTextures;
@@ -452,7 +452,7 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryPassCommandLi
         geometryDataVector.reserve(geometryDataVector.size() + totalDataCount);
         for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
             const Mesh& mesh = meshes[i];
-            GeometryPassCommandListRecorder::GeometryData geometryData;
+            GeometryCommandListRecorder::GeometryData geometryData;
             geometryData.mVertexBufferData = mesh.GetVertexBufferData();
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
             geometryData.mWorldMatrices.reserve(meshes.size());
@@ -480,7 +480,7 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryPassCommandLi
             XMFLOAT4X4 inverseTransposeWorldMatrix;
             MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
             for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
-                GeometryPassCommandListRecorder::GeometryData& geometryData =
+                GeometryCommandListRecorder::GeometryData& geometryData =
                     geometryDataVector[geometryDataVectorOffset + i];
 
                 geometryData.mWorldMatrices.push_back(worldMatrix);
@@ -497,7 +497,7 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryPassCommandLi
                               normalTextures,
                               heightTextures);
 
-    commandListRecorders.push_back(std::unique_ptr<GeometryPassCommandListRecorder>(commandListRecorder));
+    commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
 }
 }
 

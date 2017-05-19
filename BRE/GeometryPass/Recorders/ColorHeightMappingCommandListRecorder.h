@@ -1,21 +1,21 @@
 #pragma once
 
-#include <GeometryPass/GeometryPassCommandListRecorder.h>
+#include <GeometryPass/GeometryCommandListRecorder.h>
 
 namespace BRE {
 class MaterialProperties;
 
 ///
-/// @brief Responsible to record command lists that implement height mapping
+/// @brief Responsible to record command lists that implement color height mapping
 ///
-class HeightCommandListRecorder : public GeometryPassCommandListRecorder {
+class ColorHeightMappingCommandListRecorder : public GeometryCommandListRecorder {
 public:
-    HeightCommandListRecorder() = default;
-    ~HeightCommandListRecorder() = default;
-    HeightCommandListRecorder(const HeightCommandListRecorder&) = delete;
-    const HeightCommandListRecorder& operator=(const HeightCommandListRecorder&) = delete;
-    HeightCommandListRecorder(HeightCommandListRecorder&&) = default;
-    HeightCommandListRecorder& operator=(HeightCommandListRecorder&&) = default;
+    ColorHeightMappingCommandListRecorder() = default;
+    ~ColorHeightMappingCommandListRecorder() = default;
+    ColorHeightMappingCommandListRecorder(const ColorHeightMappingCommandListRecorder&) = delete;
+    const ColorHeightMappingCommandListRecorder& operator=(const ColorHeightMappingCommandListRecorder&) = delete;
+    ColorHeightMappingCommandListRecorder(ColorHeightMappingCommandListRecorder&&) = default;
+    ColorHeightMappingCommandListRecorder& operator=(ColorHeightMappingCommandListRecorder&&) = default;
 
     ///
     /// @brief Initializes pipeline state object and root signature
@@ -32,13 +32,11 @@ public:
     ///
     /// @param geometryDataVector List of geometry data. Must not be empty
     /// @param materialProperties List of material properties. Must not be empty.
-    /// @param diffuseTextures List of diffuse textures. Must not be empty.
     /// @param normalTextures List of normal textures. Must not be empty.
     /// @param heightTextures List of height textures. Must not be empty.
     ///
     void Init(const std::vector<GeometryData>& geometryDataVector,
               const std::vector<MaterialProperties>& materialProperties,
-              const std::vector<ID3D12Resource*>& diffuseTextures,
               const std::vector<ID3D12Resource*>& normalTextures,
               const std::vector<ID3D12Resource*>& heightTextures) noexcept;
 
@@ -61,18 +59,14 @@ private:
     ///
     /// @brief Initializes the constant buffers
     /// @param materialProperties List of material properties. Must not be empty.
-    /// @param diffuseTextures List of diffuse textures. Must not be empty.
     /// @param normalTextures List of normal textures. Must not be empty.
     /// @param heightTextures List of height textures. Must not be empty.
     ///
     void InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                             const std::vector<ID3D12Resource*>& diffuseTextures,
                              const std::vector<ID3D12Resource*>& normalTextures,
                              const std::vector<ID3D12Resource*>& heightTextures) noexcept;
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorBufferGpuDescriptorsBegin;
     D3D12_GPU_DESCRIPTOR_HANDLE mNormalBufferGpuDescriptorsBegin;
     D3D12_GPU_DESCRIPTOR_HANDLE mHeightBufferGpuDescriptorsBegin;
 };
 }
-

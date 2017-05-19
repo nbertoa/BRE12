@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <CommandManager\CommandListPerFrame.h>
-#include <GeometryPass\GeometryPassCommandListRecorder.h>
+#include <GeometryPass\GeometryCommandListRecorder.h>
 
 namespace BRE {
 struct FrameCBuffer;
@@ -21,7 +21,7 @@ public:
         BUFFERS_COUNT
     };
 
-    GeometryPass(GeometryPassCommandListRecorders& geometryPassCommandListRecorders);
+    GeometryPass(GeometryCommandListRecorders& geometryPassCommandListRecorders);
     ~GeometryPass() = default;
     GeometryPass(const GeometryPass&) = delete;
     const GeometryPass& operator=(const GeometryPass&) = delete;
@@ -70,7 +70,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D12Resource> mGeometryBuffers[BUFFERS_COUNT];
     D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBufferRenderTargetViews[BUFFERS_COUNT];
 
-    GeometryPassCommandListRecorders& mGeometryPassCommandListRecorders;
+    GeometryCommandListRecorders& mGeometryCommandListRecorders;
 };
 
 }

@@ -1,8 +1,8 @@
 #include "Scene.h"
 
 namespace BRE {
-GeometryPassCommandListRecorders&
-Scene::GetGeometryPassCommandListRecorders() noexcept
+GeometryCommandListRecorders&
+Scene::GetGeometryCommandListRecorders() noexcept
 {
     return mGeometryCommandListRecorders;
 }

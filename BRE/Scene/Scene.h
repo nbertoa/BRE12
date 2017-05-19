@@ -3,7 +3,7 @@
 #include <vector>
 
 #include <Camera\Camera.h>
-#include <GeometryPass/GeometryPassCommandListRecorder.h>
+#include <GeometryPass/GeometryCommandListRecorder.h>
 
 namespace BRE {
 ///
@@ -21,7 +21,7 @@ public:
     /// @brief Get geometry pass command list recorders
     /// @return Geometry pass command list recorders
     ///
-    GeometryPassCommandListRecorders& GetGeometryPassCommandListRecorders() noexcept;
+    GeometryCommandListRecorders& GetGeometryCommandListRecorders() noexcept;
 
     ///
     /// @brief Get sky box cube map resource
@@ -47,7 +47,7 @@ public:
     }
 
 private:
-    GeometryPassCommandListRecorders mGeometryCommandListRecorders;
+    GeometryCommandListRecorders mGeometryCommandListRecorders;
 
     ID3D12Resource* mSkyBoxCubeMap{ nullptr };
     ID3D12Resource* mDiffuseIrradianceCubeMap{ nullptr };

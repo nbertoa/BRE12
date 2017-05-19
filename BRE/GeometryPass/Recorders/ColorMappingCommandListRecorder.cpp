@@ -1,4 +1,4 @@
-#include "ColorCommandListRecorder.h"
+#include "ColorMappingCommandListRecorder.h"
 
 #include <DirectXMath.h>
 
@@ -27,7 +27,7 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
 void
-ColorCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
+ColorMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
                                                         const std::uint32_t geometryBufferCount) noexcept
 {
     BRE_ASSERT(geometryBufferFormats != nullptr);
@@ -54,7 +54,7 @@ ColorCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geome
 }
 
 void
-ColorCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
+ColorMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
                                const std::vector<MaterialProperties>& materialProperties) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
@@ -84,7 +84,7 @@ ColorCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVect
 }
 
 void
-ColorCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
+ColorMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(sPSO != nullptr);
@@ -140,7 +140,7 @@ ColorCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBu
 }
 
 void
-ColorCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties) noexcept
+ColorMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(mObjectUploadCBuffers == nullptr);

@@ -19,7 +19,7 @@ struct FrameCBuffer;
 /// - Inherit from it and reimplement RecordAndPushCommandLists() method
 /// - Call RecordAndPushCommandLists() to create command lists to execute in the GPU
 ///
-class GeometryPassCommandListRecorder {
+class GeometryCommandListRecorder {
 public:
     struct GeometryData {
         GeometryData() = default;
@@ -30,14 +30,14 @@ public:
         std::vector<DirectX::XMFLOAT4X4> mInverseTransposeWorldMatrices;
     };
 
-    GeometryPassCommandListRecorder() = default;
-    virtual ~GeometryPassCommandListRecorder()
+    GeometryCommandListRecorder() = default;
+    virtual ~GeometryCommandListRecorder()
     {}
 
-    GeometryPassCommandListRecorder(const GeometryPassCommandListRecorder&) = delete;
-    const GeometryPassCommandListRecorder& operator=(const GeometryPassCommandListRecorder&) = delete;
-    GeometryPassCommandListRecorder(GeometryPassCommandListRecorder&&) = default;
-    GeometryPassCommandListRecorder& operator=(GeometryPassCommandListRecorder&&) = default;
+    GeometryCommandListRecorder(const GeometryCommandListRecorder&) = delete;
+    const GeometryCommandListRecorder& operator=(const GeometryCommandListRecorder&) = delete;
+    GeometryCommandListRecorder(GeometryCommandListRecorder&&) = default;
+    GeometryCommandListRecorder& operator=(GeometryCommandListRecorder&&) = default;
 
     ///
     /// @brief Initializes the command list recorder
@@ -86,6 +86,6 @@ protected:
     D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
 };
 
-using GeometryPassCommandListRecorders = std::vector<std::unique_ptr<GeometryPassCommandListRecorder>>;
+using GeometryCommandListRecorders = std::vector<std::unique_ptr<GeometryCommandListRecorder>>;
 }
 
