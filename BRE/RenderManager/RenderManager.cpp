@@ -194,7 +194,6 @@ RenderManager::RenderManager(Scene& scene)
 void
 RenderManager::InitPasses(Scene& scene) noexcept
 {
-    // Generate recorders for all the passes
     mGeometryPass.Init(GetDepthStencilCpuDesc());
 
     ID3D12Resource* skyBoxCubeMap = scene.GetSkyBoxCubeMap();
@@ -203,7 +202,7 @@ RenderManager::InitPasses(Scene& scene) noexcept
     BRE_ASSERT(skyBoxCubeMap != nullptr);
     BRE_ASSERT(diffuseIrradianceCubeMap != nullptr);
     BRE_ASSERT(specularPreConvolvedCubeMap != nullptr);
-    
+
     mEnvironmentLightPass.Init(*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(),
                                *mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(),
                                *mDepthBuffer,
@@ -245,15 +244,15 @@ RenderManager::execute()
 
         ExecuteBeginPass();
 
-        mGeometryPass.Execute(mFrameCBuffer);        
+        mGeometryPass.Execute(mFrameCBuffer);
         mEnvironmentLightPass.Execute(mFrameCBuffer);
         mSkyBoxPass.Execute(mFrameCBuffer);
         mToneMappingPass.Execute();
         mPostProcessPass.Execute(*GetCurrentFrameBuffer(), GetCurrentFrameBufferCpuDesc());
-        
+
         ExecuteFinalPass();
 
-        SignalFenceAndPresent();
+        PresentCurrentFrameAndBeginNextFrame();
     }
 
     // If we need to terminate, then we terminates command list processor
@@ -314,11 +313,11 @@ RenderManager::ExecuteBeginPass()
                                       0U,
                                       nullptr);
 
-    commandList.ClearDepthStencilView(GetDepthStencilCpuDesc(), 
-                                      D3D12_CLEAR_FLAG_DEPTH, 
-                                      1.0f, 
-                                      0U, 
-                                      0U, 
+    commandList.ClearDepthStencilView(GetDepthStencilCpuDesc(),
+                                      D3D12_CLEAR_FLAG_DEPTH,
+                                      1.0f,
+                                      0U,
+                                      0U,
                                       nullptr);
 
     BRE_CHECK_HR(commandList.Close());
@@ -460,7 +459,7 @@ RenderManager::FlushCommandQueue() noexcept
 }
 
 void
-RenderManager::SignalFenceAndPresent() noexcept
+RenderManager::PresentCurrentFrameAndBeginNextFrame() noexcept
 {
     BRE_ASSERT(mSwapChain != nullptr);
 
@@ -472,7 +471,7 @@ RenderManager::SignalFenceAndPresent() noexcept
     BRE_CHECK_HR(mSwapChain->Present(0U, 0U));
 #endif
 
-    // Add an instruction to the command queue to set a new fence point.  Because we 
+    // Add an instruction to the command queue to set a new fence point. Because we 
     // are on the GPU time line, the new fence point won't be set until the GPU finishes
     // processing all the commands prior to this Signal().
     mFenceValueByQueuedFrameIndex[mCurrentQueuedFrameIndex] = ++mCurrentFenceValue;
@@ -485,6 +484,4 @@ RenderManager::SignalFenceAndPresent() noexcept
                                                                mCurrentFenceValue,
                                                                oldestFence);
 }
-
 }
-

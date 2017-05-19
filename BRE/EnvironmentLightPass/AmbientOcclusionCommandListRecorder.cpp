@@ -77,8 +77,8 @@ GenerateSampleKernel(const std::uint32_t sampleKernelSize,
 /// @param numSamples Number of samples to generate
 /// @param noiseVector Output noise vector
 ///
-void 
-GenerateNoise(const std::uint32_t numSamples, 
+void
+GenerateNoise(const std::uint32_t numSamples,
               std::vector<XMFLOAT4>& noiseVector)
 {
     BRE_ASSERT(numSamples > 0U);
@@ -137,8 +137,8 @@ AmbientOcclusionCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 
 void
 AmbientOcclusionCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer,
-                                      ID3D12Resource& depthBuffer,
-                                      const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+                                          ID3D12Resource& depthBuffer,
+                                          const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
     BRE_ASSERT(ValidateData() == false);
 
@@ -274,9 +274,9 @@ AmbientOcclusionCommandListRecorder::CreateAndGetNoiseTexture(const std::vector<
 
 void
 AmbientOcclusionCommandListRecorder::InitShaderResourceViews(ID3D12Resource& normalSmoothnessBuffer,
-                                                         ID3D12Resource& depthBuffer,
-                                                         ID3D12Resource& noiseTexture,
-                                                         const std::uint32_t sampleKernelSize) noexcept
+                                                             ID3D12Resource& depthBuffer,
+                                                             ID3D12Resource& noiseTexture,
+                                                             const std::uint32_t sampleKernelSize) noexcept
 {
     BRE_ASSERT(mSampleKernelUploadBuffer != nullptr);
     BRE_ASSERT(sampleKernelSize != 0U);
@@ -331,4 +331,3 @@ AmbientOcclusionCommandListRecorder::InitShaderResourceViews(ID3D12Resource& nor
                                                                                           _countof(srvDescriptors));
 }
 }
-

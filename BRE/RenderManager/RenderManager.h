@@ -133,9 +133,9 @@ private:
     void FlushCommandQueue() noexcept;
 
     ///
-    /// @brief Signals fence and presents
+    /// @brief Presents current frame and continue with the next frame.
     ///
-    void SignalFenceAndPresent() noexcept;
+    void PresentCurrentFrameAndBeginNextFrame() noexcept;
 
     Microsoft::WRL::ComPtr<IDXGISwapChain3> mSwapChain{ nullptr };
 
@@ -177,6 +177,4 @@ private:
     // When it is true, master render thread is destroyed.
     bool mTerminate{ false };
 };
-
 }
-

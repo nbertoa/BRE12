@@ -49,7 +49,7 @@ BlurCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 
 void
 BlurCommandListRecorder::Init(ID3D12Resource& inputColorBuffer,
-                          const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+                              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
     BRE_ASSERT(ValidateData() == false);
 
@@ -106,8 +106,7 @@ BlurCommandListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffe
     srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
     srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
     srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
-    mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer, 
+    mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer,
                                                                                          srvDescriptor);
 }
 }
-

@@ -42,8 +42,6 @@ public:
               ID3D12Resource& depthBuffer,
               const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
-    // Preconditions:
-    // - Init() must be called first
     ///
     /// @brief Records a command list and push it into the CommandListExecutor
     ///
@@ -97,4 +95,3 @@ private:
     D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
 };
 }
-

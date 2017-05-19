@@ -112,7 +112,7 @@ float Fd_Disney(const float dotVN,
 
 // GGX/Trowbridge-Reitz
 // m is roughness
-float D_TR(const float m, 
+float D_TR(const float m,
            const float dotNH)
 {
     const float m2 = m * m;
@@ -143,8 +143,8 @@ float D_TR(const float m,
 // are not accounted for, then the active area may exceed the total area, an obvious impossibility which
 // can lead to the BRDF not conserving energy, in some cases by a huge amount
 
-float V_SmithGGXCorrelated(float dotNL, 
-                           float dotNV, 
+float V_SmithGGXCorrelated(float dotNL,
+                           float dotNV,
                            float alphaG)
 {
     // Original formulation of G_SmithGGX Correlated
@@ -162,8 +162,8 @@ float V_SmithGGXCorrelated(float dotNL,
     return 0.5f / (Lambda_GGXV + Lambda_GGXL);
 }
 
-float G_SmithGGX(const float dotNL, 
-                 const float dotNV, 
+float G_SmithGGX(const float dotNL,
+                 const float dotNV,
                  float alpha)
 {
     const float alphaSqr = alpha * alpha;
@@ -184,8 +184,8 @@ float3 Fd_Lambert(const float3 diffuseColor)
 }
 
 float Fr_DisneyDiffuse(const float dotNV,
-                       const float dotNL, 
-                       const float dotLH, 
+                       const float dotNL,
+                       const float dotLH,
                        const float linearRoughness)
 {
     const float energyBias = lerp(0, 0.5, linearRoughness);
@@ -202,18 +202,18 @@ float Fr_DisneyDiffuse(const float dotNV,
 // BRDF
 //
 
-float3 DiffuseBrdf(const float3 baseColor, 
+float3 DiffuseBrdf(const float3 baseColor,
                    const float metalMask)
 {
     const float3 diffuseColor = (1.0f - metalMask) * baseColor;
     return Fd_Lambert(diffuseColor);
 }
 
-float3 SpecularBrdf(const float3 N, 
-                    const float3 V, 
+float3 SpecularBrdf(const float3 N,
+                    const float3 V,
                     const float3 L,
-                    const float3 baseColor, 
-                    const float smoothness, 
+                    const float3 baseColor,
+                    const float smoothness,
                     const float metalMask)
 {
     const float roughness = 1.0f - smoothness;
@@ -233,19 +233,19 @@ float3 SpecularBrdf(const float3 N,
 
     const float D = D_TR(roughness, dotNH);
 
-    const float3 f0 = (1.0f - metalMask) * float3(F0_NON_METALS, 
-                                                  F0_NON_METALS, 
+    const float3 f0 = (1.0f - metalMask) * float3(F0_NON_METALS,
+                                                  F0_NON_METALS,
                                                   F0_NON_METALS) + baseColor * metalMask;
     const float3 F = F_Schlick(f0, 1.0f, dotLH);
 
     // G / (4 * dotNL * dotNV)
 #ifdef V_SMITH
-    const float G_Correlated = V_SmithGGXCorrelated(dotNV, 
-                                                    dotNL, 
+    const float G_Correlated = V_SmithGGXCorrelated(dotNV,
+                                                    dotNL,
                                                     alpha);
 #else
-    const float G_Correlated = G_SmithGGX(dotNL, 
-                                          dotNV, 
+    const float G_Correlated = G_SmithGGX(dotNL,
+                                          dotNV,
                                           alpha);
 #endif
 

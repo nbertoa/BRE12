@@ -59,7 +59,7 @@ PostProcessPass::ExecuteBeginTask(ID3D12Resource& renderTargetBuffer,
                                   const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid());
-    BRE_ASSERT(renderTargetView.ptr != 0UL);    
+    BRE_ASSERT(renderTargetView.ptr != 0UL);
 
     CD3DX12_RESOURCE_BARRIER barriers[2U];
     std::uint32_t barrierCount = 0UL;

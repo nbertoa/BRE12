@@ -59,4 +59,3 @@ private:
     D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 };
 }
-

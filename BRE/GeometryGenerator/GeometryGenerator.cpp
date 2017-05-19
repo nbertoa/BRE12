@@ -49,7 +49,7 @@ GeometryGenerator::Vertex GetMiddlePoint(const GeometryGenerator::Vertex& vertex
 /// @brief Subdivide geometry
 /// @param meshData Input/Output mesh data to subdivide
 ///
-void 
+void
 Subdivide(GeometryGenerator::MeshData& meshData) noexcept
 {
     // Save a copy of the input geometry.
@@ -61,12 +61,12 @@ Subdivide(GeometryGenerator::MeshData& meshData) noexcept
     //       v1
     //       *
     //      / \
-    //     /   \
+        //     /   \
 	//  m0*-----*m1
-    //   / \   / \
+//   / \   / \
 	//  /   \ /   \
 	// *-----*-----*
-    // v0    m2     v2
+// v0    m2     v2
 
     const std::uint32_t numTriangles{ static_cast<std::uint32_t>(inputCopy.mIndices32.size()) / 3U };
     for (std::uint32_t i = 0; i < numTriangles; ++i) {
@@ -223,7 +223,7 @@ Vertex::Vertex(const XMFLOAT3& position,
     , mUV(uv)
 {}
 
-std::vector<std::uint16_t>& 
+std::vector<std::uint16_t>&
 MeshData::GetIndices16() noexcept
 {
     if (mIndices16.empty()) {
@@ -236,7 +236,7 @@ MeshData::GetIndices16() noexcept
     return mIndices16;
 }
 
-void 
+void
 CreateBox(const float width,
           const float height,
           const float depth,
@@ -331,7 +331,7 @@ CreateBox(const float width,
     }
 }
 
-void 
+void
 GeometryGenerator::CreateSphere(const float radius,
                                 const std::uint32_t sliceCount,
                                 const std::uint32_t stackCount,
@@ -441,7 +441,7 @@ GeometryGenerator::CreateSphere(const float radius,
     }
 }
 
-void 
+void
 GeometryGenerator::CreateGeosphere(const float radius,
                                    const std::uint32_t numSubdivisions,
                                    MeshData& meshData) noexcept
@@ -517,7 +517,7 @@ GeometryGenerator::CreateGeosphere(const float radius,
     }
 }
 
-void 
+void
 CreateCylinder(const float bottomRadius,
                const float topRadius,
                const float height,
@@ -609,7 +609,7 @@ CreateCylinder(const float bottomRadius,
     BuildCylinderBottomCap(bottomRadius, height, sliceCount, meshData);
 }
 
-void 
+void
 CreateGrid(const float width,
            const float depth,
            const std::uint32_t rows,
@@ -673,6 +673,4 @@ CreateGrid(const float width,
     }
 }
 }
-
 }
-

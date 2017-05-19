@@ -19,7 +19,7 @@ ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b0);
 
 struct Output {
     float4 mPositionNDC : SV_POSITION;
-    float3 mCameraToFragmentViewSpace : VIEW_RAY;
+    float3 mCameraToFragmentVectorViewSpace : VIEW_RAY;
     float2 mUV : TEXCOORD;
 };
 
@@ -39,7 +39,7 @@ Output main(in const Input input)
     // Transform quad corners to view space near plane.
     const float4 ph = mul(output.mPositionNDC,
                           gFrameCBuffer.mInverseProjectionMatrix);
-    output.mCameraToFragmentViewSpace = ph.xyz / ph.w;
+    output.mCameraToFragmentVectorViewSpace = ph.xyz / ph.w;
 
     return output;
 }

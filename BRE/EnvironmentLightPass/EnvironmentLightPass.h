@@ -82,6 +82,4 @@ private:
     ID3D12Resource* mNormalSmoothnessBuffer{ nullptr };
     ID3D12Resource* mDepthBuffer{ nullptr };
 };
-
 }
-

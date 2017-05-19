@@ -56,6 +56,4 @@ private:
 
     CommandListPerFrame mBeginCommandListPerFrame;
 };
-
 }
-

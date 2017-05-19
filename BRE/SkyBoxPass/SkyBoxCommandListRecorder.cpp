@@ -63,11 +63,11 @@ SkyBoxCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 
 void
 SkyBoxCommandListRecorder::Init(const VertexAndIndexBufferCreator::VertexBufferData& vertexBufferData,
-                            const VertexAndIndexBufferCreator::IndexBufferData indexBufferData,
-                            const XMFLOAT4X4& worldMatrix,
-                            ID3D12Resource& skyBoxCubeMap,
-                            const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
-                            const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
+                                const VertexAndIndexBufferCreator::IndexBufferData indexBufferData,
+                                const XMFLOAT4X4& worldMatrix,
+                                ID3D12Resource& skyBoxCubeMap,
+                                const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
+                                const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
@@ -163,4 +163,3 @@ SkyBoxCommandListRecorder::InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap
     mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(skyBoxCubeMap, srvDescriptor);
 }
 }
-

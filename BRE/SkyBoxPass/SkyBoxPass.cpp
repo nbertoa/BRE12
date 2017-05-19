@@ -23,7 +23,7 @@ namespace {
 /// @param commandAllocator Output command allocator
 /// @param commandList Output command list
 ///
-void 
+void
 CreateCommandObjects(ID3D12CommandAllocator* &commandAllocator,
                      ID3D12GraphicsCommandList* &commandList) noexcept
 {
@@ -120,8 +120,8 @@ SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 bool
 SkyBoxPass::IsDataValid() const noexcept
 {
-    const bool b = 
-        mCommandListRecorder.get() != nullptr && 
+    const bool b =
+        mCommandListRecorder.get() != nullptr &&
         mDepthBuffer != nullptr;
 
     return b;
@@ -148,4 +148,3 @@ SkyBoxPass::ExecuteBeginTask() noexcept
     }
 }
 }
-

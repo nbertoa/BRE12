@@ -52,12 +52,12 @@ EnvironmentLightCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 
 void
 EnvironmentLightCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer,
-                                      ID3D12Resource& baseColorMetalMaskBuffer,
-                                      ID3D12Resource& depthBuffer,
-                                      ID3D12Resource& diffuseIrradianceCubeMap,
-                                      ID3D12Resource& specularPreConvolvedCubeMap,
-                                      ID3D12Resource& ambientAccessibilityBuffer,
-                                      const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+                                          ID3D12Resource& baseColorMetalMaskBuffer,
+                                          ID3D12Resource& depthBuffer,
+                                          ID3D12Resource& diffuseIrradianceCubeMap,
+                                          ID3D12Resource& specularPreConvolvedCubeMap,
+                                          ID3D12Resource& ambientAccessibilityBuffer,
+                                          const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
     BRE_ASSERT(ValidateData() == false);
 
@@ -118,11 +118,11 @@ EnvironmentLightCommandListRecorder::ValidateData() const noexcept
 
 void
 EnvironmentLightCommandListRecorder::InitShaderResourceViews(ID3D12Resource& normalSmoothnessBuffer,
-                                                         ID3D12Resource& baseColorMetalMaskBuffer,
-                                                         ID3D12Resource& depthBuffer,
-                                                         ID3D12Resource& diffuseIrradianceCubeMap,
-                                                         ID3D12Resource& ambientAccessibilityBuffer,
-                                                         ID3D12Resource& specularPreConvolvedCubeMap) noexcept
+                                                             ID3D12Resource& baseColorMetalMaskBuffer,
+                                                             ID3D12Resource& depthBuffer,
+                                                             ID3D12Resource& diffuseIrradianceCubeMap,
+                                                             ID3D12Resource& ambientAccessibilityBuffer,
+                                                             ID3D12Resource& specularPreConvolvedCubeMap) noexcept
 {
     // Number of geometry buffers + depth buffer + 2 cube maps + ambient accessibility buffer
     const std::uint32_t numResources = 6U;
@@ -203,4 +203,3 @@ EnvironmentLightCommandListRecorder::InitShaderResourceViews(ID3D12Resource& nor
                                                                                           numResources);
 }
 }
-

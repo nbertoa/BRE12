@@ -9,7 +9,7 @@
 
 struct Input {
     float4 mPositionNDC : SV_POSITION;
-    float3 mCameraToFragmentViewSpace : VIEW_RAY;
+    float3 mCameraToFragmentVectorViewSpace : VIEW_RAY;
 };
 
 ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b0);
@@ -44,7 +44,7 @@ Output main(const in Input input)
 
     // Compute fragment position in view space
     const float fragmentZNDC = DepthTexture.Load(fragmentScreenSpace);
-    const float3 rayViewSpace = normalize(input.mCameraToFragmentViewSpace);
+    const float3 rayViewSpace = normalize(input.mCameraToFragmentVectorViewSpace);
     const float3 fragmentPositionViewSpace = ViewRayToViewPosition(rayViewSpace,
                                                                    fragmentZNDC,
                                                                    gFrameCBuffer.mProjectionMatrix);

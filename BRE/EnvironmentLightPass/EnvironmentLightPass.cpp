@@ -75,7 +75,7 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
     AmbientOcclusionCommandListRecorder::InitSharedPSOAndRootSignature();
     BlurCommandListRecorder::InitSharedPSOAndRootSignature();
     EnvironmentLightCommandListRecorder::InitSharedPSOAndRootSignature();
-    
+
     // Create ambient accessibility buffer and blur buffer
     CreateResourceAndRenderTargetView(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
                                       L"Ambient Accessibility Buffer",
@@ -269,4 +269,3 @@ EnvironmentLightPass::ExecuteFinalTask() noexcept
     }
 }
 }
-
