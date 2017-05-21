@@ -212,7 +212,10 @@ HeightMappingCommandListRecorder::InitConstantBuffers(const std::vector<Material
         GeometryData& geomData{ mGeometryDataVec[i] };
         const std::uint32_t worldMatsCount{ static_cast<std::uint32_t>(geomData.mWorldMatrices.size()) };
         for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
-            MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j], objCBuffer.mWorldMatrix);
+            MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j], 
+                                            objCBuffer.mWorldMatrix);
+            MathUtils::StoreTransposeMatrix(geomData.mInverseTransposeWorldMatrices[j],
+                                            objCBuffer.mInverseTransposeWorldMatrix);
             mObjectUploadCBuffers->CopyData(k + j, &objCBuffer, sizeof(objCBuffer));
         }
 

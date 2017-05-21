@@ -1,0 +1,110 @@
+models:
+  floor: resources/models/unreal.obj
+  
+textures:
+  wood_diffuse: resources/textures/wood/wood.dds
+  wood_normal: resources/textures/wood/wood_normal.dds
+  sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
+  cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
+  cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds
+  
+material properties:
+  - name: titanium0
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.0
+    metal mask: 0.0
+  - name: titanium1
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.1
+    metal mask: 0.0
+  - name: titanium2
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.2
+    metal mask: 0.0
+  - name: titanium3
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.3
+    metal mask: 0.0
+  - name: titanium4
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.4
+    metal mask: 0.0
+  - name: titanium5
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.5
+    metal mask: 0.0
+  - name: titanium6
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.6
+    metal mask: 0.0
+  - name: titanium7
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.7
+    metal mask: 0.0
+  - name: titanium8
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.8
+    metal mask: 0.0
+  - name: titanium9
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.9
+    metal mask: 0.0
+  - name: titanium10
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 1.0
+    metal mask: 0.0
+    
+material techniques:
+  - name: color mapping
+  - name: wood
+    diffuse texture: wood_diffuse
+    normal texture: wood_normal
+    
+drawable objects:
+  - model: floor
+    material properties: titanium0
+    material technique: wood
+    translation: [0.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [0.1, 0.1, 0.1]
+  - model: floor
+    material properties: titanium2
+    material technique: wood
+    translation: [50.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [0.1, 0.1, 0.1]
+  - model: floor
+    material properties: titanium4
+    material technique: wood
+    translation: [100.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [0.1, 0.1, 0.1]
+  - model: floor
+    material properties: titanium6
+    material technique: wood
+    translation: [150.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [0.1, 0.1, 0.1]
+  - model: floor
+    material properties: titanium8
+    material technique: wood
+    translation: [200.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [0.1, 0.1, 0.1]
+  - model: floor
+    material properties: titanium10
+    material technique: wood
+    translation: [250.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [0.1, 0.1, 0.1]
+    
+environment:
+  - sky box texture: sky map
+    diffuse irradiance texture: cube map diffuse
+    specular pre convolved environment texture: cube map specular
+    
+camera:
+  - position: [0.0, 30.0, -90.0]
+    look vector: [0.0, 0.0, 1.0]
+    up vector: [0.0, 1.0, 0.0]
+    

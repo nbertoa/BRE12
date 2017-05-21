@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['rendermanager',['RenderManager',['../class_b_r_e_1_1_render_manager.html',1,'BRE']]],
-  ['rendertargetdescriptormanager',['RenderTargetDescriptorManager',['../class_b_r_e_1_1_render_target_descriptor_manager.html',1,'BRE']]],
-  ['resourcemanager',['ResourceManager',['../class_b_r_e_1_1_resource_manager.html',1,'BRE']]],
-  ['resourcestatemanager',['ResourceStateManager',['../class_b_r_e_1_1_resource_state_manager.html',1,'BRE']]],
-  ['rootsignaturemanager',['RootSignatureManager',['../class_b_r_e_1_1_root_signature_manager.html',1,'BRE']]]
+  ['scene',['Scene',['../class_b_r_e_1_1_scene.html',1,'BRE']]],
+  ['sceneexecutor',['SceneExecutor',['../class_b_r_e_1_1_scene_executor.html',1,'BRE']]],
+  ['sceneloader',['SceneLoader',['../class_b_r_e_1_1_scene_loader.html',1,'BRE']]],
+  ['shadermanager',['ShaderManager',['../class_b_r_e_1_1_shader_manager.html',1,'BRE']]],
+  ['skyboxcommandlistrecorder',['SkyBoxCommandListRecorder',['../class_b_r_e_1_1_sky_box_command_list_recorder.html',1,'BRE']]],
+  ['skyboxpass',['SkyBoxPass',['../class_b_r_e_1_1_sky_box_pass.html',1,'BRE']]]
 ];

@@ -72,8 +72,8 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
         MaterialProperties materialProperties(baseColor[0],
                                               baseColor[1],
                                               baseColor[2],
-                                              smoothness,
-                                              metalMask);
+                                              metalMask,
+                                              smoothness);
         mMaterialPropertiesByName.insert(std::make_pair(materialName, materialProperties));
     }
 }

@@ -190,13 +190,13 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
     <tr><td class="paramname">height</td><td>Height </td></tr>
     <tr><td class="paramname">depth</td><td>Depth </td></tr>
     <tr><td class="paramname">numSubdivisions</td><td>Number of subdivisions. This controls tessellation. </td></tr>
-    <tr><td class="paramname">commandList</td><td>Command list to create the model </td></tr>
-    <tr><td class="paramname">uploadVertexBuffer</td><td>Upload buffer for vertices </td></tr>
-    <tr><td class="paramname">uploadIndexBuffer</td><td>Upload buffer for indices </td></tr>
-    <tr><td class="paramname"><a class="el" href="class_b_r_e_1_1_model.html" title="Represents a model that can be loaded from a file. ">Model</a></td><td></td></tr>
+    <tr><td class="paramname">commandList</td><td>Command list used to upload buffers content to GPU. It must be executed after this function call to upload buffers content to GPU. It must be in recording state before calling this method. </td></tr>
+    <tr><td class="paramname">uploadVertexBuffer</td><td>Upload buffer to upload the vertex buffer content. It has to be kept alive after the function call because the command list has not been executed yet that performs the actual copy. The caller can Release the uploadVertexBuffer after it knows the copy has been executed. </td></tr>
+    <tr><td class="paramname">uploadIndexBuffer</td><td>Upload buffer to upload the index buffer content. It has to be kept alive after the function call because the command list has not been executed yet that performs the actual copy. The caller can Release the uploadIndexBuffer after it knows the copy has been executed. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="class_b_r_e_1_1_model.html" title="Represents a model that can be loaded from a file. ">Model</a> </dd></dl>
 
 </div>
 </div>
@@ -278,13 +278,13 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
     <tr><td class="paramname">height</td><td>Height </td></tr>
     <tr><td class="paramname">sliceCount</td><td>Slice count. This controls tessellation. </td></tr>
     <tr><td class="paramname">stackCount</td><td>Stack count. This controls tessellation. </td></tr>
-    <tr><td class="paramname">commandList</td><td>Command list to create the model </td></tr>
-    <tr><td class="paramname">uploadVertexBuffer</td><td>Upload buffer for vertices </td></tr>
-    <tr><td class="paramname">uploadIndexBuffer</td><td>Upload buffer for indices </td></tr>
-    <tr><td class="paramname"><a class="el" href="class_b_r_e_1_1_model.html" title="Represents a model that can be loaded from a file. ">Model</a></td><td></td></tr>
+    <tr><td class="paramname">commandList</td><td>Command list used to upload buffers content to GPU. It must be executed after this function call to upload buffers content to GPU. It must be in recording state before calling this method. </td></tr>
+    <tr><td class="paramname">uploadVertexBuffer</td><td>Upload buffer to upload the vertex buffer content. It has to be kept alive after the function call because the command list has not been executed yet that performs the actual copy. The caller can Release the uploadVertexBuffer after it knows the copy has been executed. </td></tr>
+    <tr><td class="paramname">uploadIndexBuffer</td><td>Upload buffer to upload the index buffer content. It has to be kept alive after the function call because the command list has not been executed yet that performs the actual copy. The caller can Release the uploadIndexBuffer after it knows the copy has been executed. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="class_b_r_e_1_1_model.html" title="Represents a model that can be loaded from a file. ">Model</a> </dd></dl>
 
 </div>
 </div>
@@ -345,13 +345,13 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
   <table class="params">
     <tr><td class="paramname">radius</td><td>Radius </td></tr>
     <tr><td class="paramname">numSubdivisions</td><td>Number of subdivisions. This controls tessellation. </td></tr>
-    <tr><td class="paramname">commandList</td><td>Command list to create the model </td></tr>
-    <tr><td class="paramname">uploadVertexBuffer</td><td>Upload buffer for vertices </td></tr>
-    <tr><td class="paramname">uploadIndexBuffer</td><td>Upload buffer for indices </td></tr>
-    <tr><td class="paramname"><a class="el" href="class_b_r_e_1_1_model.html" title="Represents a model that can be loaded from a file. ">Model</a></td><td></td></tr>
+    <tr><td class="paramname">commandList</td><td>Command list used to upload buffers content to GPU. It must be executed after this function call to upload buffers content to GPU. It must be in recording state before calling this method. </td></tr>
+    <tr><td class="paramname">uploadVertexBuffer</td><td>Upload buffer to upload the vertex buffer content. It has to be kept alive after the function call because the command list has not been executed yet that performs the actual copy. The caller can Release the uploadVertexBuffer after it knows the copy has been executed. </td></tr>
+    <tr><td class="paramname">uploadIndexBuffer</td><td>Upload buffer to upload the index buffer content. It has to be kept alive after the function call because the command list has not been executed yet that performs the actual copy. The caller can Release the uploadIndexBuffer after it knows the copy has been executed. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="class_b_r_e_1_1_model.html" title="Represents a model that can be loaded from a file. ">Model</a> </dd></dl>
 
 </div>
 </div>
@@ -426,13 +426,13 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
     <tr><td class="paramname">depth</td><td>Depth </td></tr>
     <tr><td class="paramname">rows</td><td>Grid rows </td></tr>
     <tr><td class="paramname">columns</td><td>Grid columns </td></tr>
-    <tr><td class="paramname">commandList</td><td>Command list to create the box </td></tr>
-    <tr><td class="paramname">uploadVertexBuffer</td><td>Upload buffer for vertices </td></tr>
-    <tr><td class="paramname">uploadIndexBuffer</td><td>Upload buffer for indices </td></tr>
-    <tr><td class="paramname"><a class="el" href="class_b_r_e_1_1_model.html" title="Represents a model that can be loaded from a file. ">Model</a></td><td></td></tr>
+    <tr><td class="paramname">commandList</td><td>Command list used to upload buffers content to GPU. It must be executed after this function call to upload buffers content to GPU. It must be in recording state before calling this method. </td></tr>
+    <tr><td class="paramname">uploadVertexBuffer</td><td>Upload buffer to upload the vertex buffer content. It has to be kept alive after the function call because the command list has not been executed yet that performs the actual copy. The caller can Release the uploadVertexBuffer after it knows the copy has been executed. </td></tr>
+    <tr><td class="paramname">uploadIndexBuffer</td><td>Upload buffer to upload the index buffer content. It has to be kept alive after the function call because the command list has not been executed yet that performs the actual copy. The caller can Release the uploadIndexBuffer after it knows the copy has been executed. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="class_b_r_e_1_1_model.html" title="Represents a model that can be loaded from a file. ">Model</a> </dd></dl>
 
 </div>
 </div>
@@ -500,13 +500,13 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
     <tr><td class="paramname">radius</td><td>Radius </td></tr>
     <tr><td class="paramname">sliceCount</td><td>Slice count. This controls tessellation. </td></tr>
     <tr><td class="paramname">stackCount</td><td>Stack count. This controls tessellation. </td></tr>
-    <tr><td class="paramname">commandList</td><td>Command list to create the model </td></tr>
-    <tr><td class="paramname">uploadVertexBuffer</td><td>Upload buffer for vertices </td></tr>
-    <tr><td class="paramname">uploadIndexBuffer</td><td>Upload buffer for indices </td></tr>
-    <tr><td class="paramname"><a class="el" href="class_b_r_e_1_1_model.html" title="Represents a model that can be loaded from a file. ">Model</a></td><td></td></tr>
+    <tr><td class="paramname">commandList</td><td>Command list used to upload buffers content to GPU. It must be executed after this function call to upload buffers content to GPU. It must be in recording state before calling this method. </td></tr>
+    <tr><td class="paramname">uploadVertexBuffer</td><td>Upload buffer to upload the vertex buffer content. It has to be kept alive after the function call because the command list has not been executed yet that performs the actual copy. The caller can Release the uploadVertexBuffer after it knows the copy has been executed. </td></tr>
+    <tr><td class="paramname">uploadIndexBuffer</td><td>Upload buffer to upload the index buffer content. It has to be kept alive after the function call because the command list has not been executed yet that performs the actual copy. The caller can Release the uploadIndexBuffer after it knows the copy has been executed. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="class_b_r_e_1_1_model.html" title="Represents a model that can be loaded from a file. ">Model</a> </dd></dl>
 
 </div>
 </div>
@@ -560,9 +560,9 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">modelFilename</td><td><a class="el" href="class_b_r_e_1_1_model.html" title="Represents a model that can be loaded from a file. ">Model</a> filename. Must be not nullptr </td></tr>
-    <tr><td class="paramname">commandList</td><td>Command list to use to create the model </td></tr>
-    <tr><td class="paramname">uploadVertexBuffer</td><td>Upload buffer for vertices </td></tr>
-    <tr><td class="paramname">uploadIndexBuffer</td><td>Upload buffer for indices </td></tr>
+    <tr><td class="paramname">commandList</td><td>Command list used to upload buffers content to GPU. It must be executed after this function call to upload buffers content to GPU. It must be in recording state before calling this method. </td></tr>
+    <tr><td class="paramname">uploadVertexBuffer</td><td>Upload buffer to upload the vertex buffer content. It has to be kept alive after the function call because the command list has not been executed yet that performs the actual copy. The caller can Release the uploadVertexBuffer after it knows the copy has been executed. </td></tr>
+    <tr><td class="paramname">uploadIndexBuffer</td><td>Upload buffer to upload the index buffer content. It has to be kept alive after the function call because the command list has not been executed yet that performs the actual copy. The caller can Release the uploadIndexBuffer after it knows the copy has been executed. </td></tr>
   </table>
   </dd>
 </dl>

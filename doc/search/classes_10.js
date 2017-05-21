@@ -1,10 +1,8 @@
 var searchData=
 [
-  ['scene',['Scene',['../class_b_r_e_1_1_scene.html',1,'BRE']]],
-  ['sceneexecutor',['SceneExecutor',['../class_b_r_e_1_1_scene_executor.html',1,'BRE']]],
-  ['sceneloader',['SceneLoader',['../class_b_r_e_1_1_scene_loader.html',1,'BRE']]],
-  ['settingsmanager',['SettingsManager',['../class_b_r_e_1_1_settings_manager.html',1,'BRE']]],
-  ['shadermanager',['ShaderManager',['../class_b_r_e_1_1_shader_manager.html',1,'BRE']]],
-  ['skyboxcommandlistrecorder',['SkyBoxCommandListRecorder',['../class_b_r_e_1_1_sky_box_command_list_recorder.html',1,'BRE']]],
-  ['skyboxpass',['SkyBoxPass',['../class_b_r_e_1_1_sky_box_pass.html',1,'BRE']]]
+  ['textureloader',['TextureLoader',['../class_b_r_e_1_1_texture_loader.html',1,'BRE']]],
+  ['texturemappingcommandlistrecorder',['TextureMappingCommandListRecorder',['../class_b_r_e_1_1_texture_mapping_command_list_recorder.html',1,'BRE']]],
+  ['timer',['Timer',['../class_b_r_e_1_1_timer.html',1,'BRE']]],
+  ['tonemappingcommandlistrecorder',['ToneMappingCommandListRecorder',['../class_b_r_e_1_1_tone_mapping_command_list_recorder.html',1,'BRE']]],
+  ['tonemappingpass',['ToneMappingPass',['../class_b_r_e_1_1_tone_mapping_pass.html',1,'BRE']]]
 ];

@@ -39,7 +39,7 @@ Output main(in const Input input)
     output.mUV = gObjCBuffer.mTexTransform * input.mUV;
 
     output.mNormalWorldSpace = mul(float4(input.mNormalObjectSpace, 0.0f),
-                                   gObjCBuffer.mInverseTransposeWorldMatrix).xyz;
+                                   gObjCBuffer.mWorldMatrix).xyz;
     output.mNormalViewSpace = mul(float4(output.mNormalWorldSpace, 0.0f),
                                   gFrameCBuffer.mViewMatrix).xyz;
 

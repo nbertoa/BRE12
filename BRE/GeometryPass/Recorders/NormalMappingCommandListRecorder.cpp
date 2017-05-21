@@ -57,9 +57,9 @@ NormalMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMA
 
 void
 NormalMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
-                                const std::vector<MaterialProperties>& materialProperties,
-                                const std::vector<ID3D12Resource*>& diffuseTextures,
-                                const std::vector<ID3D12Resource*>& normalTextures) noexcept
+                                       const std::vector<MaterialProperties>& materialProperties,
+                                       const std::vector<ID3D12Resource*>& diffuseTextures,
+                                       const std::vector<ID3D12Resource*>& normalTextures) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
     BRE_ASSERT(geometryDataVector.empty() == false);
@@ -195,7 +195,10 @@ NormalMappingCommandListRecorder::InitConstantBuffers(const std::vector<Material
         GeometryData& geomData{ mGeometryDataVec[i] };
         const std::uint32_t worldMatsCount{ static_cast<std::uint32_t>(geomData.mWorldMatrices.size()) };
         for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
-            MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j], objCBuffer.mWorldMatrix);
+            MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j], 
+                                            objCBuffer.mWorldMatrix);
+            MathUtils::StoreTransposeMatrix(geomData.mInverseTransposeWorldMatrices[j],
+                                            objCBuffer.mInverseTransposeWorldMatrix);
             mObjectUploadCBuffers->CopyData(k + j, &objCBuffer, sizeof(objCBuffer));
         }
 
