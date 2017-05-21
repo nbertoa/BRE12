@@ -22,7 +22,7 @@ public:
     /// @param geometryBufferFormats List of geometry buffers formats. It must be not nullptr
     /// @param geometryBufferCount Number of geometry buffers formats in @p geometryBufferFormats
     ///
-    static void InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats, 
+    static void InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
                                               const std::uint32_t geometryBufferCount) noexcept;
 
     ///
@@ -75,4 +75,3 @@ private:
     D3D12_GPU_DESCRIPTOR_HANDLE mHeightBufferGpuDescriptorsBegin;
 };
 }
-

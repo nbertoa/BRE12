@@ -72,6 +72,4 @@ private:
 
     GeometryCommandListRecorders& mGeometryCommandListRecorders;
 };
-
 }
-

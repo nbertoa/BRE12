@@ -29,7 +29,7 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 
 void
 ColorNormalMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
-                                                              const std::uint32_t geometryBufferCount) noexcept
+                                                                     const std::uint32_t geometryBufferCount) noexcept
 {
     BRE_ASSERT(geometryBufferFormats != nullptr);
     BRE_ASSERT(geometryBufferCount > 0U);
@@ -59,8 +59,8 @@ ColorNormalMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_
 
 void
 ColorNormalMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
-                                     const std::vector<MaterialProperties>& materialProperties,
-                                     const std::vector<ID3D12Resource*>& normalTexturess) noexcept
+                                            const std::vector<MaterialProperties>& materialProperties,
+                                            const std::vector<ID3D12Resource*>& normalTexturess) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
     BRE_ASSERT(materialProperties.empty() == false);
@@ -166,7 +166,7 @@ ColorNormalMappingCommandListRecorder::IsDataValid() const noexcept
 
 void
 ColorNormalMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                                                    const std::vector<ID3D12Resource*>& normalTextures) noexcept
+                                                           const std::vector<ID3D12Resource*>& normalTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == normalTextures.size());
@@ -250,4 +250,3 @@ ColorNormalMappingCommandListRecorder::InitConstantBuffers(const std::vector<Mat
                                                               static_cast<std::uint32_t>(normalSrvDescVec.size()));
 }
 }
-

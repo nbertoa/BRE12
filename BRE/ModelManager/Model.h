@@ -79,6 +79,4 @@ public:
 private:
     std::vector<Mesh> mMeshes;
 };
-
 }
-

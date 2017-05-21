@@ -43,4 +43,3 @@ Model::Model(const GeometryGenerator::MeshData& meshData,
                            uploadIndexBuffer));
 }
 }
-

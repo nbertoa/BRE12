@@ -134,4 +134,3 @@ Mesh::Mesh(const GeometryGenerator::MeshData& meshData,
     BRE_ASSERT(mIndexBufferData.IsDataValid());
 }
 }
-

@@ -500,4 +500,3 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryCommandListRe
     commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
 }
 }
-

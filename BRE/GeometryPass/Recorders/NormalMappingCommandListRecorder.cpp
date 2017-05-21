@@ -30,7 +30,7 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 
 void
 NormalMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
-                                                         const std::uint32_t geometryBufferCount) noexcept
+                                                                const std::uint32_t geometryBufferCount) noexcept
 {
     BRE_ASSERT(geometryBufferFormats != nullptr);
     BRE_ASSERT(geometryBufferCount > 0U);
@@ -57,9 +57,9 @@ NormalMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMA
 
 void
 NormalMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
-                                const std::vector<MaterialProperties>& materialProperties,
-                                const std::vector<ID3D12Resource*>& diffuseTextures,
-                                const std::vector<ID3D12Resource*>& normalTextures) noexcept
+                                       const std::vector<MaterialProperties>& materialProperties,
+                                       const std::vector<ID3D12Resource*>& diffuseTextures,
+                                       const std::vector<ID3D12Resource*>& normalTextures) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
     BRE_ASSERT(geometryDataVector.empty() == false);
@@ -174,8 +174,8 @@ NormalMappingCommandListRecorder::IsDataValid() const noexcept
 
 void
 NormalMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                                               const std::vector<ID3D12Resource*>& diffuseTextures,
-                                               const std::vector<ID3D12Resource*>& normalTextures) noexcept
+                                                      const std::vector<ID3D12Resource*>& diffuseTextures,
+                                                      const std::vector<ID3D12Resource*>& normalTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == diffuseTextures.size());

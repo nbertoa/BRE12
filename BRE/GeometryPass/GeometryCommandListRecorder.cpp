@@ -24,8 +24,8 @@ GeometryCommandListRecorder::IsDataValid() const noexcept
 
 void
 GeometryCommandListRecorder::Init(const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBufferRenderTargetViews,
-                                      const std::uint32_t geometryBufferRenderTargetViewCount,
-                                      const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
+                                  const std::uint32_t geometryBufferRenderTargetViewCount,
+                                  const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 {
     BRE_ASSERT(geometryBufferRenderTargetViews != nullptr);
     BRE_ASSERT(geometryBufferRenderTargetViewCount != 0U);
@@ -35,6 +35,4 @@ GeometryCommandListRecorder::Init(const D3D12_CPU_DESCRIPTOR_HANDLE* geometryBuf
     mGeometryBufferRenderTargetViewCount = geometryBufferRenderTargetViewCount;
     mDepthBufferView = depthBufferView;
 }
-
 }
-

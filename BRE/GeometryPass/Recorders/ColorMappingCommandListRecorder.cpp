@@ -28,7 +28,7 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 
 void
 ColorMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
-                                                        const std::uint32_t geometryBufferCount) noexcept
+                                                               const std::uint32_t geometryBufferCount) noexcept
 {
     BRE_ASSERT(geometryBufferFormats != nullptr);
     BRE_ASSERT(geometryBufferCount > 0U);
@@ -55,7 +55,7 @@ ColorMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT
 
 void
 ColorMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
-                               const std::vector<MaterialProperties>& materialProperties) noexcept
+                                      const std::vector<MaterialProperties>& materialProperties) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
     BRE_ASSERT(materialProperties.empty() == false);
@@ -208,4 +208,3 @@ ColorMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialP
                                                               static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
 }
 }
-

@@ -39,7 +39,7 @@ const DXGI_FORMAT sGeometryBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]
 /// @param buffers Output list of geometry buffers
 /// @param bufferRenderTargetViews Output geometry buffers render target views
 ///
-void 
+void
 CreateGeometryBuffersAndRenderTargetViews(Microsoft::WRL::ComPtr<ID3D12Resource> buffers[GeometryPass::BUFFERS_COUNT],
                                           D3D12_CPU_DESCRIPTOR_HANDLE bufferRenderTargetViews[GeometryPass::BUFFERS_COUNT]) noexcept
 {
@@ -90,9 +90,9 @@ CreateGeometryBuffersAndRenderTargetViews(Microsoft::WRL::ComPtr<ID3D12Resource>
                                                                              resourceNames[i]);
 
         buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
-        RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(), 
-        rtvDescriptor, 
-        &bufferRenderTargetViews[i]);
+        RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(),
+                                                              rtvDescriptor,
+                                                              &bufferRenderTargetViews[i]);
     }
 }
 }
@@ -109,7 +109,7 @@ GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
     BRE_ASSERT(mGeometryCommandListRecorders.empty() == false);
 
     CreateGeometryBuffersAndRenderTargetViews(mGeometryBuffers, mGeometryBufferRenderTargetViews);
-    
+
     ColorMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
     ColorHeightMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
     ColorNormalMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
@@ -185,7 +185,7 @@ GeometryPass::ExecuteBeginTask() noexcept
             ++barrierCount;
         }
     }
-    
+
     if (barrierCount > 0UL) {
         commandList.ResourceBarrier(barrierCount, barriers);
     }

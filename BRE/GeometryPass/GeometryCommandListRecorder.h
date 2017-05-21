@@ -88,4 +88,3 @@ protected:
 
 using GeometryCommandListRecorders = std::vector<std::unique_ptr<GeometryCommandListRecorder>>;
 }
-

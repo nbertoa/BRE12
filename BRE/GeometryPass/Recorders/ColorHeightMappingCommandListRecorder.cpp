@@ -31,7 +31,7 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 
 void
 ColorHeightMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
-                                                              const std::uint32_t geometryBufferCount) noexcept
+                                                                     const std::uint32_t geometryBufferCount) noexcept
 {
     BRE_ASSERT(geometryBufferFormats != nullptr);
     BRE_ASSERT(geometryBufferCount > 0U);
@@ -62,9 +62,9 @@ ColorHeightMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_
 
 void
 ColorHeightMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
-                                     const std::vector<MaterialProperties>& materialProperties,
-                                     const std::vector<ID3D12Resource*>& normalTextures,
-                                     const std::vector<ID3D12Resource*>& heightTextures) noexcept
+                                            const std::vector<MaterialProperties>& materialProperties,
+                                            const std::vector<ID3D12Resource*>& normalTextures,
+                                            const std::vector<ID3D12Resource*>& heightTextures) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
     BRE_ASSERT(geometryDataVector.empty() == false);
@@ -180,8 +180,8 @@ ColorHeightMappingCommandListRecorder::IsDataValid() const noexcept
 
 void
 ColorHeightMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                                                    const std::vector<ID3D12Resource*>& normalTextures,
-                                                    const std::vector<ID3D12Resource*>& heightTextures) noexcept
+                                                           const std::vector<ID3D12Resource*>& normalTextures,
+                                                           const std::vector<ID3D12Resource*>& heightTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == normalTextures.size());
@@ -284,4 +284,3 @@ ColorHeightMappingCommandListRecorder::InitConstantBuffers(const std::vector<Mat
                                                               static_cast<std::uint32_t>(heightSrvDescVec.size()));
 }
 }
-

@@ -1,27 +1,28 @@
 ## BRE (Bertoa Rendering Engine)
 
-This engine is the result of an intent to learn DirectX 12 and apply my knowledge about computer graphics. It is intended for learning purposes only, I do not plan to make a game or a commercial engine. 
+BRE is a rendering framework or engine which purpose is to have a codebase on which develop techniques related to computer graphics. Among BRE features we can include:
 
-## Features
+    - Task-based architecture for parallel draw submission.
+    - Asynchronous command execution/command recording
+    - An easy to read, understand and write scene format
+    - Configurable number of queued frames to keep the GPU busy
+    - Deferred shading
 
-DirectX 12:
-- Task based architecture for parallel draw submission. Command lists are recorded in parallel for Geometry Pass and Lighting Pass.
-- Asynchronous command execution/command recording.
-- Configurable number of queued frames to keep the GPU busy.
+And the rendering techniques implemented at the moment are
 
-Rendering:
-- Deferred Shading
-- Color Mapping
-- Texture Mapping
-- Normal Mapping
-- Height Mapping
+    - Color Mapping
+    - Texture Mapping
+    - Normal Mapping
+    - Height Mapping
+    - Color Normal Mapping
+    - Color Height Mapping
+    - Skybox Mapping
+    - Diffuse Irradiance Environment Mapping
+    - Specular Pre-Convolved Environment Mapping
+    - Tone Mapping
+    - Screen Space Ambient Occlusion
+    - Gamma Correction
 
-Lighting:
-- Physically Based Shading (PBR) based on smoothness/metalness
-- Image Based Lighting (IBL) based on diffuse irradiance environment cube map and specular pre-convolved environment cube map
- 
-Postprocessing:
-- Tone Mapping
 
 ## Repository structure
 The directory structure is:
@@ -29,10 +30,13 @@ The directory structure is:
 	/BRE		Source code
 	/external	Third-party libraries
 	/doc		Documentation (doxygen) - Open index file.
+	
 
-## Examples
+## Examples and Documentation
 
 In the Visual Studio solution, you can check scene files in BRE/Executable/resources/scenes. I use YAML format for scenes.
+You can open /doc/index.html file to read the Doxygen documentation
+You can check the following blog entry where I constantly add new articles about BRE (architecture, techniques, classes, etc). It is https://nbertoa.wordpress.com/bre/
 
 
 ## Blog

@@ -32,7 +32,7 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 
 void
 HeightMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
-                                                         const std::uint32_t geometryBufferCount) noexcept
+                                                                const std::uint32_t geometryBufferCount) noexcept
 {
     BRE_ASSERT(geometryBufferFormats != nullptr);
     BRE_ASSERT(geometryBufferCount > 0U);
@@ -63,10 +63,10 @@ HeightMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMA
 
 void
 HeightMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
-                                const std::vector<MaterialProperties>& materialProperties,
-                                const std::vector<ID3D12Resource*>& diffuseTextures,
-                                const std::vector<ID3D12Resource*>& normalTextures,
-                                const std::vector<ID3D12Resource*>& heightTextures) noexcept
+                                       const std::vector<MaterialProperties>& materialProperties,
+                                       const std::vector<ID3D12Resource*>& diffuseTextures,
+                                       const std::vector<ID3D12Resource*>& normalTextures,
+                                       const std::vector<ID3D12Resource*>& heightTextures) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
     BRE_ASSERT(geometryDataVector.empty() == false);
@@ -189,9 +189,9 @@ HeightMappingCommandListRecorder::IsDataValid() const noexcept
 
 void
 HeightMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                                               const std::vector<ID3D12Resource*>& diffuseTextures,
-                                               const std::vector<ID3D12Resource*>& normalTextures,
-                                               const std::vector<ID3D12Resource*>& heightTextures) noexcept
+                                                      const std::vector<ID3D12Resource*>& diffuseTextures,
+                                                      const std::vector<ID3D12Resource*>& normalTextures,
+                                                      const std::vector<ID3D12Resource*>& heightTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == diffuseTextures.size());
@@ -315,4 +315,3 @@ HeightMappingCommandListRecorder::InitConstantBuffers(const std::vector<Material
                                                               static_cast<std::uint32_t>(heightSrvDescVec.size()));
 }
 }
-

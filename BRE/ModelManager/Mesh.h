@@ -95,4 +95,3 @@ private:
     VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
 };
 }
-

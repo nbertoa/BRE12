@@ -29,7 +29,7 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 
 void
 TextureMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORMAT* geometryBufferFormats,
-                                                          const std::uint32_t geometryBufferCount) noexcept
+                                                                 const std::uint32_t geometryBufferCount) noexcept
 {
     BRE_ASSERT(geometryBufferFormats != nullptr);
     BRE_ASSERT(geometryBufferCount > 0U);
@@ -57,8 +57,8 @@ TextureMappingCommandListRecorder::InitSharedPSOAndRootSignature(const DXGI_FORM
 
 void
 TextureMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
-                                 const std::vector<MaterialProperties>& materialProperties,
-                                 const std::vector<ID3D12Resource*>& diffuseTextures) noexcept
+                                        const std::vector<MaterialProperties>& materialProperties,
+                                        const std::vector<ID3D12Resource*>& diffuseTextures) noexcept
 {
     BRE_ASSERT(geometryDataVector.empty() == false);
     BRE_ASSERT(materialProperties.empty() == false);
@@ -173,7 +173,7 @@ TextureMappingCommandListRecorder::IsDataValid() const noexcept
 
 void
 TextureMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                                                const std::vector<ID3D12Resource*>& diffuseTextures) noexcept
+                                                       const std::vector<ID3D12Resource*>& diffuseTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == diffuseTextures.size());
@@ -255,4 +255,3 @@ TextureMappingCommandListRecorder::InitConstantBuffers(const std::vector<Materia
                                                               static_cast<std::uint32_t>(srvDescVec.size()));
 }
 }
-
