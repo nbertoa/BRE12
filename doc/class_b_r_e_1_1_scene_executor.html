@@ -69,12 +69,17 @@ $(function() {
 <div class="title">BRE::SceneExecutor Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Responsible to load and execute the scene.  
+ <a href="class_b_r_e_1_1_scene_executor.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="_scene_executor_8h_source.html">SceneExecutor.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a51e6ba979d2dcd7ea90de8893771e888"><td class="memItemLeft" align="right" valign="top"><a id="a51e6ba979d2dcd7ea90de8893771e888"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>SceneExecutor</b> (HINSTANCE moduleInstanceHandle, const char *sceneFilePath)</td></tr>
-<tr class="separator:a51e6ba979d2dcd7ea90de8893771e888"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ca9d36b6508a6a01fb8ae2b65fac377"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_scene_executor.html#a3ca9d36b6508a6a01fb8ae2b65fac377">SceneExecutor</a> (const char *sceneFilePath)</td></tr>
+<tr class="memdesc:a3ca9d36b6508a6a01fb8ae2b65fac377"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_b_r_e_1_1_scene_executor.html" title="Responsible to load and execute the scene. ">SceneExecutor</a> constructor.  <a href="#a3ca9d36b6508a6a01fb8ae2b65fac377">More...</a><br /></td></tr>
+<tr class="separator:a3ca9d36b6508a6a01fb8ae2b65fac377"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad59e0b85e9fdd8c33ee113fe2ae9807d"><td class="memItemLeft" align="right" valign="top"><a id="ad59e0b85e9fdd8c33ee113fe2ae9807d"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>SceneExecutor</b> (const <a class="el" href="class_b_r_e_1_1_scene_executor.html">SceneExecutor</a> &amp;)=delete</td></tr>
 <tr class="separator:ad59e0b85e9fdd8c33ee113fe2ae9807d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -87,10 +92,76 @@ const <a class="el" href="class_b_r_e_1_1_scene_executor.html">SceneExecutor</a>
 <tr class="memitem:a62384bbd71b1001321491fceeedb54e0"><td class="memItemLeft" align="right" valign="top"><a id="a62384bbd71b1001321491fceeedb54e0"></a>
 <a class="el" href="class_b_r_e_1_1_scene_executor.html">SceneExecutor</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="class_b_r_e_1_1_scene_executor.html">SceneExecutor</a> &amp;&amp;)=delete</td></tr>
 <tr class="separator:a62384bbd71b1001321491fceeedb54e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a038dadb04d0935e3ba3a76259185aa0f"><td class="memItemLeft" align="right" valign="top"><a id="a038dadb04d0935e3ba3a76259185aa0f"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>Execute</b> () noexcept</td></tr>
+<tr class="memitem:a038dadb04d0935e3ba3a76259185aa0f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_scene_executor.html#a038dadb04d0935e3ba3a76259185aa0f">Execute</a> () noexcept</td></tr>
+<tr class="memdesc:a038dadb04d0935e3ba3a76259185aa0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes the scene executor.  <a href="#a038dadb04d0935e3ba3a76259185aa0f">More...</a><br /></td></tr>
 <tr class="separator:a038dadb04d0935e3ba3a76259185aa0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Responsible to load and execute the scene. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a3ca9d36b6508a6a01fb8ae2b65fac377"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ca9d36b6508a6a01fb8ae2b65fac377">&#9670;&nbsp;</a></span>SceneExecutor()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">BRE::SceneExecutor::SceneExecutor </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>sceneFilePath</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_b_r_e_1_1_scene_executor.html" title="Responsible to load and execute the scene. ">SceneExecutor</a> constructor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sceneFilePath</td><td><a class="el" href="class_b_r_e_1_1_scene.html" title="Represents a scene (geometry pass command list recorders, lighting configurations, camera, etc) ">Scene</a> file path. Must be not nullptr. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a038dadb04d0935e3ba3a76259185aa0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a038dadb04d0935e3ba3a76259185aa0f">&#9670;&nbsp;</a></span>Execute()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void BRE::SceneExecutor::Execute </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Executes the scene executor. </p>
+<p>This method is going to load the scene and run the main loop. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>SceneExecutor/<a class="el" href="_scene_executor_8h_source.html">SceneExecutor.h</a></li>
 <li>SceneExecutor/SceneExecutor.cpp</li>

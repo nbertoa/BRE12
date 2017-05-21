@@ -1,7 +1,7 @@
 var searchData=
 [
   ['scene',['Scene',['../class_b_r_e_1_1_scene.html',1,'BRE']]],
-  ['sceneexecutor',['SceneExecutor',['../class_b_r_e_1_1_scene_executor.html',1,'BRE']]],
+  ['sceneexecutor',['SceneExecutor',['../class_b_r_e_1_1_scene_executor.html',1,'BRE::SceneExecutor'],['../class_b_r_e_1_1_scene_executor.html#a3ca9d36b6508a6a01fb8ae2b65fac377',1,'BRE::SceneExecutor::SceneExecutor()']]],
   ['sceneloader',['SceneLoader',['../class_b_r_e_1_1_scene_loader.html',1,'BRE']]],
   ['setdiffusetexture',['SetDiffuseTexture',['../class_b_r_e_1_1_material_technique.html#adb39c4945d24a77a605de856949de933',1,'BRE::MaterialTechnique']]],
   ['setfrustum',['SetFrustum',['../class_b_r_e_1_1_camera.html#a715647da006198fb07d1702d371a47fd',1,'BRE::Camera']]],
@@ -9,7 +9,6 @@ var searchData=
   ['setlookandupvectors',['SetLookAndUpVectors',['../class_b_r_e_1_1_camera.html#a9b08ce0ac93559d83189b229a94afa9f',1,'BRE::Camera']]],
   ['setnormaltexture',['SetNormalTexture',['../class_b_r_e_1_1_material_technique.html#a6b1fed7a6781af5f6ed1e4f9d3b7e7d5',1,'BRE::MaterialTechnique']]],
   ['setposition',['SetPosition',['../class_b_r_e_1_1_camera.html#a37661bbacfc4dddabd55a471dee6b4b9',1,'BRE::Camera']]],
-  ['settingsmanager',['SettingsManager',['../class_b_r_e_1_1_settings_manager.html',1,'BRE']]],
   ['shadermanager',['ShaderManager',['../class_b_r_e_1_1_shader_manager.html',1,'BRE']]],
   ['signalfenceandwaitforcompletion',['SignalFenceAndWaitForCompletion',['../class_b_r_e_1_1_command_list_executor.html#a067325992913172ed4a2a155a3f742f7',1,'BRE::CommandListExecutor']]],
   ['skyboxcommandlistrecorder',['SkyBoxCommandListRecorder',['../class_b_r_e_1_1_sky_box_command_list_recorder.html',1,'BRE']]],

@@ -5,7 +5,7 @@
 #define MIN_TESS_DISTANCE 25.0f
 #define MAX_TESS_DISTANCE 1.0f
 #define MIN_TESS_FACTOR 1.0f
-#define MAX_TESS_FACTOR 5.0f
+#define MAX_TESS_FACTOR 25.0f
 
 struct Input {
     float3 mPositionObjectSpace : POSITION;

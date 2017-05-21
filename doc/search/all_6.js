@@ -1,10 +1,10 @@
 var searchData=
 [
-  ['geometrydata',['GeometryData',['../struct_b_r_e_1_1_geometry_pass_command_list_recorder_1_1_geometry_data.html',1,'BRE::GeometryPassCommandListRecorder']]],
+  ['geometrycommandlistrecorder',['GeometryCommandListRecorder',['../class_b_r_e_1_1_geometry_command_list_recorder.html',1,'BRE']]],
+  ['geometrydata',['GeometryData',['../struct_b_r_e_1_1_geometry_command_list_recorder_1_1_geometry_data.html',1,'BRE::GeometryCommandListRecorder']]],
   ['geometrypass',['GeometryPass',['../class_b_r_e_1_1_geometry_pass.html',1,'BRE']]],
-  ['geometrypasscommandlistrecorder',['GeometryPassCommandListRecorder',['../class_b_r_e_1_1_geometry_pass_command_list_recorder.html',1,'BRE']]],
   ['get',['Get',['../class_b_r_e_1_1_keyboard.html#a757052765119275964b430624a6d2a44',1,'BRE::Keyboard::Get()'],['../class_b_r_e_1_1_mouse.html#a5e0f2bdb3bc45a0e915a1e9278ecc45b',1,'BRE::Mouse::Get()']]],
-  ['getaspectratio',['GetAspectRatio',['../class_b_r_e_1_1_settings_manager.html#a2584990c9284c527cfe23f2e51e0b7bb',1,'BRE::SettingsManager']]],
+  ['getaspectratio',['GetAspectRatio',['../class_b_r_e_1_1_application_settings.html#a3c10da830ce297d67f4f2abec3d4bc41',1,'BRE::ApplicationSettings']]],
   ['getcamera',['GetCamera',['../class_b_r_e_1_1_camera_loader.html#a7bb3d6ba46dcad9ddaef6aa78532d258',1,'BRE::CameraLoader']]],
   ['getcommandlist',['GetCommandList',['../class_b_r_e_1_1_command_list_per_frame.html#a720fc2d8634bd6b0f8b4be51465c119f',1,'BRE::CommandListPerFrame']]],
   ['getcommandqueue',['GetCommandQueue',['../class_b_r_e_1_1_command_list_executor.html#ac0ffe405ba8eeab52359d910821a862c',1,'BRE::CommandListExecutor']]],
@@ -19,7 +19,7 @@ var searchData=
   ['getdrawableobjectsbymodelnamebytechniquetype',['GetDrawableObjectsByModelNameByTechniqueType',['../class_b_r_e_1_1_drawable_object_loader.html#a4d348785aeaab15e15d9d245f38edf05',1,'BRE::DrawableObjectLoader']]],
   ['getexecutedcommandlistcount',['GetExecutedCommandListCount',['../class_b_r_e_1_1_command_list_executor.html#a3829b7737d173d4957699c14dfec183d',1,'BRE::CommandListExecutor']]],
   ['getgeometrybuffers',['GetGeometryBuffers',['../class_b_r_e_1_1_geometry_pass.html#af3b1d60e15df46907103248a4de6c5df',1,'BRE::GeometryPass']]],
-  ['getgeometrypasscommandlistrecorders',['GetGeometryPassCommandListRecorders',['../class_b_r_e_1_1_scene.html#ae1c051e0a593f35a613ab46d5ebb765d',1,'BRE::Scene']]],
+  ['getgeometrycommandlistrecorders',['GetGeometryCommandListRecorders',['../class_b_r_e_1_1_scene.html#ab1106ba18c42651dd2c120f5a68ba8b6',1,'BRE::Scene']]],
   ['getheighttexture',['GetHeightTexture',['../class_b_r_e_1_1_material_technique.html#a8b883cc2ac83c0e8fc0d535213abbe3c',1,'BRE::MaterialTechnique']]],
   ['getidentity4x4matrix',['GetIdentity4x4Matrix',['../class_b_r_e_1_1_math_utils.html#a9c7f3f6d33b613bcdf890dc1d86c79fc',1,'BRE::MathUtils']]],
   ['getidxgifactory',['GetIDXGIFactory',['../class_b_r_e_1_1_direct_x_manager.html#a5ac2b3fd73e12daf4f02781b3f6612eb',1,'BRE::DirectXManager']]],

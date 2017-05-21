@@ -1,0 +1,107 @@
+models:
+  bunny: resources/models/bunny.obj
+  
+textures:
+  titanium_diffuse: resources/textures/metal/metal.dds
+  titanium_normal: resources/textures/metal/metal_normal.dds
+  sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
+  cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
+  cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds
+  
+material properties:
+  - name: titanium0
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.0
+    metal mask: 0.0
+  - name: titanium1
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.1
+    metal mask: 0.0
+  - name: titanium2
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.2
+    metal mask: 0.0
+  - name: titanium3
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.3
+    metal mask: 0.0
+  - name: titanium4
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.4
+    metal mask: 0.0
+  - name: titanium5
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.5
+    metal mask: 0.0
+  - name: titanium6
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.6
+    metal mask: 0.0
+  - name: titanium7
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.7
+    metal mask: 0.0
+  - name: titanium8
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.8
+    metal mask: 0.0
+  - name: titanium9
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 0.9
+    metal mask: 0.0
+  - name: titanium10
+    base color: [0.542, 0.497, 0.449]
+    smoothness: 1.0
+    metal mask: 0.0
+    
+material techniques:
+  - name: color mapping
+    
+drawable objects:
+  - model: bunny
+    material properties: titanium0
+    material technique: color mapping
+    translation: [0.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [16.0, 16.0, 16.0]
+  - model: bunny
+    material properties: titanium2
+    material technique: color mapping
+    translation: [50.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [16.0, 16.0, 16.0]
+  - model: bunny
+    material properties: titanium4
+    material technique: color mapping
+    translation: [100.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [16.0, 16.0, 16.0]
+  - model: bunny
+    material properties: titanium6
+    material technique: color mapping
+    translation: [150.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [16.0, 16.0, 16.0]
+  - model: bunny
+    material properties: titanium8
+    material technique: color mapping
+    translation: [200.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [16.0, 16.0, 16.0]
+  - model: bunny
+    material properties: titanium10
+    material technique: color mapping
+    translation: [250.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [16.0, 16.0, 16.0]
+    
+environment:
+  - sky box texture: sky map
+    diffuse irradiance texture: cube map diffuse
+    specular pre convolved environment texture: cube map specular
+    
+camera:
+  - position: [0.0, 30.0, -90.0]
+    look vector: [0.0, 0.0, 1.0]
+    up vector: [0.0, 1.0, 0.0]
+    
