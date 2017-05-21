@@ -4,20 +4,20 @@ models:
   torusKnot: resources/models/torusKnot.obj
   
 textures:
-  brick_diffuse: resources/textures/brick/brick.dds
-  brick_height: resources/textures/brick/brick_height.dds
-  brick_normal: resources/textures/brick/brick_normal.dds
+  brick_diffuse: resources/textures/cobblestone/cobblestone.dds
+  brick_height: resources/textures/cobblestone/cobblestone_height.dds
+  brick_normal: resources/textures/cobblestone/cobblestone_normal.dds
   sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
   cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
   cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds
   
 material properties:
   - name: material1
-    base color: [1.0, 0.0, 0.5]
-    smoothness: 0.0
-    metal mask: 1.0
+    base color: [1.0, 0.766, 0.366]
+    smoothness: 0.4
+    metal mask: 0.0
   - name: material2
-    base color: [1.0, 1.0, 1.0]
+    base color: [1.0, 0.766, 0.355]
     smoothness: 0.6
     metal mask: 0.0
     
@@ -26,10 +26,8 @@ material techniques:
   - name: brick
     diffuse texture: brick_diffuse
   - name: brick normal
-    diffuse texture: brick_diffuse
     normal texture: brick_normal
   - name: brick height
-    diffuse texture: brick_diffuse
     normal texture: brick_normal   
     height texture: brick_height
   - name: brick color normal
@@ -39,35 +37,10 @@ material techniques:
     height texture: brick_height
     
 drawable objects:
-  - model: mitsubaSphere
+  - model: unreal
     material properties: material1
     material technique: brick height
     translation: [0.0, 0.0, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: mitsubaSphere
-    material properties: material1
-    material technique: brick normal
-    translation: [50.0, 0.0, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: mitsubaSphere
-    material properties: material2
-    material technique: brick
-    translation: [100.0, 0.0, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: mitsubaSphere
-    material properties: material2
-    material technique: color mapping
-    translation: [150.0, 0.0, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: mitsubaSphere
-    material properties: material1
-    material technique: brick color normal
-    translation: [200.0, 0.0, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: mitsubaSphere
-    material properties: material1
-    material technique: brick color height
-    translation: [250.0, 0.0, 50.0]
     scale: [0.2, 0.2, 0.2]
     
 environment:

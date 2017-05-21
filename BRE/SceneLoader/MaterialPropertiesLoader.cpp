@@ -81,7 +81,7 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
 const MaterialProperties& MaterialPropertiesLoader::GetMaterialProperties(const std::string& name) const noexcept
 {
     std::unordered_map<std::string, MaterialProperties>::const_iterator findIt = mMaterialPropertiesByName.find(name);
-    BRE_ASSERT_MSG(findIt != mMaterialPropertiesByName.end(), L"Material not found");
+    BRE_ASSERT_MSG(findIt != mMaterialPropertiesByName.end(), L"Material properties not found");
 
     return findIt->second;
 }

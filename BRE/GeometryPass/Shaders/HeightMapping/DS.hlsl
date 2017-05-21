@@ -3,7 +3,7 @@
 #include "RS.hlsl"
 
 #define NUM_PATCH_POINTS 3
-#define HEIGHT_SCALE 0.07f
+#define HEIGHT_SCALE 1.47f
 
 struct HullShaderConstantOutput {
     float mEdgeFactors[3] : SV_TessFactor;
