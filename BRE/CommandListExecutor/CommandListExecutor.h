@@ -135,5 +135,4 @@ private:
     tbb::concurrent_queue<ID3D12CommandList*> mCommandListsToExecute;
     ID3D12Fence* mFence{ nullptr };
 };
-
 }
