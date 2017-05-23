@@ -84,11 +84,11 @@ RenderTargetDescriptorManager::CreateRenderTargetViews(ID3D12Resource* *resource
                                                            &descriptors[i],
                                                            mCurrentRenderTargetViewCpuDescriptorHandle);
         mCurrentRenderTargetViewCpuDescriptorHandle.ptr +=
-            DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+            DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     }
 
     mCurrentRenderTargetViewDescriptorHandle.ptr +=
-        descriptorCount * DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        descriptorCount * DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
     mMutex.unlock();
 
