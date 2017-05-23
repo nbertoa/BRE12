@@ -53,10 +53,7 @@ material properties:
     base color: [0.542, 0.497, 0.449]
     smoothness: 1.0
     metal mask: 0.0
-    
-material techniques:
-  - name: color mapping
-    
+        
 drawable objects:
   - model: bunny
     material properties: titanium0

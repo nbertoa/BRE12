@@ -55,7 +55,6 @@ material properties:
     metal mask: 1.0
     
 material techniques:
-  - name: color mapping
   - name: gold
     diffuse texture: gold_diffuse
     normal texture: gold_normal

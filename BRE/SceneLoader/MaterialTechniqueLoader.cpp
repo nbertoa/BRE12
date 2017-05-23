@@ -25,7 +25,14 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
     //     diffuse texture: diffuseTextureName
     //     normal texture: normalTextureName
     const YAML::Node materialTechniquesNode = rootNode["material techniques"];
-    BRE_ASSERT_MSG(materialTechniquesNode.IsDefined(), L"'material techniques' node is not defined");
+
+    // 'material techniques' node can be undefined when all the drawable objects use
+    // the color mapping technique (that is the default technique when a drawable object
+    // does not specify a 'material technique' to use)
+    if (materialTechniquesNode.IsDefined() == false) {
+        return;
+    }
+
     BRE_ASSERT_MSG(materialTechniquesNode.IsSequence(), L"'material techniques' node must be a map");
 
     std::string pairFirstValue;

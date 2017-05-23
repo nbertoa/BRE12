@@ -19,7 +19,8 @@ class MaterialTechniqueLoader {
 public:
     MaterialTechniqueLoader(TextureLoader& textureLoader)
         : mTextureLoader(textureLoader)
-    {}
+    {
+    }
 
     MaterialTechniqueLoader(const MaterialTechniqueLoader&) = delete;
     const MaterialTechniqueLoader& operator=(const MaterialTechniqueLoader&) = delete;
@@ -38,6 +39,11 @@ public:
     ///
     const MaterialTechnique& GetMaterialTechnique(const std::string& name) const noexcept;
 
+    const MaterialTechnique& GetDefaultMaterialTechnique() const noexcept
+    {
+        return mDefaultMaterialTechnique;
+    }
+
 private:
     ///
     /// @brief Update material technique
@@ -50,6 +56,11 @@ private:
                                  MaterialTechnique& materialTechnique) const noexcept;
 
     std::unordered_map<std::string, MaterialTechnique> mMaterialTechniqueByName;
+
+    // This is the default material technique if no 'material technique' is specified
+    // for a drawable object
+    MaterialTechnique mDefaultMaterialTechnique;
+
     TextureLoader& mTextureLoader;
 };
 }
