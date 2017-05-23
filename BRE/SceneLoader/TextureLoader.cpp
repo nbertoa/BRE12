@@ -21,9 +21,9 @@ TextureLoader::LoadTextures(const YAML::Node& rootNode,
 
     // Get the "textures" node. It is a map and its sintax is:
     // textures:
-    //   textureName1: texturePath1
-    //   textureName2: texturePath2
-    //   textureName3: texturePath3
+    //   name1: path1
+    //   name2: path2
+    //   name3: path3
     const YAML::Node texturesNode = rootNode["textures"];
 
     // 'textures' node can be undefined
@@ -35,29 +35,14 @@ TextureLoader::LoadTextures(const YAML::Node& rootNode,
 
     std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadBuffers;
     BRE_CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
-
-    // Iterate "textureName: texturePath" pairs and create textures.
-    std::string textureName;
-    std::string texturePath;
-    for (YAML::const_iterator it = texturesNode.begin(); it != texturesNode.end(); ++it) {
-        textureName = it->first.as<std::string>();
-        texturePath = it->second.as<std::string>();
-
-        BRE_ASSERT_MSG(mTextureByName.find(textureName) == mTextureByName.end(), L"Texture name is not unique");
-
-        uploadBuffers.resize(uploadBuffers.size() + 1);
-
-        ID3D12Resource& texture = ResourceManager::LoadTextureFromFile(texturePath.c_str(),
-                                                                       commandList,
-                                                                       uploadBuffers.back(),
-                                                                       nullptr);
-
-        mTextureByName[textureName] = &texture;
-    }
+    
+    LoadTextures(texturesNode,
+                 commandAllocator,
+                 commandList,
+                 uploadBuffers);
 
     commandList.Close();
-
-    CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+    CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);    
 }
 
 ID3D12Resource&
@@ -68,5 +53,43 @@ TextureLoader::GetTexture(const std::string& name) noexcept
     BRE_ASSERT(findIt->second != nullptr);
 
     return *findIt->second;
+}
+
+void
+TextureLoader::LoadTextures(const YAML::Node& texturesNode,
+                            ID3D12CommandAllocator& commandAllocator,
+                            ID3D12GraphicsCommandList& commandList,
+                            std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>& uploadBuffers) noexcept
+{
+    BRE_ASSERT_MSG(texturesNode.IsMap(), L"'textures' node must be a map");
+
+    std::string name;
+    std::string path;
+    for (YAML::const_iterator it = texturesNode.begin(); it != texturesNode.end(); ++it) {
+        name = it->first.as<std::string>();
+        path = it->second.as<std::string>();
+
+        // If name is "reference", then path must be a yaml file that specifies "textures"
+        if (name == "reference") {
+            const YAML::Node referenceRootNode = YAML::LoadFile(path);
+            BRE_ASSERT_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            const YAML::Node referenceTexturesNode = referenceRootNode["textures"];
+            LoadTextures(referenceTexturesNode,
+                         commandAllocator,
+                         commandList,
+                         uploadBuffers);
+        } else {
+            BRE_ASSERT_MSG(mTextureByName.find(name) == mTextureByName.end(), L"Texture name is not unique");
+
+            uploadBuffers.resize(uploadBuffers.size() + 1);
+
+            ID3D12Resource& texture = ResourceManager::LoadTextureFromFile(path.c_str(),
+                                                                           commandList,
+                                                                           uploadBuffers.back(),
+                                                                           nullptr);
+
+            mTextureByName[name] = &texture;
+        }
+    }
 }
 }

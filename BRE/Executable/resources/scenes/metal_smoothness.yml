@@ -1,128 +1,82 @@
 models:
-  unreal: resources/models/unreal.obj
+  reference: resources/scenes/helpers/models.yml
   
 textures:
-  gold_diffuse: resources/textures/metal/metal.dds
-  gold_normal: resources/textures/metal/metal_normal.dds
+  reference: resources/scenes/helpers/all_textures.yml
   sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
   cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
-  cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds
+  cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds  
   
 material properties:
-  - name: gold0
-    base color: [1.0, 0.766, 0.366]
-    smoothness: 0.0
-    metal mask: 1.0
-  - name: gold1
-    base color: [1.0, 0.766, 0.366]
-    smoothness: 0.1
-    metal mask: 1.0
-  - name: gold2
-    base color: [1.0, 0.766, 0.366]
-    smoothness: 0.2
-    metal mask: 1.0
-  - name: gold3
-    base color: [1.0, 0.766, 0.366]
-    smoothness: 0.3
-    metal mask: 1.0
-  - name: gold4
-    base color: [1.0, 0.766, 0.366]
-    smoothness: 0.4
-    metal mask: 1.0
-  - name: gold5
-    base color: [1.0, 0.766, 0.366]
-    smoothness: 0.5
-    metal mask: 1.0
-  - name: gold6
-    base color: [1.0, 0.766, 0.366]
-    smoothness: 0.6
-    metal mask: 1.0
-  - name: gold7
-    base color: [1.0, 0.766, 0.366]
-    smoothness: 0.7
-    metal mask: 1.0
-  - name: gold8
-    base color: [1.0, 0.766, 0.366]
-    smoothness: 0.8
-    metal mask: 1.0
-  - name: gold9
-    base color: [1.0, 0.766, 0.366]
-    smoothness: 0.9
-    metal mask: 1.0
-  - name: gold10
-    base color: [1.0, 0.766, 0.366]
-    smoothness: 1.0
-    metal mask: 1.0
+  - reference: resources/scenes/helpers/metals_material_properties.yml
     
 material techniques:
-  - name: gold
-    diffuse texture: gold_diffuse
-    normal texture: gold_normal
+  - reference: resources/scenes/helpers/all_material_techniques.yml
     
 drawable objects:
   - model: unreal
     material properties: gold0
-    material technique: gold
+    material technique: metal2
     translation: [0.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold1
-    material technique: gold
+    material technique: metal2
     translation: [50.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold2
-    material technique: gold
+    material technique: metal2
     translation: [100.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold3
-    material technique: gold
+    material technique: metal2
     translation: [150.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold4
-    material technique: gold
+    material technique: metal2
     translation: [200.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold5
-    material technique: gold
+    material technique: metal2
     translation: [250.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold6
-    material technique: gold
+    material technique: metal2
     translation: [300.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold7
-    material technique: gold
+    material technique: metal2
     translation: [350.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold8
-    material technique: gold
+    material technique: metal2
     translation: [400.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold9
-    material technique: gold
+    material technique: metal2
     translation: [450.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold10
-    material technique: gold
+    material technique: metal2
     translation: [500.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]

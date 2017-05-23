@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <wrl.h>
 
 namespace YAML {
 class Node;
@@ -42,6 +43,22 @@ public:
     ID3D12Resource& GetTexture(const std::string& name) noexcept;
 
 private:
+    ///
+    /// @brief Load textures
+    /// @param texturesNode YAML Node representing the "textures" field. It must be a map.
+    /// @param commandAllocator Command allocator for the command list to load textures
+    /// @param commandList Command list to load the textures
+    /// @param uploadBuffer Upload buffer to upload the texture content.
+    /// It has to be kept alive after the function call because
+    /// the command list has not been executed yet that performs the actual copy.
+    /// The caller can Release the uploadBuffer after it knows the copy has been executed.
+    ///
+    void LoadTextures(const YAML::Node& texturesNode,
+                      ID3D12CommandAllocator& commandAllocator,
+                      ID3D12GraphicsCommandList& commandList,
+                      std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>& uploadBuffers) noexcept;
+
+
     std::unordered_map<std::string, ID3D12Resource*> mTextureByName;
 };
 }

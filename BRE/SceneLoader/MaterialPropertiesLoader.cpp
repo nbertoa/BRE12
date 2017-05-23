@@ -35,7 +35,7 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
     BRE_ASSERT_MSG(materialPropertiesNode.IsSequence(), L"'material propreties' node must be a map");
 
     std::string pairFirstValue;
-    std::string materialName;
+    std::string pairSecondValue;
     for (YAML::const_iterator seqIt = materialPropertiesNode.begin(); seqIt != materialPropertiesNode.end(); ++seqIt) {
         const YAML::Node materialMap = *seqIt;
         BRE_ASSERT(materialMap.IsMap());
@@ -44,9 +44,24 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
         YAML::const_iterator mapIt = materialMap.begin();
         BRE_ASSERT_MSG(mapIt != materialMap.end(), L"Material name not found");
         pairFirstValue = mapIt->first.as<std::string>();
-        BRE_ASSERT_MSG(pairFirstValue == std::string("name"), L"Material properties 1st parameter must be 'name'");
-        materialName = mapIt->second.as<std::string>();
-        BRE_ASSERT_MSG(mMaterialPropertiesByName.find(materialName) == mMaterialPropertiesByName.end(),
+
+        BRE_ASSERT_MSG(pairFirstValue == std::string("name") || pairFirstValue == std::string("reference"),
+                       L"Material properties 1st parameter must be 'name', or it must be 'reference'");
+
+        pairSecondValue = mapIt->second.as<std::string>();
+
+        // If the item is 'reference', then path must be a yaml file that specifies "material properties"
+        if (pairFirstValue == std::string("reference")) {
+            const YAML::Node referenceRootNode = YAML::LoadFile(pairSecondValue);
+            BRE_ASSERT_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            LoadMaterialsProperties(referenceRootNode);
+
+            continue;
+        }
+
+        // Otherwise, we get the material properties
+
+        BRE_ASSERT_MSG(mMaterialPropertiesByName.find(pairSecondValue) == mMaterialPropertiesByName.end(),
                        L"Material properties name must be unique");
         ++mapIt;
         BRE_ASSERT(mapIt != materialMap.end());
@@ -79,7 +94,7 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
                                               baseColor[2],
                                               metalMask,
                                               smoothness);
-        mMaterialPropertiesByName.insert(std::make_pair(materialName, materialProperties));
+        mMaterialPropertiesByName.insert(std::make_pair(pairSecondValue, materialProperties));
     }
 }
 

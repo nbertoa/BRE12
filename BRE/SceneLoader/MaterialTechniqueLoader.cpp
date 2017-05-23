@@ -46,7 +46,22 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
         YAML::const_iterator mapIt = materialMap.begin();
         BRE_ASSERT(mapIt != materialMap.end());
         pairFirstValue = mapIt->first.as<std::string>();
-        BRE_ASSERT_MSG(pairFirstValue == std::string("name"), L"Material technique 1st parameter must be 'name'");
+
+        BRE_ASSERT_MSG(pairFirstValue == std::string("name") || pairFirstValue == std::string("reference"),
+                       L"Material techniques 1st parameter must be 'name', or it must be 'reference'");
+
+        // If name is "reference", then path must be a yaml file that specifies "material techniques"
+        if (pairFirstValue == "reference") {
+            pairSecondValue = mapIt->second.as<std::string>();
+
+            const YAML::Node referenceRootNode = YAML::LoadFile(pairSecondValue);
+            BRE_ASSERT_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            LoadMaterialTechniques(referenceRootNode);
+
+            continue;
+        }
+
+
         materialTechniqueName = mapIt->second.as<std::string>();
         BRE_ASSERT_MSG(mMaterialTechniqueByName.find(materialTechniqueName) == mMaterialTechniqueByName.end(),
                        L"Material technique name must be unique");

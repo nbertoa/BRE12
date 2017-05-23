@@ -33,25 +33,11 @@ ModelLoader::LoadModels(const YAML::Node& rootNode,
     std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadIndexBuffers;
     BRE_CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
 
-    // Iterate "modelName: modelPath" pairs and create models.
-    std::string modelName;
-    std::string modelPath;
-    for (YAML::const_iterator it = modelsNode.begin(); it != modelsNode.end(); ++it) {
-        modelName = it->first.as<std::string>();
-        modelPath = it->second.as<std::string>();
-
-        BRE_ASSERT_MSG(mModelByName.find(modelName) == mModelByName.end(), L"Model name must be unique");
-
-        uploadVertexBuffers.resize(uploadVertexBuffers.size() + 1);
-        uploadIndexBuffers.resize(uploadIndexBuffers.size() + 1);
-
-        Model& model = ModelManager::LoadModel(modelPath.c_str(),
-                                               commandList,
-                                               uploadVertexBuffers.back(),
-                                               uploadIndexBuffers.back());
-
-        mModelByName[modelName] = &model;
-    }
+    LoadModels(modelsNode,
+               commandAllocator,
+               commandList,
+               uploadVertexBuffers,
+               uploadIndexBuffers);
 
     commandList.Close();
 
@@ -65,5 +51,46 @@ const Model& ModelLoader::GetModel(const std::string& name) const noexcept
     BRE_ASSERT(findIt->second != nullptr);
 
     return *findIt->second;
+}
+
+void
+ModelLoader::LoadModels(const YAML::Node& modelsNode,
+                        ID3D12CommandAllocator& commandAllocator,
+                        ID3D12GraphicsCommandList& commandList,
+                        std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>& uploadVertexBuffers,
+                        std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>& uploadIndexBuffers) noexcept
+{
+    BRE_ASSERT_MSG(modelsNode.IsMap(), L"'models' node must be a map");
+
+    std::string name;
+    std::string path;
+    for (YAML::const_iterator it = modelsNode.begin(); it != modelsNode.end(); ++it) {
+        name = it->first.as<std::string>();
+        path = it->second.as<std::string>();
+
+        // If name is "reference", then path must be a yaml file that specifies "models"
+        if (name == "reference") {
+            const YAML::Node referenceRootNode = YAML::LoadFile(path);
+            BRE_ASSERT_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            const YAML::Node referenceModelsNode = referenceRootNode["models"];
+            LoadModels(referenceModelsNode,
+                       commandAllocator,
+                       commandList,
+                       uploadVertexBuffers,
+                       uploadIndexBuffers);
+        } else {
+            BRE_ASSERT_MSG(mModelByName.find(name) == mModelByName.end(), L"Model name must be unique");
+
+            uploadVertexBuffers.resize(uploadVertexBuffers.size() + 1);
+            uploadIndexBuffers.resize(uploadIndexBuffers.size() + 1);
+
+            Model& model = ModelManager::LoadModel(path.c_str(),
+                                                   commandList,
+                                                   uploadVertexBuffers.back(),
+                                                   uploadIndexBuffers.back());
+
+            mModelByName[name] = &model;
+        }
+    }
 }
 }
