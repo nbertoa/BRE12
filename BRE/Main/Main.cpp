@@ -86,7 +86,7 @@ WINAPI WinMain(_In_ HINSTANCE moduleInstanceHandle,
     BRE::InitSystems(moduleInstanceHandle);
 
     {
-        BRE::SceneExecutor sceneExecutor("resources/scenes/non_metal_smoothness.yml");
+        BRE::SceneExecutor sceneExecutor("resources/scenes/cobblestone_example.yml");
         sceneExecutor.Execute();
     }
 

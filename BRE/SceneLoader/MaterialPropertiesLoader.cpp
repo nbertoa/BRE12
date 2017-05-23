@@ -54,6 +54,8 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
         if (pairFirstValue == std::string("reference")) {
             const YAML::Node referenceRootNode = YAML::LoadFile(pairSecondValue);
             BRE_ASSERT_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            BRE_ASSERT_MSG(referenceRootNode["material properties"].IsDefined(),
+                           L"Reference file must have 'material properties' field");
             LoadMaterialsProperties(referenceRootNode);
 
             continue;

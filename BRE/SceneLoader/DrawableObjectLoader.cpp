@@ -73,6 +73,14 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
                 YamlUtils::GetSequence(mapIt->second, rotation, 3U);
             } else if (pairFirstValue == "scale") {
                 YamlUtils::GetSequence(mapIt->second, scale, 3U);
+            } else if (pairFirstValue == "reference") {
+                // If the first field is "reference", then the second field must be a yaml file 
+                // that specifies "drawable objects"
+                const YAML::Node referenceRootNode = YAML::LoadFile(pairSecondValue);
+                BRE_ASSERT_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+                BRE_ASSERT_MSG(referenceRootNode["drawable objects"].IsDefined(),
+                               L"Reference file must have 'drawable objects' field");
+                LoadDrawableObjects(referenceRootNode);
             } else {
                 // To avoid warning about 'conditional expression is constant'. This is the same than false
                 BRE_ASSERT_MSG(&scale == nullptr, L"Unknown object field");

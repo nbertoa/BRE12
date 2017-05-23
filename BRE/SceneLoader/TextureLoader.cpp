@@ -73,6 +73,8 @@ TextureLoader::LoadTextures(const YAML::Node& texturesNode,
         if (name == "reference") {
             const YAML::Node referenceRootNode = YAML::LoadFile(path);
             BRE_ASSERT_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            BRE_ASSERT_MSG(referenceRootNode["textures"].IsDefined(),
+                           L"Reference file must have 'textures' field");
             const YAML::Node referenceTexturesNode = referenceRootNode["textures"];
             LoadTextures(referenceTexturesNode,
                          commandAllocator,

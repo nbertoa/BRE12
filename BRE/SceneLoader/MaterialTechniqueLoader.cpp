@@ -56,6 +56,8 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
 
             const YAML::Node referenceRootNode = YAML::LoadFile(pairSecondValue);
             BRE_ASSERT_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            BRE_ASSERT_MSG(referenceRootNode["material techniques"].IsDefined(),
+                           L"Reference file must have 'material techniques' field");
             LoadMaterialTechniques(referenceRootNode);
 
             continue;

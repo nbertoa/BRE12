@@ -53,6 +53,6 @@ private:
 
     // Default material properties to use when 'material properties' is not defined
     // in a drawable object.
-    MaterialProperties mDefaultMaterialProperties{ 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+    MaterialProperties mDefaultMaterialProperties{ 1.0f, 1.0f, 1.0f, 0.0f, 1.0f };
 };
 }
