@@ -25,7 +25,12 @@ TextureLoader::LoadTextures(const YAML::Node& rootNode,
     //   textureName2: texturePath2
     //   textureName3: texturePath3
     const YAML::Node texturesNode = rootNode["textures"];
-    BRE_ASSERT_MSG(texturesNode.IsDefined(), L"'textures' node is not found");
+
+    // 'textures' node can be undefined
+    if (texturesNode.IsDefined() == false) {
+        return;
+    }
+
     BRE_ASSERT_MSG(texturesNode.IsMap(), L"'textures' node must be a map");
 
     std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadBuffers;

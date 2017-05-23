@@ -25,13 +25,18 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
     //     base color: [value, value, value]
     //     smoothness: value
     //     metal mask: value
-    const YAML::Node materialsNode = rootNode["material properties"];
-    BRE_ASSERT_MSG(materialsNode.IsDefined(), L"'material properties' node must be defined");
-    BRE_ASSERT_MSG(materialsNode.IsSequence(), L"'material propreties' node must be a map");
+    const YAML::Node materialPropertiesNode = rootNode["material properties"];
+
+    // 'material properties' node can be undefined.
+    if (materialPropertiesNode.IsDefined() == false) {
+        return;
+    }
+
+    BRE_ASSERT_MSG(materialPropertiesNode.IsSequence(), L"'material propreties' node must be a map");
 
     std::string pairFirstValue;
     std::string materialName;
-    for (YAML::const_iterator seqIt = materialsNode.begin(); seqIt != materialsNode.end(); ++seqIt) {
+    for (YAML::const_iterator seqIt = materialPropertiesNode.begin(); seqIt != materialPropertiesNode.end(); ++seqIt) {
         const YAML::Node materialMap = *seqIt;
         BRE_ASSERT(materialMap.IsMap());
 

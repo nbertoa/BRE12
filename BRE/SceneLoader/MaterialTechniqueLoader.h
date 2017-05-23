@@ -39,6 +39,14 @@ public:
     ///
     const MaterialTechnique& GetMaterialTechnique(const std::string& name) const noexcept;
 
+    ///
+    /// @brief Get default material technique
+    ///
+    /// This technique is used when 'material technique' is not specified
+    /// in a drawable object.
+    ///
+    /// @return Default MaterialTechnique
+    ///
     const MaterialTechnique& GetDefaultMaterialTechnique() const noexcept
     {
         return mDefaultMaterialTechnique;

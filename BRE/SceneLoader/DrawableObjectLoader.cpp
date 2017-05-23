@@ -82,11 +82,15 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
         }
 
         BRE_ASSERT_MSG(model != nullptr, L"'model' field was not present in current drawable object");
-        BRE_ASSERT_MSG(materialProperties != nullptr, L"'material properties' field was not present in current drawable object");
-
+       
         // If "material technique" field is not present, then it defaults to "color mapping" technique
         if (materialTechnique == nullptr) {
             materialTechnique = &mMaterialTechniqueLoader.GetDefaultMaterialTechnique();
+        }
+
+        // If "material properties" field is not present, then we get the default material properties
+        if (materialProperties == nullptr) {
+            materialProperties = &mMaterialPropertiesLoader.GetDefaultMaterialProperties();
         }
 
         // Build worldMatrix

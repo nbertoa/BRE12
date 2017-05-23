@@ -4,8 +4,9 @@
 
 #include "RS.hlsl"
 
-//#define SKIP_ENVIRONMENT_LIGHT
-//#define DEBUG_AMBIENT_ACCESIBILITY
+//#define SKIP_ENVIRONMENT_LIGHT 1
+//#define DEBUG_AMBIENT_ACCESIBILITY 1
+//#define SKIP_AMBIENT_ACCESSIBILITY 1
 
 struct Input {
     float4 mPositionNDC : SV_POSITION;
@@ -99,6 +100,8 @@ Output main(const in Input input)
                            ambientAccessibility,
                            ambientAccessibility,
                            1.0f);
+#elif SKIP_AMBIENT_ACCESSIBILITY
+    output.mColor = float4(color, 1.0f);
 #else 
     output.mColor = float4(color * ambientAccessibility, 1.0f);
 #endif

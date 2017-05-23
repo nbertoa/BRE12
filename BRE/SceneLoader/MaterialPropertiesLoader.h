@@ -35,7 +35,24 @@ public:
     ///
     const MaterialProperties& GetMaterialProperties(const std::string& name) const noexcept;
 
+    ///
+    /// @brief Get default material properties
+    ///
+    /// This technique is used when 'material properties' is not specified
+    /// in a drawable object.
+    ///
+    /// @return Default MaterialProperties
+    ///
+    const MaterialProperties& GetDefaultMaterialProperties() const noexcept
+    {
+        return mDefaultMaterialProperties;
+    }
+
 private:
     std::unordered_map<std::string, MaterialProperties> mMaterialPropertiesByName;
+
+    // Default material properties to use when 'material properties' is not defined
+    // in a drawable object.
+    MaterialProperties mDefaultMaterialProperties{ 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 };
 }
