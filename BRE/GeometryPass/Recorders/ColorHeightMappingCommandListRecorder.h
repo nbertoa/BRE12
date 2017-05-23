@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GeometryPass/GeometryCommandListRecorder.h>
+#include <ResourceManager\UploadBuffer.h>
 
 namespace BRE {
 class MaterialProperties;
@@ -68,5 +69,7 @@ private:
 
     D3D12_GPU_DESCRIPTOR_HANDLE mNormalBufferGpuDescriptorsBegin;
     D3D12_GPU_DESCRIPTOR_HANDLE mHeightBufferGpuDescriptorsBegin;
+
+    UploadBuffer* mHeightMappingUploadCBuffer{ nullptr };
 };
 }

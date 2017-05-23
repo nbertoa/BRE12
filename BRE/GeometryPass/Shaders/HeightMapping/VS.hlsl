@@ -1,11 +1,7 @@
+#include <GeometryPass/Shaders/HeightMappingCBuffer.hlsli>
 #include <ShaderUtils/CBuffers.hlsli>
 
 #include "RS.hlsl"
-
-#define MIN_TESS_DISTANCE 25.0f
-#define MAX_TESS_DISTANCE 1.0f
-#define MIN_TESS_FACTOR 1.0f
-#define MAX_TESS_FACTOR 25.0f
 
 struct Input {
     float3 mPositionObjectSpace : POSITION;
@@ -16,6 +12,7 @@ struct Input {
 
 ConstantBuffer<ObjectCBuffer> gObjCBuffer : register(b0);
 ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
+ConstantBuffer<HeightMappingCBuffer> gHeightMappingCBuffer : register(b2);
 
 struct Output {
     float3 mPositionWorldSpace : POS_WORLD;
@@ -43,13 +40,16 @@ Output main(in const Input input)
 
     // Normalized tessellation factor. 
     // The tessellation is 
-    //   0 if d >= MIN_TESS_DISTANCE and
-    //   1 if d <= MAX_TESS_DISTANCE.  
+    //   0 if d >= min tessellation distance and
+    //   1 if d <= max tessellation distance.  
     const float distance = length(output.mPositionWorldSpace - gFrameCBuffer.mEyePositionWorldSpace.xyz);
-    const float tessellationFactor = saturate((MIN_TESS_DISTANCE - distance) / (MIN_TESS_DISTANCE - MAX_TESS_DISTANCE));
+    const float tessellationFactor = saturate((gHeightMappingCBuffer.mMinTessellationDistance - distance) 
+                                              / (gHeightMappingCBuffer.mMinTessellationDistance 
+                                                 - gHeightMappingCBuffer.mMaxTessellationDistance));
 
-    // Rescale [0,1] --> [MIN_TESS_FACTOR, MAX_TESS_FACTOR].
-    output.mTessellationFactor = MIN_TESS_FACTOR + tessellationFactor * (MAX_TESS_FACTOR - MIN_TESS_FACTOR);
+    // Rescale [0,1] --> [min tessellation factor, max tessellation factor].
+    output.mTessellationFactor = gHeightMappingCBuffer.mMinTessellationFactor 
+        + tessellationFactor * (gHeightMappingCBuffer.mMaxTessellationFactor - gHeightMappingCBuffer.mMinTessellationFactor);
 
     return output;
 }

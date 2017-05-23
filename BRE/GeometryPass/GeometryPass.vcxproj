@@ -129,6 +129,7 @@
     <ClInclude Include="Recorders\HeightMappingCommandListRecorder.h" />
     <ClInclude Include="Recorders\NormalMappingCommandListRecorder.h" />
     <ClInclude Include="Recorders\TextureMappingCommandListRecorder.h" />
+    <ClInclude Include="Shaders\HeightMappingCBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeometryPass.cpp" />
@@ -417,6 +418,9 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatWarningAsError>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\HeightMappingCBuffer.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

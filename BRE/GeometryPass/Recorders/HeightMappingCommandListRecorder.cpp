@@ -5,6 +5,7 @@
 #include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
+#include <GeometryPass\Shaders\HeightMappingCBuffer.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager/UploadBufferManager.h>
@@ -18,12 +19,14 @@ namespace BRE {
 // Root signature:
 // "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Object CBuffers
 // "CBV(b1, visibility = SHADER_VISIBILITY_VERTEX), " \ 1 -> Frame CBuffer
-// "CBV(b0, visibility = SHADER_VISIBILITY_DOMAIN), " \ 2 -> Frame CBuffer
-// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_DOMAIN), " \ 3 -> Height Texture
-// "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_PIXEL), " \ 4 -> Material CBuffers
-// "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 5 -> Frame CBuffer
-// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 6 -> Diffuse Texture
-// "DescriptorTable(SRV(t1), visibility = SHADER_VISIBILITY_PIXEL), " \ 7 -> Normal Texture
+// "CBV(b2, visibility = SHADER_VISIBILITY_VERTEX), " \ 2 -> Height Mapping CBuffer
+// "CBV(b0, visibility = SHADER_VISIBILITY_DOMAIN), " \ 3 -> Frame CBuffer
+// "CBV(b1, visibility = SHADER_VISIBILITY_DOMAIN), " \ 4 -> Height Mapping CBuffer
+// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_DOMAIN), " \ 5 -> Height Texture
+// "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_PIXEL), " \ 6 -> Material CBuffers
+// "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 7 -> Frame CBuffer
+// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 8 -> Diffuse Texture
+// "DescriptorTable(SRV(t1), visibility = SHADER_VISIBILITY_PIXEL), " \ 9 -> Normal Texture
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -138,10 +141,15 @@ HeightMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
     // Set frame constants root parameters
-    D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
+    D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(
+        uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
+    const D3D12_GPU_VIRTUAL_ADDRESS heightMappingCBufferGpuVAddress(
+        mHeightMappingUploadCBuffer->GetResource()->GetGPUVirtualAddress());
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-    commandList.SetGraphicsRootConstantBufferView(2U, frameCBufferGpuVAddress);
-    commandList.SetGraphicsRootConstantBufferView(5U, frameCBufferGpuVAddress);
+    commandList.SetGraphicsRootConstantBufferView(2U, heightMappingCBufferGpuVAddress);
+    commandList.SetGraphicsRootConstantBufferView(3U, frameCBufferGpuVAddress);
+    commandList.SetGraphicsRootConstantBufferView(4U, heightMappingCBufferGpuVAddress);
+    commandList.SetGraphicsRootConstantBufferView(7U, frameCBufferGpuVAddress);
 
     // Draw objects
     const std::size_t geomCount{ mGeometryDataVec.size() };
@@ -154,16 +162,16 @@ HeightMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& 
             commandList.SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
             objectCBufferGpuDesc.ptr += descHandleIncSize;
 
-            commandList.SetGraphicsRootDescriptorTable(3U, heightsBufferGpuDesc);
+            commandList.SetGraphicsRootDescriptorTable(5U, heightsBufferGpuDesc);
             heightsBufferGpuDesc.ptr += descHandleIncSize;
 
-            commandList.SetGraphicsRootDescriptorTable(4U, materialsCBufferGpuDesc);
+            commandList.SetGraphicsRootDescriptorTable(6U, materialsCBufferGpuDesc);
             materialsCBufferGpuDesc.ptr += descHandleIncSize;
 
-            commandList.SetGraphicsRootDescriptorTable(6U, texturesBufferGpuDesc);
+            commandList.SetGraphicsRootDescriptorTable(8U, texturesBufferGpuDesc);
             texturesBufferGpuDesc.ptr += descHandleIncSize;
 
-            commandList.SetGraphicsRootDescriptorTable(7U, normalsBufferGpuDesc);
+            commandList.SetGraphicsRootDescriptorTable(9U, normalsBufferGpuDesc);
             normalsBufferGpuDesc.ptr += descHandleIncSize;
 
             commandList.DrawIndexedInstanced(geomData.mIndexBufferData.mElementCount, 1U, 0U, 0U, 0U);
@@ -316,5 +324,19 @@ HeightMappingCommandListRecorder::InitConstantBuffers(const std::vector<Material
         CbvSrvUavDescriptorManager::CreateShaderResourceViews(heightResVec.data(),
                                                               heightSrvDescVec.data(),
                                                               static_cast<std::uint32_t>(heightSrvDescVec.size()));
+
+    // Height mapping constant buffer
+    const std::size_t heightMappingUploadCBufferElemSize =
+        UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(HeightMappingCBuffer));
+
+    mHeightMappingUploadCBuffer = &UploadBufferManager::CreateUploadBuffer(heightMappingUploadCBufferElemSize,
+                                                                           1U);
+    HeightMappingCBuffer heightMappingCBuffer(ApplicationSettings::sMinTessellationDistance,
+                                              ApplicationSettings::sMaxTessellationDistance,
+                                              ApplicationSettings::sMinTessellationFactor,
+                                              ApplicationSettings::sMaxTessellationFactor,
+                                              ApplicationSettings::sHeightScale);
+
+    mHeightMappingUploadCBuffer->CopyData(0U, &heightMappingCBuffer, sizeof(HeightMappingCBuffer));
 }
 }

@@ -1,9 +1,9 @@
+#include <GeometryPass/Shaders/HeightMappingCBuffer.hlsli>
 #include <ShaderUtils/CBuffers.hlsli>
 
 #include "RS.hlsl"
 
 #define NUM_PATCH_POINTS 3
-#define HEIGHT_SCALE 1.47f
 
 struct HullShaderConstantOutput {
     float mEdgeFactors[3] : SV_TessFactor;
@@ -18,6 +18,7 @@ struct Input {
 };
 
 ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b0);
+ConstantBuffer<HeightMappingCBuffer> gHeightMappingCBuffer : register(b1);
 
 SamplerState TextureSampler : register (s0);
 Texture2D HeightTexture : register (t0);
@@ -65,7 +66,7 @@ Output main(const HullShaderConstantOutput HSConstantOutput,
     const float height = HeightTexture.SampleLevel(TextureSampler,
                                                    output.mUV,
                                                    mipLevel).x;
-    const float displacement = (HEIGHT_SCALE * (height - 1));
+    const float displacement = (gHeightMappingCBuffer.mHeightScale * (height - 1));
 
     // Offset vertex along normal
     positionWorldSpace += output.mNormalWorldSpace * displacement;

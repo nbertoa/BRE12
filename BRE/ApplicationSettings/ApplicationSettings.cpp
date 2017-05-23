@@ -26,4 +26,11 @@ const D3D12_VIEWPORT ApplicationSettings::sScreenViewport{ 0.0f, 0.0f, Applicati
 const D3D12_RECT ApplicationSettings::sScissorRect{ 0, 0, ApplicationSettings::sWindowWidth, ApplicationSettings::sWindowHeight };
 
 const float ApplicationSettings::sSecondsPerFrame{ 1.0f / 60.0f };
+
+// Height mapping constants
+float ApplicationSettings::sMinTessellationDistance{ 25.0f };
+float ApplicationSettings::sMaxTessellationDistance{ 1.0f };
+float ApplicationSettings::sMinTessellationFactor{ 1.0f };
+float ApplicationSettings::sMaxTessellationFactor{ 25.0f };
+float ApplicationSettings::sHeightScale{ 1.5f };
 }

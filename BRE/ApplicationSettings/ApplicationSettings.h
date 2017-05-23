@@ -59,5 +59,12 @@ public:
     // want a fixed update time step, for example,
     // 60 FPS, then you should store 1.0f / 60.0f here
     static const float sSecondsPerFrame;
+
+    // Height mapping constants
+    static float sMinTessellationDistance;
+    static float sMaxTessellationDistance;
+    static float sMinTessellationFactor;
+    static float sMaxTessellationFactor;
+    static float sHeightScale;
 };
 }

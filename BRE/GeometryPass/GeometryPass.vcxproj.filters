@@ -21,6 +21,9 @@
     <ClInclude Include="Recorders\ColorMappingCommandListRecorder.h">
       <Filter>Recorders</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\HeightMappingCBuffer.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeometryPass.cpp" />
@@ -137,5 +140,10 @@
     <FxCompile Include="Shaders\ColorMapping\VS.hlsl">
       <Filter>Shaders\ColorMapping</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\HeightMappingCBuffer.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
