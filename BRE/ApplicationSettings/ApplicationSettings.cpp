@@ -7,8 +7,8 @@
 namespace BRE {
 const bool ApplicationSettings::sIsFullscreenWindow{ true };
 const std::uint32_t ApplicationSettings::sCpuProcessorCount{ 4U }; // This should be changed according your processor
-const std::uint32_t ApplicationSettings::sWindowWidth{ 1280U };
-const std::uint32_t ApplicationSettings::sWindowHeight{ 720U };
+const std::uint32_t ApplicationSettings::sWindowWidth{ 1920U };
+const std::uint32_t ApplicationSettings::sWindowHeight{ 1080U };
 
 const DXGI_FORMAT ApplicationSettings::sFrameBufferRTFormat{ DXGI_FORMAT_R10G10B10A2_UNORM };
 const DXGI_FORMAT ApplicationSettings::sFrameBufferFormat{ DXGI_FORMAT_R10G10B10A2_UNORM };
@@ -26,17 +26,4 @@ const D3D12_VIEWPORT ApplicationSettings::sScreenViewport{ 0.0f, 0.0f, Applicati
 const D3D12_RECT ApplicationSettings::sScissorRect{ 0, 0, ApplicationSettings::sWindowWidth, ApplicationSettings::sWindowHeight };
 
 const float ApplicationSettings::sSecondsPerFrame{ 1.0f / 60.0f };
-
-// Height mapping constants
-float ApplicationSettings::sMinTessellationDistance{ 25.0f };
-float ApplicationSettings::sMaxTessellationDistance{ 50.0f };
-float ApplicationSettings::sMinTessellationFactor{ 1.0f };
-float ApplicationSettings::sMaxTessellationFactor{ 5.0f };
-float ApplicationSettings::sHeightScale{ 3.5f };
-
-// Ambient occlusion constants
-std::uint32_t ApplicationSettings::sSampleKernelSize{ 16U };
-float ApplicationSettings::sNoiseTextureDimension{ 4.0f };
-float ApplicationSettings::sOcclusionRadius{ 1.5f };
-float ApplicationSettings::sSsaoPower{ 1.0f };
 }

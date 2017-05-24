@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ApplicationSettings\ApplicationSettings.h>
+#include <GeometryPass\GeometrySettings.h>
 
 namespace BRE {
 ///
@@ -28,11 +28,11 @@ struct HeightMappingCBuffer {
     HeightMappingCBuffer(HeightMappingCBuffer&&) = default;
     HeightMappingCBuffer& operator=(HeightMappingCBuffer&&) = default;
 
-    float mMinTessellationDistance{ ApplicationSettings::sMinTessellationDistance };
-    float mMaxTessellationDistance{ ApplicationSettings::sMaxTessellationDistance };
-    float mMinTessellationFactor{ ApplicationSettings::sMinTessellationFactor };
-    float mMaxTessellationFactor{ ApplicationSettings::sMaxTessellationFactor };
-    float mHeightScale{ ApplicationSettings::sHeightScale };
+    float mMinTessellationDistance{ GeometrySettings::sMinTessellationDistance };
+    float mMaxTessellationDistance{ GeometrySettings::sMaxTessellationDistance };
+    float mMinTessellationFactor{ GeometrySettings::sMinTessellationFactor };
+    float mMaxTessellationFactor{ GeometrySettings::sMaxTessellationFactor };
+    float mHeightScale{ GeometrySettings::sHeightScale };
 };
 
 }

@@ -2,7 +2,7 @@
 #define BLUR_CBUFFER_H
 
 struct BlurCBuffer {
-    float mNoiseTextureDimension;
+    uint mNoiseTextureDimension;
 };
 
 #endif

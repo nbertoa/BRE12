@@ -1,8 +1,10 @@
 #include "AmbientOcclusionCommandListRecorder.h"
 
+#include <ApplicationSettings\ApplicationSettings.h>
 #include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DXUtils\d3dx12.h>
+#include <EnvironmentLightPass\EnvironmentLightSettings.h>
 #include <EnvironmentLightPass\Shaders\AmbientOcclusionCBuffer.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOManager/PSOManager.h>
@@ -147,9 +149,9 @@ AmbientOcclusionCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer
     mRenderTargetView = renderTargetView;
 
     const std::uint32_t sampleKernelSize = 
-        static_cast<std::uint32_t>(ApplicationSettings::sSampleKernelSize);
+        static_cast<std::uint32_t>(EnvironmentLightSettings::sSampleKernelSize);
     const std::uint32_t noiseTextureDimension = 
-        static_cast<std::uint32_t>(ApplicationSettings::sNoiseTextureDimension);
+        static_cast<std::uint32_t>(EnvironmentLightSettings::sNoiseTextureDimension);
 
     std::vector<XMFLOAT4> sampleKernel;
     GenerateSampleKernel(sampleKernelSize, sampleKernel);
@@ -352,10 +354,10 @@ AmbientOcclusionCommandListRecorder::InitAmbientOcclusionCBuffer() noexcept
                                                                               1U);
     AmbientOcclusionCBuffer ambientOcclusionCBuffer(static_cast<float>(ApplicationSettings::sWindowWidth),
                                                     static_cast<float>(ApplicationSettings::sWindowHeight),
-                                                    ApplicationSettings::sSampleKernelSize,
-                                                    ApplicationSettings::sNoiseTextureDimension,
-                                                    ApplicationSettings::sOcclusionRadius,
-                                                    ApplicationSettings::sSsaoPower);
+                                                    EnvironmentLightSettings::sSampleKernelSize,
+                                                    EnvironmentLightSettings::sNoiseTextureDimension,
+                                                    EnvironmentLightSettings::sOcclusionRadius,
+                                                    EnvironmentLightSettings::sSsaoPower);
 
     mAmbientOcclusionUploadCBuffer->CopyData(0U, &ambientOcclusionCBuffer, sizeof(AmbientOcclusionCBuffer));
 }

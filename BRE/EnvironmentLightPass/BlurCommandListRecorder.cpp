@@ -3,8 +3,10 @@
 #include <d3d12.h>
 #include <DirectXMath.h>
 
+#include <ApplicationSettings\ApplicationSettings.h>
 #include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
+#include <EnvironmentLightPass\EnvironmentLightSettings.h>
 #include <EnvironmentLightPass\Shaders\BlurCBuffer.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager/UploadBufferManager.h>
@@ -127,7 +129,7 @@ BlurCommandListRecorder::InitBlurCBuffer() noexcept
 
     mBlurUploadCBuffer = &UploadBufferManager::CreateUploadBuffer(blurUploadCBufferElemSize,
                                                                   1U);
-    BlurCBuffer blurCBuffer(ApplicationSettings::sNoiseTextureDimension);
+    BlurCBuffer blurCBuffer(EnvironmentLightSettings::sNoiseTextureDimension);
 
     mBlurUploadCBuffer->CopyData(0U, &blurCBuffer, sizeof(BlurCBuffer));
 }

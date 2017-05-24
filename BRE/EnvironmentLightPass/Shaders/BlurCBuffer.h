@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ApplicationSettings\ApplicationSettings.h>
+#include <EnvironmentLightPass\EnvironmentLightSettings.h>
 
 namespace BRE {
 ///
@@ -9,7 +9,12 @@ namespace BRE {
 struct BlurCBuffer {
     BlurCBuffer() = default;
 
-    BlurCBuffer(const float noiseTextureDimension)
+    ///
+    /// @brief BlurCBuffer constructor
+    /// @param noiseTextureDimension Noise vectors texture dimensions (e.g. 4 (4x4), 8 (8x8))
+    /// These vectors where used in ambient occlusion algorithm
+    ///
+    BlurCBuffer(const std::uint32_t noiseTextureDimension)
         : mNoiseTextureDimension(noiseTextureDimension)
     {
 
@@ -20,7 +25,7 @@ struct BlurCBuffer {
     BlurCBuffer(BlurCBuffer&&) = default;
     BlurCBuffer& operator=(BlurCBuffer&&) = default;
 
-    float mNoiseTextureDimension{ ApplicationSettings::sNoiseTextureDimension };
+    std::uint32_t mNoiseTextureDimension{ EnvironmentLightSettings::sNoiseTextureDimension };
 };
 
 }

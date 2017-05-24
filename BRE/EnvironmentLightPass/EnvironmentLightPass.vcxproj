@@ -126,12 +126,14 @@
     <ClCompile Include="AmbientOcclusionCommandListRecorder.cpp" />
     <ClCompile Include="BlurCommandListRecorder.cpp" />
     <ClCompile Include="EnvironmentLightCommandListRecorder.cpp" />
+    <ClCompile Include="EnvironmentLightSettings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EnvironmentLightPass.h" />
     <ClInclude Include="AmbientOcclusionCommandListRecorder.h" />
     <ClInclude Include="BlurCommandListRecorder.h" />
     <ClInclude Include="EnvironmentLightCommandListRecorder.h" />
+    <ClInclude Include="EnvironmentLightSettings.h" />
     <ClInclude Include="Shaders\AmbientOcclusionCBuffer.h" />
     <ClInclude Include="Shaders\BlurCBuffer.h" />
   </ItemGroup>

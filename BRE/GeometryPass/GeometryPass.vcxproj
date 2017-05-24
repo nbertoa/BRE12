@@ -123,6 +123,7 @@
   <ItemGroup>
     <ClInclude Include="GeometryPass.h" />
     <ClInclude Include="GeometryCommandListRecorder.h" />
+    <ClInclude Include="GeometrySettings.h" />
     <ClInclude Include="Recorders\ColorMappingCommandListRecorder.h" />
     <ClInclude Include="Recorders\ColorHeightMappingCommandListRecorder.h" />
     <ClInclude Include="Recorders\ColorNormalMappingCommandListRecorder.h" />
@@ -134,6 +135,7 @@
   <ItemGroup>
     <ClCompile Include="GeometryPass.cpp" />
     <ClCompile Include="GeometryCommandListRecorder.cpp" />
+    <ClCompile Include="GeometrySettings.cpp" />
     <ClCompile Include="Recorders\ColorMappingCommandListRecorder.cpp" />
     <ClCompile Include="Recorders\ColorHeightMappingCommandListRecorder.cpp" />
     <ClCompile Include="Recorders\ColorNormalMappingandListRecorder.cpp" />

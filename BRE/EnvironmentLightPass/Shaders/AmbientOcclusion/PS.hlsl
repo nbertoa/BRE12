@@ -100,7 +100,7 @@ Output main(const in Input input)
 #endif
 
     // Sharpen the contrast
-    output.mAmbientAccessibility = saturate(pow(output.mAmbientAccessibility, 
+    output.mAmbientAccessibility = saturate(pow(abs(output.mAmbientAccessibility), 
                                                 gAmbientOcclusionCBuffer.mSsaoPower));
 
     return output;

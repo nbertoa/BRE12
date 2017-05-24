@@ -5,6 +5,7 @@
 #include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
+#include <GeometryPass\GeometrySettings.h>
 #include <GeometryPass\Shaders\HeightMappingCBuffer.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOManager/PSOManager.h>
@@ -300,11 +301,11 @@ ColorHeightMappingCommandListRecorder::InitConstantBuffers(const std::vector<Mat
 
     mHeightMappingUploadCBuffer = &UploadBufferManager::CreateUploadBuffer(heightMappingUploadCBufferElemSize,
                                                                            1U);
-    HeightMappingCBuffer heightMappingCBuffer(ApplicationSettings::sMinTessellationDistance,
-                                              ApplicationSettings::sMaxTessellationDistance,
-                                              ApplicationSettings::sMinTessellationFactor,
-                                              ApplicationSettings::sMaxTessellationFactor,
-                                              ApplicationSettings::sHeightScale);
+    HeightMappingCBuffer heightMappingCBuffer(GeometrySettings::sMinTessellationDistance,
+                                              GeometrySettings::sMaxTessellationDistance,
+                                              GeometrySettings::sMinTessellationFactor,
+                                              GeometrySettings::sMaxTessellationFactor,
+                                              GeometrySettings::sHeightScale);
 
     mHeightMappingUploadCBuffer->CopyData(0U, &heightMappingCBuffer, sizeof(HeightMappingCBuffer));
 }

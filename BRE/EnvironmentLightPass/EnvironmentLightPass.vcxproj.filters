@@ -5,6 +5,7 @@
     <ClCompile Include="AmbientOcclusionCommandListRecorder.cpp" />
     <ClCompile Include="BlurCommandListRecorder.cpp" />
     <ClCompile Include="EnvironmentLightCommandListRecorder.cpp" />
+    <ClCompile Include="EnvironmentLightSettings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EnvironmentLightPass.h" />
@@ -17,6 +18,7 @@
     <ClInclude Include="Shaders\BlurCBuffer.h">
       <Filter>Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="EnvironmentLightSettings.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
