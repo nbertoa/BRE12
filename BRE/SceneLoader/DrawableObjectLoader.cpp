@@ -32,8 +32,8 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
     //     material technique: drawableObjectName
     //     scale: [1, 3, 3]
     const YAML::Node drawableObjectsNode = rootNode["drawable objects"];
-    BRE_ASSERT_MSG(drawableObjectsNode.IsDefined(), L"'drawable objects' node must be defined");
-    BRE_ASSERT_MSG(drawableObjectsNode.IsSequence(), L"'drawable objects' node must be a sequence");
+    BRE_CHECK_MSG(drawableObjectsNode.IsDefined(), L"'drawable objects' node must be defined");
+    BRE_CHECK_MSG(drawableObjectsNode.IsSequence(), L"'drawable objects' node must be a sequence");
 
     // We need model name to fill mDrawableObjectsByModelName
     std::string modelName;
@@ -41,7 +41,7 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
     std::string pairSecondValue;
     for (YAML::const_iterator seqIt = drawableObjectsNode.begin(); seqIt != drawableObjectsNode.end(); ++seqIt) {
         const YAML::Node drawableObjectMap = *seqIt;
-        BRE_ASSERT_MSG(drawableObjectMap.IsMap(), L"Each drawable object must be a map");
+        BRE_CHECK_MSG(drawableObjectMap.IsMap(), L"Each drawable object must be a map");
 
         // Get data to build drawable object
         const Model* model = nullptr;
@@ -55,16 +55,16 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
             pairFirstValue = mapIt->first.as<std::string>();
 
             if (pairFirstValue == "model") {
-                BRE_ASSERT_MSG(model == nullptr, L"Drawable object model must be set once");
+                BRE_CHECK_MSG(model == nullptr, L"Drawable object model must be set once");
                 pairSecondValue = mapIt->second.as<std::string>();
                 modelName = pairSecondValue;
                 model = &mModelLoader.GetModel(pairSecondValue);
             } else if (pairFirstValue == "material properties") {
-                BRE_ASSERT_MSG(materialProperties == nullptr, L"Drawable object material properties must be set once");
+                BRE_CHECK_MSG(materialProperties == nullptr, L"Drawable object material properties must be set once");
                 pairSecondValue = mapIt->second.as<std::string>();
                 materialProperties = &mMaterialPropertiesLoader.GetMaterialProperties(pairSecondValue);
             } else if (pairFirstValue == "material technique") {
-                BRE_ASSERT_MSG(materialTechnique == nullptr, L"Drawable object material technique must be set once");
+                BRE_CHECK_MSG(materialTechnique == nullptr, L"Drawable object material technique must be set once");
                 pairSecondValue = mapIt->second.as<std::string>();
                 materialTechnique = &mMaterialTechniqueLoader.GetMaterialTechnique(pairSecondValue);
             } else if (pairFirstValue == "translation") {
@@ -77,19 +77,19 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
                 // If the first field is "reference", then the second field must be a yaml file 
                 // that specifies "drawable objects"
                 const YAML::Node referenceRootNode = YAML::LoadFile(pairSecondValue);
-                BRE_ASSERT_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
-                BRE_ASSERT_MSG(referenceRootNode["drawable objects"].IsDefined(),
+                BRE_CHECK_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+                BRE_CHECK_MSG(referenceRootNode["drawable objects"].IsDefined(),
                                L"Reference file must have 'drawable objects' field");
                 LoadDrawableObjects(referenceRootNode);
             } else {
                 // To avoid warning about 'conditional expression is constant'. This is the same than false
-                BRE_ASSERT_MSG(&scale == nullptr, L"Unknown object field");
+                BRE_CHECK_MSG(&scale == nullptr, L"Unknown object field");
             }
 
             ++mapIt;
         }
 
-        BRE_ASSERT_MSG(model != nullptr, L"'model' field was not present in current drawable object");
+        BRE_CHECK_MSG(model != nullptr, L"'model' field was not present in current drawable object");
        
         // If "material technique" field is not present, then it defaults to "color mapping" technique
         if (materialTechnique == nullptr) {

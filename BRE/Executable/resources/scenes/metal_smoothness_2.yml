@@ -27,7 +27,7 @@ drawable objects:
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
-    material properties: aluminum10
+    material properties: aluminum7
     material technique: metal3
     translation: [100.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]

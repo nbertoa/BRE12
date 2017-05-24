@@ -74,7 +74,7 @@ InitMainWindow(HWND& windowHandle,
                                   moduleInstanceHandle,
                                   nullptr);
 
-    BRE_ASSERT_MSG(windowHandle, L"Window creation failed");
+    BRE_CHECK_MSG(windowHandle, L"Window creation failed");
 
     ShowWindow(windowHandle, SW_SHOW);
     UpdateWindow(windowHandle);
@@ -118,7 +118,7 @@ DirectXManager::InitWindowAndDevice(const HINSTANCE moduleInstanceHandle) noexce
         }
     }
 
-    BRE_ASSERT_MSG(adapter != nullptr, L"No adapter supports ID3D12Device or a feature level");
+    BRE_CHECK_MSG(adapter != nullptr, L"No adapter supports ID3D12Device or a feature level");
 
     BRE_CHECK_HR(D3D12CreateDevice(adapter,
                                    D3D_FEATURE_LEVEL_12_1,

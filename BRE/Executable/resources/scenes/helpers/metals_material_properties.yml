@@ -439,3 +439,47 @@ material properties:
     base color: [0.672, 0.637, 0.585]
     smoothness: 1.0
     metal mask: 1.0
+  - name: metal0
+    base color: [1.0, 1.0, 1.0]
+    smoothness: 0.0
+    metal mask: 1.0
+  - name: metal1
+    base color: [1.0, 1.0, 1.0]
+    smoothness: 0.1
+    metal mask: 1.0
+  - name: metal2
+    base color: [1.0, 1.0, 1.0]
+    smoothness: 0.2
+    metal mask: 1.0
+  - name: metal3
+    base color: [1.0, 1.0, 1.0]
+    smoothness: 0.3
+    metal mask: 1.0
+  - name: metal4
+    base color: [1.0, 1.0, 1.0]
+    smoothness: 0.4
+    metal mask: 1.0
+  - name: metal5
+    base color: [1.0, 1.0, 1.0]
+    smoothness: 0.5
+    metal mask: 1.0
+  - name: metal6
+    base color: [1.0, 1.0, 1.0]
+    smoothness: 0.6
+    metal mask: 1.0
+  - name: metal7
+    base color: [1.0, 1.0, 1.0]
+    smoothness: 0.7
+    metal mask: 1.0
+  - name: metal8
+    base color: [1.0, 1.0, 1.0]
+    smoothness: 0.8
+    metal mask: 1.0
+  - name: metal9
+    base color: [1.0, 1.0, 1.0]
+    smoothness: 0.9
+    metal mask: 1.0
+  - name: metal10
+    base color: [1.0, 1.0, 1.0]
+    smoothness: 1.0
+    metal mask: 1.0

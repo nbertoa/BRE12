@@ -29,11 +29,11 @@ CameraLoader::LoadCamera(const YAML::Node& rootNode) noexcept
         return;
     }
 
-    BRE_ASSERT_MSG(cameraNode.IsSequence(), L"'camera' node must be a sequence");
+    BRE_CHECK_MSG(cameraNode.IsSequence(), L"'camera' node must be a sequence");
 
-    BRE_ASSERT_MSG(cameraNode.begin() != cameraNode.end(), L"'camera' node is empty");
+    BRE_CHECK_MSG(cameraNode.begin() != cameraNode.end(), L"'camera' node is empty");
     const YAML::Node cameraMap = *cameraNode.begin();
-    BRE_ASSERT_MSG(cameraMap.IsMap(), L"'camera' node first sequence is not a map");
+    BRE_CHECK_MSG(cameraMap.IsMap(), L"'camera' node first sequence is not a map");
 
     // Get data to set camera
     float position[3]{ 0.0f, 0.0f, 0.0f };
@@ -52,7 +52,7 @@ CameraLoader::LoadCamera(const YAML::Node& rootNode) noexcept
             YamlUtils::GetSequence(mapIt->second, upVector, 3U);
         } else {
             // To avoid warning about 'conditional expression is constant'. This is the same than false
-            BRE_ASSERT_MSG(&propertyName == nullptr, L"Unknown camera field");
+            BRE_CHECK_MSG(&propertyName == nullptr, L"Unknown camera field");
         }
 
         ++mapIt;

@@ -19,12 +19,12 @@ EnvironmentLoader::LoadEnvironment(const YAML::Node& rootNode) noexcept
     //     diffuse irradiance texture: textureName
     //     specular pre convolved environment texture: textureName
     const YAML::Node environmentNode = rootNode["environment"];
-    BRE_ASSERT_MSG(environmentNode.IsDefined(), L"'environment' node must be defined");
-    BRE_ASSERT_MSG(environmentNode.IsSequence(), L"'environment' node must be a sequence");
+    BRE_CHECK_MSG(environmentNode.IsDefined(), L"'environment' node must be defined");
+    BRE_CHECK_MSG(environmentNode.IsSequence(), L"'environment' node must be a sequence");
 
     BRE_ASSERT(environmentNode.begin() != environmentNode.end());
     const YAML::Node environmentMap = *environmentNode.begin();
-    BRE_ASSERT_MSG(environmentMap.IsMap(), L"'environment' node first sequence element must be a map");
+    BRE_CHECK_MSG(environmentMap.IsMap(), L"'environment' node first sequence element must be a map");
 
     // Fill the environment textures
     YAML::const_iterator mapIt = environmentMap.begin();
@@ -47,18 +47,18 @@ void EnvironmentLoader::UpdateEnvironmentTexture(const std::string& environmentP
 {
     ID3D12Resource& texture = mTextureLoader.GetTexture(environmentTextureName);
     if (environmentPropertyName == "sky box texture") {
-        BRE_ASSERT_MSG(mSkyBoxTexture == nullptr, L"Sky box texture must be set once");
+        BRE_CHECK_MSG(mSkyBoxTexture == nullptr, L"Sky box texture must be set once");
         mSkyBoxTexture = &texture;
     } else if (environmentPropertyName == "diffuse irradiance texture") {
-        BRE_ASSERT_MSG(mDiffuseIrradianceTexture == nullptr, L"Diffuse irradiance texture must be set once");
+        BRE_CHECK_MSG(mDiffuseIrradianceTexture == nullptr, L"Diffuse irradiance texture must be set once");
         mDiffuseIrradianceTexture = &texture;
     } else if (environmentPropertyName == "specular pre convolved environment texture") {
-        BRE_ASSERT_MSG(mSpecularPreConvolvedEnvironmentTexture == nullptr,
+        BRE_CHECK_MSG(mSpecularPreConvolvedEnvironmentTexture == nullptr,
                        L"Specular pre convolved enviroment texture must be set once");
         mSpecularPreConvolvedEnvironmentTexture = &texture;
     } else {
         // To avoid warning about 'conditional expression is constant'. This is the same than false
-        BRE_ASSERT_MSG(&texture == nullptr, L"Unknown environment field");
+        BRE_CHECK_MSG(&texture == nullptr, L"Unknown environment field");
     }
 }
 }

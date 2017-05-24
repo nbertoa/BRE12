@@ -26,8 +26,8 @@ ModelLoader::LoadModels(const YAML::Node& rootNode,
     //   modelName2: modelPath2
     //   modelName3: modelPath3
     const YAML::Node modelsNode = rootNode["models"];
-    BRE_ASSERT_MSG(modelsNode.IsDefined(), L"'models' node not found");
-    BRE_ASSERT_MSG(modelsNode.IsMap(), L"'models' node must be a map");
+    BRE_CHECK_MSG(modelsNode.IsDefined(), L"'models' node not found");
+    BRE_CHECK_MSG(modelsNode.IsMap(), L"'models' node must be a map");
 
     std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadVertexBuffers;
     std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadIndexBuffers;
@@ -47,7 +47,7 @@ ModelLoader::LoadModels(const YAML::Node& rootNode,
 const Model& ModelLoader::GetModel(const std::string& name) const noexcept
 {
     std::unordered_map<std::string, Model*>::const_iterator findIt = mModelByName.find(name);
-    BRE_ASSERT_MSG(findIt != mModelByName.end(), L"Model name not found");
+    BRE_CHECK_MSG(findIt != mModelByName.end(), L"Model name not found");
     BRE_ASSERT(findIt->second != nullptr);
 
     return *findIt->second;
@@ -60,7 +60,7 @@ ModelLoader::LoadModels(const YAML::Node& modelsNode,
                         std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>& uploadVertexBuffers,
                         std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>& uploadIndexBuffers) noexcept
 {
-    BRE_ASSERT_MSG(modelsNode.IsMap(), L"'models' node must be a map");
+    BRE_CHECK_MSG(modelsNode.IsMap(), L"'models' node must be a map");
 
     std::string name;
     std::string path;
@@ -71,7 +71,7 @@ ModelLoader::LoadModels(const YAML::Node& modelsNode,
         // If name is "reference", then path must be a yaml file that specifies "models"
         if (name == "reference") {
             const YAML::Node referenceRootNode = YAML::LoadFile(path);
-            BRE_ASSERT_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            BRE_CHECK_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
             const YAML::Node referenceModelsNode = referenceRootNode["models"];
             LoadModels(referenceModelsNode,
                        commandAllocator,
@@ -79,7 +79,7 @@ ModelLoader::LoadModels(const YAML::Node& modelsNode,
                        uploadVertexBuffers,
                        uploadIndexBuffers);
         } else {
-            BRE_ASSERT_MSG(mModelByName.find(name) == mModelByName.end(), L"Model name must be unique");
+            BRE_CHECK_MSG(mModelByName.find(name) == mModelByName.end(), L"Model name must be unique");
 
             uploadVertexBuffers.resize(uploadVertexBuffers.size() + 1);
             uploadIndexBuffers.resize(uploadIndexBuffers.size() + 1);

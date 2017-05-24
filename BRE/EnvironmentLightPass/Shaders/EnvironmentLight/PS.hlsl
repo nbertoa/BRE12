@@ -68,14 +68,16 @@ Output main(const in Input input)
 
     // Diffuse reflection color.
     // When we sample a cube map, we need to use data in world space, not view space.
-    const float3 diffuseReflection = DiffuseCubeMapTexture.Sample(TextureSampler,
-                                                                  normalWorldSpace).rgb;
+    const float3 diffuseReflection = DiffuseCubeMapTexture.SampleLevel(TextureSampler, 
+                                                                       normalWorldSpace, 
+                                                                       0).rgb;
     const float3 diffuseColor = (1.0f - metalMask) * baseColor;
     const float3 indirectFDiffuse = diffuseColor * diffuseReflection;
 
     // Compute incident vector. 
     // When we sample a cube map, we need to use data in world space, not view space.
-    const float3 incidentVectorWorldSpace = fragmentPositionWorldSpace - gFrameCBuffer.mEyePositionWorldSpace.xyz;
+    const float3 incidentVectorWorldSpace = 
+        fragmentPositionWorldSpace - gFrameCBuffer.mEyePositionWorldSpace.xyz;
     const float3 reflectionVectorWorldSpace = reflect(incidentVectorWorldSpace,
                                                       normalWorldSpace);
 
@@ -83,7 +85,8 @@ Output main(const in Input input)
     const float smoothness = normal_smoothness.z;
     const uint mipmap = (1.0f - smoothness) * 10.0f;
     const float3 specularReflection = SpecularCubeMapTexture.SampleLevel(TextureSampler,
-                                                                         reflectionVectorWorldSpace, mipmap).rgb;
+                                                                         reflectionVectorWorldSpace, 
+                                                                         mipmap).rgb;
 
     // Specular reflection color
     const float3 dielectricColor = float3(0.04f, 0.04f, 0.04f);

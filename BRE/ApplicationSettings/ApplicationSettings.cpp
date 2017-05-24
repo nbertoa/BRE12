@@ -29,10 +29,10 @@ const float ApplicationSettings::sSecondsPerFrame{ 1.0f / 60.0f };
 
 // Height mapping constants
 float ApplicationSettings::sMinTessellationDistance{ 25.0f };
-float ApplicationSettings::sMaxTessellationDistance{ 1.0f };
+float ApplicationSettings::sMaxTessellationDistance{ 50.0f };
 float ApplicationSettings::sMinTessellationFactor{ 1.0f };
-float ApplicationSettings::sMaxTessellationFactor{ 25.0f };
-float ApplicationSettings::sHeightScale{ 1.5f };
+float ApplicationSettings::sMaxTessellationFactor{ 5.0f };
+float ApplicationSettings::sHeightScale{ 3.5f };
 
 // Ambient occlusion constants
 std::uint32_t ApplicationSettings::sSampleKernelSize{ 16U };

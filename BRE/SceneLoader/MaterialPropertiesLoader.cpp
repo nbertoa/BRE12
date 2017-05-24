@@ -32,7 +32,7 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
         return;
     }
 
-    BRE_ASSERT_MSG(materialPropertiesNode.IsSequence(), L"'material propreties' node must be a map");
+    BRE_CHECK_MSG(materialPropertiesNode.IsSequence(), L"'material propreties' node must be a map");
 
     std::string pairFirstValue;
     std::string pairSecondValue;
@@ -42,10 +42,10 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
 
         // Get material name
         YAML::const_iterator mapIt = materialMap.begin();
-        BRE_ASSERT_MSG(mapIt != materialMap.end(), L"Material name not found");
+        BRE_CHECK_MSG(mapIt != materialMap.end(), L"Material name not found");
         pairFirstValue = mapIt->first.as<std::string>();
 
-        BRE_ASSERT_MSG(pairFirstValue == std::string("name") || pairFirstValue == std::string("reference"),
+        BRE_CHECK_MSG(pairFirstValue == std::string("name") || pairFirstValue == std::string("reference"),
                        L"Material properties 1st parameter must be 'name', or it must be 'reference'");
 
         pairSecondValue = mapIt->second.as<std::string>();
@@ -53,8 +53,8 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
         // If the item is 'reference', then path must be a yaml file that specifies "material properties"
         if (pairFirstValue == std::string("reference")) {
             const YAML::Node referenceRootNode = YAML::LoadFile(pairSecondValue);
-            BRE_ASSERT_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
-            BRE_ASSERT_MSG(referenceRootNode["material properties"].IsDefined(),
+            BRE_CHECK_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            BRE_CHECK_MSG(referenceRootNode["material properties"].IsDefined(),
                            L"Reference file must have 'material properties' field");
             LoadMaterialsProperties(referenceRootNode);
 
@@ -63,7 +63,7 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
 
         // Otherwise, we get the material properties
 
-        BRE_ASSERT_MSG(mMaterialPropertiesByName.find(pairSecondValue) == mMaterialPropertiesByName.end(),
+        BRE_CHECK_MSG(mMaterialPropertiesByName.find(pairSecondValue) == mMaterialPropertiesByName.end(),
                        L"Material properties name must be unique");
         ++mapIt;
         BRE_ASSERT(mapIt != materialMap.end());
@@ -85,7 +85,7 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
                 MathUtils::Clamp(metalMask, 0.0f, 1.0f);
             } else {
                 // To avoid warning about 'conditional expression is constant'. This is the same than false
-                BRE_ASSERT_MSG(&metalMask == nullptr, L"Unknown material properties field");
+                BRE_CHECK_MSG(&metalMask == nullptr, L"Unknown material properties field");
             }
 
             ++mapIt;
@@ -103,7 +103,7 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
 const MaterialProperties& MaterialPropertiesLoader::GetMaterialProperties(const std::string& name) const noexcept
 {
     std::unordered_map<std::string, MaterialProperties>::const_iterator findIt = mMaterialPropertiesByName.find(name);
-    BRE_ASSERT_MSG(findIt != mMaterialPropertiesByName.end(), L"Material properties not found");
+    BRE_CHECK_MSG(findIt != mMaterialPropertiesByName.end(), L"Material properties not found");
 
     return findIt->second;
 }

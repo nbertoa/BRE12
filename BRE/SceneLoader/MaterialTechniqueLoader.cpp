@@ -33,7 +33,7 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
         return;
     }
 
-    BRE_ASSERT_MSG(materialTechniquesNode.IsSequence(), L"'material techniques' node must be a map");
+    BRE_CHECK_MSG(materialTechniquesNode.IsSequence(), L"'material techniques' node must be a map");
 
     std::string pairFirstValue;
     std::string pairSecondValue;
@@ -47,7 +47,7 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
         BRE_ASSERT(mapIt != materialMap.end());
         pairFirstValue = mapIt->first.as<std::string>();
 
-        BRE_ASSERT_MSG(pairFirstValue == std::string("name") || pairFirstValue == std::string("reference"),
+        BRE_CHECK_MSG(pairFirstValue == std::string("name") || pairFirstValue == std::string("reference"),
                        L"Material techniques 1st parameter must be 'name', or it must be 'reference'");
 
         // If name is "reference", then path must be a yaml file that specifies "material techniques"
@@ -55,8 +55,8 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
             pairSecondValue = mapIt->second.as<std::string>();
 
             const YAML::Node referenceRootNode = YAML::LoadFile(pairSecondValue);
-            BRE_ASSERT_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
-            BRE_ASSERT_MSG(referenceRootNode["material techniques"].IsDefined(),
+            BRE_CHECK_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            BRE_CHECK_MSG(referenceRootNode["material techniques"].IsDefined(),
                            L"Reference file must have 'material techniques' field");
             LoadMaterialTechniques(referenceRootNode);
 
@@ -65,7 +65,7 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
 
 
         materialTechniqueName = mapIt->second.as<std::string>();
-        BRE_ASSERT_MSG(mMaterialTechniqueByName.find(materialTechniqueName) == mMaterialTechniqueByName.end(),
+        BRE_CHECK_MSG(mMaterialTechniqueByName.find(materialTechniqueName) == mMaterialTechniqueByName.end(),
                        L"Material technique name must be unique");
         ++mapIt;
 
@@ -85,7 +85,7 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
 const MaterialTechnique& MaterialTechniqueLoader::GetMaterialTechnique(const std::string& name) const noexcept
 {
     std::unordered_map<std::string, MaterialTechnique>::const_iterator findIt = mMaterialTechniqueByName.find(name);
-    BRE_ASSERT_MSG(findIt != mMaterialTechniqueByName.end(), L"Material technique name not found");
+    BRE_CHECK_MSG(findIt != mMaterialTechniqueByName.end(), L"Material technique name not found");
 
     return findIt->second;
 }
@@ -103,7 +103,7 @@ void MaterialTechniqueLoader::UpdateMaterialTechnique(const std::string& materia
         materialTechnique.SetHeightTexture(&texture);
     } else {
         // To avoid warning about 'conditional expression is constant'. This is the same than false
-        BRE_ASSERT_MSG(&materialTechniquePropertyName == nullptr, L"Unknown material technique field");
+        BRE_CHECK_MSG(&materialTechniquePropertyName == nullptr, L"Unknown material technique field");
     }
 }
 }

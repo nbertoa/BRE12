@@ -8,75 +8,63 @@ textures:
   cube map specular: resources/textures/cubeMaps/canyon_specular_cube_map.dds 
   
 material properties:
-  - reference: resources/scenes/helpers/metals_material_properties.yml
+  - reference: resources/scenes/helpers/all_material_properties.yml
     
 material techniques:
   - reference: resources/scenes/helpers/all_material_techniques.yml
     
 drawable objects:
   - model: unreal
-    material properties: gold0
-    material technique: metal2
-    translation: [0.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: unreal
-    material properties: gold1
-    material technique: metal2
-    translation: [50.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: unreal
-    material properties: gold2
-    material technique: metal2
+    material properties: gold8
+    material technique: metal_normal
     translation: [100.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold3
-    material technique: metal2
+    material technique: metal_normal
     translation: [150.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold4
-    material technique: metal2
+    material technique: metal_normal
     translation: [200.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold5
-    material technique: metal2
+    material technique: metal_normal
     translation: [250.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold6
-    material technique: metal2
+    material technique: metal_normal
     translation: [300.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold7
-    material technique: metal2
+    material technique: metal_normal
     translation: [350.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold8
-    material technique: metal2
+    material technique: metal_normal
     translation: [400.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold9
-    material technique: metal2
+    material technique: metal_normal
     translation: [450.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]
   - model: unreal
     material properties: gold10
-    material technique: metal2
+    material technique: metal_normal
     translation: [500.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.2, 0.2, 0.2]

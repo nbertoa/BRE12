@@ -3,50 +3,50 @@ models:
   
 textures:
   reference: resources/scenes/helpers/all_textures.yml
-  sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
-  cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
-  cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds
+  sky map: resources/textures/cubeMaps/factory_cube_map.dds
+  cube map diffuse: resources/textures/cubeMaps/factory_diffuse_cube_map.dds
+  cube map specular: resources/textures/cubeMaps/factory_specular_cube_map.dds
   
 material properties:
-  - reference: resources/scenes/helpers/metals_material_properties.yml
+  - reference: resources/scenes/helpers/all_material_properties.yml
     
 material techniques:
   - reference: resources/scenes/helpers/all_material_techniques.yml
     
 drawable objects:
   - model: floor
-    material properties: titanium0
-    material technique: wood
+    material properties: non_metal5
+    material technique: asphalt_normal
     translation: [0.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.1, 0.1, 0.1]
   - model: floor
-    material properties: titanium2
-    material technique: wood
+    material properties: metal6
+    material technique: concrete_normal
     translation: [50.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.1, 0.1, 0.1]
   - model: floor
-    material properties: titanium4
-    material technique: wood
+    material properties: metal7
+    material technique: wood_normal
     translation: [100.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.1, 0.1, 0.1]
   - model: floor
-    material properties: titanium6
-    material technique: wood
+    material properties: non_metal8
+    material technique: wood_normal
     translation: [150.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.1, 0.1, 0.1]
   - model: floor
-    material properties: titanium8
-    material technique: wood
+    material properties: non_metal3
+    material technique: wood2_normal
     translation: [200.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.1, 0.1, 0.1]
   - model: floor
-    material properties: titanium10
-    material technique: wood
+    material properties: non_metal4
+    material technique: wood2_normal
     translation: [250.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [0.1, 0.1, 0.1]

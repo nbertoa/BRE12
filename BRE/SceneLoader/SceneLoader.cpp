@@ -41,7 +41,7 @@ SceneLoader::LoadScene(const char* sceneFilePath) noexcept
     BRE_ASSERT(sceneFilePath != nullptr);
 
     const YAML::Node rootNode = YAML::LoadFile(sceneFilePath);
-    BRE_ASSERT_MSG(rootNode.IsDefined(), L"Failed to open yaml file");
+    BRE_CHECK_MSG(rootNode.IsDefined(), L"Failed to open yaml file");
 
     mModelLoader.LoadModels(rootNode, *mCommandAllocator, *mCommandList);
     mTextureLoader.LoadTextures(rootNode, *mCommandAllocator, *mCommandList);

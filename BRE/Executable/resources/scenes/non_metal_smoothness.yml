@@ -9,6 +9,9 @@ textures:
   
 material properties:
   - reference: resources/scenes/helpers/non_metals_material_properties.yml
+  
+material techniques:
+  - reference: resources/scenes/helpers/all_material_techniques.yml
         
 drawable objects:
   - model: bunny

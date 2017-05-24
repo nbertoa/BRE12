@@ -1,0 +1,3 @@
+material properties:
+  - reference: resources/scenes/helpers/metals_material_properties.yml
+  - reference: resources/scenes/helpers/non_metals_material_properties.yml

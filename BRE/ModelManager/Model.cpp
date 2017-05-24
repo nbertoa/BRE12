@@ -18,7 +18,7 @@ Model::Model(const char* modelFilename,
     Assimp::Importer importer;
     const std::uint32_t flags{ aiProcessPreset_TargetRealtime_Fast | aiProcess_ConvertToLeftHanded };
     const aiScene* scene{ importer.ReadFile(filePath.c_str(), flags) };
-    BRE_ASSERT_MSG(scene != nullptr, StringUtils::AnsiToWideString(importer.GetErrorString()).c_str());
+    BRE_CHECK_MSG(scene != nullptr, StringUtils::AnsiToWideString(importer.GetErrorString()).c_str());
 
     BRE_ASSERT(scene->HasMeshes());
 

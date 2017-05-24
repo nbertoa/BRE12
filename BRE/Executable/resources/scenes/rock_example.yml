@@ -1,0 +1,57 @@
+models:
+  reference: resources/scenes/helpers/models.yml
+  
+textures:
+  reference: resources/scenes/helpers/all_textures.yml
+  sky map: resources/textures/cubeMaps/factory_cube_map.dds
+  cube map diffuse: resources/textures/cubeMaps/factory_diffuse_cube_map.dds
+  cube map specular: resources/textures/cubeMaps/factory_specular_cube_map.dds  
+  
+material properties:
+  - reference: resources/scenes/helpers/metals_material_properties.yml
+    
+material techniques:
+  - reference: resources/scenes/helpers/all_material_techniques.yml
+    
+drawable objects:
+  - model: unreal
+    material technique: cobblestone_normal
+    translation: [0.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [0.2, 0.2, 0.2]
+  - model: unreal
+    material technique: wood2_normal
+    translation: [50.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [0.2, 0.2, 0.2]
+  - model: unreal
+    material technique: rock3_normal
+    translation: [100.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [0.2, 0.2, 0.2]
+  - model: unreal
+    material technique: rock4_normal
+    translation: [150.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [0.2, 0.2, 0.2]
+  - model: unreal
+    material technique: rock5_normal
+    translation: [200.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [0.2, 0.2, 0.2]
+  - model: unreal
+    material technique: rock6_normal
+    translation: [250.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [0.2, 0.2, 0.2]
+    
+environment:
+  - sky box texture: sky map
+    diffuse irradiance texture: cube map diffuse
+    specular pre convolved environment texture: cube map specular
+    
+camera:
+  - position: [0.0, 30.0, -90.0]
+    look vector: [0.0, 0.0, 1.0]
+    up vector: [0.0, 1.0, 0.0]
+    

@@ -8,17 +8,13 @@
 
 #define BRE_ASSERT(condition) assert(condition)
 
-#if defined(DEBUG) || defined(_DEBUG)
-#define BRE_ASSERT_MSG(condition, msg) \
+#define BRE_CHECK_MSG(condition, msg) \
 { \
 	if ((condition) == false) { \
 		MessageBox(0, msg, 0, 0); \
 		abort(); \
 	} \
 }
-#else
-#define BRE_ASSERT_MSG(condition, msg) (assert(condition))
-#endif
 
 #ifndef BRE_CHECK_HR
 #define BRE_CHECK_HR(x) \
