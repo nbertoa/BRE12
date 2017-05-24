@@ -47,7 +47,7 @@ private:
     /// @brief Checks if internal data is valid. Typically, used for assertions
     /// @return True if valid. Otherwise, false
     ///
-    bool ValidateData() const noexcept;
+    bool IsDataValid() const noexcept;
 
     ///
     /// @brief Executes begin task for the pass

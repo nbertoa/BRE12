@@ -132,6 +132,8 @@
     <ClInclude Include="AmbientOcclusionCommandListRecorder.h" />
     <ClInclude Include="BlurCommandListRecorder.h" />
     <ClInclude Include="EnvironmentLightCommandListRecorder.h" />
+    <ClInclude Include="Shaders\AmbientOcclusionCBuffer.h" />
+    <ClInclude Include="Shaders\BlurCBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\AmbientOcclusion\PS.hlsl">
@@ -246,6 +248,10 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatWarningAsError>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\AmbientOcclusionCBuffer.hlsli" />
+    <None Include="Shaders\BlurCBuffer.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

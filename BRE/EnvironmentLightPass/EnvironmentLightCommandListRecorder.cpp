@@ -59,7 +59,7 @@ EnvironmentLightCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer
                                           ID3D12Resource& ambientAccessibilityBuffer,
                                           const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
-    BRE_ASSERT(ValidateData() == false);
+    BRE_ASSERT(IsDataValid() == false);
 
     mRenderTargetView = renderTargetView;
 
@@ -70,13 +70,13 @@ EnvironmentLightCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer
                             ambientAccessibilityBuffer,
                             specularPreConvolvedCubeMap);
 
-    BRE_ASSERT(ValidateData());
+    BRE_ASSERT(IsDataValid());
 }
 
 void
 EnvironmentLightCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
-    BRE_ASSERT(ValidateData());
+    BRE_ASSERT(IsDataValid());
     BRE_ASSERT(sPSO != nullptr);
     BRE_ASSERT(sRootSignature != nullptr);
 
@@ -107,7 +107,7 @@ EnvironmentLightCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
 }
 
 bool
-EnvironmentLightCommandListRecorder::ValidateData() const noexcept
+EnvironmentLightCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
         mRenderTargetView.ptr != 0UL &&

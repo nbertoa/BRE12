@@ -66,5 +66,11 @@ public:
     static float sMinTessellationFactor;
     static float sMaxTessellationFactor;
     static float sHeightScale;
+
+    // Ambient occlusion constants
+    static std::uint32_t sSampleKernelSize;
+    static float sNoiseTextureDimension;
+    static float sOcclusionRadius;
+    static float sSsaoPower;
 };
 }

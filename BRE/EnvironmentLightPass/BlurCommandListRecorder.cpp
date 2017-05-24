@@ -5,14 +5,17 @@
 
 #include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
+#include <EnvironmentLightPass\Shaders\BlurCBuffer.h>
 #include <PSOManager/PSOManager.h>
+#include <ResourceManager/UploadBufferManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <Utils/DebugUtils.h>
 
 namespace BRE {
 // Root Signature:
-// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)" 0 -> Color Buffer Texture
+// "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 0 -> Blur CBuffer
+// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)" 1 -> Color Buffer Texture
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -51,19 +54,21 @@ void
 BlurCommandListRecorder::Init(ID3D12Resource& inputColorBuffer,
                               const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
-    BRE_ASSERT(ValidateData() == false);
+    BRE_ASSERT(IsDataValid() == false);
 
     mRenderTargetView = renderTargetView;
 
     InitShaderResourceViews(inputColorBuffer);
 
-    BRE_ASSERT(ValidateData());
+    InitBlurCBuffer();
+
+    BRE_ASSERT(IsDataValid());
 }
 
 void
 BlurCommandListRecorder::RecordAndPushCommandLists() noexcept
 {
-    BRE_ASSERT(ValidateData());
+    BRE_ASSERT(IsDataValid());
     BRE_ASSERT(sPSO != nullptr);
     BRE_ASSERT(sRootSignature != nullptr);
 
@@ -76,8 +81,12 @@ BlurCommandListRecorder::RecordAndPushCommandLists() noexcept
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 
+    const D3D12_GPU_VIRTUAL_ADDRESS blurCBufferGpuVAddress(
+        mBlurUploadCBuffer->GetResource()->GetGPUVirtualAddress());
+
     commandList.SetGraphicsRootSignature(sRootSignature);
-    commandList.SetGraphicsRootDescriptorTable(0U, mStartPixelShaderResourceView);
+    commandList.SetGraphicsRootConstantBufferView(0U, blurCBufferGpuVAddress);
+    commandList.SetGraphicsRootDescriptorTable(1U, mStartPixelShaderResourceView);
 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
@@ -87,7 +96,7 @@ BlurCommandListRecorder::RecordAndPushCommandLists() noexcept
 }
 
 bool
-BlurCommandListRecorder::ValidateData() const noexcept
+BlurCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
         mStartPixelShaderResourceView.ptr != 0UL &&
@@ -108,5 +117,18 @@ BlurCommandListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffe
     srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
     mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer,
                                                                                          srvDescriptor);
+}
+
+void
+BlurCommandListRecorder::InitBlurCBuffer() noexcept
+{
+    const std::size_t blurUploadCBufferElemSize =
+        UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(BlurCBuffer));
+
+    mBlurUploadCBuffer = &UploadBufferManager::CreateUploadBuffer(blurUploadCBufferElemSize,
+                                                                  1U);
+    BlurCBuffer blurCBuffer(ApplicationSettings::sNoiseTextureDimension);
+
+    mBlurUploadCBuffer->CopyData(0U, &blurCBuffer, sizeof(BlurCBuffer));
 }
 }

@@ -5,6 +5,7 @@
 
 #include <CommandManager\CommandListPerFrame.h>
 #include <ResourceManager\FrameUploadCBufferPerFrame.h>
+#include <ResourceManager\UploadBuffer.h>
 
 namespace BRE {
 struct FrameCBuffer;
@@ -54,7 +55,7 @@ public:
     ///
     /// @brief Validates internal data. Used most with assertions.
     ///
-    bool ValidateData() const noexcept;
+    bool IsDataValid() const noexcept;
 
 private:
     ///
@@ -84,6 +85,11 @@ private:
                                  ID3D12Resource& noiseTexture,
                                  const std::uint32_t sampleKernelSize) noexcept;
 
+    ///
+    /// @brief Initialize ambient occlusion constant buffer
+    ///
+    void InitAmbientOcclusionCBuffer() noexcept;
+
     CommandListPerFrame mCommandListPerFrame;
 
     FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
@@ -93,5 +99,7 @@ private:
     D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
 
     D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
+
+    UploadBuffer* mAmbientOcclusionUploadCBuffer{ nullptr };
 };
 }

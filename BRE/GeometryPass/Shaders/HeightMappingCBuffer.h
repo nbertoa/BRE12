@@ -1,7 +1,5 @@
 #pragma once
 
-#include <DirectXMath.h>
-
 #include <ApplicationSettings\ApplicationSettings.h>
 
 namespace BRE {

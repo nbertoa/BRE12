@@ -3,6 +3,7 @@
 #include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DXUtils\d3dx12.h>
+#include <EnvironmentLightPass\Shaders\AmbientOcclusionCBuffer.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager/ResourceManager.h>
@@ -19,7 +20,8 @@ namespace BRE {
 // Root Signature:
 // "CBV(b0, visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Frame CBuffer
 // "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 1 -> Frame CBuffer
-// "DescriptorTable(SRV(t0), SRV(t1), SRV(t2), SRV(t3), visibility = SHADER_VISIBILITY_PIXEL)" 2 -> normal_smoothness + depth + sample kernel + kernel noise
+// "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Ambient Occlusion CBuffer
+// "DescriptorTable(SRV(t0), SRV(t1), SRV(t2), SRV(t3), visibility = SHADER_VISIBILITY_PIXEL)" 3 -> normal_smoothness + depth + sample kernel + kernel noise
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -140,12 +142,14 @@ AmbientOcclusionCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer
                                           ID3D12Resource& depthBuffer,
                                           const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
-    BRE_ASSERT(ValidateData() == false);
+    BRE_ASSERT(IsDataValid() == false);
 
     mRenderTargetView = renderTargetView;
 
-    const std::uint32_t sampleKernelSize = 64U;
-    const std::uint32_t noiseTextureDimension = 4U;
+    const std::uint32_t sampleKernelSize = 
+        static_cast<std::uint32_t>(ApplicationSettings::sSampleKernelSize);
+    const std::uint32_t noiseTextureDimension = 
+        static_cast<std::uint32_t>(ApplicationSettings::sNoiseTextureDimension);
 
     std::vector<XMFLOAT4> sampleKernel;
     GenerateSampleKernel(sampleKernelSize, sampleKernel);
@@ -160,13 +164,15 @@ AmbientOcclusionCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer
                             *noiseTexture,
                             sampleKernelSize);
 
-    BRE_ASSERT(ValidateData());
+    InitAmbientOcclusionCBuffer();
+
+    BRE_ASSERT(IsDataValid());
 }
 
 void
 AmbientOcclusionCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
-    BRE_ASSERT(ValidateData());
+    BRE_ASSERT(IsDataValid());
     BRE_ASSERT(sPSO != nullptr);
     BRE_ASSERT(sRootSignature != nullptr);
 
@@ -184,10 +190,14 @@ AmbientOcclusionCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 
     commandList.SetGraphicsRootSignature(sRootSignature);
-    const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
+    const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(
+        uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
+    const D3D12_GPU_VIRTUAL_ADDRESS ambientOcclusionCBufferGpuVAddress(
+        mAmbientOcclusionUploadCBuffer->GetResource()->GetGPUVirtualAddress());
     commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-    commandList.SetGraphicsRootDescriptorTable(2U, mStartPixelShaderResourceView);
+    commandList.SetGraphicsRootConstantBufferView(2U, ambientOcclusionCBufferGpuVAddress);
+    commandList.SetGraphicsRootDescriptorTable(3U, mStartPixelShaderResourceView);
 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
@@ -197,12 +207,13 @@ AmbientOcclusionCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
 }
 
 bool
-AmbientOcclusionCommandListRecorder::ValidateData() const noexcept
+AmbientOcclusionCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
         mSampleKernelUploadBuffer != nullptr &&
         mRenderTargetView.ptr != 0UL &&
-        mStartPixelShaderResourceView.ptr != 0UL;
+        mStartPixelShaderResourceView.ptr != 0UL &&
+        mAmbientOcclusionUploadCBuffer != nullptr;
 
     return result;
 }
@@ -330,4 +341,23 @@ AmbientOcclusionCommandListRecorder::InitShaderResourceViews(ID3D12Resource& nor
                                                                                           srvDescriptors,
                                                                                           _countof(srvDescriptors));
 }
+
+void
+AmbientOcclusionCommandListRecorder::InitAmbientOcclusionCBuffer() noexcept
+{
+    const std::size_t ambientOcclusionUploadCBufferElemSize =
+        UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(AmbientOcclusionCBuffer));
+
+    mAmbientOcclusionUploadCBuffer = &UploadBufferManager::CreateUploadBuffer(ambientOcclusionUploadCBufferElemSize,
+                                                                              1U);
+    AmbientOcclusionCBuffer ambientOcclusionCBuffer(static_cast<float>(ApplicationSettings::sWindowWidth),
+                                                    static_cast<float>(ApplicationSettings::sWindowHeight),
+                                                    ApplicationSettings::sSampleKernelSize,
+                                                    ApplicationSettings::sNoiseTextureDimension,
+                                                    ApplicationSettings::sOcclusionRadius,
+                                                    ApplicationSettings::sSsaoPower);
+
+    mAmbientOcclusionUploadCBuffer->CopyData(0U, &ambientOcclusionCBuffer, sizeof(AmbientOcclusionCBuffer));
+}
+
 }

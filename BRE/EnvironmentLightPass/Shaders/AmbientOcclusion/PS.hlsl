@@ -1,17 +1,8 @@
+#include <EnvironmentLightPass/Shaders/AmbientOcclusionCBuffer.hlsli>
 #include <ShaderUtils/CBuffers.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
 #include "RS.hlsl"
-
-#define SAMPLE_KERNEL_SIZE 64U
-#define SCREEN_TOP_LEFT_X 0.0f
-#define SCREEN_TOP_LEFT_Y 0.0f
-#define SCREEN_WIDTH 1920.0f
-#define SCREEN_HEIGHT 1080.0f
-#define NOISE_TEXTURE_DIMENSION 4.0f
-#define NOISE_SCALE float2(SCREEN_WIDTH / NOISE_TEXTURE_DIMENSION, SCREEN_HEIGHT/ NOISE_TEXTURE_DIMENSION)
-#define OCCLUSION_RADIUS 1.5f
-#define SSAO_POWER 1.0f
 
 //#define SKIP_AMBIENT_OCCLUSION
 
@@ -22,6 +13,7 @@ struct Input {
 };
 
 ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b0);
+ConstantBuffer<AmbientOcclusionCBuffer> gAmbientOcclusionCBuffer : register(b1);
 
 SamplerState TextureSampler : register (s0);
 
@@ -42,6 +34,10 @@ Output main(const in Input input)
 #ifdef SKIP_AMBIENT_OCCLUSION
     output.mAmbientAccessibility = 1.0f;
 #else
+    const float2 noiseScale = 
+        float2(gAmbientOcclusionCBuffer.mScreenWidth / gAmbientOcclusionCBuffer.mNoiseTextureDimension, 
+               gAmbientOcclusionCBuffer.mScreenHeight / gAmbientOcclusionCBuffer.mNoiseTextureDimension);
+
     const int3 fragmentScreenSpace = int3(input.mPositionScreenSpace.xy, 0);
 
     const float fragmentZNDC = DepthTexture.Load(fragmentScreenSpace);
@@ -56,7 +52,8 @@ Output main(const in Input input)
 
     // Build a matrix to reorient the sample kernel
     // along current fragment normal vector.
-    const float3 noiseVec = NoiseTexture.SampleLevel(TextureSampler, NOISE_SCALE * input.mUV, 0.0f).xyz * 2.0f - 1.0f;
+    const float3 noiseVec = NoiseTexture.SampleLevel(TextureSampler, 
+                                                     noiseScale * input.mUV, 0.0f).xyz * 2.0f - 1.0f;
     const float3 tangentViewSpace = normalize(noiseVec - normalViewSpace * dot(noiseVec, normalViewSpace));
     const float3 bitangentViewSpace = normalize(cross(normalViewSpace, tangentViewSpace));
     const float3x3 sampleKernelRotationMatrix = float3x3(tangentViewSpace,
@@ -64,25 +61,27 @@ Output main(const in Input input)
                                                          normalViewSpace);
 
     float occlusionSum = 0.0f;
-    for (uint i = 0U; i < SAMPLE_KERNEL_SIZE; ++i) {
+    for (uint i = 0U; i < gAmbientOcclusionCBuffer.mSampleKernelSize; ++i) {
         // Rotate sample and get sample position in view space
         float4 rotatedSample = float4(mul(SampleKernelBuffer[i].xyz, sampleKernelRotationMatrix), 0.0f);
-        float4 samplePositionViewSpace = fragmentPositionViewSpace + rotatedSample * OCCLUSION_RADIUS;
+        float4 samplePositionViewSpace = 
+            fragmentPositionViewSpace + rotatedSample * gAmbientOcclusionCBuffer.mOcclusionRadius;
 
-        float4 samplePositionNDC = mul(samplePositionViewSpace, gFrameCBuffer.mProjectionMatrix);
+        float4 samplePositionNDC = mul(samplePositionViewSpace, 
+                                       gFrameCBuffer.mProjectionMatrix);
         samplePositionNDC.xy /= samplePositionNDC.w;
 
         const int2 samplePositionScreenSpace = NdcToScreenSpace(samplePositionNDC.xy,
-                                                                SCREEN_TOP_LEFT_X,
-                                                                SCREEN_TOP_LEFT_Y,
-                                                                SCREEN_WIDTH,
-                                                                SCREEN_HEIGHT);
+                                                                0.0f,
+                                                                0.0f,
+                                                                gAmbientOcclusionCBuffer.mScreenWidth,
+                                                                gAmbientOcclusionCBuffer.mScreenHeight);
 
         const bool isOutsideScreenBorders =
-            samplePositionScreenSpace.x < SCREEN_TOP_LEFT_X ||
-            samplePositionScreenSpace.x > SCREEN_WIDTH ||
-            samplePositionScreenSpace.y < SCREEN_TOP_LEFT_Y ||
-            samplePositionScreenSpace.y > SCREEN_HEIGHT;
+            samplePositionScreenSpace.x < 0.0f ||
+            samplePositionScreenSpace.x > gAmbientOcclusionCBuffer.mScreenWidth ||
+            samplePositionScreenSpace.y < 0.0f ||
+            samplePositionScreenSpace.y > gAmbientOcclusionCBuffer.mScreenHeight;
 
         if (isOutsideScreenBorders == false) {
             float sampleZNDC = DepthTexture.Load(int3(samplePositionScreenSpace, 0));
@@ -90,16 +89,19 @@ Output main(const in Input input)
             const float sampleZViewSpace = NdcZToScreenSpaceZ(sampleZNDC,
                                                               gFrameCBuffer.mProjectionMatrix);
 
-            const float rangeCheck = abs(fragmentPositionViewSpace.z - sampleZViewSpace) < OCCLUSION_RADIUS ? 1.0f : 0.0f;
+            const float rangeCheck = 
+                abs(fragmentPositionViewSpace.z - sampleZViewSpace) < 
+                gAmbientOcclusionCBuffer.mOcclusionRadius ? 1.0f : 0.0f;
             occlusionSum += (sampleZViewSpace <= samplePositionViewSpace.z ? 1.0f : 0.0f) * rangeCheck;
         }
     }
 
-    output.mAmbientAccessibility = 1.0f - (occlusionSum / SAMPLE_KERNEL_SIZE);
+    output.mAmbientAccessibility = 1.0f - (occlusionSum / gAmbientOcclusionCBuffer.mSampleKernelSize);
 #endif
 
     // Sharpen the contrast
-    output.mAmbientAccessibility = saturate(pow(output.mAmbientAccessibility, SSAO_POWER));
+    output.mAmbientAccessibility = saturate(pow(output.mAmbientAccessibility, 
+                                                gAmbientOcclusionCBuffer.mSsaoPower));
 
     return output;
 }

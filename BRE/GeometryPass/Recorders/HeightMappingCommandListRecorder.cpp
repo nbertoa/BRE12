@@ -190,7 +190,8 @@ HeightMappingCommandListRecorder::IsDataValid() const noexcept
         GeometryCommandListRecorder::IsDataValid() &&
         mBaseColorBufferGpuDescriptorsBegin.ptr != 0UL &&
         mNormalBufferGpuDescriptorsBegin.ptr != 0UL &&
-        mHeightBufferGpuDescriptorsBegin.ptr != 0UL;
+        mHeightBufferGpuDescriptorsBegin.ptr != 0UL &&
+        mHeightMappingUploadCBuffer != nullptr;
 
     return result;
 }

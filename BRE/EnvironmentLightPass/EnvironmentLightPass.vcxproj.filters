@@ -11,6 +11,12 @@
     <ClInclude Include="AmbientOcclusionCommandListRecorder.h" />
     <ClInclude Include="BlurCommandListRecorder.h" />
     <ClInclude Include="EnvironmentLightCommandListRecorder.h" />
+    <ClInclude Include="Shaders\AmbientOcclusionCBuffer.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\BlurCBuffer.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -54,5 +60,13 @@
     <FxCompile Include="Shaders\AmbientOcclusion\VS.hlsl">
       <Filter>Shaders\AmbientOcclusion</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\AmbientOcclusionCBuffer.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\BlurCBuffer.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

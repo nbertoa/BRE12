@@ -1,9 +1,7 @@
+#include <EnvironmentLightPass/Shaders/BlurCBuffer.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
 #include "RS.hlsl"
-
-// This should match noise texture dimension (for example, 4x4)
-#define BLUR_SIZE 4
 
 #define SKIP_BLUR
 
@@ -11,6 +9,8 @@ struct Input {
     float4 mPositionNDC : SV_POSITION;
     float2 mUV : TEXCOORD;
 };
+
+ConstantBuffer<BlurCBuffer> gBlurCBuffer : register(b0);
 
 SamplerState TextureSampler : register (s0);
 Texture2D<float> BufferTexture : register(t0);
@@ -31,18 +31,18 @@ Output main(const in Input input)
     float w;
     float h;
     BufferTexture.GetDimensions(w, h);
-    const float2 texelSize = 1.0 / float2(w, h);
-    float result = 0.0;
-    const float hlimComponent = float(-BLUR_SIZE) * 0.5 + 0.5;
+    const float2 texelSize = 1.0f / float2(w, h);
+    float result = 0.0f;
+    const float hlimComponent = float(-gBlurCBuffer.mNoiseTextureDimension) * 0.5f + 0.5f;
     const float2 hlim = float2(hlimComponent, hlimComponent);
-    for (uint i = 0; i < BLUR_SIZE; ++i) {
-        for (uint j = 0; j < BLUR_SIZE; ++j) {
+    for (uint i = 0U; i < gBlurCBuffer.mNoiseTextureDimension; ++i) {
+        for (uint j = 0U; j < gBlurCBuffer.mNoiseTextureDimension; ++j) {
             const float2 offset = (hlim + float2(float(i), float(j))) * texelSize;
             result += BufferTexture.Sample(TextureSampler, input.mUV + offset).r;
         }
     }
 
-    output.mColor = result / float(BLUR_SIZE * BLUR_SIZE);
+    output.mColor = result / float(gBlurCBuffer.mNoiseTextureDimension * gBlurCBuffer.mNoiseTextureDimension);
 #endif
 
     return output;

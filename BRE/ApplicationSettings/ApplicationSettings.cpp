@@ -7,8 +7,8 @@
 namespace BRE {
 const bool ApplicationSettings::sIsFullscreenWindow{ true };
 const std::uint32_t ApplicationSettings::sCpuProcessorCount{ 4U }; // This should be changed according your processor
-const std::uint32_t ApplicationSettings::sWindowWidth{ 1920U };
-const std::uint32_t ApplicationSettings::sWindowHeight{ 1080U };
+const std::uint32_t ApplicationSettings::sWindowWidth{ 1280U };
+const std::uint32_t ApplicationSettings::sWindowHeight{ 720U };
 
 const DXGI_FORMAT ApplicationSettings::sFrameBufferRTFormat{ DXGI_FORMAT_R10G10B10A2_UNORM };
 const DXGI_FORMAT ApplicationSettings::sFrameBufferFormat{ DXGI_FORMAT_R10G10B10A2_UNORM };
@@ -33,4 +33,10 @@ float ApplicationSettings::sMaxTessellationDistance{ 1.0f };
 float ApplicationSettings::sMinTessellationFactor{ 1.0f };
 float ApplicationSettings::sMaxTessellationFactor{ 25.0f };
 float ApplicationSettings::sHeightScale{ 1.5f };
+
+// Ambient occlusion constants
+std::uint32_t ApplicationSettings::sSampleKernelSize{ 16U };
+float ApplicationSettings::sNoiseTextureDimension{ 4.0f };
+float ApplicationSettings::sOcclusionRadius{ 1.5f };
+float ApplicationSettings::sSsaoPower{ 1.0f };
 }

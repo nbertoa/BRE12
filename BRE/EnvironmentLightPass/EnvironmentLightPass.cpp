@@ -70,7 +70,7 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
                            ID3D12Resource& specularPreConvolvedCubeMap,
                            const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
-    BRE_ASSERT(ValidateData() == false);
+    BRE_ASSERT(IsDataValid() == false);
 
     AmbientOcclusionCommandListRecorder::InitSharedPSOAndRootSignature();
     BlurCommandListRecorder::InitSharedPSOAndRootSignature();
@@ -112,13 +112,13 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
     mNormalSmoothnessBuffer = &normalSmoothnessBuffer;
     mDepthBuffer = &depthBuffer;
 
-    BRE_ASSERT(ValidateData());
+    BRE_ASSERT(IsDataValid());
 }
 
 void
 EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 {
-    BRE_ASSERT(ValidateData());
+    BRE_ASSERT(IsDataValid());
 
     const std::uint32_t taskCount{ 5U };
     CommandListExecutor::Get().ResetExecutedCommandListCount();
@@ -139,7 +139,7 @@ EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 }
 
 bool
-EnvironmentLightPass::ValidateData() const noexcept
+EnvironmentLightPass::IsDataValid() const noexcept
 {
     const bool b =
         mAmbientOcclusionRecorder.get() != nullptr &&
@@ -157,7 +157,7 @@ EnvironmentLightPass::ValidateData() const noexcept
 void
 EnvironmentLightPass::ExecuteBeginTask() noexcept
 {
-    BRE_ASSERT(ValidateData());
+    BRE_ASSERT(IsDataValid());
 
     ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
@@ -210,7 +210,7 @@ EnvironmentLightPass::ExecuteBeginTask() noexcept
 void
 EnvironmentLightPass::ExecuteMiddleTask() noexcept
 {
-    BRE_ASSERT(ValidateData());
+    BRE_ASSERT(IsDataValid());
 
     // Check resource states:
     // Ambient accesibility buffer was used as render target resource by ambient accesibility shader.
@@ -251,7 +251,7 @@ EnvironmentLightPass::ExecuteMiddleTask() noexcept
 void
 EnvironmentLightPass::ExecuteFinalTask() noexcept
 {
-    BRE_ASSERT(ValidateData());
+    BRE_ASSERT(IsDataValid());
 
     CD3DX12_RESOURCE_BARRIER barriers[1U];
     std::uint32_t barrierCount = 0UL;
