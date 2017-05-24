@@ -11,7 +11,6 @@
 #include <SceneLoader\ModelLoader.h>
 #include <SceneLoader\TextureLoader.h>
 
-
 namespace BRE {
 class Scene;
 

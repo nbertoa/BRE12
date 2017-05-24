@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include <Camera\Camera.h>
 
 namespace YAML {

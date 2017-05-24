@@ -12,6 +12,7 @@
     <ClInclude Include="DrawableObjectLoader.h" />
     <ClInclude Include="EnvironmentLoader.h" />
     <ClInclude Include="CameraLoader.h" />
+    <ClInclude Include="SettingsLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SceneLoader.cpp" />
@@ -23,5 +24,6 @@
     <ClCompile Include="MaterialTechnique.cpp" />
     <ClCompile Include="EnvironmentLoader.cpp" />
     <ClCompile Include="CameraLoader.cpp" />
+    <ClCompile Include="SettingsLoader.cpp" />
   </ItemGroup>
 </Project>

@@ -3,6 +3,11 @@
 #include <tbb/task_scheduler_init.h>
 #include <windows.h>
 
+#pragma warning( push )
+#pragma warning( disable : 4127)
+#include <yaml-cpp/yaml.h>
+#pragma warning( pop ) 
+
 #include <CommandManager\CommandAllocatorManager.h>
 #include <CommandManager/CommandListManager.h>
 #include <CommandManager\CommandQueueManager.h>
@@ -19,6 +24,7 @@
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <SceneExecutor/SceneExecutor.h>
 #include <SceneLoader\SceneLoader.h>
+#include <SceneLoader\SettingsLoader.h>
 #include <ShaderManager\ShaderManager.h>
 
 #if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
@@ -36,8 +42,17 @@ const std::uint32_t CBV_SRV_UAV_DESCRIPTOR_HEAP_SIZE = 3000U;
 /// @brief Initializes all the systems
 /// @param moduleInstanceHandle Module instance handle to create the window
 ///
-void InitSystems(const HINSTANCE moduleInstanceHandle) noexcept
+void InitSystems(const HINSTANCE moduleInstanceHandle,
+                 const char* sceneFilePath) noexcept
 {
+    BRE_ASSERT(sceneFilePath != nullptr);
+
+    // Load settings
+    const YAML::Node rootNode = YAML::LoadFile(sceneFilePath);
+    BRE_CHECK_MSG(rootNode.IsDefined(), L"Failed to open yaml file");
+    SettingsLoader settingsLoader;
+    settingsLoader.LoadSettings(rootNode);
+
     DirectXManager::InitWindowAndDevice(moduleInstanceHandle);
     const HWND windowHandle = DirectXManager::GetWindowHandle();
 
@@ -81,12 +96,15 @@ WINAPI WinMain(_In_ HINSTANCE moduleInstanceHandle,
                _In_ LPSTR /*commandLine*/,
                _In_ int /*showCommand*/)
 {
+    const char* sceneFilePath = "resources/scenes/showcase_normal.yml";
+
     tbb::task_scheduler_init taskSchedulerInit;
 
-    BRE::InitSystems(moduleInstanceHandle);
+    BRE::InitSystems(moduleInstanceHandle,
+                     sceneFilePath);
 
     {
-        BRE::SceneExecutor sceneExecutor("resources/scenes/showcase_normal.yml");
+        BRE::SceneExecutor sceneExecutor(sceneFilePath);
         sceneExecutor.Execute();
     }
 

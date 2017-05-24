@@ -133,6 +133,7 @@
     <ClInclude Include="MaterialTechniqueLoader.h" />
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="SceneLoader.h" />
+    <ClInclude Include="SettingsLoader.h" />
     <ClInclude Include="TextureLoader.h" />
     <ClInclude Include="YamlUtils.h" />
   </ItemGroup>
@@ -145,6 +146,7 @@
     <ClCompile Include="MaterialTechnique.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="SceneLoader.cpp" />
+    <ClCompile Include="SettingsLoader.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

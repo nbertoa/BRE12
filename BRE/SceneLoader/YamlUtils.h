@@ -22,37 +22,16 @@ public:
     YamlUtils& operator=(YamlUtils&&) = delete;
 
     ///
-    /// @brief Get scalar
+    /// @brief Get scalar 
     /// @param node YAML node
-    /// @param key Key to get scalar
-    /// @return Scalar value
+    /// @param scalar Output scalar
     ///
     template<typename T>
-    static T GetScalar(const YAML::Node& node,
-                       const char* key)
+    static void GetScalar(const YAML::Node& node, T& scalar) noexcept
     {
-        BRE_ASSERT(key != nullptr);
-        YAML::Node attr = node[key];
-        BRE_ASSERT(attr.IsDefined());
-        BRE_ASSERT(attr.IsScalar());
-        return std::to_string(attr.as<std::string>());
-    }
-
-    ///
-    /// @brief Get string 
-    /// @param node YAML node
-    /// @param key Key to get string
-    /// @return String
-    ///
-    template<>
-    static std::string GetScalar(const YAML::Node& node,
-                                 const char* key)
-    {
-        BRE_ASSERT(key != nullptr);
-        YAML::Node attr = node[key];
-        BRE_ASSERT(attr.IsDefined());
-        BRE_ASSERT(attr.IsScalar());
-        return attr.as<std::string>();
+        BRE_ASSERT(node.IsDefined());
+        BRE_ASSERT(node.IsScalar());
+        scalar = node.as<T>();
     }
 
     ///
@@ -64,12 +43,12 @@ public:
     template<typename T>
     static void GetSequence(const YAML::Node& node,
                             T* const sequenceOutput,
-                            const size_t numElems)
+                            const size_t numElems) noexcept
     {
         BRE_ASSERT(sequenceOutput != nullptr);
         BRE_ASSERT(node.IsDefined());
         BRE_ASSERT(node.IsSequence());
-        size_t currentNumElems = 0;
+        size_t currentNumElems = 0UL;
         for (const YAML::Node& seqNode : node) {
             BRE_ASSERT(seqNode.IsScalar());
             BRE_ASSERT(currentNumElems < numElems);
