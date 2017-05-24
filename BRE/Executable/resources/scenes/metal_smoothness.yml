@@ -3,9 +3,9 @@ models:
   
 textures:
   reference: resources/scenes/helpers/all_textures.yml
-  sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
-  cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
-  cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds  
+  sky map: resources/textures/cubeMaps/canyon_cube_map.dds
+  cube map diffuse: resources/textures/cubeMaps/canyon_diffuse_cube_map.dds
+  cube map specular: resources/textures/cubeMaps/canyon_specular_cube_map.dds 
   
 material properties:
   - reference: resources/scenes/helpers/metals_material_properties.yml
