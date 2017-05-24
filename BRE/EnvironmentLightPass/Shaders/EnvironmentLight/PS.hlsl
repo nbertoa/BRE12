@@ -79,9 +79,9 @@ Output main(const in Input input)
     const float3 reflectionVectorWorldSpace = reflect(incidentVectorWorldSpace,
                                                       normalWorldSpace);
 
-    // Our cube map has 10 mip map levels (0 - 9) based on smoothness
+    // Our cube map has 10 mip map levels
     const float smoothness = normal_smoothness.z;
-    const uint mipmap = (1.0f - smoothness) * 9.0f;
+    const uint mipmap = (1.0f - smoothness) * 10.0f;
     const float3 specularReflection = SpecularCubeMapTexture.SampleLevel(TextureSampler,
                                                                          reflectionVectorWorldSpace, mipmap).rgb;
 
