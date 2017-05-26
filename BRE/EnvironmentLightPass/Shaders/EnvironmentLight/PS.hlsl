@@ -68,10 +68,9 @@ Output main(const in Input input)
 
     // Diffuse reflection color.
     // When we sample a cube map, we need to use data in world space, not view space.
-    const float3 diffuseReflection = DiffuseCubeMapTexture.SampleLevel(TextureSampler, 
-                                                                       normalWorldSpace, 
-                                                                       0).rgb;
-    const float3 diffuseColor = (1.0f - metalMask) * baseColor;
+    const float3 diffuseReflection = DiffuseCubeMapTexture.Sample(TextureSampler, 
+                                                                  normalWorldSpace).rgb;
+    const float3 diffuseColor = DiffuseBrdf(baseColor, metalMask);
     const float3 indirectFDiffuse = diffuseColor * diffuseReflection;
 
     // Compute incident vector. 

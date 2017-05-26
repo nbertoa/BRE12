@@ -76,13 +76,13 @@ drawable objects:
     scale: [0.5, 0.5, 0.5]
   - model: unreal
     material properties: metal9
-    material technique: rock6_normal
+    material technique: rock5_normal
     translation: [1500.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
   - model: unreal
     material properties: non_metal9
-    material technique: rock6_normal
+    material technique: rock5_normal
     translation: [1650.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
@@ -100,13 +100,13 @@ drawable objects:
     scale: [0.5, 0.5, 0.5]
   - model: unreal
     material properties: metal8
-    material technique: brick4_normal
+    material technique: brick3_normal
     translation: [2100.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
   - model: unreal
     material properties: non_metal8
-    material technique: brick4_normal
+    material technique: brick3_normal
     translation: [2250.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
