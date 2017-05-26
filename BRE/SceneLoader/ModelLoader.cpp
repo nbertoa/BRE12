@@ -47,7 +47,9 @@ ModelLoader::LoadModels(const YAML::Node& rootNode,
 const Model& ModelLoader::GetModel(const std::string& name) const noexcept
 {
     std::unordered_map<std::string, Model*>::const_iterator findIt = mModelByName.find(name);
-    BRE_CHECK_MSG(findIt != mModelByName.end(), L"Model name not found");
+    const std::wstring errorMsg =
+        L"Model name not found: " + StringUtils::AnsiToWideString(name);
+    BRE_CHECK_MSG(findIt != mModelByName.end(), errorMsg.c_str());
     BRE_ASSERT(findIt->second != nullptr);
 
     return *findIt->second;
@@ -71,7 +73,9 @@ ModelLoader::LoadModels(const YAML::Node& modelsNode,
         // If name is "reference", then path must be a yaml file that specifies "models"
         if (name == "reference") {
             const YAML::Node referenceRootNode = YAML::LoadFile(path);
-            BRE_CHECK_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            const std::wstring errorMsg =
+                L"Failed to open yaml file: " + StringUtils::AnsiToWideString(path);
+            BRE_CHECK_MSG(referenceRootNode.IsDefined(), errorMsg.c_str());
             const YAML::Node referenceModelsNode = referenceRootNode["models"];
             LoadModels(referenceModelsNode,
                        commandAllocator,
@@ -79,7 +83,9 @@ ModelLoader::LoadModels(const YAML::Node& modelsNode,
                        uploadVertexBuffers,
                        uploadIndexBuffers);
         } else {
-            BRE_CHECK_MSG(mModelByName.find(name) == mModelByName.end(), L"Model name must be unique");
+            const std::wstring errorMsg =
+                L"Model name must be unique: " + StringUtils::AnsiToWideString(name);
+            BRE_CHECK_MSG(mModelByName.find(name) == mModelByName.end(), errorMsg.c_str());
 
             uploadVertexBuffers.resize(uploadVertexBuffers.size() + 1);
             uploadIndexBuffers.resize(uploadIndexBuffers.size() + 1);

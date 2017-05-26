@@ -32,7 +32,7 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
         return;
     }
 
-    BRE_CHECK_MSG(materialPropertiesNode.IsSequence(), L"'material propreties' node must be a map");
+    BRE_CHECK_MSG(materialPropertiesNode.IsSequence(), L"'material properties' node must be a map");
 
     std::string pairFirstValue;
     std::string pairSecondValue;
@@ -85,7 +85,9 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
                 MathUtils::Clamp(metalMask, 0.0f, 1.0f);
             } else {
                 // To avoid warning about 'conditional expression is constant'. This is the same than false
-                BRE_CHECK_MSG(&metalMask == nullptr, L"Unknown material properties field");
+                const std::wstring errorMsg =
+                    L"Unknown material properties field: " + StringUtils::AnsiToWideString(pairFirstValue);
+                BRE_CHECK_MSG(&metalMask == nullptr, errorMsg.c_str());
             }
 
             ++mapIt;
@@ -103,7 +105,9 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
 const MaterialProperties& MaterialPropertiesLoader::GetMaterialProperties(const std::string& name) const noexcept
 {
     std::unordered_map<std::string, MaterialProperties>::const_iterator findIt = mMaterialPropertiesByName.find(name);
-    BRE_CHECK_MSG(findIt != mMaterialPropertiesByName.end(), L"Material properties not found");
+    const std::wstring errorMsg =
+        L"Material properties not found: " + StringUtils::AnsiToWideString(name);
+    BRE_CHECK_MSG(findIt != mMaterialPropertiesByName.end(), errorMsg.c_str());
 
     return findIt->second;
 }

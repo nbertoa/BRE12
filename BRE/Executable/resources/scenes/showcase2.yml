@@ -1,0 +1,175 @@
+models:
+  mitsubaSphere: resources/models/mitsubaSphere.obj
+  mitsubaFloor: resources/models/mitsubaFloor.obj
+  
+textures:
+  reference: resources/scenes/helpers/all_textures.yml
+  sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
+  cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
+  cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds 
+  
+material properties:
+  - reference: resources/scenes/helpers/all_material_properties.yml
+  - name: light_yellow
+    base color: [0.8, 0.8, 0.0]
+    metal mask: 0.0
+    smoothness: 0.2
+  - name: light_yellow_metal
+    base color: [0.8, 0.8, 0.0]
+    metal mask: 1.0
+    smoothness: 0.2
+  - name: light_blue
+    base color: [0.0, 0.0, 0.8]
+    metal mask: 0.0
+    smoothness: 0.4
+  - name: light_blue_metal
+    base color: [0.0, 0.0, 0.8]
+    metal mask: 1.0
+    smoothness: 0.4
+  - name: light_violet
+    base color: [0.2, 0.2, 0.8]
+    metal mask: 0.0
+    smoothness: 0.6
+  - name: light_violet_metal
+    base color: [0.2, 0.2, 0.8]
+    metal mask: 1.0
+    smoothness: 0.6
+  - name: light_green
+    base color: [0.2, 0.8, 0.2]
+    metal mask: 0.0
+    smoothness: 0.8
+  - name: light_green_metal
+    base color: [0.2, 0.8, 0.2]
+    metal mask: 1.0
+    smoothness: 0.8
+  - name: light_orange
+    base color: [0.8, 0.2, 0.2]
+    metal mask: 0.0
+    smoothness: 1.0
+  - name: light_orange_metal
+    base color: [0.8, 0.2, 0.2]
+    metal mask: 1.0
+    smoothness: 1.0
+  - name: white
+    base color: [1.0, 1.0, 1.0]
+    metal mask: 0.0
+    smoothness: 0.9
+  - name: light_x
+    base color: [0.8, 0.0, 0.8]
+    metal mask: 0.0
+    smoothness: 0.8
+  - name: light_x_metal
+    base color: [0.8, 0.0, 0.8]
+    metal mask: 1.0
+    smoothness: 0.8
+  
+material techniques:
+  - reference: resources/scenes/helpers/all_material_techniques.yml
+        
+drawable objects:
+  - model: mitsubaFloor
+    material properties: white
+    material technique: rock_normal
+    translation: [0.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: light_yellow
+    translation: [-50.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: light_yellow_metal
+    translation: [50.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaFloor
+    material properties: white
+    material technique: rock2_normal
+    translation: [200.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: light_blue
+    translation: [150.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: light_blue_metal
+    translation: [250.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaFloor
+    material properties: white
+    material technique: rock3_normal
+    translation: [400.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: light_violet
+    translation: [350.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: light_violet_metal
+    translation: [450.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaFloor
+    material properties: white
+    material technique: rock4_normal
+    translation: [600.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: light_green
+    translation: [550.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: light_green_metal
+    translation: [650.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaFloor
+    material properties: white
+    material technique: rock5_normal
+    translation: [800.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: light_orange
+    translation: [750.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: light_orange_metal
+    translation: [850.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaFloor
+    material properties: white
+    material technique: rock6_normal
+    translation: [1000.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: light_x
+    translation: [950.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: light_x_metal
+    translation: [1050.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+    
+environment:
+  - sky box texture: sky map
+    diffuse irradiance texture: cube map diffuse
+    specular pre convolved environment texture: cube map specular
+    
+camera:
+  - position: [0.0, 100.0, -100.0]
+    look vector: [0.0, -1.0, 1.0]
+    up vector: [0.0, 1.0, 0.0]   

@@ -52,7 +52,9 @@ CameraLoader::LoadCamera(const YAML::Node& rootNode) noexcept
             YamlUtils::GetSequence(mapIt->second, upVector, 3U);
         } else {
             // To avoid warning about 'conditional expression is constant'. This is the same than false
-            BRE_CHECK_MSG(&propertyName == nullptr, L"Unknown camera field");
+            const std::wstring errorMsg =
+                L"Unknown camera field: " + StringUtils::AnsiToWideString(propertyName);
+            BRE_CHECK_MSG(&propertyName == nullptr, errorMsg.c_str());
         }
 
         ++mapIt;

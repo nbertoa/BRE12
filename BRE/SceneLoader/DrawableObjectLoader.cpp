@@ -83,7 +83,9 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
                 LoadDrawableObjects(referenceRootNode);
             } else {
                 // To avoid warning about 'conditional expression is constant'. This is the same than false
-                BRE_CHECK_MSG(&scale == nullptr, L"Unknown object field");
+                const std::wstring errorMsg =
+                    L"Unknown drawable object field: " + StringUtils::AnsiToWideString(pairFirstValue);
+                BRE_CHECK_MSG(&scale == nullptr, errorMsg.c_str());
             }
 
             ++mapIt;

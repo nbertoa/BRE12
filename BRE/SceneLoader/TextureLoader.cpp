@@ -49,7 +49,9 @@ ID3D12Resource&
 TextureLoader::GetTexture(const std::string& name) noexcept
 {
     std::unordered_map<std::string, ID3D12Resource*>::iterator findIt = mTextureByName.find(name);
-    BRE_CHECK_MSG(findIt != mTextureByName.end(), L"Texture name not found");
+    const std::wstring errorMsg =
+        L"Texture name not found: " + StringUtils::AnsiToWideString(name);
+    BRE_CHECK_MSG(findIt != mTextureByName.end(), errorMsg.c_str());
     BRE_ASSERT(findIt->second != nullptr);
 
     return *findIt->second;
@@ -72,7 +74,9 @@ TextureLoader::LoadTextures(const YAML::Node& texturesNode,
         // If name is "reference", then path must be a yaml file that specifies "textures"
         if (name == "reference") {
             const YAML::Node referenceRootNode = YAML::LoadFile(path);
-            BRE_CHECK_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            const std::wstring errorMsg =
+                L"Failed to open yaml file: " + StringUtils::AnsiToWideString(path);
+            BRE_CHECK_MSG(referenceRootNode.IsDefined(), errorMsg.c_str());
             BRE_CHECK_MSG(referenceRootNode["textures"].IsDefined(),
                            L"Reference file must have 'textures' field");
             const YAML::Node referenceTexturesNode = referenceRootNode["textures"];
@@ -81,7 +85,9 @@ TextureLoader::LoadTextures(const YAML::Node& texturesNode,
                          commandList,
                          uploadBuffers);
         } else {
-            BRE_CHECK_MSG(mTextureByName.find(name) == mTextureByName.end(), L"Texture name is not unique");
+            const std::wstring errorMsg =
+                L"Texture name must be unique: " + StringUtils::AnsiToWideString(name);
+            BRE_CHECK_MSG(mTextureByName.find(name) == mTextureByName.end(), errorMsg.c_str());
 
             uploadBuffers.resize(uploadBuffers.size() + 1);
 

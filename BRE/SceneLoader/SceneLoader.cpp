@@ -41,7 +41,9 @@ SceneLoader::LoadScene(const char* sceneFilePath) noexcept
     BRE_ASSERT(sceneFilePath != nullptr);
 
     const YAML::Node rootNode = YAML::LoadFile(sceneFilePath);
-    BRE_CHECK_MSG(rootNode.IsDefined(), L"Failed to open yaml file");
+    const std::wstring errorMsg =
+        L"Failed to open yaml file: " + StringUtils::AnsiToWideString(sceneFilePath);
+    BRE_CHECK_MSG(rootNode.IsDefined(), errorMsg.c_str());
 
     mModelLoader.LoadModels(rootNode, *mCommandAllocator, *mCommandList);
     mTextureLoader.LoadTextures(rootNode, *mCommandAllocator, *mCommandList);
@@ -104,34 +106,34 @@ SceneLoader::GenerateGeometryPassRecordersForColorMapping(GeometryCommandListRec
             GeometryCommandListRecorder::GeometryData geometryData;
             geometryData.mVertexBufferData = mesh.GetVertexBufferData();
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
-            geometryData.mWorldMatrices.reserve(meshes.size());
-            geometryData.mInverseTransposeWorldMatrices.reserve(meshes.size());
+            geometryData.mWorldMatrices.reserve(drawableObjects.size());
+            geometryData.mInverseTransposeWorldMatrices.reserve(drawableObjects.size());
             geometryDataVector.emplace_back(geometryData);
         }
 
-        // Iterate over all drawable objects and fill buffers
-        materialProperties.reserve(materialProperties.size() + totalDataCount);
-        for (const DrawableObject& drawableObject : drawableObjects) {
-            // Store material properties
-            materialProperties.push_back(drawableObject.GetMaterialProperties());
+        // Iterate all the meses and store data for all the drawable objects.
+        for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
+            GeometryCommandListRecorder::GeometryData& geometryData =
+                geometryDataVector[geometryDataVectorOffset + i];
 
-            // Store world matrix
-            const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
-            XMFLOAT4X4 inverseTransposeWorldMatrix;
-            MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
-            for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
-                GeometryCommandListRecorder::GeometryData& geometryData =
-                    geometryDataVector[geometryDataVectorOffset + i];
-
+            for (const DrawableObject& drawableObject : drawableObjects) {
+                // Store material properties
+                materialProperties.push_back(drawableObject.GetMaterialProperties());
+                
+                // Store matrices
+                const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
+                XMFLOAT4X4 inverseTransposeWorldMatrix;
+                MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
                 geometryData.mWorldMatrices.push_back(worldMatrix);
                 geometryData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
             }
         }
 
-        geometryDataVectorOffset += totalDataCount;
+        geometryDataVectorOffset += meshes.size();
     }
 
-    commandListRecorder->Init(geometryDataVector, materialProperties);
+    commandListRecorder->Init(geometryDataVector, 
+                              materialProperties);
 
     commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
 }
@@ -168,39 +170,39 @@ SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(GeometryCommandL
             GeometryCommandListRecorder::GeometryData geometryData;
             geometryData.mVertexBufferData = mesh.GetVertexBufferData();
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
-            geometryData.mWorldMatrices.reserve(meshes.size());
-            geometryData.mInverseTransposeWorldMatrices.reserve(meshes.size());
+            geometryData.mWorldMatrices.reserve(drawableObjects.size());
+            geometryData.mInverseTransposeWorldMatrices.reserve(drawableObjects.size());
             geometryDataVector.emplace_back(geometryData);
         }
 
-        // Iterate over all drawable objects and fill buffers
-        materialProperties.reserve(materialProperties.size() + totalDataCount);
-        normalTextures.reserve(normalTextures.size() + totalDataCount);
-        for (const DrawableObject& drawableObject : drawableObjects) {
-            // Store material properties
-            materialProperties.push_back(drawableObject.GetMaterialProperties());
+        // Iterate all the meses and store data for all the drawable objects.
+        for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
+            GeometryCommandListRecorder::GeometryData& geometryData =
+                geometryDataVector[geometryDataVectorOffset + i];
 
-            // Store textures
-            const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
-            normalTextures.push_back(&materialTechnique.GetNormalTexture());
+            for (const DrawableObject& drawableObject : drawableObjects) {
+                // Store material properties
+                materialProperties.push_back(drawableObject.GetMaterialProperties());
 
-            // Store world matrix
-            const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
-            XMFLOAT4X4 inverseTransposeWorldMatrix;
-            MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
-            for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
-                GeometryCommandListRecorder::GeometryData& geometryData =
-                    geometryDataVector[geometryDataVectorOffset + i];
+                // Store textures
+                const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
+                normalTextures.push_back(&materialTechnique.GetNormalTexture());
 
+                // Store matrices
+                const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
+                XMFLOAT4X4 inverseTransposeWorldMatrix;
+                MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
                 geometryData.mWorldMatrices.push_back(worldMatrix);
                 geometryData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
             }
         }
 
-        geometryDataVectorOffset += totalDataCount;
+        geometryDataVectorOffset += meshes.size();
     }
 
-    commandListRecorder->Init(geometryDataVector, materialProperties, normalTextures);
+    commandListRecorder->Init(geometryDataVector, 
+                              materialProperties, 
+                              normalTextures);
 
     commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
 }
@@ -238,38 +240,35 @@ SceneLoader::GenerateGeometryPassRecordersForColorHeightMapping(GeometryCommandL
             GeometryCommandListRecorder::GeometryData geometryData;
             geometryData.mVertexBufferData = mesh.GetVertexBufferData();
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
-            geometryData.mWorldMatrices.reserve(meshes.size());
-            geometryData.mInverseTransposeWorldMatrices.reserve(meshes.size());
+            geometryData.mWorldMatrices.reserve(drawableObjects.size());
+            geometryData.mInverseTransposeWorldMatrices.reserve(drawableObjects.size());
             geometryDataVector.emplace_back(geometryData);
         }
 
-        // Iterate over all drawable objects and fill buffers
-        materialProperties.reserve(materialProperties.size() + totalDataCount);
-        normalTextures.reserve(normalTextures.size() + totalDataCount);
-        heightTextures.reserve(heightTextures.size() + totalDataCount);
-        for (const DrawableObject& drawableObject : drawableObjects) {
-            // Store material properties
-            materialProperties.push_back(drawableObject.GetMaterialProperties());
+        // Iterate all the meses and store data for all the drawable objects.
+        for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
+            GeometryCommandListRecorder::GeometryData& geometryData =
+                geometryDataVector[geometryDataVectorOffset + i];
 
-            // Store textures
-            const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
-            normalTextures.push_back(&materialTechnique.GetNormalTexture());
-            heightTextures.push_back(&materialTechnique.GetHeightTexture());
+            for (const DrawableObject& drawableObject : drawableObjects) {
+                // Store material properties
+                materialProperties.push_back(drawableObject.GetMaterialProperties());
 
-            // Store world matrix
-            const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
-            XMFLOAT4X4 inverseTransposeWorldMatrix;
-            MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
-            for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
-                GeometryCommandListRecorder::GeometryData& geometryData =
-                    geometryDataVector[geometryDataVectorOffset + i];
+                // Store textures
+                const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
+                normalTextures.push_back(&materialTechnique.GetNormalTexture());
+                heightTextures.push_back(&materialTechnique.GetHeightTexture());
 
+                // Store matrices
+                const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
+                XMFLOAT4X4 inverseTransposeWorldMatrix;
+                MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
                 geometryData.mWorldMatrices.push_back(worldMatrix);
                 geometryData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
             }
         }
 
-        geometryDataVectorOffset += totalDataCount;
+        geometryDataVectorOffset += meshes.size();
     }
 
     commandListRecorder->Init(geometryDataVector,
@@ -312,39 +311,39 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryCommandListR
             GeometryCommandListRecorder::GeometryData geometryData;
             geometryData.mVertexBufferData = mesh.GetVertexBufferData();
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
-            geometryData.mWorldMatrices.reserve(meshes.size());
-            geometryData.mInverseTransposeWorldMatrices.reserve(meshes.size());
+            geometryData.mWorldMatrices.reserve(drawableObjects.size());
+            geometryData.mInverseTransposeWorldMatrices.reserve(drawableObjects.size());
             geometryDataVector.emplace_back(geometryData);
         }
 
-        // Iterate over all drawable objects and fill buffers
-        materialProperties.reserve(materialProperties.size() + totalDataCount);
-        diffuseTextures.reserve(diffuseTextures.size() + totalDataCount);
-        for (const DrawableObject& drawableObject : drawableObjects) {
-            // Store material properties
-            materialProperties.push_back(drawableObject.GetMaterialProperties());
+        // Iterate all the meses and store data for all the drawable objects.
+        for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
+            GeometryCommandListRecorder::GeometryData& geometryData =
+                geometryDataVector[geometryDataVectorOffset + i];
 
-            // Store textures
-            const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
-            diffuseTextures.push_back(&materialTechnique.GetDiffuseTexture());
+            for (const DrawableObject& drawableObject : drawableObjects) {
+                // Store material properties
+                materialProperties.push_back(drawableObject.GetMaterialProperties());
 
-            // Store world matrix
-            const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
-            XMFLOAT4X4 inverseTransposeWorldMatrix;
-            MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
-            for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
-                GeometryCommandListRecorder::GeometryData& geometryData =
-                    geometryDataVector[geometryDataVectorOffset + i];
+                // Store textures
+                const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
+                diffuseTextures.push_back(&materialTechnique.GetDiffuseTexture());
 
+                // Store matrices
+                const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
+                XMFLOAT4X4 inverseTransposeWorldMatrix;
+                MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
                 geometryData.mWorldMatrices.push_back(worldMatrix);
                 geometryData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
             }
         }
 
-        geometryDataVectorOffset += totalDataCount;
+        geometryDataVectorOffset += meshes.size();
     }
 
-    commandListRecorder->Init(geometryDataVector, materialProperties, diffuseTextures);
+    commandListRecorder->Init(geometryDataVector, 
+                              materialProperties, 
+                              diffuseTextures);
 
     commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
 }
@@ -382,41 +381,41 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryCommandListRe
             GeometryCommandListRecorder::GeometryData geometryData;
             geometryData.mVertexBufferData = mesh.GetVertexBufferData();
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
-            geometryData.mWorldMatrices.reserve(meshes.size());
-            geometryData.mInverseTransposeWorldMatrices.reserve(meshes.size());
+            geometryData.mWorldMatrices.reserve(drawableObjects.size());
+            geometryData.mInverseTransposeWorldMatrices.reserve(drawableObjects.size());
             geometryDataVector.emplace_back(geometryData);
         }
 
-        // Iterate over all drawable objects and fill buffers
-        materialProperties.reserve(materialProperties.size() + totalDataCount);
-        diffuseTextures.reserve(diffuseTextures.size() + totalDataCount);
-        normalTextures.reserve(normalTextures.size() + totalDataCount);
-        for (const DrawableObject& drawableObject : drawableObjects) {
-            // Store material properties
-            materialProperties.push_back(drawableObject.GetMaterialProperties());
+        // Iterate all the meses and store data for all the drawable objects.
+        for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
+            GeometryCommandListRecorder::GeometryData& geometryData =
+                geometryDataVector[geometryDataVectorOffset + i];
 
-            // Store textures
-            const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
-            diffuseTextures.push_back(&materialTechnique.GetDiffuseTexture());
-            normalTextures.push_back(&materialTechnique.GetNormalTexture());
+            for (const DrawableObject& drawableObject : drawableObjects) {
+                // Store material properties
+                materialProperties.push_back(drawableObject.GetMaterialProperties());
 
-            // Store world matrix
-            const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
-            XMFLOAT4X4 inverseTransposeWorldMatrix;
-            MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
-            for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
-                GeometryCommandListRecorder::GeometryData& geometryData =
-                    geometryDataVector[geometryDataVectorOffset + i];
+                // Store textures
+                const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
+                diffuseTextures.push_back(&materialTechnique.GetDiffuseTexture());
+                normalTextures.push_back(&materialTechnique.GetNormalTexture());
 
+                // Store matrices
+                const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
+                XMFLOAT4X4 inverseTransposeWorldMatrix;
+                MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
                 geometryData.mWorldMatrices.push_back(worldMatrix);
                 geometryData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
             }
         }
 
-        geometryDataVectorOffset += totalDataCount;
+        geometryDataVectorOffset += meshes.size();
     }
 
-    commandListRecorder->Init(geometryDataVector, materialProperties, diffuseTextures, normalTextures);
+    commandListRecorder->Init(geometryDataVector, 
+                              materialProperties, 
+                              diffuseTextures, 
+                              normalTextures);
 
     commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
 }
@@ -455,40 +454,36 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryCommandListRe
             GeometryCommandListRecorder::GeometryData geometryData;
             geometryData.mVertexBufferData = mesh.GetVertexBufferData();
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
-            geometryData.mWorldMatrices.reserve(meshes.size());
-            geometryData.mInverseTransposeWorldMatrices.reserve(meshes.size());
+            geometryData.mWorldMatrices.reserve(drawableObjects.size());
+            geometryData.mInverseTransposeWorldMatrices.reserve(drawableObjects.size());
             geometryDataVector.emplace_back(geometryData);
         }
+        
+        // Iterate all the meses and store data for all the drawable objects.
+        for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
+            GeometryCommandListRecorder::GeometryData& geometryData =
+                geometryDataVector[geometryDataVectorOffset + i];
 
-        // Iterate over all drawable objects and fill buffers
-        materialProperties.reserve(materialProperties.size() + totalDataCount);
-        diffuseTextures.reserve(diffuseTextures.size() + totalDataCount);
-        normalTextures.reserve(normalTextures.size() + totalDataCount);
-        heightTextures.reserve(heightTextures.size() + totalDataCount);
-        for (const DrawableObject& drawableObject : drawableObjects) {
-            // Store material properties
-            materialProperties.push_back(drawableObject.GetMaterialProperties());
+            for (const DrawableObject& drawableObject : drawableObjects) {
+                // Store material properties
+                materialProperties.push_back(drawableObject.GetMaterialProperties());
 
-            // Store textures
-            const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
-            diffuseTextures.push_back(&materialTechnique.GetDiffuseTexture());
-            normalTextures.push_back(&materialTechnique.GetNormalTexture());
-            heightTextures.push_back(&materialTechnique.GetHeightTexture());
+                // Store textures
+                const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
+                diffuseTextures.push_back(&materialTechnique.GetDiffuseTexture());
+                normalTextures.push_back(&materialTechnique.GetNormalTexture());
+                heightTextures.push_back(&materialTechnique.GetHeightTexture());
 
-            // Store world matrix
-            const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
-            XMFLOAT4X4 inverseTransposeWorldMatrix;
-            MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
-            for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
-                GeometryCommandListRecorder::GeometryData& geometryData =
-                    geometryDataVector[geometryDataVectorOffset + i];
-
+                // Store matrices
+                const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
+                XMFLOAT4X4 inverseTransposeWorldMatrix;
+                MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
                 geometryData.mWorldMatrices.push_back(worldMatrix);
                 geometryData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
             }
         }
 
-        geometryDataVectorOffset += totalDataCount;
+        geometryDataVectorOffset += meshes.size();
     }
 
     commandListRecorder->Init(geometryDataVector,

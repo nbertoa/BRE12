@@ -2,3 +2,4 @@ models:
   unreal: resources/models/unreal.obj
   floor: resources/models/floor.obj
   mitsubaSphere: resources/models/mitsubaSphere.obj
+  mitsuba: resources/models/mitsuba.obj

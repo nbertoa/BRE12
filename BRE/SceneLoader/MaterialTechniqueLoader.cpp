@@ -55,7 +55,9 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
             pairSecondValue = mapIt->second.as<std::string>();
 
             const YAML::Node referenceRootNode = YAML::LoadFile(pairSecondValue);
-            BRE_CHECK_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
+            const std::wstring errorMsg =
+                L"Failed to open yaml file: " + StringUtils::AnsiToWideString(pairSecondValue);
+            BRE_CHECK_MSG(referenceRootNode.IsDefined(), errorMsg.c_str());
             BRE_CHECK_MSG(referenceRootNode["material techniques"].IsDefined(),
                            L"Reference file must have 'material techniques' field");
             LoadMaterialTechniques(referenceRootNode);
@@ -65,8 +67,10 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
 
 
         materialTechniqueName = mapIt->second.as<std::string>();
+        const std::wstring errorMsg =
+            L"Material technique name must be unique: " + StringUtils::AnsiToWideString(materialTechniqueName);
         BRE_CHECK_MSG(mMaterialTechniqueByName.find(materialTechniqueName) == mMaterialTechniqueByName.end(),
-                       L"Material technique name must be unique");
+                       errorMsg.c_str());
         ++mapIt;
 
         // Get material techniques settings (diffuse texture, normal texture, etc)
@@ -85,7 +89,9 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
 const MaterialTechnique& MaterialTechniqueLoader::GetMaterialTechnique(const std::string& name) const noexcept
 {
     std::unordered_map<std::string, MaterialTechnique>::const_iterator findIt = mMaterialTechniqueByName.find(name);
-    BRE_CHECK_MSG(findIt != mMaterialTechniqueByName.end(), L"Material technique name not found");
+    const std::wstring errorMsg =
+        L"Material technique name not found: " + StringUtils::AnsiToWideString(name);
+    BRE_CHECK_MSG(findIt != mMaterialTechniqueByName.end(), errorMsg.c_str());
 
     return findIt->second;
 }
@@ -103,7 +109,9 @@ void MaterialTechniqueLoader::UpdateMaterialTechnique(const std::string& materia
         materialTechnique.SetHeightTexture(&texture);
     } else {
         // To avoid warning about 'conditional expression is constant'. This is the same than false
-        BRE_CHECK_MSG(&materialTechniquePropertyName == nullptr, L"Unknown material technique field");
+        const std::wstring errorMsg =
+            L"Unknown material technique field: " + StringUtils::AnsiToWideString(materialTechniquePropertyName);
+        BRE_CHECK_MSG(&materialTechniquePropertyName == nullptr, errorMsg.c_str());
     }
 }
 }

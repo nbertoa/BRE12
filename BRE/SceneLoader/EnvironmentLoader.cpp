@@ -58,7 +58,9 @@ void EnvironmentLoader::UpdateEnvironmentTexture(const std::string& environmentP
         mSpecularPreConvolvedEnvironmentTexture = &texture;
     } else {
         // To avoid warning about 'conditional expression is constant'. This is the same than false
-        BRE_CHECK_MSG(&texture == nullptr, L"Unknown environment field");
+        const std::wstring errorMsg =
+            L"Unknown environment field: " + StringUtils::AnsiToWideString(environmentPropertyName);
+        BRE_CHECK_MSG(&texture == nullptr, errorMsg.c_str());
     }
 }
 }

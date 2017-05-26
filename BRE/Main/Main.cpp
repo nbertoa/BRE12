@@ -26,6 +26,7 @@
 #include <SceneLoader\SceneLoader.h>
 #include <SceneLoader\SettingsLoader.h>
 #include <ShaderManager\ShaderManager.h>
+#include <Utils\DebugUtils.h>
 
 #if defined(DEBUG) || defined(_DEBUG)                                                                                                                                                            
 #define _CRTDBG_MAP_ALLOC          
@@ -49,7 +50,9 @@ void InitSystems(const HINSTANCE moduleInstanceHandle,
 
     // Load settings
     const YAML::Node rootNode = YAML::LoadFile(sceneFilePath);
-    BRE_CHECK_MSG(rootNode.IsDefined(), L"Failed to open yaml file");
+    const std::wstring errorMsg = 
+        L"Failed to open yaml file: " + StringUtils::AnsiToWideString(sceneFilePath);
+    BRE_CHECK_MSG(rootNode.IsDefined(), errorMsg.c_str());
     SettingsLoader settingsLoader;
     settingsLoader.LoadSettings(rootNode);
 
@@ -96,7 +99,7 @@ WINAPI WinMain(_In_ HINSTANCE moduleInstanceHandle,
                _In_ LPSTR /*commandLine*/,
                _In_ int /*showCommand*/)
 {
-    const char* sceneFilePath = "resources/scenes/showcase_normal.yml";
+    const char* sceneFilePath = "resources/scenes/showcase2.yml";
 
     tbb::task_scheduler_init taskSchedulerInit;
 

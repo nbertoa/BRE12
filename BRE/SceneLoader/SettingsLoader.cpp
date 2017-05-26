@@ -98,7 +98,9 @@ SettingsLoader::LoadSettings(const YAML::Node& rootNode) noexcept
                                  GeometrySettings::sHeightScale);
         } else {
             // To avoid warning about 'conditional expression is constant'. This is the same than false
-            BRE_CHECK_MSG(&propertyName == nullptr, L"Unknown settings field");
+            const std::wstring errorMsg =
+                L"Unknown settings field: " + StringUtils::AnsiToWideString(propertyName);
+            BRE_CHECK_MSG(&propertyName == nullptr, errorMsg.c_str());
         }
 
         ++mapIt;
