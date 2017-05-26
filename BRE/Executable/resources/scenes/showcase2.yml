@@ -311,7 +311,7 @@ camera:
     up vector: [0.0, 1.0, 0.0]   
     
 settings:
-  - height mapping height scale: 8.0
+  - height mapping height scale: 12.0
     height mapping min tessellation distance: 1.0
     height mapping max tessellation distance: 1.0
     height mapping min tessellation factor: 25.0
