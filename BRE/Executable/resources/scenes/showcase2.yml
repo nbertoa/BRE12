@@ -53,15 +53,39 @@ material properties:
   - name: white
     base color: [1.0, 1.0, 1.0]
     metal mask: 0.0
-    smoothness: 0.9
-  - name: light_x
+    smoothness: 0.6
+  - name: light_pink
     base color: [0.8, 0.0, 0.8]
     metal mask: 0.0
-    smoothness: 0.8
-  - name: light_x_metal
+    smoothness: 0.7
+  - name: light_pink_metal
     base color: [0.8, 0.0, 0.8]
     metal mask: 1.0
-    smoothness: 0.8
+    smoothness: 0.7
+  - name: gray
+    base color: [0.5, 0.5, 0.5]
+    metal mask: 0.0
+    smoothness: 0.5
+  - name: gray_metal
+    base color: [0.5, 0.5, 0.5]
+    metal mask: 1.0
+    smoothness: 0.5
+  - name: white2
+    base color: [1.0, 1.0, 1.0]
+    metal mask: 0.0
+    smoothness: 0.9
+  - name: white_metal
+    base color: [1.0, 1.0, 1.0]
+    metal mask: 1.0
+    smoothness: 0.9
+  - name: black
+    base color: [0.2, 0.2, 0.2]
+    metal mask: 0.0
+    smoothness: 1.0
+  - name: black_metal
+    base color: [0.2, 0.2, 0.2]
+    metal mask: 1.0
+    smoothness: 1.0
   
 material techniques:
   - reference: resources/scenes/helpers/all_material_techniques.yml
@@ -69,7 +93,7 @@ material techniques:
 drawable objects:
   - model: mitsubaFloor
     material properties: white
-    material technique: rock_normal
+    material technique: rock_height
     translation: [0.0, 0.0, 0.0]
     rotation: [0.0, 0.0, 0.0]
     scale: [15.0, 15.0, 15.0]
@@ -85,7 +109,7 @@ drawable objects:
     scale: [1.0, 1.0, 1.0]
   - model: mitsubaFloor
     material properties: white
-    material technique: rock2_normal
+    material technique: rock2_height
     translation: [200.0, 0.0, 0.0]
     rotation: [0.0, 0.0, 0.0]
     scale: [15.0, 15.0, 15.0]
@@ -101,7 +125,7 @@ drawable objects:
     scale: [1.0, 1.0, 1.0]
   - model: mitsubaFloor
     material properties: white
-    material technique: rock3_normal
+    material technique: rock3_height
     translation: [400.0, 0.0, 0.0]
     rotation: [0.0, 0.0, 0.0]
     scale: [15.0, 15.0, 15.0]
@@ -117,7 +141,7 @@ drawable objects:
     scale: [1.0, 1.0, 1.0]
   - model: mitsubaFloor
     material properties: white
-    material technique: rock4_normal
+    material technique: rock4_height
     translation: [600.0, 0.0, 0.0]
     rotation: [0.0, 0.0, 0.0]
     scale: [15.0, 15.0, 15.0]
@@ -133,7 +157,7 @@ drawable objects:
     scale: [1.0, 1.0, 1.0]
   - model: mitsubaFloor
     material properties: white
-    material technique: rock5_normal
+    material technique: rock5_height
     translation: [800.0, 0.0, 0.0]
     rotation: [0.0, 0.0, 0.0]
     scale: [15.0, 15.0, 15.0]
@@ -149,18 +173,130 @@ drawable objects:
     scale: [1.0, 1.0, 1.0]
   - model: mitsubaFloor
     material properties: white
-    material technique: rock6_normal
+    material technique: cobblestone_height
     translation: [1000.0, 0.0, 0.0]
     rotation: [0.0, 0.0, 0.0]
     scale: [15.0, 15.0, 15.0]
   - model: mitsubaSphere
-    material properties: light_x
+    material properties: light_pink
     translation: [950.0, 0.0, 0.0]
     rotation: [0.0, 0.0, 0.0]
     scale: [1.0, 1.0, 1.0]
   - model: mitsubaSphere
-    material properties: light_x_metal
+    material properties: light_pink_metal
     translation: [1050.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaFloor
+    material properties: white
+    material technique: cobblestone2_height
+    translation: [1200.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: gray
+    translation: [1150.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: gray_metal
+    translation: [1250.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaFloor
+    material properties: white
+    material technique: cobblestone3_height
+    translation: [1400.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: white2
+    translation: [1350.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: white_metal
+    translation: [1450.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaFloor
+    material properties: white
+    material technique: cobblestone4_height
+    translation: [1600.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: black
+    translation: [1550.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: black_metal
+    translation: [1650.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaFloor
+    material properties: white
+    material technique: cobblestone5_height
+    translation: [1800.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: gold8
+    translation: [1750.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: gold4
+    translation: [1850.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaFloor
+    material properties: white
+    material technique: brick_height
+    translation: [2000.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: silver8
+    translation: [1950.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: silver4
+    translation: [2050.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaFloor
+    material properties: white
+    material technique: brick2_height
+    translation: [2200.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: copper7
+    translation: [2150.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: copper9
+    translation: [2250.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaFloor
+    material properties: white
+    material technique: brick3_height
+    translation: [2400.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [15.0, 15.0, 15.0]
+  - model: mitsubaSphere
+    material properties: titanium2
+    translation: [2350.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+  - model: mitsubaSphere
+    material properties: titanium8
+    translation: [2450.0, 0.0, 0.0]
     rotation: [0.0, 0.0, 0.0]
     scale: [1.0, 1.0, 1.0]
     
@@ -173,3 +309,10 @@ camera:
   - position: [0.0, 100.0, -100.0]
     look vector: [0.0, -1.0, 1.0]
     up vector: [0.0, 1.0, 0.0]   
+    
+settings:
+  - height mapping height scale: 8.0
+    height mapping min tessellation distance: 1.0
+    height mapping max tessellation distance: 1.0
+    height mapping min tessellation factor: 25.0
+    height mapping max tessellation factor: 25.0

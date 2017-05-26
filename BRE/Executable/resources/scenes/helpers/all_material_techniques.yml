@@ -26,15 +26,6 @@ material techniques:
     diffuse texture: brick3
     normal texture: brick3_normal
     height texture: brick3_height
-  - name: brick4
-    diffuse texture: brick4
-  - name: brick4_normal
-    diffuse texture: brick4
-    normal texture: brick4_normal
-  - name: brick4_height
-    diffuse texture: brick4
-    normal texture: brick4_normal
-    height texture: brick4_height
   - name: cobblestone
     diffuse texture: cobblestone
   - name: cobblestone_normal
@@ -53,24 +44,33 @@ material techniques:
     diffuse texture: cobblestone2
     normal texture: cobblestone2_normal
     height texture: cobblestone2_height
-  - name: asphalt
-    diffuse texture: asphalt
-  - name: asphalt_normal
-    diffuse texture: asphalt    
-    normal texture: asphalt_normal
-  - name: asphalt_height
-    diffuse texture: asphalt    
-    normal texture: asphalt_normal
-    height texture: asphalt_height
-  - name: concrete
-    diffuse texture: concrete   
-  - name: concrete_normal
-    diffuse texture: concrete     
-    normal texture: concrete_normal
-  - name: concrete_height
-    diffuse texture: concrete     
-    normal texture: concrete_normal
-    height texture: concrete_height
+  - name: cobblestone3
+    diffuse texture: cobblestone3
+  - name: cobblestone3_normal
+    diffuse texture: cobblestone3
+    normal texture: cobblestone3_normal
+  - name: cobblestone3_height
+    diffuse texture: cobblestone3
+    normal texture: cobblestone3_normal
+    height texture: cobblestone3_height
+  - name: cobblestone4
+    diffuse texture: cobblestone4
+  - name: cobblestone4_normal
+    diffuse texture: cobblestone4
+    normal texture: cobblestone4_normal
+  - name: cobblestone4_height
+    diffuse texture: cobblestone4
+    normal texture: cobblestone4_normal
+    height texture: cobblestone4_height
+  - name: cobblestone5
+    diffuse texture: cobblestone5
+  - name: cobblestone5_normal
+    diffuse texture: cobblestone5
+    normal texture: cobblestone5_normal
+  - name: cobblestone5_height
+    diffuse texture: cobblestone5
+    normal texture: cobblestone5_normal
+    height texture: cobblestone5_height
   - name: metal
     diffuse texture: metal     
   - name: metal_normal
@@ -100,39 +100,37 @@ material techniques:
   - name: rock2_normal
     diffuse texture: rock2     
     normal texture: rock2_normal
+  - name: rock2_height
+    diffuse texture: rock2     
+    normal texture: rock2_normal
+    height texture: rock2_height
   - name: rock3
     diffuse texture: rock3
   - name: rock3_normal
     diffuse texture: rock3     
     normal texture: rock3_normal
+  - name: rock3_height
+    diffuse texture: rock3     
+    normal texture: rock3_normal
+    height texture: rock3_height
   - name: rock4
     diffuse texture: rock4
   - name: rock4_normal
     diffuse texture: rock4     
     normal texture: rock4_normal
+  - name: rock4_height
+    diffuse texture: rock4     
+    normal texture: rock4_normal
+    height texture: rock4_height
   - name: rock5
     diffuse texture: rock5
   - name: rock5_normal
     diffuse texture: rock5     
     normal texture: rock5_normal
-  - name: rock6
-    diffuse texture: rock6
-  - name: rock6_normal
-    diffuse texture: rock6     
-    normal texture: rock6_normal
-  - name: rock6_height
-    diffuse texture: rock6     
-    normal texture: rock6_normal
-    height texture: rock6_height
-  - name: sand
-    diffuse texture: sand 
-  - name: sand_normal
-    diffuse texture: sand      
-    normal texture: sand_normal
-  - name: sand_height
-    diffuse texture: sand      
-    normal texture: sand_normal
-    height texture: sand_height
+  - name: rock5_height
+    diffuse texture: rock5     
+    normal texture: rock5_normal
+    height texture: rock5_height
   - name: wood
     diffuse texture: wood    
   - name: wood_normal
