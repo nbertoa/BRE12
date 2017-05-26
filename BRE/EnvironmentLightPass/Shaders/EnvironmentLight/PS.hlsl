@@ -20,9 +20,9 @@ SamplerState TextureSampler : register (s0);
 Texture2D<float4> Normal_SmoothnessTexture : register (t0);
 Texture2D<float4> BaseColor_MetalMaskTexture : register (t1);
 Texture2D<float> DepthTexture : register (t2);
-TextureCube DiffuseCubeMapTexture : register(t3);
-TextureCube SpecularCubeMapTexture : register(t4);
-Texture2D<float> AmbientAccessibility : register (t5);
+TextureCube DiffuseIBLCubeMap : register(t3);
+TextureCube SpecularIBLCubeMap : register(t4);
+Texture2D<float> AmbientAccessibilityTexture : register (t5);
 
 struct Output {
     float4 mColor : SV_Target0;
@@ -39,7 +39,7 @@ Output main(const in Input input)
     const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
 
     // Ambient accessibility (1.0f - ambient occlussion factor)
-    const float ambientAccessibility = AmbientAccessibility.Load(fragmentScreenSpace);
+    const float ambientAccessibility = AmbientAccessibilityTexture.Load(fragmentScreenSpace);
 
     const float4 normal_smoothness = Normal_SmoothnessTexture.Load(fragmentScreenSpace);
 
@@ -65,37 +65,25 @@ Output main(const in Input input)
     // As we are working at view space, we do not need camera position to 
     // compute vector from geometry position to camera.
     const float3 fragmentPositionToCameraViewSpace = normalize(-fragmentPositionViewSpace);
+    
+    const float3 indirectDiffuseColor = DiffuseIBL(baseColor,
+                                                   metalMask,
+                                                   TextureSampler,
+                                                   DiffuseIBLCubeMap,
+                                                   normalWorldSpace);
 
-    // Diffuse reflection color.
-    // When we sample a cube map, we need to use data in world space, not view space.
-    const float3 diffuseReflection = DiffuseCubeMapTexture.Sample(TextureSampler, 
-                                                                  normalWorldSpace).rgb;
-    const float3 diffuseColor = DiffuseBrdf(baseColor, metalMask);
-    const float3 indirectFDiffuse = diffuseColor * diffuseReflection;
+    const float3 indirectSpecularColor = SpecularIBL(baseColor,
+                                                     metalMask,
+                                                     normal_smoothness.z,
+                                                     TextureSampler,
+                                                     SpecularIBLCubeMap,
+                                                     fragmentPositionToCameraViewSpace,
+                                                     fragmentPositionWorldSpace,
+                                                     gFrameCBuffer.mEyePositionWorldSpace.xyz,
+                                                     normalWorldSpace,
+                                                     normalViewSpace);
 
-    // Compute incident vector. 
-    // When we sample a cube map, we need to use data in world space, not view space.
-    const float3 incidentVectorWorldSpace = 
-        fragmentPositionWorldSpace - gFrameCBuffer.mEyePositionWorldSpace.xyz;
-    const float3 reflectionVectorWorldSpace = reflect(incidentVectorWorldSpace,
-                                                      normalWorldSpace);
-
-    // Our cube map has 10 mip map levels
-    const float smoothness = normal_smoothness.z;
-    const uint mipmap = (1.0f - smoothness) * 10.0f;
-    const float3 specularReflection = SpecularCubeMapTexture.SampleLevel(TextureSampler,
-                                                                         reflectionVectorWorldSpace, 
-                                                                         mipmap).rgb;
-
-    // Specular reflection color
-    const float3 dielectricColor = float3(0.04f, 0.04f, 0.04f);
-    const float3 f0 = lerp(dielectricColor, baseColor, metalMask);
-    const float3 F = F_Schlick(f0,
-                               1.0f,
-                               dot(fragmentPositionToCameraViewSpace, normalViewSpace));
-    const float3 indirectFSpecular = F * specularReflection;
-
-    const float3 color = indirectFDiffuse + indirectFSpecular;
+    const float3 color = indirectDiffuseColor + indirectSpecularColor;
 
 #ifdef DEBUG_AMBIENT_ACCESIBILITY
     output.mColor = float4(ambientAccessibility,
