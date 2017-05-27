@@ -217,8 +217,9 @@ DiffuseIBL(const float3 baseColor,
            const float3 normalWorldSpace)
 {
     // When we sample a cube map, we need to use data in world space, not view space.
-    const float3 diffuseReflection = diffuseIBLCubeMap.Sample(textureSampler,
-                                                              normalWorldSpace).rgb;
+    const float3 diffuseReflection = diffuseIBLCubeMap.SampleLevel(textureSampler,
+                                                                   normalWorldSpace,
+                                                                   0).rgb;
     const float3 diffuseColor = (1.0f - metalMask) * baseColor;
 
     return diffuseColor * diffuseReflection;
@@ -243,7 +244,7 @@ SpecularIBL(const float3 baseColor,
                                                       normalWorldSpace);
 
     // Our cube map has 10 mip map levels
-    const uint mipmap = (1.0f - smoothness) * 10.0f;
+    const int mipmap = (1.0f - smoothness) * 10.0f;
     const float3 specularReflection = specularIBLCubeMap.SampleLevel(textureSampler,
                                                                      reflectionVectorWorldSpace,
                                                                      mipmap).rgb;

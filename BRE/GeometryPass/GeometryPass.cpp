@@ -82,6 +82,7 @@ CreateGeometryBuffersAndRenderTargetViews(Microsoft::WRL::ComPtr<ID3D12Resource>
         D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor{};
         rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
         rtvDescriptor.Format = resourceDescriptor.Format;
+        resourceDescriptor.MipLevels = 1U;
         ID3D12Resource* resource = &ResourceManager::CreateCommittedResource(heapProps,
                                                                              D3D12_HEAP_FLAG_NONE,
                                                                              resourceDescriptor,

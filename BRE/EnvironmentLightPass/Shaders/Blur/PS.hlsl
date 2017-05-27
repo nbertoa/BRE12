@@ -38,7 +38,8 @@ Output main(const in Input input)
     for (uint i = 0U; i < gBlurCBuffer.mNoiseTextureDimension; ++i) {
         for (uint j = 0U; j < gBlurCBuffer.mNoiseTextureDimension; ++j) {
             const float2 offset = (hlim + float2(float(i), float(j))) * texelSize;
-            result += BufferTexture.Sample(TextureSampler, input.mUV + offset).r;
+            result += BufferTexture.Sample(TextureSampler, 
+                                           input.mUV + offset).r;
         }
     }
 
