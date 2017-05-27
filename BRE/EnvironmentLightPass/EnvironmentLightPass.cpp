@@ -120,7 +120,7 @@ EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    const std::uint32_t taskCount{ 5U };
+    std::uint32_t taskCount{ 5U };
     CommandListExecutor::Get().ResetExecutedCommandListCount();
 
     ExecuteBeginTask();
@@ -129,7 +129,9 @@ EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
     ExecuteMiddleTask();
     mBlurRecorder->RecordAndPushCommandLists();
 
-    ExecuteFinalTask();
+    if (ExecuteFinalTask()) {
+        ++taskCount;
+    }
     mEnvironmentLightRecorder->RecordAndPushCommandLists(frameCBuffer);
 
     // Wait until all previous tasks command lists are executed
@@ -248,7 +250,7 @@ EnvironmentLightPass::ExecuteMiddleTask() noexcept
     CommandListExecutor::Get().AddCommandList(commandList);
 }
 
-void
+bool
 EnvironmentLightPass::ExecuteFinalTask() noexcept
 {
     BRE_ASSERT(IsDataValid());
@@ -266,6 +268,10 @@ EnvironmentLightPass::ExecuteFinalTask() noexcept
         commandList.ResourceBarrier(barrierCount, barriers);
         BRE_CHECK_HR(commandList.Close());
         CommandListExecutor::Get().AddCommandList(commandList);
+
+        return true;
+    } else {
+        return false;
     }
 }
 }

@@ -60,9 +60,11 @@ private:
     void ExecuteMiddleTask() noexcept;
 
     ///
-    /// Executes final task for the pass
+    /// @brief Executes final task for the pass
+    /// @return Returns true if the final task command list was pushed to 
+    /// the CommandListExecutor. Otherwise, false.
     ///
-    void ExecuteFinalTask() noexcept;
+    bool ExecuteFinalTask() noexcept;
 
     CommandListPerFrame mBeginCommandListPerFrame;
     CommandListPerFrame mMiddleCommandListPerFrame;

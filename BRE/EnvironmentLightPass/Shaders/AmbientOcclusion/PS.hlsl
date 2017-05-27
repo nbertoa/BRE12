@@ -54,7 +54,7 @@ Output main(const in Input input)
     // along current fragment normal vector.
     const float3 noiseVec = NoiseTexture.SampleLevel(TextureSampler, 
                                                      noiseScale * input.mUV, 
-                                                     0).xyz * 2.0f - float3(1.0f, 1.0f, 1.0f);
+                                                     0).xyz * 2.0f - 1.0f;
     const float3 tangentViewSpace = normalize(noiseVec - normalViewSpace * dot(noiseVec, normalViewSpace));
     const float3 bitangentViewSpace = normalize(cross(normalViewSpace, tangentViewSpace));
     const float3x3 sampleKernelRotationMatrix = float3x3(tangentViewSpace,

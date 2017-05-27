@@ -35,7 +35,7 @@ Output main(const in Input input)
 
     // Normal (encoded in view space)
     const float3 normalObjectSpace = normalize(NormalTexture.Sample(TextureSampler, 
-                                                                    input.mUV).xyz * 2.0f - float3(1.0f, 1.0f, 1.0f));
+                                                                    input.mUV).xyz * 2.0f - 1.0f);
     const float3x3 tbnWorldSpace = float3x3(normalize(input.mTangentWorldSpace),
                                             normalize(input.mBinormalWorldSpace),
                                             normalize(input.mNormalWorldSpace));
