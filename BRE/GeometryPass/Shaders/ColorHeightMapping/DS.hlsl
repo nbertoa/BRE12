@@ -60,14 +60,9 @@ Output main(const HullShaderConstantOutput HSConstantOutput,
     float3 positionViewSpace = mul(float4(positionWorldSpace, 1.0f),
                                    gFrameCBuffer.mViewMatrix).xyz;
 
-    // Choose the mipmap level based on distance to the eye; specifically, choose the next miplevel every mipInterval units, and clamp the miplevel in [0, 6].
-    const float mipInterval = 20.0f;
-    const float mipLevel = clamp((length(positionViewSpace) - mipInterval) / mipInterval,
-                                 0.0f,
-                                 6.0f);
     const float height = HeightTexture.SampleLevel(TextureSampler,
                                                    output.mUV,
-                                                   mipLevel).x;
+                                                   0).x;
     const float displacement = (gHeightMappingCBuffer.mHeightScale * (height - 1));
 
     // Offset vertex along normal

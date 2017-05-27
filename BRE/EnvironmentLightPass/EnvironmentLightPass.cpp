@@ -31,7 +31,7 @@ CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceInitialSta
     resourceDescriptor.Width = ApplicationSettings::sWindowWidth;
     resourceDescriptor.Height = ApplicationSettings::sWindowHeight;
     resourceDescriptor.DepthOrArraySize = 1U;
-    resourceDescriptor.MipLevels = 0U;
+    resourceDescriptor.MipLevels = 1U;
     resourceDescriptor.SampleDesc.Count = 1U;
     resourceDescriptor.SampleDesc.Quality = 0U;
     resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;

@@ -66,17 +66,19 @@
 // Schlick fresnel:
 // f0 is the normal incidence reflectance (F() at 0 degrees, used as specular color)
 // f90 is the reflectance at 90 degrees
-float3 F_Schlick(const float3 f0,
-                 const float f90,
-                 const float dotLH)
+float3
+F_Schlick(const float3 f0,
+          const float f90,
+          const float dotLH)
 {
     return f0 + (f90 - f0) * pow(1.0f - dotLH, 5.0f);
 }
 
-float Fd_Disney(const float dotVN,
-                const float dotLN,
-                const float dotLH,
-                float linearRoughness)
+float
+Fd_Disney(const float dotVN,
+          const float dotLN,
+          const float dotLH,
+          float linearRoughness)
 {
     float energyBias = lerp(0.0f, 0.5f, linearRoughness);
     float energyFactor = lerp(1.0, 1.0 / 1.51, linearRoughness);
@@ -112,8 +114,9 @@ float Fd_Disney(const float dotVN,
 
 // GGX/Trowbridge-Reitz
 // m is roughness
-float D_TR(const float m,
-           const float dotNH)
+float
+D_TR(const float m,
+     const float dotNH)
 {
     const float m2 = m * m;
     const float denom = dotNH * dotNH * (m2 - 1.0f) + 1.0f;
@@ -143,9 +146,10 @@ float D_TR(const float m,
 // are not accounted for, then the active area may exceed the total area, an obvious impossibility which
 // can lead to the BRDF not conserving energy, in some cases by a huge amount
 
-float V_SmithGGXCorrelated(float dotNL,
-                           float dotNV,
-                           float alphaG)
+float
+V_SmithGGXCorrelated(float dotNL,
+                     float dotNV,
+                     float alphaG)
 {
     // Original formulation of G_SmithGGX Correlated
     // lambda_v = (-1 + sqrt ( alphaG2 * (1 - dotNL2 ) / dotNL2 + 1)) * 0.5 f;
@@ -162,9 +166,10 @@ float V_SmithGGXCorrelated(float dotNL,
     return 0.5f / (Lambda_GGXV + Lambda_GGXL);
 }
 
-float G_SmithGGX(const float dotNL,
-                 const float dotNV,
-                 float alpha)
+float
+G_SmithGGX(const float dotNL,
+           const float dotNV,
+           float alpha)
 {
     const float alphaSqr = alpha * alpha;
     const float G_V = dotNV + sqrt((dotNV - dotNV * alphaSqr) * dotNV + alphaSqr);
@@ -178,15 +183,17 @@ float G_SmithGGX(const float dotNL,
 //
 
 // Lambertian diffuse term
-float3 Fd_Lambert(const float3 diffuseColor)
+float3
+Fd_Lambert(const float3 diffuseColor)
 {
     return diffuseColor / PI;
 }
 
-float Fr_DisneyDiffuse(const float dotNV,
-                       const float dotNL,
-                       const float dotLH,
-                       const float linearRoughness)
+float
+Fr_DisneyDiffuse(const float dotNV,
+                 const float dotNL,
+                 const float dotLH,
+                 const float linearRoughness)
 {
     const float energyBias = lerp(0, 0.5, linearRoughness);
     const float energyFactor = lerp(1.0, 1.0 / 1.51, linearRoughness);
@@ -199,22 +206,78 @@ float Fr_DisneyDiffuse(const float dotNV,
 }
 
 //
+// Image Based Lighting
+//
+
+float3
+DiffuseIBL(const float3 baseColor,
+           const float metalMask,
+           SamplerState textureSampler,
+           TextureCube diffuseIBLCubeMap,
+           const float3 normalWorldSpace)
+{
+    // When we sample a cube map, we need to use data in world space, not view space.
+    const float3 diffuseReflection = diffuseIBLCubeMap.SampleLevel(textureSampler,
+                                                                   normalWorldSpace,
+                                                                   0).rgb;
+    const float3 diffuseColor = (1.0f - metalMask) * baseColor;
+
+    return diffuseColor * diffuseReflection;
+}
+
+float3
+SpecularIBL(const float3 baseColor,
+            const float metalMask,
+            const float smoothness,
+            SamplerState textureSampler,
+            TextureCube specularIBLCubeMap,
+            const float3 viewVectorViewSpace,
+            const float3 positionWorldSpace,
+            const float3 eyePositionWorldSpace,
+            const float3 normalWorldSpace,
+            const float3 normalViewSpace)
+{
+    // Compute incident vector. 
+    // When we sample a cube map, we need to use data in world space, not view space.
+    const float3 incidentVectorWorldSpace = positionWorldSpace - eyePositionWorldSpace;
+    const float3 reflectionVectorWorldSpace = reflect(incidentVectorWorldSpace,
+                                                      normalWorldSpace);
+
+    // Our cube map has 10 mip map levels
+    const int mipmap = (1.0f - smoothness) * 10.0f;
+    const float3 specularReflection = specularIBLCubeMap.SampleLevel(textureSampler,
+                                                                     reflectionVectorWorldSpace,
+                                                                     mipmap).rgb;
+
+    // Specular reflection color
+    const float3 dielectricColor = float3(0.04f, 0.04f, 0.04f);
+    const float3 f0 = lerp(dielectricColor, baseColor, metalMask);
+    const float3 F = F_Schlick(f0,
+                               1.0f,
+                               dot(viewVectorViewSpace, normalViewSpace));
+
+    return F * specularReflection;
+}
+
+//
 // BRDF
 //
 
-float3 DiffuseBrdf(const float3 baseColor,
-                   const float metalMask)
+float3
+DiffuseBrdf(const float3 baseColor,
+            const float metalMask)
 {
     const float3 diffuseColor = (1.0f - metalMask) * baseColor;
     return Fd_Lambert(diffuseColor);
 }
 
-float3 SpecularBrdf(const float3 N,
-                    const float3 V,
-                    const float3 L,
-                    const float3 baseColor,
-                    const float smoothness,
-                    const float metalMask)
+float3
+SpecularBrdf(const float3 N,
+             const float3 V,
+             const float3 L,
+             const float3 baseColor,
+             const float smoothness,
+             const float metalMask)
 {
     const float roughness = 1.0f - smoothness;
 

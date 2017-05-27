@@ -7,7 +7,7 @@
 //#define SKIP_AMBIENT_OCCLUSION
 
 struct Input {
-    float4 mPositionScreenSpace : SV_POSITION;
+    float4 mPositionNDC : SV_POSITION;
     float3 mRayViewSpace : VIEW_RAY;
     float2 mUV : TEXCOORD;
 };
@@ -38,22 +38,23 @@ Output main(const in Input input)
         float2(gAmbientOcclusionCBuffer.mScreenWidth / gAmbientOcclusionCBuffer.mNoiseTextureDimension, 
                gAmbientOcclusionCBuffer.mScreenHeight / gAmbientOcclusionCBuffer.mNoiseTextureDimension);
 
-    const int3 fragmentScreenSpace = int3(input.mPositionScreenSpace.xy, 0);
+    const int3 fragmentPositionNDC = int3(input.mPositionNDC.xy, 0);
 
-    const float fragmentZNDC = DepthTexture.Load(fragmentScreenSpace);
+    const float fragmentZNDC = DepthTexture.Load(fragmentPositionNDC);
     const float3 rayViewSpace = normalize(input.mRayViewSpace);
     const float4 fragmentPositionViewSpace = float4(ViewRayToViewPosition(rayViewSpace,
                                                                           fragmentZNDC,
                                                                           gFrameCBuffer.mProjectionMatrix),
                                                     1.0f);
 
-    const float2 normal = Normal_SmoothnessTexture.Load(fragmentScreenSpace).xy;
+    const float2 normal = Normal_SmoothnessTexture.Load(fragmentPositionNDC).xy;
     const float3 normalViewSpace = normalize(Decode(normal));
 
-    // Build a matrix to reorient the sample kernel
+    // Build a matrix to reorient the sample kerne
     // along current fragment normal vector.
     const float3 noiseVec = NoiseTexture.SampleLevel(TextureSampler, 
-                                                     noiseScale * input.mUV, 0.0f).xyz * 2.0f - 1.0f;
+                                                     noiseScale * input.mUV, 
+                                                     0).xyz * 2.0f - float3(1.0f, 1.0f, 1.0f);
     const float3 tangentViewSpace = normalize(noiseVec - normalViewSpace * dot(noiseVec, normalViewSpace));
     const float3 bitangentViewSpace = normalize(cross(normalViewSpace, tangentViewSpace));
     const float3x3 sampleKernelRotationMatrix = float3x3(tangentViewSpace,
