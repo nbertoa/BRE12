@@ -72,7 +72,7 @@ void InitSystems(const HINSTANCE moduleInstanceHandle,
     DepthStencilDescriptorManager::Init();
     RenderTargetDescriptorManager::Init(RENDER_TARGET_DESCRIPTOR_HEAP_SIZE);
 
-    //ShowCursor(false);
+    ShowCursor(false);
 }
 
 ///
