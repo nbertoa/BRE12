@@ -161,6 +161,10 @@ ResourceManager::CreateCommittedResource(const D3D12_HEAP_PROPERTIES& heapProper
         break;
     case ResourceStateTrackingType::NO_TRACKING:
         break;
+    case ResourceStateTrackingType::SUBRESOURCE_TRACKING:
+        ResourceStateManager::AddSubresourceTracking(*resource,
+                                                     resourceStates);
+        break;
     default:
         BRE_ASSERT(false && "Unknown ResourceStateTrackingType");
         break;

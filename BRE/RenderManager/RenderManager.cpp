@@ -203,12 +203,14 @@ RenderManager::InitPasses(Scene& scene) noexcept
     BRE_ASSERT(diffuseIrradianceCubeMap != nullptr);
     BRE_ASSERT(specularPreConvolvedCubeMap != nullptr);
 
+    mReflectionPass.Init(*mDepthBuffer);
+
     mEnvironmentLightPass.Init(*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK],
                                *mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS],
                                *mDepthBuffer,
                                *diffuseIrradianceCubeMap,
                                *specularPreConvolvedCubeMap,
-                               mIntermediateColorBuffer1RenderTargetView);
+                               mIntermediateColorBuffer1RenderTargetView);    
 
     mSkyBoxPass.Init(*skyBoxCubeMap,
                      *mDepthBuffer,
@@ -246,6 +248,7 @@ RenderManager::execute()
 
         mGeometryPass.Execute(mFrameCBuffer);
         mEnvironmentLightPass.Execute(mFrameCBuffer);
+        mReflectionPass.Execute();
         mSkyBoxPass.Execute(mFrameCBuffer);
         mToneMappingPass.Execute();
         mPostProcessPass.Execute(*GetCurrentFrameBuffer(), GetCurrentFrameBufferCpuDesc());

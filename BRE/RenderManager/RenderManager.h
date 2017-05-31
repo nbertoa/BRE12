@@ -5,12 +5,13 @@
 #include <tbb/task.h>
 #include <wrl.h>
 
+#include <ApplicationSettings\ApplicationSettings.h>
 #include <CommandManager\CommandListPerFrame.h>
 #include <Camera/Camera.h>
 #include <EnvironmentLightPass\EnvironmentLightPass.h>
 #include <GeometryPass\GeometryPass.h>
 #include <PostProcesspass\PostProcesspass.h>
-#include <ApplicationSettings\ApplicationSettings.h>
+#include <ReflectionPass\ReflectionPass.h>
 #include <SkyBoxPass\SkyBoxPass.h>
 #include <ShaderUtils\CBuffers.h>
 #include <ToneMappingPass\ToneMappingPass.h>
@@ -149,6 +150,7 @@ private:
     // Passes
     GeometryPass mGeometryPass;
     EnvironmentLightPass mEnvironmentLightPass;
+    ReflectionPass mReflectionPass;
     SkyBoxPass mSkyBoxPass;
     ToneMappingPass mToneMappingPass;
     PostProcessPass mPostProcessPass;

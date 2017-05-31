@@ -34,7 +34,7 @@
 
 namespace BRE {
 namespace {
-const std::uint32_t RENDER_TARGET_DESCRIPTOR_HEAP_SIZE = 10U;
+const std::uint32_t RENDER_TARGET_DESCRIPTOR_HEAP_SIZE = 30U;
 const std::uint32_t CBV_SRV_UAV_DESCRIPTOR_HEAP_SIZE = 3000U;
 
 ///
