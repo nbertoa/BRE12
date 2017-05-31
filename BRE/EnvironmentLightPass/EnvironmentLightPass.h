@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <wrl.h>
 
 #include <CommandManager\CommandListPerFrame.h>
 #include <EnvironmentLightPass\AmbientOcclusionCommandListRecorder.h>
@@ -70,10 +69,10 @@ private:
     CommandListPerFrame mMiddleCommandListPerFrame;
     CommandListPerFrame mFinalCommandListPerFrame;
 
-    Microsoft::WRL::ComPtr<ID3D12Resource> mAmbientAccessibilityBuffer;
+    ID3D12Resource* mAmbientAccessibilityBuffer{ nullptr };
     D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetView{ 0UL };
 
-    Microsoft::WRL::ComPtr<ID3D12Resource> mBlurBuffer;
+    ID3D12Resource* mBlurBuffer{ nullptr };
     D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRenderTargetView{ 0UL };
 
     std::unique_ptr<AmbientOcclusionCommandListRecorder> mAmbientOcclusionRecorder;

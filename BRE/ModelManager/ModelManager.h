@@ -42,8 +42,8 @@ public:
     ///
     static Model& LoadModel(const char* modelFilename,
                             ID3D12GraphicsCommandList& commandList,
-                            Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                            Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
+                            ID3D12Resource* &uploadVertexBuffer,
+                            ID3D12Resource* &uploadIndexBuffer) noexcept;
 
     ///
     /// @brief Create a box centered at the origin
@@ -69,8 +69,8 @@ public:
                             const float depth,
                             const std::uint32_t numSubdivisions,
                             ID3D12GraphicsCommandList& commandList,
-                            Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                            Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
+                            ID3D12Resource* &uploadVertexBuffer,
+                            ID3D12Resource* &uploadIndexBuffer) noexcept;
 
     ///
     /// @brief Create a sphere centered at the origin
@@ -94,8 +94,8 @@ public:
                                const std::uint32_t sliceCount,
                                const std::uint32_t stackCount,
                                ID3D12GraphicsCommandList& commandList,
-                               Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                               Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
+                               ID3D12Resource* &uploadVertexBuffer,
+                               ID3D12Resource* &uploadIndexBuffer) noexcept;
 
     ///
     /// @brief Create a geosphere centered at the origin
@@ -117,8 +117,8 @@ public:
     static Model& CreateGeosphere(const float radius,
                                   const std::uint32_t numSubdivisions,
                                   ID3D12GraphicsCommandList& commandList,
-                                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
+                                  ID3D12Resource* &uploadVertexBuffer,
+                                  ID3D12Resource* &uploadIndexBuffer) noexcept;
 
     ///
     /// @brief Create a cylinder centered at the origin
@@ -146,8 +146,8 @@ public:
                                  const std::uint32_t sliceCount,
                                  const std::uint32_t stackCount,
                                  ID3D12GraphicsCommandList& commandList,
-                                 Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                                 Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
+                                 ID3D12Resource* &uploadVertexBuffer,
+                                 ID3D12Resource* &uploadIndexBuffer) noexcept;
 
     ///
     /// @brief Create a rows X columns grid in the xz-plane centered at the origin
@@ -173,8 +173,8 @@ public:
                              const std::uint32_t rows,
                              const std::uint32_t columns,
                              ID3D12GraphicsCommandList& commandList,
-                             Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                             Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept;
+                             ID3D12Resource* &uploadVertexBuffer,
+                             ID3D12Resource* &uploadIndexBuffer) noexcept;
 
 private:
     static tbb::concurrent_unordered_set<Model*> mModels;

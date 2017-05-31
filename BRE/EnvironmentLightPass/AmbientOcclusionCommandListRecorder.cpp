@@ -53,9 +53,9 @@ GenerateSampleKernel(const std::uint32_t sampleKernelSize,
     const float sampleKernelSizeFloat = static_cast<float>(sampleKernelSize);
     XMVECTOR vec;
     for (std::uint32_t i = 0U; i < sampleKernelSize; ++i) {
-        const float x = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
-        const float y = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
-        const float z = MathUtils::RandomFloatInInverval(0.0f, 1.0f);
+        const float x = MathUtils::RandomFloatInInterval(-1.0f, 1.0f);
+        const float y = MathUtils::RandomFloatInInterval(-1.0f, 1.0f);
+        const float z = MathUtils::RandomFloatInInterval(0.0f, 1.0f);
         sampleKernel.push_back(XMFLOAT4(x, y, z, 0.0f));
         XMFLOAT4& currentSample = sampleKernel.back();
         vec = XMLoadFloat4(&currentSample);
@@ -90,8 +90,8 @@ GenerateNoise(const std::uint32_t numSamples,
     noiseVector.reserve(numSamples);
     XMVECTOR vec;
     for (std::uint32_t i = 0U; i < numSamples; ++i) {
-        const float x = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
-        const float y = MathUtils::RandomFloatInInverval(-1.0f, 1.0f);
+        const float x = MathUtils::RandomFloatInInterval(-1.0f, 1.0f);
+        const float y = MathUtils::RandomFloatInInterval(-1.0f, 1.0f);
         // The z component must zero. Since our kernel is oriented along the z-axis, 
         // we want the random rotation to occur around that axis.
         const float z = 0.0f;
@@ -193,9 +193,9 @@ AmbientOcclusionCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
 
     commandList.SetGraphicsRootSignature(sRootSignature);
     const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(
-        uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
+        uploadFrameCBuffer.GetResource().GetGPUVirtualAddress());
     const D3D12_GPU_VIRTUAL_ADDRESS ambientOcclusionCBufferGpuVAddress(
-        mAmbientOcclusionUploadCBuffer->GetResource()->GetGPUVirtualAddress());
+        mAmbientOcclusionUploadCBuffer->GetResource().GetGPUVirtualAddress());
     commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(2U, ambientOcclusionCBufferGpuVAddress);
@@ -268,7 +268,8 @@ AmbientOcclusionCommandListRecorder::CreateAndGetNoiseTexture(const std::vector<
                                                              resourceDescriptor,
                                                              D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
                                                              nullptr,
-                                                             L"Noise Buffer");
+                                                             L"Noise Buffer",
+                                                             ResourceManager::ResourceStateTrackingType::FULL_TRACKING);
 
     // In order to copy CPU memory data into our default buffer, we need to create
     // an intermediate upload heap. 
@@ -280,7 +281,8 @@ AmbientOcclusionCommandListRecorder::CreateAndGetNoiseTexture(const std::vector<
                                                                          CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
                                                                          D3D12_RESOURCE_STATE_GENERIC_READ,
                                                                          nullptr,
-                                                                         nullptr);
+                                                                         nullptr,
+                                                                         ResourceManager::ResourceStateTrackingType::NO_TRACKING);
 
     return noiseTexture;
 }
@@ -298,7 +300,7 @@ AmbientOcclusionCommandListRecorder::InitShaderResourceViews(ID3D12Resource& nor
     {
         &normalSmoothnessBuffer,
         &depthBuffer,
-        mSampleKernelUploadBuffer->GetResource(),
+        &mSampleKernelUploadBuffer->GetResource(),
         &noiseTexture,
     };
 
@@ -322,7 +324,7 @@ AmbientOcclusionCommandListRecorder::InitShaderResourceViews(ID3D12Resource& nor
 
     // Fill sample kernel buffer descriptor
     srvDescriptors[2].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDescriptors[2].Format = mSampleKernelUploadBuffer->GetResource()->GetDesc().Format;
+    srvDescriptors[2].Format = mSampleKernelUploadBuffer->GetResource().GetDesc().Format;
     srvDescriptors[2].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
     srvDescriptors[2].Buffer.FirstElement = 0UL;
     srvDescriptors[2].Buffer.NumElements = sampleKernelSize;

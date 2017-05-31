@@ -9,8 +9,8 @@ namespace StringUtils {
 /// @param source Source string
 /// @param destination Destination wide string
 ///
- void AnsiToWideString(const std::string& source,
-                       std::wstring& destination) noexcept;
+void AnsiToWideString(const std::string& source,
+                      std::wstring& destination) noexcept;
 
 ///
 /// @brief Converts ANSI string to wide string

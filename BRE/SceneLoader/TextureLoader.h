@@ -2,7 +2,6 @@
 
 #include <string>
 #include <unordered_map>
-#include <wrl.h>
 
 namespace YAML {
 class Node;
@@ -56,7 +55,7 @@ private:
     void LoadTextures(const YAML::Node& texturesNode,
                       ID3D12CommandAllocator& commandAllocator,
                       ID3D12GraphicsCommandList& commandList,
-                      std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>& uploadBuffers) noexcept;
+                      std::vector<ID3D12Resource*>& uploadBuffers) noexcept;
 
 
     std::unordered_map<std::string, ID3D12Resource*> mTextureByName;

@@ -84,7 +84,7 @@ BlurCommandListRecorder::RecordAndPushCommandLists() noexcept
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 
     const D3D12_GPU_VIRTUAL_ADDRESS blurCBufferGpuVAddress(
-        mBlurUploadCBuffer->GetResource()->GetGPUVirtualAddress());
+        mBlurUploadCBuffer->GetResource().GetGPUVirtualAddress());
 
     commandList.SetGraphicsRootSignature(sRootSignature);
     commandList.SetGraphicsRootConstantBufferView(0U, blurCBufferGpuVAddress);

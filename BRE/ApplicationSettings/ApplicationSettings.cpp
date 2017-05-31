@@ -22,19 +22,19 @@ float ApplicationSettings::sNearPlaneZ{ 1.0f };
 float ApplicationSettings::sFarPlaneZ{ FLT_MAX };
 float ApplicationSettings::sVerticalFieldOfView{ 0.25f * MathUtils::Pi };
 
-D3D12_VIEWPORT ApplicationSettings::sScreenViewport {
-0.0f, 
-0.0f, 
-static_cast<float>(ApplicationSettings::sWindowWidth), 
-static_cast<float>(ApplicationSettings::sWindowHeight),
-0.0f, 
-1.0f };
+D3D12_VIEWPORT ApplicationSettings::sScreenViewport{
+    0.0f,
+    0.0f,
+    static_cast<float>(ApplicationSettings::sWindowWidth),
+    static_cast<float>(ApplicationSettings::sWindowHeight),
+    0.0f,
+    1.0f };
 
-D3D12_RECT ApplicationSettings::sScissorRect{ 
-0, 
-0, 
-static_cast<LONG>(ApplicationSettings::sWindowWidth), 
-static_cast<LONG>(ApplicationSettings::sWindowHeight) };
+D3D12_RECT ApplicationSettings::sScissorRect{
+    0,
+    0,
+    static_cast<LONG>(ApplicationSettings::sWindowWidth),
+    static_cast<LONG>(ApplicationSettings::sWindowHeight) };
 
 const float ApplicationSettings::sSecondsPerFrame{ 1.0f / 60.0f };
 }

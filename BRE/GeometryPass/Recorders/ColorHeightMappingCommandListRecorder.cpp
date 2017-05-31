@@ -138,9 +138,9 @@ ColorHeightMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuf
 
     // Set frame constants root parameters
     const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(
-        uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
+        uploadFrameCBuffer.GetResource().GetGPUVirtualAddress());
     const D3D12_GPU_VIRTUAL_ADDRESS heightMappingCBufferGpuVAddress(
-        mHeightMappingUploadCBuffer->GetResource()->GetGPUVirtualAddress());
+        mHeightMappingUploadCBuffer->GetResource().GetGPUVirtualAddress());
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(2U, heightMappingCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(3U, frameCBufferGpuVAddress);
@@ -224,8 +224,8 @@ ColorHeightMappingCommandListRecorder::InitConstantBuffers(const std::vector<Mat
     const std::size_t matCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(MaterialProperties)) };
     mMaterialUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, numResources);
 
-    D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialUploadCBuffers->GetResource()->GetGPUVirtualAddress() };
-    D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffers->GetResource()->GetGPUVirtualAddress() };
+    D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialUploadCBuffers->GetResource().GetGPUVirtualAddress() };
+    D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffers->GetResource().GetGPUVirtualAddress() };
 
     // Create object / materials cbuffers descriptors
     // Create textures SRV descriptors

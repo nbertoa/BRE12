@@ -28,8 +28,8 @@ void CreateVertexAndIndexBufferData(VertexAndIndexBufferCreator::VertexBufferDat
                                     VertexAndIndexBufferCreator::IndexBufferData& indexBufferData,
                                     const GeometryGenerator::MeshData& meshData,
                                     ID3D12GraphicsCommandList& commandList,
-                                    Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                                    Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
+                                    ID3D12Resource* &uploadVertexBuffer,
+                                    ID3D12Resource* &uploadIndexBuffer) noexcept
 {
     BRE_ASSERT(vertexBufferData.IsDataValid() == false);
     BRE_ASSERT(indexBufferData.IsDataValid() == false);
@@ -61,8 +61,8 @@ void CreateVertexAndIndexBufferData(VertexAndIndexBufferCreator::VertexBufferDat
 
 Mesh::Mesh(const aiMesh& mesh,
            ID3D12GraphicsCommandList& commandList,
-           Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-           Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer)
+           ID3D12Resource* &uploadVertexBuffer,
+           ID3D12Resource* &uploadIndexBuffer)
 {
     GeometryGenerator::MeshData meshData;
 
@@ -120,8 +120,8 @@ Mesh::Mesh(const aiMesh& mesh,
 
 Mesh::Mesh(const GeometryGenerator::MeshData& meshData,
            ID3D12GraphicsCommandList& commandList,
-           Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-           Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer)
+           ID3D12Resource* &uploadVertexBuffer,
+           ID3D12Resource* &uploadIndexBuffer)
 {
     CreateVertexAndIndexBufferData(mVertexBufferData,
                                    mIndexBufferData,

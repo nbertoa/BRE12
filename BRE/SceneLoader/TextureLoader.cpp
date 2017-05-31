@@ -33,7 +33,7 @@ TextureLoader::LoadTextures(const YAML::Node& rootNode,
 
     BRE_CHECK_MSG(texturesNode.IsMap(), L"'textures' node must be a map");
 
-    std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadBuffers;
+    std::vector<ID3D12Resource*> uploadBuffers;
     BRE_CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
     
     LoadTextures(texturesNode,
@@ -61,7 +61,7 @@ void
 TextureLoader::LoadTextures(const YAML::Node& texturesNode,
                             ID3D12CommandAllocator& commandAllocator,
                             ID3D12GraphicsCommandList& commandList,
-                            std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>& uploadBuffers) noexcept
+                            std::vector<ID3D12Resource*>& uploadBuffers) noexcept
 {
     BRE_CHECK_MSG(texturesNode.IsMap(), L"'textures' node must be a map");
 

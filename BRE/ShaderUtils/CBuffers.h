@@ -38,23 +38,4 @@ struct FrameCBuffer {
     DirectX::XMFLOAT4X4 mInverseProjectionMatrix{ MathUtils::GetIdentity4x4Matrix() };
     DirectX::XMFLOAT4 mEyeWorldPosition{ 0.0f, 0.0f, 0.0f, 1.0f };
 };
-
-///
-/// @brief Immutable constant buffer (does not change across frames or objects) 
-///
-struct ImmutableCBuffer {
-    ImmutableCBuffer() = default;
-    ~ImmutableCBuffer() = default;
-    ImmutableCBuffer(const ImmutableCBuffer&) = default;
-    ImmutableCBuffer(ImmutableCBuffer&&) = default;
-    ImmutableCBuffer& operator=(ImmutableCBuffer&&) = default;
-
-    float mNearZ_FarZ_ScreenW_ScreenH[4U]{
-        ApplicationSettings::sNearPlaneZ,
-        ApplicationSettings::sFarPlaneZ,
-        static_cast<float>(ApplicationSettings::sWindowWidth),
-        static_cast<float>(ApplicationSettings::sWindowHeight)
-    };
-};
-
 }

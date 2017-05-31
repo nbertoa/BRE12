@@ -123,7 +123,7 @@ TextureMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // Set frame constants root parameters
-    D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
+    D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource().GetGPUVirtualAddress());
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(3U, frameCBufferGpuVAddress);
 
@@ -206,8 +206,8 @@ TextureMappingCommandListRecorder::InitConstantBuffers(const std::vector<Materia
     const std::size_t matCBufferElemSize{ UploadBuffer::GetRoundedConstantBufferSizeInBytes(sizeof(MaterialProperties)) };
     mMaterialUploadCBuffers = &UploadBufferManager::CreateUploadBuffer(matCBufferElemSize, numResources);
 
-    D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialUploadCBuffers->GetResource()->GetGPUVirtualAddress() };
-    D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffers->GetResource()->GetGPUVirtualAddress() };
+    D3D12_GPU_VIRTUAL_ADDRESS materialsGpuAddress{ mMaterialUploadCBuffers->GetResource().GetGPUVirtualAddress() };
+    D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffers->GetResource().GetGPUVirtualAddress() };
 
     // Create object / materials cbuffers descriptors
     // Create textures SRV descriptors

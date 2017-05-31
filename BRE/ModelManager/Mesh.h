@@ -68,8 +68,8 @@ private:
     ///
     explicit Mesh(const aiMesh& mesh,
                   ID3D12GraphicsCommandList& commandList,
-                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
+                  ID3D12Resource* &uploadVertexBuffer,
+                  ID3D12Resource* &uploadIndexBuffer);
 
     ///
     /// @brief Mesh constructor
@@ -88,8 +88,8 @@ private:
     ///
     explicit Mesh(const GeometryGenerator::MeshData& meshData,
                   ID3D12GraphicsCommandList& commandList,
-                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
+                  ID3D12Resource* &uploadVertexBuffer,
+                  ID3D12Resource* &uploadIndexBuffer);
 
     VertexAndIndexBufferCreator::VertexBufferData mVertexBufferData;
     VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;

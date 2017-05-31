@@ -1,0 +1,37 @@
+models:
+  sponza: resources/models/sponza.obj
+  
+textures:
+  reference: resources/scenes/helpers/all_textures.yml
+  sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
+  cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
+  cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds 
+  
+material properties:
+  - reference: resources/scenes/helpers/all_material_properties.yml
+  - name: white
+    base color: [1.0, 1.0, 1.0]
+    metal mask: 0.0
+    smoothness: 0.7
+  
+material techniques:
+  - reference: resources/scenes/helpers/all_material_techniques.yml
+        
+drawable objects:
+  - model: sponza
+    material properties: white
+    material technique: brick3_normal
+    translation: [0.0, 0.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+    
+environment:
+  - sky box texture: sky map
+    diffuse irradiance texture: cube map diffuse
+    specular pre convolved environment texture: cube map specular  
+
+settings:
+  - screen width: 1280
+    screen height: 720
+    ambient occlusion sample kernel size: 4
+    ambient occlusion noise texture dimension: 1

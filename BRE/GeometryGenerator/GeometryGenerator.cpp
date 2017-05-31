@@ -249,9 +249,9 @@ CreateBox(const float width,
 
     Vertex v[24];
 
-    float w2{ 0.5f * width };
-    float h2{ 0.5f * height };
-    float d2{ 0.5f * depth };
+    const float w2{ 0.5f * width };
+    const float h2{ 0.5f * height };
+    const float d2{ 0.5f * depth };
 
     // Fill in the front face vertex data.
     v[0] = Vertex(XMFLOAT3{ -w2, -h2, -d2 }, XMFLOAT3{ 0.0f, 0.0f, -1.0f }, XMFLOAT3{ 1.0f, 0.0f, 0.0f, }, XMFLOAT2{ 0.0f, 1.0f });

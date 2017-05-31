@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <wrl.h>
 
 #include <GeometryGenerator/GeometryGenerator.h>
 #include <ModelManager/Mesh.h>
@@ -35,8 +34,8 @@ public:
     ///
     explicit Model(const char* modelFilename,
                    ID3D12GraphicsCommandList& commandList,
-                   Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                   Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
+                   ID3D12Resource* &ploadVertexBuffer,
+                   ID3D12Resource* &uploadIndexBuffer);
 
     ///
     /// @brief Model constructor
@@ -55,8 +54,8 @@ public:
     ///
     explicit Model(const GeometryGenerator::MeshData& meshData,
                    ID3D12GraphicsCommandList& commandList,
-                   Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                   Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer);
+                   ID3D12Resource* &uploadVertexBuffer,
+                   ID3D12Resource* &uploadIndexBuffer);
 
     ///
     /// @brief Checks if there are meshes or not

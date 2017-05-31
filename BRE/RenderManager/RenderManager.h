@@ -3,6 +3,7 @@
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <tbb/task.h>
+#include <wrl.h>
 
 #include <CommandManager\CommandListPerFrame.h>
 #include <Camera/Camera.h>
@@ -86,7 +87,7 @@ private:
     ///
     void CreateIntermediateColorBufferAndRenderTargetView(const D3D12_RESOURCE_STATES initialState,
                                                           const wchar_t* resourceName,
-                                                          Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
+                                                          ID3D12Resource* &buffer,
                                                           D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
     ///
@@ -96,7 +97,7 @@ private:
     ID3D12Resource* GetCurrentFrameBuffer() const noexcept
     {
         BRE_ASSERT(mSwapChain != nullptr);
-        return mFrameBuffers[mSwapChain->GetCurrentBackBufferIndex()].Get();
+        return mFrameBuffers[mSwapChain->GetCurrentBackBufferIndex()];
     }
 
     ///
@@ -155,7 +156,7 @@ private:
     CommandListPerFrame mBeginCommandListPerFrame;
     CommandListPerFrame mFinalCommandListPerFrame;
 
-    Microsoft::WRL::ComPtr<ID3D12Resource> mFrameBuffers[ApplicationSettings::sSwapChainBufferCount];
+    ID3D12Resource* mFrameBuffers[ApplicationSettings::sSwapChainBufferCount]{ nullptr };
     D3D12_CPU_DESCRIPTOR_HANDLE mFrameBufferRenderTargetViews[ApplicationSettings::sSwapChainBufferCount]{ 0UL };
 
     ID3D12Resource* mDepthBuffer{ nullptr };
@@ -163,9 +164,9 @@ private:
 
     // Buffers used for intermediate computations.
     // They are used as render targets (light pass) or pixel shader resources (post processing passes)
-    Microsoft::WRL::ComPtr<ID3D12Resource> mIntermediateColorBuffer1;
+    ID3D12Resource* mIntermediateColorBuffer1{ nullptr };
     D3D12_CPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer1RenderTargetView;
-    Microsoft::WRL::ComPtr<ID3D12Resource> mIntermediateColorBuffer2;
+    ID3D12Resource* mIntermediateColorBuffer2{ nullptr };
     D3D12_CPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer2RenderTargetView;
 
     // We cache it here, as is is used by most passes.

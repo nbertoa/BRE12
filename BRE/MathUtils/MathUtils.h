@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <DirectXMath.h>
+#include <cmath>
 #include <cstdint>
 
 #include <Utils\DebugUtils.h>
@@ -25,7 +26,7 @@ public:
     /// @param topValue Top Value
     /// @return Random value
     ///
-    static float RandomFloatInInverval(const float bottomValue,
+    static float RandomFloatInInterval(const float bottomValue,
                                        const float topValue) noexcept
     {
         BRE_ASSERT(bottomValue < topValue);
@@ -83,14 +84,16 @@ public:
                   const T& b,
                   const float t) noexcept
     {
+        BRE_ASSERT(0.0f < t || AreEqual(0.0f, t));
+        BRE_ASSERT(t < 1.0f || AreEqual(1.0f, t));
         return a + (b - a) * t;
     }
 
     ///
     /// @brief Clamp a value
     /// @param x Value
-    /// @param low Low limit
-    /// @param high High limit
+    /// @param low Low limit. It must be less or equal than @p high.
+    /// @param high High limit. It must be greater of equal than @p low.
     /// @return Clamped value
     ///
     template<typename T>
@@ -98,6 +101,7 @@ public:
                    const T& low,
                    const T& high) noexcept
     {
+        BRE_ASSERT(low < high || AreEqual(low, high));
         return x < low ? low : (x > high ? high : x);
     }
 
@@ -210,6 +214,89 @@ public:
             0.0f, 0.0f, 0.0f, 1.0f);
 
         return identityMatrix;
+    }
+
+    ///
+    /// @brief Checks if two floats are equal or not.
+    /// @return True if they are equal. Otherwise, false.
+    ///
+    static float AreEqual(const float f1,
+                          const float f2)
+    {
+        return fabs(f1 - f2) < 1.e-5f;
+    }
+
+    ///
+    /// @brief Checks if two XMFLOAT2 are equal or not.
+    /// @param p1 First XMFLOAT2
+    /// @param p2 Second XMFLOAT2
+    /// @return True if they are equal. Otherwise, false
+    ///
+    static bool AreEqual(const DirectX::XMFLOAT2& p1,
+                         const DirectX::XMFLOAT2& p2)
+    {
+       const DirectX::XMVECTOR xmP1 = DirectX::XMLoadFloat2(&p1);
+       const DirectX::XMVECTOR xmP2 = DirectX::XMLoadFloat2(&p2);
+
+       return DirectX::XMVector2Equal(xmP1, xmP2);
+    }
+
+    ///
+    /// @brief Checks if two XMFLOAT3 are equal or not.
+    /// @param p1 First XMFLOAT3
+    /// @param p2 Second XMFLOAT3
+    /// @return True if they are equal. Otherwise, false
+    ///
+    static bool AreEqual(const DirectX::XMFLOAT3& p1,
+                         const DirectX::XMFLOAT3& p2)
+    {
+        const DirectX::XMVECTOR xmP1 = DirectX::XMLoadFloat3(&p1);
+        const DirectX::XMVECTOR xmP2 = DirectX::XMLoadFloat3(&p2);
+
+        return DirectX::XMVector3Equal(xmP1, xmP2);
+    }
+
+    ///
+    /// @brief Checks if two XMFLOAT4 are equal or not.
+    /// @param p1 First XMFLOAT4
+    /// @param p2 Second XMFLOAT4
+    /// @return True if they are equal. Otherwise, false
+    ///
+    static bool AreEqual(const DirectX::XMFLOAT4& p1,
+                         const DirectX::XMFLOAT4& p2)
+    {
+        const DirectX::XMVECTOR xmP1 = DirectX::XMLoadFloat4(&p1);
+        const DirectX::XMVECTOR xmP2 = DirectX::XMLoadFloat4(&p2);
+
+        return DirectX::XMVector4Equal(xmP1, xmP2);
+    }
+
+    ///
+    /// @brief Checks if two XMFLOAT4X4 are equal or not.
+    /// @param p1 First XMFLOAT4X4
+    /// @param p2 Second XMFLOAT4X4
+    /// @return True if they are equal. Otherwise, false
+    ///
+    static bool AreEqual(const DirectX::XMFLOAT4X4& p1,
+                         const DirectX::XMFLOAT4X4& p2)
+    {
+        return 
+            AreEqual(p1._11, p2._11) &&
+            AreEqual(p1._12, p2._12) &&
+            AreEqual(p1._13, p2._13) &&
+            AreEqual(p1._14, p2._14) &&
+            AreEqual(p1._21, p2._21) &&
+            AreEqual(p1._22, p2._22) &&
+            AreEqual(p1._23, p2._23) &&
+            AreEqual(p1._24, p2._24) &&
+            AreEqual(p1._31, p2._31) &&
+            AreEqual(p1._32, p2._32) &&
+            AreEqual(p1._33, p2._33) &&
+            AreEqual(p1._34, p2._34) &&
+            AreEqual(p1._41, p2._41) &&
+            AreEqual(p1._42, p2._42) &&
+            AreEqual(p1._43, p2._43) &&
+            AreEqual(p1._44, p2._44);
     }
 
     static const float Infinity;

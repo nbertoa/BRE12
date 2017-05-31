@@ -17,9 +17,4 @@ struct FrameCBuffer {
 	float4 mEyePositionWorldSpace;
 };
 
-// Immutable constant buffer data (does not change across frames or objects) 
-struct ImmutableCBuffer {
-	float4 mNearZ_FarZ_ScreenW_ScreenH;
-};
-
 #endif

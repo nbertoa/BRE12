@@ -3,7 +3,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <d3d12.h>
-#include <wrl.h>
+
+#include <Utils\DebugUtils.h>
 
 namespace BRE {
 ///
@@ -31,9 +32,10 @@ public:
     /// @brief Get resource
     /// @return Resource
     ///
-    __forceinline ID3D12Resource* GetResource() const noexcept
+    __forceinline ID3D12Resource& GetResource() const noexcept
     {
-        return mBuffer.Get();
+        BRE_ASSERT(mBuffer != nullptr);
+        return *mBuffer;
     }
 
     ///
@@ -59,7 +61,7 @@ public:
     static std::size_t GetRoundedConstantBufferSizeInBytes(const std::size_t sizeInBytes);
 
 private:
-    Microsoft::WRL::ComPtr<ID3D12Resource> mBuffer;
+    ID3D12Resource* mBuffer{ nullptr };
     std::uint8_t* mMappedData{ nullptr };
     std::size_t mElementSize{ 0U };
 };

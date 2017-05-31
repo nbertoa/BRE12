@@ -1,5 +1,3 @@
-#include <windows.h>
-
 #include <tbb/task_scheduler_init.h>
 #include <windows.h>
 
@@ -72,7 +70,7 @@ void InitSystems(const HINSTANCE moduleInstanceHandle,
     DepthStencilDescriptorManager::Init();
     RenderTargetDescriptorManager::Init(RENDER_TARGET_DESCRIPTOR_HEAP_SIZE);
 
-    ShowCursor(false);
+    //ShowCursor(false);
 }
 
 ///
@@ -99,7 +97,7 @@ WINAPI WinMain(_In_ HINSTANCE moduleInstanceHandle,
                _In_ LPSTR /*commandLine*/,
                _In_ int /*showCommand*/)
 {
-    const char* sceneFilePath = "resources/scenes/showcase.yml";
+    const char* sceneFilePath = "resources/scenes/showcase2.yml";
 
     tbb::task_scheduler_init taskSchedulerInit;
 

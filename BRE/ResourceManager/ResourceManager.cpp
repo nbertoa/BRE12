@@ -26,7 +26,7 @@ ResourceManager::Clear() noexcept
 ID3D12Resource&
 ResourceManager::LoadTextureFromFile(const char* textureFilename,
                                      ID3D12GraphicsCommandList& commandList,
-                                     Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
+                                     ID3D12Resource* &uploadBuffer,
                                      const wchar_t* resourceName) noexcept
 {
     ID3D12Resource* resource{ nullptr };
@@ -36,13 +36,16 @@ ResourceManager::LoadTextureFromFile(const char* textureFilename,
     const std::wstring filePathW(StringUtils::AnsiToWideString(filePath));
 
     Microsoft::WRL::ComPtr<ID3D12Resource> resourcePtr;
+    Microsoft::WRL::ComPtr<ID3D12Resource> uploadBufferPtr;
     mMutex.lock();
     BRE_CHECK_HR(DirectX::CreateDDSTextureFromFile12(&DirectXManager::GetDevice(),
                                                      &commandList,
                                                      filePathW.c_str(),
                                                      resourcePtr,
-                                                     uploadBuffer));
+                                                     uploadBufferPtr));
     mMutex.unlock();
+
+    uploadBuffer = uploadBufferPtr.Detach();
 
     resource = resourcePtr.Detach();
 
@@ -60,7 +63,7 @@ ID3D12Resource&
 ResourceManager::CreateDefaultBuffer(const void* sourceData,
                                      const std::size_t sourceDataSize,
                                      ID3D12GraphicsCommandList& commandList,
-                                     Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
+                                     ID3D12Resource* &uploadBuffer,
                                      const wchar_t* resourceName) noexcept
 {
     BRE_ASSERT(sourceData != nullptr);
@@ -100,7 +103,7 @@ ResourceManager::CreateDefaultBuffer(const void* sourceData,
                                                                      &resDesc,
                                                                      D3D12_RESOURCE_STATE_GENERIC_READ,
                                                                      nullptr,
-                                                                     IID_PPV_ARGS(uploadBuffer.GetAddressOf())));
+                                                                     IID_PPV_ARGS(&uploadBuffer)));
     mMutex.unlock();
 
     // Describe the data we want to copy into the default buffer.
@@ -115,7 +118,7 @@ ResourceManager::CreateDefaultBuffer(const void* sourceData,
     CD3DX12_RESOURCE_BARRIER resBarrier{ CD3DX12_RESOURCE_BARRIER::Transition(resource,
                                                                               D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST) };
     commandList.ResourceBarrier(1, &resBarrier);
-    UpdateSubresources<1>(&commandList, resource, uploadBuffer.Get(), 0, 0, 1, &subResourceData);
+    UpdateSubresources<1>(&commandList, resource, uploadBuffer, 0, 0, 1, &subResourceData);
     resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(resource,
                                                       D3D12_RESOURCE_STATE_COPY_DEST,
                                                       D3D12_RESOURCE_STATE_GENERIC_READ);
@@ -137,7 +140,8 @@ ResourceManager::CreateCommittedResource(const D3D12_HEAP_PROPERTIES& heapProper
                                          const D3D12_RESOURCE_DESC& resourceDescriptor,
                                          const D3D12_RESOURCE_STATES& resourceStates,
                                          const D3D12_CLEAR_VALUE* clearValue,
-                                         const wchar_t* resourceName) noexcept
+                                         const wchar_t* resourceName,
+                                         const ResourceStateTrackingType resourceStateTrackingType) noexcept
 {
     ID3D12Resource* resource{ nullptr };
 
@@ -150,7 +154,17 @@ ResourceManager::CreateCommittedResource(const D3D12_HEAP_PROPERTIES& heapProper
                                                                      IID_PPV_ARGS(&resource)));
     mMutex.unlock();
 
-    ResourceStateManager::AddResource(*resource, resourceStates);
+    switch (resourceStateTrackingType) {
+    case ResourceStateTrackingType::FULL_TRACKING:
+        ResourceStateManager::AddFullResourceTracking(*resource,
+                                                      resourceStates);
+        break;
+    case ResourceStateTrackingType::NO_TRACKING:
+        break;
+    default:
+        BRE_ASSERT(false && "Unknown ResourceStateTrackingType");
+        break;
+    };
 
     BRE_ASSERT(resource != nullptr);
     mResources.insert(resource);

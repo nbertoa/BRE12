@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{4EAB39FD-5BFF-43D4-8E55-0F775433AF16}</ProjectGuid>
-    <RootNamespace>Main</RootNamespace>
+    <ProjectGuid>{F907D956-1B83-4B80-83B5-75FB2E80416E}</ProjectGuid>
+    <RootNamespace>UnitTests</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -69,12 +69,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <OutDir>$(SolutionDir)Executable\</OutDir>
     <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <OutDir>$(SolutionDir)Executable\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -93,8 +91,9 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
+      <AdditionalDependencies>ApplicationSettingsd.lib;Camerad.lib;CommandManagerd.lib;CommandListExecutord.lib;DescriptorManagerd.lib;DirectXManagerd.lib;DXUtilsd.lib;EnvironmentLightPassd.lib;GeometryGeneratord.lib;GeometryPassd.lib;Inputd.lib;MathUtilsd.lib;ModelManagerd.lib;PostProcessPassd.lib;PSOManagerd.lib;RenderManagerd.lib;ResourceManagerd.lib;ResourceStateManagerd.lib;RootSignatureManagerd.lib;Scened.lib;SceneExecutord.lib;SceneLoaderd.lib;ShaderManagerd.lib;ShaderUtilsd.lib;SkyBoxPassd.lib;Timerd.lib;ToneMappingPassd.lib;Utilsd.lib;assimp.lib;d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb_debug.lib;tbb_preview_debug.lib;tbbmalloc_debug.lib;tbbproxy_debug.lib;yaml-cppd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\external\yaml-cpp\lib;$(SolutionDir)\..\external\tbb\lib;$(SolutionDir)\..\external\assimp-3.1.1\lib;$(OutDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ApplicationSettingsd.lib;Camerad.lib;CommandManagerd.lib;CommandListExecutord.lib;DescriptorManagerd.lib;DirectXManagerd.lib;DXUtilsd.lib;EnvironmentLightPassd.lib;GeometryGeneratord.lib;GeometryPassd.lib;Inputd.lib;MathUtilsd.lib;ModelManagerd.lib;PostProcessPassd.lib;PSOManagerd.lib;ReflectionPassd.lib;RenderManagerd.lib;ResourceManagerd.lib;ResourceStateManagerd.lib;RootSignatureManagerd.lib;Scened.lib;SceneExecutord.lib;SceneLoaderd.lib;ShaderManagerd.lib;ShaderUtilsd.lib;SkyBoxPassd.lib;Timerd.lib;ToneMappingPassd.lib;Utilsd.lib;assimp.lib;d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb_debug.lib;tbb_preview_debug.lib;tbbmalloc_debug.lib;tbbproxy_debug.lib;yaml-cppd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -123,12 +122,21 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ApplicationSettings.lib;Camera.lib;CommandManager.lib;CommandListExecutor.lib;DescriptorManager.lib;DirectXManager.lib;DXUtils.lib;EnvironmentLightPass.lib;GeometryGenerator.lib;GeometryPass.lib;Input.lib;MathUtils.lib;ModelManager.lib;PostProcessPass.lib;PSOManager.lib;RenderManager.lib;ResourceManager.lib;ResourceStateManager.lib;RootSignatureManager.lib;Scene.lib;SceneExecutor.lib;SceneLoader.lib;ShaderManager.lib;ShaderUtils.lib;SkyBoxPass.lib;Timer.lib;ToneMappingPass.lib;Utils.lib;assimp.lib;d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb.lib;tbb_preview.lib;tbbmalloc.lib;tbbproxy.lib;yaml-cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\external\yaml-cpp\lib;$(SolutionDir)\..\external\tbb\lib;$(SolutionDir)\..\external\assimp-3.1.1\lib;$(OutDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ApplicationSettings.lib;Camera.lib;CommandManager.lib;CommandListExecutor.lib;DescriptorManager.lib;DirectXManager.lib;DXUtils.lib;EnvironmentLightPass.lib;GeometryGenerator.lib;GeometryPass.lib;Input.lib;MathUtils.lib;ModelManager.lib;PostProcessPass.lib;PSOManager.lib;ReflectionPass.lib;RenderManager.lib;ResourceManager.lib;ResourceStateManager.lib;RootSignatureManager.lib;Scene.lib;SceneExecutor.lib;SceneLoader.lib;ShaderManager.lib;ShaderUtils.lib;SkyBoxPass.lib;Timer.lib;ToneMappingPass.lib;Utils.lib;assimp.lib;d3dcompiler.lib;d3d12.lib;dinput8.lib;dxgi.lib;dxguid.lib;tbb.lib;tbb_preview.lib;tbbmalloc.lib;tbbproxy.lib;yaml-cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp" />
+    <ClInclude Include="Catch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Catch.cpp" />
+    <ClCompile Include="TestMathUtils\TestMathUtils.cpp" />
+    <ClCompile Include="TestTimer\TestTimer.cpp" />
+    <ClCompile Include="TestUtils\TestUtils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
 </Project>

@@ -38,7 +38,7 @@ public:
     /// @brief Get geometry buffers
     /// @return List of geometry buffers
     ///
-    __forceinline Microsoft::WRL::ComPtr<ID3D12Resource>* GetGeometryBuffers() noexcept
+    __forceinline ID3D12Resource* *GetGeometryBuffers() noexcept
     {
         return mGeometryBuffers;
     }
@@ -67,7 +67,7 @@ private:
     CommandListPerFrame mCommandListPerFrame;
 
     // Geometry buffers data
-    Microsoft::WRL::ComPtr<ID3D12Resource> mGeometryBuffers[BUFFERS_COUNT];
+    ID3D12Resource* mGeometryBuffers[BUFFERS_COUNT]{ nullptr };
     D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBufferRenderTargetViews[BUFFERS_COUNT];
 
     GeometryCommandListRecorders& mGeometryCommandListRecorders;

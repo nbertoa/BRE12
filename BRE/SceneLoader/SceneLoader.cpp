@@ -119,7 +119,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorMapping(GeometryCommandListRec
             for (const DrawableObject& drawableObject : drawableObjects) {
                 // Store material properties
                 materialProperties.push_back(drawableObject.GetMaterialProperties());
-                
+
                 // Store matrices
                 const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
                 XMFLOAT4X4 inverseTransposeWorldMatrix;
@@ -132,7 +132,7 @@ SceneLoader::GenerateGeometryPassRecordersForColorMapping(GeometryCommandListRec
         geometryDataVectorOffset += meshes.size();
     }
 
-    commandListRecorder->Init(geometryDataVector, 
+    commandListRecorder->Init(geometryDataVector,
                               materialProperties);
 
     commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
@@ -200,8 +200,8 @@ SceneLoader::GenerateGeometryPassRecordersForColorNormalMapping(GeometryCommandL
         geometryDataVectorOffset += meshes.size();
     }
 
-    commandListRecorder->Init(geometryDataVector, 
-                              materialProperties, 
+    commandListRecorder->Init(geometryDataVector,
+                              materialProperties,
                               normalTextures);
 
     commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
@@ -341,8 +341,8 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryCommandListR
         geometryDataVectorOffset += meshes.size();
     }
 
-    commandListRecorder->Init(geometryDataVector, 
-                              materialProperties, 
+    commandListRecorder->Init(geometryDataVector,
+                              materialProperties,
                               diffuseTextures);
 
     commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
@@ -412,9 +412,9 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryCommandListRe
         geometryDataVectorOffset += meshes.size();
     }
 
-    commandListRecorder->Init(geometryDataVector, 
-                              materialProperties, 
-                              diffuseTextures, 
+    commandListRecorder->Init(geometryDataVector,
+                              materialProperties,
+                              diffuseTextures,
                               normalTextures);
 
     commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
@@ -458,7 +458,7 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryCommandListRe
             geometryData.mInverseTransposeWorldMatrices.reserve(drawableObjects.size());
             geometryDataVector.emplace_back(geometryData);
         }
-        
+
         // Iterate all the meses and store data for all the drawable objects.
         for (std::uint32_t i = 0U; i < meshes.size(); ++i) {
             GeometryCommandListRecorder::GeometryData& geometryData =

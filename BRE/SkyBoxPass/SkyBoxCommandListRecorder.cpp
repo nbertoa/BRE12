@@ -103,7 +103,7 @@ SkyBoxCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 
     commandList.SetGraphicsRootSignature(sRootSignature);
-    D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
+    D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource().GetGPUVirtualAddress());
     commandList.SetGraphicsRootDescriptorTable(0U, mObjectCBufferView);
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootDescriptorTable(2U, mStartPixelShaderResourceView);
@@ -144,7 +144,7 @@ SkyBoxCommandListRecorder::InitConstantBuffers(const XMFLOAT4X4& worldMatrix) no
 
     // Create object cbufferview
     D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
-    const D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffer->GetResource()->GetGPUVirtualAddress() };
+    const D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffer->GetResource().GetGPUVirtualAddress() };
     cBufferDesc.BufferLocation = objCBufferGpuAddress;
     cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(objCBufferElemSize);
     mObjectCBufferView = CbvSrvUavDescriptorManager::CreateConstantBufferView(cBufferDesc);

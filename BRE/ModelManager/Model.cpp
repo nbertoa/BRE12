@@ -9,8 +9,8 @@
 namespace BRE {
 Model::Model(const char* modelFilename,
              ID3D12GraphicsCommandList& commandList,
-             Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-             Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer)
+             ID3D12Resource* &uploadVertexBuffer,
+             ID3D12Resource* &uploadIndexBuffer)
 {
     BRE_ASSERT(modelFilename != nullptr);
     const std::string filePath(modelFilename);
@@ -34,8 +34,8 @@ Model::Model(const char* modelFilename,
 
 Model::Model(const GeometryGenerator::MeshData& meshData,
              ID3D12GraphicsCommandList& commandList,
-             Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-             Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer)
+             ID3D12Resource* &uploadVertexBuffer,
+             ID3D12Resource* &uploadIndexBuffer)
 {
     mMeshes.push_back(Mesh(meshData,
                            commandList,

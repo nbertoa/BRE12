@@ -40,7 +40,7 @@ const DXGI_FORMAT sGeometryBufferFormats[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]
 /// @param bufferRenderTargetViews Output geometry buffers render target views
 ///
 void
-CreateGeometryBuffersAndRenderTargetViews(Microsoft::WRL::ComPtr<ID3D12Resource> buffers[GeometryPass::BUFFERS_COUNT],
+CreateGeometryBuffersAndRenderTargetViews(ID3D12Resource* buffers[GeometryPass::BUFFERS_COUNT],
                                           D3D12_CPU_DESCRIPTOR_HANDLE bufferRenderTargetViews[GeometryPass::BUFFERS_COUNT]) noexcept
 {
     // Set shared buffers properties
@@ -62,10 +62,7 @@ CreateGeometryBuffersAndRenderTargetViews(Microsoft::WRL::ComPtr<ID3D12Resource>
         { DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 0.0f },
     };
     BRE_ASSERT(_countof(clearValue) == GeometryPass::BUFFERS_COUNT);
-
-    buffers[GeometryPass::NORMAL_SMOOTHNESS].Reset();
-    buffers[GeometryPass::BASECOLOR_METALMASK].Reset();
-
+    
     CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 
     // Create and store render target views
@@ -83,15 +80,15 @@ CreateGeometryBuffersAndRenderTargetViews(Microsoft::WRL::ComPtr<ID3D12Resource>
         rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
         rtvDescriptor.Format = resourceDescriptor.Format;
         resourceDescriptor.MipLevels = 1U;
-        ID3D12Resource* resource = &ResourceManager::CreateCommittedResource(heapProps,
-                                                                             D3D12_HEAP_FLAG_NONE,
-                                                                             resourceDescriptor,
-                                                                             D3D12_RESOURCE_STATE_RENDER_TARGET,
-                                                                             &clearValue[i],
-                                                                             resourceNames[i]);
+        buffers[i] = &ResourceManager::CreateCommittedResource(heapProps,
+                                                               D3D12_HEAP_FLAG_NONE,
+                                                               resourceDescriptor,
+                                                               D3D12_RESOURCE_STATE_RENDER_TARGET,
+                                                               &clearValue[i],
+                                                               resourceNames[i],
+                                                               ResourceManager::ResourceStateTrackingType::FULL_TRACKING);
 
-        buffers[i] = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
-        RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i].Get(),
+        RenderTargetDescriptorManager::CreateRenderTargetView(*buffers[i],
                                                               rtvDescriptor,
                                                               &bufferRenderTargetViews[i]);
     }
@@ -156,7 +153,7 @@ bool
 GeometryPass::IsDataValid() const noexcept
 {
     for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
-        if (mGeometryBuffers[i].Get() == nullptr) {
+        if (mGeometryBuffers[i] == nullptr) {
             return false;
         }
     }
@@ -180,8 +177,8 @@ GeometryPass::ExecuteBeginTask() noexcept
     CD3DX12_RESOURCE_BARRIER barriers[BUFFERS_COUNT];
     std::uint32_t barrierCount = 0UL;
     for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
-        if (ResourceStateManager::GetResourceState(*mGeometryBuffers[i].Get()) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
-            barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mGeometryBuffers[i].Get(),
+        if (ResourceStateManager::GetResourceState(*mGeometryBuffers[i]) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+            barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mGeometryBuffers[i],
                                                                                             D3D12_RESOURCE_STATE_RENDER_TARGET);
             ++barrierCount;
         }

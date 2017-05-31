@@ -39,34 +39,34 @@ SettingsLoader::LoadSettings(const YAML::Node& rootNode) noexcept
         propertyName = mapIt->first.as<std::string>();
 
         if (propertyName == "screen height") {
-            YamlUtils::GetScalar(mapIt->second, 
+            YamlUtils::GetScalar(mapIt->second,
                                  ApplicationSettings::sWindowHeight);
-            ApplicationSettings::sScissorRect.bottom = 
+            ApplicationSettings::sScissorRect.bottom =
                 static_cast<LONG>(ApplicationSettings::sWindowHeight);
-            ApplicationSettings::sScreenViewport.Height = 
+            ApplicationSettings::sScreenViewport.Height =
                 static_cast<float>(ApplicationSettings::sWindowHeight);
         } else if (propertyName == "screen width") {
-            YamlUtils::GetScalar(mapIt->second, 
+            YamlUtils::GetScalar(mapIt->second,
                                  ApplicationSettings::sWindowWidth);
-            ApplicationSettings::sScissorRect.right = 
+            ApplicationSettings::sScissorRect.right =
                 static_cast<LONG>(ApplicationSettings::sWindowWidth);
-            ApplicationSettings::sScreenViewport.Width = 
+            ApplicationSettings::sScreenViewport.Width =
                 static_cast<float>(ApplicationSettings::sWindowWidth);
         } else if (propertyName == "CPU processors") {
-            YamlUtils::GetScalar(mapIt->second, 
+            YamlUtils::GetScalar(mapIt->second,
                                  ApplicationSettings::sCpuProcessorCount);
         } else if (propertyName == "near plane z") {
             YamlUtils::GetScalar(mapIt->second,
                                  ApplicationSettings::sNearPlaneZ);
         } else if (propertyName == "far plane z") {
-            YamlUtils::GetScalar(mapIt->second, 
+            YamlUtils::GetScalar(mapIt->second,
                                  ApplicationSettings::sFarPlaneZ);
         } else if (propertyName == "vertical field of view") {
-            YamlUtils::GetScalar(mapIt->second, 
+            YamlUtils::GetScalar(mapIt->second,
                                  ApplicationSettings::sVerticalFieldOfView);
         } else if (propertyName == "fullscreen") {
             std::uint32_t isFullscreen;
-            YamlUtils::GetScalar(mapIt->second, 
+            YamlUtils::GetScalar(mapIt->second,
                                  isFullscreen);
             ApplicationSettings::sIsFullscreenWindow = isFullscreen > 0U;
         } else if (propertyName == "ambient occlusion sample kernel size") {

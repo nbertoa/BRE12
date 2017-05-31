@@ -3,7 +3,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <d3d12.h>
-#include <wrl.h>
 
 namespace BRE {
 ///
@@ -113,7 +112,7 @@ public:
     static void CreateVertexBuffer(const BufferCreationData& bufferCreationData,
                                    VertexBufferData& vertexBufferData,
                                    ID3D12GraphicsCommandList& commandList,
-                                   Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
+                                   ID3D12Resource* &uploadBuffer) noexcept;
 
     ///
     /// @brief Creates index buffer
@@ -130,7 +129,7 @@ public:
     static void CreateIndexBuffer(const BufferCreationData& bufferCreationData,
                                   IndexBufferData& indexBufferData,
                                   ID3D12GraphicsCommandList& commandList,
-                                  Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept;
+                                  ID3D12Resource* &uploadBuffer) noexcept;
 };
 }
 

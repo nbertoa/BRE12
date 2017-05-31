@@ -203,8 +203,8 @@ RenderManager::InitPasses(Scene& scene) noexcept
     BRE_ASSERT(diffuseIrradianceCubeMap != nullptr);
     BRE_ASSERT(specularPreConvolvedCubeMap != nullptr);
 
-    mEnvironmentLightPass.Init(*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK].Get(),
-                               *mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS].Get(),
+    mEnvironmentLightPass.Init(*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK],
+                               *mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS],
                                *mDepthBuffer,
                                *diffuseIrradianceCubeMap,
                                *specularPreConvolvedCubeMap,
@@ -215,11 +215,11 @@ RenderManager::InitPasses(Scene& scene) noexcept
                      mIntermediateColorBuffer1RenderTargetView,
                      GetDepthStencilCpuDesc());
 
-    mToneMappingPass.Init(*mIntermediateColorBuffer1.Get(),
-                          *mIntermediateColorBuffer2.Get(),
+    mToneMappingPass.Init(*mIntermediateColorBuffer1,
+                          *mIntermediateColorBuffer2,
                           mIntermediateColorBuffer2RenderTargetView);
 
-    mPostProcessPass.Init(*mIntermediateColorBuffer2.Get());
+    mPostProcessPass.Init(*mIntermediateColorBuffer2);
 
     // Initialize fence values for all frames to the same number.
     const std::uint64_t count{ _countof(mFenceValueByQueuedFrameIndex) };
@@ -276,14 +276,14 @@ RenderManager::ExecuteBeginPass()
         ++barrierCount;
     }
 
-    if (ResourceStateManager::GetResourceState(*mIntermediateColorBuffer1.Get()) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
-        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mIntermediateColorBuffer1.Get(),
+    if (ResourceStateManager::GetResourceState(*mIntermediateColorBuffer1) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mIntermediateColorBuffer1,
                                                                                         D3D12_RESOURCE_STATE_RENDER_TARGET);
         ++barrierCount;
     }
 
-    if (ResourceStateManager::GetResourceState(*mIntermediateColorBuffer2.Get()) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
-        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mIntermediateColorBuffer2.Get(),
+    if (ResourceStateManager::GetResourceState(*mIntermediateColorBuffer2) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mIntermediateColorBuffer2,
                                                                                         D3D12_RESOURCE_STATE_RENDER_TARGET);
         ++barrierCount;
     }
@@ -360,13 +360,14 @@ RenderManager::CreateFrameBuffersAndRenderTargetViews() noexcept
     // Create frame buffer render target views
     const std::size_t rtvDescriptorSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) };
     for (std::uint32_t i = 0U; i < ApplicationSettings::sSwapChainBufferCount; ++i) {
-        BRE_CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mFrameBuffers[i].GetAddressOf())));
+        BRE_CHECK_HR(mSwapChain->GetBuffer(i, IID_PPV_ARGS(&mFrameBuffers[i])));
 
-        RenderTargetDescriptorManager::CreateRenderTargetView(*mFrameBuffers[i].Get(),
+        RenderTargetDescriptorManager::CreateRenderTargetView(*mFrameBuffers[i],
                                                               rtvDescriptor,
                                                               &mFrameBufferRenderTargetViews[i]);
 
-        ResourceStateManager::AddResource(*mFrameBuffers[i].Get(), D3D12_RESOURCE_STATE_PRESENT);
+        ResourceStateManager::AddFullResourceTracking(*mFrameBuffers[i],
+                                                      D3D12_RESOURCE_STATE_PRESENT);
     }
 }
 
@@ -398,7 +399,8 @@ RenderManager::CreateDepthStencilBufferAndView() noexcept
                                                              depthStencilDesc,
                                                              D3D12_RESOURCE_STATE_DEPTH_WRITE,
                                                              &clearValue,
-                                                             L"Depth Stencil Buffer");
+                                                             L"Depth Stencil Buffer",
+                                                             ResourceManager::ResourceStateTrackingType::FULL_TRACKING);
 
     // Create descriptor to mip level 0 of entire resource using the format of the resource.
     D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
@@ -411,7 +413,7 @@ RenderManager::CreateDepthStencilBufferAndView() noexcept
 void
 RenderManager::CreateIntermediateColorBufferAndRenderTargetView(const D3D12_RESOURCE_STATES initialState,
                                                                 const wchar_t* resourceName,
-                                                                Microsoft::WRL::ComPtr<ID3D12Resource>& buffer,
+                                                                ID3D12Resource* &buffer,
                                                                 D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
     BRE_ASSERT(resourceName != nullptr);
@@ -436,15 +438,15 @@ RenderManager::CreateIntermediateColorBufferAndRenderTargetView(const D3D12_RESO
     rtvDescriptor.Format = resourceDescriptor.Format;
     CD3DX12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
     D3D12_CLEAR_VALUE clearValue = { resourceDescriptor.Format, 0.0f, 0.0f, 0.0f, 1.0f };
-    ID3D12Resource* resource = &ResourceManager::CreateCommittedResource(heapProperties,
-                                                                         D3D12_HEAP_FLAG_NONE,
-                                                                         resourceDescriptor,
-                                                                         initialState,
-                                                                         &clearValue,
-                                                                         resourceName);
-    buffer = Microsoft::WRL::ComPtr<ID3D12Resource>(resource);
+    buffer = &ResourceManager::CreateCommittedResource(heapProperties,
+                                                       D3D12_HEAP_FLAG_NONE,
+                                                       resourceDescriptor,
+                                                       initialState,
+                                                       &clearValue,
+                                                       resourceName,
+                                                       ResourceManager::ResourceStateTrackingType::FULL_TRACKING);
 
-    RenderTargetDescriptorManager::CreateRenderTargetView(*buffer.Get(),
+    RenderTargetDescriptorManager::CreateRenderTargetView(*buffer,
                                                           rtvDescriptor,
                                                           &renderTargetView);
 }

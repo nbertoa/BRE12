@@ -29,8 +29,8 @@ ModelLoader::LoadModels(const YAML::Node& rootNode,
     BRE_CHECK_MSG(modelsNode.IsDefined(), L"'models' node not found");
     BRE_CHECK_MSG(modelsNode.IsMap(), L"'models' node must be a map");
 
-    std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadVertexBuffers;
-    std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadIndexBuffers;
+    std::vector<ID3D12Resource*> uploadVertexBuffers;
+    std::vector<ID3D12Resource*> uploadIndexBuffers;
     BRE_CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
 
     LoadModels(modelsNode,
@@ -59,8 +59,8 @@ void
 ModelLoader::LoadModels(const YAML::Node& modelsNode,
                         ID3D12CommandAllocator& commandAllocator,
                         ID3D12GraphicsCommandList& commandList,
-                        std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>& uploadVertexBuffers,
-                        std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>& uploadIndexBuffers) noexcept
+                        std::vector<ID3D12Resource*>& uploadVertexBuffers,
+                        std::vector<ID3D12Resource*>& uploadIndexBuffers) noexcept
 {
     BRE_CHECK_MSG(modelsNode.IsMap(), L"'models' node must be a map");
 

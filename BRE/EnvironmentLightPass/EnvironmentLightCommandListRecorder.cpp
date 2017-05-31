@@ -94,7 +94,7 @@ EnvironmentLightCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 
     commandList.SetGraphicsRootSignature(sRootSignature);
-    const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource()->GetGPUVirtualAddress());
+    const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource().GetGPUVirtualAddress());
     commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootDescriptorTable(2U, mStartPixelShaderResourceView);

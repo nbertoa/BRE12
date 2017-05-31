@@ -49,7 +49,7 @@ void
 VertexAndIndexBufferCreator::CreateVertexBuffer(const BufferCreationData& bufferCreationData,
                                                 VertexBufferData& vertexBufferData,
                                                 ID3D12GraphicsCommandList& commandList,
-                                                Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept
+                                                ID3D12Resource* &uploadBuffer) noexcept
 {
     BRE_ASSERT(bufferCreationData.IsDataValid());
 
@@ -103,7 +103,7 @@ void
 VertexAndIndexBufferCreator::CreateIndexBuffer(const BufferCreationData& bufferCreationData,
                                                IndexBufferData& indexBufferData,
                                                ID3D12GraphicsCommandList& commandList,
-                                               Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer) noexcept
+                                               ID3D12Resource* &uploadBuffer) noexcept
 {
     BRE_ASSERT(bufferCreationData.IsDataValid());
 

@@ -21,8 +21,8 @@ ModelManager::Clear() noexcept
 Model&
 ModelManager::LoadModel(const char* modelFilename,
                         ID3D12GraphicsCommandList& commandList,
-                        Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                        Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
+                        ID3D12Resource* &uploadVertexBuffer,
+                        ID3D12Resource* &uploadIndexBuffer) noexcept
 {
     BRE_ASSERT(modelFilename != nullptr);
 
@@ -47,8 +47,8 @@ ModelManager::CreateBox(const float width,
                         const float depth,
                         const std::uint32_t numSubdivisions,
                         ID3D12GraphicsCommandList& commandList,
-                        Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                        Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
+                        ID3D12Resource* &uploadVertexBuffer,
+                        ID3D12Resource* &uploadIndexBuffer) noexcept
 {
     Model* model{ nullptr };
 
@@ -76,8 +76,8 @@ ModelManager::CreateSphere(const float radius,
                            const std::uint32_t sliceCount,
                            const std::uint32_t stackCount,
                            ID3D12GraphicsCommandList& commandList,
-                           Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                           Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
+                           ID3D12Resource* &uploadVertexBuffer,
+                           ID3D12Resource* &uploadIndexBuffer) noexcept
 {
     Model* model{ nullptr };
 
@@ -104,8 +104,8 @@ Model&
 ModelManager::CreateGeosphere(const float radius,
                               const std::uint32_t numSubdivisions,
                               ID3D12GraphicsCommandList& commandList,
-                              Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                              Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
+                              ID3D12Resource* &uploadVertexBuffer,
+                              ID3D12Resource* &uploadIndexBuffer) noexcept
 {
     Model* model{ nullptr };
 
@@ -134,8 +134,8 @@ ModelManager::CreateCylinder(const float bottomRadius,
                              const std::uint32_t sliceCount,
                              const std::uint32_t stackCount,
                              ID3D12GraphicsCommandList& commandList,
-                             Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                             Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
+                             ID3D12Resource* &uploadVertexBuffer,
+                             ID3D12Resource* &uploadIndexBuffer) noexcept
 {
     Model* model{ nullptr };
 
@@ -166,8 +166,8 @@ ModelManager::CreateGrid(const float width,
                          const std::uint32_t rows,
                          const std::uint32_t columns,
                          ID3D12GraphicsCommandList& commandList,
-                         Microsoft::WRL::ComPtr<ID3D12Resource>& uploadVertexBuffer,
-                         Microsoft::WRL::ComPtr<ID3D12Resource>& uploadIndexBuffer) noexcept
+                         ID3D12Resource* &uploadVertexBuffer,
+                         ID3D12Resource* &uploadIndexBuffer) noexcept
 {
     Model* model{ nullptr };
 

@@ -79,7 +79,7 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
                 const YAML::Node referenceRootNode = YAML::LoadFile(pairSecondValue);
                 BRE_CHECK_MSG(referenceRootNode.IsDefined(), L"Failed to open yaml file");
                 BRE_CHECK_MSG(referenceRootNode["drawable objects"].IsDefined(),
-                               L"Reference file must have 'drawable objects' field");
+                              L"Reference file must have 'drawable objects' field");
                 LoadDrawableObjects(referenceRootNode);
             } else {
                 // To avoid warning about 'conditional expression is constant'. This is the same than false
@@ -92,7 +92,7 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
         }
 
         BRE_CHECK_MSG(model != nullptr, L"'model' field was not present in current drawable object");
-       
+
         // If "material technique" field is not present, then it defaults to "color mapping" technique
         if (materialTechnique == nullptr) {
             materialTechnique = &mMaterialTechniqueLoader.GetDefaultMaterialTechnique();

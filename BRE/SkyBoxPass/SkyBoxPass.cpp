@@ -45,9 +45,14 @@ CreateAndGetSkyBoxSphereModel(ID3D12CommandAllocator& commandAllocator,
 {
     BRE_CHECK_HR(commandList.Reset(&commandAllocator, nullptr));
 
-    Microsoft::WRL::ComPtr<ID3D12Resource> uploadVertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D12Resource> uploadIndexBuffer;
-    Model* model = &ModelManager::CreateSphere(3000, 50, 50, commandList, uploadVertexBuffer, uploadIndexBuffer);
+    ID3D12Resource* uploadVertexBuffer;
+    ID3D12Resource* uploadIndexBuffer;
+    Model* model = &ModelManager::CreateSphere(3000U, 
+                                               50U, 
+                                               50U, 
+                                               commandList, 
+                                               uploadVertexBuffer, 
+                                               uploadIndexBuffer);
 
     commandList.Close();
     CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);

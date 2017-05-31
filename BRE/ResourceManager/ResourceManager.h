@@ -12,6 +12,23 @@ namespace BRE {
 ///
 class ResourceManager {
 public:
+    ///
+    /// @brief Enum class where its members indicate the type
+    /// of tracking desired.
+    ///
+    /// NO_TRACKING: Resource does not need tracking, and it will not be 
+    /// registered in ResourceStateManager.
+    /// FULL_TRACKING: Resource needs tracking, but of all the resource, not
+    /// a subresource. It will be registered in ResourceStateManager.
+    /// SUBRESOURCE_TRACKING: resource needs tracking, and it needs it per resource basis.
+    /// It will be registered in ResourecStateManager. 
+    ///
+    enum class ResourceStateTrackingType {
+        NO_TRACKING,
+        FULL_TRACKING,
+        SUBRESOURCE_TRACKING,
+    };
+
     ResourceManager() = delete;
     ~ResourceManager() = delete;
     ResourceManager(const ResourceManager&) = delete;
@@ -38,7 +55,7 @@ public:
     ///
     static ID3D12Resource& LoadTextureFromFile(const char* textureFilename,
                                                ID3D12GraphicsCommandList& commandList,
-                                               Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
+                                               ID3D12Resource* &uploadBuffer,
                                                const wchar_t* resourceName) noexcept;
 
     ///
@@ -57,7 +74,7 @@ public:
     static ID3D12Resource& CreateDefaultBuffer(const void* sourceData,
                                                const std::size_t sourceDataSize,
                                                ID3D12GraphicsCommandList& commandList,
-                                               Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer,
+                                               ID3D12Resource* &uploadBuffer,
                                                const wchar_t* resourceName) noexcept;
 
     ///
@@ -74,7 +91,8 @@ public:
                                                    const D3D12_RESOURCE_DESC& resourceDescriptor,
                                                    const D3D12_RESOURCE_STATES& resourceStates,
                                                    const D3D12_CLEAR_VALUE* clearValue,
-                                                   const wchar_t* resourceName) noexcept;
+                                                   const wchar_t* resourceName,
+                                                   const ResourceStateTrackingType resourceStateTrackingType) noexcept;
 
 private:
     static tbb::concurrent_unordered_set<ID3D12Resource*> mResources;

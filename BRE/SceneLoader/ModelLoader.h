@@ -2,7 +2,6 @@
 
 #include <string>
 #include <unordered_map>
-#include <wrl.h>
 
 namespace YAML {
 class Node;
@@ -62,8 +61,8 @@ private:
     void LoadModels(const YAML::Node& modelsNode,
                     ID3D12CommandAllocator& commandAllocator,
                     ID3D12GraphicsCommandList& commandList,
-                    std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>& uploadVertexBuffers,
-                    std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>>& uploadIndexBuffers) noexcept;
+                    std::vector<ID3D12Resource*>& uploadVertexBuffers,
+                    std::vector<ID3D12Resource*>& uploadIndexBuffers) noexcept;
 
     std::unordered_map<std::string, Model*> mModelByName;
 };

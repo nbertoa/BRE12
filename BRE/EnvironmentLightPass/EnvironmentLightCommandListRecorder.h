@@ -1,7 +1,5 @@
 #pragma once
 
-#include <wrl.h>
-
 #include <CommandManager\CommandListPerFrame.h>
 #include <ResourceManager\FrameUploadCBufferPerFrame.h>
 

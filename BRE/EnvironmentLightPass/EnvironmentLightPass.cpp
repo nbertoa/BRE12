@@ -21,9 +21,11 @@ namespace {
 void
 CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceInitialState,
                                   const wchar_t* resourceName,
-                                  Microsoft::WRL::ComPtr<ID3D12Resource>& resource,
+                                  ID3D12Resource* &resource,
                                   D3D12_CPU_DESCRIPTOR_HANDLE& resourceRenderTargetView) noexcept
 {
+    BRE_ASSERT(resource == nullptr);
+
     // Set shared buffers properties
     D3D12_RESOURCE_DESC resourceDescriptor = {};
     resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -39,24 +41,23 @@ CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceInitialSta
     resourceDescriptor.Format = DXGI_FORMAT_R16_UNORM;
 
     D3D12_CLEAR_VALUE clearValue{ resourceDescriptor.Format, 0.0f, 0.0f, 0.0f, 0.0f };
-    resource.Reset();
 
     CD3DX12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
 
     // Create buffer resource
-    ID3D12Resource* resourcePtr = &ResourceManager::CreateCommittedResource(heapProperties,
-                                                                            D3D12_HEAP_FLAG_NONE,
-                                                                            resourceDescriptor,
-                                                                            resourceInitialState,
-                                                                            &clearValue,
-                                                                            resourceName);
-    resource = Microsoft::WRL::ComPtr<ID3D12Resource>(resourcePtr);
+    resource = &ResourceManager::CreateCommittedResource(heapProperties,
+                                                         D3D12_HEAP_FLAG_NONE,
+                                                         resourceDescriptor,
+                                                         resourceInitialState,
+                                                         &clearValue,
+                                                         resourceName,
+                                                         ResourceManager::ResourceStateTrackingType::FULL_TRACKING);
 
     // Create render target view	
     D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor{};
     rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
     rtvDescriptor.Format = resourceDescriptor.Format;
-    RenderTargetDescriptorManager::CreateRenderTargetView(*resource.Get(),
+    RenderTargetDescriptorManager::CreateRenderTargetView(*resource,
                                                           rtvDescriptor,
                                                           &resourceRenderTargetView);
 }
@@ -95,7 +96,7 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
 
     // Initialize blur recorder
     mBlurRecorder.reset(new BlurCommandListRecorder());
-    mBlurRecorder->Init(*mAmbientAccessibilityBuffer.Get(),
+    mBlurRecorder->Init(*mAmbientAccessibilityBuffer,
                         mBlurBufferRenderTargetView);
 
     // Initialize ambient light recorder
@@ -105,7 +106,7 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
                                     depthBuffer,
                                     diffuseIrradianceCubeMap,
                                     specularPreConvolvedCubeMap,
-                                    *mBlurBuffer.Get(),
+                                    *mBlurBuffer,
                                     renderTargetView);
 
     mBaseColorMetalMaskBuffer = &baseColorMetalMaskBuffer;
@@ -146,8 +147,8 @@ EnvironmentLightPass::IsDataValid() const noexcept
     const bool b =
         mAmbientOcclusionRecorder.get() != nullptr &&
         mEnvironmentLightRecorder.get() != nullptr &&
-        mAmbientAccessibilityBuffer.Get() != nullptr &&
-        mBlurBuffer.Get() != nullptr &&
+        mAmbientAccessibilityBuffer != nullptr &&
+        mBlurBuffer != nullptr &&
         mBlurBufferRenderTargetView.ptr != 0UL &&
         mBaseColorMetalMaskBuffer != nullptr &&
         mNormalSmoothnessBuffer != nullptr &&
@@ -165,14 +166,14 @@ EnvironmentLightPass::ExecuteBeginTask() noexcept
 
     CD3DX12_RESOURCE_BARRIER barriers[5U];
     std::uint32_t barrierCount = 0UL;
-    if (ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer.Get()) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
-        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(),
+    if (ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer,
                                                                                         D3D12_RESOURCE_STATE_RENDER_TARGET);
         ++barrierCount;
     }
 
-    if (ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
-        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(),
+    if (ResourceStateManager::GetResourceState(*mBlurBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer,
                                                                                         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         ++barrierCount;
     }
@@ -214,24 +215,19 @@ EnvironmentLightPass::ExecuteMiddleTask() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    // Check resource states:
-    // Ambient accesibility buffer was used as render target resource by ambient accesibility shader.
-    // Blur buffer was used as pixel shader resource by ambient light shader
-    BRE_ASSERT(ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer.Get()) == D3D12_RESOURCE_STATE_RENDER_TARGET);
-    BRE_ASSERT(ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
     ID3D12GraphicsCommandList& commandList = mMiddleCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
     CD3DX12_RESOURCE_BARRIER barriers[2U];
     std::uint32_t barrierCount = 0UL;
-    if (ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer.Get()) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
-        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer.Get(),
+    if (ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer,
                                                                                         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         ++barrierCount;
     }
 
-    if (ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
-        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(),
+    if (ResourceStateManager::GetResourceState(*mBlurBuffer) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer,
                                                                                         D3D12_RESOURCE_STATE_RENDER_TARGET);
         ++barrierCount;
     }
@@ -257,8 +253,8 @@ EnvironmentLightPass::ExecuteFinalTask() noexcept
 
     CD3DX12_RESOURCE_BARRIER barriers[1U];
     std::uint32_t barrierCount = 0UL;
-    if (ResourceStateManager::GetResourceState(*mBlurBuffer.Get()) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
-        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer.Get(),
+    if (ResourceStateManager::GetResourceState(*mBlurBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer,
                                                                                         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         ++barrierCount;
     }
