@@ -27,15 +27,8 @@ ReflectionPass::Execute() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    std::uint32_t taskCount{ 1U };
-    CommandListExecutor::Get().ResetExecutedCommandListCount();
-
-    ExecuteBeginTask();
-
-    // Wait until all previous tasks command lists are executed
-    while (CommandListExecutor::Get().GetExecutedCommandListCount() < taskCount) {
-        Sleep(0U);
-    }
+    //RecordPrePassCommandList();
+    //RecordHierZBufferCommandLists();
 }
 
 void
@@ -132,11 +125,11 @@ ReflectionPass::IsDataValid() const noexcept
 }
 
 void
-ReflectionPass::ExecuteBeginTask() noexcept
+ReflectionPass::RecordPrePassCommandList() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+    ID3D12GraphicsCommandList& commandList = mPrePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
     const std::uint32_t numMipLevels = _countof(mHierZBufferMipLevelRenderTargetViews);
 
@@ -169,6 +162,12 @@ ReflectionPass::ExecuteBeginTask() noexcept
                                       nullptr);
 
     BRE_CHECK_HR(commandList.Close());
-    CommandListExecutor::Get().AddCommandList(commandList);
+    CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+}
+
+void 
+ReflectionPass::RecordHierZBufferCommandLists() noexcept
+{
+
 }
 }

@@ -129,14 +129,15 @@ GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    ExecuteBeginTask();
-
-    const std::uint32_t taskCount{ static_cast<std::uint32_t>(mGeometryCommandListRecorders.size()) };
     CommandListExecutor::Get().ResetExecutedCommandListCount();
+    const std::uint32_t geometryPassCommandListCount = static_cast<std::uint32_t>(mGeometryCommandListRecorders.size());
+    const std::uint32_t commandListCount{ geometryPassCommandListCount + 1U };
+
+    RecordPrePassCommandList();
 
     // Execute tasks
-    std::uint32_t grainSize{ max(1U, (taskCount) / ApplicationSettings::sCpuProcessorCount) };
-    tbb::parallel_for(tbb::blocked_range<std::size_t>(0, taskCount, grainSize),
+    std::uint32_t grainSize{ max(1U, (geometryPassCommandListCount) / ApplicationSettings::sCpuProcessorCount) };
+    tbb::parallel_for(tbb::blocked_range<std::size_t>(0, geometryPassCommandListCount, grainSize),
                       [&](const tbb::blocked_range<size_t>& r) {
         for (size_t i = r.begin(); i != r.end(); ++i)
             mGeometryCommandListRecorders[i]->RecordAndPushCommandLists(frameCBuffer);
@@ -144,7 +145,7 @@ GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
     );
 
     // Wait until all previous tasks command lists are executed
-    while (CommandListExecutor::Get().GetExecutedCommandListCount() < taskCount) {
+    while (CommandListExecutor::Get().GetExecutedCommandListCount() < commandListCount) {
         Sleep(0U);
     }
 }
@@ -168,11 +169,11 @@ GeometryPass::IsDataValid() const noexcept
 }
 
 void
-GeometryPass::ExecuteBeginTask() noexcept
+GeometryPass::RecordPrePassCommandList() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+    ID3D12GraphicsCommandList& commandList = mPrePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
     CD3DX12_RESOURCE_BARRIER barriers[BUFFERS_COUNT];
     std::uint32_t barrierCount = 0UL;
@@ -196,6 +197,6 @@ GeometryPass::ExecuteBeginTask() noexcept
     commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[BASECOLOR_METALMASK], zero, 0U, nullptr);
 
     BRE_CHECK_HR(commandList.Close());
-    CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+    CommandListExecutor::Get().AddCommandList(commandList);
 }
 }

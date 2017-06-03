@@ -60,11 +60,11 @@ private:
     bool IsDataValid() const noexcept;
 
     ///
-    /// @brief Executes begin task for geometry pass
+    /// @brief Records pre pass command list
     ///
-    void ExecuteBeginTask() noexcept;
+    void RecordPrePassCommandList() noexcept;
 
-    CommandListPerFrame mCommandListPerFrame;
+    CommandListPerFrame mPrePassCommandListPerFrame;
 
     // Geometry buffers data
     ID3D12Resource* mGeometryBuffers[BUFFERS_COUNT]{ nullptr };

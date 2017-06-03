@@ -32,14 +32,19 @@ PostProcessPass::Execute(ID3D12Resource& renderTargetBuffer,
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(renderTargetView.ptr != 0UL);
-
-    ExecuteBeginTask(renderTargetBuffer, renderTargetView);
-
+    
+    std::uint32_t commandListCount = 1;
     CommandListExecutor::Get().ResetExecutedCommandListCount();
+
+    if (RecordPrePassCommandList(renderTargetBuffer,
+                                  renderTargetView)) {
+        ++commandListCount;
+    }
+        
     mCommandListRecorder->RecordAndPushCommandLists(renderTargetView);
 
     // Wait until all previous tasks command lists are executed
-    while (CommandListExecutor::Get().GetExecutedCommandListCount() < 1) {
+    while (CommandListExecutor::Get().GetExecutedCommandListCount() < commandListCount) {
         Sleep(0U);
     }
 }
@@ -54,9 +59,9 @@ PostProcessPass::IsDataValid() const noexcept
     return b;
 }
 
-void
-PostProcessPass::ExecuteBeginTask(ID3D12Resource& renderTargetBuffer,
-                                  const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+bool
+PostProcessPass::RecordPrePassCommandList(ID3D12Resource& renderTargetBuffer,
+                                           const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(renderTargetView.ptr != 0UL);
@@ -76,10 +81,14 @@ PostProcessPass::ExecuteBeginTask(ID3D12Resource& renderTargetBuffer,
     }
 
     if (barrierCount > 0UL) {
-        ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+        ID3D12GraphicsCommandList& commandList = mPrePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
         commandList.ResourceBarrier(barrierCount, barriers);
         BRE_CHECK_HR(commandList.Close());
-        CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+        CommandListExecutor::Get().AddCommandList(commandList);
+
+        return true;
     }
+
+    return false;
 }
 }

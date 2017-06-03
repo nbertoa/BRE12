@@ -49,25 +49,25 @@ private:
     bool IsDataValid() const noexcept;
 
     ///
-    /// @brief Executes begin task for the pass
+    /// @brief Records pre pass command list
     ///
-    void ExecuteBeginTask() noexcept;
+    void RecordPrePassCommandList() noexcept;
 
     ///
-    /// @brief Executes middle task for the pass
+    /// @brief Records middle pass command list
     ///
-    void ExecuteMiddleTask() noexcept;
+    void RecordMiddlePassCommandList() noexcept;
 
     ///
-    /// @brief Executes final task for the pass
-    /// @return Returns true if the final task command list was pushed to 
+    /// @brief Records post pass command list
+    /// @return Returns true if the command list was pushed to 
     /// the CommandListExecutor. Otherwise, false.
     ///
-    bool ExecuteFinalTask() noexcept;
+    bool RecordPostPassCommandList() noexcept;
 
-    CommandListPerFrame mBeginCommandListPerFrame;
-    CommandListPerFrame mMiddleCommandListPerFrame;
-    CommandListPerFrame mFinalCommandListPerFrame;
+    CommandListPerFrame mPrePassCommandListPerFrame;
+    CommandListPerFrame mMiddlePassCommandListPerFrame;
+    CommandListPerFrame mPostPassCommandListPerFrame;
 
     ID3D12Resource* mAmbientAccessibilityBuffer{ nullptr };
     D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetView{ 0UL };

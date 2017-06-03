@@ -43,14 +43,15 @@ private:
     bool IsDataValid() const noexcept;
 
     ///
-    /// @brief Execute begin task for pass
+    /// @brief Records pre pass command list
     /// @param renderTargetBuffer Render target buffer
     /// @param renderTargetView Render target view
+    /// @return True if a command list was recorded. Otherwise, false.
     ///
-    void ExecuteBeginTask(ID3D12Resource& renderTargetBuffer,
-                          const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    bool RecordPrePassCommandList(ID3D12Resource& renderTargetBuffer,
+                                   const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
-    CommandListPerFrame mCommandListPerFrame;
+    CommandListPerFrame mPrePassCommandListPerFrame;
 
     ID3D12Resource* mInputColorBuffer{ nullptr };
 

@@ -155,8 +155,8 @@ private:
     ToneMappingPass mToneMappingPass;
     PostProcessPass mPostProcessPass;
 
-    CommandListPerFrame mBeginCommandListPerFrame;
-    CommandListPerFrame mFinalCommandListPerFrame;
+    CommandListPerFrame mPrePassCommandListPerFrame;
+    CommandListPerFrame mPostPassCommandListPerFrame;
 
     ID3D12Resource* mFrameBuffers[ApplicationSettings::sSwapChainBufferCount]{ nullptr };
     D3D12_CPU_DESCRIPTOR_HANDLE mFrameBufferRenderTargetViews[ApplicationSettings::sSwapChainBufferCount]{ 0UL };

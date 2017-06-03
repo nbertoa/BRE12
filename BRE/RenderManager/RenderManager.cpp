@@ -269,7 +269,7 @@ RenderManager::execute()
 void
 RenderManager::ExecuteBeginPass()
 {
-    ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+    ID3D12GraphicsCommandList& commandList = mPrePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
     CD3DX12_RESOURCE_BARRIER barriers[4U];
     std::uint32_t barrierCount = 0UL;
@@ -339,7 +339,7 @@ RenderManager::ExecuteFinalPass()
     }
 
     if (barrierCount > 0UL) {
-        ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+        ID3D12GraphicsCommandList& commandList = mPostPassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
         commandList.ResourceBarrier(barrierCount, barriers);
         BRE_CHECK_HR(commandList.Close());
         CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);

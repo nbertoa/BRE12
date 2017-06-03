@@ -46,14 +46,15 @@ private:
     bool IsDataValid() const noexcept;
 
     ///
-    /// @brief Execute begin task of skybox pass
+    /// @brief Records pre pass command list
+    /// @return True if a command list was recorded. Otherwise, false.
     ///
-    void ExecuteBeginTask() noexcept;
+    bool RecordPrePassCommandList() noexcept;
 
     std::unique_ptr<SkyBoxCommandListRecorder> mCommandListRecorder;
 
     ID3D12Resource* mDepthBuffer{ nullptr };
 
-    CommandListPerFrame mBeginCommandListPerFrame;
+    CommandListPerFrame mPrePassCommandListPerFrame;
 };
 }

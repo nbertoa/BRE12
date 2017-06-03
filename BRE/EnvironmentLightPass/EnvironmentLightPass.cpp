@@ -121,22 +121,22 @@ EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    std::uint32_t taskCount{ 5U };
+    std::uint32_t commandListCount{ 5U };
     CommandListExecutor::Get().ResetExecutedCommandListCount();
 
-    ExecuteBeginTask();
+    RecordPrePassCommandList();
     mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
 
-    ExecuteMiddleTask();
+    RecordMiddlePassCommandList();
     mBlurRecorder->RecordAndPushCommandLists();
 
-    if (ExecuteFinalTask()) {
-        ++taskCount;
+    if (RecordPostPassCommandList()) {
+        ++commandListCount;
     }
     mEnvironmentLightRecorder->RecordAndPushCommandLists(frameCBuffer);
 
     // Wait until all previous tasks command lists are executed
-    while (CommandListExecutor::Get().GetExecutedCommandListCount() < taskCount) {
+    while (CommandListExecutor::Get().GetExecutedCommandListCount() < commandListCount) {
         Sleep(0U);
     }
 }
@@ -158,11 +158,11 @@ EnvironmentLightPass::IsDataValid() const noexcept
 }
 
 void
-EnvironmentLightPass::ExecuteBeginTask() noexcept
+EnvironmentLightPass::RecordPrePassCommandList() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    ID3D12GraphicsCommandList& commandList = mBeginCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+    ID3D12GraphicsCommandList& commandList = mPrePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
     CD3DX12_RESOURCE_BARRIER barriers[5U];
     std::uint32_t barrierCount = 0UL;
@@ -211,12 +211,12 @@ EnvironmentLightPass::ExecuteBeginTask() noexcept
 }
 
 void
-EnvironmentLightPass::ExecuteMiddleTask() noexcept
+EnvironmentLightPass::RecordMiddlePassCommandList() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
 
-    ID3D12GraphicsCommandList& commandList = mMiddleCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+    ID3D12GraphicsCommandList& commandList = mMiddlePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
     CD3DX12_RESOURCE_BARRIER barriers[2U];
     std::uint32_t barrierCount = 0UL;
@@ -247,7 +247,7 @@ EnvironmentLightPass::ExecuteMiddleTask() noexcept
 }
 
 bool
-EnvironmentLightPass::ExecuteFinalTask() noexcept
+EnvironmentLightPass::RecordPostPassCommandList() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
@@ -260,7 +260,7 @@ EnvironmentLightPass::ExecuteFinalTask() noexcept
     }
 
     if (barrierCount > 0UL) {
-        ID3D12GraphicsCommandList& commandList = mFinalCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
+        ID3D12GraphicsCommandList& commandList = mPostPassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
         commandList.ResourceBarrier(barrierCount, barriers);
         BRE_CHECK_HR(commandList.Close());
         CommandListExecutor::Get().AddCommandList(commandList);

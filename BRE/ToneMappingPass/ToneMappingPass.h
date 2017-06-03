@@ -43,11 +43,12 @@ private:
     bool IsDataValid() const noexcept;
 
     ///
-    /// @brief Executes begin task
+    /// @brief Records pre pass command list
+    /// @return True if a command list was recorded. Otherwise, false.
     ///
-    void ExecuteBeginTask() noexcept;
+    bool RecordPrePassCommandList() noexcept;
 
-    CommandListPerFrame mCommandListPerFrame;
+    CommandListPerFrame mPrePassCommandListPerFrame;
 
     ID3D12Resource* mInputColorBuffer{ nullptr };
     ID3D12Resource* mOutputColorBuffer{ nullptr };

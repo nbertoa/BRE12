@@ -39,11 +39,16 @@ private:
     bool IsDataValid() const noexcept;
 
     ///
-    /// @brief Executes begin task for the pass
+    /// @brief Records pre pass command list
     ///
-    void ExecuteBeginTask() noexcept;
+    void RecordPrePassCommandList() noexcept;
 
-    CommandListPerFrame mBeginCommandListPerFrame;
+    ///
+    /// @brief Records command lists related with hi-z buffer 
+    ///
+    void RecordHierZBufferCommandLists() noexcept;
+
+    CommandListPerFrame mPrePassCommandListPerFrame;
 
     ID3D12Resource* mHierZBuffer{ nullptr };
     D3D12_CPU_DESCRIPTOR_HANDLE mHierZBufferMipLevelRenderTargetViews[10U]{ 0UL };
