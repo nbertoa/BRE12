@@ -97,10 +97,10 @@ HeightMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometry
         mGeometryDataVec.push_back(geometryDataVector[i]);
     }
 
-    InitConstantBuffers(materialProperties,
-                        diffuseTextures,
-                        normalTextures,
-                        heightTextures);
+    InitCBuffersAndViews(materialProperties,
+                         diffuseTextures,
+                         normalTextures,
+                         heightTextures);
 
     BRE_ASSERT(IsDataValid());
 }
@@ -199,10 +199,10 @@ HeightMappingCommandListRecorder::IsDataValid() const noexcept
 }
 
 void
-HeightMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                                                      const std::vector<ID3D12Resource*>& diffuseTextures,
-                                                      const std::vector<ID3D12Resource*>& normalTextures,
-                                                      const std::vector<ID3D12Resource*>& heightTextures) noexcept
+HeightMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties,
+                                                       const std::vector<ID3D12Resource*>& diffuseTextures,
+                                                       const std::vector<ID3D12Resource*>& normalTextures,
+                                                       const std::vector<ID3D12Resource*>& heightTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == diffuseTextures.size());

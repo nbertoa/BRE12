@@ -85,9 +85,9 @@ NormalMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometry
         mGeometryDataVec.push_back(geometryDataVector[i]);
     }
 
-    InitConstantBuffers(materialProperties,
-                        diffuseTextures,
-                        normalTextures);
+    InitCBuffersAndViews(materialProperties,
+                         diffuseTextures,
+                         normalTextures);
 
     BRE_ASSERT(IsDataValid());
 }
@@ -174,9 +174,9 @@ NormalMappingCommandListRecorder::IsDataValid() const noexcept
 }
 
 void
-NormalMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                                                      const std::vector<ID3D12Resource*>& diffuseTextures,
-                                                      const std::vector<ID3D12Resource*>& normalTextures) noexcept
+NormalMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties,
+                                                       const std::vector<ID3D12Resource*>& diffuseTextures,
+                                                       const std::vector<ID3D12Resource*>& normalTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == diffuseTextures.size());
@@ -196,7 +196,7 @@ NormalMappingCommandListRecorder::InitConstantBuffers(const std::vector<Material
         GeometryData& geomData{ mGeometryDataVec[i] };
         const std::uint32_t worldMatsCount{ static_cast<std::uint32_t>(geomData.mWorldMatrices.size()) };
         for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
-            MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j], 
+            MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j],
                                             objCBuffer.mWorldMatrix);
             MathUtils::StoreTransposeMatrix(geomData.mInverseTransposeWorldMatrices[j],
                                             objCBuffer.mInverseTransposeWorldMatrix);

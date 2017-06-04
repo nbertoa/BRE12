@@ -61,16 +61,16 @@ public:
 
 private:
     ///
-    /// @brief Initializes the constant buffers
+    /// @brief Initializes the constant buffers and views
     /// @param materialProperties List of material properties. Must not be empty.
     /// @param diffuseTextures List of diffuse textures. Must not be empty.
     /// @param normalTextures List of normal textures. Must not be empty.
     /// @param heightTextures List of height textures. Must not be empty.
     ///
-    void InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                             const std::vector<ID3D12Resource*>& diffuseTextures,
-                             const std::vector<ID3D12Resource*>& normalTextures,
-                             const std::vector<ID3D12Resource*>& heightTextures) noexcept;
+    void InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties,
+                              const std::vector<ID3D12Resource*>& diffuseTextures,
+                              const std::vector<ID3D12Resource*>& normalTextures,
+                              const std::vector<ID3D12Resource*>& heightTextures) noexcept;
 
     D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorTextureRenderTargetViewsBegin;
     D3D12_GPU_DESCRIPTOR_HANDLE mNormalTextureRenderTargetViewsBegin;

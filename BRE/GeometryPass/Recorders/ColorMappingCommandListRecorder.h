@@ -48,9 +48,9 @@ public:
 
 private:
     ///
-    /// @brief Initializes the constant buffers
+    /// @brief Initializes the constant buffers and views
     /// @param materialProperties List of material properties. Must not be empty.
     ///
-    void InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties) noexcept;
+    void InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties) noexcept;
 };
 }

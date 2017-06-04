@@ -78,7 +78,7 @@ ColorMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometryD
         mGeometryDataVec.push_back(geometryDataVector[i]);
     }
 
-    InitConstantBuffers(materialProperties);
+    InitCBuffersAndViews(materialProperties);
 
     BRE_ASSERT(IsDataValid());
 }
@@ -142,7 +142,7 @@ ColorMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 }
 
 void
-ColorMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties) noexcept
+ColorMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(mObjectUploadCBuffers == nullptr);

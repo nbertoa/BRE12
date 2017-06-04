@@ -83,7 +83,8 @@ TextureMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometr
         mGeometryDataVec.push_back(geometryDataVector[i]);
     }
 
-    InitConstantBuffers(materialProperties, diffuseTextures);
+    InitCBuffersAndViews(materialProperties, 
+                         diffuseTextures);
 
     BRE_ASSERT(IsDataValid());
 }
@@ -173,8 +174,8 @@ TextureMappingCommandListRecorder::IsDataValid() const noexcept
 }
 
 void
-TextureMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                                                       const std::vector<ID3D12Resource*>& diffuseTextures) noexcept
+TextureMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties,
+                                                        const std::vector<ID3D12Resource*>& diffuseTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == diffuseTextures.size());

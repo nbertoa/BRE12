@@ -94,9 +94,9 @@ ColorHeightMappingCommandListRecorder::Init(const std::vector<GeometryData>& geo
         mGeometryDataVec.push_back(geometryDataVector[i]);
     }
 
-    InitConstantBuffers(materialProperties,
-                        normalTextures,
-                        heightTextures);
+    InitCBuffersAndViews(materialProperties,
+                         normalTextures,
+                         heightTextures);
 
     BRE_ASSERT(IsDataValid());
 }
@@ -190,9 +190,9 @@ ColorHeightMappingCommandListRecorder::IsDataValid() const noexcept
 }
 
 void
-ColorHeightMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                                                           const std::vector<ID3D12Resource*>& normalTextures,
-                                                           const std::vector<ID3D12Resource*>& heightTextures) noexcept
+ColorHeightMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties,
+                                                            const std::vector<ID3D12Resource*>& normalTextures,
+                                                            const std::vector<ID3D12Resource*>& heightTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == normalTextures.size());

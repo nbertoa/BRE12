@@ -84,7 +84,7 @@ ColorNormalMappingCommandListRecorder::Init(const std::vector<GeometryData>& geo
         mGeometryDataVec.push_back(geometryDataVector[i]);
     }
 
-    InitConstantBuffers(materialProperties, normalTexturess);
+    InitCBuffersAndViews(materialProperties, normalTexturess);
 
     BRE_ASSERT(IsDataValid());
 }
@@ -166,8 +166,8 @@ ColorNormalMappingCommandListRecorder::IsDataValid() const noexcept
 }
 
 void
-ColorNormalMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
-                                                           const std::vector<ID3D12Resource*>& normalTextures) noexcept
+ColorNormalMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties,
+                                                            const std::vector<ID3D12Resource*>& normalTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == normalTextures.size());
