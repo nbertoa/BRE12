@@ -34,16 +34,16 @@ public:
     /// @param baseColorMetalMaskBuffer Geometry buffer that contains base color and metal mask.
     /// @param diffuseIrradianceCubeMap Diffuse irradiance environment cube map
     /// @param specularPreConvolvedCubeMap Specular pre convolved environment cube map
-    /// @param ambientAccessibilityBuffer Ambient accessibility buffer
     /// @param outputColorBufferRenderTargetView Render target view to the output color buffer
+    /// @param ambientAccessibilityBufferShaderResourceView Shader resource view to the ambient accessibility buffer
     /// @param depthBufferShaderResourceView Depth buffer shader resource view
     ///
     void Init(ID3D12Resource& normalSmoothnessBuffer,
               ID3D12Resource& baseColorMetalMaskBuffer,
               ID3D12Resource& diffuseIrradianceCubeMap,
               ID3D12Resource& specularPreConvolvedCubeMap,
-              ID3D12Resource& ambientAccessibilityBuffer,
               const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
+              const D3D12_GPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferShaderResourceView,
               const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept;
 
     ///
@@ -74,14 +74,14 @@ private:
     void InitShaderResourceViews(ID3D12Resource& normalSmoothnessBuffer,
                                  ID3D12Resource& baseColorMetalMaskBuffer,
                                  ID3D12Resource& diffuseIrradianceCubeMap,
-                                 ID3D12Resource& specularPreConvolvedCubeMap,
-                                 ID3D12Resource& ambientAccessibilityBuffer) noexcept;
+                                 ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
     CommandListPerFrame mCommandListPerFrame;
 
     FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
     D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferRenderTargetView{ 0UL };
+    D3D12_GPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferShaderResourceView{ 0UL };
     D3D12_GPU_DESCRIPTOR_HANDLE mDepthBufferShaderResourceView{ 0UL };
 
     // First descriptor in the list. All the others are contiguous

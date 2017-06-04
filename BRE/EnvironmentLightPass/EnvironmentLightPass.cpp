@@ -121,8 +121,8 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
                                     baseColorMetalMaskBuffer,
                                     diffuseIrradianceCubeMap,
                                     specularPreConvolvedCubeMap,
-                                    *mBlurBuffer,
                                     outputColorBufferRenderTargetView,
+                                    mBlurBufferShaderResourceView,
                                     depthBufferShaderResourceView);
 
     mBaseColorMetalMaskBuffer = &baseColorMetalMaskBuffer;

@@ -14,7 +14,8 @@ namespace BRE {
 // Root Signature:
 // "CBV(b0, visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Frame CBuffer
 // "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 1 -> Frame CBuffer
-// "DescriptorTable(SRV(t0), SRV(t1), SRV(t2), SRV(t3), SRV(t4), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Textures 
+// "DescriptorTable(SRV(t0), SRV(t1), SRV(t2), SRV(t3), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Geometry buffers + diffuse & specular irradiance cube maps 
+// "DescriptorTable(SRV(t4), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Ambient accessibility buffer 
 // "DescriptorTable(SRV(t5), visibility = SHADER_VISIBILITY_PIXEL), " \ 3 -> Depth buffer
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -55,20 +56,20 @@ EnvironmentLightCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer
                                           ID3D12Resource& baseColorMetalMaskBuffer,
                                           ID3D12Resource& diffuseIrradianceCubeMap,
                                           ID3D12Resource& specularPreConvolvedCubeMap,
-                                          ID3D12Resource& ambientAccessibilityBuffer,
                                           const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
+                                          const D3D12_GPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferShaderResourceView,
                                           const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
     mOutputColorBufferRenderTargetView = outputColorBufferRenderTargetView;
+    mAmbientAccessibilityBufferShaderResourceView = ambientAccessibilityBufferShaderResourceView;
     mDepthBufferShaderResourceView = depthBufferShaderResourceView;
 
     InitShaderResourceViews(normalSmoothnessBuffer,
                             baseColorMetalMaskBuffer,
                             diffuseIrradianceCubeMap,
-                            specularPreConvolvedCubeMap,
-                            ambientAccessibilityBuffer);
+                            specularPreConvolvedCubeMap);
 
     BRE_ASSERT(IsDataValid());
 }
@@ -98,7 +99,8 @@ EnvironmentLightCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
     commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootDescriptorTable(2U, mPixelShaderResourceViewsBegin);
-    commandList.SetGraphicsRootDescriptorTable(3U, mDepthBufferShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(3U, mAmbientAccessibilityBufferShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(4U, mDepthBufferShaderResourceView);
 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
@@ -114,6 +116,7 @@ EnvironmentLightCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
         mOutputColorBufferRenderTargetView.ptr != 0UL &&
+        mAmbientAccessibilityBufferShaderResourceView.ptr != 0UL &&
         mDepthBufferShaderResourceView.ptr != 0UL &&
         mPixelShaderResourceViewsBegin.ptr != 0UL;
 
@@ -124,8 +127,7 @@ void
 EnvironmentLightCommandListRecorder::InitShaderResourceViews(ID3D12Resource& normalSmoothnessBuffer,
                                                              ID3D12Resource& baseColorMetalMaskBuffer,
                                                              ID3D12Resource& diffuseIrradianceCubeMap,
-                                                             ID3D12Resource& specularPreConvolvedCubeMap,
-                                                             ID3D12Resource& ambientAccessibilityBuffer) noexcept
+                                                             ID3D12Resource& specularPreConvolvedCubeMap) noexcept
 {
     ID3D12Resource* resources[] =
     {
@@ -133,7 +135,6 @@ EnvironmentLightCommandListRecorder::InitShaderResourceViews(ID3D12Resource& nor
         &baseColorMetalMaskBuffer,
         &diffuseIrradianceCubeMap,
         &specularPreConvolvedCubeMap,
-        &ambientAccessibilityBuffer,
     };
 
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptors[_countof(resources)]{};
@@ -168,14 +169,6 @@ EnvironmentLightCommandListRecorder::InitShaderResourceViews(ID3D12Resource& nor
     srvDescriptors[3].TextureCube.MipLevels = specularPreConvolvedCubeMap.GetDesc().MipLevels;
     srvDescriptors[3].TextureCube.ResourceMinLODClamp = 0.0f;
     srvDescriptors[3].Format = specularPreConvolvedCubeMap.GetDesc().Format;
-    
-    // Ambient accessibility buffer
-    srvDescriptors[4].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDescriptors[4].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDescriptors[4].Texture2D.MostDetailedMip = 0;
-    srvDescriptors[4].Texture2D.ResourceMinLODClamp = 0.0f;
-    srvDescriptors[4].Format = ambientAccessibilityBuffer.GetDesc().Format;
-    srvDescriptors[4].Texture2D.MipLevels = ambientAccessibilityBuffer.GetDesc().MipLevels;
 
     BRE_ASSERT(_countof(resources) == _countof(srvDescriptors));
     
