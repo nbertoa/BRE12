@@ -38,7 +38,9 @@ public:
     ///
     /// Init() must be called first
     ///
-    void RecordAndPushCommandLists() noexcept;
+    /// @return The number of pushed command lists
+    ///
+    std::uint32_t RecordAndPushCommandLists() noexcept;
 
     ///
     /// @brief Checks if internal data is valid. Typically, used for assertions

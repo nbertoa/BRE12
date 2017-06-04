@@ -88,7 +88,7 @@ TextureMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometr
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 TextureMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
@@ -149,8 +149,9 @@ TextureMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
     }
 
     commandList.Close();
+    CommandListExecutor::Get().PushCommandList(commandList);
 
-    CommandListExecutor::Get().AddCommandList(commandList);
+    return 1U;
 }
 
 bool

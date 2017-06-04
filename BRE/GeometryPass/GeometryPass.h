@@ -44,13 +44,15 @@ public:
     }
 
     ///
-    /// @brief Executes the geometry pass
+    /// @brief Executes the pass
     ///
-    /// Init() must be called first
+    /// Init() must be called first. This method can record and
+    /// push command lists to the CommandListExecutor.
     ///
     /// @param frameCBuffer Constant buffer per frame, for current frame
+    /// @return The number of recorded command lists.
     ///
-    void Execute(const FrameCBuffer& frameCBuffer) noexcept;
+    std::uint32_t Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
     ///
@@ -60,9 +62,11 @@ private:
     bool IsDataValid() const noexcept;
 
     ///
-    /// @brief Records pre pass command list
+    /// @brief Records pre pass command lists and pushes them to 
+    /// the CommandListExecutor.
+    /// @return The number of recorded command lists
     ///
-    void RecordPrePassCommandList() noexcept;
+    std::uint32_t RecordAndPushPrePassCommandLists() noexcept;
 
     CommandListPerFrame mPrePassCommandListPerFrame;
 

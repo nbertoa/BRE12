@@ -26,27 +26,21 @@ PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 PostProcessPass::Execute(ID3D12Resource& renderTargetBuffer,
                          const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(renderTargetView.ptr != 0UL);
     
-    std::uint32_t commandListCount = 1;
-    CommandListExecutor::Get().ResetExecutedCommandListCount();
+    std::uint32_t commandListCount = 0U;
 
-    if (RecordPrePassCommandList(renderTargetBuffer,
-                                  renderTargetView)) {
-        ++commandListCount;
-    }
+    commandListCount += RecordAndPushPrePassCommandLists(renderTargetBuffer,
+                                                         renderTargetView);
         
-    mCommandListRecorder->RecordAndPushCommandLists(renderTargetView);
+    commandListCount += mCommandListRecorder->RecordAndPushCommandLists(renderTargetView);
 
-    // Wait until all previous tasks command lists are executed
-    while (CommandListExecutor::Get().GetExecutedCommandListCount() < commandListCount) {
-        Sleep(0U);
-    }
+    return commandListCount;
 }
 
 bool
@@ -59,9 +53,9 @@ PostProcessPass::IsDataValid() const noexcept
     return b;
 }
 
-bool
-PostProcessPass::RecordPrePassCommandList(ID3D12Resource& renderTargetBuffer,
-                                           const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+std::uint32_t
+PostProcessPass::RecordAndPushPrePassCommandLists(ID3D12Resource& renderTargetBuffer,
+                                                  const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(renderTargetView.ptr != 0UL);
@@ -84,11 +78,11 @@ PostProcessPass::RecordPrePassCommandList(ID3D12Resource& renderTargetBuffer,
         ID3D12GraphicsCommandList& commandList = mPrePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
         commandList.ResourceBarrier(barrierCount, barriers);
         BRE_CHECK_HR(commandList.Close());
-        CommandListExecutor::Get().AddCommandList(commandList);
+        CommandListExecutor::Get().PushCommandList(commandList);
 
-        return true;
+        return 1U;
     }
 
-    return false;
+    return 0U;
 }
 }

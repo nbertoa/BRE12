@@ -82,7 +82,7 @@ SkyBoxCommandListRecorder::Init(const VertexAndIndexBufferCreator::VertexBufferD
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 SkyBoxCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
@@ -114,7 +114,9 @@ SkyBoxCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
     commandList.DrawIndexedInstanced(mIndexBufferData.mElementCount, 1U, 0U, 0U, 0U);
 
     commandList.Close();
-    CommandListExecutor::Get().AddCommandList(commandList);
+    CommandListExecutor::Get().PushCommandList(commandList);
+
+    return 1U;
 }
 
 bool

@@ -57,7 +57,7 @@ PostProcessCommandListRecorder::Init(ID3D12Resource& inputColorBuffer) noexcept
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 PostProcessCommandListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid());
@@ -80,7 +80,9 @@ PostProcessCommandListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRI
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
 
     commandList.Close();
-    CommandListExecutor::Get().AddCommandList(commandList);
+    CommandListExecutor::Get().PushCommandList(commandList);
+
+    return 1U;
 }
 
 bool

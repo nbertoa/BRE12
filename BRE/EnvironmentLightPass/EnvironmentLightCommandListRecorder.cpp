@@ -73,7 +73,7 @@ EnvironmentLightCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 EnvironmentLightCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
@@ -103,7 +103,9 @@ EnvironmentLightCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
 
     commandList.Close();
-    CommandListExecutor::Get().AddCommandList(commandList);
+    CommandListExecutor::Get().PushCommandList(commandList);
+
+    return 1U;
 }
 
 bool

@@ -55,8 +55,9 @@ public:
     /// Init() must be called first
     ///
     /// @param frameCBuffer Constant buffer per frame, for current frame
+    /// @return The number of pushed command lists
     ///
-    virtual void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept = 0;
+    virtual std::uint32_t RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept = 0;
 
     ///
     /// @brief Checks if internal data is valid. Typically, used for assertions

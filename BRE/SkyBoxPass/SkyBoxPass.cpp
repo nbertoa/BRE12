@@ -106,24 +106,17 @@ SkyBoxPass::Init(ID3D12Resource& skyBoxCubeMap,
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    std::uint32_t commandListCount = 1;
-    CommandListExecutor::Get().ResetExecutedCommandListCount();
+    std::uint32_t commandListCount = 0U;
 
-    if (RecordPrePassCommandList()) {
-        ++commandListCount;
-    }
-    
-    mCommandListRecorder->RecordAndPushCommandLists(frameCBuffer);
+    commandListCount += RecordAndPushPrePassCommandLists();
+    commandListCount += mCommandListRecorder->RecordAndPushCommandLists(frameCBuffer);
 
-    // Wait until all previous tasks command lists are executed
-    while (CommandListExecutor::Get().GetExecutedCommandListCount() < commandListCount) {
-        Sleep(0U);
-    }
+    return commandListCount;
 }
 
 bool
@@ -136,8 +129,8 @@ SkyBoxPass::IsDataValid() const noexcept
     return b;
 }
 
-bool
-SkyBoxPass::RecordPrePassCommandList() noexcept
+std::uint32_t
+SkyBoxPass::RecordAndPushPrePassCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
@@ -153,11 +146,11 @@ SkyBoxPass::RecordPrePassCommandList() noexcept
         ID3D12GraphicsCommandList& commandList = mPrePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
         commandList.ResourceBarrier(barrierCount, barriers);
         BRE_CHECK_HR(commandList.Close());
-        CommandListExecutor::Get().AddCommandList(commandList);
+        CommandListExecutor::Get().PushCommandList(commandList);
 
-        return true;
+        return 1U;
     }
 
-    return false;
+    return 0U;
 }
 }

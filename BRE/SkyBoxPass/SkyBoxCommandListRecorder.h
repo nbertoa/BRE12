@@ -50,9 +50,13 @@ public:
 
     ///
     /// @brief Records and pushes command lists to CommandListExecutor
-    /// @param frameCBuffer Constant buffer per frame, for current frame
     ///
-    void RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
+    /// Init() must be called first.
+    ///
+    /// @param frameCBuffer Constant buffer per frame, for current frame
+    /// @return The number of pushed command lists
+    ///
+    std::uint32_t RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
 
     ///
     /// @brief Checks if internal data is valid. Typically, used for assertions

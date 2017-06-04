@@ -25,15 +25,17 @@ public:
     void Init(ID3D12Resource& inputColorBuffer) noexcept;
 
     ///
-    /// @brief Execute post process pass
+    /// @brief Executes the pass
     ///
-    /// Init() must be called first
+    /// Init() must be called first. This method can record and
+    /// push command lists to the CommandListExecutor.
     ///
     /// @param renderTargetBuffer Render target buffer
     /// @param renderTargetView Render target view
+    /// @return The number of recorded command lists.
     ///
-    void Execute(ID3D12Resource& renderTargetBuffer,
-                 const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    std::uint32_t Execute(ID3D12Resource& renderTargetBuffer,
+                          const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
 private:
     ///
@@ -43,13 +45,14 @@ private:
     bool IsDataValid() const noexcept;
 
     ///
-    /// @brief Records pre pass command list
+    /// @brief Records pre pass command lists and pushes them to 
+    /// the CommandListExecutor.
     /// @param renderTargetBuffer Render target buffer
     /// @param renderTargetView Render target view
-    /// @return True if a command list was recorded. Otherwise, false.
+    /// @return The number of recorded command lists
     ///
-    bool RecordPrePassCommandList(ID3D12Resource& renderTargetBuffer,
-                                   const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    std::uint32_t RecordAndPushPrePassCommandLists(ID3D12Resource& renderTargetBuffer,
+                                                   const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
     CommandListPerFrame mPrePassCommandListPerFrame;
 

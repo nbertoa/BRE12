@@ -120,14 +120,18 @@ private:
     }
 
     ///
-    /// @brief Executes begin pass for render manager
+    /// @brief Records pre pass command lists and pushes them to 
+    /// the CommandListExecutor.
+    /// @return The number of recorded command lists
     ///
-    void ExecuteBeginPass();
+    std::uint32_t RecordAndPushPrePassCommandLists() noexcept;
 
     ///
-    /// @brief Executes final pass for render manager
+    /// @brief Records post pass command lists and pushes them to 
+    /// the CommandListExecutor.
+    /// @return The number of recorded command lists
     ///
-    void ExecuteFinalPass();
+    std::uint32_t RecordAndPushPostPassCommandLists() noexcept;
 
     ///
     /// @brief Flushes command queue

@@ -244,16 +244,24 @@ RenderManager::execute()
         mTimer.Tick();
         UpdateCameraAndFrameCBuffer(mTimer.GetDeltaTimeInSeconds(), mCamera, mFrameCBuffer);
 
-        ExecuteBeginPass();
+        std::uint32_t commandListCount = 0U;
+        CommandListExecutor::Get().ResetExecutedCommandListCount();
 
-        mGeometryPass.Execute(mFrameCBuffer);
-        mEnvironmentLightPass.Execute(mFrameCBuffer);
-        mReflectionPass.Execute();
-        mSkyBoxPass.Execute(mFrameCBuffer);
-        mToneMappingPass.Execute();
-        mPostProcessPass.Execute(*GetCurrentFrameBuffer(), GetCurrentFrameBufferCpuDesc());
+        commandListCount += RecordAndPushPrePassCommandLists();
 
-        ExecuteFinalPass();
+        commandListCount += mGeometryPass.Execute(mFrameCBuffer);
+        commandListCount += mEnvironmentLightPass.Execute(mFrameCBuffer);
+        commandListCount += mReflectionPass.Execute();
+        commandListCount += mSkyBoxPass.Execute(mFrameCBuffer);
+        commandListCount += mToneMappingPass.Execute();
+        commandListCount += mPostProcessPass.Execute(*GetCurrentFrameBuffer(), GetCurrentFrameBufferCpuDesc());
+
+        commandListCount += RecordAndPushPostPassCommandLists();
+
+        // Wait until all previous tasks command lists are executed
+        while (CommandListExecutor::Get().GetExecutedCommandListCount() < commandListCount) {
+            Sleep(0U);
+        }
 
         PresentCurrentFrameAndBeginNextFrame();
     }
@@ -266,8 +274,8 @@ RenderManager::execute()
     return nullptr;
 }
 
-void
-RenderManager::ExecuteBeginPass()
+std::uint32_t
+RenderManager::RecordAndPushPrePassCommandLists() noexcept
 {
     ID3D12GraphicsCommandList& commandList = mPrePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
@@ -324,11 +332,13 @@ RenderManager::ExecuteBeginPass()
                                       nullptr);
 
     BRE_CHECK_HR(commandList.Close());
-    CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+    CommandListExecutor::Get().PushCommandList(commandList);
+
+    return 1U;
 }
 
-void
-RenderManager::ExecuteFinalPass()
+std::uint32_t
+RenderManager::RecordAndPushPostPassCommandLists() noexcept
 {
     CD3DX12_RESOURCE_BARRIER barriers[4U];
     std::uint32_t barrierCount = 0UL;
@@ -342,8 +352,12 @@ RenderManager::ExecuteFinalPass()
         ID3D12GraphicsCommandList& commandList = mPostPassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
         commandList.ResourceBarrier(barrierCount, barriers);
         BRE_CHECK_HR(commandList.Close());
-        CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+        CommandListExecutor::Get().PushCommandList(commandList);
+
+        return 1U;
     }
+
+    return 0U;
 }
 
 void

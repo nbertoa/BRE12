@@ -116,29 +116,23 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    std::uint32_t commandListCount{ 5U };
-    CommandListExecutor::Get().ResetExecutedCommandListCount();
+    std::uint32_t commandListCount = 0U;
 
-    RecordPrePassCommandList();
-    mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
+    commandListCount += RecordAndPushPrePassCommandLists();
+    commandListCount += mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
 
-    RecordMiddlePassCommandList();
-    mBlurRecorder->RecordAndPushCommandLists();
+    commandListCount += RecordAndPushMiddlePassCommandLists();
+    commandListCount += mBlurRecorder->RecordAndPushCommandLists();
 
-    if (RecordPostPassCommandList()) {
-        ++commandListCount;
-    }
-    mEnvironmentLightRecorder->RecordAndPushCommandLists(frameCBuffer);
+    commandListCount += RecordAndPushPostPassCommandLists();
+    commandListCount += mEnvironmentLightRecorder->RecordAndPushCommandLists(frameCBuffer);
 
-    // Wait until all previous tasks command lists are executed
-    while (CommandListExecutor::Get().GetExecutedCommandListCount() < commandListCount) {
-        Sleep(0U);
-    }
+    return commandListCount;
 }
 
 bool
@@ -157,8 +151,8 @@ EnvironmentLightPass::IsDataValid() const noexcept
     return b;
 }
 
-void
-EnvironmentLightPass::RecordPrePassCommandList() noexcept
+std::uint32_t
+EnvironmentLightPass::RecordAndPushPrePassCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
@@ -207,11 +201,13 @@ EnvironmentLightPass::RecordPrePassCommandList() noexcept
                                       nullptr);
 
     BRE_CHECK_HR(commandList.Close());
-    CommandListExecutor::Get().AddCommandList(commandList);
+    CommandListExecutor::Get().PushCommandList(commandList);
+
+    return 1U;
 }
 
-void
-EnvironmentLightPass::RecordMiddlePassCommandList() noexcept
+std::uint32_t
+EnvironmentLightPass::RecordAndPushMiddlePassCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
@@ -243,11 +239,13 @@ EnvironmentLightPass::RecordMiddlePassCommandList() noexcept
                                       nullptr);
 
     BRE_CHECK_HR(commandList.Close());
-    CommandListExecutor::Get().AddCommandList(commandList);
+    CommandListExecutor::Get().PushCommandList(commandList);
+
+    return 1U;
 }
 
-bool
-EnvironmentLightPass::RecordPostPassCommandList() noexcept
+std::uint32_t
+EnvironmentLightPass::RecordAndPushPostPassCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
@@ -263,11 +261,11 @@ EnvironmentLightPass::RecordPostPassCommandList() noexcept
         ID3D12GraphicsCommandList& commandList = mPostPassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
         commandList.ResourceBarrier(barrierCount, barriers);
         BRE_CHECK_HR(commandList.Close());
-        CommandListExecutor::Get().AddCommandList(commandList);
+        CommandListExecutor::Get().PushCommandList(commandList);
 
-        return true;
-    } else {
-        return false;
+        return 1U;
     }
+
+    return 0U;
 }
 }

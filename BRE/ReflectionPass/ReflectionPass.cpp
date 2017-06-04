@@ -22,13 +22,17 @@ ReflectionPass::Init(ID3D12Resource& depthBuffer) noexcept
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 ReflectionPass::Execute() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    //RecordPrePassCommandList();
-    //RecordHierZBufferCommandLists();
+    std::uint32_t commandListCount = 0U;
+
+    commandListCount += RecordAndPushPrePassCommandLists();
+    commandListCount += RecordAndPushHierZBufferCommandLists();
+
+    return commandListCount;
 }
 
 void
@@ -124,8 +128,8 @@ ReflectionPass::IsDataValid() const noexcept
     return b;
 }
 
-void
-ReflectionPass::RecordPrePassCommandList() noexcept
+std::uint32_t
+ReflectionPass::RecordAndPushPrePassCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
@@ -162,12 +166,14 @@ ReflectionPass::RecordPrePassCommandList() noexcept
                                       nullptr);
 
     BRE_CHECK_HR(commandList.Close());
-    CommandListExecutor::Get().ExecuteCommandListAndWaitForCompletion(commandList);
+    CommandListExecutor::Get().PushCommandList(commandList);
+
+    return 1U;
 }
 
-void 
-ReflectionPass::RecordHierZBufferCommandLists() noexcept
+std::uint32_t 
+ReflectionPass::RecordAndPushHierZBufferCommandLists() noexcept
 {
-
+    return 0U;
 }
 }

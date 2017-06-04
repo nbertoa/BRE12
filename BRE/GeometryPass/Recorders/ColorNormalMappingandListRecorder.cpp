@@ -89,7 +89,7 @@ ColorNormalMappingCommandListRecorder::Init(const std::vector<GeometryData>& geo
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 ColorNormalMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
@@ -150,8 +150,9 @@ ColorNormalMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuf
     }
 
     commandList.Close();
+    CommandListExecutor::Get().PushCommandList(commandList);
 
-    CommandListExecutor::Get().AddCommandList(commandList);
+    return 1U;
 }
 
 bool

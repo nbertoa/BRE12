@@ -31,9 +31,12 @@ public:
     ///
     /// @brief Executes the pass
     ///
-    /// Init() must be called before
+    /// Init() must be called first. This method can record and
+    /// push command lists to the CommandListExecutor.
     ///
-    void Execute() noexcept;
+    /// @return The number of recorded command lists.
+    ///
+    std::uint32_t Execute() noexcept;
 
 private:
     ///
@@ -43,10 +46,11 @@ private:
     bool IsDataValid() const noexcept;
 
     ///
-    /// @brief Records pre pass command list
-    /// @return True if a command list was recorded. Otherwise, false.
+    /// @brief Records pre pass command lists and pushes them to 
+    /// the CommandListExecutor.
+    /// @return The number of recorded command lists
     ///
-    bool RecordPrePassCommandList() noexcept;
+    std::uint32_t RecordAndPushPrePassCommandLists() noexcept;
 
     CommandListPerFrame mPrePassCommandListPerFrame;
 

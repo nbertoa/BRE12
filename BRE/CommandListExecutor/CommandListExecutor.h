@@ -70,11 +70,11 @@ public:
     }
 
     ///
-    /// @brief Add a command list to be executed
+    /// @brief Push a command list to be executed
     ///
     /// @param commandList The command list to add
     ///
-    __forceinline void AddCommandList(ID3D12CommandList& commandList) noexcept
+    __forceinline void PushCommandList(ID3D12CommandList& commandList) noexcept
     {
         mCommandListsToExecute.push(&commandList);
     }

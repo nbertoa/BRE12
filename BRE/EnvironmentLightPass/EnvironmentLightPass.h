@@ -37,9 +37,14 @@ public:
 
     ///
     /// @brief Executes the pass
-    /// @param frameCBuffer Constant buffer per frame, for current frame
     ///
-    void Execute(const FrameCBuffer& frameCBuffer) noexcept;
+    /// Init() must be called first. This method can record and
+    /// push command lists to the CommandListExecutor.
+    ///
+    /// @param frameCBuffer Constant buffer per frame, for current frame
+    /// @return The number of recorded command lists.
+    ///
+    std::uint32_t Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
     ///
@@ -49,21 +54,25 @@ private:
     bool IsDataValid() const noexcept;
 
     ///
-    /// @brief Records pre pass command list
+    /// @brief Records pre pass command lists and pushes them to 
+    /// the CommandListExecutor.
+    /// @return The number of recorded command lists
     ///
-    void RecordPrePassCommandList() noexcept;
+    std::uint32_t RecordAndPushPrePassCommandLists() noexcept;
 
     ///
-    /// @brief Records middle pass command list
+    /// @brief Records middle pass command lists and pushes them to 
+    /// the CommandListExecutor.
+    /// @return The number of recorded command lists
     ///
-    void RecordMiddlePassCommandList() noexcept;
+    std::uint32_t RecordAndPushMiddlePassCommandLists() noexcept;
 
     ///
-    /// @brief Records post pass command list
-    /// @return Returns true if the command list was pushed to 
-    /// the CommandListExecutor. Otherwise, false.
+    /// @brief Records post pass command lists and pushes them to 
+    /// the CommandListExecutor.
+    /// @return The number of recorded command lists
     ///
-    bool RecordPostPassCommandList() noexcept;
+    std::uint32_t RecordAndPushPostPassCommandLists() noexcept;
 
     CommandListPerFrame mPrePassCommandListPerFrame;
     CommandListPerFrame mMiddlePassCommandListPerFrame;

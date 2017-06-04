@@ -67,7 +67,7 @@ BlurCommandListRecorder::Init(ID3D12Resource& inputColorBuffer,
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 BlurCommandListRecorder::RecordAndPushCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
@@ -94,7 +94,9 @@ BlurCommandListRecorder::RecordAndPushCommandLists() noexcept
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
 
     commandList.Close();
-    CommandListExecutor::Get().AddCommandList(commandList);
+    CommandListExecutor::Get().PushCommandList(commandList);
+
+    return 1U;
 }
 
 bool

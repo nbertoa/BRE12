@@ -29,24 +29,17 @@ ToneMappingPass::Init(ID3D12Resource& inputColorBuffer,
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 ToneMappingPass::Execute() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    std::uint32_t commandListCount = 1;
-    CommandListExecutor::Get().ResetExecutedCommandListCount();
+    std::uint32_t commandListCount = 0U;
 
-    if (RecordPrePassCommandList()) {
-        ++commandListCount;
-    }
+    commandListCount += RecordAndPushPrePassCommandLists();
+    commandListCount += mCommandListRecorder->RecordAndPushCommandLists();
 
-    mCommandListRecorder->RecordAndPushCommandLists();
-
-    // Wait until all previous tasks command lists are executed
-    while (CommandListExecutor::Get().GetExecutedCommandListCount() < commandListCount) {
-        Sleep(0U);
-    }
+    return commandListCount;
 }
 
 bool
@@ -60,8 +53,8 @@ ToneMappingPass::IsDataValid() const noexcept
     return b;
 }
 
-bool
-ToneMappingPass::RecordPrePassCommandList() noexcept
+std::uint32_t
+ToneMappingPass::RecordAndPushPrePassCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
@@ -83,11 +76,11 @@ ToneMappingPass::RecordPrePassCommandList() noexcept
         ID3D12GraphicsCommandList& commandList = mPrePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
         commandList.ResourceBarrier(barrierCount, barriers);
         BRE_CHECK_HR(commandList.Close());
-        CommandListExecutor::Get().AddCommandList(commandList);
+        CommandListExecutor::Get().PushCommandList(commandList);
 
-        return true;
+        return 1U;
     }
 
-    return false;
+    return 0U;
 }
 }

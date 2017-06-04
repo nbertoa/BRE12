@@ -105,7 +105,7 @@ HeightMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometry
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 HeightMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
@@ -180,8 +180,9 @@ HeightMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& 
     }
 
     commandList.Close();
+    CommandListExecutor::Get().PushCommandList(commandList);
 
-    CommandListExecutor::Get().AddCommandList(commandList);
+    return 1U;
 }
 
 bool

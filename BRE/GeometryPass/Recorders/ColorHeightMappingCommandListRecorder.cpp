@@ -101,7 +101,7 @@ ColorHeightMappingCommandListRecorder::Init(const std::vector<GeometryData>& geo
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 ColorHeightMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
@@ -173,7 +173,9 @@ ColorHeightMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuf
 
     commandList.Close();
 
-    CommandListExecutor::Get().AddCommandList(commandList);
+    CommandListExecutor::Get().PushCommandList(commandList);
+
+    return 1U;
 }
 
 bool

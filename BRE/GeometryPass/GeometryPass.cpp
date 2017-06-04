@@ -124,16 +124,15 @@ GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
     BRE_ASSERT(IsDataValid());
 }
 
-void
+std::uint32_t
 GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    CommandListExecutor::Get().ResetExecutedCommandListCount();
     const std::uint32_t geometryPassCommandListCount = static_cast<std::uint32_t>(mGeometryCommandListRecorders.size());
-    const std::uint32_t commandListCount{ geometryPassCommandListCount + 1U };
+    std::uint32_t commandListCount = geometryPassCommandListCount;
 
-    RecordPrePassCommandList();
+    commandListCount += RecordAndPushPrePassCommandLists();
 
     // Execute tasks
     std::uint32_t grainSize{ max(1U, (geometryPassCommandListCount) / ApplicationSettings::sCpuProcessorCount) };
@@ -144,10 +143,7 @@ GeometryPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
     }
     );
 
-    // Wait until all previous tasks command lists are executed
-    while (CommandListExecutor::Get().GetExecutedCommandListCount() < commandListCount) {
-        Sleep(0U);
-    }
+    return commandListCount;
 }
 
 bool
@@ -168,8 +164,8 @@ GeometryPass::IsDataValid() const noexcept
     return mGeometryCommandListRecorders.empty() == false;
 }
 
-void
-GeometryPass::RecordPrePassCommandList() noexcept
+std::uint32_t
+GeometryPass::RecordAndPushPrePassCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
@@ -197,6 +193,8 @@ GeometryPass::RecordPrePassCommandList() noexcept
     commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[BASECOLOR_METALMASK], zero, 0U, nullptr);
 
     BRE_CHECK_HR(commandList.Close());
-    CommandListExecutor::Get().AddCommandList(commandList);
+    CommandListExecutor::Get().PushCommandList(commandList);
+
+    return 1U;
 }
 }

@@ -41,8 +41,9 @@ public:
     /// Init() must be called first
     ///
     /// @param renderTargetView Render target view
+    /// @return The number of pushed command lists
     ///
-    void RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    std::uint32_t RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
 
     ///
     /// @brief Checks if internal data is valid. Typically, used with assertions
