@@ -79,9 +79,11 @@ private:
     CommandListPerFrame mPostPassCommandListPerFrame;
 
     ID3D12Resource* mAmbientAccessibilityBuffer{ nullptr };
+    D3D12_GPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferShaderResourceView{ 0UL };
     D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetView{ 0UL };
 
     ID3D12Resource* mBlurBuffer{ nullptr };
+    D3D12_GPU_DESCRIPTOR_HANDLE mBlurBufferShaderResourceView{ 0UL };
     D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRenderTargetView{ 0UL };
 
     std::unique_ptr<AmbientOcclusionCommandListRecorder> mAmbientOcclusionRecorder;

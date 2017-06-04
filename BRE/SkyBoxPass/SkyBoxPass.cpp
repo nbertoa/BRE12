@@ -64,7 +64,7 @@ CreateAndGetSkyBoxSphereModel(ID3D12CommandAllocator& commandAllocator,
 void
 SkyBoxPass::Init(ID3D12Resource& skyBoxCubeMap,
                  ID3D12Resource& depthBuffer,
-                 const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
+                 const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
                  const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
@@ -75,7 +75,8 @@ SkyBoxPass::Init(ID3D12Resource& skyBoxCubeMap,
     ID3D12GraphicsCommandList* commandList;
     CreateCommandObjects(commandAllocator, commandList);
 
-    Model& model = CreateAndGetSkyBoxSphereModel(*commandAllocator, *commandList);
+    Model& model = CreateAndGetSkyBoxSphereModel(*commandAllocator, 
+                                                 *commandList);
     const std::vector<Mesh>& meshes(model.GetMeshes());
     BRE_ASSERT(meshes.size() == 1UL);
 
@@ -100,7 +101,7 @@ SkyBoxPass::Init(ID3D12Resource& skyBoxCubeMap,
                                mesh.GetIndexBufferData(),
                                worldMatrix,
                                skyBoxCubeMap,
-                               renderTargetView,
+                               outputColorBufferRenderTargetView,
                                depthBufferView);
 
     BRE_ASSERT(IsDataValid());

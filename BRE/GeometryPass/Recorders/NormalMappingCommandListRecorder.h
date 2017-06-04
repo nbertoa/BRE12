@@ -67,7 +67,7 @@ private:
                              const std::vector<ID3D12Resource*>& diffuseTextures,
                              const std::vector<ID3D12Resource*>& normalTextures) noexcept;
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorBufferGpuDescriptorsBegin;
-    D3D12_GPU_DESCRIPTOR_HANDLE mNormalBufferGpuDescriptorsBegin;
+    D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorTextureRenderTargetViewsBegin;
+    D3D12_GPU_DESCRIPTOR_HANDLE mNormalTextureRenderTargetViewsBegin;
 };
 }

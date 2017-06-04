@@ -7,7 +7,7 @@
 
 namespace BRE {
 ///
-/// Responsible to generate command lists recorders for the post process tone mapping effect
+/// Responsible to generate command lists recorders for the post'process tone mapping effect
 ///
 class ToneMappingPass {
 public:
@@ -21,12 +21,14 @@ public:
     ///
     /// @brief Initializes the tone mapping pass
     /// @param inputColorBuffer Input buffer to apply tone mapping
+    /// @param inputColorBufferShaderResourceView Shader resource view to the input buffer
     /// @param outputColorBuffer Output buffer with the tone mapping applied
-    /// @param renderTargetView CPU descriptor of the render target
+    /// @param outputColorBufferRenderTargetView Render target view to the output color buffer
     ///
     void Init(ID3D12Resource& inputColorBuffer,
+              const D3D12_GPU_DESCRIPTOR_HANDLE& inputColorBufferShaderResourceView,
               ID3D12Resource& outputColorBuffer,
-              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+              const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView) noexcept;
 
     ///
     /// @brief Executes the pass

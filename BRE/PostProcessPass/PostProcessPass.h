@@ -21,8 +21,10 @@ public:
     ///
     /// @brief Initializes post process pass
     /// @param inputColorBuffer Input color buffer to apply post processing 
+    /// @param inputColorBufferShaderResourceView Shader resource view to the input color buffer
     ///
-    void Init(ID3D12Resource& inputColorBuffer) noexcept;
+    void Init(ID3D12Resource& inputColorBuffer,
+              const D3D12_GPU_DESCRIPTOR_HANDLE& inputColorBufferShaderResourceView) noexcept;
 
     ///
     /// @brief Executes the pass
@@ -30,12 +32,12 @@ public:
     /// Init() must be called first. This method can record and
     /// push command lists to the CommandListExecutor.
     ///
-    /// @param renderTargetBuffer Render target buffer
-    /// @param renderTargetView Render target view
+    /// @param frameBuffer Frame buffer
+    /// @param renderTargetView Render target view to the frame buffer
     /// @return The number of recorded command lists.
     ///
-    std::uint32_t Execute(ID3D12Resource& renderTargetBuffer,
-                          const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    std::uint32_t Execute(ID3D12Resource& frameBuffer,
+                          const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferRenderTargetView) noexcept;
 
 private:
     ///
@@ -47,12 +49,12 @@ private:
     ///
     /// @brief Records pre pass command lists and pushes them to 
     /// the CommandListExecutor.
-    /// @param renderTargetBuffer Render target buffer
-    /// @param renderTargetView Render target view
+    /// @param frameBuffer Frame buffer
+    /// @param renderTargetView Render target view to the frame buffer
     /// @return The number of recorded command lists
     ///
-    std::uint32_t RecordAndPushPrePassCommandLists(ID3D12Resource& renderTargetBuffer,
-                                                   const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    std::uint32_t RecordAndPushPrePassCommandLists(ID3D12Resource& frameBuffer,
+                                                   const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferRenderTargetView) noexcept;
 
     CommandListPerFrame mPrePassCommandListPerFrame;
 

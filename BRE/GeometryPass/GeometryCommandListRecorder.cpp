@@ -16,10 +16,10 @@ GeometryCommandListRecorder::IsDataValid() const noexcept
 
     return
         mObjectUploadCBuffers != nullptr &&
-        mStartObjectCBufferView.ptr != 0UL &&
+        mObjectCBufferViewsBegin.ptr != 0UL &&
         geometryDataCount != 0UL &&
         mMaterialUploadCBuffers != nullptr &&
-        mStartMaterialCBufferView.ptr != 0UL;
+        mMaterialCBufferViewsBegin.ptr != 0UL;
 }
 
 void

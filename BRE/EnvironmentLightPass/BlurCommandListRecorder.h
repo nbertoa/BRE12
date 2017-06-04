@@ -28,11 +28,13 @@ public:
     ///
     /// This method must be called after InitSharedPSOAndRootSignature
     ///
-    /// @param inputColorBuffer Input buffer that contains colors to be blurred
-    /// @param renderTargetView
+    /// @param ambientAccessibilityBufferShaderResourceView Shader resource view to 
+    /// the ambient accessibility buffer
+    /// @param outputAmbientAccessibilityBufferRenderTargetView Render target view to
+    /// the blurred ambient accessibility buffer
     ///
-    void Init(ID3D12Resource& inputColorBuffer,
-              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    void Init(const D3D12_GPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferShaderResourceView,
+              const D3D12_CPU_DESCRIPTOR_HANDLE& outputAmbientAccessibilityBufferRenderTargetView) noexcept;
 
     ///
     /// @brief Records command lists and pushes them into CommandListExecutor
@@ -51,20 +53,14 @@ public:
 
 private:
     ///
-    /// @brief Initializes shader resource views
-    /// @param inputColorBuffer Input buffer that contains colors to be blurred
-    ///
-    void InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept;
-
-    ///
     /// @brief Initialize blur constant buffer
     ///
     void InitBlurCBuffer() noexcept;
 
     CommandListPerFrame mCommandListPerFrame;
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
-    D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
+    D3D12_GPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferShaderResourceView{ 0UL };
+    D3D12_CPU_DESCRIPTOR_HANDLE mOutputAmbientAccessibilityBufferRenderTargetView{ 0UL };
 
     UploadBuffer* mBlurUploadCBuffer{ nullptr };
 };

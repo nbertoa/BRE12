@@ -13,18 +13,20 @@
 namespace BRE {
 void
 ToneMappingPass::Init(ID3D12Resource& inputColorBuffer,
+                      const D3D12_GPU_DESCRIPTOR_HANDLE& inputColorBufferShaderResourceView,
                       ID3D12Resource& outputColorBuffer,
-                      const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+                      const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
-    mInputColorBuffer = &inputColorBuffer;
-    mOutputColorBuffer = &outputColorBuffer;
-
     ToneMappingCommandListRecorder::InitSharedPSOAndRootSignature();
 
+    mInputColorBuffer = &inputColorBuffer;
+    mOutputColorBuffer = &outputColorBuffer;    
+
     mCommandListRecorder.reset(new ToneMappingCommandListRecorder());
-    mCommandListRecorder->Init(*mInputColorBuffer, renderTargetView);
+    mCommandListRecorder->Init(inputColorBufferShaderResourceView,
+                               outputColorBufferRenderTargetView);
 
     BRE_ASSERT(IsDataValid());
 }

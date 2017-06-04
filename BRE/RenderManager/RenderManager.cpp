@@ -6,6 +6,7 @@
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <CommandManager/CommandQueueManager.h>
 #include <CommandManager/FenceManager.h>
+#include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DescriptorManager\DepthStencilDescriptorManager.h>
 #include <DescriptorManager\RenderTargetDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
@@ -170,15 +171,17 @@ RenderManager::RenderManager(Scene& scene)
 
     CreateDepthStencilBufferAndView();
 
-    CreateIntermediateColorBufferAndRenderTargetView(D3D12_RESOURCE_STATE_RENDER_TARGET,
-                                                     L"Intermediate Color Buffer 1",
-                                                     mIntermediateColorBuffer1,
-                                                     mIntermediateColorBuffer1RenderTargetView);
+    CreateIntermediateColorBufferAndViews(D3D12_RESOURCE_STATE_RENDER_TARGET,
+                                          L"Intermediate Color Buffer 1",
+                                          mIntermediateColorBuffer1,
+                                          mIntermediateColorBuffer1RenderTargetView,
+                                          mIntermediateColorBuffer1ShaderResourceView);
 
-    CreateIntermediateColorBufferAndRenderTargetView(D3D12_RESOURCE_STATE_RENDER_TARGET,
-                                                     L"Intermediate Color Buffer 2",
-                                                     mIntermediateColorBuffer2,
-                                                     mIntermediateColorBuffer2RenderTargetView);
+    CreateIntermediateColorBufferAndViews(D3D12_RESOURCE_STATE_RENDER_TARGET,
+                                          L"Intermediate Color Buffer 2",
+                                          mIntermediateColorBuffer2,
+                                          mIntermediateColorBuffer2RenderTargetView,
+                                          mIntermediateColorBuffer2ShaderResourceView);
 
     mCamera.SetFrustum(ApplicationSettings::sVerticalFieldOfView,
                        ApplicationSettings::GetAspectRatio(),
@@ -218,10 +221,12 @@ RenderManager::InitPasses(Scene& scene) noexcept
                      GetDepthStencilCpuDesc());
 
     mToneMappingPass.Init(*mIntermediateColorBuffer1,
+                          mIntermediateColorBuffer1ShaderResourceView,
                           *mIntermediateColorBuffer2,
                           mIntermediateColorBuffer2RenderTargetView);
 
-    mPostProcessPass.Init(*mIntermediateColorBuffer2);
+    mPostProcessPass.Init(*mIntermediateColorBuffer2,
+                          mIntermediateColorBuffer2ShaderResourceView);
 
     // Initialize fence values for all frames to the same number.
     const std::uint64_t count{ _countof(mFenceValueByQueuedFrameIndex) };
@@ -428,10 +433,11 @@ RenderManager::CreateDepthStencilBufferAndView() noexcept
 }
 
 void
-RenderManager::CreateIntermediateColorBufferAndRenderTargetView(const D3D12_RESOURCE_STATES initialState,
-                                                                const wchar_t* resourceName,
-                                                                ID3D12Resource* &buffer,
-                                                                D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+RenderManager::CreateIntermediateColorBufferAndViews(const D3D12_RESOURCE_STATES initialState,
+                                                     const wchar_t* resourceName,
+                                                     ID3D12Resource* &buffer,
+                                                     D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
+                                                     D3D12_GPU_DESCRIPTOR_HANDLE& shaderResourceView) noexcept
 {
     BRE_ASSERT(resourceName != nullptr);
 
@@ -449,10 +455,7 @@ RenderManager::CreateIntermediateColorBufferAndRenderTargetView(const D3D12_RESO
     resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
     resourceDescriptor.Format = ApplicationSettings::sColorBufferFormat;
 
-    // Create buffer and render target view
-    D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor{};
-    rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-    rtvDescriptor.Format = resourceDescriptor.Format;
+    // Create buffer
     CD3DX12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
     D3D12_CLEAR_VALUE clearValue = { resourceDescriptor.Format, 0.0f, 0.0f, 0.0f, 1.0f };
     buffer = &ResourceManager::CreateCommittedResource(heapProperties,
@@ -463,9 +466,24 @@ RenderManager::CreateIntermediateColorBufferAndRenderTargetView(const D3D12_RESO
                                                        resourceName,
                                                        ResourceManager::ResourceStateTrackingType::FULL_TRACKING);
 
+    // Create render target view
+    D3D12_RENDER_TARGET_VIEW_DESC rtvDescriptor{};
+    rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+    rtvDescriptor.Format = resourceDescriptor.Format;
     RenderTargetDescriptorManager::CreateRenderTargetView(*buffer,
                                                           rtvDescriptor,
                                                           &renderTargetView);
+
+    // Create shader resource view
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
+    srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDescriptor.Texture2D.MostDetailedMip = 0;
+    srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+    srvDescriptor.Format = buffer->GetDesc().Format;
+    srvDescriptor.Texture2D.MipLevels = buffer->GetDesc().MipLevels;
+    shaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(*buffer,
+                                                                              srvDescriptor);
 }
 
 void

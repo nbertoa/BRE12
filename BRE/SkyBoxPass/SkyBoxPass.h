@@ -24,12 +24,12 @@ public:
     /// @brief Initializes the sky box pass
     /// @param skyBoxCubeMap Sky box cube map resource
     /// @param depthBuffer Depth buffer resource
-    /// @param renderTargetView Render target view
-    /// @param Depth buffer view
+    /// @param outputColorBufferRenderTargetView Render target view to the output color buffer
+    /// @param depthBufferView Depth buffer view
     ///
     void Init(ID3D12Resource& skyBoxCubeMap,
               ID3D12Resource& depthBuffer,
-              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
+              const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
               const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 
     ///

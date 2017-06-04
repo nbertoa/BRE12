@@ -1,18 +1,23 @@
-#include "ToneMappingCommandListRecorder.h"
+#include "HiZBufferCommandListRecorder.h"
 
 #include <d3d12.h>
-#include <DirectXMath.h>
 
 #include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
+#include <DirectXManager\DirectXManager.h>
 #include <PSOManager/PSOManager.h>
+#include <ResourceManager/UploadBufferManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
 #include <Utils/DebugUtils.h>
 
+using namespace DirectX;
+
 namespace BRE {
 // Root Signature:
-// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)" 0 -> Color Buffer Texture
+// "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Object CBuffers
+// "CBV(b1, visibility = SHADER_VISIBILITY_VERTEX), " \ 1 > Frame CBuffer
+// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Cube Map texture
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -20,18 +25,26 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
 void
-ToneMappingCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
+HiZBufferCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 {
     BRE_ASSERT(sPSO == nullptr);
     BRE_ASSERT(sRootSignature == nullptr);
 
     PSOManager::PSOCreationData psoData{};
-    psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ToneMappingPass/Shaders/PS.cso");
-    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ToneMappingPass/Shaders/VS.cso");
+    // The camera is inside the sky sphere, so just turn off culling.
+    psoData.mRasterizerDescriptor.CullMode = D3D12_CULL_MODE_NONE;
 
-    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("ToneMappingPass/Shaders/RS.cso");
+    // Make sure the depth function is LESS_EQUAL and not just GREATER.  
+    // Otherwise, the normalized depth values at z = 1 (NDC) will 
+    // fail the depth test if the depth buffer was cleared to 1.
+    psoData.mDepthStencilDescriptor.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+    psoData.mInputLayoutDescriptors = D3DFactory::GetPositionNormalTangentTexCoordInputLayout();
+
+    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("SkyBoxPass/Shaders/PS.cso");
+    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("SkyBoxPass/Shaders/VS.cso");
+
+    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("SkyBoxPass/Shaders/RS.cso");
     psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
     sRootSignature = psoData.mRootSignature;
 
@@ -48,19 +61,19 @@ ToneMappingCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 }
 
 void
-ToneMappingCommandListRecorder::Init(const D3D12_GPU_DESCRIPTOR_HANDLE& inputColorBufferShaderResourceView,
-                                     const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView) noexcept
+HiZBufferCommandListRecorder::Init(const D3D12_GPU_DESCRIPTOR_HANDLE& upperLevelBufferShaderResourceView,
+                                   const D3D12_CPU_DESCRIPTOR_HANDLE& lowerLevelBufferRenderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
-    mInputColorBufferShaderResourceView = inputColorBufferShaderResourceView;
-    mOutputColorBufferRenderTargetView = outputColorBufferRenderTargetView;
+    mUpperLevelBufferShaderResourceView = upperLevelBufferShaderResourceView;
+    mLowerLevelBufferRenderTargetView = lowerLevelBufferRenderTargetView;
 
     BRE_ASSERT(IsDataValid());
 }
 
 std::uint32_t
-ToneMappingCommandListRecorder::RecordAndPushCommandLists() noexcept
+HiZBufferCommandListRecorder::RecordAndPushCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(sPSO != nullptr);
@@ -70,13 +83,13 @@ ToneMappingCommandListRecorder::RecordAndPushCommandLists() noexcept
 
     commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
     commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
-    commandList.OMSetRenderTargets(1U, &mOutputColorBufferRenderTargetView, false, nullptr);
+    commandList.OMSetRenderTargets(1U, &mLowerLevelBufferRenderTargetView, false, nullptr);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 
     commandList.SetGraphicsRootSignature(sRootSignature);
-    commandList.SetGraphicsRootDescriptorTable(0U, mInputColorBufferShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(0U, mUpperLevelBufferShaderResourceView);
 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
@@ -88,11 +101,11 @@ ToneMappingCommandListRecorder::RecordAndPushCommandLists() noexcept
 }
 
 bool
-ToneMappingCommandListRecorder::IsDataValid() const noexcept
+HiZBufferCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
-        mInputColorBufferShaderResourceView.ptr != 0UL &&
-        mOutputColorBufferRenderTargetView.ptr != 0UL;
+        mUpperLevelBufferShaderResourceView.ptr != 0UL &&
+        mLowerLevelBufferRenderTargetView.ptr != 0UL;
 
     return result;
 }

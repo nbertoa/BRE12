@@ -8,7 +8,7 @@ struct ID3D12Resource;
 
 namespace BRE {
 ///
-/// Responsible to generate command list recorderes for post processing effects (anti aliasing, color grading, etc).
+/// Responsible to record and push command lists for post processing effects (anti aliasing, color grading, etc).
 ///
 class PostProcessCommandListRecorder {
 public:
@@ -31,19 +31,19 @@ public:
     ///
     /// InitSharedPSOAndRootSignature() must be called before
     ///
-    /// @param inputColorBuffer Input color buffer
+    /// @param inputColorBufferShaderResourceView Shader resource view to the input color buffer
     ///
-    void Init(ID3D12Resource& inputColorBuffer) noexcept;
+    void Init(const D3D12_GPU_DESCRIPTOR_HANDLE& inputColorBufferShaderResourceView) noexcept;
 
     ///
     /// @brief Records and pushes command lists to CommandListExecutor
     ///
     /// Init() must be called first
     ///
-    /// @param renderTargetView Render target view
+    /// @param outputColorBufferRenderTargetView Render target view to the output color buffer
     /// @return The number of pushed command lists
     ///
-    std::uint32_t RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    std::uint32_t RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView) noexcept;
 
     ///
     /// @brief Checks if internal data is valid. Typically, used with assertions
@@ -52,14 +52,8 @@ public:
     bool IsDataValid() const noexcept;
 
 private:
-    ///
-    /// @brief Initializes shader resource views
-    /// @param inputColorBuffer Input color buffer
-    ///
-    void InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept;
-
     CommandListPerFrame mCommandListPerFrame;
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
+    D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferShaderResourceView{ 0UL };
 };
 }

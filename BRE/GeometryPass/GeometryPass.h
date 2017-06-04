@@ -72,7 +72,7 @@ private:
 
     // Geometry buffers data
     ID3D12Resource* mGeometryBuffers[BUFFERS_COUNT]{ nullptr };
-    D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBufferRenderTargetViews[BUFFERS_COUNT];
+    D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBufferRenderTargetViews[BUFFERS_COUNT]{ 0UL };
 
     GeometryCommandListRecorders& mGeometryCommandListRecorders;
 };

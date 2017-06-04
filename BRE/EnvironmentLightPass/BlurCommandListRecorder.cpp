@@ -53,14 +53,13 @@ BlurCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 }
 
 void
-BlurCommandListRecorder::Init(ID3D12Resource& inputColorBuffer,
-                              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+BlurCommandListRecorder::Init(const D3D12_GPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferShaderResourceView,
+                              const D3D12_CPU_DESCRIPTOR_HANDLE& outputAmbientAccessibilityBufferRenderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
-    mRenderTargetView = renderTargetView;
-
-    InitShaderResourceViews(inputColorBuffer);
+    mAmbientAccessibilityBufferShaderResourceView = ambientAccessibilityBufferShaderResourceView;
+    mOutputAmbientAccessibilityBufferRenderTargetView = outputAmbientAccessibilityBufferRenderTargetView;
 
     InitBlurCBuffer();
 
@@ -78,7 +77,10 @@ BlurCommandListRecorder::RecordAndPushCommandLists() noexcept
 
     commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
     commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
-    commandList.OMSetRenderTargets(1U, &mRenderTargetView, false, nullptr);
+    commandList.OMSetRenderTargets(1U, 
+                                   &mOutputAmbientAccessibilityBufferRenderTargetView, 
+                                   false, 
+                                   nullptr);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
@@ -88,7 +90,7 @@ BlurCommandListRecorder::RecordAndPushCommandLists() noexcept
 
     commandList.SetGraphicsRootSignature(sRootSignature);
     commandList.SetGraphicsRootConstantBufferView(0U, blurCBufferGpuVAddress);
-    commandList.SetGraphicsRootDescriptorTable(1U, mStartPixelShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(1U, mAmbientAccessibilityBufferShaderResourceView);
 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
@@ -103,24 +105,10 @@ bool
 BlurCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
-        mStartPixelShaderResourceView.ptr != 0UL &&
-        mRenderTargetView.ptr != 0UL;
+        mAmbientAccessibilityBufferShaderResourceView.ptr != 0UL &&
+        mOutputAmbientAccessibilityBufferRenderTargetView.ptr != 0UL;
 
     return result;
-}
-
-void
-BlurCommandListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept
-{
-    D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
-    srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDescriptor.Texture2D.MostDetailedMip = 0;
-    srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
-    srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
-    srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
-    mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer,
-                                                                                         srvDescriptor);
 }
 
 void

@@ -80,16 +80,18 @@ private:
     void CreateDepthStencilBufferAndView() noexcept;
 
     ///
-    /// @brief Creates intermediate color buffer and render target view
+    /// @brief Creates intermediate color buffer, shader resource views, and render target views.
     /// @param initialState Initial state of the buffers
     /// @param resourceName Resource name
     /// @param buffer Output color buffer
     /// @param renderTargetView Output render target view
+    /// @param shaderResourceView Output shader resource view
     ///
-    void CreateIntermediateColorBufferAndRenderTargetView(const D3D12_RESOURCE_STATES initialState,
-                                                          const wchar_t* resourceName,
-                                                          ID3D12Resource* &buffer,
-                                                          D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    void CreateIntermediateColorBufferAndViews(const D3D12_RESOURCE_STATES initialState,
+                                               const wchar_t* resourceName,
+                                               ID3D12Resource* &buffer,
+                                               D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
+                                               D3D12_GPU_DESCRIPTOR_HANDLE& shaderResourceView) noexcept;
 
     ///
     /// @brief Get current frame buffer
@@ -171,9 +173,11 @@ private:
     // Buffers used for intermediate computations.
     // They are used as render targets (light pass) or pixel shader resources (post processing passes)
     ID3D12Resource* mIntermediateColorBuffer1{ nullptr };
-    D3D12_CPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer1RenderTargetView;
+    D3D12_GPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer1ShaderResourceView{ 0UL };
+    D3D12_CPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer1RenderTargetView{ 0UL };
     ID3D12Resource* mIntermediateColorBuffer2{ nullptr };
-    D3D12_CPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer2RenderTargetView;
+    D3D12_GPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer2ShaderResourceView{ 0UL };
+    D3D12_CPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer2RenderTargetView{ 0UL };
 
     // We cache it here, as is is used by most passes.
     FrameCBuffer mFrameCBuffer;

@@ -63,6 +63,6 @@ private:
     void InitConstantBuffers(const std::vector<MaterialProperties>& materialProperties,
                              const std::vector<ID3D12Resource*>& normalTextures) noexcept;
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mNormalBufferGpuDescriptorsBegin;
+    D3D12_GPU_DESCRIPTOR_HANDLE mNormalTextureRenderTargetViewsBegin;
 };
 }

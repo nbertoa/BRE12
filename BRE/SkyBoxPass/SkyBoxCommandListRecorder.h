@@ -38,14 +38,14 @@ public:
     /// @param indexBufferData Index buffer data of the sky box
     /// @param worldMatrix World matrix of the sky box
     /// @param skyBoxCubeMap Sky box cube map
-    /// @param renderTargetView Render target view
+    /// @param outputColorBufferRenderTargetView Render target view to the output color buffer
     /// @param depthBufferView Depth buffer view
     ///
     void Init(const VertexAndIndexBufferCreator::VertexBufferData& vertexBufferData,
               const VertexAndIndexBufferCreator::IndexBufferData indexBufferData,
               const DirectX::XMFLOAT4X4& worldMatrix,
               ID3D12Resource& skyBoxCubeMap,
-              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
+              const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
               const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 
     ///
@@ -89,7 +89,7 @@ private:
 
     D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView;
 
-    D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
+    D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferRenderTargetView{ 0UL };
     D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };
 };
 }

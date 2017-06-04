@@ -48,17 +48,17 @@ PostProcessCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 }
 
 void
-PostProcessCommandListRecorder::Init(ID3D12Resource& inputColorBuffer) noexcept
+PostProcessCommandListRecorder::Init(const D3D12_GPU_DESCRIPTOR_HANDLE& inputColorBufferShaderResourceView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
-    InitShaderResourceViews(inputColorBuffer);
+    mInputColorBufferShaderResourceView = inputColorBufferShaderResourceView;
 
     BRE_ASSERT(IsDataValid());
 }
 
 std::uint32_t
-PostProcessCommandListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+PostProcessCommandListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(sPSO != nullptr);
@@ -68,13 +68,13 @@ PostProcessCommandListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRI
 
     commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
     commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
-    commandList.OMSetRenderTargets(1U, &renderTargetView, false, nullptr);
+    commandList.OMSetRenderTargets(1U, &outputColorBufferRenderTargetView, false, nullptr);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 
     commandList.SetGraphicsRootSignature(sRootSignature);
-    commandList.SetGraphicsRootDescriptorTable(0U, mStartPixelShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(0U, mInputColorBufferShaderResourceView);
 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
@@ -88,22 +88,8 @@ PostProcessCommandListRecorder::RecordAndPushCommandLists(const D3D12_CPU_DESCRI
 bool
 PostProcessCommandListRecorder::IsDataValid() const noexcept
 {
-    const bool result = mStartPixelShaderResourceView.ptr != 0UL;
+    const bool result = mInputColorBufferShaderResourceView.ptr != 0UL;
 
     return result;
-}
-
-void
-PostProcessCommandListRecorder::InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept
-{
-    D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
-    srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDescriptor.Texture2D.MostDetailedMip = 0;
-    srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
-    srvDescriptor.Format = inputColorBuffer.GetDesc().Format;
-    srvDescriptor.Texture2D.MipLevels = inputColorBuffer.GetDesc().MipLevels;
-    mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(inputColorBuffer,
-                                                                                         srvDescriptor);
 }
 }

@@ -4,7 +4,7 @@
 
 namespace BRE {
 ///
-/// Responsible to record command lists for the tone mapping pass
+/// Responsible to record and push command lists for the tone mapping pass
 ///
 class ToneMappingCommandListRecorder {
 public:
@@ -27,11 +27,11 @@ public:
     ///
     /// InitSharedPSOAndRootSignature() must be called before
     ///
-    /// @param inputColorBuffer Input color buffer to apply the tone mapping
-    /// @param renderTargetView Render target view
+    /// @param inputColorBufferShaderResourceView Shader resource view to the input color buffer
+    /// @param outputColorBufferRenderTargetView Render target view to the output color buffer
     ///
-    void Init(ID3D12Resource& inputColorBuffer,
-              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+    void Init(const D3D12_GPU_DESCRIPTOR_HANDLE& inputColorBufferShaderResourceView,
+              const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView) noexcept;
 
     ///
     /// @brief Records and pushes command lists to the CommandListExecutor
@@ -49,15 +49,9 @@ public:
     bool IsDataValid() const noexcept;
 
 private:
-    ///
-    /// @brief Initializes shader resource views
-    /// @param inputColorBuffer Input color buffer to apply tone mapping
-    ///
-    void InitShaderResourceViews(ID3D12Resource& inputColorBuffer) noexcept;
-
     CommandListPerFrame mCommandListPerFrame;
 
-    D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
-    D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
+    D3D12_GPU_DESCRIPTOR_HANDLE mInputColorBufferShaderResourceView{ 0UL };
+    D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferRenderTargetView{ 0UL };    
 };
 }

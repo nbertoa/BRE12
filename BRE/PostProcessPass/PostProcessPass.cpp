@@ -12,7 +12,8 @@ using namespace DirectX;
 
 namespace BRE {
 void
-PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept
+PostProcessPass::Init(ID3D12Resource& inputColorBuffer,
+                      const D3D12_GPU_DESCRIPTOR_HANDLE& inputColorBufferShaderResourceView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
@@ -21,24 +22,24 @@ PostProcessPass::Init(ID3D12Resource& inputColorBuffer) noexcept
     PostProcessCommandListRecorder::InitSharedPSOAndRootSignature();
 
     mCommandListRecorder.reset(new PostProcessCommandListRecorder());
-    mCommandListRecorder->Init(inputColorBuffer);
+    mCommandListRecorder->Init(inputColorBufferShaderResourceView);
 
     BRE_ASSERT(IsDataValid());
 }
 
 std::uint32_t
-PostProcessPass::Execute(ID3D12Resource& renderTargetBuffer,
-                         const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+PostProcessPass::Execute(ID3D12Resource& frameBuffer,
+                         const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferRenderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid());
-    BRE_ASSERT(renderTargetView.ptr != 0UL);
+    BRE_ASSERT(frameBufferRenderTargetView.ptr != 0UL);
     
     std::uint32_t commandListCount = 0U;
 
-    commandListCount += RecordAndPushPrePassCommandLists(renderTargetBuffer,
-                                                         renderTargetView);
+    commandListCount += RecordAndPushPrePassCommandLists(frameBuffer,
+                                                         frameBufferRenderTargetView);
         
-    commandListCount += mCommandListRecorder->RecordAndPushCommandLists(renderTargetView);
+    commandListCount += mCommandListRecorder->RecordAndPushCommandLists(frameBufferRenderTargetView);
 
     return commandListCount;
 }
@@ -54,11 +55,11 @@ PostProcessPass::IsDataValid() const noexcept
 }
 
 std::uint32_t
-PostProcessPass::RecordAndPushPrePassCommandLists(ID3D12Resource& renderTargetBuffer,
-                                                  const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+PostProcessPass::RecordAndPushPrePassCommandLists(ID3D12Resource& frameBuffer,
+                                                  const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferRenderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid());
-    BRE_ASSERT(renderTargetView.ptr != 0UL);
+    BRE_ASSERT(frameBufferRenderTargetView.ptr != 0UL);
 
     CD3DX12_RESOURCE_BARRIER barriers[2U];
     std::uint32_t barrierCount = 0UL;
@@ -68,8 +69,8 @@ PostProcessPass::RecordAndPushPrePassCommandLists(ID3D12Resource& renderTargetBu
         ++barrierCount;
     }
 
-    if (ResourceStateManager::GetResourceState(renderTargetBuffer) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
-        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(renderTargetBuffer,
+    if (ResourceStateManager::GetResourceState(frameBuffer) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(frameBuffer,
                                                                                         D3D12_RESOURCE_STATE_RENDER_TARGET);
         ++barrierCount;
     }

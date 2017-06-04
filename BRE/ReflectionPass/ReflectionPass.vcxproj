@@ -120,9 +120,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="HiZBufferCommandListRecorder.h" />
     <ClInclude Include="ReflectionPass.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="HiZBufferCommandListRecorder.cpp" />
     <ClCompile Include="ReflectionPass.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

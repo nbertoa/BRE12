@@ -68,8 +68,8 @@ private:
                              const std::vector<ID3D12Resource*>& normalTextures,
                              const std::vector<ID3D12Resource*>& heightTextures) noexcept;
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mNormalBufferGpuDescriptorsBegin;
-    D3D12_GPU_DESCRIPTOR_HANDLE mHeightBufferGpuDescriptorsBegin;
+    D3D12_GPU_DESCRIPTOR_HANDLE mNormalTextureRenderTargetViewsBegin;
+    D3D12_GPU_DESCRIPTOR_HANDLE mHeightTextureRenderTargetViewsBegin;
 
     UploadBuffer* mHeightMappingUploadCBuffer{ nullptr };
 };

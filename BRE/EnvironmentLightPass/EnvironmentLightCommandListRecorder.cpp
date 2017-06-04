@@ -57,11 +57,11 @@ EnvironmentLightCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer
                                           ID3D12Resource& diffuseIrradianceCubeMap,
                                           ID3D12Resource& specularPreConvolvedCubeMap,
                                           ID3D12Resource& ambientAccessibilityBuffer,
-                                          const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+                                          const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
-    mRenderTargetView = renderTargetView;
+    mOutputColorBufferRenderTargetView = outputColorBufferRenderTargetView;
 
     InitShaderResourceViews(normalSmoothnessBuffer,
                             baseColorMetalMaskBuffer,
@@ -88,7 +88,7 @@ EnvironmentLightCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
 
     commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
     commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
-    commandList.OMSetRenderTargets(1U, &mRenderTargetView, false, nullptr);
+    commandList.OMSetRenderTargets(1U, &mOutputColorBufferRenderTargetView, false, nullptr);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
@@ -112,7 +112,7 @@ bool
 EnvironmentLightCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
-        mRenderTargetView.ptr != 0UL &&
+        mOutputColorBufferRenderTargetView.ptr != 0UL &&
         mStartPixelShaderResourceView.ptr != 0UL;
 
     return result;

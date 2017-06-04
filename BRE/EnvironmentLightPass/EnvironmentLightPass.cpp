@@ -3,6 +3,7 @@
 #include <d3d12.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
+#include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DescriptorManager\RenderTargetDescriptorManager.h>
 #include <DXUtils\d3dx12.h>
 #include <ResourceManager\ResourceManager.h>
@@ -12,7 +13,7 @@
 namespace BRE {
 namespace {
 ///
-/// @brief Creates resource and render target view for environment light pass
+/// @brief Creates resource, render target view and shader resource view.
 /// @param resourceInitialState Initial statea of the resource to create
 /// @param resourceName Name of the resource
 /// @param resource Output resource
@@ -22,7 +23,8 @@ void
 CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceInitialState,
                                   const wchar_t* resourceName,
                                   ID3D12Resource* &resource,
-                                  D3D12_CPU_DESCRIPTOR_HANDLE& resourceRenderTargetView) noexcept
+                                  D3D12_CPU_DESCRIPTOR_HANDLE& resourceRenderTargetView,
+                                  D3D12_GPU_DESCRIPTOR_HANDLE& resourceShaderResourceView) noexcept
 {
     BRE_ASSERT(resource == nullptr);
 
@@ -60,6 +62,17 @@ CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceInitialSta
     RenderTargetDescriptorManager::CreateRenderTargetView(*resource,
                                                           rtvDescriptor,
                                                           &resourceRenderTargetView);
+
+    // Create shader resource view
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
+    srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDescriptor.Texture2D.MostDetailedMip = 0;
+    srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+    srvDescriptor.Format = resource->GetDesc().Format;
+    srvDescriptor.Texture2D.MipLevels = resource->GetDesc().MipLevels;
+    resourceShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(*resource,
+                                                                                      srvDescriptor);
 }
 }
 
@@ -81,12 +94,14 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
     CreateResourceAndRenderTargetView(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
                                       L"Ambient Accessibility Buffer",
                                       mAmbientAccessibilityBuffer,
-                                      mAmbientAccessibilityBufferRenderTargetView);
+                                      mAmbientAccessibilityBufferRenderTargetView,
+                                      mAmbientAccessibilityBufferShaderResourceView);
 
     CreateResourceAndRenderTargetView(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
                                       L"Blur Buffer",
                                       mBlurBuffer,
-                                      mBlurBufferRenderTargetView);
+                                      mBlurBufferRenderTargetView,
+                                      mBlurBufferShaderResourceView);
 
     // Initialize ambient occlusion recorder
     mAmbientOcclusionRecorder.reset(new AmbientOcclusionCommandListRecorder());
@@ -96,7 +111,7 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
 
     // Initialize blur recorder
     mBlurRecorder.reset(new BlurCommandListRecorder());
-    mBlurRecorder->Init(*mAmbientAccessibilityBuffer,
+    mBlurRecorder->Init(mAmbientAccessibilityBufferShaderResourceView,
                         mBlurBufferRenderTargetView);
 
     // Initialize ambient light recorder
@@ -142,7 +157,10 @@ EnvironmentLightPass::IsDataValid() const noexcept
         mAmbientOcclusionRecorder.get() != nullptr &&
         mEnvironmentLightRecorder.get() != nullptr &&
         mAmbientAccessibilityBuffer != nullptr &&
+        mAmbientAccessibilityBufferShaderResourceView.ptr != 0UL &&
+        mAmbientAccessibilityBufferRenderTargetView.ptr != 0UL &&
         mBlurBuffer != nullptr &&
+        mBlurBufferShaderResourceView.ptr != 0UL &&
         mBlurBufferRenderTargetView.ptr != 0UL &&
         mBaseColorMetalMaskBuffer != nullptr &&
         mNormalSmoothnessBuffer != nullptr &&

@@ -111,8 +111,8 @@ ColorMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
 
     commandList.SetGraphicsRootSignature(sRootSignature);
     const std::size_t descHandleIncSize{ DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-    D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferGpuDesc(mStartObjectCBufferView);
-    D3D12_GPU_DESCRIPTOR_HANDLE materialsCBufferGpuDesc(mStartMaterialCBufferView);
+    D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferView(mObjectCBufferViewsBegin);
+    D3D12_GPU_DESCRIPTOR_HANDLE materialCBufferView(mMaterialCBufferViewsBegin);
     D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource().GetGPUVirtualAddress());
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(3U, frameCBufferGpuVAddress);
@@ -125,11 +125,11 @@ ColorMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& f
         commandList.IASetIndexBuffer(&geomData.mIndexBufferData.mBufferView);
         const std::size_t worldMatsCount{ geomData.mWorldMatrices.size() };
         for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
-            commandList.SetGraphicsRootDescriptorTable(0U, objectCBufferGpuDesc);
-            objectCBufferGpuDesc.ptr += descHandleIncSize;
+            commandList.SetGraphicsRootDescriptorTable(0U, objectCBufferView);
+            objectCBufferView.ptr += descHandleIncSize;
 
-            commandList.SetGraphicsRootDescriptorTable(2U, materialsCBufferGpuDesc);
-            materialsCBufferGpuDesc.ptr += descHandleIncSize;
+            commandList.SetGraphicsRootDescriptorTable(2U, materialCBufferView);
+            materialCBufferView.ptr += descHandleIncSize;
 
             commandList.DrawIndexedInstanced(geomData.mIndexBufferData.mElementCount, 1U, 0U, 0U, 0U);
         }
@@ -202,10 +202,10 @@ ColorMappingCommandListRecorder::InitConstantBuffers(const std::vector<MaterialP
                                           &materialProperties[i],
                                           sizeof(MaterialProperties));
     }
-    mStartObjectCBufferView =
+    mObjectCBufferViewsBegin =
         CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),
                                                               static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-    mStartMaterialCBufferView =
+    mMaterialCBufferViewsBegin =
         CbvSrvUavDescriptorManager::CreateConstantBufferViews(materialCbufferViewDescVec.data(),
                                                               static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
 }

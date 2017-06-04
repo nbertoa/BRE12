@@ -142,11 +142,11 @@ AmbientOcclusionCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 void
 AmbientOcclusionCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer,
                                           ID3D12Resource& depthBuffer,
-                                          const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+                                          const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRenderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
-    mRenderTargetView = renderTargetView;
+    mAmbientAccessibilityBufferRenderTargetView = ambientAccessibilityBufferRenderTargetView;
 
     const std::uint32_t sampleKernelSize = 
         static_cast<std::uint32_t>(EnvironmentLightSettings::sSampleKernelSize);
@@ -186,7 +186,10 @@ AmbientOcclusionCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
 
     commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
     commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
-    commandList.OMSetRenderTargets(1U, &mRenderTargetView, false, nullptr);
+    commandList.OMSetRenderTargets(1U, 
+                                   &mAmbientAccessibilityBufferRenderTargetView, 
+                                   false, 
+                                   nullptr);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
@@ -215,7 +218,7 @@ AmbientOcclusionCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
         mSampleKernelUploadBuffer != nullptr &&
-        mRenderTargetView.ptr != 0UL &&
+        mAmbientAccessibilityBufferRenderTargetView.ptr != 0UL &&
         mStartPixelShaderResourceView.ptr != 0UL &&
         mAmbientOcclusionUploadCBuffer != nullptr;
 

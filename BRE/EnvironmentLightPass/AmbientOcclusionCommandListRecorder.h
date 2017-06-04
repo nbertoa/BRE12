@@ -37,11 +37,11 @@ public:
     /// 
     /// @param normalSmoothnessBuffer Geometry buffer that contains normal and smoothness factor
     /// @param depthBuffer Depth buffer
-    /// @param renderTargetView CPU descriptor handle of the render target
+    /// @param ambientAccessibilityBufferRenderTargetView Render target view to the ambient accessibility buffer
     ///
     void Init(ID3D12Resource& normalSmoothnessBuffer,
               ID3D12Resource& depthBuffer,
-              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+              const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRenderTargetView) noexcept;
 
     ///
     /// @brief Records a command list and push it into the CommandListExecutor
@@ -97,7 +97,7 @@ private:
 
     UploadBuffer* mSampleKernelUploadBuffer{ nullptr };
 
-    D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
+    D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetView{ 0UL };
 
     D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
 

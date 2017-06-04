@@ -76,9 +76,9 @@ protected:
     FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
     UploadBuffer* mObjectUploadCBuffers{ nullptr };
-    D3D12_GPU_DESCRIPTOR_HANDLE mStartObjectCBufferView;
+    D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferViewsBegin;
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mStartMaterialCBufferView;
+    D3D12_GPU_DESCRIPTOR_HANDLE mMaterialCBufferViewsBegin;
     UploadBuffer* mMaterialUploadCBuffers{ nullptr };
 
     const D3D12_CPU_DESCRIPTOR_HANDLE* mGeometryBufferRenderTargetViews{ nullptr };

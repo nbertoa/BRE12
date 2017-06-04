@@ -36,7 +36,7 @@ public:
     /// @param diffuseIrradianceCubeMap Diffuse irradiance environment cube map
     /// @param specularPreConvolvedCubeMap Specular pre convolved environment cube map
     /// @param ambientAccessibilityBuffer Ambient accessibility buffer
-    /// @param renderTargetView Render target view
+    /// @param outputColorBufferRenderTargetView Render target view to the output color buffer
     ///
     void Init(ID3D12Resource& normalSmoothnessBuffer,
               ID3D12Resource& baseColorMetalMaskBuffer,
@@ -44,7 +44,7 @@ public:
               ID3D12Resource& diffuseIrradianceCubeMap,
               ID3D12Resource& specularPreConvolvedCubeMap,
               ID3D12Resource& ambientAccessibilityBuffer,
-              const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept;
+              const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView) noexcept;
 
     ///
     /// @brief Records command lists and pushes them into CommandListExecutor
@@ -83,7 +83,7 @@ private:
 
     FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
-    D3D12_CPU_DESCRIPTOR_HANDLE mRenderTargetView{ 0UL };
+    D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferRenderTargetView{ 0UL };
 
     D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
 };

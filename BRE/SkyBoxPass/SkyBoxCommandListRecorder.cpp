@@ -66,14 +66,15 @@ SkyBoxCommandListRecorder::Init(const VertexAndIndexBufferCreator::VertexBufferD
                                 const VertexAndIndexBufferCreator::IndexBufferData indexBufferData,
                                 const XMFLOAT4X4& worldMatrix,
                                 ID3D12Resource& skyBoxCubeMap,
-                                const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView,
+                                const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
                                 const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
     mVertexBufferData = vertexBufferData;
     mIndexBufferData = indexBufferData;
-    mRenderTargetView = renderTargetView;
+
+    mOutputColorBufferRenderTargetView = outputColorBufferRenderTargetView;
     mDepthBufferView = depthBufferView;
 
     InitConstantBuffers(worldMatrix);
@@ -97,7 +98,10 @@ SkyBoxCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
 
     commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
     commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
-    commandList.OMSetRenderTargets(1U, &mRenderTargetView, false, &mDepthBufferView);
+    commandList.OMSetRenderTargets(1U, 
+                                   &mOutputColorBufferRenderTargetView, 
+                                   false, 
+                                   &mDepthBufferView);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
@@ -126,7 +130,7 @@ SkyBoxCommandListRecorder::IsDataValid() const noexcept
         mObjectUploadCBuffer != nullptr &&
         mObjectCBufferView.ptr != 0UL &&
         mStartPixelShaderResourceView.ptr != 0UL &&
-        mRenderTargetView.ptr != 0UL &&
+        mOutputColorBufferRenderTargetView.ptr != 0UL &&
         mDepthBufferView.ptr != 0UL;
 
     return result;
@@ -162,6 +166,7 @@ SkyBoxCommandListRecorder::InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap
     srvDescriptor.TextureCube.MipLevels = skyBoxCubeMap.GetDesc().MipLevels;
     srvDescriptor.TextureCube.ResourceMinLODClamp = 0.0f;
     srvDescriptor.Format = skyBoxCubeMap.GetDesc().Format;
-    mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(skyBoxCubeMap, srvDescriptor);
+    mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(skyBoxCubeMap, 
+                                                                                         srvDescriptor);
 }
 }

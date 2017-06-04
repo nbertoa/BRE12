@@ -118,7 +118,9 @@ GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
     // Init geometry command list recorders
     for (GeometryCommandListRecorders::value_type& recorder : mGeometryCommandListRecorders) {
         BRE_ASSERT(recorder.get() != nullptr);
-        recorder->Init(mGeometryBufferRenderTargetViews, BUFFERS_COUNT, depthBufferView);
+        recorder->Init(mGeometryBufferRenderTargetViews, 
+                       BUFFERS_COUNT, 
+                       depthBufferView);
     }
 
     BRE_ASSERT(IsDataValid());
