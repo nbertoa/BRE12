@@ -63,6 +63,6 @@ private:
     void InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties,
                               const std::vector<ID3D12Resource*>& diffuseTextures) noexcept;
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorTextureRenderTargetViewsBegin;
+    D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorTextureRenderTargetViewsBegin{ 0U };
 };
 }

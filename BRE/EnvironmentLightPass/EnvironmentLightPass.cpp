@@ -82,7 +82,8 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
                            ID3D12Resource& depthBuffer,
                            ID3D12Resource& diffuseIrradianceCubeMap,
                            ID3D12Resource& specularPreConvolvedCubeMap,
-                           const D3D12_CPU_DESCRIPTOR_HANDLE& renderTargetView) noexcept
+                           const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
+                           const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
@@ -106,8 +107,8 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
     // Initialize ambient occlusion recorder
     mAmbientOcclusionRecorder.reset(new AmbientOcclusionCommandListRecorder());
     mAmbientOcclusionRecorder->Init(normalSmoothnessBuffer,
-                                    depthBuffer,
-                                    mAmbientAccessibilityBufferRenderTargetView);
+                                    mAmbientAccessibilityBufferRenderTargetView,
+                                    depthBufferShaderResourceView);
 
     // Initialize blur recorder
     mBlurRecorder.reset(new BlurCommandListRecorder());
@@ -118,11 +119,11 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
     mEnvironmentLightRecorder.reset(new EnvironmentLightCommandListRecorder());
     mEnvironmentLightRecorder->Init(normalSmoothnessBuffer,
                                     baseColorMetalMaskBuffer,
-                                    depthBuffer,
                                     diffuseIrradianceCubeMap,
                                     specularPreConvolvedCubeMap,
                                     *mBlurBuffer,
-                                    renderTargetView);
+                                    outputColorBufferRenderTargetView,
+                                    depthBufferShaderResourceView);
 
     mBaseColorMetalMaskBuffer = &baseColorMetalMaskBuffer;
     mNormalSmoothnessBuffer = &normalSmoothnessBuffer;

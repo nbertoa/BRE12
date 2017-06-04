@@ -87,7 +87,8 @@ private:
     UploadBuffer* mObjectUploadCBuffer{ nullptr };
     D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferView;
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView;
+    // First descriptor in the list. All the others are contiguous
+    D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderResourceViewsBegin;
 
     D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferRenderTargetView{ 0UL };
     D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferView{ 0UL };

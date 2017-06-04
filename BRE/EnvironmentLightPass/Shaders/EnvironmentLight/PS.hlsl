@@ -19,10 +19,10 @@ SamplerState TextureSampler : register (s0);
 
 Texture2D<float4> Normal_SmoothnessTexture : register (t0);
 Texture2D<float4> BaseColor_MetalMaskTexture : register (t1);
-Texture2D<float> DepthTexture : register (t2);
-TextureCube DiffuseIBLCubeMap : register(t3);
-TextureCube SpecularIBLCubeMap : register(t4);
-Texture2D<float> AmbientAccessibilityTexture : register (t5);
+TextureCube DiffuseIBLCubeMap : register(t2);
+TextureCube SpecularIBLCubeMap : register(t3);
+Texture2D<float> AmbientAccessibilityTexture : register (t4);
+Texture2D<float> DepthTexture : register (t5);
 
 struct Output {
     float4 mColor : SV_Target0;

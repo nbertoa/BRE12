@@ -32,19 +32,19 @@ public:
     ///
     /// @param normalSmoothnessBuffer Geometry buffer that contains normals and smoothness factors.
     /// @param baseColorMetalMaskBuffer Geometry buffer that contains base color and metal mask.
-    /// @param depthBuffer Depth buffer
     /// @param diffuseIrradianceCubeMap Diffuse irradiance environment cube map
     /// @param specularPreConvolvedCubeMap Specular pre convolved environment cube map
     /// @param ambientAccessibilityBuffer Ambient accessibility buffer
     /// @param outputColorBufferRenderTargetView Render target view to the output color buffer
+    /// @param depthBufferShaderResourceView Depth buffer shader resource view
     ///
     void Init(ID3D12Resource& normalSmoothnessBuffer,
               ID3D12Resource& baseColorMetalMaskBuffer,
-              ID3D12Resource& depthBuffer,
               ID3D12Resource& diffuseIrradianceCubeMap,
               ID3D12Resource& specularPreConvolvedCubeMap,
               ID3D12Resource& ambientAccessibilityBuffer,
-              const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView) noexcept;
+              const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
+              const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept;
 
     ///
     /// @brief Records command lists and pushes them into CommandListExecutor
@@ -67,24 +67,24 @@ private:
     /// @brief Initializes shader resource views
     /// @param normalSmoothnessBuffer Geometry buffer that contains normals and smoothness factors.
     /// @param baseColorMetalMaskBuffer Geometry buffer that contains base color and metal mask.
-    /// @param depthBuffer Depth buffer
     /// @param diffuseIrradianceCubeMap Diffuse irradiance environment cube map
-    /// @param ambientAccessibilityBuffer Ambient accessibility buffer
     /// @param specularPreConvolvedCubeMap Specular pre convolved environment cube map
+    /// @param ambientAccessibilityBuffer Ambient accessibility buffer
     ///
     void InitShaderResourceViews(ID3D12Resource& normalSmoothnessBuffer,
                                  ID3D12Resource& baseColorMetalMaskBuffer,
-                                 ID3D12Resource& depthBuffer,
                                  ID3D12Resource& diffuseIrradianceCubeMap,
-                                 ID3D12Resource& ambientAccessibilityBuffer,
-                                 ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
+                                 ID3D12Resource& specularPreConvolvedCubeMap,
+                                 ID3D12Resource& ambientAccessibilityBuffer) noexcept;
 
     CommandListPerFrame mCommandListPerFrame;
 
     FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
     D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferRenderTargetView{ 0UL };
+    D3D12_GPU_DESCRIPTOR_HANDLE mDepthBufferShaderResourceView{ 0UL };
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
+    // First descriptor in the list. All the others are contiguous
+    D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderResourceViewsBegin{ 0UL };
 };
 }

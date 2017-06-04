@@ -38,10 +38,11 @@ public:
     /// @param normalSmoothnessBuffer Geometry buffer that contains normal and smoothness factor
     /// @param depthBuffer Depth buffer
     /// @param ambientAccessibilityBufferRenderTargetView Render target view to the ambient accessibility buffer
+    /// @param depthBufferShaderResourceView Depth buffer shader resource view
     ///
     void Init(ID3D12Resource& normalSmoothnessBuffer,
-              ID3D12Resource& depthBuffer,
-              const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRenderTargetView) noexcept;
+              const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRenderTargetView,
+              const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept;
 
     ///
     /// @brief Records a command list and push it into the CommandListExecutor
@@ -75,14 +76,12 @@ private:
     ///
     /// @brief Initializes ambient occlusion shaders resource views
     /// @param normalSmothnessBuffer Geometry buffer that contains normals and smoothness factor
-    /// @param depthBuffer Depth buffer
     /// @param noiseTexture Noise texture created with CreateAndGetNoiseTexture
     /// @param sampleKernelSize Size of the sample kernel
     /// @see CreateSampleKernelBuffer
     /// @see CreateAndGetNoiseTexture
     ///
     void InitShaderResourceViews(ID3D12Resource& normalSmoothnessBuffer,
-                                 ID3D12Resource& depthBuffer,
                                  ID3D12Resource& noiseTexture,
                                  const std::uint32_t sampleKernelSize) noexcept;
 
@@ -99,7 +98,10 @@ private:
 
     D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetView{ 0UL };
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mStartPixelShaderResourceView{ 0UL };
+    D3D12_GPU_DESCRIPTOR_HANDLE mDepthBufferShaderResourceView{ 0UL };
+
+    // First descriptor in the list. All the others are contiguous
+    D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderResourceViewsBegin{ 0UL };
 
     UploadBuffer* mAmbientOcclusionUploadCBuffer{ nullptr };
 };

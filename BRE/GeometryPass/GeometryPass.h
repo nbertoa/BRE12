@@ -15,7 +15,7 @@ struct FrameCBuffer;
 class GeometryPass {
 public:
     // Geometry buffers
-    enum Buffers {
+    enum BufferType {
         NORMAL_SMOOTHNESS = 0U, // 2 encoded normals based on octahedron encoding + 1 smoothness
         BASECOLOR_METALMASK, // 3 base color + 1 metal mask
         BUFFERS_COUNT
@@ -35,12 +35,13 @@ public:
     void Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 
     ///
-    /// @brief Get geometry buffers
-    /// @return List of geometry buffers
+    /// @brief Get geometry buffer by type
+    /// @param bufferType Buffer type
+    /// @return Geometry buffer
     ///
-    __forceinline ID3D12Resource* *GetGeometryBuffers() noexcept
+    __forceinline ID3D12Resource& GetGeometryBuffer(const BufferType bufferType) noexcept
     {
-        return mGeometryBuffers;
+        return *mGeometryBuffers[bufferType];
     }
 
     ///

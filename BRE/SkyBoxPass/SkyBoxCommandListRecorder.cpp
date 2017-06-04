@@ -110,7 +110,7 @@ SkyBoxCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCB
     D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource().GetGPUVirtualAddress());
     commandList.SetGraphicsRootDescriptorTable(0U, mObjectCBufferView);
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-    commandList.SetGraphicsRootDescriptorTable(2U, mStartPixelShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(2U, mPixelShaderResourceViewsBegin);
 
     commandList.IASetVertexBuffers(0U, 1U, &mVertexBufferData.mBufferView);
     commandList.IASetIndexBuffer(&mIndexBufferData.mBufferView);
@@ -129,7 +129,7 @@ SkyBoxCommandListRecorder::IsDataValid() const noexcept
     const bool result =
         mObjectUploadCBuffer != nullptr &&
         mObjectCBufferView.ptr != 0UL &&
-        mStartPixelShaderResourceView.ptr != 0UL &&
+        mPixelShaderResourceViewsBegin.ptr != 0UL &&
         mOutputColorBufferRenderTargetView.ptr != 0UL &&
         mDepthBufferView.ptr != 0UL;
 
@@ -166,7 +166,7 @@ SkyBoxCommandListRecorder::InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap
     srvDescriptor.TextureCube.MipLevels = skyBoxCubeMap.GetDesc().MipLevels;
     srvDescriptor.TextureCube.ResourceMinLODClamp = 0.0f;
     srvDescriptor.Format = skyBoxCubeMap.GetDesc().Format;
-    mStartPixelShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(skyBoxCubeMap, 
+    mPixelShaderResourceViewsBegin = CbvSrvUavDescriptorManager::CreateShaderResourceView(skyBoxCubeMap, 
                                                                                          srvDescriptor);
 }
 }

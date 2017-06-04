@@ -168,6 +168,7 @@ private:
     D3D12_CPU_DESCRIPTOR_HANDLE mFrameBufferRenderTargetViews[ApplicationSettings::sSwapChainBufferCount]{ 0UL };
 
     ID3D12Resource* mDepthBuffer{ nullptr };
+    D3D12_GPU_DESCRIPTOR_HANDLE mDepthBufferShaderResourceView{ 0UL };
     D3D12_CPU_DESCRIPTOR_HANDLE mDepthBufferRenderTargetView{ 0UL };
 
     // Buffers used for intermediate computations.

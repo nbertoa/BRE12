@@ -18,9 +18,9 @@ ConstantBuffer<AmbientOcclusionCBuffer> gAmbientOcclusionCBuffer : register(b1);
 SamplerState TextureSampler : register (s0);
 
 Texture2D<float4> Normal_SmoothnessTexture : register (t0);
-Texture2D<float> DepthTexture : register (t1);
-StructuredBuffer<float4> SampleKernelBuffer : register(t2);
-Texture2D<float4> NoiseTexture : register (t3);
+StructuredBuffer<float4> SampleKernelBuffer : register(t1);
+Texture2D<float4> NoiseTexture : register (t2);
+Texture2D<float> DepthTexture : register (t3);
 
 struct Output {
     float mAmbientAccessibility : SV_Target0;

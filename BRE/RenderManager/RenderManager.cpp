@@ -188,8 +188,21 @@ RenderManager::RenderManager(Scene& scene)
                        ApplicationSettings::sNearPlaneZ,
                        ApplicationSettings::sFarPlaneZ);
 
-    InitPasses(scene);
+    // Shader resource view to the depth buffer
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptor{};
+    srvDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDescriptor.Format = ApplicationSettings::sDepthStencilSRVFormat;
+    srvDescriptor.Texture2D.MostDetailedMip = 0;
+    srvDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+    srvDescriptor.Texture2D.PlaneSlice = 0;
+    srvDescriptor.Texture2D.MipLevels = mDepthBuffer->GetDesc().MipLevels;
 
+    mDepthBufferShaderResourceView = CbvSrvUavDescriptorManager::CreateShaderResourceView(*mDepthBuffer,
+                                                                                          srvDescriptor);
+
+    InitPasses(scene);
+    
     // Spawns master render task
     parent()->spawn(*this);
 }
@@ -208,12 +221,13 @@ RenderManager::InitPasses(Scene& scene) noexcept
 
     mReflectionPass.Init(*mDepthBuffer);
 
-    mEnvironmentLightPass.Init(*mGeometryPass.GetGeometryBuffers()[GeometryPass::BASECOLOR_METALMASK],
-                               *mGeometryPass.GetGeometryBuffers()[GeometryPass::NORMAL_SMOOTHNESS],
+    mEnvironmentLightPass.Init(mGeometryPass.GetGeometryBuffer(GeometryPass::BASECOLOR_METALMASK),
+                               mGeometryPass.GetGeometryBuffer(GeometryPass::NORMAL_SMOOTHNESS),
                                *mDepthBuffer,
                                *diffuseIrradianceCubeMap,
                                *specularPreConvolvedCubeMap,
-                               mIntermediateColorBuffer1RenderTargetView);    
+                               mIntermediateColorBuffer1RenderTargetView,
+                               mDepthBufferShaderResourceView);    
 
     mSkyBoxPass.Init(*skyBoxCubeMap,
                      *mDepthBuffer,
