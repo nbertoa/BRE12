@@ -83,6 +83,8 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
                            ID3D12Resource& diffuseIrradianceCubeMap,
                            ID3D12Resource& specularPreConvolvedCubeMap,
                            const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
+                           const D3D12_GPU_DESCRIPTOR_HANDLE& geometryBufferShaderResourceViewsBegin,
+                           const D3D12_GPU_DESCRIPTOR_HANDLE& normalSmoothnessBufferShaderResourceView,
                            const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
@@ -106,8 +108,8 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
 
     // Initialize ambient occlusion recorder
     mAmbientOcclusionRecorder.reset(new AmbientOcclusionCommandListRecorder());
-    mAmbientOcclusionRecorder->Init(normalSmoothnessBuffer,
-                                    mAmbientAccessibilityBufferRenderTargetView,
+    mAmbientOcclusionRecorder->Init(mAmbientAccessibilityBufferRenderTargetView,
+                                    normalSmoothnessBufferShaderResourceView,
                                     depthBufferShaderResourceView);
 
     // Initialize blur recorder
@@ -117,11 +119,10 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
 
     // Initialize ambient light recorder
     mEnvironmentLightRecorder.reset(new EnvironmentLightCommandListRecorder());
-    mEnvironmentLightRecorder->Init(normalSmoothnessBuffer,
-                                    baseColorMetalMaskBuffer,
-                                    diffuseIrradianceCubeMap,
+    mEnvironmentLightRecorder->Init(diffuseIrradianceCubeMap,
                                     specularPreConvolvedCubeMap,
                                     outputColorBufferRenderTargetView,
+                                    geometryBufferShaderResourceViewsBegin,
                                     mBlurBufferShaderResourceView,
                                     depthBufferShaderResourceView);
 

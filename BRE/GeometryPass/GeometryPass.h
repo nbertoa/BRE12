@@ -30,7 +30,7 @@ public:
 
     ///
     /// @brief Initializes geometry pass
-    /// @param depthBufferView Dpeth buffer view
+    /// @param depthBufferView Depth buffer view
     ///
     void Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept;
 
@@ -42,6 +42,26 @@ public:
     __forceinline ID3D12Resource& GetGeometryBuffer(const BufferType bufferType) noexcept
     {
         return *mGeometryBuffers[bufferType];
+    }
+
+    ///
+    /// @brief Get the shader resource view to the beginning of the contiguos list
+    /// of shader resource views of the geometry buffers.
+    /// @return The shader resource view to the beginning of the contiguos list
+    /// where all the shader resource views for all the geometry buffers are stored.
+    ///
+    __forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetGeometryBufferShaderResourceViews() noexcept
+    {
+        return mGeometryBufferShaderResourceViews[0U];
+    }
+
+    ///
+    /// @brief Get a shader resource view to a specific geometry buffer
+    /// @return Shader resource view
+    ///
+    __forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetGeometryBufferShaderResourceView(const BufferType bufferType) noexcept
+    {
+        return mGeometryBufferShaderResourceViews[bufferType];
     }
 
     ///
@@ -69,10 +89,16 @@ private:
     ///
     std::uint32_t RecordAndPushPrePassCommandLists() noexcept;
 
+    ///
+    /// @brief Initializes shader resource views
+    ///
+    void InitShaderResourceViews() noexcept;
+
     CommandListPerFrame mPrePassCommandListPerFrame;
 
     // Geometry buffers data
     ID3D12Resource* mGeometryBuffers[BUFFERS_COUNT]{ nullptr };
+    D3D12_GPU_DESCRIPTOR_HANDLE mGeometryBufferShaderResourceViews[BUFFERS_COUNT]{ 0UL };
     D3D12_CPU_DESCRIPTOR_HANDLE mGeometryBufferRenderTargetViews[BUFFERS_COUNT]{ 0UL };
 
     GeometryCommandListRecorders& mGeometryCommandListRecorders;

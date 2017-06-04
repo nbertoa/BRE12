@@ -104,23 +104,14 @@ private:
     }
 
     ///
-    /// @brief Get current frame buffer CPU descriptor
-    /// @return CPU descriptor
+    /// @brief Get render target view to the current frame buffer
+    /// @return Render target view
     ///
-    D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentFrameBufferCpuDesc() const noexcept
+    D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentFrameBufferRenderTargetView() const noexcept
     {
         return mFrameBufferRenderTargetViews[mSwapChain->GetCurrentBackBufferIndex()];
     }
-
-    ///
-    /// @brief Get depth stencil CPU descriptor
-    /// @return CPU descriptor
-    ///
-    D3D12_CPU_DESCRIPTOR_HANDLE GetDepthStencilCpuDesc() const noexcept
-    {
-        return mDepthBufferRenderTargetView;
-    }
-
+    
     ///
     /// @brief Records pre pass command lists and pushes them to 
     /// the CommandListExecutor.
@@ -144,7 +135,7 @@ private:
     /// @brief Presents current frame and continue with the next frame.
     ///
     void PresentCurrentFrameAndBeginNextFrame() noexcept;
-
+    
     Microsoft::WRL::ComPtr<IDXGISwapChain3> mSwapChain{ nullptr };
 
     // Fences data for synchronization purposes.
@@ -179,7 +170,7 @@ private:
     ID3D12Resource* mIntermediateColorBuffer2{ nullptr };
     D3D12_GPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer2ShaderResourceView{ 0UL };
     D3D12_CPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer2RenderTargetView{ 0UL };
-
+    
     // We cache it here, as is is used by most passes.
     FrameCBuffer mFrameCBuffer;
 

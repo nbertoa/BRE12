@@ -14,9 +14,10 @@ namespace BRE {
 // Root Signature:
 // "CBV(b0, visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Frame CBuffer
 // "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 1 -> Frame CBuffer
-// "DescriptorTable(SRV(t0), SRV(t1), SRV(t2), SRV(t3), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Geometry buffers + diffuse & specular irradiance cube maps 
-// "DescriptorTable(SRV(t4), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Ambient accessibility buffer 
-// "DescriptorTable(SRV(t5), visibility = SHADER_VISIBILITY_PIXEL), " \ 3 -> Depth buffer
+// "DescriptorTable(SRV(t0), SRV(t1), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Geometry buffers 
+// "DescriptorTable(SRV(t2), SRV(t3), visibility = SHADER_VISIBILITY_PIXEL), " \ 3 -> diffuse & specular irradiance cube maps 
+// "DescriptorTable(SRV(t4), visibility = SHADER_VISIBILITY_PIXEL), " \ 4 -> Ambient accessibility buffer 
+// "DescriptorTable(SRV(t5), visibility = SHADER_VISIBILITY_PIXEL), " \ 5 -> Depth buffer
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
 ID3D12RootSignature* sRootSignature{ nullptr };
@@ -52,23 +53,21 @@ EnvironmentLightCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 }
 
 void
-EnvironmentLightCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer,
-                                          ID3D12Resource& baseColorMetalMaskBuffer,
-                                          ID3D12Resource& diffuseIrradianceCubeMap,
+EnvironmentLightCommandListRecorder::Init(ID3D12Resource& diffuseIrradianceCubeMap,
                                           ID3D12Resource& specularPreConvolvedCubeMap,
                                           const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
+                                          const D3D12_GPU_DESCRIPTOR_HANDLE& geometryBufferShaderResourceViewsBegin,
                                           const D3D12_GPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferShaderResourceView,
                                           const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
     mOutputColorBufferRenderTargetView = outputColorBufferRenderTargetView;
+    mGeometryBufferShaderResourceViewsBegin = geometryBufferShaderResourceViewsBegin;
     mAmbientAccessibilityBufferShaderResourceView = ambientAccessibilityBufferShaderResourceView;
     mDepthBufferShaderResourceView = depthBufferShaderResourceView;
 
-    InitShaderResourceViews(normalSmoothnessBuffer,
-                            baseColorMetalMaskBuffer,
-                            diffuseIrradianceCubeMap,
+    InitShaderResourceViews(diffuseIrradianceCubeMap,
                             specularPreConvolvedCubeMap);
 
     BRE_ASSERT(IsDataValid());
@@ -98,9 +97,10 @@ EnvironmentLightCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
     const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource().GetGPUVirtualAddress());
     commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
-    commandList.SetGraphicsRootDescriptorTable(2U, mPixelShaderResourceViewsBegin);
-    commandList.SetGraphicsRootDescriptorTable(3U, mAmbientAccessibilityBufferShaderResourceView);
-    commandList.SetGraphicsRootDescriptorTable(4U, mDepthBufferShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(2U, mGeometryBufferShaderResourceViewsBegin);
+    commandList.SetGraphicsRootDescriptorTable(3U, mDiffuseAndSpecularIrradianceTextureShaderResourceViews);
+    commandList.SetGraphicsRootDescriptorTable(4U, mAmbientAccessibilityBufferShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(5U, mDepthBufferShaderResourceView);
 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
@@ -116,64 +116,46 @@ EnvironmentLightCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
         mOutputColorBufferRenderTargetView.ptr != 0UL &&
+        mGeometryBufferShaderResourceViewsBegin.ptr != 0UL &&
         mAmbientAccessibilityBufferShaderResourceView.ptr != 0UL &&
         mDepthBufferShaderResourceView.ptr != 0UL &&
-        mPixelShaderResourceViewsBegin.ptr != 0UL;
+        mDiffuseAndSpecularIrradianceTextureShaderResourceViews.ptr != 0UL;
 
     return result;
 }
 
 void
-EnvironmentLightCommandListRecorder::InitShaderResourceViews(ID3D12Resource& normalSmoothnessBuffer,
-                                                             ID3D12Resource& baseColorMetalMaskBuffer,
-                                                             ID3D12Resource& diffuseIrradianceCubeMap,
+EnvironmentLightCommandListRecorder::InitShaderResourceViews(ID3D12Resource& diffuseIrradianceCubeMap,
                                                              ID3D12Resource& specularPreConvolvedCubeMap) noexcept
 {
     ID3D12Resource* resources[] =
     {
-        &normalSmoothnessBuffer,
-        &baseColorMetalMaskBuffer,
         &diffuseIrradianceCubeMap,
         &specularPreConvolvedCubeMap,
     };
 
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptors[_countof(resources)]{};
-
-    // Normal and smoothness geometry buffer
-    srvDescriptors[0].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDescriptors[0].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDescriptors[0].Texture2D.MostDetailedMip = 0;
-    srvDescriptors[0].Texture2D.ResourceMinLODClamp = 0.0f;
-    srvDescriptors[0].Format = normalSmoothnessBuffer.GetDesc().Format;
-    srvDescriptors[0].Texture2D.MipLevels = normalSmoothnessBuffer.GetDesc().MipLevels;
-    
-    // Base color and metal mask geometry buffer
-    srvDescriptors[1].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDescriptors[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDescriptors[1].Texture2D.MostDetailedMip = 0;
-    srvDescriptors[1].Texture2D.ResourceMinLODClamp = 0.0f;
-    srvDescriptors[1].Format = baseColorMetalMaskBuffer.GetDesc().Format;
-    srvDescriptors[1].Texture2D.MipLevels = baseColorMetalMaskBuffer.GetDesc().MipLevels;
    
     // Fill cube map texture descriptors	
-    srvDescriptors[2].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDescriptors[2].ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-    srvDescriptors[2].TextureCube.MostDetailedMip = 0;
-    srvDescriptors[2].TextureCube.MipLevels = diffuseIrradianceCubeMap.GetDesc().MipLevels;
-    srvDescriptors[2].TextureCube.ResourceMinLODClamp = 0.0f;
-    srvDescriptors[2].Format = diffuseIrradianceCubeMap.GetDesc().Format;
+    srvDescriptors[0].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDescriptors[0].ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+    srvDescriptors[0].TextureCube.MostDetailedMip = 0;
+    srvDescriptors[0].TextureCube.MipLevels = diffuseIrradianceCubeMap.GetDesc().MipLevels;
+    srvDescriptors[0].TextureCube.ResourceMinLODClamp = 0.0f;
+    srvDescriptors[0].Format = diffuseIrradianceCubeMap.GetDesc().Format;
     
-    srvDescriptors[3].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDescriptors[3].ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-    srvDescriptors[3].TextureCube.MostDetailedMip = 0;
-    srvDescriptors[3].TextureCube.MipLevels = specularPreConvolvedCubeMap.GetDesc().MipLevels;
-    srvDescriptors[3].TextureCube.ResourceMinLODClamp = 0.0f;
-    srvDescriptors[3].Format = specularPreConvolvedCubeMap.GetDesc().Format;
+    srvDescriptors[1].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDescriptors[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+    srvDescriptors[1].TextureCube.MostDetailedMip = 0;
+    srvDescriptors[1].TextureCube.MipLevels = specularPreConvolvedCubeMap.GetDesc().MipLevels;
+    srvDescriptors[1].TextureCube.ResourceMinLODClamp = 0.0f;
+    srvDescriptors[1].Format = specularPreConvolvedCubeMap.GetDesc().Format;
 
     BRE_ASSERT(_countof(resources) == _countof(srvDescriptors));
     
-    mPixelShaderResourceViewsBegin = CbvSrvUavDescriptorManager::CreateShaderResourceViews(resources,
-                                                                                           srvDescriptors,
-                                                                                           _countof(srvDescriptors));
+    mDiffuseAndSpecularIrradianceTextureShaderResourceViews = 
+        CbvSrvUavDescriptorManager::CreateShaderResourceViews(resources,
+                                                              srvDescriptors,
+                                                              _countof(srvDescriptors));
 }
 }

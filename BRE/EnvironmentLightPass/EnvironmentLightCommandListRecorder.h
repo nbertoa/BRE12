@@ -30,19 +30,18 @@ public:
     ///
     /// InitSharedPSOAndRootSignature() must be called first
     ///
-    /// @param normalSmoothnessBuffer Geometry buffer that contains normals and smoothness factors.
-    /// @param baseColorMetalMaskBuffer Geometry buffer that contains base color and metal mask.
     /// @param diffuseIrradianceCubeMap Diffuse irradiance environment cube map
     /// @param specularPreConvolvedCubeMap Specular pre convolved environment cube map
     /// @param outputColorBufferRenderTargetView Render target view to the output color buffer
+    /// @param geometryBufferShaderResourceViewsBegin Shader resource view 
+    /// to the first geometry buffer. The geometry buffer shader resource views are contiguous.
     /// @param ambientAccessibilityBufferShaderResourceView Shader resource view to the ambient accessibility buffer
     /// @param depthBufferShaderResourceView Depth buffer shader resource view
     ///
-    void Init(ID3D12Resource& normalSmoothnessBuffer,
-              ID3D12Resource& baseColorMetalMaskBuffer,
-              ID3D12Resource& diffuseIrradianceCubeMap,
+    void Init(ID3D12Resource& diffuseIrradianceCubeMap,
               ID3D12Resource& specularPreConvolvedCubeMap,
               const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
+              const D3D12_GPU_DESCRIPTOR_HANDLE& geometryBufferShaderResourceViewsBegin,
               const D3D12_GPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferShaderResourceView,
               const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept;
 
@@ -65,15 +64,11 @@ public:
 private:
     ///
     /// @brief Initializes shader resource views
-    /// @param normalSmoothnessBuffer Geometry buffer that contains normals and smoothness factors.
-    /// @param baseColorMetalMaskBuffer Geometry buffer that contains base color and metal mask.
     /// @param diffuseIrradianceCubeMap Diffuse irradiance environment cube map
     /// @param specularPreConvolvedCubeMap Specular pre convolved environment cube map
     /// @param ambientAccessibilityBuffer Ambient accessibility buffer
     ///
-    void InitShaderResourceViews(ID3D12Resource& normalSmoothnessBuffer,
-                                 ID3D12Resource& baseColorMetalMaskBuffer,
-                                 ID3D12Resource& diffuseIrradianceCubeMap,
+    void InitShaderResourceViews(ID3D12Resource& diffuseIrradianceCubeMap,
                                  ID3D12Resource& specularPreConvolvedCubeMap) noexcept;
 
     CommandListPerFrame mCommandListPerFrame;
@@ -81,10 +76,14 @@ private:
     FrameUploadCBufferPerFrame mFrameUploadCBufferPerFrame;
 
     D3D12_CPU_DESCRIPTOR_HANDLE mOutputColorBufferRenderTargetView{ 0UL };
+
+    // First descriptor in the list. All the others are contiguous
+    D3D12_GPU_DESCRIPTOR_HANDLE mGeometryBufferShaderResourceViewsBegin{ 0UL };
+
     D3D12_GPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferShaderResourceView{ 0UL };
     D3D12_GPU_DESCRIPTOR_HANDLE mDepthBufferShaderResourceView{ 0UL };
 
     // First descriptor in the list. All the others are contiguous
-    D3D12_GPU_DESCRIPTOR_HANDLE mPixelShaderResourceViewsBegin{ 0UL };
+    D3D12_GPU_DESCRIPTOR_HANDLE mDiffuseAndSpecularIrradianceTextureShaderResourceViews{ 0UL };
 };
 }

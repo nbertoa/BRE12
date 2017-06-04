@@ -23,8 +23,9 @@ namespace BRE {
 // "CBV(b0, visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Frame CBuffer
 // "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 1 -> Frame CBuffer
 // "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Ambient Occlusion CBuffer
-// "DescriptorTable(SRV(t0), SRV(t1), SRV(t2), visibility = SHADER_VISIBILITY_PIXEL)" 3 -> normal_smoothness + sample kernel + kernel noise
-// "DescriptorTable(SRV(t3), visibility = SHADER_VISIBILITY_PIXEL)" 3 -> depth buffer
+// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)" 3 -> normal_smoothness
+// "DescriptorTable(SRV(t1), SRV(t2), visibility = SHADER_VISIBILITY_PIXEL)" 4 -> sample kernel + kernel noise
+// "DescriptorTable(SRV(t3), visibility = SHADER_VISIBILITY_PIXEL)" 5 -> depth buffer
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -141,13 +142,14 @@ AmbientOcclusionCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 }
 
 void
-AmbientOcclusionCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer,
-                                          const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRenderTargetView,
+AmbientOcclusionCommandListRecorder::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRenderTargetView,
+                                          const D3D12_GPU_DESCRIPTOR_HANDLE& normalSmoothnessBufferShaderResourceView,
                                           const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
-
+    
     mAmbientAccessibilityBufferRenderTargetView = ambientAccessibilityBufferRenderTargetView;
+    mNormalSmoothnessBufferShaderResourceView = normalSmoothnessBufferShaderResourceView;
     mDepthBufferShaderResourceView = depthBufferShaderResourceView;
 
     const std::uint32_t sampleKernelSize = 
@@ -163,8 +165,7 @@ AmbientOcclusionCommandListRecorder::Init(ID3D12Resource& normalSmoothnessBuffer
     CreateSampleKernelBuffer(sampleKernel);
     ID3D12Resource* noiseTexture = CreateAndGetNoiseTexture(noises);
     BRE_ASSERT(noiseTexture != nullptr);
-    InitShaderResourceViews(normalSmoothnessBuffer,
-                            *noiseTexture,
+    InitShaderResourceViews(*noiseTexture,
                             sampleKernelSize);
 
     InitAmbientOcclusionCBuffer();
@@ -203,8 +204,9 @@ AmbientOcclusionCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
     commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(2U, ambientOcclusionCBufferGpuVAddress);
-    commandList.SetGraphicsRootDescriptorTable(3U, mPixelShaderResourceViewsBegin);
-    commandList.SetGraphicsRootDescriptorTable(4U, mDepthBufferShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(3U, mNormalSmoothnessBufferShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(4U, mPixelShaderResourceViewsBegin);
+    commandList.SetGraphicsRootDescriptorTable(5U, mDepthBufferShaderResourceView);
 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
@@ -221,6 +223,8 @@ AmbientOcclusionCommandListRecorder::IsDataValid() const noexcept
     const bool result =
         mSampleKernelUploadBuffer != nullptr &&
         mAmbientAccessibilityBufferRenderTargetView.ptr != 0UL &&
+
+        mNormalSmoothnessBufferShaderResourceView.ptr != 0UL &&
         mDepthBufferShaderResourceView.ptr != 0UL &&
         mPixelShaderResourceViewsBegin.ptr != 0UL &&
         mAmbientOcclusionUploadCBuffer != nullptr;
@@ -296,8 +300,7 @@ AmbientOcclusionCommandListRecorder::CreateAndGetNoiseTexture(const std::vector<
 }
 
 void
-AmbientOcclusionCommandListRecorder::InitShaderResourceViews(ID3D12Resource& normalSmoothnessBuffer,
-                                                             ID3D12Resource& noiseTexture,
+AmbientOcclusionCommandListRecorder::InitShaderResourceViews(ID3D12Resource& noiseTexture,
                                                              const std::uint32_t sampleKernelSize) noexcept
 {
     BRE_ASSERT(mSampleKernelUploadBuffer != nullptr);
@@ -305,36 +308,27 @@ AmbientOcclusionCommandListRecorder::InitShaderResourceViews(ID3D12Resource& nor
 
     ID3D12Resource* resources[] =
     {
-        &normalSmoothnessBuffer,
         &mSampleKernelUploadBuffer->GetResource(),
         &noiseTexture,
     };
 
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptors[_countof(resources)]{};
 
-    // Fill normal_smoothness buffer texture descriptor
-    srvDescriptors[0].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDescriptors[0].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDescriptors[0].Texture2D.MostDetailedMip = 0;
-    srvDescriptors[0].Texture2D.ResourceMinLODClamp = 0.0f;
-    srvDescriptors[0].Format = normalSmoothnessBuffer.GetDesc().Format;
-    srvDescriptors[0].Texture2D.MipLevels = normalSmoothnessBuffer.GetDesc().MipLevels;
-
     // Fill sample kernel buffer descriptor
-    srvDescriptors[1].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDescriptors[1].Format = mSampleKernelUploadBuffer->GetResource().GetDesc().Format;
-    srvDescriptors[1].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-    srvDescriptors[1].Buffer.FirstElement = 0UL;
-    srvDescriptors[1].Buffer.NumElements = sampleKernelSize;
-    srvDescriptors[1].Buffer.StructureByteStride = sizeof(XMFLOAT4);
+    srvDescriptors[0].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDescriptors[0].Format = mSampleKernelUploadBuffer->GetResource().GetDesc().Format;
+    srvDescriptors[0].ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+    srvDescriptors[0].Buffer.FirstElement = 0UL;
+    srvDescriptors[0].Buffer.NumElements = sampleKernelSize;
+    srvDescriptors[0].Buffer.StructureByteStride = sizeof(XMFLOAT4);
 
     // Fill kernel noise texture descriptor
-    srvDescriptors[2].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDescriptors[2].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDescriptors[2].Texture2D.MostDetailedMip = 0;
-    srvDescriptors[2].Texture2D.ResourceMinLODClamp = 0.0f;
-    srvDescriptors[2].Format = noiseTexture.GetDesc().Format;
-    srvDescriptors[2].Texture2D.MipLevels = noiseTexture.GetDesc().MipLevels;
+    srvDescriptors[1].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDescriptors[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDescriptors[1].Texture2D.MostDetailedMip = 0;
+    srvDescriptors[1].Texture2D.ResourceMinLODClamp = 0.0f;
+    srvDescriptors[1].Format = noiseTexture.GetDesc().Format;
+    srvDescriptors[1].Texture2D.MipLevels = noiseTexture.GetDesc().MipLevels;
 
     BRE_ASSERT(_countof(resources) == _countof(srvDescriptors));
 

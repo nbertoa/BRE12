@@ -4,7 +4,7 @@
 
 #include "RS.hlsl"
 
-//#define SKIP_AMBIENT_OCCLUSION
+#define SKIP_AMBIENT_OCCLUSION
 
 struct Input {
     float4 mPositionNDC : SV_POSITION;

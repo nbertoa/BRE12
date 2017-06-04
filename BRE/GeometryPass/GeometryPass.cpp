@@ -5,7 +5,9 @@
 #include <tbb/parallel_for.h>
 
 #include <CommandListExecutor/CommandListExecutor.h>
+#include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DescriptorManager\RenderTargetDescriptorManager.h>
+#include <DirectXManager\DirectXManager.h>
 #include <DXUtils/d3dx12.h>
 #include <GeometryPass\Recorders\ColorMappingCommandListRecorder.h>
 #include <GeometryPass\Recorders\ColorHeightMappingCommandListRecorder.h>
@@ -62,7 +64,7 @@ CreateGeometryBuffersAndRenderTargetViews(ID3D12Resource* buffers[GeometryPass::
         { DXGI_FORMAT_UNKNOWN, 0.0f, 0.0f, 0.0f, 0.0f },
     };
     BRE_ASSERT(_countof(clearValue) == GeometryPass::BUFFERS_COUNT);
-    
+
     CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 
     // Create and store render target views
@@ -115,11 +117,13 @@ GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
     NormalMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
     TextureMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
 
+    InitShaderResourceViews();
+
     // Init geometry command list recorders
     for (GeometryCommandListRecorders::value_type& recorder : mGeometryCommandListRecorders) {
         BRE_ASSERT(recorder.get() != nullptr);
-        recorder->Init(mGeometryBufferRenderTargetViews, 
-                       BUFFERS_COUNT, 
+        recorder->Init(mGeometryBufferRenderTargetViews,
+                       BUFFERS_COUNT,
                        depthBufferView);
     }
 
@@ -198,5 +202,34 @@ GeometryPass::RecordAndPushPrePassCommandLists() noexcept
     CommandListExecutor::Get().PushCommandList(commandList);
 
     return 1U;
+}
+
+void
+GeometryPass::InitShaderResourceViews() noexcept
+{
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptors[BUFFERS_COUNT]{};
+
+    for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
+        srvDescriptors[i].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDescriptors[i].ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDescriptors[i].Texture2D.MostDetailedMip = 0;
+        srvDescriptors[i].Texture2D.ResourceMinLODClamp = 0.0f;
+        srvDescriptors[i].Format = mGeometryBuffers[i]->GetDesc().Format;
+        srvDescriptors[i].Texture2D.MipLevels = mGeometryBuffers[i]->GetDesc().MipLevels;
+    }
+    
+    const D3D12_GPU_DESCRIPTOR_HANDLE shaderResourceViewBegin = 
+        CbvSrvUavDescriptorManager::CreateShaderResourceViews(mGeometryBuffers,
+                                                              srvDescriptors,
+                                                              BUFFERS_COUNT);
+
+    // After creating all the contiguous descriptors, we need to initialize each
+    // shader resource view member variables
+    const std::size_t descriptorHandleIncrementSize = 
+        DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
+        mGeometryBufferShaderResourceViews[i].ptr = shaderResourceViewBegin.ptr + i * descriptorHandleIncrementSize;
+    }
+
 }
 }

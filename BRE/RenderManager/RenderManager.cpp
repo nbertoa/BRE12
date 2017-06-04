@@ -210,7 +210,7 @@ RenderManager::RenderManager(Scene& scene)
 void
 RenderManager::InitPasses(Scene& scene) noexcept
 {
-    mGeometryPass.Init(GetDepthStencilCpuDesc());
+    mGeometryPass.Init(mDepthBufferRenderTargetView);
 
     ID3D12Resource* skyBoxCubeMap = scene.GetSkyBoxCubeMap();
     ID3D12Resource* diffuseIrradianceCubeMap = scene.GetDiffuseIrradianceCubeMap();
@@ -227,12 +227,14 @@ RenderManager::InitPasses(Scene& scene) noexcept
                                *diffuseIrradianceCubeMap,
                                *specularPreConvolvedCubeMap,
                                mIntermediateColorBuffer1RenderTargetView,
+                               mGeometryPass.GetGeometryBufferShaderResourceViews(),
+                               mGeometryPass.GetGeometryBufferShaderResourceView(GeometryPass::NORMAL_SMOOTHNESS),
                                mDepthBufferShaderResourceView);    
 
     mSkyBoxPass.Init(*skyBoxCubeMap,
                      *mDepthBuffer,
                      mIntermediateColorBuffer1RenderTargetView,
-                     GetDepthStencilCpuDesc());
+                     mDepthBufferRenderTargetView);
 
     mToneMappingPass.Init(*mIntermediateColorBuffer1,
                           mIntermediateColorBuffer1ShaderResourceView,
@@ -273,7 +275,8 @@ RenderManager::execute()
         commandListCount += mReflectionPass.Execute();
         commandListCount += mSkyBoxPass.Execute(mFrameCBuffer);
         commandListCount += mToneMappingPass.Execute();
-        commandListCount += mPostProcessPass.Execute(*GetCurrentFrameBuffer(), GetCurrentFrameBufferCpuDesc());
+        commandListCount += mPostProcessPass.Execute(*GetCurrentFrameBuffer(), 
+                                                     GetCurrentFrameBufferRenderTargetView());
 
         commandListCount += RecordAndPushPostPassCommandLists();
 
@@ -328,7 +331,7 @@ RenderManager::RecordAndPushPrePassCommandLists() noexcept
         commandList.ResourceBarrier(barrierCount, barriers);
     }
 
-    commandList.ClearRenderTargetView(GetCurrentFrameBufferCpuDesc(),
+    commandList.ClearRenderTargetView(GetCurrentFrameBufferRenderTargetView(),
                                       Colors::Black,
                                       0U,
                                       nullptr);
@@ -343,7 +346,7 @@ RenderManager::RecordAndPushPrePassCommandLists() noexcept
                                       0U,
                                       nullptr);
 
-    commandList.ClearDepthStencilView(GetDepthStencilCpuDesc(),
+    commandList.ClearDepthStencilView(mDepthBufferRenderTargetView,
                                       D3D12_CLEAR_FLAG_DEPTH,
                                       1.0f,
                                       0U,

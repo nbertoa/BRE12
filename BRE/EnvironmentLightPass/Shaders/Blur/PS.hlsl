@@ -3,7 +3,7 @@
 
 #include "RS.hlsl"
 
-//#define SKIP_BLUR
+#define SKIP_BLUR
 
 struct Input {
     float4 mPositionNDC : SV_POSITION;
