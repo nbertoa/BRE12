@@ -176,6 +176,35 @@ GetPositionTexCoordInputLayout() noexcept
 
     return inputElementDesc;
 }
+
+D3D12_RESOURCE_DESC
+GetResourceDescriptor(const std::uint64_t width,
+                      const std::uint32_t height,
+                      const DXGI_FORMAT format,
+                      const D3D12_RESOURCE_FLAGS flags,
+                      const D3D12_RESOURCE_DIMENSION dimension,
+                      const D3D12_TEXTURE_LAYOUT textureLayout,
+                      const std::uint16_t mipLevels,
+                      const std::uint16_t depthOrArraySize,                      
+                      const std::uint64_t alignment,
+                      const std::uint32_t sampleDescCount,
+                      const std::uint32_t sampleDescQuality) noexcept
+{
+    D3D12_RESOURCE_DESC resourceDescriptor = {};
+    resourceDescriptor.Dimension = dimension;
+    resourceDescriptor.Format = format;
+    resourceDescriptor.Alignment = alignment;
+    resourceDescriptor.Width = width;
+    resourceDescriptor.Height = height;
+    resourceDescriptor.DepthOrArraySize = depthOrArraySize;
+    resourceDescriptor.MipLevels = mipLevels;
+    resourceDescriptor.SampleDesc.Count = sampleDescCount;
+    resourceDescriptor.SampleDesc.Quality = sampleDescQuality;
+    resourceDescriptor.Layout = textureLayout;
+    resourceDescriptor.Flags = flags;
+
+    return resourceDescriptor;
+}
 }
 }
 

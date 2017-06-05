@@ -5,7 +5,7 @@
 #include <CommandListExecutor/CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DescriptorManager\RenderTargetDescriptorManager.h>
-#include <DXUtils\d3dx12.h>
+#include <DXUtils\D3DFactory.h>
 #include <ResourceManager\ResourceManager.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <Utils\DebugUtils.h>
@@ -29,18 +29,10 @@ CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceInitialSta
     BRE_ASSERT(resource == nullptr);
 
     // Set shared buffers properties
-    D3D12_RESOURCE_DESC resourceDescriptor = {};
-    resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-    resourceDescriptor.Alignment = 0U;
-    resourceDescriptor.Width = ApplicationSettings::sWindowWidth;
-    resourceDescriptor.Height = ApplicationSettings::sWindowHeight;
-    resourceDescriptor.DepthOrArraySize = 1U;
-    resourceDescriptor.MipLevels = 1U;
-    resourceDescriptor.SampleDesc.Count = 1U;
-    resourceDescriptor.SampleDesc.Quality = 0U;
-    resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-    resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-    resourceDescriptor.Format = DXGI_FORMAT_R16_UNORM;
+    const D3D12_RESOURCE_DESC resourceDescriptor = D3DFactory::GetResourceDescriptor(ApplicationSettings::sWindowWidth,
+                                                                                     ApplicationSettings::sWindowHeight,
+                                                                                     DXGI_FORMAT_R16_UNORM,
+                                                                                     D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 
     D3D12_CLEAR_VALUE clearValue{ resourceDescriptor.Format, 0.0f, 0.0f, 0.0f, 0.0f };
 

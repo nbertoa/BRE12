@@ -10,7 +10,7 @@
 #include <DescriptorManager\DepthStencilDescriptorManager.h>
 #include <DescriptorManager\RenderTargetDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
-#include <DXUtils/d3dx12.h>
+#include <DXUtils\D3DFactory.h>
 #include <Input/Keyboard.h>
 #include <Input/Mouse.h>
 #include <ResourceManager\ResourceManager.h>
@@ -414,18 +414,10 @@ void
 RenderManager::CreateDepthStencilBufferAndView() noexcept
 {
     // Create the depth/stencil buffer and view.
-    D3D12_RESOURCE_DESC depthStencilDesc = {};
-    depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-    depthStencilDesc.Alignment = 0U;
-    depthStencilDesc.Width = ApplicationSettings::sWindowWidth;
-    depthStencilDesc.Height = ApplicationSettings::sWindowHeight;
-    depthStencilDesc.DepthOrArraySize = 1U;
-    depthStencilDesc.MipLevels = 1U;
-    depthStencilDesc.Format = ApplicationSettings::sDepthStencilFormat;
-    depthStencilDesc.SampleDesc.Count = 1U;
-    depthStencilDesc.SampleDesc.Quality = 0U;
-    depthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-    depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+    const D3D12_RESOURCE_DESC depthStencilDesc = D3DFactory::GetResourceDescriptor(ApplicationSettings::sWindowWidth,
+                                                                                   ApplicationSettings::sWindowHeight,
+                                                                                   ApplicationSettings::sDepthStencilFormat,
+                                                                                   D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 
     D3D12_CLEAR_VALUE clearValue = {};
     clearValue.Format = ApplicationSettings::sDepthStencilViewFormat;
@@ -459,18 +451,10 @@ RenderManager::CreateIntermediateColorBufferAndViews(const D3D12_RESOURCE_STATES
     BRE_ASSERT(resourceName != nullptr);
 
     // Fill resource description
-    D3D12_RESOURCE_DESC resourceDescriptor = {};
-    resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-    resourceDescriptor.Alignment = 0U;
-    resourceDescriptor.Width = ApplicationSettings::sWindowWidth;
-    resourceDescriptor.Height = ApplicationSettings::sWindowHeight;
-    resourceDescriptor.DepthOrArraySize = 1U;
-    resourceDescriptor.MipLevels = 0U;
-    resourceDescriptor.SampleDesc.Count = 1U;
-    resourceDescriptor.SampleDesc.Quality = 0U;
-    resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-    resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-    resourceDescriptor.Format = ApplicationSettings::sColorBufferFormat;
+    const D3D12_RESOURCE_DESC resourceDescriptor = D3DFactory::GetResourceDescriptor(ApplicationSettings::sWindowWidth,
+                                                                                     ApplicationSettings::sWindowHeight,
+                                                                                     ApplicationSettings::sColorBufferFormat,
+                                                                                     D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 
     // Create buffer
     D3D12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };

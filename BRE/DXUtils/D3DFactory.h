@@ -66,7 +66,7 @@ D3D12_BLEND_DESC GetAlwaysBlendDesc() noexcept;
 /// @brief Get an input layout of position
 /// @return A list of input element descriptor
 ///
-std::vector<D3D12_INPUT_ELEMENT_DESC> GetPositionsInputLayout() noexcept;
+std::vector<D3D12_INPUT_ELEMENT_DESC> GetPositionInputLayout() noexcept;
 
 ///
 /// @brief Get an input layout of position, normal, tangent and texture coordinates.
@@ -79,6 +79,33 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> GetPositionNormalTangentTexCoordInputLayou
 /// @return A list of input element descriptor
 ///
 std::vector<D3D12_INPUT_ELEMENT_DESC> GetPositionTexCoordInputLayout() noexcept;
+
+///
+/// @brief Helper method to create D3D12_RESOURCE_DESC easily.
+/// @param width Resource width
+/// @param height Resource height
+/// @param format Resource format
+/// @param flags Resource flags
+/// @param dimension Resource dimension
+/// @param textureLayout Texture layout
+/// @param mipLevels Number of mip levels of the resource
+/// @param depthOrArraySize Depth or array size
+/// @param alignment Alignment
+/// @param sampleDescCount Sample descriptor count
+/// @param sampleDescQuality Sample descriptor quality
+/// @return Resource descriptor
+///
+D3D12_RESOURCE_DESC GetResourceDescriptor(const std::uint64_t width,
+                                          const std::uint32_t height,
+                                          const DXGI_FORMAT format,
+                                          const D3D12_RESOURCE_FLAGS flags,
+                                          const D3D12_RESOURCE_DIMENSION dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
+                                          const D3D12_TEXTURE_LAYOUT textureLayout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
+                                          const std::uint16_t mipLevels = 1UL,
+                                          const std::uint16_t depthOrArraySize = 1UL,                                          
+                                          const std::uint64_t alignment = 0UL,
+                                          const std::uint32_t sampleDescCount = 1U,
+                                          const std::uint32_t sampleDescQuality = 0U) noexcept;
 }
 }
 

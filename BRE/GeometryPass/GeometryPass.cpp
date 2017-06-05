@@ -8,7 +8,7 @@
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DescriptorManager\RenderTargetDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
-#include <DXUtils/d3dx12.h>
+#include <DXUtils/D3DFactory.h>
 #include <GeometryPass\Recorders\ColorMappingCommandListRecorder.h>
 #include <GeometryPass\Recorders\ColorHeightMappingCommandListRecorder.h>
 #include <GeometryPass\Recorders\ColorNormalMappingCommandListRecorder.h>
@@ -46,17 +46,13 @@ CreateGeometryBuffersAndRenderTargetViews(ID3D12Resource* buffers[GeometryPass::
                                           D3D12_CPU_DESCRIPTOR_HANDLE bufferRenderTargetViews[GeometryPass::BUFFERS_COUNT]) noexcept
 {
     // Set shared buffers properties
-    D3D12_RESOURCE_DESC resourceDescriptor = {};
-    resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-    resourceDescriptor.Alignment = 0U;
-    resourceDescriptor.Width = ApplicationSettings::sWindowWidth;
-    resourceDescriptor.Height = ApplicationSettings::sWindowHeight;
-    resourceDescriptor.DepthOrArraySize = 1U;
-    resourceDescriptor.MipLevels = 0U;
-    resourceDescriptor.SampleDesc.Count = 1U;
-    resourceDescriptor.SampleDesc.Quality = 0U;
-    resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-    resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+    D3D12_RESOURCE_DESC resourceDescriptor = D3DFactory::GetResourceDescriptor(ApplicationSettings::sWindowWidth,
+                                                                               ApplicationSettings::sWindowHeight,
+                                                                               DXGI_FORMAT_UNKNOWN,
+                                                                               D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET,
+                                                                               D3D12_RESOURCE_DIMENSION_TEXTURE2D,
+                                                                               D3D12_TEXTURE_LAYOUT_UNKNOWN,
+                                                                               0U);
 
     D3D12_CLEAR_VALUE clearValue[]
     {

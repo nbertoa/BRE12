@@ -1,6 +1,7 @@
 #include "ResourceManager.h"
 
 #include <DirectXManager/DirectXManager.h>
+#include <DXUtils\D3DFactory.h>
 #include <ResourceManager\DDSTextureLoader.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <ApplicationSettings\ApplicationSettings.h>
@@ -78,11 +79,17 @@ ResourceManager::CreateDefaultBuffer(const void* sourceData,
     heapProps.CreationNodeMask = 1U;
     heapProps.VisibleNodeMask = 1U;
 
-    CD3DX12_RESOURCE_DESC resDesc{ CD3DX12_RESOURCE_DESC::Buffer(sourceDataSize) };
+    const D3D12_RESOURCE_DESC resourceDescriptor = D3DFactory::GetResourceDescriptor(sourceDataSize,
+                                                                                     1,
+                                                                                     DXGI_FORMAT_UNKNOWN,
+                                                                                     D3D12_RESOURCE_FLAG_NONE,
+                                                                                     D3D12_RESOURCE_DIMENSION_BUFFER,
+                                                                                     D3D12_TEXTURE_LAYOUT_ROW_MAJOR);
+
     mMutex.lock();
     BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProps,
                                                                      D3D12_HEAP_FLAG_NONE,
-                                                                     &resDesc,
+                                                                     &resourceDescriptor,
                                                                      D3D12_RESOURCE_STATE_COMMON,
                                                                      nullptr,
                                                                      IID_PPV_ARGS(&resource)));
@@ -95,11 +102,10 @@ ResourceManager::CreateDefaultBuffer(const void* sourceData,
     heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
     heapProps.CreationNodeMask = 1U;
     heapProps.VisibleNodeMask = 1U;
-    resDesc = CD3DX12_RESOURCE_DESC::Buffer(sourceDataSize);
 
     BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProps,
                                                                      D3D12_HEAP_FLAG_NONE,
-                                                                     &resDesc,
+                                                                     &resourceDescriptor,
                                                                      D3D12_RESOURCE_STATE_GENERIC_READ,
                                                                      nullptr,
                                                                      IID_PPV_ARGS(&uploadBuffer)));

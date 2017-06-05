@@ -3,6 +3,7 @@
 #include <ApplicationSettings\ApplicationSettings.h>
 #include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
+#include <DXUtils\D3DFactory.h>
 #include <DXUtils\d3dx12.h>
 #include <EnvironmentLightPass\EnvironmentLightSettings.h>
 #include <EnvironmentLightPass\Shaders\AmbientOcclusionCBuffer.h>
@@ -259,18 +260,10 @@ AmbientOcclusionCommandListRecorder::CreateAndGetNoiseTexture(const std::vector<
     const std::uint32_t noiseVectorCount = static_cast<std::uint32_t>(noiseVector.size());
 
     // Kernel noise resource and fill it
-    D3D12_RESOURCE_DESC resourceDescriptor = {};
-    resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-    resourceDescriptor.Alignment = 0U;
-    resourceDescriptor.Width = noiseVectorCount;
-    resourceDescriptor.Height = noiseVectorCount;
-    resourceDescriptor.DepthOrArraySize = 1U;
-    resourceDescriptor.MipLevels = 1U;
-    resourceDescriptor.SampleDesc.Count = 1U;
-    resourceDescriptor.SampleDesc.Quality = 0U;
-    resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-    resourceDescriptor.Format = DXGI_FORMAT_R16G16B16A16_UNORM;
-    resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
+    D3D12_RESOURCE_DESC resourceDescriptor = D3DFactory::GetResourceDescriptor(noiseVectorCount,
+                                                                               noiseVectorCount,
+                                                                               DXGI_FORMAT_R16G16B16A16_UNORM,
+                                                                               D3D12_RESOURCE_FLAG_NONE);
 
     // Create noise texture and fill it.
     ID3D12Resource* noiseTexture{ nullptr };
@@ -296,9 +289,16 @@ AmbientOcclusionCommandListRecorder::CreateAndGetNoiseTexture(const std::vector<
     heapProperties.CreationNodeMask = 1;
     heapProperties.VisibleNodeMask = 0;
 
+    resourceDescriptor = D3DFactory::GetResourceDescriptor(uploadBufferSize,
+                                                           1,
+                                                           DXGI_FORMAT_UNKNOWN,
+                                                           D3D12_RESOURCE_FLAG_NONE,
+                                                           D3D12_RESOURCE_DIMENSION_BUFFER,
+                                                           D3D12_TEXTURE_LAYOUT_ROW_MAJOR);
+
     noiseTextureUploadBuffer = &ResourceManager::CreateCommittedResource(heapProperties,
                                                                          D3D12_HEAP_FLAG_NONE,
-                                                                         CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
+                                                                         resourceDescriptor,
                                                                          D3D12_RESOURCE_STATE_GENERIC_READ,
                                                                          nullptr,
                                                                          nullptr,

@@ -1,6 +1,6 @@
 #include "UploadBuffer.h"
 
-#include <DxUtils/d3dx12.h>
+#include <DXUtils\D3DFactory.h>
 #include <Utils/DebugUtils.h>
 
 namespace BRE {
@@ -12,8 +12,15 @@ UploadBuffer::UploadBuffer(ID3D12Device& device,
     BRE_ASSERT(elementSize > 0);
     BRE_ASSERT(elementCount > 0);
 
-    D3D12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_UPLOAD };
-    CD3DX12_RESOURCE_DESC resourceDescriptor{ CD3DX12_RESOURCE_DESC::Buffer(mElementSize * elementCount) };
+    const D3D12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_UPLOAD };
+
+    const D3D12_RESOURCE_DESC resourceDescriptor = D3DFactory::GetResourceDescriptor(mElementSize * elementCount,
+                                                                                     1U,
+                                                                                     DXGI_FORMAT_UNKNOWN,
+                                                                                     D3D12_RESOURCE_FLAG_NONE,
+                                                                                     D3D12_RESOURCE_DIMENSION_BUFFER,
+                                                                                     D3D12_TEXTURE_LAYOUT_ROW_MAJOR);
+
     BRE_CHECK_HR(device.CreateCommittedResource(&heapProperties,
                                                 D3D12_HEAP_FLAG_NONE,
                                                 &resourceDescriptor,
