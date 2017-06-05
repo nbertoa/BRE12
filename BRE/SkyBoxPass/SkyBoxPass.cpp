@@ -135,7 +135,7 @@ SkyBoxPass::RecordAndPushPrePassCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    CD3DX12_RESOURCE_BARRIER barriers[1U];
+    D3D12_RESOURCE_BARRIER barriers[1U];
     std::uint32_t barrierCount = 0UL;
     if (ResourceStateManager::GetResourceState(*mDepthBuffer) != D3D12_RESOURCE_STATE_DEPTH_WRITE) {
         barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mDepthBuffer,

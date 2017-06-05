@@ -12,7 +12,7 @@ UploadBuffer::UploadBuffer(ID3D12Device& device,
     BRE_ASSERT(elementSize > 0);
     BRE_ASSERT(elementCount > 0);
 
-    CD3DX12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_UPLOAD };
+    D3D12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_UPLOAD };
     CD3DX12_RESOURCE_DESC resourceDescriptor{ CD3DX12_RESOURCE_DESC::Buffer(mElementSize * elementCount) };
     BRE_CHECK_HR(device.CreateCommittedResource(&heapProperties,
                                                 D3D12_HEAP_FLAG_NONE,

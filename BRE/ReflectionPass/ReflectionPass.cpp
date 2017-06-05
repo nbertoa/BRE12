@@ -44,7 +44,7 @@ ReflectionPass::InitHierZBuffer() noexcept
     BRE_ASSERT(numMipLevels == _countof(mHierZBufferMipLevelShaderResourceViews));
 
     // Create hier z buffer     
-    CD3DX12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
+    D3D12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
     D3D12_RESOURCE_DESC resourceDescriptor = {};
     resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
     resourceDescriptor.Alignment = 0U;
@@ -137,7 +137,7 @@ ReflectionPass::RecordAndPushPrePassCommandLists() noexcept
 
     const std::uint32_t numMipLevels = _countof(mHierZBufferMipLevelRenderTargetViews);
 
-    CD3DX12_RESOURCE_BARRIER barriers[numMipLevels + 1U];
+    D3D12_RESOURCE_BARRIER barriers[numMipLevels + 1U];
     std::uint32_t barrierCount = 0UL;
     for (std::uint32_t i = 0; i < numMipLevels; ++i) {
         if (ResourceStateManager::GetSubresourceState(*mHierZBuffer, i) != D3D12_RESOURCE_STATE_RENDER_TARGET) {

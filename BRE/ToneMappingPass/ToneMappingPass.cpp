@@ -60,7 +60,7 @@ ToneMappingPass::RecordAndPushPrePassCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    CD3DX12_RESOURCE_BARRIER barriers[2U];
+    D3D12_RESOURCE_BARRIER barriers[2U];
     std::uint32_t barrierCount = 0UL;
     if (ResourceStateManager::GetResourceState(*mInputColorBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
         barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mInputColorBuffer,

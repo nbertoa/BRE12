@@ -4,8 +4,6 @@
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_vector.h>
 
-#include <DXUtils\d3dx12.h>
-
 namespace BRE {
 ///
 /// @brief Responsible to track resource states.
@@ -57,8 +55,8 @@ public:
     /// @param newState New resource state. It must be different than current state.
     /// @return Transition resource barrier
     ///
-    static CD3DX12_RESOURCE_BARRIER ChangeResourceStateAndGetBarrier(ID3D12Resource& resource,
-                                                                     const D3D12_RESOURCE_STATES newState) noexcept;
+    static D3D12_RESOURCE_BARRIER ChangeResourceStateAndGetBarrier(ID3D12Resource& resource,
+                                                                   const D3D12_RESOURCE_STATES newState) noexcept;
 
     ///
     /// @brief Change subresource state and get barrier
@@ -70,9 +68,9 @@ public:
     /// @param newState New resource state. It must be different than current state.
     /// @return Transition resource barrier
     ///
-    static CD3DX12_RESOURCE_BARRIER ChangeSubresourceStateAndGetBarrier(ID3D12Resource& resource,
-                                                                        const std::uint32_t subresourceIndex,
-                                                                        const D3D12_RESOURCE_STATES newState) noexcept;
+    static D3D12_RESOURCE_BARRIER ChangeSubresourceStateAndGetBarrier(ID3D12Resource& resource,
+                                                                      const std::uint32_t subresourceIndex,
+                                                                      const D3D12_RESOURCE_STATES newState) noexcept;
 
     ///
     /// @brief Get resource state

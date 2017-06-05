@@ -1,7 +1,6 @@
 #include "ResourceManager.h"
 
 #include <DirectXManager/DirectXManager.h>
-#include <DXUtils/d3dx12.h>
 #include <ResourceManager\DDSTextureLoader.h>
 #include <ResourceStateManager\ResourceStateManager.h>
 #include <ApplicationSettings\ApplicationSettings.h>
@@ -115,14 +114,31 @@ ResourceManager::CreateDefaultBuffer(const void* sourceData,
     // Schedule to copy the data to the default buffer resource. At a high level, the helper function UpdateSubresources
     // will copy the CPU memory into the intermediate upload heap.  Then, using ID3D12CommandList::CopySubresourceRegion,
     // the intermediate upload heap data will be copied to mBuffer.
-    CD3DX12_RESOURCE_BARRIER resBarrier{ CD3DX12_RESOURCE_BARRIER::Transition(resource,
-                                                                              D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST) };
-    commandList.ResourceBarrier(1, &resBarrier);
-    UpdateSubresources<1>(&commandList, resource, uploadBuffer, 0, 0, 1, &subResourceData);
-    resBarrier = CD3DX12_RESOURCE_BARRIER::Transition(resource,
-                                                      D3D12_RESOURCE_STATE_COPY_DEST,
-                                                      D3D12_RESOURCE_STATE_GENERIC_READ);
-    commandList.ResourceBarrier(1, &resBarrier);
+    D3D12_RESOURCE_BARRIER resourceBarrier;
+    resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    resourceBarrier.Transition.pResource = resource;
+    resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+    resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+    resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;    
+    commandList.ResourceBarrier(1, &resourceBarrier);
+
+    UpdateSubresources<1>(&commandList, 
+                          resource, 
+                          uploadBuffer, 
+                          0, 
+                          0, 
+                          1,
+                          &subResourceData);
+
+    resourceBarrier = D3D12_RESOURCE_BARRIER{};
+    resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    resourceBarrier.Transition.pResource = resource;
+    resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+    resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
+    resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    commandList.ResourceBarrier(1, &resourceBarrier);
 
     BRE_ASSERT(resource != nullptr);
     mResources.insert(resource);

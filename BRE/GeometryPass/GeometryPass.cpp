@@ -65,7 +65,7 @@ CreateGeometryBuffersAndRenderTargetViews(ID3D12Resource* buffers[GeometryPass::
     };
     BRE_ASSERT(_countof(clearValue) == GeometryPass::BUFFERS_COUNT);
 
-    CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
+    D3D12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 
     // Create and store render target views
     const wchar_t* resourceNames[GeometryPass::BUFFERS_COUNT] =
@@ -177,7 +177,7 @@ GeometryPass::RecordAndPushPrePassCommandLists() noexcept
 
     ID3D12GraphicsCommandList& commandList = mPrePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
-    CD3DX12_RESOURCE_BARRIER barriers[BUFFERS_COUNT];
+    D3D12_RESOURCE_BARRIER barriers[BUFFERS_COUNT];
     std::uint32_t barrierCount = 0UL;
     for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
         if (ResourceStateManager::GetResourceState(*mGeometryBuffers[i]) != D3D12_RESOURCE_STATE_RENDER_TARGET) {

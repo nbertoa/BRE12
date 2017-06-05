@@ -274,7 +274,7 @@ AmbientOcclusionCommandListRecorder::CreateAndGetNoiseTexture(const std::vector<
 
     // Create noise texture and fill it.
     ID3D12Resource* noiseTexture{ nullptr };
-    CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
+    D3D12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
     noiseTexture = &ResourceManager::CreateCommittedResource(heapProps,
                                                              D3D12_HEAP_FLAG_NONE,
                                                              resourceDescriptor,
@@ -287,8 +287,16 @@ AmbientOcclusionCommandListRecorder::CreateAndGetNoiseTexture(const std::vector<
     // an intermediate upload heap. 
     const std::uint32_t num2DSubresources = resourceDescriptor.DepthOrArraySize * resourceDescriptor.MipLevels;
     const std::size_t uploadBufferSize = GetRequiredIntermediateSize(noiseTexture, 0, num2DSubresources);
-    ID3D12Resource* noiseTextureUploadBuffer{ nullptr };
-    noiseTextureUploadBuffer = &ResourceManager::CreateCommittedResource(CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+    ID3D12Resource* noiseTextureUploadBuffer{ nullptr }; 
+
+    D3D12_HEAP_PROPERTIES heapProperties;
+    heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
+    heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    heapProperties.CreationNodeMask = 1;
+    heapProperties.VisibleNodeMask = 0;
+
+    noiseTextureUploadBuffer = &ResourceManager::CreateCommittedResource(heapProperties,
                                                                          D3D12_HEAP_FLAG_NONE,
                                                                          CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
                                                                          D3D12_RESOURCE_STATE_GENERIC_READ,

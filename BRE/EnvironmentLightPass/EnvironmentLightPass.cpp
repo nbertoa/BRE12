@@ -44,7 +44,7 @@ CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceInitialSta
 
     D3D12_CLEAR_VALUE clearValue{ resourceDescriptor.Format, 0.0f, 0.0f, 0.0f, 0.0f };
 
-    CD3DX12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
+    D3D12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
 
     // Create buffer resource
     resource = &ResourceManager::CreateCommittedResource(heapProperties,
@@ -178,7 +178,7 @@ EnvironmentLightPass::RecordAndPushPrePassCommandLists() noexcept
 
     ID3D12GraphicsCommandList& commandList = mPrePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
-    CD3DX12_RESOURCE_BARRIER barriers[5U];
+    D3D12_RESOURCE_BARRIER barriers[5U];
     std::uint32_t barrierCount = 0UL;
     if (ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
         barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer,
@@ -234,7 +234,7 @@ EnvironmentLightPass::RecordAndPushMiddlePassCommandLists() noexcept
 
     ID3D12GraphicsCommandList& commandList = mMiddlePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
-    CD3DX12_RESOURCE_BARRIER barriers[2U];
+    D3D12_RESOURCE_BARRIER barriers[2U];
     std::uint32_t barrierCount = 0UL;
     if (ResourceStateManager::GetResourceState(*mAmbientAccessibilityBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
         barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mAmbientAccessibilityBuffer,
@@ -269,7 +269,7 @@ EnvironmentLightPass::RecordAndPushPostPassCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
 
-    CD3DX12_RESOURCE_BARRIER barriers[1U];
+    D3D12_RESOURCE_BARRIER barriers[1U];
     std::uint32_t barrierCount = 0UL;
     if (ResourceStateManager::GetResourceState(*mBlurBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
         barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBlurBuffer,

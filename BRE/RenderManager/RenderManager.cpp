@@ -301,7 +301,7 @@ RenderManager::RecordAndPushPrePassCommandLists() noexcept
 {
     ID3D12GraphicsCommandList& commandList = mPrePassCommandListPerFrame.ResetCommandListWithNextCommandAllocator(nullptr);
 
-    CD3DX12_RESOURCE_BARRIER barriers[4U];
+    D3D12_RESOURCE_BARRIER barriers[4U];
     std::uint32_t barrierCount = 0UL;
     if (ResourceStateManager::GetResourceState(*GetCurrentFrameBuffer()) != D3D12_RESOURCE_STATE_RENDER_TARGET) {
         barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*GetCurrentFrameBuffer(),
@@ -362,7 +362,7 @@ RenderManager::RecordAndPushPrePassCommandLists() noexcept
 std::uint32_t
 RenderManager::RecordAndPushPostPassCommandLists() noexcept
 {
-    CD3DX12_RESOURCE_BARRIER barriers[4U];
+    D3D12_RESOURCE_BARRIER barriers[4U];
     std::uint32_t barrierCount = 0UL;
     if (ResourceStateManager::GetResourceState(*GetCurrentFrameBuffer()) != D3D12_RESOURCE_STATE_PRESENT) {
         barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*GetCurrentFrameBuffer(),
@@ -432,7 +432,7 @@ RenderManager::CreateDepthStencilBufferAndView() noexcept
     clearValue.DepthStencil.Depth = 1.0f;
     clearValue.DepthStencil.Stencil = 0U;
 
-    CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
+    D3D12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
     mDepthBuffer = &ResourceManager::CreateCommittedResource(heapProps,
                                                              D3D12_HEAP_FLAG_NONE,
                                                              depthStencilDesc,
@@ -473,7 +473,7 @@ RenderManager::CreateIntermediateColorBufferAndViews(const D3D12_RESOURCE_STATES
     resourceDescriptor.Format = ApplicationSettings::sColorBufferFormat;
 
     // Create buffer
-    CD3DX12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
+    D3D12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
     D3D12_CLEAR_VALUE clearValue = { resourceDescriptor.Format, 0.0f, 0.0f, 0.0f, 1.0f };
     buffer = &ResourceManager::CreateCommittedResource(heapProperties,
                                                        D3D12_HEAP_FLAG_NONE,
