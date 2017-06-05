@@ -424,8 +424,8 @@ RenderManager::CreateDepthStencilBufferAndView() noexcept
     clearValue.DepthStencil.Depth = 1.0f;
     clearValue.DepthStencil.Stencil = 0U;
 
-    D3D12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-    mDepthBuffer = &ResourceManager::CreateCommittedResource(heapProps,
+    const D3D12_HEAP_PROPERTIES heapProperties = D3DFactory::GetHeapProperties();
+    mDepthBuffer = &ResourceManager::CreateCommittedResource(heapProperties,
                                                              D3D12_HEAP_FLAG_NONE,
                                                              depthStencilDesc,
                                                              D3D12_RESOURCE_STATE_DEPTH_WRITE,
@@ -457,7 +457,7 @@ RenderManager::CreateIntermediateColorBufferAndViews(const D3D12_RESOURCE_STATES
                                                                                      D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 
     // Create buffer
-    D3D12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
+    const D3D12_HEAP_PROPERTIES heapProperties = D3DFactory::GetHeapProperties();
     D3D12_CLEAR_VALUE clearValue = { resourceDescriptor.Format, 0.0f, 0.0f, 0.0f, 1.0f };
     buffer = &ResourceManager::CreateCommittedResource(heapProperties,
                                                        D3D12_HEAP_FLAG_NONE,

@@ -102,10 +102,22 @@ D3D12_RESOURCE_DESC GetResourceDescriptor(const std::uint64_t width,
                                           const D3D12_RESOURCE_DIMENSION dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
                                           const D3D12_TEXTURE_LAYOUT textureLayout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
                                           const std::uint16_t mipLevels = 1UL,
-                                          const std::uint16_t depthOrArraySize = 1UL,                                          
+                                          const std::uint16_t depthOrArraySize = 1UL,
                                           const std::uint64_t alignment = 0UL,
                                           const std::uint32_t sampleDescCount = 1U,
                                           const std::uint32_t sampleDescQuality = 0U) noexcept;
+
+D3D12_HEAP_PROPERTIES GetHeapProperties(const D3D12_HEAP_TYPE heapType = D3D12_HEAP_TYPE_DEFAULT,
+                                        const D3D12_CPU_PAGE_PROPERTY cpuPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
+                                        const D3D12_MEMORY_POOL memoryPool = D3D12_MEMORY_POOL_UNKNOWN,
+                                        const std::uint32_t creationNodeMask = 0U,
+                                        const std::uint32_t visibleNodeMask = 0U) noexcept;
+
+D3D12_RESOURCE_BARRIER GetTransitionResourceBarrier(ID3D12Resource& resource,
+                                                    const D3D12_RESOURCE_STATES stateBefore,
+                                                    const D3D12_RESOURCE_STATES stateAfter,
+                                                    const std::uint32_t subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+                                                    const D3D12_RESOURCE_BARRIER_FLAGS flags = D3D12_RESOURCE_BARRIER_FLAG_NONE) noexcept;
 }
 }
 

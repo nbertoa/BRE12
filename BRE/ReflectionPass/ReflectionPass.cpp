@@ -44,7 +44,7 @@ ReflectionPass::InitHierZBuffer() noexcept
     BRE_ASSERT(numMipLevels == _countof(mHierZBufferMipLevelShaderResourceViews));
 
     // Create hier z buffer     
-    D3D12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
+    const D3D12_HEAP_PROPERTIES heapProperties = D3DFactory::GetHeapProperties();
     const D3D12_RESOURCE_DESC resourceDescriptor = D3DFactory::GetResourceDescriptor(ApplicationSettings::sWindowWidth,
                                                                                      ApplicationSettings::sWindowHeight,
                                                                                      ApplicationSettings::sDepthStencilSRVFormat,

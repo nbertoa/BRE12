@@ -205,6 +205,42 @@ GetResourceDescriptor(const std::uint64_t width,
 
     return resourceDescriptor;
 }
+
+D3D12_HEAP_PROPERTIES
+D3DFactory::GetHeapProperties(const D3D12_HEAP_TYPE heapType,
+                              const D3D12_CPU_PAGE_PROPERTY cpuPageProperty,
+                              const D3D12_MEMORY_POOL memoryPool,
+                              const std::uint32_t creationNodeMask,
+                              const std::uint32_t visibleNodeMask) noexcept
+{
+    D3D12_HEAP_PROPERTIES heapProperties;
+    heapProperties.Type = heapType;
+    heapProperties.CPUPageProperty = cpuPageProperty;
+    heapProperties.MemoryPoolPreference = memoryPool;
+    heapProperties.CreationNodeMask = creationNodeMask;
+    heapProperties.VisibleNodeMask = visibleNodeMask;
+
+    return heapProperties;
+}
+
+D3D12_RESOURCE_BARRIER
+D3DFactory::GetTransitionResourceBarrier(ID3D12Resource& resource,
+                                         const D3D12_RESOURCE_STATES stateBefore,
+                                         const D3D12_RESOURCE_STATES stateAfter,
+                                         const std::uint32_t subresource,
+                                         const D3D12_RESOURCE_BARRIER_FLAGS flags) noexcept
+{
+    D3D12_RESOURCE_BARRIER resourceBarrier;
+    resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    resourceBarrier.Flags = flags;
+    resourceBarrier.Transition.pResource = &resource;
+    resourceBarrier.Transition.StateBefore = stateBefore;
+    resourceBarrier.Transition.StateAfter = stateAfter;
+    resourceBarrier.Transition.Subresource = subresource;
+
+    return resourceBarrier;
+}
+
 }
 }
 

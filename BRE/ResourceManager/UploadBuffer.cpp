@@ -12,7 +12,7 @@ UploadBuffer::UploadBuffer(ID3D12Device& device,
     BRE_ASSERT(elementSize > 0);
     BRE_ASSERT(elementCount > 0);
 
-    const D3D12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_UPLOAD };
+    const D3D12_HEAP_PROPERTIES heapProperties = D3DFactory::GetHeapProperties(D3D12_HEAP_TYPE_UPLOAD);
 
     const D3D12_RESOURCE_DESC resourceDescriptor = D3DFactory::GetResourceDescriptor(mElementSize * elementCount,
                                                                                      1U,

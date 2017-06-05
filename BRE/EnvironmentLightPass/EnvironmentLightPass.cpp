@@ -36,7 +36,7 @@ CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceInitialSta
 
     D3D12_CLEAR_VALUE clearValue{ resourceDescriptor.Format, 0.0f, 0.0f, 0.0f, 0.0f };
 
-    D3D12_HEAP_PROPERTIES heapProperties{ D3D12_HEAP_TYPE_DEFAULT };
+    const D3D12_HEAP_PROPERTIES heapProperties = D3DFactory::GetHeapProperties();
 
     // Create buffer resource
     resource = &ResourceManager::CreateCommittedResource(heapProperties,

@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <DXUtils\D3DFactory.h>
 #include <Utils\DebugUtils.h>
 
 namespace BRE {
@@ -65,15 +66,11 @@ ResourceStateManager::ChangeResourceStateAndGetBarrier(ID3D12Resource& resource,
     accessor->second = newState;
     accessor.release();
     
-    D3D12_RESOURCE_BARRIER barrier;
-    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = &resource;
-    barrier.Transition.StateBefore = oldState;
-    barrier.Transition.StateAfter = newState;
-    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    const D3D12_RESOURCE_BARRIER resourceBarrier = D3DFactory::GetTransitionResourceBarrier(resource,
+                                                                                            oldState,
+                                                                                            newState);
 
-    return barrier;
+    return resourceBarrier;
 }
 
 D3D12_RESOURCE_BARRIER
@@ -92,15 +89,12 @@ ResourceStateManager::ChangeSubresourceStateAndGetBarrier(ID3D12Resource& resour
     stateBySubresourceIndex[subresourceIndex] = newState;
     accessor.release();
 
-    D3D12_RESOURCE_BARRIER barrier;
-    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = &resource;
-    barrier.Transition.StateBefore = oldState;
-    barrier.Transition.StateAfter = newState;
-    barrier.Transition.Subresource = subresourceIndex;
+    const D3D12_RESOURCE_BARRIER resourceBarrier = D3DFactory::GetTransitionResourceBarrier(resource,
+                                                                                            oldState,
+                                                                                            newState,
+                                                                                            subresourceIndex);
 
-    return barrier;
+    return resourceBarrier;
 }
 
 D3D12_RESOURCE_STATES

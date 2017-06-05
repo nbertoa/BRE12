@@ -61,7 +61,7 @@ CreateGeometryBuffersAndRenderTargetViews(ID3D12Resource* buffers[GeometryPass::
     };
     BRE_ASSERT(_countof(clearValue) == GeometryPass::BUFFERS_COUNT);
 
-    D3D12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
+    const D3D12_HEAP_PROPERTIES heapProperties = D3DFactory::GetHeapProperties();
 
     // Create and store render target views
     const wchar_t* resourceNames[GeometryPass::BUFFERS_COUNT] =
@@ -78,7 +78,7 @@ CreateGeometryBuffersAndRenderTargetViews(ID3D12Resource* buffers[GeometryPass::
         rtvDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
         rtvDescriptor.Format = resourceDescriptor.Format;
         resourceDescriptor.MipLevels = 1U;
-        buffers[i] = &ResourceManager::CreateCommittedResource(heapProps,
+        buffers[i] = &ResourceManager::CreateCommittedResource(heapProperties,
                                                                D3D12_HEAP_FLAG_NONE,
                                                                resourceDescriptor,
                                                                D3D12_RESOURCE_STATE_RENDER_TARGET,

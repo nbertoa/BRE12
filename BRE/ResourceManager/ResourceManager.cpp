@@ -72,12 +72,11 @@ ResourceManager::CreateDefaultBuffer(const void* sourceData,
     ID3D12Resource* resource{ nullptr };
 
     // Create the actual default buffer resource.
-    D3D12_HEAP_PROPERTIES heapProps{};
-    heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
-    heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-    heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-    heapProps.CreationNodeMask = 1U;
-    heapProps.VisibleNodeMask = 1U;
+    D3D12_HEAP_PROPERTIES heapProperties = D3DFactory::GetHeapProperties(D3D12_HEAP_TYPE_DEFAULT,
+                                                                         D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
+                                                                         D3D12_MEMORY_POOL_UNKNOWN,
+                                                                         1U,
+                                                                         1U);
 
     const D3D12_RESOURCE_DESC resourceDescriptor = D3DFactory::GetResourceDescriptor(sourceDataSize,
                                                                                      1,
@@ -87,7 +86,7 @@ ResourceManager::CreateDefaultBuffer(const void* sourceData,
                                                                                      D3D12_TEXTURE_LAYOUT_ROW_MAJOR);
 
     mMutex.lock();
-    BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProps,
+    BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProperties,
                                                                      D3D12_HEAP_FLAG_NONE,
                                                                      &resourceDescriptor,
                                                                      D3D12_RESOURCE_STATE_COMMON,
@@ -96,14 +95,13 @@ ResourceManager::CreateDefaultBuffer(const void* sourceData,
 
     // In order to copy CPU memory data into our default buffer, we need to create
     // an intermediate upload heap. 
-    heapProps = D3D12_HEAP_PROPERTIES{};
-    heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
-    heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-    heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-    heapProps.CreationNodeMask = 1U;
-    heapProps.VisibleNodeMask = 1U;
+    heapProperties = D3DFactory::GetHeapProperties(D3D12_HEAP_TYPE_UPLOAD,
+                                                   D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
+                                                   D3D12_MEMORY_POOL_UNKNOWN,
+                                                   1U,
+                                                   1U);
 
-    BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProps,
+    BRE_CHECK_HR(DirectXManager::GetDevice().CreateCommittedResource(&heapProperties,
                                                                      D3D12_HEAP_FLAG_NONE,
                                                                      &resourceDescriptor,
                                                                      D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -120,13 +118,9 @@ ResourceManager::CreateDefaultBuffer(const void* sourceData,
     // Schedule to copy the data to the default buffer resource. At a high level, the helper function UpdateSubresources
     // will copy the CPU memory into the intermediate upload heap.  Then, using ID3D12CommandList::CopySubresourceRegion,
     // the intermediate upload heap data will be copied to mBuffer.
-    D3D12_RESOURCE_BARRIER resourceBarrier;
-    resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    resourceBarrier.Transition.pResource = resource;
-    resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-    resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-    resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;    
+    D3D12_RESOURCE_BARRIER resourceBarrier = D3DFactory::GetTransitionResourceBarrier(*resource,
+                                                                                      D3D12_RESOURCE_STATE_COMMON,
+                                                                                      D3D12_RESOURCE_STATE_COPY_DEST); 
     commandList.ResourceBarrier(1, &resourceBarrier);
 
     UpdateSubresources<1>(&commandList, 
@@ -137,13 +131,9 @@ ResourceManager::CreateDefaultBuffer(const void* sourceData,
                           1,
                           &subResourceData);
 
-    resourceBarrier = D3D12_RESOURCE_BARRIER{};
-    resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    resourceBarrier.Transition.pResource = resource;
-    resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-    resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
-    resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    resourceBarrier = D3DFactory::GetTransitionResourceBarrier(*resource,
+                                                               D3D12_RESOURCE_STATE_COPY_DEST,
+                                                               D3D12_RESOURCE_STATE_GENERIC_READ);
     commandList.ResourceBarrier(1, &resourceBarrier);
 
     BRE_ASSERT(resource != nullptr);
