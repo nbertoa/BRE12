@@ -60,12 +60,6 @@ public:
     bool IsDataValid() const noexcept;
 
 private:
-    ///
-    /// @brief Initializes shader resource views
-    /// @param skyBoxCubeMap Sky box cube map resource
-    ///
-    void InitShaderResourceViews(ID3D12Resource& skyBoxCubeMap) noexcept;
-
     CommandListPerFrame mCommandListPerFrame;
     
     D3D12_GPU_DESCRIPTOR_HANDLE mUpperLevelBufferShaderResourceView{ 0UL };

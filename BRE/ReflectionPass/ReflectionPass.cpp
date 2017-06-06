@@ -19,6 +19,8 @@ ReflectionPass::Init(ID3D12Resource& depthBuffer) noexcept
     mDepthBuffer = &depthBuffer;
     InitHierZBuffer();
 
+    mHiZBufferCommandListRecorder.InitSharedPSOAndRootSignature();
+
     BRE_ASSERT(IsDataValid());
 }
 

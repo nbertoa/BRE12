@@ -1,6 +1,7 @@
 #pragma once
 
 #include <CommandManager\CommandListPerFrame.h>
+#include <ReflectionPass\HiZBufferCommandListRecorder.h>
 
 namespace BRE {
 ///
@@ -64,5 +65,7 @@ private:
 
     ID3D12Resource* mDepthBuffer{ nullptr };
     D3D12_GPU_DESCRIPTOR_HANDLE mDepthBufferShaderResourceView{ 0UL };
+
+    HiZBufferCommandListRecorder mHiZBufferCommandListRecorder;
 };
 }

@@ -21,8 +21,7 @@ PostProcessPass::Init(ID3D12Resource& inputColorBuffer,
 
     PostProcessCommandListRecorder::InitSharedPSOAndRootSignature();
 
-    mCommandListRecorder.reset(new PostProcessCommandListRecorder());
-    mCommandListRecorder->Init(inputColorBufferShaderResourceView);
+    mCommandListRecorder.Init(inputColorBufferShaderResourceView);
 
     BRE_ASSERT(IsDataValid());
 }
@@ -39,7 +38,7 @@ PostProcessPass::Execute(ID3D12Resource& frameBuffer,
     commandListCount += RecordAndPushPrePassCommandLists(frameBuffer,
                                                          frameBufferRenderTargetView);
         
-    commandListCount += mCommandListRecorder->RecordAndPushCommandLists(frameBufferRenderTargetView);
+    commandListCount += mCommandListRecorder.RecordAndPushCommandLists(frameBufferRenderTargetView);
 
     return commandListCount;
 }
@@ -48,7 +47,6 @@ bool
 PostProcessPass::IsDataValid() const noexcept
 {
     const bool b =
-        mCommandListRecorder.get() != nullptr &&
         mInputColorBuffer != nullptr;
 
     return b;

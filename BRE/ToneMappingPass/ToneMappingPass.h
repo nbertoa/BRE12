@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <CommandManager\CommandListPerFrame.h>
 #include <ToneMappingPass\ToneMappingCommandListRecorder.h>
 
@@ -59,6 +57,6 @@ private:
     ID3D12Resource* mInputColorBuffer{ nullptr };
     ID3D12Resource* mOutputColorBuffer{ nullptr };
 
-    std::unique_ptr<ToneMappingCommandListRecorder> mCommandListRecorder;
+    ToneMappingCommandListRecorder mCommandListRecorder;
 };
 }

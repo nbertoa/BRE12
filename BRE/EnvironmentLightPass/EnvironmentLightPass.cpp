@@ -99,24 +99,21 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
                                       mBlurBufferShaderResourceView);
 
     // Initialize ambient occlusion recorder
-    mAmbientOcclusionRecorder.reset(new AmbientOcclusionCommandListRecorder());
-    mAmbientOcclusionRecorder->Init(mAmbientAccessibilityBufferRenderTargetView,
-                                    normalSmoothnessBufferShaderResourceView,
-                                    depthBufferShaderResourceView);
+    mAmbientOcclusionRecorder.Init(mAmbientAccessibilityBufferRenderTargetView,
+                                   normalSmoothnessBufferShaderResourceView,
+                                   depthBufferShaderResourceView);
 
     // Initialize blur recorder
-    mBlurRecorder.reset(new BlurCommandListRecorder());
-    mBlurRecorder->Init(mAmbientAccessibilityBufferShaderResourceView,
-                        mBlurBufferRenderTargetView);
+    mBlurRecorder.Init(mAmbientAccessibilityBufferShaderResourceView,
+                       mBlurBufferRenderTargetView);
 
     // Initialize ambient light recorder
-    mEnvironmentLightRecorder.reset(new EnvironmentLightCommandListRecorder());
-    mEnvironmentLightRecorder->Init(diffuseIrradianceCubeMap,
-                                    specularPreConvolvedCubeMap,
-                                    outputColorBufferRenderTargetView,
-                                    geometryBufferShaderResourceViewsBegin,
-                                    mBlurBufferShaderResourceView,
-                                    depthBufferShaderResourceView);
+    mEnvironmentLightRecorder.Init(diffuseIrradianceCubeMap,
+                                   specularPreConvolvedCubeMap,
+                                   outputColorBufferRenderTargetView,
+                                   geometryBufferShaderResourceViewsBegin,
+                                   mBlurBufferShaderResourceView,
+                                   depthBufferShaderResourceView);
 
     mBaseColorMetalMaskBuffer = &baseColorMetalMaskBuffer;
     mNormalSmoothnessBuffer = &normalSmoothnessBuffer;
@@ -133,13 +130,13 @@ EnvironmentLightPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
     std::uint32_t commandListCount = 0U;
 
     commandListCount += RecordAndPushPrePassCommandLists();
-    commandListCount += mAmbientOcclusionRecorder->RecordAndPushCommandLists(frameCBuffer);
+    commandListCount += mAmbientOcclusionRecorder.RecordAndPushCommandLists(frameCBuffer);
 
     commandListCount += RecordAndPushMiddlePassCommandLists();
-    commandListCount += mBlurRecorder->RecordAndPushCommandLists();
+    commandListCount += mBlurRecorder.RecordAndPushCommandLists();
 
     commandListCount += RecordAndPushPostPassCommandLists();
-    commandListCount += mEnvironmentLightRecorder->RecordAndPushCommandLists(frameCBuffer);
+    commandListCount += mEnvironmentLightRecorder.RecordAndPushCommandLists(frameCBuffer);
 
     return commandListCount;
 }
@@ -148,8 +145,6 @@ bool
 EnvironmentLightPass::IsDataValid() const noexcept
 {
     const bool b =
-        mAmbientOcclusionRecorder.get() != nullptr &&
-        mEnvironmentLightRecorder.get() != nullptr &&
         mAmbientAccessibilityBuffer != nullptr &&
         mAmbientAccessibilityBufferShaderResourceView.ptr != 0UL &&
         mAmbientAccessibilityBufferRenderTargetView.ptr != 0UL &&

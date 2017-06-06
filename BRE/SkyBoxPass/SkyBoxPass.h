@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <CommandManager\CommandListPerFrame.h>
 #include <SkyBoxPass\SkyBoxCommandListRecorder.h>
 
@@ -57,7 +55,7 @@ private:
     ///
     std::uint32_t RecordAndPushPrePassCommandLists() noexcept;
 
-    std::unique_ptr<SkyBoxCommandListRecorder> mCommandListRecorder;
+    SkyBoxCommandListRecorder mCommandListRecorder;
 
     ID3D12Resource* mDepthBuffer{ nullptr };
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <CommandManager\CommandListPerFrame.h>
 #include <PostProcessPass\PostProcessCommandListRecorder.h>
 
@@ -60,6 +58,6 @@ private:
 
     ID3D12Resource* mInputColorBuffer{ nullptr };
 
-    std::unique_ptr<PostProcessCommandListRecorder> mCommandListRecorder;
+    PostProcessCommandListRecorder mCommandListRecorder;
 };
 }

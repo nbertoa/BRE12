@@ -24,9 +24,8 @@ ToneMappingPass::Init(ID3D12Resource& inputColorBuffer,
     mInputColorBuffer = &inputColorBuffer;
     mOutputColorBuffer = &outputColorBuffer;    
 
-    mCommandListRecorder.reset(new ToneMappingCommandListRecorder());
-    mCommandListRecorder->Init(inputColorBufferShaderResourceView,
-                               outputColorBufferRenderTargetView);
+    mCommandListRecorder.Init(inputColorBufferShaderResourceView,
+                              outputColorBufferRenderTargetView);
 
     BRE_ASSERT(IsDataValid());
 }
@@ -39,7 +38,7 @@ ToneMappingPass::Execute() noexcept
     std::uint32_t commandListCount = 0U;
 
     commandListCount += RecordAndPushPrePassCommandLists();
-    commandListCount += mCommandListRecorder->RecordAndPushCommandLists();
+    commandListCount += mCommandListRecorder.RecordAndPushCommandLists();
 
     return commandListCount;
 }
@@ -48,7 +47,6 @@ bool
 ToneMappingPass::IsDataValid() const noexcept
 {
     const bool b =
-        mCommandListRecorder.get() != nullptr &&
         mInputColorBuffer != nullptr &&
         mOutputColorBuffer != nullptr;
 

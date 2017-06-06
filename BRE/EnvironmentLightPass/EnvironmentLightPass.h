@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <CommandManager\CommandListPerFrame.h>
 #include <EnvironmentLightPass\AmbientOcclusionCommandListRecorder.h>
 #include <EnvironmentLightPass\BlurCommandListRecorder.h>
@@ -96,9 +94,9 @@ private:
     D3D12_GPU_DESCRIPTOR_HANDLE mBlurBufferShaderResourceView{ 0UL };
     D3D12_CPU_DESCRIPTOR_HANDLE mBlurBufferRenderTargetView{ 0UL };
 
-    std::unique_ptr<AmbientOcclusionCommandListRecorder> mAmbientOcclusionRecorder;
-    std::unique_ptr<BlurCommandListRecorder> mBlurRecorder;
-    std::unique_ptr<EnvironmentLightCommandListRecorder> mEnvironmentLightRecorder;
+    AmbientOcclusionCommandListRecorder mAmbientOcclusionRecorder;
+    BlurCommandListRecorder mBlurRecorder;
+    EnvironmentLightCommandListRecorder mEnvironmentLightRecorder;
 
     ID3D12Resource* mBaseColorMetalMaskBuffer{ nullptr };
     ID3D12Resource* mNormalSmoothnessBuffer{ nullptr };

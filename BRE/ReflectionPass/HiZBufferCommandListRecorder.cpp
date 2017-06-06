@@ -15,9 +15,7 @@ using namespace DirectX;
 
 namespace BRE {
 // Root Signature:
-// "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Object CBuffers
-// "CBV(b1, visibility = SHADER_VISIBILITY_VERTEX), " \ 1 > Frame CBuffer
-// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Cube Map texture
+// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 0 -> Upper level hi-z resource
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -31,25 +29,17 @@ HiZBufferCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
     BRE_ASSERT(sRootSignature == nullptr);
 
     PSOManager::PSOCreationData psoData{};
+    psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-    // The camera is inside the sky sphere, so just turn off culling.
-    psoData.mRasterizerDescriptor.CullMode = D3D12_CULL_MODE_NONE;
+    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ReflectionPass/Shaders/PS.cso");
+    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ReflectionPass/Shaders/VS.cso");
 
-    // Make sure the depth function is LESS_EQUAL and not just GREATER.  
-    // Otherwise, the normalized depth values at z = 1 (NDC) will 
-    // fail the depth test if the depth buffer was cleared to 1.
-    psoData.mDepthStencilDescriptor.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-    psoData.mInputLayoutDescriptors = D3DFactory::GetPositionNormalTangentTexCoordInputLayout();
-
-    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("SkyBoxPass/Shaders/PS.cso");
-    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("SkyBoxPass/Shaders/VS.cso");
-
-    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("SkyBoxPass/Shaders/RS.cso");
+    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("ReflectionPass/Shaders/RS.cso");
     psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
     sRootSignature = psoData.mRootSignature;
 
     psoData.mNumRenderTargets = 1U;
-    psoData.mRenderTargetFormats[0U] = ApplicationSettings::sColorBufferFormat;
+    psoData.mRenderTargetFormats[0U] = ApplicationSettings::sDepthStencilSRVFormat;
     for (std::size_t i = psoData.mNumRenderTargets; i < _countof(psoData.mRenderTargetFormats); ++i) {
         psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
     }

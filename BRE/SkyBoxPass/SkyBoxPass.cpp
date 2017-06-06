@@ -96,13 +96,12 @@ SkyBoxPass::Init(ID3D12Resource& skyBoxCubeMap,
 
     SkyBoxCommandListRecorder::InitSharedPSOAndRootSignature();
 
-    mCommandListRecorder.reset(new SkyBoxCommandListRecorder());
-    mCommandListRecorder->Init(mesh.GetVertexBufferData(),
-                               mesh.GetIndexBufferData(),
-                               worldMatrix,
-                               skyBoxCubeMap,
-                               outputColorBufferRenderTargetView,
-                               depthBufferView);
+    mCommandListRecorder.Init(mesh.GetVertexBufferData(),
+                              mesh.GetIndexBufferData(),
+                              worldMatrix,
+                              skyBoxCubeMap,
+                              outputColorBufferRenderTargetView,
+                              depthBufferView);
 
     BRE_ASSERT(IsDataValid());
 }
@@ -115,7 +114,7 @@ SkyBoxPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
     std::uint32_t commandListCount = 0U;
 
     commandListCount += RecordAndPushPrePassCommandLists();
-    commandListCount += mCommandListRecorder->RecordAndPushCommandLists(frameCBuffer);
+    commandListCount += mCommandListRecorder.RecordAndPushCommandLists(frameCBuffer);
 
     return commandListCount;
 }
@@ -124,7 +123,6 @@ bool
 SkyBoxPass::IsDataValid() const noexcept
 {
     const bool b =
-        mCommandListRecorder.get() != nullptr &&
         mDepthBuffer != nullptr;
 
     return b;
