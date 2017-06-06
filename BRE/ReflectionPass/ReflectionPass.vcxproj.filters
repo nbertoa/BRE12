@@ -3,14 +3,19 @@
   <ItemGroup>
     <ClInclude Include="ReflectionPass.h" />
     <ClInclude Include="HiZBufferCommandListRecorder.h" />
+    <ClInclude Include="CopyResourcesCommandListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ReflectionPass.cpp" />
     <ClCompile Include="HiZBufferCommandListRecorder.cpp" />
+    <ClCompile Include="CopyResourcesCommandListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
       <UniqueIdentifier>{3f386158-50ec-44eb-87ce-4c0fa5f56482}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\HiZBuffer">
+      <UniqueIdentifier>{bd34f864-fb7b-4d14-85d9-cd906c4569ca}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -22,6 +27,15 @@
     </FxCompile>
     <FxCompile Include="Shaders\VS.hlsl">
       <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\HiZBuffer\PS.hlsl">
+      <Filter>Shaders\HiZBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\HiZBuffer\RS.hlsl">
+      <Filter>Shaders\HiZBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\HiZBuffer\VS.hlsl">
+      <Filter>Shaders\HiZBuffer</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

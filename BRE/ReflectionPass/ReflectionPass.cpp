@@ -19,7 +19,16 @@ ReflectionPass::Init(ID3D12Resource& depthBuffer) noexcept
     mDepthBuffer = &depthBuffer;
     InitHierZBuffer();
 
-    mHiZBufferCommandListRecorder.InitSharedPSOAndRootSignature();
+    CopyResourcesCommandListRecorder::InitSharedPSOAndRootSignature();
+    HiZBufferCommandListRecorder::InitSharedPSOAndRootSignature();
+
+    mCopyDepthBufferToHiZBufferMipLevel0CommandListRecorder.Init(mDepthBufferShaderResourceView,
+                                                                 mHierZBufferMipLevelRenderTargetViews[0U]);
+
+    for (std::uint32_t i = 0U; i < _countof(mHiZBufferCommandListRecorders); ++i) {
+        mHiZBufferCommandListRecorders[i].Init(mHierZBufferMipLevelShaderResourceViews[i],
+                                               mHierZBufferMipLevelRenderTargetViews[i + 1]);
+    }
 
     BRE_ASSERT(IsDataValid());
 }
@@ -32,6 +41,13 @@ ReflectionPass::Execute() noexcept
     std::uint32_t commandListCount = 0U;
 
     commandListCount += RecordAndPushPrePassCommandLists();
+
+    commandListCount += mCopyDepthBufferToHiZBufferMipLevel0CommandListRecorder.RecordAndPushCommandLists();
+
+    for (std::uint32_t i = 0U; i < _countof(mHiZBufferCommandListRecorders); ++i) {
+        commandListCount += mHiZBufferCommandListRecorders[i].RecordAndPushCommandLists();
+    }
+
     commandListCount += RecordAndPushHierZBufferCommandLists();
 
     return commandListCount;

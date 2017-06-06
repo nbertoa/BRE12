@@ -3,7 +3,6 @@
 #include <DirectXMath.h>
 
 #include <CommandManager\CommandListPerFrame.h>
-#include <ResourceManager\FrameUploadCBufferPerFrame.h>
 
 namespace BRE {
 

@@ -2872,3 +2872,6 @@
 /BRE/ReflectionPass/x64/Release/ReflectionPass.tlog/ReflectionPass.write.1u.tlog
 /BRE/ReflectionPass/x64/Release/ReflectionPass.tlog/fxc.read.1.tlog
 /BRE/ReflectionPass/x64/Release/ReflectionPass.tlog/fxc.write.1.tlog
+/BRE/Executable/ReflectionPass/Shaders/HierZBuffer/PS.cso
+/BRE/Executable/ReflectionPass/Shaders/HierZBuffer/RS.cso
+/BRE/Executable/ReflectionPass/Shaders/HierZBuffer/VS.cso

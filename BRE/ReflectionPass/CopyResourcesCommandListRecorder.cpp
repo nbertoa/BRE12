@@ -1,4 +1,4 @@
-#include "HiZBufferCommandListRecorder.h"
+#include "CopyResourcesCommandListRecorder.h"
 
 #include <d3d12.h>
 
@@ -15,7 +15,7 @@ using namespace DirectX;
 
 namespace BRE {
 // Root Signature:
-// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 0 -> Upper level hi-z resource
+// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 0 -> Input resource
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -23,7 +23,7 @@ ID3D12RootSignature* sRootSignature{ nullptr };
 }
 
 void
-HiZBufferCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
+CopyResourcesCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 {
     BRE_ASSERT(sPSO == nullptr);
     BRE_ASSERT(sRootSignature == nullptr);
@@ -31,10 +31,10 @@ HiZBufferCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
     PSOManager::PSOCreationData psoData{};
     psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ReflectionPass/Shaders/HierZBuffer/PS.cso");
-    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ReflectionPass/Shaders/HierZBuffer/VS.cso");
+    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ReflectionPass/Shaders/PS.cso");
+    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ReflectionPass/Shaders/VS.cso");
 
-    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("ReflectionPass/Shaders/HierZBuffer/RS.cso");
+    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("ReflectionPass/Shaders/RS.cso");
     psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
     sRootSignature = psoData.mRootSignature;
 
@@ -51,19 +51,19 @@ HiZBufferCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 }
 
 void
-HiZBufferCommandListRecorder::Init(const D3D12_GPU_DESCRIPTOR_HANDLE& upperLevelBufferShaderResourceView,
-                                   const D3D12_CPU_DESCRIPTOR_HANDLE& lowerLevelBufferRenderTargetView) noexcept
+CopyResourcesCommandListRecorder::Init(const D3D12_GPU_DESCRIPTOR_HANDLE& inputBufferShaderResourceView,
+                                       const D3D12_CPU_DESCRIPTOR_HANDLE& outputBufferRenderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
-    mUpperLevelBufferShaderResourceView = upperLevelBufferShaderResourceView;
-    mLowerLevelBufferRenderTargetView = lowerLevelBufferRenderTargetView;
+    mInputBufferShaderResourceView = inputBufferShaderResourceView;
+    mOutputBufferRenderTargetView = outputBufferRenderTargetView;
 
     BRE_ASSERT(IsDataValid());
 }
 
 std::uint32_t
-HiZBufferCommandListRecorder::RecordAndPushCommandLists() noexcept
+CopyResourcesCommandListRecorder::RecordAndPushCommandLists() noexcept
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(sPSO != nullptr);
@@ -73,13 +73,13 @@ HiZBufferCommandListRecorder::RecordAndPushCommandLists() noexcept
 
     commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
     commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
-    commandList.OMSetRenderTargets(1U, &mLowerLevelBufferRenderTargetView, false, nullptr);
+    commandList.OMSetRenderTargets(1U, &mOutputBufferRenderTargetView, false, nullptr);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 
     commandList.SetGraphicsRootSignature(sRootSignature);
-    commandList.SetGraphicsRootDescriptorTable(0U, mUpperLevelBufferShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(0U, mInputBufferShaderResourceView);
 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
@@ -91,11 +91,11 @@ HiZBufferCommandListRecorder::RecordAndPushCommandLists() noexcept
 }
 
 bool
-HiZBufferCommandListRecorder::IsDataValid() const noexcept
+CopyResourcesCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
-        mUpperLevelBufferShaderResourceView.ptr != 0UL &&
-        mLowerLevelBufferRenderTargetView.ptr != 0UL;
+        mInputBufferShaderResourceView.ptr != 0UL &&
+        mOutputBufferRenderTargetView.ptr != 0UL;
 
     return result;
 }
