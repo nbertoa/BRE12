@@ -2875,3 +2875,6 @@
 /BRE/Executable/ReflectionPass/Shaders/HierZBuffer/PS.cso
 /BRE/Executable/ReflectionPass/Shaders/HierZBuffer/RS.cso
 /BRE/Executable/ReflectionPass/Shaders/HierZBuffer/VS.cso
+/BRE/Executable/ReflectionPass/Shaders/CopyResources/PS.cso
+/BRE/Executable/ReflectionPass/Shaders/CopyResources/RS.cso
+/BRE/Executable/ReflectionPass/Shaders/CopyResources/VS.cso

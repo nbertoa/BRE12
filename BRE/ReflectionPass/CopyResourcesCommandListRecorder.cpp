@@ -31,10 +31,10 @@ CopyResourcesCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
     PSOManager::PSOCreationData psoData{};
     psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ReflectionPass/Shaders/PS.cso");
-    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ReflectionPass/Shaders/VS.cso");
+    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ReflectionPass/Shaders/CopyResources/PS.cso");
+    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("ReflectionPass/Shaders/CopyResources/VS.cso");
 
-    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("ReflectionPass/Shaders/RS.cso");
+    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("ReflectionPass/Shaders/CopyResources/RS.cso");
     psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
     sRootSignature = psoData.mRootSignature;
 
