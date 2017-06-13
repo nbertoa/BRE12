@@ -40,6 +40,11 @@ private:
     void InitHierZBuffer() noexcept;
 
     ///
+    /// @brief Initializes visibility buffer
+    ///
+    void InitVisibilityBuffer() noexcept;
+
+    ///
     /// @brief Checks if internal data is valid. Typically, used for assertions
     /// @return True if valid. Otherwise, false
     ///
@@ -63,6 +68,10 @@ private:
     ID3D12Resource* mHierZBuffer{ nullptr };
     D3D12_CPU_DESCRIPTOR_HANDLE mHierZBufferMipLevelRenderTargetViews[10U]{ 0UL };
     D3D12_GPU_DESCRIPTOR_HANDLE mHierZBufferMipLevelShaderResourceViews[10U]{ 0UL };
+
+    ID3D12Resource* mVisibilityBuffer{ nullptr };
+    D3D12_CPU_DESCRIPTOR_HANDLE mVisibilityBufferMipLevelRenderTargetViews[10U]{ 0UL };
+    D3D12_GPU_DESCRIPTOR_HANDLE mVisibilityBufferMipLevelShaderResourceViews[10U]{ 0UL };
 
     ID3D12Resource* mDepthBuffer{ nullptr };
     D3D12_GPU_DESCRIPTOR_HANDLE mDepthBufferShaderResourceView{ 0UL };

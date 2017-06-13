@@ -39,7 +39,7 @@ CopyResourcesCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
     sRootSignature = psoData.mRootSignature;
 
     psoData.mNumRenderTargets = 1U;
-    psoData.mRenderTargetFormats[0U] = ApplicationSettings::sDepthStencilSRVFormat;
+    psoData.mRenderTargetFormats[0U] = DXGI_FORMAT_R32G32_FLOAT;
     for (std::size_t i = psoData.mNumRenderTargets; i < _countof(psoData.mRenderTargetFormats); ++i) {
         psoData.mRenderTargetFormats[i] = DXGI_FORMAT_UNKNOWN;
     }
