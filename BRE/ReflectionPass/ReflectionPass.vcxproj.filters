@@ -4,11 +4,13 @@
     <ClInclude Include="ReflectionPass.h" />
     <ClInclude Include="HiZBufferCommandListRecorder.h" />
     <ClInclude Include="CopyResourcesCommandListRecorder.h" />
+    <ClInclude Include="VisibilityBufferCommandListRecorder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ReflectionPass.cpp" />
     <ClCompile Include="HiZBufferCommandListRecorder.cpp" />
     <ClCompile Include="CopyResourcesCommandListRecorder.cpp" />
+    <ClCompile Include="VisibilityBufferCommandListRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -19,6 +21,9 @@
     </Filter>
     <Filter Include="Shaders\CopyResources">
       <UniqueIdentifier>{0a1ac3c7-83fe-45b0-98ce-17583d47e70b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\VisibilityBuffer">
+      <UniqueIdentifier>{bc26f7d5-5145-44cd-a71f-a8d34273219f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -39,6 +44,15 @@
     </FxCompile>
     <FxCompile Include="Shaders\CopyResources\VS.hlsl">
       <Filter>Shaders\CopyResources</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\VisibilityBuffer\PS.hlsl">
+      <Filter>Shaders\VisibilityBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\VisibilityBuffer\RS.hlsl">
+      <Filter>Shaders\VisibilityBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\VisibilityBuffer\VS.hlsl">
+      <Filter>Shaders\VisibilityBuffer</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

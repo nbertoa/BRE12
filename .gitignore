@@ -2878,3 +2878,6 @@
 /BRE/Executable/ReflectionPass/Shaders/CopyResources/PS.cso
 /BRE/Executable/ReflectionPass/Shaders/CopyResources/RS.cso
 /BRE/Executable/ReflectionPass/Shaders/CopyResources/VS.cso
+/BRE/Executable/ReflectionPass/Shaders/VisibilityBuffer/PS.cso
+/BRE/Executable/ReflectionPass/Shaders/VisibilityBuffer/RS.cso
+/BRE/Executable/ReflectionPass/Shaders/VisibilityBuffer/VS.cso

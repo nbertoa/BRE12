@@ -3,6 +3,7 @@
 #include <CommandManager\CommandListPerFrame.h>
 #include <ReflectionPass\CopyResourcesCommandListRecorder.h>
 #include <ReflectionPass\HiZBufferCommandListRecorder.h>
+#include <ReflectionPass\VisibilityBufferCommandListRecorder.h>
 
 namespace BRE {
 ///
@@ -63,6 +64,12 @@ private:
     ///
     std::uint32_t RecordAndPushHierZBufferCommandLists() noexcept;
 
+    ///
+    /// @brief Records command lists related with the visibility buffer and
+    /// pushes them to the CommandListExecutor
+    ///
+    std::uint32_t RecordAndPushVisibilityBufferCommandLists() noexcept;
+
     CommandListPerFrame mPrePassCommandListPerFrame;
 
     ID3D12Resource* mHierZBuffer{ nullptr };
@@ -78,5 +85,6 @@ private:
 
     CopyResourcesCommandListRecorder mCopyDepthBufferToHiZBufferMipLevel0CommandListRecorder;
     HiZBufferCommandListRecorder mHiZBufferCommandListRecorders[9U];
+    VisibilityBufferCommandListRecorder mVisibilityBufferCommandListRecorders[9U];
 };
 }

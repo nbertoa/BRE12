@@ -22,6 +22,7 @@ ReflectionPass::Init(ID3D12Resource& depthBuffer) noexcept
 
     CopyResourcesCommandListRecorder::InitSharedPSOAndRootSignature();
     HiZBufferCommandListRecorder::InitSharedPSOAndRootSignature();
+    VisibilityBufferCommandListRecorder::InitSharedPSOAndRootSignature();
 
     mCopyDepthBufferToHiZBufferMipLevel0CommandListRecorder.Init(mDepthBufferShaderResourceView,
                                                                  mHierZBufferMipLevelRenderTargetViews[0U]);
@@ -29,6 +30,12 @@ ReflectionPass::Init(ID3D12Resource& depthBuffer) noexcept
     for (std::uint32_t i = 0U; i < _countof(mHiZBufferCommandListRecorders); ++i) {
         mHiZBufferCommandListRecorders[i].Init(mHierZBufferMipLevelShaderResourceViews[i],
                                                mHierZBufferMipLevelRenderTargetViews[i + 1]);
+    }
+
+    for (std::uint32_t i = 0U; i < _countof(mVisibilityBufferCommandListRecorders); ++i) {
+        mVisibilityBufferCommandListRecorders[i].Init(mHierZBufferMipLevelShaderResourceViews[i],
+                                                      mVisibilityBufferMipLevelShaderResourceViews[i],
+                                                      mVisibilityBufferMipLevelRenderTargetViews[i + 1]);
     }
 
     BRE_ASSERT(IsDataValid());
@@ -44,6 +51,8 @@ ReflectionPass::Execute() noexcept
     commandListCount += RecordAndPushPrePassCommandLists();
 
     commandListCount += RecordAndPushHierZBufferCommandLists();
+
+    commandListCount += RecordAndPushVisibilityBufferCommandLists();
 
     return commandListCount;
 }
@@ -273,6 +282,18 @@ ReflectionPass::RecordAndPushHierZBufferCommandLists() noexcept
 
     for (std::uint32_t i = 0U; i < _countof(mHiZBufferCommandListRecorders); ++i) {
         commandListCount += mHiZBufferCommandListRecorders[i].RecordAndPushCommandLists();
+    }
+
+    return commandListCount;
+}
+
+std::uint32_t
+ReflectionPass::RecordAndPushVisibilityBufferCommandLists() noexcept
+{
+    std::uint32_t commandListCount = 0U;
+
+    for (std::uint32_t i = 0U; i < _countof(mVisibilityBufferCommandListRecorders); ++i) {
+        commandListCount += mVisibilityBufferCommandListRecorders[i].RecordAndPushCommandLists();
     }
 
     return commandListCount;
