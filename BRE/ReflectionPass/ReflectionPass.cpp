@@ -8,6 +8,7 @@
 #include <DXUtils\D3DFactory.h>
 #include <ResourceManager\ResourceManager.h>
 #include <ResourceStateManager\ResourceStateManager.h>
+#include <ShaderUtils\CBuffers.h>
 #include <Utils\DebugUtils.h>
 
 namespace BRE {
@@ -34,6 +35,7 @@ ReflectionPass::Init(ID3D12Resource& depthBuffer) noexcept
 
     for (std::uint32_t i = 0U; i < _countof(mVisibilityBufferCommandListRecorders); ++i) {
         mVisibilityBufferCommandListRecorders[i].Init(mHierZBufferMipLevelShaderResourceViews[i],
+                                                      mHierZBufferMipLevelShaderResourceViews[i + 1],
                                                       mVisibilityBufferMipLevelShaderResourceViews[i],
                                                       mVisibilityBufferMipLevelRenderTargetViews[i + 1]);
     }
@@ -42,7 +44,7 @@ ReflectionPass::Init(ID3D12Resource& depthBuffer) noexcept
 }
 
 std::uint32_t
-ReflectionPass::Execute() noexcept
+ReflectionPass::Execute(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
 
@@ -52,7 +54,7 @@ ReflectionPass::Execute() noexcept
 
     commandListCount += RecordAndPushHierZBufferCommandLists();
 
-    commandListCount += RecordAndPushVisibilityBufferCommandLists();
+    commandListCount += RecordAndPushVisibilityBufferCommandLists(frameCBuffer);
 
     return commandListCount;
 }
@@ -288,12 +290,12 @@ ReflectionPass::RecordAndPushHierZBufferCommandLists() noexcept
 }
 
 std::uint32_t
-ReflectionPass::RecordAndPushVisibilityBufferCommandLists() noexcept
+ReflectionPass::RecordAndPushVisibilityBufferCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     std::uint32_t commandListCount = 0U;
 
     for (std::uint32_t i = 0U; i < _countof(mVisibilityBufferCommandListRecorders); ++i) {
-        commandListCount += mVisibilityBufferCommandListRecorders[i].RecordAndPushCommandLists();
+        commandListCount += mVisibilityBufferCommandListRecorders[i].RecordAndPushCommandLists(frameCBuffer);
     }
 
     return commandListCount;

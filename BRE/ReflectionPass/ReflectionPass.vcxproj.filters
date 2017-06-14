@@ -45,13 +45,13 @@
     <FxCompile Include="Shaders\CopyResources\VS.hlsl">
       <Filter>Shaders\CopyResources</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\VisibilityBuffer\PS.hlsl">
-      <Filter>Shaders\VisibilityBuffer</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\VisibilityBuffer\RS.hlsl">
       <Filter>Shaders\VisibilityBuffer</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\VisibilityBuffer\VS.hlsl">
+      <Filter>Shaders\VisibilityBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\VisibilityBuffer\PS.hlsl">
       <Filter>Shaders\VisibilityBuffer</Filter>
     </FxCompile>
   </ItemGroup>

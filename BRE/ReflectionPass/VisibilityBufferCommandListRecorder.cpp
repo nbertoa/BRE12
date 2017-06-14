@@ -9,6 +9,7 @@
 #include <ResourceManager/UploadBufferManager.h>
 #include <RootSignatureManager\RootSignatureManager.h>
 #include <ShaderManager\ShaderManager.h>
+#include <ShaderUtils\CBuffers.h>
 #include <Utils/DebugUtils.h>
 
 using namespace DirectX;
@@ -16,7 +17,9 @@ using namespace DirectX;
 namespace BRE {
 // Root Signature:
 // "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 0 -> Upper level hi-z resource
-// "DescriptorTable(SRV(t1), visibility = SHADER_VISIBILITY_PIXEL), " \ 1 -> Upper level visibility resource
+// "DescriptorTable(SRV(t1), visibility = SHADER_VISIBILITY_PIXEL), " \ 1 -> UpLowerper level hi-z resource
+// "DescriptorTable(SRV(t2), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Upper level visibility resource
+// "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL)" \ 3 -> Frame CBuffer
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -53,12 +56,14 @@ VisibilityBufferCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 
 void
 VisibilityBufferCommandListRecorder::Init(const D3D12_GPU_DESCRIPTOR_HANDLE& upperLevelHiZBufferShaderResourceView,
+                                          const D3D12_GPU_DESCRIPTOR_HANDLE& lowerLevelHiZBufferShaderResourceView,
                                           const D3D12_GPU_DESCRIPTOR_HANDLE& upperLevelVisibilityBufferShaderResourceView,
                                           const D3D12_CPU_DESCRIPTOR_HANDLE& lowerLevelVisibilityBufferRenderTargetView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
 
     mUpperLevelHiZBufferShaderResourceView = upperLevelHiZBufferShaderResourceView;
+    mLowerLevelHiZBufferShaderResourceView = lowerLevelHiZBufferShaderResourceView;
     mUpperLevelVisibilityBufferShaderResourceView = upperLevelVisibilityBufferShaderResourceView;
     mLowerLevelVisibilityBufferRenderTargetView = lowerLevelVisibilityBufferRenderTargetView;
 
@@ -66,11 +71,15 @@ VisibilityBufferCommandListRecorder::Init(const D3D12_GPU_DESCRIPTOR_HANDLE& upp
 }
 
 std::uint32_t
-VisibilityBufferCommandListRecorder::RecordAndPushCommandLists() noexcept
+VisibilityBufferCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& frameCBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
     BRE_ASSERT(sPSO != nullptr);
     BRE_ASSERT(sRootSignature != nullptr);
+
+    // Update frame constants
+    UploadBuffer& uploadFrameCBuffer(mFrameUploadCBufferPerFrame.GetNextFrameCBuffer());
+    uploadFrameCBuffer.CopyData(0U, &frameCBuffer, sizeof(frameCBuffer));
 
     ID3D12GraphicsCommandList& commandList = mCommandListPerFrame.ResetCommandListWithNextCommandAllocator(sPSO);
 
@@ -82,8 +91,11 @@ VisibilityBufferCommandListRecorder::RecordAndPushCommandLists() noexcept
     commandList.SetDescriptorHeaps(_countof(heaps), heaps);
 
     commandList.SetGraphicsRootSignature(sRootSignature);
+    const D3D12_GPU_VIRTUAL_ADDRESS frameCBufferGpuVAddress(uploadFrameCBuffer.GetResource().GetGPUVirtualAddress());
     commandList.SetGraphicsRootDescriptorTable(0U, mUpperLevelHiZBufferShaderResourceView);
-    commandList.SetGraphicsRootDescriptorTable(1U, mUpperLevelHiZBufferShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(1U, mLowerLevelHiZBufferShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(2U, mUpperLevelHiZBufferShaderResourceView);
+    commandList.SetGraphicsRootConstantBufferView(3U, frameCBufferGpuVAddress);
 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList.DrawInstanced(6U, 1U, 0U, 0U);
@@ -99,6 +111,7 @@ VisibilityBufferCommandListRecorder::IsDataValid() const noexcept
 {
     const bool result =
         mUpperLevelHiZBufferShaderResourceView.ptr != 0UL &&
+        mLowerLevelHiZBufferShaderResourceView.ptr != 0UL &&
         mUpperLevelVisibilityBufferShaderResourceView.ptr != 0UL &&
         mLowerLevelVisibilityBufferRenderTargetView.ptr != 0UL;
 

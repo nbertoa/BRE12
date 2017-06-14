@@ -5,4 +5,6 @@
 "DENY_DOMAIN_SHADER_ROOT_ACCESS | " \
 "DENY_GEOMETRY_SHADER_ROOT_ACCESS), " \
 "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \
-"DescriptorTable(SRV(t1), visibility = SHADER_VISIBILITY_PIXEL)"
+"DescriptorTable(SRV(t1), visibility = SHADER_VISIBILITY_PIXEL), " \
+"DescriptorTable(SRV(t2), visibility = SHADER_VISIBILITY_PIXEL), " \
+"CBV(b0, visibility = SHADER_VISIBILITY_PIXEL)"

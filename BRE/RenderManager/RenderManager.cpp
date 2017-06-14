@@ -263,7 +263,9 @@ RenderManager::execute()
 {
     while (!mTerminate) {
         mTimer.Tick();
-        UpdateCameraAndFrameCBuffer(mTimer.GetDeltaTimeInSeconds(), mCamera, mFrameCBuffer);
+        UpdateCameraAndFrameCBuffer(mTimer.GetDeltaTimeInSeconds(), 
+                                    mCamera, 
+                                    mFrameCBuffer);
 
         std::uint32_t commandListCount = 0U;
         CommandListExecutor::Get().ResetExecutedCommandListCount();
@@ -272,7 +274,7 @@ RenderManager::execute()
 
         commandListCount += mGeometryPass.Execute(mFrameCBuffer);
         commandListCount += mEnvironmentLightPass.Execute(mFrameCBuffer);
-        commandListCount += mReflectionPass.Execute();
+        commandListCount += mReflectionPass.Execute(mFrameCBuffer);
         commandListCount += mSkyBoxPass.Execute(mFrameCBuffer);
         commandListCount += mToneMappingPass.Execute();
         commandListCount += mPostProcessPass.Execute(*GetCurrentFrameBuffer(), 

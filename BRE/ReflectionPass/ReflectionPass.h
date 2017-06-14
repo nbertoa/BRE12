@@ -6,6 +6,8 @@
 #include <ReflectionPass\VisibilityBufferCommandListRecorder.h>
 
 namespace BRE {
+struct FrameCBuffer;
+
 ///
 /// @brief Pass responsible to apply hi-Z screen space cone-traced reflections
 /// 
@@ -30,9 +32,10 @@ public:
     /// Init() must be called first. This method can record and
     /// push command lists to the CommandListExecutor.
     ///
+    /// @param frameCBuffer Constant buffer per frame, for current frame
     /// @return The number of recorded command lists.
     ///
-    std::uint32_t Execute() noexcept;
+    std::uint32_t Execute(const FrameCBuffer& frameCBuffer) noexcept;
 
 private:
     ///
@@ -67,8 +70,9 @@ private:
     ///
     /// @brief Records command lists related with the visibility buffer and
     /// pushes them to the CommandListExecutor
+    /// @param frameCBuffer Constant buffer per frame, for current frame
     ///
-    std::uint32_t RecordAndPushVisibilityBufferCommandLists() noexcept;
+    std::uint32_t RecordAndPushVisibilityBufferCommandLists(const FrameCBuffer& frameCBuffer) noexcept;
 
     CommandListPerFrame mPrePassCommandListPerFrame;
 
