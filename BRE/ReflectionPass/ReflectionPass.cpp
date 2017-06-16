@@ -263,7 +263,7 @@ ReflectionPass::RecordAndPushPrePassCommandLists() noexcept
     // Clear all the mip levels of the visibility buffer with the 100% visibility (1.0f)
     float fullVisibility[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     for (std::uint32_t i = 0U; i < numMipLevels; ++i) {
-        commandList.ClearRenderTargetView(mVisibilityBufferMipLevelRenderTargetViews[1],
+        commandList.ClearRenderTargetView(mVisibilityBufferMipLevelRenderTargetViews[i],
                                           fullVisibility,
                                           0U,
                                           nullptr);
