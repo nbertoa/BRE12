@@ -69,15 +69,12 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
         BRE_ASSERT(mapIt != materialMap.end());
 
         // Get material properties
-        float baseColor[3U] = { 0.0f, 0.0f, 0.0f };
         float smoothness = 0.0f;
         float metalMask = 0.0f;
         while (mapIt != materialMap.end()) {
             pairFirstValue = mapIt->first.as<std::string>();
 
-            if (pairFirstValue == "base color") {
-                YamlUtils::GetSequence(mapIt->second, baseColor, 3U);
-            } else if (pairFirstValue == "smoothness") {
+            if (pairFirstValue == "smoothness") {
                 smoothness = mapIt->second.as<float>();
                 MathUtils::Clamp(smoothness, 0.0f, 1.0f);
             } else if (pairFirstValue == "metal mask") {
@@ -93,10 +90,7 @@ MaterialPropertiesLoader::LoadMaterialsProperties(const YAML::Node& rootNode) no
             ++mapIt;
         }
 
-        MaterialProperties materialProperties(baseColor[0],
-                                              baseColor[1],
-                                              baseColor[2],
-                                              metalMask,
+        MaterialProperties materialProperties(metalMask,
                                               smoothness);
         mMaterialPropertiesByName.insert(std::make_pair(pairSecondValue, materialProperties));
     }

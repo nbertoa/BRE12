@@ -6,26 +6,18 @@ namespace BRE {
 MaterialTechnique::TechniqueType
 MaterialTechnique::GetType() const noexcept
 {
-    if (mDiffuseTexture != nullptr) {
-        if (mNormalTexture != nullptr) {
-            if (mHeightTexture != nullptr) {
-                return TechniqueType::HEIGHT_MAPPING;
-            } else {
-                return TechniqueType::NORMAL_MAPPING;
-            }
-        } else {
-            BRE_CHECK_MSG(mHeightTexture == nullptr, L"There is no technique with diffuse and height texture but no normal texture");
-            return TechniqueType::TEXTURE_MAPPING;
-        }
-    } else if (mNormalTexture != nullptr) {
+    BRE_CHECK_MSG(mDiffuseTexture != nullptr, L"There is no technique without diffuse texture");
+
+    if (mNormalTexture != nullptr) {
         if (mHeightTexture != nullptr) {
-            return TechniqueType::COLOR_HEIGHT_MAPPING;
+            return TechniqueType::HEIGHT_MAPPING;
         } else {
-            return TechniqueType::COLOR_NORMAL_MAPPING;
+            return TechniqueType::NORMAL_MAPPING;
         }
     } else {
-        BRE_CHECK_MSG(mHeightTexture == nullptr, L"There is no technique with height texture only");
-        return TechniqueType::COLOR_MAPPING;
+        BRE_CHECK_MSG(mHeightTexture == nullptr, L"There is no technique with diffuse and height texture but no normal texture");
+        return TechniqueType::TEXTURE_MAPPING;
     }
+
 }
 }

@@ -1,73 +1,55 @@
 models:
-  reference: resources/scenes/helpers/models.yml
+  bunny: resources/models/bunny.obj
   
 textures:
   reference: resources/scenes/helpers/all_textures.yml
-  sky map: resources/textures/cubeMaps/canyon_cube_map.dds
-  cube map diffuse: resources/textures/cubeMaps/canyon_diffuse_cube_map.dds
-  cube map specular: resources/textures/cubeMaps/canyon_specular_cube_map.dds 
+  sky map: resources/textures/cubeMaps/factory_cube_map.dds
+  cube map diffuse: resources/textures/cubeMaps/factory_diffuse_cube_map.dds
+  cube map specular: resources/textures/cubeMaps/factory_specular_cube_map.dds
   
 material properties:
   - reference: resources/scenes/helpers/all_material_properties.yml
-    
+  
 material techniques:
   - reference: resources/scenes/helpers/all_material_techniques.yml
-    
+        
 drawable objects:
-  - model: unreal
-    material properties: gold8
-    material technique: metal_normal
+  - model: bunny
+    material properties: metal0
+    material technique: yellow
+    translation: [0.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [16.0, 16.0, 16.0]
+  - model: bunny
+    material properties: metal2
+    material technique: yellow
+    translation: [50.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 50.0]
+    scale: [16.0, 16.0, 16.0]
+  - model: bunny
+    material properties: metal4
+    material technique: yellow
     translation: [100.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: unreal
-    material properties: gold3
-    material technique: metal_normal
+    scale: [16.0, 16.0, 16.0]
+  - model: bunny
+    material properties: metal6
+    material technique: yellow
     translation: [150.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: unreal
-    material properties: gold4
-    material technique: metal_normal
+    scale: [16.0, 16.0, 16.0]
+  - model: bunny
+    material properties: metal8
+    material technique: yellow
     translation: [200.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: unreal
-    material properties: gold5
-    material technique: metal_normal
+    scale: [16.0, 16.0, 16.0]
+  - model: bunny
+    material properties: metal10
+    material technique: yellow
     translation: [250.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: unreal
-    material properties: gold6
-    material technique: metal_normal
-    translation: [300.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: unreal
-    material properties: gold7
-    material technique: metal_normal
-    translation: [350.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: unreal
-    material properties: gold8
-    material technique: metal_normal
-    translation: [400.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: unreal
-    material properties: gold9
-    material technique: metal_normal
-    translation: [450.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 50.0]
-    scale: [0.2, 0.2, 0.2]
-  - model: unreal
-    material properties: gold10
-    material technique: metal_normal
-    translation: [500.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 50.0]
-    scale: [0.2, 0.2, 0.2]
+    scale: [16.0, 16.0, 16.0]
     
 environment:
   - sky box texture: sky map

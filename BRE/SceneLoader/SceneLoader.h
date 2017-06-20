@@ -39,24 +39,6 @@ private:
     void GenerateGeometryPassRecorders(Scene& scene) noexcept;
 
     ///
-    /// @brief Generate geometry pass command list recorders for color mapping
-    /// @param commandListRecorders Geometry pass command list recorders
-    ///
-    void GenerateGeometryPassRecordersForColorMapping(GeometryCommandListRecorders& commandListRecorders) noexcept;
-
-    ///
-    /// @brief Generate geometry pass command list recorders for color normal mapping
-    /// @param commandListRecorders Geometry pass command list recorders
-    ///
-    void GenerateGeometryPassRecordersForColorNormalMapping(GeometryCommandListRecorders& commandListRecorders) noexcept;
-
-    ///
-    /// @brief Generate geometry pass command list recorders for color height mapping
-    /// @param commandListRecorders Geometry pass command list recorders
-    ///
-    void GenerateGeometryPassRecordersForColorHeightMapping(GeometryCommandListRecorders& commandListRecorders) noexcept;
-
-    ///
     /// @brief Generate geometry pass command list recorders for texture mapping
     /// @param commandListRecorders Geometry pass command list recorders
     ///

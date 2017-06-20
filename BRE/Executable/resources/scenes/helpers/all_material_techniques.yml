@@ -149,5 +149,7 @@ material techniques:
     diffuse texture: wood2     
     normal texture: wood2_normal
     height texture: wood2_height
+  - name: yellow
+    diffuse texture: yellow
     
     

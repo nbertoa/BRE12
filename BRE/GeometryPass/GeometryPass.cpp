@@ -9,9 +9,6 @@
 #include <DescriptorManager\RenderTargetDescriptorManager.h>
 #include <DirectXManager\DirectXManager.h>
 #include <DXUtils/D3DFactory.h>
-#include <GeometryPass\Recorders\ColorMappingCommandListRecorder.h>
-#include <GeometryPass\Recorders\ColorHeightMappingCommandListRecorder.h>
-#include <GeometryPass\Recorders\ColorNormalMappingCommandListRecorder.h>
 #include <GeometryPass\Recorders\HeightMappingCommandListRecorder.h>
 #include <GeometryPass\Recorders\NormalMappingCommandListRecorder.h>
 #include <GeometryPass\Recorders\TextureMappingCommandListRecorder.h>
@@ -106,9 +103,6 @@ GeometryPass::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& depthBufferView) noexcept
 
     CreateGeometryBuffersAndRenderTargetViews(mGeometryBuffers, mGeometryBufferRenderTargetViews);
 
-    ColorMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
-    ColorHeightMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
-    ColorNormalMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
     HeightMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
     NormalMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);
     TextureMappingCommandListRecorder::InitSharedPSOAndRootSignature(sGeometryBufferFormats, BUFFERS_COUNT);

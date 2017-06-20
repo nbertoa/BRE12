@@ -49,11 +49,11 @@ Output main(const in Input input)
     // Base color and metal mask
     const float3 diffuseColor = DiffuseTexture.Sample(TextureSampler,
                                                       input.mUV).rgb;
-    output.mBaseColor_MetalMask = float4(gMaterialPropertiesCBuffer.mBaseColor_MetalMask.xyz * diffuseColor,
-                                         gMaterialPropertiesCBuffer.mBaseColor_MetalMask.w);
+    output.mBaseColor_MetalMask = float4(diffuseColor,
+                                         gMaterialPropertiesCBuffer.mMetalnessSmoothness.r);
 
     // Smoothness
-    output.mNormal_Smoothness.z = gMaterialPropertiesCBuffer.mSmoothness;
+    output.mNormal_Smoothness.z = gMaterialPropertiesCBuffer.mMetalnessSmoothness.g;
 
     return output;
 }

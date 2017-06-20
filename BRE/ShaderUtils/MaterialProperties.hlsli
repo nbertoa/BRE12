@@ -2,8 +2,8 @@
 #define MATERIALPROPERTIES_H
 
 struct MaterialProperties {
-    float4 mBaseColor_MetalMask;
-    float mSmoothness;
+    // We use 4 floats: metalness + smoothnes + padding
+    float4 mMetalnessSmoothness;
 };
 
 #endif 

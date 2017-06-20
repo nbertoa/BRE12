@@ -8,39 +8,45 @@ textures:
   cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds
   
 material properties:
-  - reference: resources/scenes/helpers/non_metals_material_properties.yml
+  - reference: resources/scenes/helpers/all_material_properties.yml
   
 material techniques:
   - reference: resources/scenes/helpers/all_material_techniques.yml
         
 drawable objects:
   - model: bunny
-    material properties: charcoal10
+    material properties: non_metal0
+    material technique: yellow
     translation: [0.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [16.0, 16.0, 16.0]
   - model: bunny
-    material properties: desert_sand8
+    material properties: non_metal2
+    material technique: yellow
     translation: [50.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [16.0, 16.0, 16.0]
   - model: bunny
-    material properties: ocean_ice6
+    material properties: non_metal4
+    material technique: yellow
     translation: [100.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [16.0, 16.0, 16.0]
   - model: bunny
-    material properties: worn_asphalt7
+    material properties: non_metal6
+    material technique: yellow
     translation: [150.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [16.0, 16.0, 16.0]
   - model: bunny
-    material properties: green_grass3
+    material properties: non_metal8
+    material technique: yellow
     translation: [200.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [16.0, 16.0, 16.0]
   - model: bunny
-    material properties: bare_soil9
+    material properties: non_metal10
+    material technique: yellow
     translation: [250.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [16.0, 16.0, 16.0]

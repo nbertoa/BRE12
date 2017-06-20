@@ -65,7 +65,6 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
             continue;
         }
 
-
         materialTechniqueName = mapIt->second.as<std::string>();
         const std::wstring errorMsg =
             L"Material technique name must be unique: " + StringUtils::AnsiToWideString(materialTechniqueName);

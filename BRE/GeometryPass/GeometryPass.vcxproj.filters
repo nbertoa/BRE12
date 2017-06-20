@@ -12,15 +12,6 @@
     <ClInclude Include="Recorders\HeightMappingCommandListRecorder.h">
       <Filter>Recorders</Filter>
     </ClInclude>
-    <ClInclude Include="Recorders\ColorNormalMappingCommandListRecorder.h">
-      <Filter>Recorders</Filter>
-    </ClInclude>
-    <ClInclude Include="Recorders\ColorHeightMappingCommandListRecorder.h">
-      <Filter>Recorders</Filter>
-    </ClInclude>
-    <ClInclude Include="Recorders\ColorMappingCommandListRecorder.h">
-      <Filter>Recorders</Filter>
-    </ClInclude>
     <ClInclude Include="Shaders\HeightMappingCBuffer.h">
       <Filter>Shaders</Filter>
     </ClInclude>
@@ -36,15 +27,6 @@
       <Filter>Recorders</Filter>
     </ClCompile>
     <ClCompile Include="Recorders\HeightMappingCommandListRecorder.cpp">
-      <Filter>Recorders</Filter>
-    </ClCompile>
-    <ClCompile Include="Recorders\ColorNormalMappingandListRecorder.cpp">
-      <Filter>Recorders</Filter>
-    </ClCompile>
-    <ClCompile Include="Recorders\ColorHeightMappingCommandListRecorder.cpp">
-      <Filter>Recorders</Filter>
-    </ClCompile>
-    <ClCompile Include="Recorders\ColorMappingCommandListRecorder.cpp">
       <Filter>Recorders</Filter>
     </ClCompile>
     <ClCompile Include="GeometrySettings.cpp" />
@@ -64,15 +46,6 @@
     </Filter>
     <Filter Include="Shaders\NormalMapping">
       <UniqueIdentifier>{747aceb1-adf0-4eab-b917-db1d4dee27db}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders\ColorNormalMapping">
-      <UniqueIdentifier>{3d10d77c-6138-4d24-bb66-96d8bbb038d8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders\ColorHeightMapping">
-      <UniqueIdentifier>{f2ec66fd-0992-4304-a5bf-1f1c62a05963}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders\ColorMapping">
-      <UniqueIdentifier>{38ea52c5-014e-456a-b7b0-cbe0e4cf5767}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -108,39 +81,6 @@
     </FxCompile>
     <FxCompile Include="Shaders\HeightMapping\DS.hlsl">
       <Filter>Shaders\HeightMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ColorNormalMapping\PS.hlsl">
-      <Filter>Shaders\ColorNormalMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ColorNormalMapping\RS.hlsl">
-      <Filter>Shaders\ColorNormalMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ColorNormalMapping\VS.hlsl">
-      <Filter>Shaders\ColorNormalMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ColorHeightMapping\DS.hlsl">
-      <Filter>Shaders\ColorHeightMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ColorHeightMapping\HS.hlsl">
-      <Filter>Shaders\ColorHeightMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ColorHeightMapping\PS.hlsl">
-      <Filter>Shaders\ColorHeightMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ColorHeightMapping\RS.hlsl">
-      <Filter>Shaders\ColorHeightMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ColorHeightMapping\VS.hlsl">
-      <Filter>Shaders\ColorHeightMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ColorMapping\PS.hlsl">
-      <Filter>Shaders\ColorMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ColorMapping\RS.hlsl">
-      <Filter>Shaders\ColorMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ColorMapping\VS.hlsl">
-      <Filter>Shaders\ColorMapping</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

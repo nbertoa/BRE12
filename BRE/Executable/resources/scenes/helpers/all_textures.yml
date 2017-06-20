@@ -29,6 +29,7 @@ textures:
   metal2_normal: resources/textures/metal/metal2_normal.dds
   metal3: resources/textures/metal/metal3.dds
   metal3_normal: resources/textures/metal/metal3_normal.dds
+  metalness0: resources/textures/metalness0.dds
   rock: resources/textures/rock/rock.dds
   rock_normal: resources/textures/rock/rock_normal.dds
   rock_height: resources/textures/rock/rock_height.dds
@@ -50,3 +51,4 @@ textures:
   wood2: resources/textures/wood/wood2.dds
   wood2_normal: resources/textures/wood/wood2_normal.dds
   wood2_height: resources/textures/wood/wood2_height.dds
+  yellow: resources/textures/colors/yellow.dds
