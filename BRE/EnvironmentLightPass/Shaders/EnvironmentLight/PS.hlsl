@@ -36,15 +36,15 @@ Output main(const in Input input)
 #ifdef SKIP_ENVIRONMENT_LIGHT
     output.mColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 #else
-    const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
+    const int3 fragmentPositionScreenSpace = int3(input.mPositionNDC.xy, 0);
 
     // Ambient accessibility (1.0f - ambient occlussion factor)
-    const float ambientAccessibility = AmbientAccessibilityTexture.Load(fragmentScreenSpace);
+    const float ambientAccessibility = AmbientAccessibilityTexture.Load(fragmentPositionScreenSpace);
 
-    const float4 normal_smoothness = Normal_SmoothnessTexture.Load(fragmentScreenSpace);
+    const float4 normal_smoothness = Normal_SmoothnessTexture.Load(fragmentPositionScreenSpace);
 
     // Compute fragment position in view space
-    const float fragmentZNDC = DepthTexture.Load(fragmentScreenSpace);
+    const float fragmentZNDC = DepthTexture.Load(fragmentPositionScreenSpace);
     const float3 rayViewSpace = normalize(input.mCameraToFragmentVectorViewSpace);
     const float3 fragmentPositionViewSpace = ViewRayToViewPosition(rayViewSpace,
                                                                    fragmentZNDC,
@@ -58,7 +58,7 @@ Output main(const in Input input)
     const float3 normalWorldSpace = normalize(mul(float4(normalViewSpace, 0.0f),
                                                   gFrameCBuffer.mInverseViewMatrix).xyz);
 
-    const float4 baseColor_metalmask = BaseColor_MetalMaskTexture.Load(fragmentScreenSpace);
+    const float4 baseColor_metalmask = BaseColor_MetalMaskTexture.Load(fragmentPositionScreenSpace);
     const float3 baseColor = baseColor_metalmask.xyz;
     const float metalMask = baseColor_metalmask.w;
 

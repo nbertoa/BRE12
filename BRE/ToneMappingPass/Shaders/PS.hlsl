@@ -32,9 +32,9 @@ Output main(const in Input input)
 {
     Output output = (Output)0;
 
-    const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
+    const int3 fragmentPositionScreenSpace = int3(input.mPositionNDC.xy, 0);
 
-    const float4 color = ColorBufferTexture.Load(fragmentScreenSpace);
+    const float4 color = ColorBufferTexture.Load(fragmentPositionScreenSpace);
 
 #ifdef SKIP_TONE_MAPPING
     output.mColor = color;

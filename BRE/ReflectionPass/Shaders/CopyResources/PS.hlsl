@@ -18,8 +18,8 @@ Output main(const in Input input)
     // We store the minimum and maximum for each hi-z buffer level in r and g channels respectively.
     // At the upmost level, the minimum and maximum is the same because we are working
     // at pixel level.
-    const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
-    output.mHiZBufferMipLevel0.r = DepthBuffer.Load(fragmentScreenSpace);
+    const int3 fragmentPositionScreenSpace = int3(input.mPositionNDC.xy, 0);
+    output.mHiZBufferMipLevel0.r = DepthBuffer.Load(fragmentPositionScreenSpace);
     output.mHiZBufferMipLevel0.g = output.mHiZBufferMipLevel0.r;
 
     return output;

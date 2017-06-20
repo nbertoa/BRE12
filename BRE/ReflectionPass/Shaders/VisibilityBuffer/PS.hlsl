@@ -22,18 +22,18 @@ Output main(const in Input input)
 {
     Output output = (Output)0;
 
-    const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
+    const int3 fragmentPositionScreenSpace = int3(input.mPositionNDC.xy, 0);
     float4 upperMinZ;
-    upperMinZ.x = HierZBufferUpperLevel.Load(fragmentScreenSpace).x;
-    upperMinZ.y = HierZBufferUpperLevel.Load(fragmentScreenSpace + int3(0, -1, 0)).x;
-    upperMinZ.z = HierZBufferUpperLevel.Load(fragmentScreenSpace + int3(-1, 0, 0)).x;
-    upperMinZ.w = HierZBufferUpperLevel.Load(fragmentScreenSpace + int3(-1, -1, 0)).x;
+    upperMinZ.x = HierZBufferUpperLevel.Load(fragmentPositionScreenSpace).x;
+    upperMinZ.y = HierZBufferUpperLevel.Load(fragmentPositionScreenSpace + int3(0, -1, 0)).x;
+    upperMinZ.z = HierZBufferUpperLevel.Load(fragmentPositionScreenSpace + int3(-1, 0, 0)).x;
+    upperMinZ.w = HierZBufferUpperLevel.Load(fragmentPositionScreenSpace + int3(-1, -1, 0)).x;
     upperMinZ.x = NdcZToScreenSpaceZ(upperMinZ.x, gFrameCBuffer.mProjectionMatrix);
     upperMinZ.y = NdcZToScreenSpaceZ(upperMinZ.y, gFrameCBuffer.mProjectionMatrix);
     upperMinZ.z = NdcZToScreenSpaceZ(upperMinZ.z, gFrameCBuffer.mProjectionMatrix);
     upperMinZ.w = NdcZToScreenSpaceZ(upperMinZ.w, gFrameCBuffer.mProjectionMatrix);
 
-    float2 lowerMinMaxZ = HierZBufferLowerLevel.Load(fragmentScreenSpace);
+    float2 lowerMinMaxZ = HierZBufferLowerLevel.Load(fragmentPositionScreenSpace);
     lowerMinMaxZ.x = NdcZToScreenSpaceZ(lowerMinMaxZ.x, gFrameCBuffer.mProjectionMatrix);
     lowerMinMaxZ.y = NdcZToScreenSpaceZ(lowerMinMaxZ.y, gFrameCBuffer.mProjectionMatrix);
 
@@ -41,10 +41,10 @@ Output main(const in Input input)
 
     // Get the previous 4 fine transparency values.
     float4 visibility;
-    visibility.x = VisibilityBufferUpperLevel.Load(fragmentScreenSpace);
-    visibility.y = VisibilityBufferUpperLevel.Load(fragmentScreenSpace + int3(0, -1, 0));
-    visibility.z = VisibilityBufferUpperLevel.Load(fragmentScreenSpace + int3(-1, 0, 0));
-    visibility.w = VisibilityBufferUpperLevel.Load(fragmentScreenSpace + int3(-1, -1, 0));
+    visibility.x = VisibilityBufferUpperLevel.Load(fragmentPositionScreenSpace);
+    visibility.y = VisibilityBufferUpperLevel.Load(fragmentPositionScreenSpace + int3(0, -1, 0));
+    visibility.z = VisibilityBufferUpperLevel.Load(fragmentPositionScreenSpace + int3(-1, 0, 0));
+    visibility.w = VisibilityBufferUpperLevel.Load(fragmentPositionScreenSpace + int3(-1, -1, 0));
 
     // Calculate the percentage of visibility relative to the
     // calculated coarse depth. Modulate with transparency of previous mip.

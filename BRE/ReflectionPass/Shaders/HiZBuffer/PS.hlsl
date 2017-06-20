@@ -15,11 +15,11 @@ Output main(const in Input input)
 {
     Output output = (Output)0;
 
-    const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
-    const float2 minMaxDepth0 = HierZBufferUpperLevel.Load(fragmentScreenSpace);
-    const float2 minMaxDepth1 = HierZBufferUpperLevel.Load(fragmentScreenSpace + int3(0, -1, 0));
-    const float2 minMaxDepth2 = HierZBufferUpperLevel.Load(fragmentScreenSpace + int3(-1, 0, 0));
-    const float2 minMaxDepth3 = HierZBufferUpperLevel.Load(fragmentScreenSpace + int3(-1, -1, 0));
+    const int3 fragmentPositionScreenSpace = int3(input.mPositionNDC.xy, 0);
+    const float2 minMaxDepth0 = HierZBufferUpperLevel.Load(fragmentPositionScreenSpace);
+    const float2 minMaxDepth1 = HierZBufferUpperLevel.Load(fragmentPositionScreenSpace + int3(0, -1, 0));
+    const float2 minMaxDepth2 = HierZBufferUpperLevel.Load(fragmentPositionScreenSpace + int3(-1, 0, 0));
+    const float2 minMaxDepth3 = HierZBufferUpperLevel.Load(fragmentPositionScreenSpace + int3(-1, -1, 0));
 
     // We store the minimum and maximum neighbors depth in the R and G channels respectively.
     output.mHierZBufferLowerLevel.r = min(min(minMaxDepth0.x, minMaxDepth1.x),

@@ -25,8 +25,8 @@ Output main(const in Input input)
     Output output = (Output)0;
 
 #ifdef SKIP_BLUR
-    const int3 fragmentScreenSpace = int3(input.mPositionNDC.xy, 0);
-    output.mColor = BufferTexture.Load(fragmentScreenSpace);
+    const int3 fragmentPositionScreenSpace = int3(input.mPositionNDC.xy, 0);
+    output.mColor = BufferTexture.Load(fragmentPositionScreenSpace);
 #else
     float w;
     float h;

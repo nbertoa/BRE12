@@ -24,8 +24,8 @@ Output main(const in Input input)
 {
     Output output = (Output)0;
 
-    const int3 fragmentScreenSpace = int3(input.mPositionScreenSpace.xy, 0);
-    output.mColor = ColorBufferTexture.Load(fragmentScreenSpace);
+    const int3 fragmentPositionScreenSpace = int3(input.mPositionScreenSpace.xy, 0);
+    output.mColor = ColorBufferTexture.Load(fragmentPositionScreenSpace);
     output.mColor = float4(accurateLinearToSRGB(output.mColor.xyz),
                            1.0f);
 

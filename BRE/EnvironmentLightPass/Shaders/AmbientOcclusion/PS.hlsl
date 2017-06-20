@@ -38,16 +38,16 @@ Output main(const in Input input)
         float2(gAmbientOcclusionCBuffer.mScreenWidth / gAmbientOcclusionCBuffer.mNoiseTextureDimension, 
                gAmbientOcclusionCBuffer.mScreenHeight / gAmbientOcclusionCBuffer.mNoiseTextureDimension);
 
-    const int3 fragmentPositionNDC = int3(input.mPositionNDC.xy, 0);
+    const int3 fragmentPositionScreenSpace = int3(input.mPositionNDC.xy, 0);
 
-    const float fragmentZNDC = DepthTexture.Load(fragmentPositionNDC);
+    const float fragmentZNDC = DepthTexture.Load(fragmentPositionScreenSpace);
     const float3 rayViewSpace = normalize(input.mRayViewSpace);
     const float4 fragmentPositionViewSpace = float4(ViewRayToViewPosition(rayViewSpace,
                                                                           fragmentZNDC,
                                                                           gFrameCBuffer.mProjectionMatrix),
                                                     1.0f);
 
-    const float2 normal = Normal_SmoothnessTexture.Load(fragmentPositionNDC).xy;
+    const float2 normal = Normal_SmoothnessTexture.Load(fragmentPositionScreenSpace).xy;
     const float3 normalViewSpace = normalize(Decode(normal));
 
     // Build a matrix to reorient the sample kerne
