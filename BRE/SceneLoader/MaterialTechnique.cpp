@@ -8,6 +8,7 @@ MaterialTechnique::GetType() const noexcept
 {
     BRE_CHECK_MSG(mDiffuseTexture != nullptr, L"There is no technique without diffuse texture");
     BRE_CHECK_MSG(mMetalnessTexture != nullptr, L"There is no technique without metalness texture");
+    BRE_CHECK_MSG(mRoughnessTexture != nullptr, L"There is no technique without roughness texture");
 
     if (mNormalTexture != nullptr) {
         if (mHeightTexture != nullptr) {

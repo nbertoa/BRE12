@@ -2,206 +2,260 @@ material techniques:
   - name: brick
     diffuse texture: brick
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: brick_normal
     diffuse texture: brick
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: brick_normal
   - name: brick_height
     diffuse texture: brick
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: brick_normal
     height texture: brick_height
   - name: brick2
     diffuse texture: brick2
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: brick2_normal
     diffuse texture: brick2
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: brick2_normal
   - name: brick2_height
     diffuse texture: brick2
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: brick2_normal
     height texture: brick2_height
   - name: brick3
     diffuse texture: brick3
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: brick3_normal
     diffuse texture: brick3
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: brick3_normal
   - name: brick3_height
     diffuse texture: brick3
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: brick3_normal
     height texture: brick3_height
   - name: cobblestone
     diffuse texture: cobblestone
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: cobblestone_normal
     diffuse texture: cobblestone
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: cobblestone_normal
   - name: cobblestone_height
     diffuse texture: cobblestone
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: cobblestone_normal
     height texture: cobblestone_height
   - name: cobblestone2
     diffuse texture: cobblestone2
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: cobblestone2_normal
     diffuse texture: cobblestone2
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: cobblestone2_normal
   - name: cobblestone2_height
     diffuse texture: cobblestone2
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: cobblestone2_normal
     height texture: cobblestone2_height
   - name: cobblestone3
     diffuse texture: cobblestone3
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: cobblestone3_normal
     diffuse texture: cobblestone3
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: cobblestone3_normal
   - name: cobblestone3_height
     diffuse texture: cobblestone3
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: cobblestone3_normal
     height texture: cobblestone3_height
   - name: cobblestone4
     diffuse texture: cobblestone4
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: cobblestone4_normal
     diffuse texture: cobblestone4
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: cobblestone4_normal
   - name: cobblestone4_height
     diffuse texture: cobblestone4
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: cobblestone4_normal
     height texture: cobblestone4_height
   - name: cobblestone5
     diffuse texture: cobblestone5
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: cobblestone5_normal
     diffuse texture: cobblestone5
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: cobblestone5_normal
   - name: cobblestone5_height
     diffuse texture: cobblestone5
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: cobblestone5_normal
     height texture: cobblestone5_height
   - name: metal
     diffuse texture: metal     
     metalness texture: metalness1
+    roughness texture: roughness0
   - name: metal_normal
     diffuse texture: metal
     metalness texture: metalness1
+    roughness texture: roughness0
     normal texture: metal_normal
   - name: metal2
     diffuse texture: metal2     
     metalness texture: metalness1
+    roughness texture: roughness0
   - name: metal2_normal
     diffuse texture: metal2
     metalness texture: metalness1
+    roughness texture: roughness0
     normal texture: metal2_normal
   - name: metal3
     diffuse texture: metal3     
     metalness texture: metalness1
+    roughness texture: roughness0
   - name: metal3_normal
     diffuse texture: metal3
+    metalness texture: metalness1
+    roughness texture: roughness0
     normal texture: metal3_normal
   - name: rock
     diffuse texture: rock
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: rock_normal
     diffuse texture: rock     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: rock_normal
   - name: rock_height
     diffuse texture: rock     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: rock_normal
     height texture: rock_height
   - name: rock2
     diffuse texture: rock2
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: rock2_normal
     diffuse texture: rock2     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: rock2_normal
   - name: rock2_height
     diffuse texture: rock2     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: rock2_normal
     height texture: rock2_height
   - name: rock3
     diffuse texture: rock3
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: rock3_normal
     diffuse texture: rock3     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: rock3_normal
   - name: rock3_height
     diffuse texture: rock3     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: rock3_normal
     height texture: rock3_height
   - name: rock4
     diffuse texture: rock4
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: rock4_normal
     diffuse texture: rock4     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: rock4_normal
   - name: rock4_height
     diffuse texture: rock4     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: rock4_normal
     height texture: rock4_height
   - name: rock5
     diffuse texture: rock5
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: rock5_normal
     diffuse texture: rock5
-    metalness texture: metalness0    
+    metalness texture: metalness0  
+    roughness texture: roughness0.5    
     normal texture: rock5_normal
   - name: rock5_height
     diffuse texture: rock5     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: rock5_normal
     height texture: rock5_height
   - name: wood
     diffuse texture: wood
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: wood_normal
     diffuse texture: wood     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: wood_normal
   - name: wood_height
     diffuse texture: wood     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: wood_normal
     height texture: wood_height
   - name: wood2
     diffuse texture: wood2  
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: wood2_normal
     diffuse texture: wood2     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: wood2_normal
   - name: wood2_height
     diffuse texture: wood2     
     metalness texture: metalness0
+    roughness texture: roughness0.5
     normal texture: wood2_normal
     height texture: wood2_height
   - name: yellow
     diffuse texture: yellow
     metalness texture: metalness0
+    roughness texture: roughness0.5
   - name: yellow_metal
     diffuse texture: yellow
     metalness texture: metalness1
+    roughness texture: roughness0

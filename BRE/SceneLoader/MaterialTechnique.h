@@ -21,9 +21,13 @@ public:
     };
 
     MaterialTechnique(ID3D12Resource* diffuseTexture = nullptr,
+                      ID3D12Resource* metalnessTexture = nullptr,
+                      ID3D12Resource* roughnessTexture = nullptr,
                       ID3D12Resource* normalTexture = nullptr,
                       ID3D12Resource* heightTexture = nullptr)
         : mDiffuseTexture(diffuseTexture)
+        , mMetalnessTexture(metalnessTexture)
+        , mRoughnessTexture(roughnessTexture)
         , mNormalTexture(normalTexture)
         , mHeightTexture(heightTexture)
     {}
@@ -49,6 +53,36 @@ public:
     }
 
     ///
+    /// @brief Get roughness texture
+    /// @return Roughness texture
+    ///
+    ID3D12Resource& GetRoughnessTexture() const noexcept
+    {
+        BRE_ASSERT(mRoughnessTexture != nullptr);
+        return *mRoughnessTexture;
+    }
+
+    ///
+    /// @brief Get normal texture
+    /// @return Normal texture
+    ///
+    ID3D12Resource& GetNormalTexture() const noexcept
+    {
+        BRE_ASSERT(mNormalTexture != nullptr);
+        return *mNormalTexture;
+    }
+
+    ///
+    /// @brief Get height texture
+    /// @return Height texture
+    ///
+    ID3D12Resource& GetHeightTexture() const noexcept
+    {
+        BRE_ASSERT(mHeightTexture != nullptr);
+        return *mHeightTexture;
+    }
+
+    ///
     /// @brief Set diffuse texture
     /// @param texture New diffuse texture.
     ///
@@ -69,13 +103,13 @@ public:
     }
 
     ///
-    /// @brief Get normal texture
-    /// @return Normal texture
+    /// @brief Set roughness texture
+    /// @param texture New roughness texture.
     ///
-    ID3D12Resource& GetNormalTexture() const noexcept
+    void SetRoughnessTexture(ID3D12Resource* texture) noexcept
     {
-        BRE_ASSERT(mNormalTexture != nullptr);
-        return *mNormalTexture;
+        BRE_ASSERT(texture != nullptr);
+        mRoughnessTexture = texture;
     }
 
     ///
@@ -86,16 +120,6 @@ public:
     {
         BRE_ASSERT(texture != nullptr);
         mNormalTexture = texture;
-    }
-
-    ///
-    /// @brief Get height texture
-    /// @return Height texture
-    ///
-    ID3D12Resource& GetHeightTexture() const noexcept
-    {
-        BRE_ASSERT(mHeightTexture != nullptr);
-        return *mHeightTexture;
     }
 
     ///
@@ -117,6 +141,7 @@ public:
 private:
     ID3D12Resource* mDiffuseTexture{ nullptr };
     ID3D12Resource* mMetalnessTexture{ nullptr };
+    ID3D12Resource* mRoughnessTexture{ nullptr };
     ID3D12Resource* mNormalTexture{ nullptr };
     ID3D12Resource* mHeightTexture{ nullptr };
 };

@@ -46,6 +46,9 @@ textures:
   rock5: resources/textures/rock/rock5.dds
   rock5_normal: resources/textures/rock/rock5_normal.dds
   rock5_height: resources/textures/rock/rock5_height.dds
+  roughness0: resources/textures/roughness0.dds
+  roughness0.5: resources/textures/roughness0.5.dds
+  roughness1: resources/textures/roughness1.dds
   wood: resources/textures/wood/wood.dds
   wood_normal: resources/textures/wood/wood_normal.dds
   wood_height: resources/textures/wood/wood_height.dds

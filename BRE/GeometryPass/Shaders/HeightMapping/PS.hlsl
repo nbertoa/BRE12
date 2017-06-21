@@ -23,7 +23,8 @@ ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
 SamplerState TextureSampler : register (s0);
 Texture2D DiffuseTexture : register (t0);
 Texture2D MetalnessTexture : register (t1);
-Texture2D NormalTexture : register (t2);
+Texture2D RoughnessTexture : register (t2);
+Texture2D NormalTexture : register (t3);
 
 struct Output {
     float4 mNormal_Smoothness : SV_Target0;
@@ -56,7 +57,8 @@ Output main(const in Input input)
                                          metalness);
 
     // Smoothness
-    output.mNormal_Smoothness.z = gMaterialPropertiesCBuffer.mMetalnessSmoothness.g;
+    output.mNormal_Smoothness.z = RoughnessTexture.Sample(TextureSampler,
+                                                          input.mUV).r;
 
     return output;
 }

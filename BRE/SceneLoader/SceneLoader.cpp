@@ -86,7 +86,8 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryCommandListR
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> diffuseTextures;
     std::vector<ID3D12Resource*> metalnessTextures;
-
+    std::vector<ID3D12Resource*> roughnessTextures;
+    
     std::size_t geometryDataVectorOffset = 0;
     for (const DrawableObjectLoader::DrawableObjectsByModelName::value_type& pair : drawableObjectsByModelName) {
         const std::vector<DrawableObject>& drawableObjects = pair.second;
@@ -120,7 +121,7 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryCommandListR
                 const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
                 diffuseTextures.push_back(&materialTechnique.GetDiffuseTexture());
                 metalnessTextures.push_back(&materialTechnique.GetMetalnessTexture());
-
+                roughnessTextures.push_back(&materialTechnique.GetRoughnessTexture());
 
                 // Store matrices
                 const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
@@ -137,7 +138,8 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryCommandListR
     commandListRecorder->Init(geometryDataVector,
                               materialProperties,
                               diffuseTextures,
-                              metalnessTextures);
+                              metalnessTextures,
+                              roughnessTextures);
 
     commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
 }
@@ -159,6 +161,7 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryCommandListRe
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> diffuseTextures;
     std::vector<ID3D12Resource*> metalnessTextures;
+    std::vector<ID3D12Resource*> roughnessTextures;
     std::vector<ID3D12Resource*> normalTextures;
 
     std::size_t geometryDataVectorOffset = 0;
@@ -194,6 +197,7 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryCommandListRe
                 const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
                 diffuseTextures.push_back(&materialTechnique.GetDiffuseTexture());
                 metalnessTextures.push_back(&materialTechnique.GetMetalnessTexture());
+                roughnessTextures.push_back(&materialTechnique.GetRoughnessTexture());
                 normalTextures.push_back(&materialTechnique.GetNormalTexture());
 
                 // Store matrices
@@ -212,6 +216,7 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryCommandListRe
                               materialProperties,
                               diffuseTextures,
                               metalnessTextures,
+                              roughnessTextures,
                               normalTextures);
 
     commandListRecorders.push_back(std::unique_ptr<GeometryCommandListRecorder>(commandListRecorder));
@@ -234,6 +239,7 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryCommandListRe
     std::vector<MaterialProperties> materialProperties;
     std::vector<ID3D12Resource*> diffuseTextures;
     std::vector<ID3D12Resource*> metalnessTextures;
+    std::vector<ID3D12Resource*> roughnessTextures;
     std::vector<ID3D12Resource*> normalTextures;
     std::vector<ID3D12Resource*> heightTextures;
 
@@ -270,6 +276,7 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryCommandListRe
                 const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
                 diffuseTextures.push_back(&materialTechnique.GetDiffuseTexture());
                 metalnessTextures.push_back(&materialTechnique.GetMetalnessTexture());
+                roughnessTextures.push_back(&materialTechnique.GetRoughnessTexture());
                 normalTextures.push_back(&materialTechnique.GetNormalTexture());
                 heightTextures.push_back(&materialTechnique.GetHeightTexture());
 
@@ -289,6 +296,7 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryCommandListRe
                               materialProperties,
                               diffuseTextures,
                               metalnessTextures,
+                              roughnessTextures,
                               normalTextures,
                               heightTextures);
 

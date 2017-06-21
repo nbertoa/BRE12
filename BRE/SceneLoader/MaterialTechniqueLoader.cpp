@@ -20,11 +20,13 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
     //   - name: techniqueName1
     //     diffuse texture: diffuseTextureName
     //     metalness texture: metalnessTextureName
+    //     roughness texture: roughnessTextureName
     //     normal texture: normalTextureName
     //     height texture: heightTextureName
     //   - name: techniqueName2
     //     diffuse texture: diffuseTextureName
     //     metalness texture: metalnessTextureName
+    //     roughness texture: roughnessTextureName
     //     normal texture: normalTextureName
     const YAML::Node materialTechniquesNode = rootNode["material techniques"];
 
@@ -100,6 +102,8 @@ void MaterialTechniqueLoader::UpdateMaterialTechnique(const std::string& materia
         materialTechnique.SetDiffuseTexture(&texture);
     } else if (materialTechniquePropertyName == "metalness texture") {
         materialTechnique.SetMetalnessTexture(&texture);
+    } else if (materialTechniquePropertyName == "roughness texture") {
+        materialTechnique.SetRoughnessTexture(&texture);
     } else if (materialTechniquePropertyName == "normal texture") {
         materialTechnique.SetNormalTexture(&texture);
     } else if (materialTechniquePropertyName == "height texture") {

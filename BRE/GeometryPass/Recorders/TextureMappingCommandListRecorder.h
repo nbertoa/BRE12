@@ -34,11 +34,13 @@ public:
     /// @param materialProperties List of material properties. Must not be empty.
     /// @param diffuseTextures List of diffuse textures. Must not be empty.
     /// @param metalnessTextures List of metalness textures. Must not be empty.
+    /// @param roughnessTextures List of rougness textures. Must not be empty.
     ///
     void Init(const std::vector<GeometryData>& geometryDataVector,
               const std::vector<MaterialProperties>& materialProperties,
               const std::vector<ID3D12Resource*>& diffuseTextures,
-              const std::vector<ID3D12Resource*>& metalnessTextures) noexcept;
+              const std::vector<ID3D12Resource*>& metalnessTextures,
+              const std::vector<ID3D12Resource*>& roughnessTextures) noexcept;
 
     ///
     /// @brief Records and push command lists to CommandListExecutor
@@ -62,15 +64,20 @@ private:
     /// @param materialProperties List of material properties. Must not be empty.
     /// @param diffuseTextures List of diffuse textures. Must not be empty.
     /// @param metalnessTextures List of metalness textures. Must not be empty.
+    /// @param roughnessTextures List of rougness textures. Must not be empty.
     ///
     void InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties,
                               const std::vector<ID3D12Resource*>& diffuseTextures,
-                              const std::vector<ID3D12Resource*>& metalnessTextures) noexcept;
+                              const std::vector<ID3D12Resource*>& metalnessTextures,
+                              const std::vector<ID3D12Resource*>& roughnessTextures) noexcept;
 
     // First descriptor in the list. All the others are contiguous
     D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorTextureRenderTargetViewsBegin{ 0U };
 
     // First descriptor in the list. All the others are contiguous
     D3D12_GPU_DESCRIPTOR_HANDLE mMetalnessTextureRenderTargetViewsBegin{ 0U };
+
+    // First descriptor in the list. All the others are contiguous
+    D3D12_GPU_DESCRIPTOR_HANDLE mRoughnessTextureRenderTargetViewsBegin{ 0U };
 };
 }

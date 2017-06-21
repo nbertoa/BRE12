@@ -22,6 +22,7 @@ namespace BRE {
 // "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 3 -> Frame CBuffer
 // "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 4 -> Diffuse Texture
 // "DescriptorTable(SRV(t1), visibility = SHADER_VISIBILITY_PIXEL), " \ 5 -> Metalness Texture
+// "DescriptorTable(SRV(t2), visibility = SHADER_VISIBILITY_PIXEL), " \ 6 -> Roughness Texture
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -60,12 +61,14 @@ void
 TextureMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
                                         const std::vector<MaterialProperties>& materialProperties,
                                         const std::vector<ID3D12Resource*>& diffuseTextures,
-                                        const std::vector<ID3D12Resource*>& metalnessTextures) noexcept
+                                        const std::vector<ID3D12Resource*>& metalnessTextures,
+                                        const std::vector<ID3D12Resource*>& roughnessTextures) noexcept
 {
     BRE_ASSERT(geometryDataVector.empty() == false);
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == diffuseTextures.size());
     BRE_ASSERT(diffuseTextures.size() == metalnessTextures.size());
+    BRE_ASSERT(metalnessTextures.size() == roughnessTextures.size());
     BRE_ASSERT(IsDataValid() == false);
 
     const std::size_t numResources = materialProperties.size();
@@ -88,7 +91,8 @@ TextureMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometr
 
     InitCBuffersAndViews(materialProperties, 
                          diffuseTextures,
-                         metalnessTextures);
+                         metalnessTextures,
+                         roughnessTextures);
 
     BRE_ASSERT(IsDataValid());
 }
@@ -125,6 +129,7 @@ TextureMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
     D3D12_GPU_DESCRIPTOR_HANDLE materialCBufferView(mMaterialCBufferViewsBegin);
     D3D12_GPU_DESCRIPTOR_HANDLE baseColorTextureRenderTargetView(mBaseColorTextureRenderTargetViewsBegin);
     D3D12_GPU_DESCRIPTOR_HANDLE metalnessTextureRenderTargetView(mMetalnessTextureRenderTargetViewsBegin);
+    D3D12_GPU_DESCRIPTOR_HANDLE roughnessTextureRenderTargetView(mRoughnessTextureRenderTargetViewsBegin);
 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -153,6 +158,9 @@ TextureMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
             commandList.SetGraphicsRootDescriptorTable(5U, metalnessTextureRenderTargetView);
             metalnessTextureRenderTargetView.ptr += descHandleIncSize;
 
+            commandList.SetGraphicsRootDescriptorTable(6U, roughnessTextureRenderTargetView);
+            roughnessTextureRenderTargetView.ptr += descHandleIncSize;
+
             commandList.DrawIndexedInstanced(geomData.mIndexBufferData.mElementCount, 1U, 0U, 0U, 0U);
         }
     }
@@ -177,7 +185,8 @@ TextureMappingCommandListRecorder::IsDataValid() const noexcept
     const bool result =
         GeometryCommandListRecorder::IsDataValid() &&
         mBaseColorTextureRenderTargetViewsBegin.ptr != 0UL &&
-        mMetalnessTextureRenderTargetViewsBegin.ptr != 0UL;
+        mMetalnessTextureRenderTargetViewsBegin.ptr != 0UL &&
+        mRoughnessTextureRenderTargetViewsBegin.ptr != 0UL;
 
     return result;
 }
@@ -185,11 +194,13 @@ TextureMappingCommandListRecorder::IsDataValid() const noexcept
 void
 TextureMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties,
                                                         const std::vector<ID3D12Resource*>& diffuseTextures,
-                                                        const std::vector<ID3D12Resource*>& metalnessTextures) noexcept
+                                                        const std::vector<ID3D12Resource*>& metalnessTextures,
+                                                        const std::vector<ID3D12Resource*>& roughnessTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == diffuseTextures.size());
     BRE_ASSERT(diffuseTextures.size() == metalnessTextures.size());
+    BRE_ASSERT(metalnessTextures.size() == roughnessTextures.size());
     BRE_ASSERT(mObjectUploadCBuffers == nullptr);
     BRE_ASSERT(mMaterialUploadCBuffers == nullptr);
 
@@ -240,6 +251,11 @@ TextureMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<Materi
     metalnessResVec.reserve(numResources);
     std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> metalnessSrvDescVec;
     metalnessSrvDescVec.reserve(numResources);
+
+    std::vector<ID3D12Resource*> roughnessResVec;
+    roughnessResVec.reserve(numResources);
+    std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> roughnessSrvDescVec;
+    roughnessSrvDescVec.reserve(numResources);
     for (std::size_t i = 0UL; i < numResources; ++i) {
         // Object cbuffer desc
         D3D12_CONSTANT_BUFFER_VIEW_DESC cBufferDesc{};
@@ -276,22 +292,43 @@ TextureMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<Materi
         srvDesc.Texture2D.MipLevels = metalnessResVec.back()->GetDesc().MipLevels;
         metalnessSrvDescVec.push_back(srvDesc);
 
+        // Roughness descriptor
+        roughnessResVec.push_back(roughnessTextures[i]);
+
+        srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MostDetailedMip = 0;
+        srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+        srvDesc.Format = roughnessResVec.back()->GetDesc().Format;
+        srvDesc.Texture2D.MipLevels = roughnessResVec.back()->GetDesc().MipLevels;
+        roughnessSrvDescVec.push_back(srvDesc);
+
         mMaterialUploadCBuffers->CopyData(static_cast<std::uint32_t>(i), &materialProperties[i], sizeof(MaterialProperties));
     }
+
     mObjectCBufferViewsBegin =
         CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),
                                                               static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
+
     mMaterialCBufferViewsBegin =
         CbvSrvUavDescriptorManager::CreateConstantBufferViews(materialCbufferViewDescVec.data(),
                                                               static_cast<std::uint32_t>(materialCbufferViewDescVec.size()));
+
     mBaseColorTextureRenderTargetViewsBegin =
         CbvSrvUavDescriptorManager::CreateShaderResourceViews(resVec.data(),
                                                               srvDescVec.data(),
                                                               static_cast<std::uint32_t>(srvDescVec.size()));
+
     mMetalnessTextureRenderTargetViewsBegin =
         CbvSrvUavDescriptorManager::CreateShaderResourceViews(metalnessResVec.data(),
                                                               metalnessSrvDescVec.data(),
                                                               static_cast<std::uint32_t>(metalnessSrvDescVec.size()));
+
+    mRoughnessTextureRenderTargetViewsBegin =
+        CbvSrvUavDescriptorManager::CreateShaderResourceViews(roughnessResVec.data(),
+                                                              roughnessSrvDescVec.data(),
+                                                              static_cast<std::uint32_t>(roughnessSrvDescVec.size()));
 
 }
 }

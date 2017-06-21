@@ -228,7 +228,7 @@ DiffuseIBL(const float3 baseColor,
 float3
 SpecularIBL(const float3 baseColor,
             const float metalMask,
-            const float smoothness,
+            const float roughness,
             SamplerState textureSampler,
             TextureCube specularIBLCubeMap,
             const float3 viewVectorViewSpace,
@@ -244,7 +244,7 @@ SpecularIBL(const float3 baseColor,
                                                       normalWorldSpace);
 
     // Our cube map has 10 mip map levels
-    const int mipmap = (1.0f - smoothness) * 10.0f;
+    const int mipmap = roughness * 10.0f;
     const float3 specularReflection = specularIBLCubeMap.SampleLevel(textureSampler,
                                                                      reflectionVectorWorldSpace,
                                                                      mipmap).rgb;
