@@ -22,7 +22,8 @@ ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
 
 SamplerState TextureSampler : register (s0);
 Texture2D DiffuseTexture : register (t0);
-Texture2D NormalTexture : register (t1);
+Texture2D MetalnessTexture : register (t1);
+Texture2D NormalTexture : register (t2);
 
 struct Output {
     float4 mNormal_Smoothness : SV_Target0;
@@ -46,11 +47,13 @@ Output main(const in Input input)
                                            normalize(input.mNormalViewSpace));
     output.mNormal_Smoothness.xy = Encode(normalize(mul(normalObjectSpace, tbnViewSpace)));
 
-    // Base color and metal mask
+    // Base color and metalness
     const float3 diffuseColor = DiffuseTexture.Sample(TextureSampler,
                                                       input.mUV).rgb;
+    const float metalness = MetalnessTexture.Sample(TextureSampler,
+                                                    input.mUV).r;
     output.mBaseColor_MetalMask = float4(diffuseColor,
-                                         gMaterialPropertiesCBuffer.mMetalnessSmoothness.r);
+                                         metalness);
 
     // Smoothness
     output.mNormal_Smoothness.z = gMaterialPropertiesCBuffer.mMetalnessSmoothness.g;

@@ -21,7 +21,8 @@ namespace BRE {
 // "DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Material CBuffers
 // "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 3 -> Frame CBuffer
 // "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \ 4 -> Diffuse Texture
-// "DescriptorTable(SRV(t1), visibility = SHADER_VISIBILITY_PIXEL), " \ 5 -> Normal Texture
+// "DescriptorTable(SRV(t1), visibility = SHADER_VISIBILITY_PIXEL), " \ 5 -> Metalness Texture
+// "DescriptorTable(SRV(t2), visibility = SHADER_VISIBILITY_PIXEL), " \ 6 -> Normal Texture
 
 namespace {
 ID3D12PipelineState* sPSO{ nullptr };
@@ -59,13 +60,15 @@ void
 NormalMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometryDataVector,
                                        const std::vector<MaterialProperties>& materialProperties,
                                        const std::vector<ID3D12Resource*>& diffuseTextures,
+                                       const std::vector<ID3D12Resource*>& metalnessTextures,
                                        const std::vector<ID3D12Resource*>& normalTextures) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
     BRE_ASSERT(geometryDataVector.empty() == false);
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == diffuseTextures.size());
-    BRE_ASSERT(diffuseTextures.size() == normalTextures.size());
+    BRE_ASSERT(diffuseTextures.size() == metalnessTextures.size());
+    BRE_ASSERT(metalnessTextures.size() == normalTextures.size());
 
     const std::size_t numResources = materialProperties.size();
     const std::size_t geometryDataCount = geometryDataVector.size();
@@ -87,6 +90,7 @@ NormalMappingCommandListRecorder::Init(const std::vector<GeometryData>& geometry
 
     InitCBuffersAndViews(materialProperties,
                          diffuseTextures,
+                         metalnessTextures,
                          normalTextures);
 
     BRE_ASSERT(IsDataValid());
@@ -123,6 +127,7 @@ NormalMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& 
     D3D12_GPU_DESCRIPTOR_HANDLE objectCBufferView(mObjectCBufferViewsBegin);
     D3D12_GPU_DESCRIPTOR_HANDLE materialCBufferView(mMaterialCBufferViewsBegin);
     D3D12_GPU_DESCRIPTOR_HANDLE baseColorTextureRenderTargetView(mBaseColorTextureRenderTargetViewsBegin);
+    D3D12_GPU_DESCRIPTOR_HANDLE metalnessTextureRenderTargetView(mMetalnessTextureRenderTargetViewsBegin);
     D3D12_GPU_DESCRIPTOR_HANDLE normalTextureRenderTargetView(mNormalTextureRenderTargetViewsBegin);
 
     commandList.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -149,7 +154,10 @@ NormalMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& 
             commandList.SetGraphicsRootDescriptorTable(4U, baseColorTextureRenderTargetView);
             baseColorTextureRenderTargetView.ptr += descHandleIncSize;
 
-            commandList.SetGraphicsRootDescriptorTable(5U, normalTextureRenderTargetView);
+            commandList.SetGraphicsRootDescriptorTable(5U, metalnessTextureRenderTargetView);
+            metalnessTextureRenderTargetView.ptr += descHandleIncSize;
+
+            commandList.SetGraphicsRootDescriptorTable(6U, normalTextureRenderTargetView);
             normalTextureRenderTargetView.ptr += descHandleIncSize;
 
             commandList.DrawIndexedInstanced(geomData.mIndexBufferData.mElementCount, 1U, 0U, 0U, 0U);
@@ -168,6 +176,7 @@ NormalMappingCommandListRecorder::IsDataValid() const noexcept
     const bool result =
         GeometryCommandListRecorder::IsDataValid() &&
         mBaseColorTextureRenderTargetViewsBegin.ptr != 0UL &&
+        mMetalnessTextureRenderTargetViewsBegin.ptr != 0UL &&
         mNormalTextureRenderTargetViewsBegin.ptr != 0UL;
 
     return result;
@@ -176,11 +185,13 @@ NormalMappingCommandListRecorder::IsDataValid() const noexcept
 void
 NormalMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties,
                                                        const std::vector<ID3D12Resource*>& diffuseTextures,
+                                                       const std::vector<ID3D12Resource*>& metalnessTextures,
                                                        const std::vector<ID3D12Resource*>& normalTextures) noexcept
 {
     BRE_ASSERT(materialProperties.empty() == false);
     BRE_ASSERT(materialProperties.size() == diffuseTextures.size());
-    BRE_ASSERT(diffuseTextures.size() == normalTextures.size());
+    BRE_ASSERT(diffuseTextures.size() == metalnessTextures.size());
+    BRE_ASSERT(metalnessTextures.size() == normalTextures.size());
     BRE_ASSERT(mObjectUploadCBuffers == nullptr);
     BRE_ASSERT(mMaterialUploadCBuffers == nullptr);
 
@@ -226,6 +237,11 @@ NormalMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<Materia
     std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> textureSrvDescVec;
     textureSrvDescVec.reserve(numResources);
 
+    std::vector<ID3D12Resource*> metalnessResVec;
+    metalnessResVec.reserve(numResources);
+    std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> metalnessSrvDescVec;
+    metalnessSrvDescVec.reserve(numResources);
+
     std::vector<ID3D12Resource*> normalResVec;
     normalResVec.reserve(numResources);
     std::vector<D3D12_SHADER_RESOURCE_VIEW_DESC> normalSrvDescVec;
@@ -254,6 +270,18 @@ NormalMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<Materia
         srvDesc.Texture2D.MipLevels = textureResVec.back()->GetDesc().MipLevels;
         textureSrvDescVec.push_back(srvDesc);
 
+        // Metalness descriptor
+        metalnessResVec.push_back(metalnessTextures[i]);
+
+        srvDesc = D3D12_SHADER_RESOURCE_VIEW_DESC{};
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MostDetailedMip = 0;
+        srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+        srvDesc.Format = metalnessResVec.back()->GetDesc().Format;
+        srvDesc.Texture2D.MipLevels = metalnessResVec.back()->GetDesc().MipLevels;
+        metalnessSrvDescVec.push_back(srvDesc);
+
         // Normal descriptor
         normalResVec.push_back(normalTextures[i]);
 
@@ -278,6 +306,11 @@ NormalMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<Materia
         CbvSrvUavDescriptorManager::CreateShaderResourceViews(textureResVec.data(),
                                                               textureSrvDescVec.data(),
                                                               static_cast<std::uint32_t>(textureSrvDescVec.size()));
+
+    mMetalnessTextureRenderTargetViewsBegin =
+        CbvSrvUavDescriptorManager::CreateShaderResourceViews(metalnessResVec.data(),
+                                                              metalnessSrvDescVec.data(),
+                                                              static_cast<std::uint32_t>(metalnessSrvDescVec.size()));
     mNormalTextureRenderTargetViewsBegin =
         CbvSrvUavDescriptorManager::CreateShaderResourceViews(normalResVec.data(),
                                                               normalSrvDescVec.data(),

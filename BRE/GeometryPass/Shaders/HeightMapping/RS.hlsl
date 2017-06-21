@@ -12,4 +12,5 @@
 "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \
 "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \
 "DescriptorTable(SRV(t1), visibility = SHADER_VISIBILITY_PIXEL), " \
+"DescriptorTable(SRV(t2), visibility = SHADER_VISIBILITY_PIXEL), " \
 "StaticSampler(s0, filter=FILTER_ANISOTROPIC)"

@@ -33,10 +33,12 @@ public:
     /// @param geometryDataVector List of geometry data. Must not be empty
     /// @param materialProperties List of material properties. Must not be empty.
     /// @param diffuseTextures List of diffuse textures. Must not be empty.
+    /// @param metalnessTextures List of metalness textures. Must not be empty.
     ///
     void Init(const std::vector<GeometryData>& geometryDataVector,
               const std::vector<MaterialProperties>& materialProperties,
-              const std::vector<ID3D12Resource*>& diffuseTextures) noexcept;
+              const std::vector<ID3D12Resource*>& diffuseTextures,
+              const std::vector<ID3D12Resource*>& metalnessTextures) noexcept;
 
     ///
     /// @brief Records and push command lists to CommandListExecutor
@@ -59,10 +61,16 @@ private:
     /// @brief Initializes the constant buffers and views
     /// @param materialProperties List of material properties. Must not be empty.
     /// @param diffuseTextures List of diffuse textures. Must not be empty.
+    /// @param metalnessTextures List of metalness textures. Must not be empty.
     ///
     void InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties,
-                              const std::vector<ID3D12Resource*>& diffuseTextures) noexcept;
+                              const std::vector<ID3D12Resource*>& diffuseTextures,
+                              const std::vector<ID3D12Resource*>& metalnessTextures) noexcept;
 
+    // First descriptor in the list. All the others are contiguous
     D3D12_GPU_DESCRIPTOR_HANDLE mBaseColorTextureRenderTargetViewsBegin{ 0U };
+
+    // First descriptor in the list. All the others are contiguous
+    D3D12_GPU_DESCRIPTOR_HANDLE mMetalnessTextureRenderTargetViewsBegin{ 0U };
 };
 }

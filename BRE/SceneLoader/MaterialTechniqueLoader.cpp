@@ -19,20 +19,16 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
     // material techniques:
     //   - name: techniqueName1
     //     diffuse texture: diffuseTextureName
+    //     metalness texture: metalnessTextureName
     //     normal texture: normalTextureName
     //     height texture: heightTextureName
     //   - name: techniqueName2
     //     diffuse texture: diffuseTextureName
+    //     metalness texture: metalnessTextureName
     //     normal texture: normalTextureName
     const YAML::Node materialTechniquesNode = rootNode["material techniques"];
 
-    // 'material techniques' node can be undefined when all the drawable objects use
-    // the color mapping technique (that is the default technique when a drawable object
-    // does not specify a 'material technique' to use)
-    if (materialTechniquesNode.IsDefined() == false) {
-        return;
-    }
-
+    BRE_CHECK_MSG(materialTechniquesNode.IsDefined(), L"'material techniques' node must be defined");
     BRE_CHECK_MSG(materialTechniquesNode.IsSequence(), L"'material techniques' node must be a map");
 
     std::string pairFirstValue;
@@ -102,6 +98,8 @@ void MaterialTechniqueLoader::UpdateMaterialTechnique(const std::string& materia
     ID3D12Resource& texture = mTextureLoader.GetTexture(materialTechniqueTextureName);
     if (materialTechniquePropertyName == "diffuse texture") {
         materialTechnique.SetDiffuseTexture(&texture);
+    } else if (materialTechniquePropertyName == "metalness texture") {
+        materialTechnique.SetMetalnessTexture(&texture);
     } else if (materialTechniquePropertyName == "normal texture") {
         materialTechnique.SetNormalTexture(&texture);
     } else if (materialTechniquePropertyName == "height texture") {

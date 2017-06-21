@@ -39,6 +39,16 @@ public:
     }
 
     ///
+    /// @brief Get metalness texture
+    /// @return Metalness texture
+    ///
+    ID3D12Resource& GetMetalnessTexture() const noexcept
+    {
+        BRE_ASSERT(mMetalnessTexture != nullptr);
+        return *mMetalnessTexture;
+    }
+
+    ///
     /// @brief Set diffuse texture
     /// @param texture New diffuse texture.
     ///
@@ -46,6 +56,16 @@ public:
     {
         BRE_ASSERT(texture != nullptr);
         mDiffuseTexture = texture;
+    }
+
+    ///
+    /// @brief Set metalness texture
+    /// @param texture New metalness texture.
+    ///
+    void SetMetalnessTexture(ID3D12Resource* texture) noexcept
+    {
+        BRE_ASSERT(texture != nullptr);
+        mMetalnessTexture = texture;
     }
 
     ///
@@ -96,6 +116,7 @@ public:
 
 private:
     ID3D12Resource* mDiffuseTexture{ nullptr };
+    ID3D12Resource* mMetalnessTexture{ nullptr };
     ID3D12Resource* mNormalTexture{ nullptr };
     ID3D12Resource* mHeightTexture{ nullptr };
 };

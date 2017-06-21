@@ -30,6 +30,7 @@ textures:
   metal3: resources/textures/metal/metal3.dds
   metal3_normal: resources/textures/metal/metal3_normal.dds
   metalness0: resources/textures/metalness0.dds
+  metalness1: resources/textures/metalness1.dds
   rock: resources/textures/rock/rock.dds
   rock_normal: resources/textures/rock/rock_normal.dds
   rock_height: resources/textures/rock/rock_height.dds
