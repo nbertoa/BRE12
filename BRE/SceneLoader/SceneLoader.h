@@ -6,7 +6,6 @@
 #include <SceneLoader\CameraLoader.h>
 #include <SceneLoader\DrawableObjectLoader.h>
 #include <SceneLoader\EnvironmentLoader.h>
-#include <SceneLoader\MaterialPropertiesLoader.h>
 #include <SceneLoader\MaterialTechniqueLoader.h>
 #include <SceneLoader\ModelLoader.h>
 #include <SceneLoader\TextureLoader.h>
@@ -60,7 +59,6 @@ private:
     ID3D12GraphicsCommandList* mCommandList{ nullptr };
     ModelLoader mModelLoader;
     TextureLoader mTextureLoader;
-    MaterialPropertiesLoader mMaterialPropertiesLoader;
     MaterialTechniqueLoader mMaterialTechniqueLoader;
     DrawableObjectLoader mDrawableObjectLoader;
     EnvironmentLoader mEnvironmentLoader;

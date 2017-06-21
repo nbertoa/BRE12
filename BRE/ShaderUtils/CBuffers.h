@@ -18,7 +18,7 @@ struct ObjectCBuffer {
 
     DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::GetIdentity4x4Matrix() };
     DirectX::XMFLOAT4X4 mInverseTransposeWorldMatrix{ MathUtils::GetIdentity4x4Matrix() };
-    float mTextureScaleFactor{ 2.0f };
+    float mTextureScale{ 5.0f };
 };
 
 ///

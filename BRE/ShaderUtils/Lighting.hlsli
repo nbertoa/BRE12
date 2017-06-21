@@ -211,7 +211,7 @@ Fr_DisneyDiffuse(const float dotNV,
 
 float3
 DiffuseIBL(const float3 baseColor,
-           const float metalMask,
+           const float metalness,
            SamplerState textureSampler,
            TextureCube diffuseIBLCubeMap,
            const float3 normalWorldSpace)
@@ -220,14 +220,14 @@ DiffuseIBL(const float3 baseColor,
     const float3 diffuseReflection = diffuseIBLCubeMap.SampleLevel(textureSampler,
                                                                    normalWorldSpace,
                                                                    0).rgb;
-    const float3 diffuseColor = (1.0f - metalMask) * baseColor;
+    const float3 diffuseColor = (1.0f - metalness) * baseColor;
 
     return diffuseColor * diffuseReflection;
 }
 
 float3
 SpecularIBL(const float3 baseColor,
-            const float metalMask,
+            const float metalness,
             const float roughness,
             SamplerState textureSampler,
             TextureCube specularIBLCubeMap,
@@ -251,7 +251,7 @@ SpecularIBL(const float3 baseColor,
 
     // Specular reflection color
     const float3 dielectricColor = float3(0.04f, 0.04f, 0.04f);
-    const float3 f0 = lerp(dielectricColor, baseColor, metalMask);
+    const float3 f0 = lerp(dielectricColor, baseColor, metalness);
     const float3 F = F_Schlick(f0,
                                1.0f,
                                dot(viewVectorViewSpace, normalViewSpace));
@@ -265,9 +265,9 @@ SpecularIBL(const float3 baseColor,
 
 float3
 DiffuseBrdf(const float3 baseColor,
-            const float metalMask)
+            const float metalness)
 {
-    const float3 diffuseColor = (1.0f - metalMask) * baseColor;
+    const float3 diffuseColor = (1.0f - metalness) * baseColor;
     return Fd_Lambert(diffuseColor);
 }
 
@@ -276,11 +276,9 @@ SpecularBrdf(const float3 N,
              const float3 V,
              const float3 L,
              const float3 baseColor,
-             const float smoothness,
-             const float metalMask)
+             const float roughness,
+             const float metalness)
 {
-    const float roughness = 1.0f - smoothness;
-
     // Disney's reparametrization of roughness
     const float alpha = roughness * roughness;
 
@@ -296,9 +294,9 @@ SpecularBrdf(const float3 N,
 
     const float D = D_TR(roughness, dotNH);
 
-    const float3 f0 = (1.0f - metalMask) * float3(F0_NON_METALS,
+    const float3 f0 = (1.0f - metalness) * float3(F0_NON_METALS,
                                                   F0_NON_METALS,
-                                                  F0_NON_METALS) + baseColor * metalMask;
+                                                  F0_NON_METALS) + baseColor * metalness;
     const float3 F = F_Schlick(f0, 1.0f, dotLH);
 
     // G / (4 * dotNL * dotNV)

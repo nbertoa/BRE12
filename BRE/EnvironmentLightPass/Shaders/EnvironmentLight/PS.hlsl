@@ -17,8 +17,8 @@ ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b0);
 
 SamplerState TextureSampler : register (s0);
 
-Texture2D<float4> Normal_SmoothnessTexture : register (t0);
-Texture2D<float4> BaseColor_MetalMaskTexture : register (t1);
+Texture2D<float4> Normal_RoughnessTexture : register (t0);
+Texture2D<float4> BaseColor_MetalnessTexture : register (t1);
 TextureCube DiffuseIBLCubeMap : register(t2);
 TextureCube SpecularIBLCubeMap : register(t3);
 Texture2D<float> AmbientAccessibilityTexture : register (t4);
@@ -41,7 +41,7 @@ Output main(const in Input input)
     // Ambient accessibility (1.0f - ambient occlussion factor)
     const float ambientAccessibility = AmbientAccessibilityTexture.Load(fragmentPositionScreenSpace);
 
-    const float4 normal_smoothness = Normal_SmoothnessTexture.Load(fragmentPositionScreenSpace);
+    const float4 normal_roughness = Normal_RoughnessTexture.Load(fragmentPositionScreenSpace);
 
     // Compute fragment position in view space
     const float fragmentZNDC = DepthTexture.Load(fragmentPositionScreenSpace);
@@ -53,28 +53,28 @@ Output main(const in Input input)
     const float3 fragmentPositionWorldSpace = mul(float4(fragmentPositionViewSpace, 1.0f),
                                                   gFrameCBuffer.mInverseViewMatrix).xyz;
 
-    const float2 encodedNormal = normal_smoothness.xy;
+    const float2 encodedNormal = normal_roughness.xy;
     const float3 normalViewSpace = normalize(Decode(encodedNormal));
     const float3 normalWorldSpace = normalize(mul(float4(normalViewSpace, 0.0f),
                                                   gFrameCBuffer.mInverseViewMatrix).xyz);
 
-    const float4 baseColor_metalmask = BaseColor_MetalMaskTexture.Load(fragmentPositionScreenSpace);
-    const float3 baseColor = baseColor_metalmask.xyz;
-    const float metalMask = baseColor_metalmask.w;
+    const float4 baseColor_metalness = BaseColor_MetalnessTexture.Load(fragmentPositionScreenSpace);
+    const float3 baseColor = baseColor_metalness.xyz;
+    const float metalness = baseColor_metalness.w;
 
     // As we are working at view space, we do not need camera position to 
     // compute vector from geometry position to camera.
     const float3 fragmentPositionToCameraViewSpace = normalize(-fragmentPositionViewSpace);
     
     const float3 indirectDiffuseColor = DiffuseIBL(baseColor,
-                                                   metalMask,
+                                                   metalness,
                                                    TextureSampler,
                                                    DiffuseIBLCubeMap,
                                                    normalWorldSpace);
 
     const float3 indirectSpecularColor = SpecularIBL(baseColor,
-                                                     metalMask,
-                                                     normal_smoothness.z,
+                                                     metalness,
+                                                     normal_roughness.z,
                                                      TextureSampler,
                                                      SpecularIBLCubeMap,
                                                      fragmentPositionToCameraViewSpace,

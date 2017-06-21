@@ -24,7 +24,7 @@ namespace BRE {
 // "CBV(b0, visibility = SHADER_VISIBILITY_VERTEX), " \ 0 -> Frame CBuffer
 // "CBV(b0, visibility = SHADER_VISIBILITY_PIXEL), " \ 1 -> Frame CBuffer
 // "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \ 2 -> Ambient Occlusion CBuffer
-// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)" 3 -> normal_smoothness
+// "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL)" 3 -> normal_roughness
 // "DescriptorTable(SRV(t1), SRV(t2), visibility = SHADER_VISIBILITY_PIXEL)" 4 -> sample kernel + kernel noise
 // "DescriptorTable(SRV(t3), visibility = SHADER_VISIBILITY_PIXEL)" 5 -> depth buffer
 
@@ -144,13 +144,13 @@ AmbientOcclusionCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
 
 void
 AmbientOcclusionCommandListRecorder::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRenderTargetView,
-                                          const D3D12_GPU_DESCRIPTOR_HANDLE& normalSmoothnessBufferShaderResourceView,
+                                          const D3D12_GPU_DESCRIPTOR_HANDLE& normalRoughnessBufferShaderResourceView,
                                           const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
     
     mAmbientAccessibilityBufferRenderTargetView = ambientAccessibilityBufferRenderTargetView;
-    mNormalSmoothnessBufferShaderResourceView = normalSmoothnessBufferShaderResourceView;
+    mNormalRoughnessBufferShaderResourceView = normalRoughnessBufferShaderResourceView;
     mDepthBufferShaderResourceView = depthBufferShaderResourceView;
 
     const std::uint32_t sampleKernelSize = 
@@ -205,7 +205,7 @@ AmbientOcclusionCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
     commandList.SetGraphicsRootConstantBufferView(0U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(1U, frameCBufferGpuVAddress);
     commandList.SetGraphicsRootConstantBufferView(2U, ambientOcclusionCBufferGpuVAddress);
-    commandList.SetGraphicsRootDescriptorTable(3U, mNormalSmoothnessBufferShaderResourceView);
+    commandList.SetGraphicsRootDescriptorTable(3U, mNormalRoughnessBufferShaderResourceView);
     commandList.SetGraphicsRootDescriptorTable(4U, mPixelShaderResourceViewsBegin);
     commandList.SetGraphicsRootDescriptorTable(5U, mDepthBufferShaderResourceView);
 
@@ -225,7 +225,7 @@ AmbientOcclusionCommandListRecorder::IsDataValid() const noexcept
         mSampleKernelUploadBuffer != nullptr &&
         mAmbientAccessibilityBufferRenderTargetView.ptr != 0UL &&
 
-        mNormalSmoothnessBufferShaderResourceView.ptr != 0UL &&
+        mNormalRoughnessBufferShaderResourceView.ptr != 0UL &&
         mDepthBufferShaderResourceView.ptr != 0UL &&
         mPixelShaderResourceViewsBegin.ptr != 0UL &&
         mAmbientOcclusionUploadCBuffer != nullptr;

@@ -23,7 +23,7 @@ using namespace DirectX;
 namespace BRE {
 SceneLoader::SceneLoader()
     : mMaterialTechniqueLoader(mTextureLoader)
-    , mDrawableObjectLoader(mMaterialPropertiesLoader, mMaterialTechniqueLoader, mModelLoader)
+    , mDrawableObjectLoader(mMaterialTechniqueLoader, mModelLoader)
     , mEnvironmentLoader(mTextureLoader)
 {
 
@@ -44,7 +44,6 @@ SceneLoader::LoadScene(const char* sceneFilePath) noexcept
 
     mModelLoader.LoadModels(rootNode, *mCommandAllocator, *mCommandList);
     mTextureLoader.LoadTextures(rootNode, *mCommandAllocator, *mCommandList);
-    mMaterialPropertiesLoader.LoadMaterialsProperties(rootNode);
     mMaterialTechniqueLoader.LoadMaterialTechniques(rootNode);
     mDrawableObjectLoader.LoadDrawableObjects(rootNode);
     mEnvironmentLoader.LoadEnvironment(rootNode);
@@ -83,8 +82,7 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryCommandListR
     // to initialize the command list recorder.
     TextureMappingCommandListRecorder* commandListRecorder = new TextureMappingCommandListRecorder;
     std::vector<GeometryCommandListRecorder::GeometryData> geometryDataVector;
-    std::vector<MaterialProperties> materialProperties;
-    std::vector<ID3D12Resource*> diffuseTextures;
+    std::vector<ID3D12Resource*> baseColorTextures;
     std::vector<ID3D12Resource*> metalnessTextures;
     std::vector<ID3D12Resource*> roughnessTextures;
     
@@ -105,6 +103,7 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryCommandListR
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
             geometryData.mWorldMatrices.reserve(drawableObjects.size());
             geometryData.mInverseTransposeWorldMatrices.reserve(drawableObjects.size());
+            geometryData.mTextureScales.reserve(drawableObjects.size());
             geometryDataVector.emplace_back(geometryData);
         }
 
@@ -114,21 +113,19 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryCommandListR
                 geometryDataVector[geometryDataVectorOffset + i];
 
             for (const DrawableObject& drawableObject : drawableObjects) {
-                // Store material properties
-                materialProperties.push_back(drawableObject.GetMaterialProperties());
-
                 // Store textures
                 const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
-                diffuseTextures.push_back(&materialTechnique.GetDiffuseTexture());
+                baseColorTextures.push_back(&materialTechnique.GetBaseColorTexture());
                 metalnessTextures.push_back(&materialTechnique.GetMetalnessTexture());
                 roughnessTextures.push_back(&materialTechnique.GetRoughnessTexture());
 
-                // Store matrices
+                // Store matrices and texture scale
                 const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
                 XMFLOAT4X4 inverseTransposeWorldMatrix;
                 MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
                 geometryData.mWorldMatrices.push_back(worldMatrix);
                 geometryData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
+                geometryData.mTextureScales.push_back(drawableObject.GetTextureScale());
             }
         }
 
@@ -136,8 +133,7 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryCommandListR
     }
 
     commandListRecorder->Init(geometryDataVector,
-                              materialProperties,
-                              diffuseTextures,
+                              baseColorTextures,
                               metalnessTextures,
                               roughnessTextures);
 
@@ -158,8 +154,7 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryCommandListRe
     // to initialize the command list recorder.
     NormalMappingCommandListRecorder* commandListRecorder = new NormalMappingCommandListRecorder;
     std::vector<GeometryCommandListRecorder::GeometryData> geometryDataVector;
-    std::vector<MaterialProperties> materialProperties;
-    std::vector<ID3D12Resource*> diffuseTextures;
+    std::vector<ID3D12Resource*> baseColorTextures;
     std::vector<ID3D12Resource*> metalnessTextures;
     std::vector<ID3D12Resource*> roughnessTextures;
     std::vector<ID3D12Resource*> normalTextures;
@@ -181,6 +176,7 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryCommandListRe
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
             geometryData.mWorldMatrices.reserve(drawableObjects.size());
             geometryData.mInverseTransposeWorldMatrices.reserve(drawableObjects.size());
+            geometryData.mTextureScales.reserve(drawableObjects.size());
             geometryDataVector.emplace_back(geometryData);
         }
 
@@ -190,22 +186,20 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryCommandListRe
                 geometryDataVector[geometryDataVectorOffset + i];
 
             for (const DrawableObject& drawableObject : drawableObjects) {
-                // Store material properties
-                materialProperties.push_back(drawableObject.GetMaterialProperties());
-
                 // Store textures
                 const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
-                diffuseTextures.push_back(&materialTechnique.GetDiffuseTexture());
+                baseColorTextures.push_back(&materialTechnique.GetBaseColorTexture());
                 metalnessTextures.push_back(&materialTechnique.GetMetalnessTexture());
                 roughnessTextures.push_back(&materialTechnique.GetRoughnessTexture());
                 normalTextures.push_back(&materialTechnique.GetNormalTexture());
 
-                // Store matrices
+                // Store matrices and texture scale
                 const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
                 XMFLOAT4X4 inverseTransposeWorldMatrix;
                 MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
                 geometryData.mWorldMatrices.push_back(worldMatrix);
                 geometryData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
+                geometryData.mTextureScales.push_back(drawableObject.GetTextureScale());
             }
         }
 
@@ -213,8 +207,7 @@ SceneLoader::GenerateGeometryPassRecordersForNormalMapping(GeometryCommandListRe
     }
 
     commandListRecorder->Init(geometryDataVector,
-                              materialProperties,
-                              diffuseTextures,
+                              baseColorTextures,
                               metalnessTextures,
                               roughnessTextures,
                               normalTextures);
@@ -236,8 +229,7 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryCommandListRe
     // to initialize the command list recorder.
     HeightMappingCommandListRecorder* commandListRecorder = new HeightMappingCommandListRecorder;
     std::vector<GeometryCommandListRecorder::GeometryData> geometryDataVector;
-    std::vector<MaterialProperties> materialProperties;
-    std::vector<ID3D12Resource*> diffuseTextures;
+    std::vector<ID3D12Resource*> baseColorTextures;
     std::vector<ID3D12Resource*> metalnessTextures;
     std::vector<ID3D12Resource*> roughnessTextures;
     std::vector<ID3D12Resource*> normalTextures;
@@ -260,6 +252,7 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryCommandListRe
             geometryData.mIndexBufferData = mesh.GetIndexBufferData();
             geometryData.mWorldMatrices.reserve(drawableObjects.size());
             geometryData.mInverseTransposeWorldMatrices.reserve(drawableObjects.size());
+            geometryData.mTextureScales.reserve(drawableObjects.size());
             geometryDataVector.emplace_back(geometryData);
         }
 
@@ -269,23 +262,21 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryCommandListRe
                 geometryDataVector[geometryDataVectorOffset + i];
 
             for (const DrawableObject& drawableObject : drawableObjects) {
-                // Store material properties
-                materialProperties.push_back(drawableObject.GetMaterialProperties());
-
                 // Store textures
                 const MaterialTechnique& materialTechnique = drawableObject.GetMaterialTechnique();
-                diffuseTextures.push_back(&materialTechnique.GetDiffuseTexture());
+                baseColorTextures.push_back(&materialTechnique.GetBaseColorTexture());
                 metalnessTextures.push_back(&materialTechnique.GetMetalnessTexture());
                 roughnessTextures.push_back(&materialTechnique.GetRoughnessTexture());
                 normalTextures.push_back(&materialTechnique.GetNormalTexture());
                 heightTextures.push_back(&materialTechnique.GetHeightTexture());
 
-                // Store matrices
+                // Store matrices and texture scale
                 const XMFLOAT4X4& worldMatrix = drawableObject.GetWorldMatrix();
                 XMFLOAT4X4 inverseTransposeWorldMatrix;
                 MathUtils::StoreInverseTransposeMatrix(worldMatrix, inverseTransposeWorldMatrix);
                 geometryData.mWorldMatrices.push_back(worldMatrix);
                 geometryData.mInverseTransposeWorldMatrices.push_back(inverseTransposeWorldMatrix);
+                geometryData.mTextureScales.push_back(drawableObject.GetTextureScale());
             }
         }
 
@@ -293,8 +284,7 @@ SceneLoader::GenerateGeometryPassRecordersForHeightMapping(GeometryCommandListRe
     }
 
     commandListRecorder->Init(geometryDataVector,
-                              materialProperties,
-                              diffuseTextures,
+                              baseColorTextures,
                               metalnessTextures,
                               roughnessTextures,
                               normalTextures,

@@ -123,12 +123,10 @@
   <ItemGroup>
     <None Include="CBuffers.hlsli" />
     <None Include="Lighting.hlsli" />
-    <None Include="MaterialProperties.hlsli" />
     <None Include="Utils.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CBuffers.h" />
-    <ClInclude Include="MaterialProperties.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CBuffers.cpp" />

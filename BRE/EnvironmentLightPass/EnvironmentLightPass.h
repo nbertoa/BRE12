@@ -20,8 +20,8 @@ public:
 
     ///
     /// @brief Initializes the pass
-    /// @param baseColorMetalMaskBuffer Geometry buffer that contains base color and metal mask.
-    /// @param normalSmoothnessBuffer Geometry buffer that contains normals and smoothness factors.
+    /// @param baseColorMetalnessBuffer Geometry buffer that contains base color and metalness.
+    /// @param normalRoughnessBuffer Geometry buffer that contains normals and roughness factors.
     /// @param depthBuffer Depth buffer
     /// @param diffuseIrradianceCubeMap Diffuse irradiance environment cube map
     /// @param depthBufferShaderResourceView Shader resource view to the depth buffer
@@ -29,18 +29,18 @@ public:
     /// @param outputColorBufferRenderTargetView Render target view to the output color buffer
     /// @param geometryBufferShaderResourceViewsBegin Shader resource view 
     /// to the first geometry buffer. The geometry buffer shader resource views are contiguous.
-    /// @param normalSmoothnessBufferShaderResourceView Shader resource view to
-    /// the normal and smoothness buffer
+    /// @param normalRoughnessBufferShaderResourceView Shader resource view to
+    /// the normal and roughness buffer
     /// @param depthBufferShaderResourceView Shader resource view to the depth buffer
     ///
-    void Init(ID3D12Resource& baseColorMetalMaskBuffer,
-              ID3D12Resource& normalSmoothnessBuffer,
+    void Init(ID3D12Resource& baseColorMetalnessBuffer,
+              ID3D12Resource& normalRoughnessBuffer,
               ID3D12Resource& depthBuffer,
               ID3D12Resource& diffuseIrradianceCubeMap,
               ID3D12Resource& specularPreConvolvedCubeMap,              
               const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
               const D3D12_GPU_DESCRIPTOR_HANDLE& geometryBufferShaderResourceViewsBegin,
-              const D3D12_GPU_DESCRIPTOR_HANDLE& normalSmoothnessBufferShaderResourceView,
+              const D3D12_GPU_DESCRIPTOR_HANDLE& normalRoughnessBufferShaderResourceView,
               const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept;
 
     ///
@@ -98,8 +98,8 @@ private:
     BlurCommandListRecorder mBlurRecorder;
     EnvironmentLightCommandListRecorder mEnvironmentLightRecorder;
 
-    ID3D12Resource* mBaseColorMetalMaskBuffer{ nullptr };
-    ID3D12Resource* mNormalSmoothnessBuffer{ nullptr };
+    ID3D12Resource* mBaseColorMetalnessBuffer{ nullptr };
+    ID3D12Resource* mNormalRoughnessBuffer{ nullptr };
     ID3D12Resource* mDepthBuffer{ nullptr };
 };
 }

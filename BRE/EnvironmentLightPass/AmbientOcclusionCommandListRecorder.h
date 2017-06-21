@@ -36,11 +36,11 @@ public:
     /// InitSharedPSOAndRootSignature() must be called first and once
     /// 
     /// @param ambientAccessibilityBufferRenderTargetView Render target view to the ambient accessibility buffer
-    /// @param normalSmoothnessBufferShaderResourceView Shader resource view to the normal and smoothness buffer
+    /// @param normalRoughnessBufferShaderResourceView Shader resource view to the normal and roughness buffer
     /// @param depthBufferShaderResourceView Depth buffer shader resource view
     ///k
     void Init(const D3D12_CPU_DESCRIPTOR_HANDLE& ambientAccessibilityBufferRenderTargetView,
-              const D3D12_GPU_DESCRIPTOR_HANDLE& normalSmoothnessBufferShaderResourceView,
+              const D3D12_GPU_DESCRIPTOR_HANDLE& normalRoughnessBufferShaderResourceView,
               const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept;
 
     ///
@@ -95,7 +95,7 @@ private:
 
     D3D12_CPU_DESCRIPTOR_HANDLE mAmbientAccessibilityBufferRenderTargetView{ 0UL };
 
-    D3D12_GPU_DESCRIPTOR_HANDLE mNormalSmoothnessBufferShaderResourceView{ 0UL };
+    D3D12_GPU_DESCRIPTOR_HANDLE mNormalRoughnessBufferShaderResourceView{ 0UL };
     D3D12_GPU_DESCRIPTOR_HANDLE mDepthBufferShaderResourceView{ 0UL };
 
     // First descriptor in the list. All the others are contiguous

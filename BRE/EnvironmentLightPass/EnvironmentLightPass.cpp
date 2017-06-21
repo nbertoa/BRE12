@@ -69,14 +69,14 @@ CreateResourceAndRenderTargetView(const D3D12_RESOURCE_STATES resourceInitialSta
 }
 
 void
-EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
-                           ID3D12Resource& normalSmoothnessBuffer,
+EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalnessBuffer,
+                           ID3D12Resource& normalRoughnessBuffer,
                            ID3D12Resource& depthBuffer,
                            ID3D12Resource& diffuseIrradianceCubeMap,
                            ID3D12Resource& specularPreConvolvedCubeMap,
                            const D3D12_CPU_DESCRIPTOR_HANDLE& outputColorBufferRenderTargetView,
                            const D3D12_GPU_DESCRIPTOR_HANDLE& geometryBufferShaderResourceViewsBegin,
-                           const D3D12_GPU_DESCRIPTOR_HANDLE& normalSmoothnessBufferShaderResourceView,
+                           const D3D12_GPU_DESCRIPTOR_HANDLE& normalRoughnessBufferShaderResourceView,
                            const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
@@ -100,7 +100,7 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
 
     // Initialize ambient occlusion recorder
     mAmbientOcclusionRecorder.Init(mAmbientAccessibilityBufferRenderTargetView,
-                                   normalSmoothnessBufferShaderResourceView,
+                                   normalRoughnessBufferShaderResourceView,
                                    depthBufferShaderResourceView);
 
     // Initialize blur recorder
@@ -115,8 +115,8 @@ EnvironmentLightPass::Init(ID3D12Resource& baseColorMetalMaskBuffer,
                                    mBlurBufferShaderResourceView,
                                    depthBufferShaderResourceView);
 
-    mBaseColorMetalMaskBuffer = &baseColorMetalMaskBuffer;
-    mNormalSmoothnessBuffer = &normalSmoothnessBuffer;
+    mBaseColorMetalnessBuffer = &baseColorMetalnessBuffer;
+    mNormalRoughnessBuffer = &normalRoughnessBuffer;
     mDepthBuffer = &depthBuffer;
 
     BRE_ASSERT(IsDataValid());
@@ -151,8 +151,8 @@ EnvironmentLightPass::IsDataValid() const noexcept
         mBlurBuffer != nullptr &&
         mBlurBufferShaderResourceView.ptr != 0UL &&
         mBlurBufferRenderTargetView.ptr != 0UL &&
-        mBaseColorMetalMaskBuffer != nullptr &&
-        mNormalSmoothnessBuffer != nullptr &&
+        mBaseColorMetalnessBuffer != nullptr &&
+        mNormalRoughnessBuffer != nullptr &&
         mDepthBuffer != nullptr;
 
     return b;
@@ -179,14 +179,14 @@ EnvironmentLightPass::RecordAndPushPrePassCommandLists() noexcept
         ++barrierCount;
     }
 
-    if (ResourceStateManager::GetResourceState(*mBaseColorMetalMaskBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
-        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBaseColorMetalMaskBuffer,
+    if (ResourceStateManager::GetResourceState(*mBaseColorMetalnessBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mBaseColorMetalnessBuffer,
                                                                                         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         ++barrierCount;
     }
 
-    if (ResourceStateManager::GetResourceState(*mNormalSmoothnessBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
-        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mNormalSmoothnessBuffer,
+    if (ResourceStateManager::GetResourceState(*mNormalRoughnessBuffer) != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        barriers[barrierCount] = ResourceStateManager::ChangeResourceStateAndGetBarrier(*mNormalRoughnessBuffer,
                                                                                         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         ++barrierCount;
     }

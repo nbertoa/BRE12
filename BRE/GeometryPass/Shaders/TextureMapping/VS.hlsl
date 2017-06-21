@@ -38,7 +38,7 @@ Output main(in const Input input)
     output.mPositionClipSpace = mul(float4(output.mPositionViewSpace, 1.0f),
                                     gFrameCBuffer.mProjectionMatrix);
 
-    output.mUV = gObjCBuffer.mTexTransform * input.mUV;
+    output.mUV = gObjCBuffer.mTextureScale * input.mUV;
 
     return output;
 }

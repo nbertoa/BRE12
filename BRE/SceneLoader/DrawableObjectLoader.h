@@ -12,7 +12,6 @@ class Node;
 }
 
 namespace BRE {
-class MaterialPropertiesLoader;
 class MaterialTechniqueLoader;
 class ModelLoader;
 
@@ -23,11 +22,9 @@ class DrawableObjectLoader {
 public:
     using DrawableObjectsByModelName = std::unordered_map<std::string, std::vector<DrawableObject>>;
 
-    DrawableObjectLoader(const MaterialPropertiesLoader& materialPropertiesLoader,
-                         const MaterialTechniqueLoader& materialTechniqueLoader,
+    DrawableObjectLoader(const MaterialTechniqueLoader& materialTechniqueLoader,
                          const ModelLoader& modelLoader)
-        : mMaterialPropertiesLoader(materialPropertiesLoader)
-        , mMaterialTechniqueLoader(materialTechniqueLoader)
+        : mMaterialTechniqueLoader(materialTechniqueLoader)
         , mModelLoader(modelLoader)
     {}
 
@@ -55,7 +52,6 @@ public:
 private:
     DrawableObjectsByModelName mDrawableObjectsByModelName[MaterialTechnique::NUM_TECHNIQUES];
 
-    const MaterialPropertiesLoader& mMaterialPropertiesLoader;
     const MaterialTechniqueLoader& mMaterialTechniqueLoader;
     const ModelLoader& mModelLoader;
 };

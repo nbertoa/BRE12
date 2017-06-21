@@ -17,7 +17,7 @@ ConstantBuffer<AmbientOcclusionCBuffer> gAmbientOcclusionCBuffer : register(b1);
 
 SamplerState TextureSampler : register (s0);
 
-Texture2D<float4> Normal_SmoothnessTexture : register (t0);
+Texture2D<float4> Normal_RoughnessTexture : register (t0);
 StructuredBuffer<float4> SampleKernelBuffer : register(t1);
 Texture2D<float4> NoiseTexture : register (t2);
 Texture2D<float> DepthTexture : register (t3);
@@ -47,7 +47,7 @@ Output main(const in Input input)
                                                                           gFrameCBuffer.mProjectionMatrix),
                                                     1.0f);
 
-    const float2 normal = Normal_SmoothnessTexture.Load(fragmentPositionScreenSpace).xy;
+    const float2 normal = Normal_RoughnessTexture.Load(fragmentPositionScreenSpace).xy;
     const float3 normalViewSpace = normalize(Decode(normal));
 
     // Build a matrix to reorient the sample kerne

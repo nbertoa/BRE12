@@ -5,7 +5,7 @@
 struct ObjectCBuffer {
 	float4x4 mWorldMatrix;
 	float4x4 mInverseTransposeWorldMatrix;
-	float mTexTransform;
+	float mTextureScale;
 };
 
 // Per frame constant buffer data

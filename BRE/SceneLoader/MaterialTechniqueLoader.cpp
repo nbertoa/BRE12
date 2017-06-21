@@ -18,13 +18,13 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
     // Get the "material techniques" node. It is a sequence of maps and its sintax is:
     // material techniques:
     //   - name: techniqueName1
-    //     diffuse texture: diffuseTextureName
+    //     base color texture: baseColorTextureName
     //     metalness texture: metalnessTextureName
     //     roughness texture: roughnessTextureName
     //     normal texture: normalTextureName
     //     height texture: heightTextureName
     //   - name: techniqueName2
-    //     diffuse texture: diffuseTextureName
+    //     base color texture: baseColorTextureName
     //     metalness texture: metalnessTextureName
     //     roughness texture: roughnessTextureName
     //     normal texture: normalTextureName
@@ -70,7 +70,7 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
                        errorMsg.c_str());
         ++mapIt;
 
-        // Get material techniques settings (diffuse texture, normal texture, etc)
+        // Get material techniques settings (base color texture, normal texture, etc)
         MaterialTechnique materialTechnique;
         while (mapIt != materialMap.end()) {
             pairFirstValue = mapIt->first.as<std::string>();
@@ -98,8 +98,8 @@ void MaterialTechniqueLoader::UpdateMaterialTechnique(const std::string& materia
                                                       MaterialTechnique& materialTechnique) const noexcept
 {
     ID3D12Resource& texture = mTextureLoader.GetTexture(materialTechniqueTextureName);
-    if (materialTechniquePropertyName == "diffuse texture") {
-        materialTechnique.SetDiffuseTexture(&texture);
+    if (materialTechniquePropertyName == "base color texture") {
+        materialTechnique.SetBaseColorTexture(&texture);
     } else if (materialTechniquePropertyName == "metalness texture") {
         materialTechnique.SetMetalnessTexture(&texture);
     } else if (materialTechniquePropertyName == "roughness texture") {

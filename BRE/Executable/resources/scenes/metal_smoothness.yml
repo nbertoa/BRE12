@@ -7,45 +7,36 @@ textures:
   cube map diffuse: resources/textures/cubeMaps/factory_diffuse_cube_map.dds
   cube map specular: resources/textures/cubeMaps/factory_specular_cube_map.dds
   
-material properties:
-  - reference: resources/scenes/helpers/all_material_properties.yml
-  
 material techniques:
   - reference: resources/scenes/helpers/all_material_techniques.yml
         
 drawable objects:
   - model: bunny
-    material properties: metal0
     material technique: yellow_metal
     translation: [0.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [16.0, 16.0, 16.0]
   - model: bunny
-    material properties: metal2
     material technique: yellow_metal
     translation: [50.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [16.0, 16.0, 16.0]
   - model: bunny
-    material properties: metal4
     material technique: yellow_metal
     translation: [100.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [16.0, 16.0, 16.0]
   - model: bunny
-    material properties: metal6
     material technique: yellow_metal
     translation: [150.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [16.0, 16.0, 16.0]
   - model: bunny
-    material properties: metal8
     material technique: yellow_metal
     translation: [200.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]
     scale: [16.0, 16.0, 16.0]
   - model: bunny
-    material properties: metal10
     material technique: yellow_metal
     translation: [250.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 50.0]

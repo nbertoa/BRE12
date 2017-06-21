@@ -1,5 +1,4 @@
 #include <ShaderUtils/CBuffers.hlsli>
-#include <ShaderUtils/MaterialProperties.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
 #include "RS.hlsl"
@@ -13,17 +12,16 @@ struct Input {
     float2 mUV : TEXCOORD;
 };
 
-ConstantBuffer<MaterialProperties> gMaterialPropertiesCBuffer : register(b0);
-ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b1);
+ConstantBuffer<FrameCBuffer> gFrameCBuffer : register(b0);
 
 SamplerState TextureSampler : register (s0);
-Texture2D DiffuseTexture : register (t0);
+Texture2D BaseColorTexture : register (t0);
 Texture2D MetalnessTexture : register (t1);
 Texture2D RoughnessTexture : register (t2);
 
 struct Output {
-    float4 mNormal_Smoothness : SV_Target0;
-    float4 mBaseColor_MetalMask : SV_Target1;
+    float4 mNormal_Roughness : SV_Target0;
+    float4 mBaseColor_Metalness : SV_Target1;
 };
 
 [RootSignature(RS)]
@@ -33,19 +31,19 @@ Output main(const in Input input)
 
     // Normal (encoded in view space)
     const float3 normalViewSpace = normalize(input.mNormalViewSpace);
-    output.mNormal_Smoothness.xy = Encode(normalViewSpace);
+    output.mNormal_Roughness.xy = Encode(normalViewSpace);
 
     // Base color and metalness
-    const float3 diffuseColor = DiffuseTexture.Sample(TextureSampler,
-                                                      input.mUV).rgb;
+    const float3 baseColor = BaseColorTexture.Sample(TextureSampler,
+                                                     input.mUV).rgb;
 
     const float metalness = MetalnessTexture.Sample(TextureSampler,
                                                     input.mUV).r;
-    output.mBaseColor_MetalMask = float4(diffuseColor,
+    output.mBaseColor_Metalness = float4(baseColor,
                                          metalness);
 
-    // Smoothness
-    output.mNormal_Smoothness.z = RoughnessTexture.Sample(TextureSampler,
+    // Roughness
+    output.mNormal_Roughness.z = RoughnessTexture.Sample(TextureSampler,
                                                           input.mUV).r;
 
     return output;

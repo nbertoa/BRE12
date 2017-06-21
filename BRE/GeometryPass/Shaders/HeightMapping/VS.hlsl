@@ -36,7 +36,7 @@ Output main(in const Input input)
     output.mTangentWorldSpace = mul(float4(input.mTangentObjectSpace, 0.0f),
                                     gObjCBuffer.mWorldMatrix).xyz;
 
-    output.mUV = gObjCBuffer.mTexTransform * input.mUV;
+    output.mUV = gObjCBuffer.mTextureScale * input.mUV;
 
     // Normalized tessellation factor. 
     // The tessellation is 

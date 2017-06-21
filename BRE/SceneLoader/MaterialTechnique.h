@@ -6,7 +6,7 @@ struct ID3D12Resource;
 
 namespace BRE {
 ///
-/// @brief Contains material technique data like diffuse texture, normal texture, height texture, etc.
+/// @brief Contains material technique data like base color texture, normal texture, height texture, etc.
 ///
 class MaterialTechnique {
 public:
@@ -20,12 +20,12 @@ public:
         NUM_TECHNIQUES,
     };
 
-    MaterialTechnique(ID3D12Resource* diffuseTexture = nullptr,
+    MaterialTechnique(ID3D12Resource* baseColorTexture = nullptr,
                       ID3D12Resource* metalnessTexture = nullptr,
                       ID3D12Resource* roughnessTexture = nullptr,
                       ID3D12Resource* normalTexture = nullptr,
                       ID3D12Resource* heightTexture = nullptr)
-        : mDiffuseTexture(diffuseTexture)
+        : mBaseColorTexture(baseColorTexture)
         , mMetalnessTexture(metalnessTexture)
         , mRoughnessTexture(roughnessTexture)
         , mNormalTexture(normalTexture)
@@ -33,13 +33,13 @@ public:
     {}
 
     ///
-    /// @brief Get diffuse texture
-    /// @return Diffuse texture
+    /// @brief Get base color texture
+    /// @return Base color texture
     ///
-    ID3D12Resource& GetDiffuseTexture() const noexcept
+    ID3D12Resource& GetBaseColorTexture() const noexcept
     {
-        BRE_ASSERT(mDiffuseTexture != nullptr);
-        return *mDiffuseTexture;
+        BRE_ASSERT(mBaseColorTexture != nullptr);
+        return *mBaseColorTexture;
     }
 
     ///
@@ -83,13 +83,13 @@ public:
     }
 
     ///
-    /// @brief Set diffuse texture
-    /// @param texture New diffuse texture.
+    /// @brief Set base color texture
+    /// @param texture New base color texture.
     ///
-    void SetDiffuseTexture(ID3D12Resource* texture) noexcept
+    void SetBaseColorTexture(ID3D12Resource* texture) noexcept
     {
         BRE_ASSERT(texture != nullptr);
-        mDiffuseTexture = texture;
+        mBaseColorTexture = texture;
     }
 
     ///
@@ -139,7 +139,7 @@ public:
     TechniqueType GetType() const noexcept;
 
 private:
-    ID3D12Resource* mDiffuseTexture{ nullptr };
+    ID3D12Resource* mBaseColorTexture{ nullptr };
     ID3D12Resource* mMetalnessTexture{ nullptr };
     ID3D12Resource* mRoughnessTexture{ nullptr };
     ID3D12Resource* mNormalTexture{ nullptr };

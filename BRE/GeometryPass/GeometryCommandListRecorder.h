@@ -28,6 +28,7 @@ public:
         VertexAndIndexBufferCreator::IndexBufferData mIndexBufferData;
         std::vector<DirectX::XMFLOAT4X4> mWorldMatrices;
         std::vector<DirectX::XMFLOAT4X4> mInverseTransposeWorldMatrices;
+        std::vector<float> mTextureScales;
     };
 
     GeometryCommandListRecorder() = default;
@@ -77,9 +78,6 @@ protected:
 
     UploadBuffer* mObjectUploadCBuffers{ nullptr };
     D3D12_GPU_DESCRIPTOR_HANDLE mObjectCBufferViewsBegin{ 0U };
-
-    D3D12_GPU_DESCRIPTOR_HANDLE mMaterialCBufferViewsBegin{ 0U };
-    UploadBuffer* mMaterialUploadCBuffers{ nullptr };
 
     const D3D12_CPU_DESCRIPTOR_HANDLE* mGeometryBufferRenderTargetViews{ nullptr };
     std::uint32_t mGeometryBufferRenderTargetViewCount{ 0U };

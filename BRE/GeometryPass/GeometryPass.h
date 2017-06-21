@@ -16,8 +16,8 @@ class GeometryPass {
 public:
     // Geometry buffers
     enum BufferType {
-        NORMAL_SMOOTHNESS = 0U, // 2 encoded normals based on octahedron encoding + 1 smoothness
-        BASECOLOR_METALMASK, // 3 base color + 1 metal mask
+        NORMAL_ROUGHNESS = 0U, // 2 encoded normals based on octahedron encoding + 1 roughness
+        BASECOLOR_METALNESS, // 3 base color + 1 metalness
         BUFFERS_COUNT
     };
 

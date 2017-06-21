@@ -63,8 +63,8 @@ CreateGeometryBuffersAndRenderTargetViews(ID3D12Resource* buffers[GeometryPass::
     // Create and store render target views
     const wchar_t* resourceNames[GeometryPass::BUFFERS_COUNT] =
     {
-        L"Normal_SmoothnessTexture Buffer",
-        L"BaseColor_MetalMaskTexture Buffer"
+        L"Normal_RoughnessTexture Buffer",
+        L"BaseColor_MetalnessTexture Buffer"
     };
     for (std::uint32_t i = 0U; i < GeometryPass::BUFFERS_COUNT; ++i) {
         resourceDescriptor.Format = sGeometryBufferFormats[i];
@@ -185,8 +185,8 @@ GeometryPass::RecordAndPushPrePassCommandLists() noexcept
     commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
 
     float zero[4U] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[NORMAL_SMOOTHNESS], Colors::Black, 0U, nullptr);
-    commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[BASECOLOR_METALMASK], zero, 0U, nullptr);
+    commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[NORMAL_ROUGHNESS], Colors::Black, 0U, nullptr);
+    commandList.ClearRenderTargetView(mGeometryBufferRenderTargetViews[BASECOLOR_METALNESS], zero, 0U, nullptr);
 
     BRE_CHECK_HR(commandList.Close());
     CommandListExecutor::Get().PushCommandList(commandList);

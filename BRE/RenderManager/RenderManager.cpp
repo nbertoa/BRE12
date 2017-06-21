@@ -221,14 +221,14 @@ RenderManager::InitPasses(Scene& scene) noexcept
 
     mReflectionPass.Init(*mDepthBuffer);
 
-    mEnvironmentLightPass.Init(mGeometryPass.GetGeometryBuffer(GeometryPass::BASECOLOR_METALMASK),
-                               mGeometryPass.GetGeometryBuffer(GeometryPass::NORMAL_SMOOTHNESS),
+    mEnvironmentLightPass.Init(mGeometryPass.GetGeometryBuffer(GeometryPass::BASECOLOR_METALNESS),
+                               mGeometryPass.GetGeometryBuffer(GeometryPass::NORMAL_ROUGHNESS),
                                *mDepthBuffer,
                                *diffuseIrradianceCubeMap,
                                *specularPreConvolvedCubeMap,
                                mIntermediateColorBuffer1RenderTargetView,
                                mGeometryPass.GetGeometryBufferShaderResourceViews(),
-                               mGeometryPass.GetGeometryBufferShaderResourceView(GeometryPass::NORMAL_SMOOTHNESS),
+                               mGeometryPass.GetGeometryBufferShaderResourceView(GeometryPass::NORMAL_ROUGHNESS),
                                mDepthBufferShaderResourceView);    
 
     mSkyBoxPass.Init(*skyBoxCubeMap,

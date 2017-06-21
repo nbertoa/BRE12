@@ -6,7 +6,6 @@
 #include <Utils\DebugUtils.h>
 
 namespace BRE {
-class MaterialProperties;
 class MaterialTechnique;
 class Model;
 
@@ -16,13 +15,13 @@ class Model;
 class DrawableObject {
 public:
     DrawableObject(const Model& model,
-                   const MaterialProperties& materialProperties,
                    const MaterialTechnique& materialTechnique,
-                   const DirectX::XMFLOAT4X4& worldMatrix)
+                   const DirectX::XMFLOAT4X4& worldMatrix,
+                   const float textureScale)
         : mModel(&model)
-        , mMaterialProperties(&materialProperties)
         , mMaterialTechnique(&materialTechnique)
         , mWorldMatrix(worldMatrix)
+        , mTextureScale(textureScale)
     {}
 
     ///
@@ -33,16 +32,6 @@ public:
     {
         BRE_ASSERT(mModel != nullptr);
         return *mModel;
-    }
-
-    ///
-    /// @brief Get material properties
-    /// @return Material properties
-    ///
-    const MaterialProperties& GetMaterialProperties() const noexcept
-    {
-        BRE_ASSERT(mMaterialProperties != nullptr);
-        return *mMaterialProperties;
     }
 
     ///
@@ -64,10 +53,19 @@ public:
         return mWorldMatrix;
     }
 
+    ///
+    /// @brief Get texture scale
+    /// @return Texture scale
+    ///
+    float GetTextureScale() const noexcept
+    {
+        return mTextureScale;
+    }
+
 private:
     const Model* mModel{ nullptr };
-    const MaterialProperties* mMaterialProperties{ nullptr };
     const MaterialTechnique* mMaterialTechnique{ nullptr };
     DirectX::XMFLOAT4X4 mWorldMatrix{ MathUtils::GetIdentity4x4Matrix() };
+    float mTextureScale{ 1.0f };
 };
 }

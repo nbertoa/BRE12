@@ -5,7 +5,6 @@
     <ClInclude Include="SceneLoader.h" />
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="TextureLoader.h" />
-    <ClInclude Include="MaterialPropertiesLoader.h" />
     <ClInclude Include="MaterialTechniqueLoader.h" />
     <ClInclude Include="MaterialTechnique.h" />
     <ClInclude Include="DrawableObject.h" />
@@ -18,7 +17,6 @@
     <ClCompile Include="SceneLoader.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
-    <ClCompile Include="MaterialPropertiesLoader.cpp" />
     <ClCompile Include="MaterialTechniqueLoader.cpp" />
     <ClCompile Include="DrawableObjectLoader.cpp" />
     <ClCompile Include="MaterialTechnique.cpp" />

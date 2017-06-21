@@ -7,63 +7,51 @@ textures:
   cube map diffuse: resources/textures/cubeMaps/factory_diffuse_cube_map.dds
   cube map specular: resources/textures/cubeMaps/factory_specular_cube_map.dds 
   
-material properties:
-  - reference: resources/scenes/helpers/all_material_properties.yml
-  
 material techniques:
   - reference: resources/scenes/helpers/all_material_techniques.yml
         
 drawable objects:
   - model: unreal
-    material properties: metal7
     material technique: wood_normal
     translation: [0.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
   - model: unreal
-    material properties: metal5
     material technique: cobblestone_normal
     translation: [150.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
   - model: unreal
-    material properties: metal9
     material technique: metal_normal
     translation: [300.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
   - model: unreal
-    material properties: metal3
     material technique: cobblestone2_normal
     translation: [450.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
   - model: unreal
-    material properties: metal6
     material technique: rock3_normal
     translation: [600.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
   - model: unreal
-    material properties: metal9
     material technique: rock5_normal
     translation: [750.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
   - model: unreal
-    material properties: metal8
     material technique: brick3_normal
     translation: [900.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
   - model: unreal
-    material properties: metal4
     material technique: brick2_normal
     translation: [1050.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
   - model: unreal
-    material properties: metal8
     material technique: brick_normal
     translation: [1200.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]

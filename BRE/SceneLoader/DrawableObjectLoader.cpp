@@ -5,7 +5,6 @@
 #include <yaml-cpp/yaml.h>
 #pragma warning( pop ) 
 
-#include <SceneLoader\MaterialPropertiesLoader.h>
 #include <SceneLoader\MaterialTechniqueLoader.h>
 #include <SceneLoader\ModelLoader.h>
 #include <SceneLoader\YamlUtils.h>
@@ -31,6 +30,7 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
     //     material properties: materialPropertiesName
     //     material technique: drawableObjectName
     //     scale: [1, 3, 3]
+    //     texture scale: 8
     const YAML::Node drawableObjectsNode = rootNode["drawable objects"];
     BRE_CHECK_MSG(drawableObjectsNode.IsDefined(), L"'drawable objects' node must be defined");
     BRE_CHECK_MSG(drawableObjectsNode.IsSequence(), L"'drawable objects' node must be a sequence");
@@ -45,11 +45,11 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
 
         // Get data to build drawable object
         const Model* model = nullptr;
-        const MaterialProperties* materialProperties = nullptr;
         const MaterialTechnique* materialTechnique = nullptr;
-        float translation[3]{ 0.0f, 0.0f, 0.0f };
-        float rotation[3]{ 0.0f, 0.0f, 0.0f };
-        float scale[3]{ 1.0f, 1.0f, 1.0f };
+        float translation[3U]{ 0.0f, 0.0f, 0.0f };
+        float rotation[3U]{ 0.0f, 0.0f, 0.0f };
+        float scale[3U]{ 1.0f, 1.0f, 1.0f };
+        float textureScale = 1.0f;
         YAML::const_iterator mapIt = drawableObjectMap.begin();
         while (mapIt != drawableObjectMap.end()) {
             pairFirstValue = mapIt->first.as<std::string>();
@@ -59,10 +59,6 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
                 pairSecondValue = mapIt->second.as<std::string>();
                 modelName = pairSecondValue;
                 model = &mModelLoader.GetModel(pairSecondValue);
-            } else if (pairFirstValue == "material properties") {
-                BRE_CHECK_MSG(materialProperties == nullptr, L"Drawable object material properties must be set once");
-                pairSecondValue = mapIt->second.as<std::string>();
-                materialProperties = &mMaterialPropertiesLoader.GetMaterialProperties(pairSecondValue);
             } else if (pairFirstValue == "material technique") {
                 BRE_CHECK_MSG(materialTechnique == nullptr, L"Drawable object material technique must be set once");
                 pairSecondValue = mapIt->second.as<std::string>();
@@ -73,6 +69,8 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
                 YamlUtils::GetSequence(mapIt->second, rotation, 3U);
             } else if (pairFirstValue == "scale") {
                 YamlUtils::GetSequence(mapIt->second, scale, 3U);
+            } else if (pairFirstValue == "texture scale") {
+                YamlUtils::GetScalar(mapIt->second, textureScale);
             } else if (pairFirstValue == "reference") {
                 // If the first field is "reference", then the second field must be a yaml file 
                 // that specifies "drawable objects"
@@ -98,11 +96,6 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
             materialTechnique = &mMaterialTechniqueLoader.GetDefaultMaterialTechnique();
         }
 
-        // If "material properties" field is not present, then we get the default material properties
-        if (materialProperties == nullptr) {
-            materialProperties = &mMaterialPropertiesLoader.GetDefaultMaterialProperties();
-        }
-
         // Build worldMatrix
         XMFLOAT4X4 worldMatrix;
         MathUtils::ComputeMatrix(worldMatrix,
@@ -117,9 +110,9 @@ DrawableObjectLoader::LoadDrawableObjects(const YAML::Node& rootNode) noexcept
                                  rotation[2]);
 
         DrawableObject drawableObject(*model,
-                                      *materialProperties,
                                       *materialTechnique,
-                                      worldMatrix);
+                                      worldMatrix,
+                                      textureScale);
 
         DrawableObjectsByModelName& drawableObjectsByModelName = mDrawableObjectsByModelName[materialTechnique->GetType()];
         drawableObjectsByModelName[modelName].emplace_back(drawableObject);

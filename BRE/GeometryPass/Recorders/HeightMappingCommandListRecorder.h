@@ -4,8 +4,6 @@
 #include <ResourceManager\UploadBuffer.h>
 
 namespace BRE {
-class MaterialProperties;
-
 ///
 /// @brief Responsible to record command lists that implement height mapping
 ///
@@ -32,16 +30,14 @@ public:
     /// InitSharedPSOAndRootSignature() must be called first
     ///
     /// @param geometryDataVector List of geometry data. Must not be empty
-    /// @param materialProperties List of material properties. Must not be empty.
-    /// @param diffuseTextures List of diffuse textures. Must not be empty.
+    /// @param baseColorTextures List of base color textures. Must not be empty.
     /// @param metalnessTextures List of metalness textures. Must not be empty.
     /// @param roughnessTextures List of rougness textures. Must not be empty.
     /// @param normalTextures List of normal textures. Must not be empty.
     /// @param heightTextures List of height textures. Must not be empty.
     ///
     void Init(const std::vector<GeometryData>& geometryDataVector,
-              const std::vector<MaterialProperties>& materialProperties,
-              const std::vector<ID3D12Resource*>& diffuseTextures,
+              const std::vector<ID3D12Resource*>& baseColorTextures,
               const std::vector<ID3D12Resource*>& metalnessTextures,
               const std::vector<ID3D12Resource*>& roughnessTextures,
               const std::vector<ID3D12Resource*>& normalTextures,
@@ -66,15 +62,13 @@ public:
 private:
     ///
     /// @brief Initializes the constant buffers and views
-    /// @param materialProperties List of material properties. Must not be empty.
-    /// @param diffuseTextures List of diffuse textures. Must not be empty.
+    /// @param baseColorTextures List of base color textures. Must not be empty.
     /// @param metalnessTextures List of metalness textures. Must not be empty.
     /// @param roughnessTextures List of rougness textures. Must not be empty.
     /// @param normalTextures List of normal textures. Must not be empty.
     /// @param heightTextures List of height textures. Must not be empty.
     ///
-    void InitCBuffersAndViews(const std::vector<MaterialProperties>& materialProperties,
-                              const std::vector<ID3D12Resource*>& diffuseTextures,
+    void InitCBuffersAndViews(const std::vector<ID3D12Resource*>& baseColorTextures,
                               const std::vector<ID3D12Resource*>& metalnessTextures,
                               const std::vector<ID3D12Resource*>& roughnessTextures,
                               const std::vector<ID3D12Resource*>& normalTextures,
