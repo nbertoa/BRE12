@@ -1,0 +1,71 @@
+models:
+  unreal: resources/models/unreal.obj
+  
+textures:
+  reference: resources/scenes/helpers/all_textures.yml
+  sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
+  cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
+  cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds 
+  
+material techniques:
+  - reference: resources/scenes/helpers/all_material_techniques.yml
+        
+drawable objects:
+  - model: unreal
+    material technique: plastic
+    translation: [0.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 2
+  - model: unreal
+    material technique: plastic2
+    translation: [150.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 3
+  - model: unreal
+    material technique: plastic3
+    translation: [300.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 4
+  - model: unreal
+    material technique: plastic4
+    translation: [450.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 5
+  - model: unreal
+    material technique: plastic5
+    translation: [600.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 6
+  - model: unreal
+    material technique: plastic6
+    translation: [750.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 7
+  - model: unreal
+    material technique: plastic7
+    translation: [900.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 8
+  - model: unreal
+    material technique: plastic8
+    translation: [1050.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 9
+    
+environment:
+  - sky box texture: sky map
+    diffuse irradiance texture: cube map diffuse
+    specular pre convolved environment texture: cube map specular
+    
+camera:
+  - position: [0.0, 75.0, -250.0]
+    look vector: [0.0, 0.0, 1.0]
+    up vector: [0.0, 1.0, 0.0]  

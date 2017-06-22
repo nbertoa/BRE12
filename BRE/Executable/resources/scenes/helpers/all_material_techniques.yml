@@ -120,32 +120,15 @@ material techniques:
     normal texture: cobblestone5_normal
     height texture: cobblestone5_height
   - name: metal
-    base color texture: metal     
-    metalness texture: metalness1
-    roughness texture: roughness0
-  - name: metal_normal
     base color texture: metal
     metalness texture: metalness1
     roughness texture: roughness0
     normal texture: metal_normal
   - name: metal2
-    base color texture: metal2     
-    metalness texture: metalness1
-    roughness texture: roughness0
-  - name: metal2_normal
     base color texture: metal2
-    metalness texture: metalness1
-    roughness texture: roughness0
+    metalness texture: metal2_metalness
+    roughness texture: metal2_roughness
     normal texture: metal2_normal
-  - name: metal3
-    base color texture: metal3     
-    metalness texture: metalness1
-    roughness texture: roughness0
-  - name: metal3_normal
-    base color texture: metal3
-    metalness texture: metalness1
-    roughness texture: roughness0
-    normal texture: metal3_normal
   - name: rock
     base color texture: rock
     metalness texture: metalness0
@@ -176,6 +159,46 @@ material techniques:
     roughness texture: roughness0.5
     normal texture: rock2_normal
     height texture: rock2_height
+  - name: plastic
+    base color texture: plastic     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic2
+    base color texture: plastic2     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic3
+    base color texture: plastic3     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic4
+    base color texture: plastic4     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic5
+    base color texture: plastic5     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic6
+    base color texture: plastic6     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic7
+    base color texture: plastic7  
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic8
+    base color texture: plastic8     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
   - name: rock3
     base color texture: rock3
     metalness texture: metalness0
@@ -251,6 +274,45 @@ material techniques:
     roughness texture: roughness0.5
     normal texture: wood2_normal
     height texture: wood2_height
+  - name: wood3
+    base color texture: wood3     
+    metalness texture: metalness0
+    roughness texture: wood3_roughness
+  - name: wood3_normal
+    base color texture: wood3     
+    metalness texture: metalness0
+    roughness texture: wood3_roughness
+    normal texture: wood3_normal
+  - name: wood3_height
+    base color texture: wood3     
+    metalness texture: metalness0
+    roughness texture: wood3_roughness
+    normal texture: wood3_normal
+    height texture: wood3_height
+  - name: wood4
+    base color texture: wood4     
+    metalness texture: metalness0
+    roughness texture: wood4_roughness
+  - name: wood4_normal
+    base color texture: wood4     
+    metalness texture: metalness0
+    roughness texture: wood4_roughness
+    normal texture: wood4_normal
+  - name: fabric
+    base color texture: fabric     
+    metalness texture: metalness0
+    roughness texture: fabric_roughness
+  - name: fabric_normal
+    base color texture: fabric     
+    metalness texture: metalness0
+    roughness texture: fabric_roughness
+    normal texture: fabric_normal
+  - name: fabric_height
+    base color texture: fabric     
+    metalness texture: metalness0
+    roughness texture: fabric_roughness
+    normal texture: fabric_normal
+    height texture: fabric_height     
   - name: yellow
     base color texture: yellow
     metalness texture: metalness0

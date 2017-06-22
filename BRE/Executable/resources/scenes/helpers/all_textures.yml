@@ -27,10 +27,20 @@ textures:
   metal_normal: resources/textures/metal/metal_normal.dds
   metal2: resources/textures/metal/metal2.dds
   metal2_normal: resources/textures/metal/metal2_normal.dds
-  metal3: resources/textures/metal/metal3.dds
-  metal3_normal: resources/textures/metal/metal3_normal.dds
+  metal2_roughness: resources/textures/metal/metal2_roughness.dds
+  metal2_metalness: resources/textures/metal/metal2_metalness.dds
   metalness0: resources/textures/metalness0.dds
   metalness1: resources/textures/metalness1.dds
+  plastic: resources/textures/plastic/plastic.dds
+  plastic2: resources/textures/plastic/plastic2.dds
+  plastic3: resources/textures/plastic/plastic3.dds
+  plastic4: resources/textures/plastic/plastic4.dds
+  plastic5: resources/textures/plastic/plastic5.dds
+  plastic6: resources/textures/plastic/plastic6.dds
+  plastic7: resources/textures/plastic/plastic7.dds
+  plastic8: resources/textures/plastic/plastic8.dds
+  plastic_normal: resources/textures/plastic/plastic_normal.dds
+  plastic_roughness: resources/textures/plastic/plastic_roughness.dds
   rock: resources/textures/rock/rock.dds
   rock_normal: resources/textures/rock/rock_normal.dds
   rock_height: resources/textures/rock/rock_height.dds
@@ -55,4 +65,15 @@ textures:
   wood2: resources/textures/wood/wood2.dds
   wood2_normal: resources/textures/wood/wood2_normal.dds
   wood2_height: resources/textures/wood/wood2_height.dds
+  wood3: resources/textures/wood/wood3.dds
+  wood3_normal: resources/textures/wood/wood3_normal.dds
+  wood3_height: resources/textures/wood/wood3_height.dds
+  wood3_roughness: resources/textures/wood/wood3_roughness.dds
+  wood4: resources/textures/wood/wood4.dds
+  wood4_normal: resources/textures/wood/wood4_normal.dds
+  wood4_roughness: resources/textures/wood/wood4_roughness.dds
+  fabric: resources/textures/fabric/fabric.dds
+  fabric_normal: resources/textures/fabric/fabric_normal.dds
+  fabric_height: resources/textures/fabric/fabric_height.dds
+  fabric_roughness: resources/textures/fabric/fabric_roughness.dds
   yellow: resources/textures/colors/yellow.dds
