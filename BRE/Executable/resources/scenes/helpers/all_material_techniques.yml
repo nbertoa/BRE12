@@ -119,6 +119,11 @@ material techniques:
     roughness texture: roughness0.5
     normal texture: cobblestone5_normal
     height texture: cobblestone5_height
+  - name: marble
+    base color texture: marble
+    metalness texture: metalness0
+    roughness texture: marble_roughness
+    normal texture: marble_normal
   - name: metal
     base color texture: metal
     metalness texture: metalness1
@@ -129,6 +134,11 @@ material techniques:
     metalness texture: metal2_metalness
     roughness texture: metal2_roughness
     normal texture: metal2_normal
+  - name: metal3
+    base color texture: metal3
+    metalness texture: metal3_metalness
+    roughness texture: metal3_roughness
+    normal texture: metal3_normal
   - name: rock
     base color texture: rock
     metalness texture: metalness0
