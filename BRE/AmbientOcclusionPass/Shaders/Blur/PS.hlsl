@@ -1,4 +1,4 @@
-#include <EnvironmentLightPass/Shaders/BlurCBuffer.hlsli>
+#include <AmbientOcclusionPass/Shaders/BlurCBuffer.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 
 #include "RS.hlsl"

@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{746964c6-8ba5-49aa-99b5-5b5277d54124}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\SSAO">
+      <UniqueIdentifier>{bbf50979-9255-498a-abc8-ab6809b43119}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Blur">
+      <UniqueIdentifier>{4028a451-8c76-436d-91e6-b81d99e50375}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\Blur\PS.hlsl">
+      <Filter>Shaders\Blur</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Blur\RS.hlsl">
+      <Filter>Shaders\Blur</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Blur\VS.hlsl">
+      <Filter>Shaders\Blur</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SSAO\PS.hlsl">
+      <Filter>Shaders\SSAO</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SSAO\RS.hlsl">
+      <Filter>Shaders\SSAO</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SSAO\VS.hlsl">
+      <Filter>Shaders\SSAO</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AmbientOcclusionCommandListRecorder.cpp" />
+    <ClCompile Include="BlurCommandListRecorder.cpp" />
+    <ClCompile Include="AmbientOcclusionPass.cpp" />
+    <ClCompile Include="AmbientOcclusionSettings.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AmbientOcclusionCommandListRecorder.h" />
+    <ClInclude Include="BlurCommandListRecorder.h" />
+    <ClInclude Include="AmbientOcclusionPass.h" />
+    <ClInclude Include="AmbientOcclusionSettings.h" />
+    <ClInclude Include="Shaders\AmbientOcclusionCBuffer.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\BlurCBuffer.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\AmbientOcclusionCBuffer.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\BlurCBuffer.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>

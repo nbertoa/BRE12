@@ -221,14 +221,20 @@ RenderManager::InitPasses(Scene& scene) noexcept
 
     mReflectionPass.Init(*mDepthBuffer);
 
+    mAmbientOcclusionPass.Init(mGeometryPass.GetGeometryBuffer(GeometryPass::NORMAL_ROUGHNESS),
+                               *mDepthBuffer, 
+                               mGeometryPass.GetGeometryBufferShaderResourceView(GeometryPass::NORMAL_ROUGHNESS),
+                               mDepthBufferShaderResourceView);
+
     mEnvironmentLightPass.Init(mGeometryPass.GetGeometryBuffer(GeometryPass::BASECOLOR_METALNESS),
                                mGeometryPass.GetGeometryBuffer(GeometryPass::NORMAL_ROUGHNESS),
                                *mDepthBuffer,
                                *diffuseIrradianceCubeMap,
                                *specularPreConvolvedCubeMap,
+                               mAmbientOcclusionPass.GetAmbientAccessibilityBuffer(),
                                mIntermediateColorBuffer1RenderTargetView,
                                mGeometryPass.GetGeometryBufferShaderResourceViews(),
-                               mGeometryPass.GetGeometryBufferShaderResourceView(GeometryPass::NORMAL_ROUGHNESS),
+                               mAmbientOcclusionPass.GetAmbientAccessibilityShaderResourceView(),
                                mDepthBufferShaderResourceView);    
 
     mSkyBoxPass.Init(*skyBoxCubeMap,
@@ -273,6 +279,7 @@ RenderManager::execute()
         commandListCount += RecordAndPushPrePassCommandLists();
 
         commandListCount += mGeometryPass.Execute(mFrameCBuffer);
+        commandListCount += mAmbientOcclusionPass.Execute(mFrameCBuffer);
         commandListCount += mEnvironmentLightPass.Execute(mFrameCBuffer);
         commandListCount += mReflectionPass.Execute(mFrameCBuffer);
         commandListCount += mSkyBoxPass.Execute(mFrameCBuffer);

@@ -5,6 +5,7 @@
 #include <tbb/task.h>
 #include <wrl.h>
 
+#include <AmbientOcclusionPass\AmbientOcclusionPass.h>
 #include <ApplicationSettings\ApplicationSettings.h>
 #include <CommandManager\CommandListPerFrame.h>
 #include <Camera/Camera.h>
@@ -146,6 +147,7 @@ private:
 
     // Passes
     GeometryPass mGeometryPass;
+    AmbientOcclusionPass mAmbientOcclusionPass;
     EnvironmentLightPass mEnvironmentLightPass;
     ReflectionPass mReflectionPass;
     SkyBoxPass mSkyBoxPass;

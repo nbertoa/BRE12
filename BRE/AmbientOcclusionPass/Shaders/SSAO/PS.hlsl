@@ -1,4 +1,4 @@
-#include <EnvironmentLightPass/Shaders/AmbientOcclusionCBuffer.hlsli>
+#include <AmbientOcclusionPass/Shaders/AmbientOcclusionCBuffer.hlsli>
 #include <ShaderUtils/CBuffers.hlsli>
 #include <ShaderUtils/Utils.hlsli>
 

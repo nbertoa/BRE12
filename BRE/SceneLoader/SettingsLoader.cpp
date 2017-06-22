@@ -5,8 +5,8 @@
 #include <yaml-cpp/yaml.h>
 #pragma warning( pop ) 
 
+#include <AmbientOcclusionPass\AmbientOcclusionSettings.h>
 #include <ApplicationSettings\ApplicationSettings.h>
-#include <EnvironmentLightPass\EnvironmentLightSettings.h>
 #include <GeometryPass\GeometrySettings.h>
 #include <SceneLoader\YamlUtils.h>
 #include <Utils/DebugUtils.h>
@@ -71,16 +71,16 @@ SettingsLoader::LoadSettings(const YAML::Node& rootNode) noexcept
             ApplicationSettings::sIsFullscreenWindow = isFullscreen > 0U;
         } else if (propertyName == "ambient occlusion sample kernel size") {
             YamlUtils::GetScalar(mapIt->second,
-                                 EnvironmentLightSettings::sSampleKernelSize);
+                                 AmbientOcclusionSettings::sSampleKernelSize);
         } else if (propertyName == "ambient occlusion noise texture dimension") {
             YamlUtils::GetScalar(mapIt->second,
-                                 EnvironmentLightSettings::sNoiseTextureDimension);
+                                 AmbientOcclusionSettings::sNoiseTextureDimension);
         } else if (propertyName == "ambient occlusion radius") {
             YamlUtils::GetScalar(mapIt->second,
-                                 EnvironmentLightSettings::sOcclusionRadius);
+                                 AmbientOcclusionSettings::sOcclusionRadius);
         } else if (propertyName == "ambient occlusion power") {
             YamlUtils::GetScalar(mapIt->second,
-                                 EnvironmentLightSettings::sSsaoPower);
+                                 AmbientOcclusionSettings::sSsaoPower);
         } else if (propertyName == "height mapping min tessellation distance") {
             YamlUtils::GetScalar(mapIt->second,
                                  GeometrySettings::sMinTessellationDistance);

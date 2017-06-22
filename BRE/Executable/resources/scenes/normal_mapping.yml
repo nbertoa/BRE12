@@ -16,46 +16,55 @@ drawable objects:
     translation: [0.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
+    texture scale: 2
   - model: unreal
     material technique: cobblestone_normal
     translation: [150.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
+    texture scale: 3
   - model: unreal
     material technique: metal_normal
     translation: [300.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
+    texture scale: 4
   - model: unreal
     material technique: cobblestone2_normal
     translation: [450.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
+    texture scale: 5
   - model: unreal
     material technique: rock3_normal
     translation: [600.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
+    texture scale: 6
   - model: unreal
     material technique: rock5_normal
     translation: [750.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
+    texture scale: 7
   - model: unreal
     material technique: brick3_normal
     translation: [900.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
+    texture scale: 8
   - model: unreal
     material technique: brick2_normal
     translation: [1050.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
+    texture scale: 9
   - model: unreal
     material technique: brick_normal
     translation: [1200.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
+    texture scale: 10
     
 environment:
   - sky box texture: sky map

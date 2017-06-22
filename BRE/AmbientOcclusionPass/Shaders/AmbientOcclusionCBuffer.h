@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
+#include <AmbientOcclusionPass\AmbientOcclusionSettings.h>
 #include <ApplicationSettings\ApplicationSettings.h>
-#include <EnvironmentLightPass\EnvironmentLightSettings.h>
 #include <Utils\DebugUtils.h>
 
 namespace BRE {
@@ -51,10 +51,10 @@ struct AmbientOcclusionCBuffer {
 
     float mScreenWidth{ static_cast<float>(ApplicationSettings::sWindowWidth) };
     float mScreenHeight{ static_cast<float>(ApplicationSettings::sWindowHeight) };
-    std::uint32_t mSampleKernelSize{ EnvironmentLightSettings::sSampleKernelSize };
-    std::uint32_t mNoiseTextureDimension{ EnvironmentLightSettings::sNoiseTextureDimension };
-    float mOcclusionRadius{ EnvironmentLightSettings::sOcclusionRadius };
-    float mSsaoPower{ EnvironmentLightSettings::sSsaoPower };
+    std::uint32_t mSampleKernelSize{ AmbientOcclusionSettings::sSampleKernelSize };
+    std::uint32_t mNoiseTextureDimension{ AmbientOcclusionSettings::sNoiseTextureDimension };
+    float mOcclusionRadius{ AmbientOcclusionSettings::sOcclusionRadius };
+    float mSsaoPower{ AmbientOcclusionSettings::sSsaoPower };
 };
 
 }

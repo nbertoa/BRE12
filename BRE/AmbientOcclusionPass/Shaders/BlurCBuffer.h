@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EnvironmentLightPass\EnvironmentLightSettings.h>
+#include <AmbientOcclusionPass\AmbientOcclusionSettings.h>
 
 namespace BRE {
 ///
@@ -25,7 +25,7 @@ struct BlurCBuffer {
     BlurCBuffer(BlurCBuffer&&) = default;
     BlurCBuffer& operator=(BlurCBuffer&&) = default;
 
-    std::uint32_t mNoiseTextureDimension{ EnvironmentLightSettings::sNoiseTextureDimension };
+    std::uint32_t mNoiseTextureDimension{ AmbientOcclusionSettings::sNoiseTextureDimension };
 };
 
 }

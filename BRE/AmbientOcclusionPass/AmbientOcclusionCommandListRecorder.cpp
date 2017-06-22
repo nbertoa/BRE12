@@ -1,12 +1,12 @@
 #include "AmbientOcclusionCommandListRecorder.h"
 
+#include <AmbientOcclusionPass\AmbientOcclusionSettings.h>
+#include <AmbientOcclusionPass\Shaders\AmbientOcclusionCBuffer.h>
 #include <ApplicationSettings\ApplicationSettings.h>
 #include <CommandListExecutor\CommandListExecutor.h>
 #include <DescriptorManager\CbvSrvUavDescriptorManager.h>
 #include <DXUtils\D3DFactory.h>
 #include <DXUtils\d3dx12.h>
-#include <EnvironmentLightPass\EnvironmentLightSettings.h>
-#include <EnvironmentLightPass\Shaders\AmbientOcclusionCBuffer.h>
 #include <MathUtils/MathUtils.h>
 #include <PSOManager/PSOManager.h>
 #include <ResourceManager/ResourceManager.h>
@@ -123,10 +123,10 @@ AmbientOcclusionCommandListRecorder::InitSharedPSOAndRootSignature() noexcept
     psoData.mBlendDescriptor = D3DFactory::GetAlwaysBlendDesc();
     psoData.mDepthStencilDescriptor = D3DFactory::GetDisabledDepthStencilDesc();
 
-    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("EnvironmentLightPass/Shaders/AmbientOcclusion/PS.cso");
-    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("EnvironmentLightPass/Shaders/AmbientOcclusion/VS.cso");
+    psoData.mPixelShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("AmbientOcclusionPass/Shaders/SSAO/PS.cso");
+    psoData.mVertexShaderBytecode = ShaderManager::LoadShaderFileAndGetBytecode("AmbientOcclusionPass/Shaders/SSAO/VS.cso");
 
-    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("EnvironmentLightPass/Shaders/AmbientOcclusion/RS.cso");
+    ID3DBlob* rootSignatureBlob = &ShaderManager::LoadShaderFileAndGetBlob("AmbientOcclusionPass/Shaders/SSAO/RS.cso");
     psoData.mRootSignature = &RootSignatureManager::CreateRootSignatureFromBlob(*rootSignatureBlob);
     sRootSignature = psoData.mRootSignature;
 
@@ -154,9 +154,9 @@ AmbientOcclusionCommandListRecorder::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& amb
     mDepthBufferShaderResourceView = depthBufferShaderResourceView;
 
     const std::uint32_t sampleKernelSize = 
-        static_cast<std::uint32_t>(EnvironmentLightSettings::sSampleKernelSize);
+        static_cast<std::uint32_t>(AmbientOcclusionSettings::sSampleKernelSize);
     const std::uint32_t noiseTextureDimension = 
-        static_cast<std::uint32_t>(EnvironmentLightSettings::sNoiseTextureDimension);
+        static_cast<std::uint32_t>(AmbientOcclusionSettings::sNoiseTextureDimension);
 
     std::vector<XMFLOAT4> sampleKernel;
     GenerateSampleKernel(sampleKernelSize, sampleKernel);
@@ -354,10 +354,10 @@ AmbientOcclusionCommandListRecorder::InitAmbientOcclusionCBuffer() noexcept
                                                                               1U);
     AmbientOcclusionCBuffer ambientOcclusionCBuffer(static_cast<float>(ApplicationSettings::sWindowWidth),
                                                     static_cast<float>(ApplicationSettings::sWindowHeight),
-                                                    EnvironmentLightSettings::sSampleKernelSize,
-                                                    EnvironmentLightSettings::sNoiseTextureDimension,
-                                                    EnvironmentLightSettings::sOcclusionRadius,
-                                                    EnvironmentLightSettings::sSsaoPower);
+                                                    AmbientOcclusionSettings::sSampleKernelSize,
+                                                    AmbientOcclusionSettings::sNoiseTextureDimension,
+                                                    AmbientOcclusionSettings::sOcclusionRadius,
+                                                    AmbientOcclusionSettings::sSsaoPower);
 
     mAmbientOcclusionUploadCBuffer->CopyData(0U, &ambientOcclusionCBuffer, sizeof(AmbientOcclusionCBuffer));
 }
