@@ -1,0 +1,5 @@
+textures:
+  fabric: resources/textures/fabric/fabric.dds
+  fabric_normal: resources/textures/fabric/fabric_normal.dds
+  fabric_height: resources/textures/fabric/fabric_height.dds
+  fabric_roughness: resources/textures/fabric/fabric_roughness.dds

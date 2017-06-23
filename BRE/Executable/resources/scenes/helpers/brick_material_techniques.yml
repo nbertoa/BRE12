@@ -1,0 +1,151 @@
+material techniques:
+  - name: brick
+    base color texture: brick
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+  - name: brick_normal
+    base color texture: brick
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: brick_normal
+  - name: brick_height
+    base color texture: brick
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: brick_normal
+    height texture: brick_height
+  - name: brick2
+    base color texture: brick2
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+  - name: brick2_normal
+    base color texture: brick2
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: brick2_normal
+  - name: brick2_height
+    base color texture: brick2
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: brick2_normal
+    height texture: brick2_height
+  - name: brick3
+    base color texture: brick3
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+  - name: brick3_normal
+    base color texture: brick3
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: brick3_normal
+  - name: brick3_height
+    base color texture: brick3
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: brick3_normal
+    height texture: brick3_height
+  - name: brick4
+    base color texture: brick4
+    metalness texture: metalness0
+    roughness texture: brick4_roughness
+  - name: brick4_normal
+    base color texture: brick4
+    metalness texture: metalness0
+    roughness texture: brick4_roughness
+    normal texture: brick4_normal
+  - name: brick4_height
+    base color texture: brick4
+    metalness texture: metalness0
+    roughness texture: brick4_roughness
+    normal texture: brick4_normal
+    height texture: brick4_height
+  - name: brick5
+    base color texture: brick5
+    metalness texture: metalness0
+    roughness texture: brick5_roughness
+  - name: brick5_normal
+    base color texture: brick5
+    metalness texture: metalness0
+    roughness texture: brick5_roughness
+    normal texture: brick5_normal
+  - name: brick5_height
+    base color texture: brick5
+    metalness texture: metalness0
+    roughness texture: brick5_roughness
+    normal texture: brick5_normal
+    height texture: brick5_height
+  - name: brick6
+    base color texture: brick6
+    metalness texture: metalness0
+    roughness texture: brick6_roughness
+  - name: brick6_normal
+    base color texture: brick6
+    metalness texture: metalness0
+    roughness texture: brick6_roughness
+    normal texture: brick6_normal
+  - name: brick6_height
+    base color texture: brick6
+    metalness texture: metalness0
+    roughness texture: brick6_roughness
+    normal texture: brick6_normal
+    height texture: brick6_height
+  - name: brick7
+    base color texture: brick7
+    metalness texture: metalness0
+    roughness texture: brick7_roughness
+  - name: brick7_normal
+    base color texture: brick7
+    metalness texture: metalness0
+    roughness texture: brick7_roughness
+    normal texture: brick7_normal
+  - name: brick7_height
+    base color texture: brick7
+    metalness texture: metalness0
+    roughness texture: brick7_roughness
+    normal texture: brick7_normal
+    height texture: brick7_height
+  - name: brick8
+    base color texture: brick8
+    metalness texture: metalness0
+    roughness texture: brick8_roughness
+  - name: brick8_normal
+    base color texture: brick8
+    metalness texture: metalness0
+    roughness texture: brick8_roughness
+    normal texture: brick8_normal
+  - name: brick8_height
+    base color texture: brick8
+    metalness texture: metalness0
+    roughness texture: brick8_roughness
+    normal texture: brick8_normal
+    height texture: brick8_height
+  - name: brick9
+    base color texture: brick9
+    metalness texture: metalness0
+    roughness texture: brick9_roughness
+  - name: brick9_normal
+    base color texture: brick9
+    metalness texture: metalness0
+    roughness texture: brick9_roughness
+    normal texture: brick9_normal
+  - name: brick9_height
+    base color texture: brick9
+    metalness texture: metalness0
+    roughness texture: brick9_roughness
+    normal texture: brick9_normal
+    height texture: brick9_height
+  - name: brick10
+    base color texture: brick10
+    metalness texture: metalness0
+    roughness texture: brick10_roughness
+  - name: brick10_normal
+    base color texture: brick10
+    metalness texture: metalness0
+    roughness texture: brick10_roughness
+    normal texture: brick10_normal
+  - name: brick10_height
+    base color texture: brick10
+    metalness texture: metalness0
+    roughness texture: brick10_roughness
+    normal texture: brick10_normal
+    height texture: brick10_height

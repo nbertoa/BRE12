@@ -1,0 +1,14 @@
+textures:
+  marble: resources/textures/metal/marble.dds
+  marble_normal: resources/textures/metal/marble_normal.dds
+  marble_roughness: resources/textures/metal/marble_roughness.dds
+  metal: resources/textures/metal/metal.dds
+  metal_normal: resources/textures/metal/metal_normal.dds
+  metal2: resources/textures/metal/metal2.dds
+  metal2_normal: resources/textures/metal/metal2_normal.dds
+  metal2_roughness: resources/textures/metal/metal2_roughness.dds
+  metal2_metalness: resources/textures/metal/metal2_metalness.dds
+  metal3: resources/textures/metal/metal3.dds
+  metal3_normal: resources/textures/metal/metal3_normal.dds
+  metal3_roughness: resources/textures/metal/metal3_roughness.dds
+  metal3_metalness: resources/textures/metal/metal3_metalness.dds

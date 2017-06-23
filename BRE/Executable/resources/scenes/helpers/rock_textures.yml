@@ -1,0 +1,16 @@
+textures:
+  rock: resources/textures/rock/rock.dds
+  rock_normal: resources/textures/rock/rock_normal.dds
+  rock_height: resources/textures/rock/rock_height.dds
+  rock2: resources/textures/rock/rock2.dds
+  rock2_normal: resources/textures/rock/rock2_normal.dds
+  rock2_height: resources/textures/rock/rock2_height.dds
+  rock3: resources/textures/rock/rock3.dds
+  rock3_normal: resources/textures/rock/rock3_normal.dds
+  rock3_height: resources/textures/rock/rock3_height.dds
+  rock4: resources/textures/rock/rock4.dds
+  rock4_normal: resources/textures/rock/rock4_normal.dds
+  rock4_height: resources/textures/rock/rock4_height.dds
+  rock5: resources/textures/rock/rock5.dds
+  rock5_normal: resources/textures/rock/rock5_normal.dds
+  rock5_height: resources/textures/rock/rock5_height.dds

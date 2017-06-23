@@ -1,0 +1,41 @@
+material techniques:
+  - name: plastic
+    base color texture: plastic     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic2
+    base color texture: plastic2     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic3
+    base color texture: plastic3     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic4
+    base color texture: plastic4     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic5
+    base color texture: plastic5     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic6
+    base color texture: plastic6     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic7
+    base color texture: plastic7  
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal
+  - name: plastic8
+    base color texture: plastic8     
+    metalness texture: metalness0
+    roughness texture: plastic_roughness
+    normal texture: plastic_normal

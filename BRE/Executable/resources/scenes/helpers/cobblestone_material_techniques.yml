@@ -1,0 +1,106 @@
+material techniques:
+  - name: cobblestone
+    base color texture: cobblestone
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+  - name: cobblestone_normal
+    base color texture: cobblestone
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: cobblestone_normal
+  - name: cobblestone_height
+    base color texture: cobblestone
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: cobblestone_normal
+    height texture: cobblestone_height
+  - name: cobblestone2
+    base color texture: cobblestone2
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+  - name: cobblestone2_normal
+    base color texture: cobblestone2
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: cobblestone2_normal
+  - name: cobblestone2_height
+    base color texture: cobblestone2
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: cobblestone2_normal
+    height texture: cobblestone2_height
+  - name: cobblestone3
+    base color texture: cobblestone3
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+  - name: cobblestone3_normal
+    base color texture: cobblestone3
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: cobblestone3_normal
+  - name: cobblestone3_height
+    base color texture: cobblestone3
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: cobblestone3_normal
+    height texture: cobblestone3_height
+  - name: cobblestone4
+    base color texture: cobblestone4
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+  - name: cobblestone4_normal
+    base color texture: cobblestone4
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: cobblestone4_normal
+  - name: cobblestone4_height
+    base color texture: cobblestone4
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: cobblestone4_normal
+    height texture: cobblestone4_height
+  - name: cobblestone5
+    base color texture: cobblestone5
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+  - name: cobblestone5_normal
+    base color texture: cobblestone5
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: cobblestone5_normal
+  - name: cobblestone5_height
+    base color texture: cobblestone5
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: cobblestone5_normal
+    height texture: cobblestone5_height
+  - name: cobblestone6
+    base color texture: cobblestone6
+    metalness texture: metalness0
+    roughness texture: cobblestone6_roughness
+  - name: cobblestone6_normal
+    base color texture: cobblestone6
+    metalness texture: metalness0
+    roughness texture: cobblestone6_roughness
+    normal texture: cobblestone6_normal
+  - name: cobblestone6_height
+    base color texture: cobblestone6
+    metalness texture: metalness0
+    roughness texture: cobblestone6_roughness
+    normal texture: cobblestone6_normal
+    height texture: cobblestone6_height
+  - name: cobblestone7
+    base color texture: cobblestone7
+    metalness texture: metalness0
+    roughness texture: cobblestone7_roughness
+  - name: cobblestone7_normal
+    base color texture: cobblestone7
+    metalness texture: metalness0
+    roughness texture: cobblestone7_roughness
+    normal texture: cobblestone7_normal
+  - name: cobblestone7_height
+    base color texture: cobblestone7
+    metalness texture: metalness0
+    roughness texture: cobblestone7_roughness
+    normal texture: cobblestone7_normal
+    height texture: cobblestone7_height

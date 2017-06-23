@@ -1,0 +1,24 @@
+textures:
+  cobblestone: resources/textures/cobblestone/cobblestone.dds
+  cobblestone_normal: resources/textures/cobblestone/cobblestone_normal.dds
+  cobblestone_height: resources/textures/cobblestone/cobblestone_height.dds
+  cobblestone2: resources/textures/cobblestone/cobblestone2.dds
+  cobblestone2_normal: resources/textures/cobblestone/cobblestone2_normal.dds
+  cobblestone2_height: resources/textures/cobblestone/cobblestone2_height.dds
+  cobblestone3: resources/textures/cobblestone/cobblestone3.dds
+  cobblestone3_normal: resources/textures/cobblestone/cobblestone3_normal.dds
+  cobblestone3_height: resources/textures/cobblestone/cobblestone3_height.dds
+  cobblestone4: resources/textures/cobblestone/cobblestone4.dds
+  cobblestone4_normal: resources/textures/cobblestone/cobblestone4_normal.dds
+  cobblestone4_height: resources/textures/cobblestone/cobblestone4_height.dds
+  cobblestone5: resources/textures/cobblestone/cobblestone5.dds
+  cobblestone5_normal: resources/textures/cobblestone/cobblestone5_normal.dds
+  cobblestone5_height: resources/textures/cobblestone/cobblestone5_height.dds
+  cobblestone6: resources/textures/cobblestone/cobblestone6.dds
+  cobblestone6_normal: resources/textures/cobblestone/cobblestone6_normal.dds
+  cobblestone6_height: resources/textures/cobblestone/cobblestone6_height.dds
+  cobblestone6_roughness: resources/textures/cobblestone/cobblestone6_roughness.dds
+  cobblestone7: resources/textures/cobblestone/cobblestone7.dds
+  cobblestone7_normal: resources/textures/cobblestone/cobblestone7_normal.dds
+  cobblestone7_height: resources/textures/cobblestone/cobblestone7_height.dds
+  cobblestone7_roughness: resources/textures/cobblestone/cobblestone7_roughness.dds

@@ -1,0 +1,11 @@
+textures:
+  plastic: resources/textures/plastic/plastic.dds
+  plastic2: resources/textures/plastic/plastic2.dds
+  plastic3: resources/textures/plastic/plastic3.dds
+  plastic4: resources/textures/plastic/plastic4.dds
+  plastic5: resources/textures/plastic/plastic5.dds
+  plastic6: resources/textures/plastic/plastic6.dds
+  plastic7: resources/textures/plastic/plastic7.dds
+  plastic8: resources/textures/plastic/plastic8.dds
+  plastic_normal: resources/textures/plastic/plastic_normal.dds
+  plastic_roughness: resources/textures/plastic/plastic_roughness.dds

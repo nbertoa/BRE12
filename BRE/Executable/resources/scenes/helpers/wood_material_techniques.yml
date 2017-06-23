@@ -1,0 +1,130 @@
+material techniques:
+  - name: wood
+    base color texture: wood
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+  - name: wood_normal
+    base color texture: wood     
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: wood_normal
+  - name: wood_height
+    base color texture: wood     
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: wood_normal
+    height texture: wood_height
+  - name: wood2
+    base color texture: wood2  
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+  - name: wood2_normal
+    base color texture: wood2     
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: wood2_normal
+  - name: wood2_height
+    base color texture: wood2     
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: wood2_normal
+    height texture: wood2_height
+  - name: wood3
+    base color texture: wood3     
+    metalness texture: metalness0
+    roughness texture: wood3_roughness
+  - name: wood3_normal
+    base color texture: wood3     
+    metalness texture: metalness0
+    roughness texture: wood3_roughness
+    normal texture: wood3_normal
+  - name: wood3_height
+    base color texture: wood3     
+    metalness texture: metalness0
+    roughness texture: wood3_roughness
+    normal texture: wood3_normal
+    height texture: wood3_height
+  - name: wood4
+    base color texture: wood4     
+    metalness texture: metalness0
+    roughness texture: wood4_roughness
+  - name: wood4_normal
+    base color texture: wood4     
+    metalness texture: metalness0
+    roughness texture: wood4_roughness
+    normal texture: wood4_normal
+  - name: wood5
+    base color texture: wood5  
+    metalness texture: metalness0
+    roughness texture: wood5_roughness
+  - name: wood5_normal
+    base color texture: wood5  
+    metalness texture: metalness0
+    roughness texture: wood5_roughness
+    normal texture: wood5_normal
+  - name: wood5_height
+    base color texture: wood5  
+    metalness texture: metalness0
+    roughness texture: wood5_roughness
+    normal texture: wood5_normal
+    height texture: wood5_height
+  - name: wood6
+    base color texture: wood6  
+    metalness texture: metalness0
+    roughness texture: wood6_roughness
+  - name: wood6_normal
+    base color texture: wood6  
+    metalness texture: metalness0
+    roughness texture: wood6_roughness
+    normal texture: wood6_normal
+  - name: wood6_height
+    base color texture: wood6  
+    metalness texture: metalness0
+    roughness texture: wood6_roughness
+    normal texture: wood6_normal
+    height texture: wood6_height
+  - name: wood7
+    base color texture: wood7  
+    metalness texture: metalness0
+    roughness texture: wood7_roughness
+  - name: wood7_normal
+    base color texture: wood7  
+    metalness texture: metalness0
+    roughness texture: wood7_roughness
+    normal texture: wood7_normal
+  - name: wood7_height
+    base color texture: wood7  
+    metalness texture: metalness0
+    roughness texture: wood7_roughness
+    normal texture: wood7_normal
+    height texture: wood7_height
+  - name: wood8
+    base color texture: wood8  
+    metalness texture: metalness0
+    roughness texture: wood8_roughness
+  - name: wood8_normal
+    base color texture: wood8  
+    metalness texture: metalness0
+    roughness texture: wood8_roughness
+    normal texture: wood8_normal
+  - name: wood8_height
+    base color texture: wood8  
+    metalness texture: metalness0
+    roughness texture: wood8_roughness
+    normal texture: wood8_normal
+    height texture: wood8_height
+  - name: wood9
+    base color texture: wood9  
+    metalness texture: metalness0
+    roughness texture: wood9_roughness
+  - name: wood9_normal
+    base color texture: wood9  
+    metalness texture: metalness0
+    roughness texture: wood9_roughness
+    normal texture: wood9_normal
+  - name: wood9_height
+    base color texture: wood9  
+    metalness texture: metalness0
+    roughness texture: wood9_roughness
+    normal texture: wood9_normal
+    height texture: wood9_height

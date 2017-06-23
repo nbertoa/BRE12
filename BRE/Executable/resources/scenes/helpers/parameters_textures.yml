@@ -1,0 +1,6 @@
+textures:
+  metalness0: resources/textures/metalness0.dds
+  metalness1: resources/textures/metalness1.dds
+  roughness0: resources/textures/roughness0.dds
+  roughness0.5: resources/textures/roughness0.5.dds
+  roughness1: resources/textures/roughness1.dds

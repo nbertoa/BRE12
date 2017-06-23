@@ -2,13 +2,15 @@ models:
   unreal: resources/models/unreal.obj
   
 textures:
-  reference: resources/scenes/helpers/all_textures.yml
+  reference: resources/scenes/helpers/plastic_textures.yml
+  reference: resources/scenes/helpers/parameters_textures.yml
   sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
   cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
   cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds 
   
 material techniques:
-  - reference: resources/scenes/helpers/all_material_techniques.yml
+  - reference: resources/scenes/helpers/plastic_material_techniques.yml
+    reference: resources/scenes/helpers/parameters_material_techniques.yml
         
 drawable objects:
   - model: unreal

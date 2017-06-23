@@ -1,0 +1,21 @@
+material techniques:
+  - name: marble
+    base color texture: marble
+    metalness texture: metalness0
+    roughness texture: marble_roughness
+    normal texture: marble_normal
+  - name: metal
+    base color texture: metal
+    metalness texture: metalness1
+    roughness texture: roughness0
+    normal texture: metal_normal
+  - name: metal2
+    base color texture: metal2
+    metalness texture: metal2_metalness
+    roughness texture: metal2_roughness
+    normal texture: metal2_normal
+  - name: metal3
+    base color texture: metal3
+    metalness texture: metal3_metalness
+    roughness texture: metal3_roughness
+    normal texture: metal3_normal
