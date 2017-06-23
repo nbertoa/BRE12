@@ -4,13 +4,12 @@ models:
 textures:
   reference: resources/scenes/helpers/rock_textures.yml
   reference: resources/scenes/helpers/parameters_textures.yml
-  sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
-  cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
-  cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds 
+  sky map: resources/textures/cubeMaps/factory_cube_map.dds
+  cube map diffuse: resources/textures/cubeMaps/factory_diffuse_cube_map.dds
+  cube map specular: resources/textures/cubeMaps/factory_specular_cube_map.dds 
   
 material techniques:
   - reference: resources/scenes/helpers/rock_material_techniques.yml
-    reference: resources/scenes/helpers/parameters_material_techniques.yml
         
 drawable objects:
   - model: unreal

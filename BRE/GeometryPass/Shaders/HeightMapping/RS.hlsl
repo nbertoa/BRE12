@@ -8,7 +8,6 @@
 "CBV(b0, visibility = SHADER_VISIBILITY_DOMAIN), " \
 "CBV(b1, visibility = SHADER_VISIBILITY_DOMAIN), " \
 "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_DOMAIN), " \
-"DescriptorTable(CBV(b0), visibility = SHADER_VISIBILITY_PIXEL), " \
 "CBV(b1, visibility = SHADER_VISIBILITY_PIXEL), " \
 "DescriptorTable(SRV(t0), visibility = SHADER_VISIBILITY_PIXEL), " \
 "DescriptorTable(SRV(t1), visibility = SHADER_VISIBILITY_PIXEL), " \

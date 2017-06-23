@@ -10,7 +10,6 @@ textures:
   
 material techniques:
   - reference: resources/scenes/helpers/plastic_material_techniques.yml
-    reference: resources/scenes/helpers/parameters_material_techniques.yml
         
 drawable objects:
   - model: unreal

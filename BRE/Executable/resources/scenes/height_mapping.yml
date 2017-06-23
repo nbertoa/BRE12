@@ -1,58 +1,48 @@
 models:
-  unreal: resources/models/unreal.obj
+  unreal: resources/models/mitsubaFloor.obj
   
 textures:
   reference: resources/scenes/helpers/cobblestone_textures.yml
+  reference: resources/scenes/helpers/brick_textures.yml
   reference: resources/scenes/helpers/parameters_textures.yml
   sky map: resources/textures/cubeMaps/milkmill_cube_map.dds
   cube map diffuse: resources/textures/cubeMaps/milkmill_diffuse_cube_map.dds
   cube map specular: resources/textures/cubeMaps/milkmill_specular_cube_map.dds 
   
 material techniques:
+  - reference: resources/scenes/helpers/brick_material_techniques.yml
   - reference: resources/scenes/helpers/cobblestone_material_techniques.yml
         
 drawable objects:
   - model: unreal
-    material technique: cobblestone_normal
+    material technique: brick9_height
     translation: [0.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 0.0]
-    scale: [0.5, 0.5, 0.5]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [10, 10, 10]
     texture scale: 1
   - model: unreal
-    material technique: cobblestone2_normal
+    material technique: brick10_height
     translation: [150.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 0.0]
-    scale: [0.5, 0.5, 0.5]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [10, 10, 10]
     texture scale: 1
   - model: unreal
-    material technique: cobblestone3_normal
+    material technique: brick7_height
     translation: [300.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 0.0]
-    scale: [0.5, 0.5, 0.5]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [10, 10, 10]
     texture scale: 1
   - model: unreal
-    material technique: cobblestone4_normal
+    material technique: cobblestone6_height
     translation: [450.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 0.0]
-    scale: [0.5, 0.5, 0.5]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [10, 10, 10]
     texture scale: 1
   - model: unreal
-    material technique: cobblestone5_normal
+    material technique: cobblestone7_height
     translation: [600.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 0.0]
-    scale: [0.5, 0.5, 0.5]
-    texture scale: 1
-  - model: unreal
-    material technique: cobblestone6_normal
-    translation: [750.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 0.0]
-    scale: [0.5, 0.5, 0.5]
-    texture scale: 1
-  - model: unreal
-    material technique: cobblestone7_normal
-    translation: [900.0, 0.0, 0.0]
-    rotation: [0.0, 0.75, 0.0]
-    scale: [0.5, 0.5, 0.5]
+    rotation: [0.0, 0.0, 0.0]
+    scale: [10, 10, 10]
     texture scale: 1
     
 environment:
@@ -61,6 +51,13 @@ environment:
     specular pre convolved environment texture: cube map specular
     
 camera:
-  - position: [0.0, 75.0, -250.0]
+  - position: [0.0, 20.0, -250.0]
     look vector: [0.0, 0.0, 1.0]
     up vector: [0.0, 1.0, 0.0]  
+    
+settings:
+  - height mapping min tessellation distance: 2
+    height mapping max tessellation distance: 2
+    height mapping min tessellation factor: 10
+    height mapping max tessellation factor: 10
+    height mapping height scale: 4
