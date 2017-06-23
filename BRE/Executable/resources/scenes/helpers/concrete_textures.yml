@@ -1,0 +1,13 @@
+textures:
+  concrete: resources/textures/concrete/concrete.dds
+  concrete_normal: resources/textures/concrete/concrete_normal.dds
+  concrete_roughness: resources/textures/concrete/concrete_roughness.dds
+  concrete2: resources/textures/concrete/concrete2.dds
+  concrete2_normal: resources/textures/concrete/concrete2_normal.dds
+  concrete2_roughness: resources/textures/concrete/concrete2_roughness.dds
+  concrete3: resources/textures/concrete/concrete3.dds
+  concrete3_normal: resources/textures/concrete/concrete3_normal.dds
+  concrete3_roughness: resources/textures/concrete/concrete3_roughness.dds
+  concrete4: resources/textures/concrete/concrete4.dds
+  concrete4_normal: resources/textures/concrete/concrete4_normal.dds
+  concrete4_roughness: resources/textures/concrete/concrete4_roughness.dds

@@ -13,4 +13,13 @@ material techniques:
     metalness texture: metalness0
     roughness texture: fabric_roughness
     normal texture: fabric_normal
-    height texture: fabric_height 
+    height texture: fabric_height
+  - name: fabric2
+    base color texture: fabric2     
+    metalness texture: metalness0
+    roughness texture: fabric2_roughness
+  - name: fabric2_normal
+    base color texture: fabric2     
+    metalness texture: metalness0
+    roughness texture: fabric2_roughness
+    normal texture: fabric2_normal

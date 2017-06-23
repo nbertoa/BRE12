@@ -1,0 +1,37 @@
+material techniques:
+  - name: concrete
+    base color texture: concrete
+    metalness texture: metalness0
+    roughness texture: concrete_roughness
+  - name: concrete_normal
+    base color texture: concrete
+    metalness texture: metalness0
+    roughness texture: concrete_roughness
+    normal texture: concrete_normal
+  - name: concrete2
+    base color texture: concrete2
+    metalness texture: metalness0
+    roughness texture: concrete2_roughness
+  - name: concrete2_normal
+    base color texture: concrete2
+    metalness texture: metalness0
+    roughness texture: concrete2_roughness
+    normal texture: concrete2_normal
+  - name: concrete3
+    base color texture: concrete3
+    metalness texture: metalness0
+    roughness texture: concrete3_roughness
+  - name: concrete3_normal
+    base color texture: concrete3
+    metalness texture: metalness0
+    roughness texture: concrete3_roughness
+    normal texture: concrete3_normal
+  - name: concrete4
+    base color texture: concrete4
+    metalness texture: metalness0
+    roughness texture: concrete4_roughness
+  - name: concrete4_normal
+    base color texture: concrete4
+    metalness texture: metalness0
+    roughness texture: concrete4_roughness
+    normal texture: concrete4_normal

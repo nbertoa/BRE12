@@ -62,3 +62,162 @@ material techniques:
     roughness texture: roughness0.5
     normal texture: rock5_normal
     height texture: rock5_height
+  - name: rock6
+    base color texture: rock6
+    metalness texture: metalness0
+    roughness texture: rock6_roughness
+  - name: rock6_normal
+    base color texture: rock6
+    metalness texture: metalness0  
+    roughness texture: rock6_roughness    
+    normal texture: rock6_normal
+  - name: rock6_height
+    base color texture: rock6     
+    metalness texture: metalness0
+    roughness texture: rock6_roughness
+    normal texture: rock6_normal
+    height texture: rock6_height
+  - name: rock7
+    base color texture: rock7
+    metalness texture: metalness0
+    roughness texture: rock7_roughness
+  - name: rock7_normal
+    base color texture: rock7
+    metalness texture: metalness0  
+    roughness texture: rock7_roughness    
+    normal texture: rock7_normal
+  - name: rock8
+    base color texture: rock8
+    metalness texture: metalness0
+    roughness texture: rock8_roughness
+  - name: rock8_normal
+    base color texture: rock8
+    metalness texture: metalness0  
+    roughness texture: rock8_roughness    
+    normal texture: rock8_normal
+  - name: rock8_height
+    base color texture: rock8     
+    metalness texture: metalness0
+    roughness texture: rock8_roughness
+    normal texture: rock8_normal
+    height texture: rock8_height
+  - name: rock9
+    base color texture: rock9
+    metalness texture: metalness0
+    roughness texture: rock9_roughness
+  - name: rock9_normal
+    base color texture: rock9
+    metalness texture: metalness0  
+    roughness texture: rock9_roughness    
+    normal texture: rock9_normal
+  - name: rock9_height
+    base color texture: rock9     
+    metalness texture: metalness0
+    roughness texture: rock9_roughness
+    normal texture: rock9_normal
+    height texture: rock9_height
+  - name: rock10
+    base color texture: rock10
+    metalness texture: metalness0
+    roughness texture: rock10_roughness
+  - name: rock10_normal
+    base color texture: rock10
+    metalness texture: metalness0  
+    roughness texture: rock10_roughness    
+    normal texture: rock10_normal
+  - name: rock10_height
+    base color texture: rock10     
+    metalness texture: metalness0
+    roughness texture: rock10_roughness
+    normal texture: rock10_normal
+    height texture: rock10_height
+  - name: rock11
+    base color texture: rock11
+    metalness texture: metalness0
+    roughness texture: rock11_roughness
+  - name: rock11_normal
+    base color texture: rock11
+    metalness texture: metalness0  
+    roughness texture: rock11_roughness    
+    normal texture: rock11_normal
+  - name: rock11_height
+    base color texture: rock11     
+    metalness texture: metalness0
+    roughness texture: rock11_roughness
+    normal texture: rock11_normal
+    height texture: rock11_height
+  - name: rock12
+    base color texture: rock12
+    metalness texture: metalness0
+    roughness texture: rock12_roughness
+  - name: rock12_normal
+    base color texture: rock12
+    metalness texture: metalness0  
+    roughness texture: rock12_roughness    
+    normal texture: rock12_normal
+  - name: rock12_height
+    base color texture: rock12     
+    metalness texture: metalness0
+    roughness texture: rock12_roughness
+    normal texture: rock12_normal
+    height texture: rock12_height
+  - name: rock13
+    base color texture: rock13
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+  - name: rock13_normal
+    base color texture: rock13
+    metalness texture: metalness0  
+    roughness texture: roughness0.5    
+    normal texture: rock13_normal
+  - name: rock13_height
+    base color texture: rock13     
+    metalness texture: metalness0
+    roughness texture: roughness0.5
+    normal texture: rock13_normal
+    height texture: rock13_height
+  - name: rock14
+    base color texture: rock14
+    metalness texture: metalness0
+    roughness texture: rock14_roughness
+  - name: rock14_normal
+    base color texture: rock14
+    metalness texture: metalness0  
+    roughness texture: rock14_roughness    
+    normal texture: rock14_normal
+  - name: rock14_height
+    base color texture: rock14     
+    metalness texture: metalness0
+    roughness texture: rock14_roughness
+    normal texture: rock14_normal
+    height texture: rock14_height
+  - name: rock15
+    base color texture: rock15
+    metalness texture: metalness0
+    roughness texture: rock15_roughness
+  - name: rock15_normal
+    base color texture: rock15
+    metalness texture: metalness0  
+    roughness texture: rock15_roughness    
+    normal texture: rock15_normal
+  - name: rock15_height
+    base color texture: rock15     
+    metalness texture: metalness0
+    roughness texture: rock15_roughness
+    normal texture: rock15_normal
+    height texture: rock15_height
+  - name: rock16
+    base color texture: rock16
+    metalness texture: metalness0
+    roughness texture: rock16_roughness
+  - name: rock16_normal
+    base color texture: rock16
+    metalness texture: metalness0  
+    roughness texture: rock16_roughness    
+    normal texture: rock16_normal
+  - name: rock16_height
+    base color texture: rock16     
+    metalness texture: metalness0
+    roughness texture: rock16_roughness
+    normal texture: rock16_normal
+    height texture: rock16_height
