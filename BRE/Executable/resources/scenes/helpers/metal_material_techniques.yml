@@ -1,6 +1,28 @@
 material techniques:
+  - name: granite
+    base color texture: granite
+    metalness texture: metalness0
+    roughness texture: granite_roughness
+  - name: granite2
+    base color texture: granite2
+    metalness texture: metalness0
+    roughness texture: granite_roughness
+  - name: granite3
+    base color texture: granite3
+    metalness texture: metalness0
+    roughness texture: granite_roughness
+  - name: granite4
+    base color texture: granite4
+    metalness texture: metalness0
+    roughness texture: granite_roughness
+    normal texture: marble_normal
   - name: marble
     base color texture: marble
+    metalness texture: metalness0
+    roughness texture: marble_roughness
+    normal texture: marble_normal
+  - name: marble2
+    base color texture: marble2
     metalness texture: metalness0
     roughness texture: marble_roughness
     normal texture: marble_normal
@@ -19,3 +41,18 @@ material techniques:
     metalness texture: metal3_metalness
     roughness texture: metal3_roughness
     normal texture: metal3_normal
+  - name: metal4
+    base color texture: metal4
+    metalness texture: metal4_metalness
+    roughness texture: metal4_roughness
+    normal texture: metal4_normal
+  - name: metal5
+    base color texture: metal5
+    metalness texture: metal5_metalness
+    roughness texture: metal5_roughness
+    normal texture: metal5_normal
+  - name: metal6
+    base color texture: metal6
+    metalness texture: metal6_metalness
+    roughness texture: metal6_roughness
+    normal texture: metal6_normal

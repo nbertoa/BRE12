@@ -32,8 +32,56 @@ drawable objects:
     scale: [0.5, 0.5, 0.5]
     texture scale: 1
   - model: unreal
-    material technique: marble
+    material technique: metal4
     translation: [450.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 1
+  - model: unreal
+    material technique: metal5
+    translation: [600.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 1
+  - model: unreal
+    material technique: metal6
+    translation: [750.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 1
+  - model: unreal
+    material technique: marble
+    translation: [900.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 1
+  - model: unreal
+    material technique: marble2
+    translation: [1050.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 1
+  - model: unreal
+    material technique: granite
+    translation: [1200.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 1
+  - model: unreal
+    material technique: granite2
+    translation: [1350.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 1
+  - model: unreal
+    material technique: granite3
+    translation: [1500.0, 0.0, 0.0]
+    rotation: [0.0, 0.75, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    texture scale: 1
+  - model: unreal
+    material technique: granite4
+    translation: [1650.0, 0.0, 0.0]
     rotation: [0.0, 0.75, 0.0]
     scale: [0.5, 0.5, 0.5]
     texture scale: 1

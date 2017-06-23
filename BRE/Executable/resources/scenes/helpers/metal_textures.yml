@@ -1,7 +1,16 @@
 textures:
+  granite: resources/textures/metal/granite.dds
+  granite2: resources/textures/metal/granite2.dds
+  granite3: resources/textures/metal/granite3.dds
+  granite4: resources/textures/metal/granite4.dds
+  granite_normal: resources/textures/metal/granite_normal.dds
+  granite_roughness: resources/textures/metal/granite_roughness.dds
   marble: resources/textures/metal/marble.dds
   marble_normal: resources/textures/metal/marble_normal.dds
   marble_roughness: resources/textures/metal/marble_roughness.dds
+  marble2: resources/textures/metal/marble2.dds
+  marble2_normal: resources/textures/metal/marble2_normal.dds
+  marble2_roughness: resources/textures/metal/marble2_roughness.dds
   metal: resources/textures/metal/metal.dds
   metal_normal: resources/textures/metal/metal_normal.dds
   metal2: resources/textures/metal/metal2.dds
@@ -12,3 +21,15 @@ textures:
   metal3_normal: resources/textures/metal/metal3_normal.dds
   metal3_roughness: resources/textures/metal/metal3_roughness.dds
   metal3_metalness: resources/textures/metal/metal3_metalness.dds
+  metal4: resources/textures/metal/metal4.dds
+  metal4_normal: resources/textures/metal/metal4_normal.dds
+  metal4_roughness: resources/textures/metal/metal4_roughness.dds
+  metal4_metalness: resources/textures/metal/metal4_metalness.dds
+  metal5: resources/textures/metal/metal5.dds
+  metal5_normal: resources/textures/metal/metal5_normal.dds
+  metal5_roughness: resources/textures/metal/metal5_roughness.dds
+  metal5_metalness: resources/textures/metal/metal5_metalness.dds
+  metal6: resources/textures/metal/metal6.dds
+  metal6_normal: resources/textures/metal/metal6_normal.dds
+  metal6_roughness: resources/textures/metal/metal6_roughness.dds
+  metal6_metalness: resources/textures/metal/metal6_metalness.dds
