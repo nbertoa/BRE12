@@ -142,7 +142,7 @@ TextureMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer&
         for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
             commandList.SetGraphicsRootDescriptorTable(0U, objectCBufferView);
             objectCBufferView.ptr += descHandleIncSize;
-            
+
             commandList.SetGraphicsRootDescriptorTable(3U, baseColorTextureRenderTargetView);
             baseColorTextureRenderTargetView.ptr += descHandleIncSize;
 
@@ -204,19 +204,19 @@ TextureMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<ID3D12
         GeometryData& geomData{ mGeometryDataVec[i] };
         const std::uint32_t worldMatsCount{ static_cast<std::uint32_t>(geomData.mWorldMatrices.size()) };
         for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
-            MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j], 
+            MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j],
                                             objCBuffer.mWorldMatrix);
             MathUtils::StoreTransposeMatrix(geomData.mInverseTransposeWorldMatrices[j],
                                             objCBuffer.mInverseTransposeWorldMatrix);
             objCBuffer.mTextureScale = geomData.mTextureScales[j];
-            mObjectUploadCBuffers->CopyData(k + j, 
-                                            &objCBuffer, 
+            mObjectUploadCBuffers->CopyData(k + j,
+                                            &objCBuffer,
                                             sizeof(objCBuffer));
         }
 
         k += worldMatsCount;
     }
-    
+
     D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffers->GetResource().GetGPUVirtualAddress() };
 
     // Create object cbuffer descriptor descriptors
@@ -280,7 +280,7 @@ TextureMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<ID3D12
         srvDesc.Format = roughnessResVec.back()->GetDesc().Format;
         srvDesc.Texture2D.MipLevels = roughnessResVec.back()->GetDesc().MipLevels;
         roughnessSrvDescVec.push_back(srvDesc);
-   }
+    }
 
     mObjectCBufferViewsBegin =
         CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),

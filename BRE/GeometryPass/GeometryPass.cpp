@@ -207,15 +207,15 @@ GeometryPass::InitShaderResourceViews() noexcept
         srvDescriptors[i].Format = mGeometryBuffers[i]->GetDesc().Format;
         srvDescriptors[i].Texture2D.MipLevels = mGeometryBuffers[i]->GetDesc().MipLevels;
     }
-    
-    const D3D12_GPU_DESCRIPTOR_HANDLE shaderResourceViewBegin = 
+
+    const D3D12_GPU_DESCRIPTOR_HANDLE shaderResourceViewBegin =
         CbvSrvUavDescriptorManager::CreateShaderResourceViews(mGeometryBuffers,
                                                               srvDescriptors,
                                                               BUFFERS_COUNT);
 
     // After creating all the contiguous descriptors, we need to initialize each
     // shader resource view member variables
-    const std::size_t descriptorHandleIncrementSize = 
+    const std::size_t descriptorHandleIncrementSize =
         DirectXManager::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     for (std::uint32_t i = 0U; i < BUFFERS_COUNT; ++i) {
         mGeometryBufferShaderResourceViews[i].ptr = shaderResourceViewBegin.ptr + i * descriptorHandleIncrementSize;

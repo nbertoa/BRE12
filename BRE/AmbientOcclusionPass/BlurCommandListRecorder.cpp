@@ -77,9 +77,9 @@ BlurCommandListRecorder::RecordAndPushCommandLists() noexcept
 
     commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
     commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
-    commandList.OMSetRenderTargets(1U, 
-                                   &mOutputAmbientAccessibilityBufferRenderTargetView, 
-                                   false, 
+    commandList.OMSetRenderTargets(1U,
+                                   &mOutputAmbientAccessibilityBufferRenderTargetView,
+                                   false,
                                    nullptr);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };

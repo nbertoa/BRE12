@@ -46,7 +46,7 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
         pairFirstValue = mapIt->first.as<std::string>();
 
         BRE_CHECK_MSG(pairFirstValue == std::string("name") || pairFirstValue == std::string("reference"),
-                       L"Material techniques 1st parameter must be 'name', or it must be 'reference'");
+                      L"Material techniques 1st parameter must be 'name', or it must be 'reference'");
 
         // If name is "reference", then path must be a yaml file that specifies "material techniques"
         if (pairFirstValue == "reference") {
@@ -57,7 +57,7 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
                 L"Failed to open yaml file: " + StringUtils::AnsiToWideString(pairSecondValue);
             BRE_CHECK_MSG(referenceRootNode.IsDefined(), errorMsg.c_str());
             BRE_CHECK_MSG(referenceRootNode["material techniques"].IsDefined(),
-                           L"Reference file must have 'material techniques' field");
+                          L"Reference file must have 'material techniques' field");
             LoadMaterialTechniques(referenceRootNode);
 
             continue;
@@ -67,7 +67,7 @@ MaterialTechniqueLoader::LoadMaterialTechniques(const YAML::Node& rootNode) noex
         const std::wstring errorMsg =
             L"Material technique name must be unique: " + StringUtils::AnsiToWideString(materialTechniqueName);
         BRE_CHECK_MSG(mMaterialTechniqueByName.find(materialTechniqueName) == mMaterialTechniqueByName.end(),
-                       errorMsg.c_str());
+                      errorMsg.c_str());
         ++mapIt;
 
         // Get material techniques settings (base color texture, normal texture, etc)

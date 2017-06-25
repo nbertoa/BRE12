@@ -86,18 +86,18 @@ const <a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html">ToneMappingPas
 <tr class="memitem:aa3fb4aa32a8de7069c39ad629ab04aab"><td class="memItemLeft" align="right" valign="top"><a id="aa3fb4aa32a8de7069c39ad629ab04aab"></a>
 <a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html">ToneMappingPass</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html">ToneMappingPass</a> &amp;&amp;)=delete</td></tr>
 <tr class="separator:aa3fb4aa32a8de7069c39ad629ab04aab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4057f8b7bf21275f40bd1df5c1e1573"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html#ad4057f8b7bf21275f40bd1df5c1e1573">Init</a> (ID3D12Resource &amp;inputColorBuffer, ID3D12Resource &amp;outputColorBuffer, const D3D12_CPU_DESCRIPTOR_HANDLE &amp;renderTargetView) noexcept</td></tr>
-<tr class="memdesc:ad4057f8b7bf21275f40bd1df5c1e1573"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the tone mapping pass.  <a href="#ad4057f8b7bf21275f40bd1df5c1e1573">More...</a><br /></td></tr>
-<tr class="separator:ad4057f8b7bf21275f40bd1df5c1e1573"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a722ce37b4e777b6157cfd1a4597be920"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html#a722ce37b4e777b6157cfd1a4597be920">Execute</a> () noexcept</td></tr>
-<tr class="memdesc:a722ce37b4e777b6157cfd1a4597be920"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes the pass.  <a href="#a722ce37b4e777b6157cfd1a4597be920">More...</a><br /></td></tr>
-<tr class="separator:a722ce37b4e777b6157cfd1a4597be920"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aead3d7580406be097fa6fa49d82d57cf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html#aead3d7580406be097fa6fa49d82d57cf">Init</a> (ID3D12Resource &amp;inputColorBuffer, const D3D12_GPU_DESCRIPTOR_HANDLE &amp;inputColorBufferShaderResourceView, ID3D12Resource &amp;outputColorBuffer, const D3D12_CPU_DESCRIPTOR_HANDLE &amp;outputColorBufferRenderTargetView) noexcept</td></tr>
+<tr class="memdesc:aead3d7580406be097fa6fa49d82d57cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the tone mapping pass.  <a href="#aead3d7580406be097fa6fa49d82d57cf">More...</a><br /></td></tr>
+<tr class="separator:aead3d7580406be097fa6fa49d82d57cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7c27fa56d09377d49ce4dcdf5bc48ec"><td class="memItemLeft" align="right" valign="top">std::uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html#ac7c27fa56d09377d49ce4dcdf5bc48ec">Execute</a> () noexcept</td></tr>
+<tr class="memdesc:ac7c27fa56d09377d49ce4dcdf5bc48ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes the pass.  <a href="#ac7c27fa56d09377d49ce4dcdf5bc48ec">More...</a><br /></td></tr>
+<tr class="separator:ac7c27fa56d09377d49ce4dcdf5bc48ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Responsible to generate command lists recorders for the post process tone mapping effect </p>
+<div class="textblock"><p>Responsible to generate command lists recorders for the post'process tone mapping effect </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a722ce37b4e777b6157cfd1a4597be920"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a722ce37b4e777b6157cfd1a4597be920">&#9670;&nbsp;</a></span>Execute()</h2>
+<a id="ac7c27fa56d09377d49ce4dcdf5bc48ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7c27fa56d09377d49ce4dcdf5bc48ec">&#9670;&nbsp;</a></span>Execute()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -106,7 +106,7 @@ const <a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html">ToneMappingPas
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void BRE::ToneMappingPass::Execute </td>
+          <td class="memname">std::uint32_t BRE::ToneMappingPass::Execute </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -120,12 +120,13 @@ const <a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html">ToneMappingPas
 </div><div class="memdoc">
 
 <p>Executes the pass. </p>
-<p><a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html#ad4057f8b7bf21275f40bd1df5c1e1573" title="Initializes the tone mapping pass. ">Init()</a> must be called before </p>
+<p><a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html#aead3d7580406be097fa6fa49d82d57cf" title="Initializes the tone mapping pass. ">Init()</a> must be called first. This method can record and push command lists to the <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>.</p>
+<dl class="section return"><dt>Returns</dt><dd>The number of recorded command lists. </dd></dl>
 
 </div>
 </div>
-<a id="ad4057f8b7bf21275f40bd1df5c1e1573"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad4057f8b7bf21275f40bd1df5c1e1573">&#9670;&nbsp;</a></span>Init()</h2>
+<a id="aead3d7580406be097fa6fa49d82d57cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aead3d7580406be097fa6fa49d82d57cf">&#9670;&nbsp;</a></span>Init()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -142,6 +143,12 @@ const <a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html">ToneMappingPas
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const D3D12_GPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
+          <td class="paramname"><em>inputColorBufferShaderResourceView</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">ID3D12Resource &amp;&#160;</td>
           <td class="paramname"><em>outputColorBuffer</em>, </td>
         </tr>
@@ -149,7 +156,7 @@ const <a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html">ToneMappingPas
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const D3D12_CPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
-          <td class="paramname"><em>renderTargetView</em>&#160;</td>
+          <td class="paramname"><em>outputColorBufferRenderTargetView</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -168,8 +175,9 @@ const <a class="el" href="class_b_r_e_1_1_tone_mapping_pass.html">ToneMappingPas
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">inputColorBuffer</td><td>Input buffer to apply tone mapping </td></tr>
+    <tr><td class="paramname">inputColorBufferShaderResourceView</td><td>Shader resource view to the input buffer </td></tr>
     <tr><td class="paramname">outputColorBuffer</td><td>Output buffer with the tone mapping applied </td></tr>
-    <tr><td class="paramname">renderTargetView</td><td>CPU descriptor of the render target </td></tr>
+    <tr><td class="paramname">outputColorBufferRenderTargetView</td><td>Render target view to the output color buffer </td></tr>
   </table>
   </dd>
 </dl>

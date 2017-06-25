@@ -89,18 +89,18 @@ const <a class="el" href="class_b_r_e_1_1_environment_light_pass.html">Environme
 <tr class="memitem:a7889a2233b493f0fcf64fe02fa02b46b"><td class="memItemLeft" align="right" valign="top"><a id="a7889a2233b493f0fcf64fe02fa02b46b"></a>
 <a class="el" href="class_b_r_e_1_1_environment_light_pass.html">EnvironmentLightPass</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="class_b_r_e_1_1_environment_light_pass.html">EnvironmentLightPass</a> &amp;&amp;)=delete</td></tr>
 <tr class="separator:a7889a2233b493f0fcf64fe02fa02b46b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a32b3973ac5ca9983bb0176a27229a25c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_environment_light_pass.html#a32b3973ac5ca9983bb0176a27229a25c">Init</a> (ID3D12Resource &amp;baseColorMetalMaskBuffer, ID3D12Resource &amp;normalSmoothnessBuffer, ID3D12Resource &amp;depthBuffer, ID3D12Resource &amp;diffuseIrradianceCubeMap, ID3D12Resource &amp;specularPreConvolvedCubeMap, const D3D12_CPU_DESCRIPTOR_HANDLE &amp;renderTargetView) noexcept</td></tr>
-<tr class="memdesc:a32b3973ac5ca9983bb0176a27229a25c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the pass.  <a href="#a32b3973ac5ca9983bb0176a27229a25c">More...</a><br /></td></tr>
-<tr class="separator:a32b3973ac5ca9983bb0176a27229a25c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6419cf17550df6f0bf515d4c83e5f0e1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_environment_light_pass.html#a6419cf17550df6f0bf515d4c83e5f0e1">Execute</a> (const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;frameCBuffer) noexcept</td></tr>
-<tr class="memdesc:a6419cf17550df6f0bf515d4c83e5f0e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes the pass.  <a href="#a6419cf17550df6f0bf515d4c83e5f0e1">More...</a><br /></td></tr>
-<tr class="separator:a6419cf17550df6f0bf515d4c83e5f0e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b55518edede93072243aad086ff3479"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_environment_light_pass.html#a3b55518edede93072243aad086ff3479">Init</a> (ID3D12Resource &amp;baseColorMetalnessBuffer, ID3D12Resource &amp;normalRoughnessBuffer, ID3D12Resource &amp;depthBuffer, ID3D12Resource &amp;diffuseIrradianceCubeMap, ID3D12Resource &amp;specularPreConvolvedCubeMap, ID3D12Resource &amp;ambientAccessibilityBuffer, const D3D12_CPU_DESCRIPTOR_HANDLE &amp;outputColorBufferRenderTargetView, const D3D12_GPU_DESCRIPTOR_HANDLE &amp;geometryBufferShaderResourceViewsBegin, const D3D12_GPU_DESCRIPTOR_HANDLE &amp;ambientAccessibilityBufferShaderResourceView, const D3D12_GPU_DESCRIPTOR_HANDLE &amp;depthBufferShaderResourceView) noexcept</td></tr>
+<tr class="memdesc:a3b55518edede93072243aad086ff3479"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the pass.  <a href="#a3b55518edede93072243aad086ff3479">More...</a><br /></td></tr>
+<tr class="separator:a3b55518edede93072243aad086ff3479"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad34a4e4992191f6be5dcc2a227b78ffc"><td class="memItemLeft" align="right" valign="top">std::uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_environment_light_pass.html#ad34a4e4992191f6be5dcc2a227b78ffc">Execute</a> (const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;frameCBuffer) noexcept</td></tr>
+<tr class="memdesc:ad34a4e4992191f6be5dcc2a227b78ffc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes the pass.  <a href="#ad34a4e4992191f6be5dcc2a227b78ffc">More...</a><br /></td></tr>
+<tr class="separator:ad34a4e4992191f6be5dcc2a227b78ffc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Pass responsible to apply ambient lighting and ambient occlusion. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a6419cf17550df6f0bf515d4c83e5f0e1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6419cf17550df6f0bf515d4c83e5f0e1">&#9670;&nbsp;</a></span>Execute()</h2>
+<a id="ad34a4e4992191f6be5dcc2a227b78ffc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad34a4e4992191f6be5dcc2a227b78ffc">&#9670;&nbsp;</a></span>Execute()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -109,7 +109,7 @@ const <a class="el" href="class_b_r_e_1_1_environment_light_pass.html">Environme
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void BRE::EnvironmentLightPass::Execute </td>
+          <td class="memname">std::uint32_t BRE::EnvironmentLightPass::Execute </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;&#160;</td>
           <td class="paramname"><em>frameCBuffer</em></td><td>)</td>
@@ -124,17 +124,19 @@ const <a class="el" href="class_b_r_e_1_1_environment_light_pass.html">Environme
 </div><div class="memdoc">
 
 <p>Executes the pass. </p>
+<p><a class="el" href="class_b_r_e_1_1_environment_light_pass.html#a3b55518edede93072243aad086ff3479" title="Initializes the pass. ">Init()</a> must be called first. This method can record and push command lists to the <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">frameCBuffer</td><td>Constant buffer per frame, for current frame </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>The number of recorded command lists. </dd></dl>
 
 </div>
 </div>
-<a id="a32b3973ac5ca9983bb0176a27229a25c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a32b3973ac5ca9983bb0176a27229a25c">&#9670;&nbsp;</a></span>Init()</h2>
+<a id="a3b55518edede93072243aad086ff3479"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b55518edede93072243aad086ff3479">&#9670;&nbsp;</a></span>Init()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -146,13 +148,13 @@ const <a class="el" href="class_b_r_e_1_1_environment_light_pass.html">Environme
           <td class="memname">void BRE::EnvironmentLightPass::Init </td>
           <td>(</td>
           <td class="paramtype">ID3D12Resource &amp;&#160;</td>
-          <td class="paramname"><em>baseColorMetalMaskBuffer</em>, </td>
+          <td class="paramname"><em>baseColorMetalnessBuffer</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">ID3D12Resource &amp;&#160;</td>
-          <td class="paramname"><em>normalSmoothnessBuffer</em>, </td>
+          <td class="paramname"><em>normalRoughnessBuffer</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -175,8 +177,32 @@ const <a class="el" href="class_b_r_e_1_1_environment_light_pass.html">Environme
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">ID3D12Resource &amp;&#160;</td>
+          <td class="paramname"><em>ambientAccessibilityBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const D3D12_CPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
-          <td class="paramname"><em>renderTargetView</em>&#160;</td>
+          <td class="paramname"><em>outputColorBufferRenderTargetView</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const D3D12_GPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
+          <td class="paramname"><em>geometryBufferShaderResourceViewsBegin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const D3D12_GPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
+          <td class="paramname"><em>ambientAccessibilityBufferShaderResourceView</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const D3D12_GPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
+          <td class="paramname"><em>depthBufferShaderResourceView</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -194,11 +220,16 @@ const <a class="el" href="class_b_r_e_1_1_environment_light_pass.html">Environme
 <p>Initializes the pass. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">baseColorMetalMaskBuffer</td><td>Geometry buffer that contains base color and metal mask. </td></tr>
-    <tr><td class="paramname">normalSmoothnessBuffer</td><td>Geometry buffer that contains normals and smoothness factors. </td></tr>
+    <tr><td class="paramname">baseColorMetalnessBuffer</td><td>Geometry buffer that contains base color and metalness. </td></tr>
+    <tr><td class="paramname">normalRoughnessBuffer</td><td>Geometry buffer that contains normals and roughness factors. </td></tr>
     <tr><td class="paramname">depthBuffer</td><td>Depth buffer </td></tr>
     <tr><td class="paramname">diffuseIrradianceCubeMap</td><td>Diffuse irradiance environment cube map </td></tr>
     <tr><td class="paramname">specularPreConvolvedCubeMap</td><td>Specular pre convolved environment cube map </td></tr>
+    <tr><td class="paramname">ambientAccessibilityBuffer</td><td>Ambient accessibility buffer </td></tr>
+    <tr><td class="paramname">outputColorBufferRenderTargetView</td><td>Render target view to the output color buffer </td></tr>
+    <tr><td class="paramname">geometryBufferShaderResourceViewsBegin</td><td>Shader resource view to the first geometry buffer. The geometry buffer shader resource views are contiguous. </td></tr>
+    <tr><td class="paramname">ambientAccessibilityBufferShaderResourceView</td><td>Shader resource view to the ambient accessibility buffer </td></tr>
+    <tr><td class="paramname">depthBufferShaderResourceView</td><td>Shader resource view to the depth buffer </td></tr>
   </table>
   </dd>
 </dl>

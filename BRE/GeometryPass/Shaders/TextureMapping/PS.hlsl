@@ -44,7 +44,7 @@ Output main(const in Input input)
 
     // Roughness
     output.mNormal_Roughness.z = RoughnessTexture.Sample(TextureSampler,
-                                                          input.mUV).r;
+                                                         input.mUV).r;
 
     return output;
 }

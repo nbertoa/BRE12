@@ -148,14 +148,14 @@ AmbientOcclusionCommandListRecorder::Init(const D3D12_CPU_DESCRIPTOR_HANDLE& amb
                                           const D3D12_GPU_DESCRIPTOR_HANDLE& depthBufferShaderResourceView) noexcept
 {
     BRE_ASSERT(IsDataValid() == false);
-    
+
     mAmbientAccessibilityBufferRenderTargetView = ambientAccessibilityBufferRenderTargetView;
     mNormalRoughnessBufferShaderResourceView = normalRoughnessBufferShaderResourceView;
     mDepthBufferShaderResourceView = depthBufferShaderResourceView;
 
-    const std::uint32_t sampleKernelSize = 
+    const std::uint32_t sampleKernelSize =
         static_cast<std::uint32_t>(AmbientOcclusionSettings::sSampleKernelSize);
-    const std::uint32_t noiseTextureDimension = 
+    const std::uint32_t noiseTextureDimension =
         static_cast<std::uint32_t>(AmbientOcclusionSettings::sNoiseTextureDimension);
 
     std::vector<XMFLOAT4> sampleKernel;
@@ -189,9 +189,9 @@ AmbientOcclusionCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffe
 
     commandList.RSSetViewports(1U, &ApplicationSettings::sScreenViewport);
     commandList.RSSetScissorRects(1U, &ApplicationSettings::sScissorRect);
-    commandList.OMSetRenderTargets(1U, 
-                                   &mAmbientAccessibilityBufferRenderTargetView, 
-                                   false, 
+    commandList.OMSetRenderTargets(1U,
+                                   &mAmbientAccessibilityBufferRenderTargetView,
+                                   false,
                                    nullptr);
 
     ID3D12DescriptorHeap* heaps[] = { &CbvSrvUavDescriptorManager::GetDescriptorHeap() };
@@ -280,7 +280,7 @@ AmbientOcclusionCommandListRecorder::CreateAndGetNoiseTexture(const std::vector<
     // an intermediate upload heap. 
     const std::uint32_t num2DSubresources = resourceDescriptor.DepthOrArraySize * resourceDescriptor.MipLevels;
     const std::size_t uploadBufferSize = GetRequiredIntermediateSize(noiseTexture, 0, num2DSubresources);
-    ID3D12Resource* noiseTextureUploadBuffer{ nullptr }; 
+    ID3D12Resource* noiseTextureUploadBuffer{ nullptr };
 
     heapProperties = D3DFactory::GetHeapProperties(D3D12_HEAP_TYPE_UPLOAD,
                                                    D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
@@ -340,8 +340,8 @@ AmbientOcclusionCommandListRecorder::InitShaderResourceViews(ID3D12Resource& noi
     BRE_ASSERT(_countof(resources) == _countof(srvDescriptors));
 
     mPixelShaderResourceViewsBegin = CbvSrvUavDescriptorManager::CreateShaderResourceViews(resources,
-                                                                                          srvDescriptors,
-                                                                                          _countof(srvDescriptors));
+                                                                                           srvDescriptors,
+                                                                                           _countof(srvDescriptors));
 }
 
 void

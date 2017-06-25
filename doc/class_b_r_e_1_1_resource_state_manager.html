@@ -93,15 +93,24 @@ const <a class="el" href="class_b_r_e_1_1_resource_state_manager.html">ResourceS
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a520a741f22a61334be89b2806448e17a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_resource_state_manager.html#a520a741f22a61334be89b2806448e17a">AddResource</a> (ID3D12Resource &amp;resource, const D3D12_RESOURCE_STATES initialState) noexcept</td></tr>
-<tr class="memdesc:a520a741f22a61334be89b2806448e17a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add resource.  <a href="#a520a741f22a61334be89b2806448e17a">More...</a><br /></td></tr>
-<tr class="separator:a520a741f22a61334be89b2806448e17a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a88cd72ce2078990da9f655323f2f3e70"><td class="memItemLeft" align="right" valign="top">static CD3DX12_RESOURCE_BARRIER&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_resource_state_manager.html#a88cd72ce2078990da9f655323f2f3e70">ChangeResourceStateAndGetBarrier</a> (ID3D12Resource &amp;resource, const D3D12_RESOURCE_STATES newState) noexcept</td></tr>
-<tr class="memdesc:a88cd72ce2078990da9f655323f2f3e70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change resource state and get barrier.  <a href="#a88cd72ce2078990da9f655323f2f3e70">More...</a><br /></td></tr>
-<tr class="separator:a88cd72ce2078990da9f655323f2f3e70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a835a431fe1fdadfc3adfd795302a766f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_resource_state_manager.html#a835a431fe1fdadfc3adfd795302a766f">AddFullResourceTracking</a> (ID3D12Resource &amp;resource, const D3D12_RESOURCE_STATES initialState) noexcept</td></tr>
+<tr class="memdesc:a835a431fe1fdadfc3adfd795302a766f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add full resource tracking.  <a href="#a835a431fe1fdadfc3adfd795302a766f">More...</a><br /></td></tr>
+<tr class="separator:a835a431fe1fdadfc3adfd795302a766f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2dbe4715e05e66b63050a9a49adeae06"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_resource_state_manager.html#a2dbe4715e05e66b63050a9a49adeae06">AddSubresourceTracking</a> (ID3D12Resource &amp;resource, const D3D12_RESOURCE_STATES initialState) noexcept</td></tr>
+<tr class="memdesc:a2dbe4715e05e66b63050a9a49adeae06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add subresource tracking.  <a href="#a2dbe4715e05e66b63050a9a49adeae06">More...</a><br /></td></tr>
+<tr class="separator:a2dbe4715e05e66b63050a9a49adeae06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa34213d307299e1e4e5af41bbfd3cdb5"><td class="memItemLeft" align="right" valign="top">static D3D12_RESOURCE_BARRIER&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_resource_state_manager.html#aa34213d307299e1e4e5af41bbfd3cdb5">ChangeResourceStateAndGetBarrier</a> (ID3D12Resource &amp;resource, const D3D12_RESOURCE_STATES newState) noexcept</td></tr>
+<tr class="memdesc:aa34213d307299e1e4e5af41bbfd3cdb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change resource state and get barrier.  <a href="#aa34213d307299e1e4e5af41bbfd3cdb5">More...</a><br /></td></tr>
+<tr class="separator:aa34213d307299e1e4e5af41bbfd3cdb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78b9fe347a66efbd1cda83d12f36f1b5"><td class="memItemLeft" align="right" valign="top">static D3D12_RESOURCE_BARRIER&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_resource_state_manager.html#a78b9fe347a66efbd1cda83d12f36f1b5">ChangeSubresourceStateAndGetBarrier</a> (ID3D12Resource &amp;resource, const std::uint32_t subresourceIndex, const D3D12_RESOURCE_STATES newState) noexcept</td></tr>
+<tr class="memdesc:a78b9fe347a66efbd1cda83d12f36f1b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change subresource state and get barrier.  <a href="#a78b9fe347a66efbd1cda83d12f36f1b5">More...</a><br /></td></tr>
+<tr class="separator:a78b9fe347a66efbd1cda83d12f36f1b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af423d9c281645ea10a6464a7831ddb21"><td class="memItemLeft" align="right" valign="top">static D3D12_RESOURCE_STATES&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_resource_state_manager.html#af423d9c281645ea10a6464a7831ddb21">GetResourceState</a> (ID3D12Resource &amp;resource) noexcept</td></tr>
 <tr class="memdesc:af423d9c281645ea10a6464a7831ddb21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get resource state.  <a href="#af423d9c281645ea10a6464a7831ddb21">More...</a><br /></td></tr>
 <tr class="separator:af423d9c281645ea10a6464a7831ddb21"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa5196c2559bb765e5964ffa7c1b38d7"><td class="memItemLeft" align="right" valign="top">static D3D12_RESOURCE_STATES&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_resource_state_manager.html#afa5196c2559bb765e5964ffa7c1b38d7">GetSubresourceState</a> (ID3D12Resource &amp;resource, const std::uint32_t subresourceIndex) noexcept</td></tr>
+<tr class="memdesc:afa5196c2559bb765e5964ffa7c1b38d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get subresource state.  <a href="#afa5196c2559bb765e5964ffa7c1b38d7">More...</a><br /></td></tr>
+<tr class="separator:afa5196c2559bb765e5964ffa7c1b38d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Responsible to track resource states. </p>
@@ -111,8 +120,8 @@ Static Public Member Functions</h2></td></tr>
 <li>Resource unregistration </li>
 </ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a520a741f22a61334be89b2806448e17a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a520a741f22a61334be89b2806448e17a">&#9670;&nbsp;</a></span>AddResource()</h2>
+<a id="a835a431fe1fdadfc3adfd795302a766f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a835a431fe1fdadfc3adfd795302a766f">&#9670;&nbsp;</a></span>AddFullResourceTracking()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -121,7 +130,7 @@ Static Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void BRE::ResourceStateManager::AddResource </td>
+          <td class="memname">void BRE::ResourceStateManager::AddFullResourceTracking </td>
           <td>(</td>
           <td class="paramtype">ID3D12Resource &amp;&#160;</td>
           <td class="paramname"><em>resource</em>, </td>
@@ -145,11 +154,11 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Add resource. </p>
-<p>Resource must not have been registered</p>
+<p>Add full resource tracking. </p>
+<p>Resource must not have been registered. You can only change the state of the entire resource, not a subresource. This is done for performance reasons.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">resource</td><td>Resource to add </td></tr>
+    <tr><td class="paramname">resource</td><td>Resource to add. It must not been added before (full resource or subresource tracking) </td></tr>
     <tr><td class="paramname">initialState</td><td>Initial state of the resource </td></tr>
   </table>
   </dd>
@@ -157,8 +166,8 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a88cd72ce2078990da9f655323f2f3e70"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a88cd72ce2078990da9f655323f2f3e70">&#9670;&nbsp;</a></span>ChangeResourceStateAndGetBarrier()</h2>
+<a id="a2dbe4715e05e66b63050a9a49adeae06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2dbe4715e05e66b63050a9a49adeae06">&#9670;&nbsp;</a></span>AddSubresourceTracking()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -167,7 +176,53 @@ Static Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">CD3DX12_RESOURCE_BARRIER BRE::ResourceStateManager::ChangeResourceStateAndGetBarrier </td>
+          <td class="memname">void BRE::ResourceStateManager::AddSubresourceTracking </td>
+          <td>(</td>
+          <td class="paramtype">ID3D12Resource &amp;&#160;</td>
+          <td class="paramname"><em>resource</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const D3D12_RESOURCE_STATES&#160;</td>
+          <td class="paramname"><em>initialState</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add subresource tracking. </p>
+<p>Resource must not have been registered. You can only change the state of a single subresource at a time. This done for performance reasons.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">resource</td><td>Resource to add. It must not been added before (full resource or subresource tracking) </td></tr>
+    <tr><td class="paramname">initialState</td><td>Initial state of the resource (this will set the initial state of all its subresources) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa34213d307299e1e4e5af41bbfd3cdb5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa34213d307299e1e4e5af41bbfd3cdb5">&#9670;&nbsp;</a></span>ChangeResourceStateAndGetBarrier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">D3D12_RESOURCE_BARRIER BRE::ResourceStateManager::ChangeResourceStateAndGetBarrier </td>
           <td>(</td>
           <td class="paramtype">ID3D12Resource &amp;&#160;</td>
           <td class="paramname"><em>resource</em>, </td>
@@ -200,6 +255,61 @@ Static Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Transition resource barrier </dd></dl>
+
+</div>
+</div>
+<a id="a78b9fe347a66efbd1cda83d12f36f1b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78b9fe347a66efbd1cda83d12f36f1b5">&#9670;&nbsp;</a></span>ChangeSubresourceStateAndGetBarrier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">D3D12_RESOURCE_BARRIER BRE::ResourceStateManager::ChangeSubresourceStateAndGetBarrier </td>
+          <td>(</td>
+          <td class="paramtype">ID3D12Resource &amp;&#160;</td>
+          <td class="paramname"><em>resource</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::uint32_t&#160;</td>
+          <td class="paramname"><em>subresourceIndex</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const D3D12_RESOURCE_STATES&#160;</td>
+          <td class="paramname"><em>newState</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Change subresource state and get barrier. </p>
+<p>Resource must have been registered. New state must be different than current state.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">resource</td><td>Resource to change state </td></tr>
+    <tr><td class="paramname">subresourceIndex</td><td>Subresource index to change state </td></tr>
+    <tr><td class="paramname">newState</td><td>New resource state. It must be different than current state. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Transition resource barrier </dd></dl>
 
 </div>
 </div>
@@ -230,11 +340,56 @@ Static Public Member Functions</h2></td></tr>
 <p>Get resource state. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">resource</td><td>Resource to get state. It must have been registered. </td></tr>
+    <tr><td class="paramname">resource</td><td>Resource to get state. It must have been registered. It must have been registered with AddFullResourceTracking. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Resource state </dd></dl>
+
+</div>
+</div>
+<a id="afa5196c2559bb765e5964ffa7c1b38d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa5196c2559bb765e5964ffa7c1b38d7">&#9670;&nbsp;</a></span>GetSubresourceState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">D3D12_RESOURCE_STATES BRE::ResourceStateManager::GetSubresourceState </td>
+          <td>(</td>
+          <td class="paramtype">ID3D12Resource &amp;&#160;</td>
+          <td class="paramname"><em>resource</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::uint32_t&#160;</td>
+          <td class="paramname"><em>subresourceIndex</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get subresource state. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">resource</td><td>Resource to get state. It must have been registered with AddSubresourceTracking. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Subresource state </dd></dl>
 
 </div>
 </div>

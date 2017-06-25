@@ -146,7 +146,7 @@ NormalMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& 
         for (std::size_t j = 0UL; j < worldMatsCount; ++j) {
             commandList.SetGraphicsRootDescriptorTable(0U, objectCBufferView);
             objectCBufferView.ptr += descHandleIncSize;
-            
+
             commandList.SetGraphicsRootDescriptorTable(3U, baseColorTextureRenderTargetView);
             baseColorTextureRenderTargetView.ptr += descHandleIncSize;
 
@@ -216,7 +216,7 @@ NormalMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<ID3D12R
 
         k += worldMatsCount;
     }
-    
+
     D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffers->GetResource().GetGPUVirtualAddress() };
 
     // Create object / materials cbuffers descriptors
@@ -252,7 +252,7 @@ NormalMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<ID3D12R
         cBufferDesc.BufferLocation = objCBufferGpuAddress + i * objCBufferElemSize;
         cBufferDesc.SizeInBytes = static_cast<std::uint32_t>(objCBufferElemSize);
         objectCbufferViewDescVec.push_back(cBufferDesc);
-        
+
         // Texture descriptor
         textureResVec.push_back(baseColorTextures[i]);
 
@@ -305,7 +305,7 @@ NormalMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<ID3D12R
     mObjectCBufferViewsBegin =
         CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),
                                                               static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-                                                              
+
     mBaseColorTextureRenderTargetViewsBegin =
         CbvSrvUavDescriptorManager::CreateShaderResourceViews(textureResVec.data(),
                                                               textureSrvDescVec.data(),

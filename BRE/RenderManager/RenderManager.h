@@ -112,7 +112,7 @@ private:
     {
         return mFrameBufferRenderTargetViews[mSwapChain->GetCurrentBackBufferIndex()];
     }
-    
+
     ///
     /// @brief Records pre pass command lists and pushes them to 
     /// the CommandListExecutor.
@@ -136,7 +136,7 @@ private:
     /// @brief Presents current frame and continue with the next frame.
     ///
     void PresentCurrentFrameAndBeginNextFrame() noexcept;
-    
+
     Microsoft::WRL::ComPtr<IDXGISwapChain3> mSwapChain{ nullptr };
 
     // Fences data for synchronization purposes.
@@ -172,7 +172,7 @@ private:
     ID3D12Resource* mIntermediateColorBuffer2{ nullptr };
     D3D12_GPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer2ShaderResourceView{ 0UL };
     D3D12_CPU_DESCRIPTOR_HANDLE mIntermediateColorBuffer2RenderTargetView{ 0UL };
-    
+
     // We cache it here, as is is used by most passes.
     FrameCBuffer mFrameCBuffer;
 

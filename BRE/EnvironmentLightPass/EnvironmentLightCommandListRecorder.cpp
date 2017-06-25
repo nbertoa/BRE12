@@ -135,7 +135,7 @@ EnvironmentLightCommandListRecorder::InitShaderResourceViews(ID3D12Resource& dif
     };
 
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDescriptors[_countof(resources)]{};
-   
+
     // Fill cube map texture descriptors	
     srvDescriptors[0].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
     srvDescriptors[0].ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
@@ -143,7 +143,7 @@ EnvironmentLightCommandListRecorder::InitShaderResourceViews(ID3D12Resource& dif
     srvDescriptors[0].TextureCube.MipLevels = diffuseIrradianceCubeMap.GetDesc().MipLevels;
     srvDescriptors[0].TextureCube.ResourceMinLODClamp = 0.0f;
     srvDescriptors[0].Format = diffuseIrradianceCubeMap.GetDesc().Format;
-    
+
     srvDescriptors[1].Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
     srvDescriptors[1].ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
     srvDescriptors[1].TextureCube.MostDetailedMip = 0;
@@ -152,8 +152,8 @@ EnvironmentLightCommandListRecorder::InitShaderResourceViews(ID3D12Resource& dif
     srvDescriptors[1].Format = specularPreConvolvedCubeMap.GetDesc().Format;
 
     BRE_ASSERT(_countof(resources) == _countof(srvDescriptors));
-    
-    mDiffuseAndSpecularIrradianceTextureShaderResourceViews = 
+
+    mDiffuseAndSpecularIrradianceTextureShaderResourceViews =
         CbvSrvUavDescriptorManager::CreateShaderResourceViews(resources,
                                                               srvDescriptors,
                                                               _countof(srvDescriptors));

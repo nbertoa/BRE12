@@ -19,8 +19,7 @@ class MaterialTechniqueLoader {
 public:
     MaterialTechniqueLoader(TextureLoader& textureLoader)
         : mTextureLoader(textureLoader)
-    {
-    }
+    {}
 
     MaterialTechniqueLoader(const MaterialTechniqueLoader&) = delete;
     const MaterialTechniqueLoader& operator=(const MaterialTechniqueLoader&) = delete;

@@ -99,12 +99,12 @@ const <a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.
 <tr class="memitem:acbca814b9ce0cb1256bdc3358e6cbd03"><td class="memItemLeft" align="right" valign="top"><a id="acbca814b9ce0cb1256bdc3358e6cbd03"></a>
 <a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html">TextureMappingCommandListRecorder</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html">TextureMappingCommandListRecorder</a> &amp;&amp;)=default</td></tr>
 <tr class="separator:acbca814b9ce0cb1256bdc3358e6cbd03"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ee2cd5418f9dac2717de80dd6c758c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html#a9ee2cd5418f9dac2717de80dd6c758c9">Init</a> (const std::vector&lt; <a class="el" href="struct_b_r_e_1_1_geometry_command_list_recorder_1_1_geometry_data.html">GeometryData</a> &gt; &amp;geometryDataVector, const std::vector&lt; <a class="el" href="class_b_r_e_1_1_material_properties.html">MaterialProperties</a> &gt; &amp;materialProperties, const std::vector&lt; ID3D12Resource *&gt; &amp;diffuseTextures) noexcept</td></tr>
-<tr class="memdesc:a9ee2cd5418f9dac2717de80dd6c758c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the recorder.  <a href="#a9ee2cd5418f9dac2717de80dd6c758c9">More...</a><br /></td></tr>
-<tr class="separator:a9ee2cd5418f9dac2717de80dd6c758c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2efe7ee3a75c7c81bc674b2abd203dd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html#ae2efe7ee3a75c7c81bc674b2abd203dd">RecordAndPushCommandLists</a> (const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;frameCBuffer) noexcept final override</td></tr>
-<tr class="memdesc:ae2efe7ee3a75c7c81bc674b2abd203dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records and push command lists to <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>.  <a href="#ae2efe7ee3a75c7c81bc674b2abd203dd">More...</a><br /></td></tr>
-<tr class="separator:ae2efe7ee3a75c7c81bc674b2abd203dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae836e57e36691d0c701cbc5d9d79f7da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html#ae836e57e36691d0c701cbc5d9d79f7da">Init</a> (const std::vector&lt; <a class="el" href="struct_b_r_e_1_1_geometry_command_list_recorder_1_1_geometry_data.html">GeometryData</a> &gt; &amp;geometryDataVector, const std::vector&lt; ID3D12Resource *&gt; &amp;baseColorTextures, const std::vector&lt; ID3D12Resource *&gt; &amp;metalnessTextures, const std::vector&lt; ID3D12Resource *&gt; &amp;roughnessTextures) noexcept</td></tr>
+<tr class="memdesc:ae836e57e36691d0c701cbc5d9d79f7da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the recorder.  <a href="#ae836e57e36691d0c701cbc5d9d79f7da">More...</a><br /></td></tr>
+<tr class="separator:ae836e57e36691d0c701cbc5d9d79f7da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa51f80f11b2f985fbb7c8ca3dd9a7612"><td class="memItemLeft" align="right" valign="top">std::uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html#aa51f80f11b2f985fbb7c8ca3dd9a7612">RecordAndPushCommandLists</a> (const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;frameCBuffer) noexcept final override</td></tr>
+<tr class="memdesc:aa51f80f11b2f985fbb7c8ca3dd9a7612"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records and push command lists to <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>.  <a href="#aa51f80f11b2f985fbb7c8ca3dd9a7612">More...</a><br /></td></tr>
+<tr class="separator:aa51f80f11b2f985fbb7c8ca3dd9a7612"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa222a0d821ff2676c7cb02cdb661e976"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html#aa222a0d821ff2676c7cb02cdb661e976">IsDataValid</a> () const noexcept final override</td></tr>
 <tr class="memdesc:aa222a0d821ff2676c7cb02cdb661e976"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if internal data is valid. Typically, used for assertions.  <a href="#aa222a0d821ff2676c7cb02cdb661e976">More...</a><br /></td></tr>
 <tr class="separator:aa222a0d821ff2676c7cb02cdb661e976"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -146,15 +146,9 @@ std::vector&lt; <a class="el" href="struct_b_r_e_1_1_geometry_command_list_recor
 <tr class="memitem:a851e987329d5d337dcaa6b585b1d2c70 inherit pro_attribs_class_b_r_e_1_1_geometry_command_list_recorder"><td class="memItemLeft" align="right" valign="top"><a id="a851e987329d5d337dcaa6b585b1d2c70"></a>
 <a class="el" href="class_b_r_e_1_1_upload_buffer.html">UploadBuffer</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>mObjectUploadCBuffers</b> { nullptr }</td></tr>
 <tr class="separator:a851e987329d5d337dcaa6b585b1d2c70 inherit pro_attribs_class_b_r_e_1_1_geometry_command_list_recorder"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9cfba1ffb6f29b1b173e53250038664b inherit pro_attribs_class_b_r_e_1_1_geometry_command_list_recorder"><td class="memItemLeft" align="right" valign="top"><a id="a9cfba1ffb6f29b1b173e53250038664b"></a>
-D3D12_GPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><b>mStartObjectCBufferView</b></td></tr>
-<tr class="separator:a9cfba1ffb6f29b1b173e53250038664b inherit pro_attribs_class_b_r_e_1_1_geometry_command_list_recorder"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9298c42b0ce775530d846a198f0d7843 inherit pro_attribs_class_b_r_e_1_1_geometry_command_list_recorder"><td class="memItemLeft" align="right" valign="top"><a id="a9298c42b0ce775530d846a198f0d7843"></a>
-D3D12_GPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><b>mStartMaterialCBufferView</b></td></tr>
-<tr class="separator:a9298c42b0ce775530d846a198f0d7843 inherit pro_attribs_class_b_r_e_1_1_geometry_command_list_recorder"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a86227ab34a67894b52dd7be9b80eca50 inherit pro_attribs_class_b_r_e_1_1_geometry_command_list_recorder"><td class="memItemLeft" align="right" valign="top"><a id="a86227ab34a67894b52dd7be9b80eca50"></a>
-<a class="el" href="class_b_r_e_1_1_upload_buffer.html">UploadBuffer</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>mMaterialUploadCBuffers</b> { nullptr }</td></tr>
-<tr class="separator:a86227ab34a67894b52dd7be9b80eca50 inherit pro_attribs_class_b_r_e_1_1_geometry_command_list_recorder"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a042890176411ea1842e08fc15cb63dc9 inherit pro_attribs_class_b_r_e_1_1_geometry_command_list_recorder"><td class="memItemLeft" align="right" valign="top"><a id="a042890176411ea1842e08fc15cb63dc9"></a>
+D3D12_GPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><b>mObjectCBufferViewsBegin</b> { 0U }</td></tr>
+<tr class="separator:a042890176411ea1842e08fc15cb63dc9 inherit pro_attribs_class_b_r_e_1_1_geometry_command_list_recorder"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab99134d977a0a7a6b57edec753580b7b inherit pro_attribs_class_b_r_e_1_1_geometry_command_list_recorder"><td class="memItemLeft" align="right" valign="top"><a id="ab99134d977a0a7a6b57edec753580b7b"></a>
 const D3D12_CPU_DESCRIPTOR_HANDLE *&#160;</td><td class="memItemRight" valign="bottom"><b>mGeometryBufferRenderTargetViews</b> { nullptr }</td></tr>
 <tr class="separator:ab99134d977a0a7a6b57edec753580b7b inherit pro_attribs_class_b_r_e_1_1_geometry_command_list_recorder"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -168,8 +162,8 @@ D3D12_CPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Responsible to record command lists that implement texture mapping. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a9ee2cd5418f9dac2717de80dd6c758c9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9ee2cd5418f9dac2717de80dd6c758c9">&#9670;&nbsp;</a></span>Init()</h2>
+<a id="ae836e57e36691d0c701cbc5d9d79f7da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae836e57e36691d0c701cbc5d9d79f7da">&#9670;&nbsp;</a></span>Init()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -186,14 +180,20 @@ D3D12_CPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::vector&lt; <a class="el" href="class_b_r_e_1_1_material_properties.html">MaterialProperties</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>materialProperties</em>, </td>
+          <td class="paramtype">const std::vector&lt; ID3D12Resource *&gt; &amp;&#160;</td>
+          <td class="paramname"><em>baseColorTextures</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const std::vector&lt; ID3D12Resource *&gt; &amp;&#160;</td>
-          <td class="paramname"><em>diffuseTextures</em>&#160;</td>
+          <td class="paramname"><em>metalnessTextures</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; ID3D12Resource *&gt; &amp;&#160;</td>
+          <td class="paramname"><em>roughnessTextures</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -213,8 +213,9 @@ D3D12_CPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">geometryDataVector</td><td>List of geometry data. Must not be empty </td></tr>
-    <tr><td class="paramname">materialProperties</td><td>List of material properties. Must not be empty. </td></tr>
-    <tr><td class="paramname">diffuseTextures</td><td>List of diffuse textures. Must not be empty. </td></tr>
+    <tr><td class="paramname">baseColorTextures</td><td>List of base color textures. Must not be empty. </td></tr>
+    <tr><td class="paramname">metalnessTextures</td><td>List of metalness textures. Must not be empty. </td></tr>
+    <tr><td class="paramname">roughnessTextures</td><td>List of rougness textures. Must not be empty. </td></tr>
   </table>
   </dd>
 </dl>
@@ -296,8 +297,8 @@ D3D12_CPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><
 
 </div>
 </div>
-<a id="ae2efe7ee3a75c7c81bc674b2abd203dd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae2efe7ee3a75c7c81bc674b2abd203dd">&#9670;&nbsp;</a></span>RecordAndPushCommandLists()</h2>
+<a id="aa51f80f11b2f985fbb7c8ca3dd9a7612"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa51f80f11b2f985fbb7c8ca3dd9a7612">&#9670;&nbsp;</a></span>RecordAndPushCommandLists()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -306,7 +307,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void BRE::TextureMappingCommandListRecorder::RecordAndPushCommandLists </td>
+          <td class="memname">std::uint32_t BRE::TextureMappingCommandListRecorder::RecordAndPushCommandLists </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;&#160;</td>
           <td class="paramname"><em>frameCBuffer</em></td><td>)</td>
@@ -321,15 +322,16 @@ D3D12_CPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><
 </div><div class="memdoc">
 
 <p>Records and push command lists to <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>. </p>
-<p><a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html#a9ee2cd5418f9dac2717de80dd6c758c9" title="Initializes the recorder. ">Init()</a> must be called first</p>
+<p><a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html#ae836e57e36691d0c701cbc5d9d79f7da" title="Initializes the recorder. ">Init()</a> must be called first</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">frameCBuffer</td><td>Constant buffer per frame, for current frame </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>The number of pushed command lists </dd></dl>
 
-<p>Implements <a class="el" href="class_b_r_e_1_1_geometry_command_list_recorder.html#a2c0790a749d80e2c48c38396540d1dc7">BRE::GeometryCommandListRecorder</a>.</p>
+<p>Implements <a class="el" href="class_b_r_e_1_1_geometry_command_list_recorder.html#a253c35e9b4a9f2dcba9ac790bd668122">BRE::GeometryCommandListRecorder</a>.</p>
 
 </div>
 </div>

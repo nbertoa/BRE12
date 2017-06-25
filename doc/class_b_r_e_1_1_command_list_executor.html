@@ -104,9 +104,9 @@ const <a class="el" href="class_b_r_e_1_1_command_list_executor.html">CommandLis
 <tr class="memitem:a3829b7737d173d4957699c14dfec183d"><td class="memItemLeft" align="right" valign="top">__forceinline std::uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_command_list_executor.html#a3829b7737d173d4957699c14dfec183d">GetExecutedCommandListCount</a> () const noexcept</td></tr>
 <tr class="memdesc:a3829b7737d173d4957699c14dfec183d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of executed command lists.  <a href="#a3829b7737d173d4957699c14dfec183d">More...</a><br /></td></tr>
 <tr class="separator:a3829b7737d173d4957699c14dfec183d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad3cae7be9b8e3b3dbccf7d27154604f0"><td class="memItemLeft" align="right" valign="top">__forceinline void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_command_list_executor.html#ad3cae7be9b8e3b3dbccf7d27154604f0">AddCommandList</a> (ID3D12CommandList &amp;commandList) noexcept</td></tr>
-<tr class="memdesc:ad3cae7be9b8e3b3dbccf7d27154604f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a command list to be executed.  <a href="#ad3cae7be9b8e3b3dbccf7d27154604f0">More...</a><br /></td></tr>
-<tr class="separator:ad3cae7be9b8e3b3dbccf7d27154604f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5219a80b89e1893a4c7d1d842bcc701d"><td class="memItemLeft" align="right" valign="top">__forceinline void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_command_list_executor.html#a5219a80b89e1893a4c7d1d842bcc701d">PushCommandList</a> (ID3D12CommandList &amp;commandList) noexcept</td></tr>
+<tr class="memdesc:a5219a80b89e1893a4c7d1d842bcc701d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a command list to be executed.  <a href="#a5219a80b89e1893a4c7d1d842bcc701d">More...</a><br /></td></tr>
+<tr class="separator:a5219a80b89e1893a4c7d1d842bcc701d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac0ffe405ba8eeab52359d910821a862c"><td class="memItemLeft" align="right" valign="top">__forceinline ID3D12CommandQueue &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_command_list_executor.html#ac0ffe405ba8eeab52359d910821a862c">GetCommandQueue</a> () noexcept</td></tr>
 <tr class="memdesc:ac0ffe405ba8eeab52359d910821a862c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the command queue.  <a href="#ac0ffe405ba8eeab52359d910821a862c">More...</a><br /></td></tr>
 <tr class="separator:ac0ffe405ba8eeab52359d910821a862c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -138,40 +138,6 @@ Static Public Member Functions</h2></td></tr>
 <li>When you want to terminate this task, you should call <a class="el" href="class_b_r_e_1_1_command_list_executor.html#a037a53e60f5bde51df60ce205ea22e76" title="Terminates the generated CommandListExecutor. ">CommandListExecutor::Terminate()</a> </li>
 </ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ad3cae7be9b8e3b3dbccf7d27154604f0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad3cae7be9b8e3b3dbccf7d27154604f0">&#9670;&nbsp;</a></span>AddCommandList()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">__forceinline void BRE::CommandListExecutor::AddCommandList </td>
-          <td>(</td>
-          <td class="paramtype">ID3D12CommandList &amp;&#160;</td>
-          <td class="paramname"><em>commandList</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Add a command list to be executed. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">commandList</td><td>The command list to add </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a9710fd6d12a07554a5cefbe5e1d0d0f0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9710fd6d12a07554a5cefbe5e1d0d0f0">&#9670;&nbsp;</a></span>CommandListExecutor::Get()</h2>
 
@@ -323,6 +289,40 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Get the number of executed command lists. </p>
 <dl class="section return"><dt>Returns</dt><dd>The number of executed command lists </dd></dl>
+
+</div>
+</div>
+<a id="a5219a80b89e1893a4c7d1d842bcc701d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5219a80b89e1893a4c7d1d842bcc701d">&#9670;&nbsp;</a></span>PushCommandList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">__forceinline void BRE::CommandListExecutor::PushCommandList </td>
+          <td>(</td>
+          <td class="paramtype">ID3D12CommandList &amp;&#160;</td>
+          <td class="paramname"><em>commandList</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Push a command list to be executed. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">commandList</td><td>The command list to add </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

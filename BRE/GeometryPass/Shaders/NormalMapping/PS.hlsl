@@ -35,7 +35,7 @@ Output main(const in Input input)
     Output output = (Output)0;
 
     // Normal (encoded in view space)
-    const float3 normalObjectSpace = normalize(NormalTexture.Sample(TextureSampler, 
+    const float3 normalObjectSpace = normalize(NormalTexture.Sample(TextureSampler,
                                                                     input.mUV).xyz * 2.0f - 1.0f);
     const float3x3 tbnWorldSpace = float3x3(normalize(input.mTangentWorldSpace),
                                             normalize(input.mBinormalWorldSpace),
@@ -45,7 +45,7 @@ Output main(const in Input input)
                                            normalize(input.mBinormalViewSpace),
                                            normalize(input.mNormalViewSpace));
     output.mNormal_Roughness.xy = Encode(normalize(mul(normalObjectSpace,
-                                                        tbnViewSpace)));
+                                                       tbnViewSpace)));
 
     // Base color and metalness
     const float3 baseColor = BaseColorTexture.Sample(TextureSampler,
@@ -57,7 +57,7 @@ Output main(const in Input input)
 
     // Roughness
     output.mNormal_Roughness.z = RoughnessTexture.Sample(TextureSampler,
-                                                          input.mUV).r;
+                                                         input.mUV).r;
 
     return output;
 }

@@ -90,15 +90,15 @@ const <a class="el" href="class_b_r_e_1_1_environment_light_command_list_recorde
 <tr class="memitem:a1292adfafed2efa11b1c257fbd21a8c2"><td class="memItemLeft" align="right" valign="top"><a id="a1292adfafed2efa11b1c257fbd21a8c2"></a>
 <a class="el" href="class_b_r_e_1_1_environment_light_command_list_recorder.html">EnvironmentLightCommandListRecorder</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="class_b_r_e_1_1_environment_light_command_list_recorder.html">EnvironmentLightCommandListRecorder</a> &amp;&amp;)=default</td></tr>
 <tr class="separator:a1292adfafed2efa11b1c257fbd21a8c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a061a027b888b11c2a0014e0981aae5b0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_environment_light_command_list_recorder.html#a061a027b888b11c2a0014e0981aae5b0">Init</a> (ID3D12Resource &amp;normalSmoothnessBuffer, ID3D12Resource &amp;baseColorMetalMaskBuffer, ID3D12Resource &amp;depthBuffer, ID3D12Resource &amp;diffuseIrradianceCubeMap, ID3D12Resource &amp;specularPreConvolvedCubeMap, ID3D12Resource &amp;ambientAccessibilityBuffer, const D3D12_CPU_DESCRIPTOR_HANDLE &amp;renderTargetView) noexcept</td></tr>
-<tr class="memdesc:a061a027b888b11c2a0014e0981aae5b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the recorder.  <a href="#a061a027b888b11c2a0014e0981aae5b0">More...</a><br /></td></tr>
-<tr class="separator:a061a027b888b11c2a0014e0981aae5b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04e87f0a32d81ebfd5934f3b32388543"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_environment_light_command_list_recorder.html#a04e87f0a32d81ebfd5934f3b32388543">RecordAndPushCommandLists</a> (const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;frameCBuffer) noexcept</td></tr>
-<tr class="memdesc:a04e87f0a32d81ebfd5934f3b32388543"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records command lists and pushes them into <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>.  <a href="#a04e87f0a32d81ebfd5934f3b32388543">More...</a><br /></td></tr>
-<tr class="separator:a04e87f0a32d81ebfd5934f3b32388543"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac229491e1e4c43ea242110b250d9b59"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_environment_light_command_list_recorder.html#aac229491e1e4c43ea242110b250d9b59">ValidateData</a> () const noexcept</td></tr>
-<tr class="memdesc:aac229491e1e4c43ea242110b250d9b59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if internal data is valid. Typically, used for assertions.  <a href="#aac229491e1e4c43ea242110b250d9b59">More...</a><br /></td></tr>
-<tr class="separator:aac229491e1e4c43ea242110b250d9b59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa0a642fe86722fd4b279bdac6320329"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_environment_light_command_list_recorder.html#afa0a642fe86722fd4b279bdac6320329">Init</a> (ID3D12Resource &amp;diffuseIrradianceCubeMap, ID3D12Resource &amp;specularPreConvolvedCubeMap, const D3D12_CPU_DESCRIPTOR_HANDLE &amp;outputColorBufferRenderTargetView, const D3D12_GPU_DESCRIPTOR_HANDLE &amp;geometryBufferShaderResourceViewsBegin, const D3D12_GPU_DESCRIPTOR_HANDLE &amp;ambientAccessibilityBufferShaderResourceView, const D3D12_GPU_DESCRIPTOR_HANDLE &amp;depthBufferShaderResourceView) noexcept</td></tr>
+<tr class="memdesc:afa0a642fe86722fd4b279bdac6320329"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the recorder.  <a href="#afa0a642fe86722fd4b279bdac6320329">More...</a><br /></td></tr>
+<tr class="separator:afa0a642fe86722fd4b279bdac6320329"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8b6d14d3ecea3681f3519f468045f16"><td class="memItemLeft" align="right" valign="top">std::uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_environment_light_command_list_recorder.html#ad8b6d14d3ecea3681f3519f468045f16">RecordAndPushCommandLists</a> (const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;frameCBuffer) noexcept</td></tr>
+<tr class="memdesc:ad8b6d14d3ecea3681f3519f468045f16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records command lists and pushes them into <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>.  <a href="#ad8b6d14d3ecea3681f3519f468045f16">More...</a><br /></td></tr>
+<tr class="separator:ad8b6d14d3ecea3681f3519f468045f16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab95a626ad2d3c73386c286ba854c7b94"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_environment_light_command_list_recorder.html#ab95a626ad2d3c73386c286ba854c7b94">IsDataValid</a> () const noexcept</td></tr>
+<tr class="memdesc:ab95a626ad2d3c73386c286ba854c7b94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if internal data is valid. Typically, used for assertions.  <a href="#ab95a626ad2d3c73386c286ba854c7b94">More...</a><br /></td></tr>
+<tr class="separator:ab95a626ad2d3c73386c286ba854c7b94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -109,8 +109,8 @@ Static Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Responsible of recording of command lists for environment light pass. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a061a027b888b11c2a0014e0981aae5b0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a061a027b888b11c2a0014e0981aae5b0">&#9670;&nbsp;</a></span>Init()</h2>
+<a id="afa0a642fe86722fd4b279bdac6320329"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa0a642fe86722fd4b279bdac6320329">&#9670;&nbsp;</a></span>Init()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -121,24 +121,6 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">void BRE::EnvironmentLightCommandListRecorder::Init </td>
           <td>(</td>
-          <td class="paramtype">ID3D12Resource &amp;&#160;</td>
-          <td class="paramname"><em>normalSmoothnessBuffer</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">ID3D12Resource &amp;&#160;</td>
-          <td class="paramname"><em>baseColorMetalMaskBuffer</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">ID3D12Resource &amp;&#160;</td>
-          <td class="paramname"><em>depthBuffer</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">ID3D12Resource &amp;&#160;</td>
           <td class="paramname"><em>diffuseIrradianceCubeMap</em>, </td>
         </tr>
@@ -151,14 +133,26 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">ID3D12Resource &amp;&#160;</td>
-          <td class="paramname"><em>ambientAccessibilityBuffer</em>, </td>
+          <td class="paramtype">const D3D12_CPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
+          <td class="paramname"><em>outputColorBufferRenderTargetView</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const D3D12_CPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
-          <td class="paramname"><em>renderTargetView</em>&#160;</td>
+          <td class="paramtype">const D3D12_GPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
+          <td class="paramname"><em>geometryBufferShaderResourceViewsBegin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const D3D12_GPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
+          <td class="paramname"><em>ambientAccessibilityBufferShaderResourceView</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const D3D12_GPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
+          <td class="paramname"><em>depthBufferShaderResourceView</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -177,13 +171,12 @@ Static Public Member Functions</h2></td></tr>
 <p><a class="el" href="class_b_r_e_1_1_environment_light_command_list_recorder.html#a111622baac4558c99482955179213216" title="Initializes pipeline state object and root signature. ">InitSharedPSOAndRootSignature()</a> must be called first</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">normalSmoothnessBuffer</td><td>Geometry buffer that contains normals and smoothness factors. </td></tr>
-    <tr><td class="paramname">baseColorMetalMaskBuffer</td><td>Geometry buffer that contains base color and metal mask. </td></tr>
-    <tr><td class="paramname">depthBuffer</td><td>Depth buffer </td></tr>
     <tr><td class="paramname">diffuseIrradianceCubeMap</td><td>Diffuse irradiance environment cube map </td></tr>
     <tr><td class="paramname">specularPreConvolvedCubeMap</td><td>Specular pre convolved environment cube map </td></tr>
-    <tr><td class="paramname">ambientAccessibilityBuffer</td><td>Ambient accessibility buffer </td></tr>
-    <tr><td class="paramname">renderTargetView</td><td>Render target view </td></tr>
+    <tr><td class="paramname">outputColorBufferRenderTargetView</td><td>Render target view to the output color buffer </td></tr>
+    <tr><td class="paramname">geometryBufferShaderResourceViewsBegin</td><td>Shader resource view to the first geometry buffer. The geometry buffer shader resource views are contiguous. </td></tr>
+    <tr><td class="paramname">ambientAccessibilityBufferShaderResourceView</td><td>Shader resource view to the ambient accessibility buffer </td></tr>
+    <tr><td class="paramname">depthBufferShaderResourceView</td><td>Depth buffer shader resource view </td></tr>
   </table>
   </dd>
 </dl>
@@ -218,8 +211,8 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a04e87f0a32d81ebfd5934f3b32388543"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a04e87f0a32d81ebfd5934f3b32388543">&#9670;&nbsp;</a></span>RecordAndPushCommandLists()</h2>
+<a id="ab95a626ad2d3c73386c286ba854c7b94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab95a626ad2d3c73386c286ba854c7b94">&#9670;&nbsp;</a></span>IsDataValid()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -228,42 +221,7 @@ Static Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void BRE::EnvironmentLightCommandListRecorder::RecordAndPushCommandLists </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;&#160;</td>
-          <td class="paramname"><em>frameCBuffer</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Records command lists and pushes them into <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>. </p>
-<p><a class="el" href="class_b_r_e_1_1_environment_light_command_list_recorder.html#a061a027b888b11c2a0014e0981aae5b0" title="Initializes the recorder. ">Init()</a> must be called first</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">frameCBuffer</td><td>Constant buffer per frame, for current frame </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="aac229491e1e4c43ea242110b250d9b59"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aac229491e1e4c43ea242110b250d9b59">&#9670;&nbsp;</a></span>ValidateData()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool BRE::EnvironmentLightCommandListRecorder::ValidateData </td>
+          <td class="memname">bool BRE::EnvironmentLightCommandListRecorder::IsDataValid </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -278,6 +236,42 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Checks if internal data is valid. Typically, used for assertions. </p>
 <dl class="section return"><dt>Returns</dt><dd>True if valid. Otherwise, false </dd></dl>
+
+</div>
+</div>
+<a id="ad8b6d14d3ecea3681f3519f468045f16"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8b6d14d3ecea3681f3519f468045f16">&#9670;&nbsp;</a></span>RecordAndPushCommandLists()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::uint32_t BRE::EnvironmentLightCommandListRecorder::RecordAndPushCommandLists </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;&#160;</td>
+          <td class="paramname"><em>frameCBuffer</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Records command lists and pushes them into <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>. </p>
+<p><a class="el" href="class_b_r_e_1_1_environment_light_command_list_recorder.html#afa0a642fe86722fd4b279bdac6320329" title="Initializes the recorder. ">Init()</a> must be called first</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">frameCBuffer</td><td>Constant buffer per frame, for current frame </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The number of pushed command lists </dd></dl>
 
 </div>
 </div>

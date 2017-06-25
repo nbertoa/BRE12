@@ -65,7 +65,7 @@ Output main(const in Input input)
     // As we are working at view space, we do not need camera position to 
     // compute vector from geometry position to camera.
     const float3 fragmentPositionToCameraViewSpace = normalize(-fragmentPositionViewSpace);
-    
+
     const float3 indirectDiffuseColor = DiffuseIBL(baseColor,
                                                    metalness,
                                                    TextureSampler,

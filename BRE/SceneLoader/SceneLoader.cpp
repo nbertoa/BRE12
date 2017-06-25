@@ -85,7 +85,7 @@ SceneLoader::GenerateGeometryPassRecordersForTextureMapping(GeometryCommandListR
     std::vector<ID3D12Resource*> baseColorTextures;
     std::vector<ID3D12Resource*> metalnessTextures;
     std::vector<ID3D12Resource*> roughnessTextures;
-    
+
     std::size_t geometryDataVectorOffset = 0;
     for (const DrawableObjectLoader::DrawableObjectsByModelName::value_type& pair : drawableObjectsByModelName) {
         const std::vector<DrawableObject>& drawableObjects = pair.second;

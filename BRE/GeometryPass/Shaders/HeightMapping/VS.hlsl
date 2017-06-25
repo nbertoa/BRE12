@@ -43,12 +43,12 @@ Output main(in const Input input)
     //   0 if d >= min tessellation distance and
     //   1 if d <= max tessellation distance.  
     const float distance = length(output.mPositionWorldSpace - gFrameCBuffer.mEyePositionWorldSpace.xyz);
-    const float tessellationFactor = saturate((gHeightMappingCBuffer.mMinTessellationDistance - distance) 
-                                              / (gHeightMappingCBuffer.mMinTessellationDistance 
+    const float tessellationFactor = saturate((gHeightMappingCBuffer.mMinTessellationDistance - distance)
+                                              / (gHeightMappingCBuffer.mMinTessellationDistance
                                                  - gHeightMappingCBuffer.mMaxTessellationDistance));
 
     // Rescale [0,1] --> [min tessellation factor, max tessellation factor].
-    output.mTessellationFactor = gHeightMappingCBuffer.mMinTessellationFactor 
+    output.mTessellationFactor = gHeightMappingCBuffer.mMinTessellationFactor
         + tessellationFactor * (gHeightMappingCBuffer.mMaxTessellationFactor - gHeightMappingCBuffer.mMinTessellationFactor);
 
     return output;

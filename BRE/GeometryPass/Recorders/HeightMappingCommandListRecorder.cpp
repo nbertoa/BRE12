@@ -169,7 +169,7 @@ HeightMappingCommandListRecorder::RecordAndPushCommandLists(const FrameCBuffer& 
 
             commandList.SetGraphicsRootDescriptorTable(5U, heightTextureRenderTargetView);
             heightTextureRenderTargetView.ptr += descHandleIncSize;
-            
+
             commandList.SetGraphicsRootDescriptorTable(7U, baseColorTextureRenderTargetView);
             baseColorTextureRenderTargetView.ptr += descHandleIncSize;
 
@@ -233,7 +233,7 @@ HeightMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<ID3D12R
         GeometryData& geomData{ mGeometryDataVec[i] };
         const std::uint32_t worldMatsCount{ static_cast<std::uint32_t>(geomData.mWorldMatrices.size()) };
         for (std::uint32_t j = 0UL; j < worldMatsCount; ++j) {
-            MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j], 
+            MathUtils::StoreTransposeMatrix(geomData.mWorldMatrices[j],
                                             objCBuffer.mWorldMatrix);
             MathUtils::StoreTransposeMatrix(geomData.mInverseTransposeWorldMatrices[j],
                                             objCBuffer.mInverseTransposeWorldMatrix);
@@ -243,7 +243,7 @@ HeightMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<ID3D12R
 
         k += worldMatsCount;
     }
-    
+
     D3D12_GPU_VIRTUAL_ADDRESS objCBufferGpuAddress{ mObjectUploadCBuffers->GetResource().GetGPUVirtualAddress() };
 
     // Create object / materials cbuffers descriptors
@@ -346,7 +346,7 @@ HeightMappingCommandListRecorder::InitCBuffersAndViews(const std::vector<ID3D12R
     mObjectCBufferViewsBegin =
         CbvSrvUavDescriptorManager::CreateConstantBufferViews(objectCbufferViewDescVec.data(),
                                                               static_cast<std::uint32_t>(objectCbufferViewDescVec.size()));
-                                                              
+
     mBaseColorTextureRenderTargetViewsBegin =
         CbvSrvUavDescriptorManager::CreateShaderResourceViews(textureResVec.data(),
                                                               textureSrvDescVec.data(),

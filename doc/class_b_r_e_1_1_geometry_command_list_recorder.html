@@ -82,12 +82,9 @@ Inheritance diagram for BRE::GeometryCommandListRecorder:</div>
  <div class="center">
   <img src="class_b_r_e_1_1_geometry_command_list_recorder.png" usemap="#BRE::GeometryCommandListRecorder_map" alt=""/>
   <map id="BRE::GeometryCommandListRecorder_map" name="BRE::GeometryCommandListRecorder_map">
-<area href="class_b_r_e_1_1_color_height_mapping_command_list_recorder.html" title="Responsible to record command lists that implement color height mapping. " alt="BRE::ColorHeightMappingCommandListRecorder" shape="rect" coords="0,56,289,80"/>
-<area href="class_b_r_e_1_1_color_mapping_command_list_recorder.html" title="Responsible to record command lists that implement color mapping. " alt="BRE::ColorMappingCommandListRecorder" shape="rect" coords="299,56,588,80"/>
-<area href="class_b_r_e_1_1_color_normal_mapping_command_list_recorder.html" title="Responsible to record command lists that implement color normal mapping. " alt="BRE::ColorNormalMappingCommandListRecorder" shape="rect" coords="598,56,887,80"/>
-<area href="class_b_r_e_1_1_height_mapping_command_list_recorder.html" title="Responsible to record command lists that implement height mapping. " alt="BRE::HeightMappingCommandListRecorder" shape="rect" coords="897,56,1186,80"/>
-<area href="class_b_r_e_1_1_normal_mapping_command_list_recorder.html" title="Responsible to record command lists that implement normal mapping. " alt="BRE::NormalMappingCommandListRecorder" shape="rect" coords="1196,56,1485,80"/>
-<area href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html" title="Responsible to record command lists that implement texture mapping. " alt="BRE::TextureMappingCommandListRecorder" shape="rect" coords="1495,56,1784,80"/>
+<area href="class_b_r_e_1_1_height_mapping_command_list_recorder.html" title="Responsible to record command lists that implement height mapping. " alt="BRE::HeightMappingCommandListRecorder" shape="rect" coords="0,56,260,80"/>
+<area href="class_b_r_e_1_1_normal_mapping_command_list_recorder.html" title="Responsible to record command lists that implement normal mapping. " alt="BRE::NormalMappingCommandListRecorder" shape="rect" coords="270,56,530,80"/>
+<area href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html" title="Responsible to record command lists that implement texture mapping. " alt="BRE::TextureMappingCommandListRecorder" shape="rect" coords="540,56,800,80"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -113,9 +110,9 @@ const <a class="el" href="class_b_r_e_1_1_geometry_command_list_recorder.html">G
 <tr class="memitem:aca921f00e2483a360359a147a0d3efc0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_geometry_command_list_recorder.html#aca921f00e2483a360359a147a0d3efc0">Init</a> (const D3D12_CPU_DESCRIPTOR_HANDLE *geometryBufferRenderTargetViews, const std::uint32_t geometryBufferRenderTargetViewCount, const D3D12_CPU_DESCRIPTOR_HANDLE &amp;depthBufferView) noexcept</td></tr>
 <tr class="memdesc:aca921f00e2483a360359a147a0d3efc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the command list recorder.  <a href="#aca921f00e2483a360359a147a0d3efc0">More...</a><br /></td></tr>
 <tr class="separator:aca921f00e2483a360359a147a0d3efc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2c0790a749d80e2c48c38396540d1dc7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_geometry_command_list_recorder.html#a2c0790a749d80e2c48c38396540d1dc7">RecordAndPushCommandLists</a> (const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;frameCBuffer) noexcept=0</td></tr>
-<tr class="memdesc:a2c0790a749d80e2c48c38396540d1dc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records and pushes command lists to <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>.  <a href="#a2c0790a749d80e2c48c38396540d1dc7">More...</a><br /></td></tr>
-<tr class="separator:a2c0790a749d80e2c48c38396540d1dc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a253c35e9b4a9f2dcba9ac790bd668122"><td class="memItemLeft" align="right" valign="top">virtual std::uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_geometry_command_list_recorder.html#a253c35e9b4a9f2dcba9ac790bd668122">RecordAndPushCommandLists</a> (const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;frameCBuffer) noexcept=0</td></tr>
+<tr class="memdesc:a253c35e9b4a9f2dcba9ac790bd668122"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records and pushes command lists to <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>.  <a href="#a253c35e9b4a9f2dcba9ac790bd668122">More...</a><br /></td></tr>
+<tr class="separator:a253c35e9b4a9f2dcba9ac790bd668122"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab36756003412bced1fa8849d5e14b1c2"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_geometry_command_list_recorder.html#ab36756003412bced1fa8849d5e14b1c2">IsDataValid</a> () const noexcept</td></tr>
 <tr class="memdesc:ab36756003412bced1fa8849d5e14b1c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if internal data is valid. Typically, used for assertions.  <a href="#ab36756003412bced1fa8849d5e14b1c2">More...</a><br /></td></tr>
 <tr class="separator:ab36756003412bced1fa8849d5e14b1c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -134,15 +131,9 @@ std::vector&lt; <a class="el" href="struct_b_r_e_1_1_geometry_command_list_recor
 <tr class="memitem:a851e987329d5d337dcaa6b585b1d2c70"><td class="memItemLeft" align="right" valign="top"><a id="a851e987329d5d337dcaa6b585b1d2c70"></a>
 <a class="el" href="class_b_r_e_1_1_upload_buffer.html">UploadBuffer</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>mObjectUploadCBuffers</b> { nullptr }</td></tr>
 <tr class="separator:a851e987329d5d337dcaa6b585b1d2c70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9cfba1ffb6f29b1b173e53250038664b"><td class="memItemLeft" align="right" valign="top"><a id="a9cfba1ffb6f29b1b173e53250038664b"></a>
-D3D12_GPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><b>mStartObjectCBufferView</b></td></tr>
-<tr class="separator:a9cfba1ffb6f29b1b173e53250038664b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9298c42b0ce775530d846a198f0d7843"><td class="memItemLeft" align="right" valign="top"><a id="a9298c42b0ce775530d846a198f0d7843"></a>
-D3D12_GPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><b>mStartMaterialCBufferView</b></td></tr>
-<tr class="separator:a9298c42b0ce775530d846a198f0d7843"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a86227ab34a67894b52dd7be9b80eca50"><td class="memItemLeft" align="right" valign="top"><a id="a86227ab34a67894b52dd7be9b80eca50"></a>
-<a class="el" href="class_b_r_e_1_1_upload_buffer.html">UploadBuffer</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>mMaterialUploadCBuffers</b> { nullptr }</td></tr>
-<tr class="separator:a86227ab34a67894b52dd7be9b80eca50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a042890176411ea1842e08fc15cb63dc9"><td class="memItemLeft" align="right" valign="top"><a id="a042890176411ea1842e08fc15cb63dc9"></a>
+D3D12_GPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><b>mObjectCBufferViewsBegin</b> { 0U }</td></tr>
+<tr class="separator:a042890176411ea1842e08fc15cb63dc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab99134d977a0a7a6b57edec753580b7b"><td class="memItemLeft" align="right" valign="top"><a id="ab99134d977a0a7a6b57edec753580b7b"></a>
 const D3D12_CPU_DESCRIPTOR_HANDLE *&#160;</td><td class="memItemRight" valign="bottom"><b>mGeometryBufferRenderTargetViews</b> { nullptr }</td></tr>
 <tr class="separator:ab99134d977a0a7a6b57edec753580b7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -156,8 +147,8 @@ D3D12_CPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Responsible to record command lists for deferred shading geometry pass. </p>
 <p>Steps:</p><ul>
-<li>Inherit from it and reimplement <a class="el" href="class_b_r_e_1_1_geometry_command_list_recorder.html#a2c0790a749d80e2c48c38396540d1dc7" title="Records and pushes command lists to CommandListExecutor. ">RecordAndPushCommandLists()</a> method</li>
-<li>Call <a class="el" href="class_b_r_e_1_1_geometry_command_list_recorder.html#a2c0790a749d80e2c48c38396540d1dc7" title="Records and pushes command lists to CommandListExecutor. ">RecordAndPushCommandLists()</a> to create command lists to execute in the GPU </li>
+<li>Inherit from it and reimplement <a class="el" href="class_b_r_e_1_1_geometry_command_list_recorder.html#a253c35e9b4a9f2dcba9ac790bd668122" title="Records and pushes command lists to CommandListExecutor. ">RecordAndPushCommandLists()</a> method</li>
+<li>Call <a class="el" href="class_b_r_e_1_1_geometry_command_list_recorder.html#a253c35e9b4a9f2dcba9ac790bd668122" title="Records and pushes command lists to CommandListExecutor. ">RecordAndPushCommandLists()</a> to create command lists to execute in the GPU </li>
 </ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="aca921f00e2483a360359a147a0d3efc0"></a>
@@ -238,12 +229,12 @@ D3D12_CPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><
 <p>Checks if internal data is valid. Typically, used for assertions. </p>
 <dl class="section return"><dt>Returns</dt><dd>True if valid. Otherwise, false </dd></dl>
 
-<p>Reimplemented in <a class="el" href="class_b_r_e_1_1_height_mapping_command_list_recorder.html#aa1ee81c87025f0be7bae75ffd5c3c548">BRE::HeightMappingCommandListRecorder</a>, <a class="el" href="class_b_r_e_1_1_color_height_mapping_command_list_recorder.html#ae3b3398206e8819a23b3b383f696d4a6">BRE::ColorHeightMappingCommandListRecorder</a>, <a class="el" href="class_b_r_e_1_1_normal_mapping_command_list_recorder.html#a1d5422267b9ff04cc1f2f1db5c1b46ea">BRE::NormalMappingCommandListRecorder</a>, <a class="el" href="class_b_r_e_1_1_color_normal_mapping_command_list_recorder.html#a2a80a9c12dc03bf6336263b324b5da50">BRE::ColorNormalMappingCommandListRecorder</a>, and <a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html#aa222a0d821ff2676c7cb02cdb661e976">BRE::TextureMappingCommandListRecorder</a>.</p>
+<p>Reimplemented in <a class="el" href="class_b_r_e_1_1_height_mapping_command_list_recorder.html#aa1ee81c87025f0be7bae75ffd5c3c548">BRE::HeightMappingCommandListRecorder</a>, <a class="el" href="class_b_r_e_1_1_normal_mapping_command_list_recorder.html#a1d5422267b9ff04cc1f2f1db5c1b46ea">BRE::NormalMappingCommandListRecorder</a>, and <a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html#aa222a0d821ff2676c7cb02cdb661e976">BRE::TextureMappingCommandListRecorder</a>.</p>
 
 </div>
 </div>
-<a id="a2c0790a749d80e2c48c38396540d1dc7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2c0790a749d80e2c48c38396540d1dc7">&#9670;&nbsp;</a></span>RecordAndPushCommandLists()</h2>
+<a id="a253c35e9b4a9f2dcba9ac790bd668122"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a253c35e9b4a9f2dcba9ac790bd668122">&#9670;&nbsp;</a></span>RecordAndPushCommandLists()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -252,7 +243,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void BRE::GeometryCommandListRecorder::RecordAndPushCommandLists </td>
+          <td class="memname">virtual std::uint32_t BRE::GeometryCommandListRecorder::RecordAndPushCommandLists </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;&#160;</td>
           <td class="paramname"><em>frameCBuffer</em></td><td>)</td>
@@ -274,8 +265,9 @@ D3D12_CPU_DESCRIPTOR_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>The number of pushed command lists </dd></dl>
 
-<p>Implemented in <a class="el" href="class_b_r_e_1_1_height_mapping_command_list_recorder.html#aaab6d24dfa30388e61fe4de58e3ee8c3">BRE::HeightMappingCommandListRecorder</a>, <a class="el" href="class_b_r_e_1_1_color_height_mapping_command_list_recorder.html#a84335d62c36706d5f06a86de59041ef6">BRE::ColorHeightMappingCommandListRecorder</a>, <a class="el" href="class_b_r_e_1_1_normal_mapping_command_list_recorder.html#ac29a27abed47aeaa08c77b7fed7647b1">BRE::NormalMappingCommandListRecorder</a>, <a class="el" href="class_b_r_e_1_1_color_normal_mapping_command_list_recorder.html#a43f1e1edfb5311ea18d8cf26e4881f46">BRE::ColorNormalMappingCommandListRecorder</a>, <a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html#ae2efe7ee3a75c7c81bc674b2abd203dd">BRE::TextureMappingCommandListRecorder</a>, and <a class="el" href="class_b_r_e_1_1_color_mapping_command_list_recorder.html#a54e5462a271158c10092695f84d8002b">BRE::ColorMappingCommandListRecorder</a>.</p>
+<p>Implemented in <a class="el" href="class_b_r_e_1_1_height_mapping_command_list_recorder.html#ad4caec06a6d56f6c3009477e54249e89">BRE::HeightMappingCommandListRecorder</a>, <a class="el" href="class_b_r_e_1_1_normal_mapping_command_list_recorder.html#a2347884ba1828da5186d28cd5b538286">BRE::NormalMappingCommandListRecorder</a>, and <a class="el" href="class_b_r_e_1_1_texture_mapping_command_list_recorder.html#aa51f80f11b2f985fbb7c8ca3dd9a7612">BRE::TextureMappingCommandListRecorder</a>.</p>
 
 </div>
 </div>

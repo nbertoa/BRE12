@@ -90,16 +90,16 @@ const <a class="el" href="class_b_r_e_1_1_ambient_occlusion_command_list_recorde
 <tr class="memitem:a64084b85d8741fed379ef37536934c08"><td class="memItemLeft" align="right" valign="top"><a id="a64084b85d8741fed379ef37536934c08"></a>
 <a class="el" href="class_b_r_e_1_1_ambient_occlusion_command_list_recorder.html">AmbientOcclusionCommandListRecorder</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="class_b_r_e_1_1_ambient_occlusion_command_list_recorder.html">AmbientOcclusionCommandListRecorder</a> &amp;&amp;)=default</td></tr>
 <tr class="separator:a64084b85d8741fed379ef37536934c08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae654f3c8cf7b6f89e81864d5d2c375b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_ambient_occlusion_command_list_recorder.html#ae654f3c8cf7b6f89e81864d5d2c375b6">Init</a> (ID3D12Resource &amp;normalSmoothnessBuffer, ID3D12Resource &amp;depthBuffer, const D3D12_CPU_DESCRIPTOR_HANDLE &amp;renderTargetView) noexcept</td></tr>
-<tr class="memdesc:ae654f3c8cf7b6f89e81864d5d2c375b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the command list recorder.  <a href="#ae654f3c8cf7b6f89e81864d5d2c375b6">More...</a><br /></td></tr>
-<tr class="separator:ae654f3c8cf7b6f89e81864d5d2c375b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a73f514368d1ee8fe44ca27eadb6770d5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_ambient_occlusion_command_list_recorder.html#a73f514368d1ee8fe44ca27eadb6770d5">RecordAndPushCommandLists</a> (const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;frameCBuffer) noexcept</td></tr>
-<tr class="memdesc:a73f514368d1ee8fe44ca27eadb6770d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records a command list and push it into the <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>.  <a href="#a73f514368d1ee8fe44ca27eadb6770d5">More...</a><br /></td></tr>
-<tr class="separator:a73f514368d1ee8fe44ca27eadb6770d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a880541d0b67c0c5f039130b54d893f2c"><td class="memItemLeft" align="right" valign="top"><a id="a880541d0b67c0c5f039130b54d893f2c"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_ambient_occlusion_command_list_recorder.html#a880541d0b67c0c5f039130b54d893f2c">ValidateData</a> () const noexcept</td></tr>
-<tr class="memdesc:a880541d0b67c0c5f039130b54d893f2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates internal data. Used most with assertions. <br /></td></tr>
-<tr class="separator:a880541d0b67c0c5f039130b54d893f2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93f5c5e5aacaabafacd6363b2d39b5e4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_ambient_occlusion_command_list_recorder.html#a93f5c5e5aacaabafacd6363b2d39b5e4">Init</a> (const D3D12_CPU_DESCRIPTOR_HANDLE &amp;ambientAccessibilityBufferRenderTargetView, const D3D12_GPU_DESCRIPTOR_HANDLE &amp;normalRoughnessBufferShaderResourceView, const D3D12_GPU_DESCRIPTOR_HANDLE &amp;depthBufferShaderResourceView) noexcept</td></tr>
+<tr class="memdesc:a93f5c5e5aacaabafacd6363b2d39b5e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the command list recorder.  <a href="#a93f5c5e5aacaabafacd6363b2d39b5e4">More...</a><br /></td></tr>
+<tr class="separator:a93f5c5e5aacaabafacd6363b2d39b5e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71b1bc506576fd9a42bebc63b075d144"><td class="memItemLeft" align="right" valign="top">std::uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_ambient_occlusion_command_list_recorder.html#a71b1bc506576fd9a42bebc63b075d144">RecordAndPushCommandLists</a> (const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;frameCBuffer) noexcept</td></tr>
+<tr class="memdesc:a71b1bc506576fd9a42bebc63b075d144"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records a command list and push it into the <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>.  <a href="#a71b1bc506576fd9a42bebc63b075d144">More...</a><br /></td></tr>
+<tr class="separator:a71b1bc506576fd9a42bebc63b075d144"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a378e18b4b317048b6d9dc13bd5f0a33b"><td class="memItemLeft" align="right" valign="top"><a id="a378e18b4b317048b6d9dc13bd5f0a33b"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_ambient_occlusion_command_list_recorder.html#a378e18b4b317048b6d9dc13bd5f0a33b">IsDataValid</a> () const noexcept</td></tr>
+<tr class="memdesc:a378e18b4b317048b6d9dc13bd5f0a33b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates internal data. Used most with assertions. <br /></td></tr>
+<tr class="separator:a378e18b4b317048b6d9dc13bd5f0a33b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -110,8 +110,8 @@ Static Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Responsible of command list recording for ambient occlusion pass. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ae654f3c8cf7b6f89e81864d5d2c375b6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae654f3c8cf7b6f89e81864d5d2c375b6">&#9670;&nbsp;</a></span>Init()</h2>
+<a id="a93f5c5e5aacaabafacd6363b2d39b5e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93f5c5e5aacaabafacd6363b2d39b5e4">&#9670;&nbsp;</a></span>Init()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -122,20 +122,20 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">void BRE::AmbientOcclusionCommandListRecorder::Init </td>
           <td>(</td>
-          <td class="paramtype">ID3D12Resource &amp;&#160;</td>
-          <td class="paramname"><em>normalSmoothnessBuffer</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">ID3D12Resource &amp;&#160;</td>
-          <td class="paramname"><em>depthBuffer</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">const D3D12_CPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
-          <td class="paramname"><em>renderTargetView</em>&#160;</td>
+          <td class="paramname"><em>ambientAccessibilityBufferRenderTargetView</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const D3D12_GPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
+          <td class="paramname"><em>normalRoughnessBufferShaderResourceView</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const D3D12_GPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
+          <td class="paramname"><em>depthBufferShaderResourceView</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -154,9 +154,9 @@ Static Public Member Functions</h2></td></tr>
 <p><a class="el" href="class_b_r_e_1_1_ambient_occlusion_command_list_recorder.html#a9e50239e3424596aad5d1e23b49e0d88" title="Initializes the pipeline state object and root signature. ">InitSharedPSOAndRootSignature()</a> must be called first and once</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">normalSmoothnessBuffer</td><td>Geometry buffer that contains normal and smoothness factor </td></tr>
-    <tr><td class="paramname">depthBuffer</td><td>Depth buffer </td></tr>
-    <tr><td class="paramname">renderTargetView</td><td>CPU descriptor handle of the render target </td></tr>
+    <tr><td class="paramname">ambientAccessibilityBufferRenderTargetView</td><td>Render target view to the ambient accessibility buffer </td></tr>
+    <tr><td class="paramname">normalRoughnessBufferShaderResourceView</td><td>Shader resource view to the normal and roughness buffer </td></tr>
+    <tr><td class="paramname">depthBufferShaderResourceView</td><td>Depth buffer shader resource view k </td></tr>
   </table>
   </dd>
 </dl>
@@ -191,8 +191,8 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a73f514368d1ee8fe44ca27eadb6770d5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a73f514368d1ee8fe44ca27eadb6770d5">&#9670;&nbsp;</a></span>RecordAndPushCommandLists()</h2>
+<a id="a71b1bc506576fd9a42bebc63b075d144"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71b1bc506576fd9a42bebc63b075d144">&#9670;&nbsp;</a></span>RecordAndPushCommandLists()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -201,7 +201,7 @@ Static Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void BRE::AmbientOcclusionCommandListRecorder::RecordAndPushCommandLists </td>
+          <td class="memname">std::uint32_t BRE::AmbientOcclusionCommandListRecorder::RecordAndPushCommandLists </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;&#160;</td>
           <td class="paramname"><em>frameCBuffer</em></td><td>)</td>
@@ -216,19 +216,20 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Records a command list and push it into the <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>. </p>
-<p><a class="el" href="class_b_r_e_1_1_ambient_occlusion_command_list_recorder.html#ae654f3c8cf7b6f89e81864d5d2c375b6" title="Initializes the command list recorder. ">Init()</a> must be called first</p>
+<p><a class="el" href="class_b_r_e_1_1_ambient_occlusion_command_list_recorder.html#a93f5c5e5aacaabafacd6363b2d39b5e4" title="Initializes the command list recorder. ">Init()</a> must be called first</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">frameCBuffer</td><td>Constant buffer per frame, for current frame </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>The number of pushed command lists </dd></dl>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>EnvironmentLightPass/<a class="el" href="_ambient_occlusion_command_list_recorder_8h_source.html">AmbientOcclusionCommandListRecorder.h</a></li>
-<li>EnvironmentLightPass/AmbientOcclusionCommandListRecorder.cpp</li>
+<li>AmbientOcclusionPass/<a class="el" href="_ambient_occlusion_command_list_recorder_8h_source.html">AmbientOcclusionCommandListRecorder.h</a></li>
+<li>AmbientOcclusionPass/AmbientOcclusionCommandListRecorder.cpp</li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

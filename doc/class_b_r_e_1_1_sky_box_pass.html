@@ -89,18 +89,18 @@ const <a class="el" href="class_b_r_e_1_1_sky_box_pass.html">SkyBoxPass</a> &amp
 <tr class="memitem:a8cac7a90f1bed6920ee095e6a62dc08e"><td class="memItemLeft" align="right" valign="top"><a id="a8cac7a90f1bed6920ee095e6a62dc08e"></a>
 <a class="el" href="class_b_r_e_1_1_sky_box_pass.html">SkyBoxPass</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="class_b_r_e_1_1_sky_box_pass.html">SkyBoxPass</a> &amp;&amp;)=delete</td></tr>
 <tr class="separator:a8cac7a90f1bed6920ee095e6a62dc08e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2b829362a9984c32af7c3663aeedb817"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_sky_box_pass.html#a2b829362a9984c32af7c3663aeedb817">Init</a> (ID3D12Resource &amp;skyBoxCubeMap, ID3D12Resource &amp;depthBuffer, const D3D12_CPU_DESCRIPTOR_HANDLE &amp;renderTargetView, const D3D12_CPU_DESCRIPTOR_HANDLE &amp;depthBufferView) noexcept</td></tr>
-<tr class="memdesc:a2b829362a9984c32af7c3663aeedb817"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the sky box pass.  <a href="#a2b829362a9984c32af7c3663aeedb817">More...</a><br /></td></tr>
-<tr class="separator:a2b829362a9984c32af7c3663aeedb817"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa17de082534d83fdc227f87df8612a90"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_sky_box_pass.html#aa17de082534d83fdc227f87df8612a90">Execute</a> (const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;frameCBuffer) noexcept</td></tr>
-<tr class="memdesc:aa17de082534d83fdc227f87df8612a90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes the pass.  <a href="#aa17de082534d83fdc227f87df8612a90">More...</a><br /></td></tr>
-<tr class="separator:aa17de082534d83fdc227f87df8612a90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90d68a809863cb6cdca9dc8a38b87ab1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_sky_box_pass.html#a90d68a809863cb6cdca9dc8a38b87ab1">Init</a> (ID3D12Resource &amp;skyBoxCubeMap, ID3D12Resource &amp;depthBuffer, const D3D12_CPU_DESCRIPTOR_HANDLE &amp;outputColorBufferRenderTargetView, const D3D12_CPU_DESCRIPTOR_HANDLE &amp;depthBufferView) noexcept</td></tr>
+<tr class="memdesc:a90d68a809863cb6cdca9dc8a38b87ab1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the sky box pass.  <a href="#a90d68a809863cb6cdca9dc8a38b87ab1">More...</a><br /></td></tr>
+<tr class="separator:a90d68a809863cb6cdca9dc8a38b87ab1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a758bcb2cfdca0ead7311ccf9e8e2d0ef"><td class="memItemLeft" align="right" valign="top">std::uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_sky_box_pass.html#a758bcb2cfdca0ead7311ccf9e8e2d0ef">Execute</a> (const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;frameCBuffer) noexcept</td></tr>
+<tr class="memdesc:a758bcb2cfdca0ead7311ccf9e8e2d0ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes the pass.  <a href="#a758bcb2cfdca0ead7311ccf9e8e2d0ef">More...</a><br /></td></tr>
+<tr class="separator:a758bcb2cfdca0ead7311ccf9e8e2d0ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Responsible of execute command lists to generate a sky box. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="aa17de082534d83fdc227f87df8612a90"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa17de082534d83fdc227f87df8612a90">&#9670;&nbsp;</a></span>Execute()</h2>
+<a id="a758bcb2cfdca0ead7311ccf9e8e2d0ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a758bcb2cfdca0ead7311ccf9e8e2d0ef">&#9670;&nbsp;</a></span>Execute()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -109,7 +109,7 @@ const <a class="el" href="class_b_r_e_1_1_sky_box_pass.html">SkyBoxPass</a> &amp
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void BRE::SkyBoxPass::Execute </td>
+          <td class="memname">std::uint32_t BRE::SkyBoxPass::Execute </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="struct_b_r_e_1_1_frame_c_buffer.html">FrameCBuffer</a> &amp;&#160;</td>
           <td class="paramname"><em>frameCBuffer</em></td><td>)</td>
@@ -124,17 +124,19 @@ const <a class="el" href="class_b_r_e_1_1_sky_box_pass.html">SkyBoxPass</a> &amp
 </div><div class="memdoc">
 
 <p>Executes the pass. </p>
+<p><a class="el" href="class_b_r_e_1_1_sky_box_pass.html#a90d68a809863cb6cdca9dc8a38b87ab1" title="Initializes the sky box pass. ">Init()</a> must be called first. This method can record and push command lists to the <a class="el" href="class_b_r_e_1_1_command_list_executor.html" title="Class responsible to execute command lists. ">CommandListExecutor</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">frameCBuffer</td><td>Constant buffer per frame, for current frame </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>The number of recorded command lists. </dd></dl>
 
 </div>
 </div>
-<a id="a2b829362a9984c32af7c3663aeedb817"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2b829362a9984c32af7c3663aeedb817">&#9670;&nbsp;</a></span>Init()</h2>
+<a id="a90d68a809863cb6cdca9dc8a38b87ab1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90d68a809863cb6cdca9dc8a38b87ab1">&#9670;&nbsp;</a></span>Init()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -158,7 +160,7 @@ const <a class="el" href="class_b_r_e_1_1_sky_box_pass.html">SkyBoxPass</a> &amp
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const D3D12_CPU_DESCRIPTOR_HANDLE &amp;&#160;</td>
-          <td class="paramname"><em>renderTargetView</em>, </td>
+          <td class="paramname"><em>outputColorBufferRenderTargetView</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -184,8 +186,8 @@ const <a class="el" href="class_b_r_e_1_1_sky_box_pass.html">SkyBoxPass</a> &amp
   <table class="params">
     <tr><td class="paramname">skyBoxCubeMap</td><td>Sky box cube map resource </td></tr>
     <tr><td class="paramname">depthBuffer</td><td>Depth buffer resource </td></tr>
-    <tr><td class="paramname">renderTargetView</td><td>Render target view </td></tr>
-    <tr><td class="paramname">Depth</td><td>buffer view </td></tr>
+    <tr><td class="paramname">outputColorBufferRenderTargetView</td><td>Render target view to the output color buffer </td></tr>
+    <tr><td class="paramname">depthBufferView</td><td>Depth buffer view </td></tr>
   </table>
   </dd>
 </dl>

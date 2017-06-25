@@ -235,10 +235,10 @@ public:
     static bool AreEqual(const DirectX::XMFLOAT2& p1,
                          const DirectX::XMFLOAT2& p2)
     {
-       const DirectX::XMVECTOR xmP1 = DirectX::XMLoadFloat2(&p1);
-       const DirectX::XMVECTOR xmP2 = DirectX::XMLoadFloat2(&p2);
+        const DirectX::XMVECTOR xmP1 = DirectX::XMLoadFloat2(&p1);
+        const DirectX::XMVECTOR xmP2 = DirectX::XMLoadFloat2(&p2);
 
-       return DirectX::XMVector2Equal(xmP1, xmP2);
+        return DirectX::XMVector2Equal(xmP1, xmP2);
     }
 
     ///
@@ -280,7 +280,7 @@ public:
     static bool AreEqual(const DirectX::XMFLOAT4X4& p1,
                          const DirectX::XMFLOAT4X4& p2)
     {
-        return 
+        return
             AreEqual(p1._11, p2._11) &&
             AreEqual(p1._12, p2._12) &&
             AreEqual(p1._13, p2._13) &&

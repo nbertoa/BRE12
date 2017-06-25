@@ -14,7 +14,7 @@ public:
     const AmbientOcclusionSettings& operator=(const AmbientOcclusionSettings&) = delete;
     AmbientOcclusionSettings(AmbientOcclusionSettings&&) = delete;
     AmbientOcclusionSettings& operator=(AmbientOcclusionSettings&&) = delete;
-    
+
     static std::uint32_t sSampleKernelSize;
     static std::uint32_t sNoiseTextureDimension;
     static float sOcclusionRadius;

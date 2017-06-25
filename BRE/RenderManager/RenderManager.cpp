@@ -202,7 +202,7 @@ RenderManager::RenderManager(Scene& scene)
                                                                                           srvDescriptor);
 
     InitPasses(scene);
-    
+
     // Spawns master render task
     parent()->spawn(*this);
 }
@@ -222,7 +222,7 @@ RenderManager::InitPasses(Scene& scene) noexcept
     mReflectionPass.Init(*mDepthBuffer);
 
     mAmbientOcclusionPass.Init(mGeometryPass.GetGeometryBuffer(GeometryPass::NORMAL_ROUGHNESS),
-                               *mDepthBuffer, 
+                               *mDepthBuffer,
                                mGeometryPass.GetGeometryBufferShaderResourceView(GeometryPass::NORMAL_ROUGHNESS),
                                mDepthBufferShaderResourceView);
 
@@ -235,7 +235,7 @@ RenderManager::InitPasses(Scene& scene) noexcept
                                mIntermediateColorBuffer1RenderTargetView,
                                mGeometryPass.GetGeometryBufferShaderResourceViews(),
                                mAmbientOcclusionPass.GetAmbientAccessibilityShaderResourceView(),
-                               mDepthBufferShaderResourceView);    
+                               mDepthBufferShaderResourceView);
 
     mSkyBoxPass.Init(*skyBoxCubeMap,
                      *mDepthBuffer,
@@ -269,8 +269,8 @@ RenderManager::execute()
 {
     while (!mTerminate) {
         mTimer.Tick();
-        UpdateCameraAndFrameCBuffer(mTimer.GetDeltaTimeInSeconds(), 
-                                    mCamera, 
+        UpdateCameraAndFrameCBuffer(mTimer.GetDeltaTimeInSeconds(),
+                                    mCamera,
                                     mFrameCBuffer);
 
         std::uint32_t commandListCount = 0U;
@@ -284,7 +284,7 @@ RenderManager::execute()
         commandListCount += mReflectionPass.Execute(mFrameCBuffer);
         commandListCount += mSkyBoxPass.Execute(mFrameCBuffer);
         commandListCount += mToneMappingPass.Execute();
-        commandListCount += mPostProcessPass.Execute(*GetCurrentFrameBuffer(), 
+        commandListCount += mPostProcessPass.Execute(*GetCurrentFrameBuffer(),
                                                      GetCurrentFrameBufferRenderTargetView());
 
         commandListCount += RecordAndPushPostPassCommandLists();

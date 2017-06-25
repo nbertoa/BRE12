@@ -71,7 +71,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Contains material technique data like diffuse texture, normal texture, height texture, etc.  
+<p>Contains material technique data like base color texture, normal texture, height texture, etc.  
  <a href="class_b_r_e_1_1_material_technique.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="_material_technique_8h_source.html">MaterialTechnique.h</a>&gt;</code></p>
@@ -93,24 +93,36 @@ Public Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:acbb72a611f5dc7876e0d58bbe16507f4"><td class="memItemLeft" align="right" valign="top"><a id="acbb72a611f5dc7876e0d58bbe16507f4"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>MaterialTechnique</b> (ID3D12Resource *diffuseTexture=nullptr, ID3D12Resource *normalTexture=nullptr, ID3D12Resource *heightTexture=nullptr)</td></tr>
-<tr class="separator:acbb72a611f5dc7876e0d58bbe16507f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abfccef61639fad452e5ac55dc34ad861"><td class="memItemLeft" align="right" valign="top">ID3D12Resource &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#abfccef61639fad452e5ac55dc34ad861">GetDiffuseTexture</a> () const noexcept</td></tr>
-<tr class="memdesc:abfccef61639fad452e5ac55dc34ad861"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get diffuse texture.  <a href="#abfccef61639fad452e5ac55dc34ad861">More...</a><br /></td></tr>
-<tr class="separator:abfccef61639fad452e5ac55dc34ad861"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb39c4945d24a77a605de856949de933"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#adb39c4945d24a77a605de856949de933">SetDiffuseTexture</a> (ID3D12Resource *texture) noexcept</td></tr>
-<tr class="memdesc:adb39c4945d24a77a605de856949de933"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set diffuse texture.  <a href="#adb39c4945d24a77a605de856949de933">More...</a><br /></td></tr>
-<tr class="separator:adb39c4945d24a77a605de856949de933"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50e22840ff7142a840f70ee10e62dda3"><td class="memItemLeft" align="right" valign="top"><a id="a50e22840ff7142a840f70ee10e62dda3"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>MaterialTechnique</b> (ID3D12Resource *baseColorTexture=nullptr, ID3D12Resource *metalnessTexture=nullptr, ID3D12Resource *roughnessTexture=nullptr, ID3D12Resource *normalTexture=nullptr, ID3D12Resource *heightTexture=nullptr)</td></tr>
+<tr class="separator:a50e22840ff7142a840f70ee10e62dda3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef8d6ebf94cb2da0ec28db214c03e03c"><td class="memItemLeft" align="right" valign="top">ID3D12Resource &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#aef8d6ebf94cb2da0ec28db214c03e03c">GetBaseColorTexture</a> () const noexcept</td></tr>
+<tr class="memdesc:aef8d6ebf94cb2da0ec28db214c03e03c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get base color texture.  <a href="#aef8d6ebf94cb2da0ec28db214c03e03c">More...</a><br /></td></tr>
+<tr class="separator:aef8d6ebf94cb2da0ec28db214c03e03c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0ed56d28496b9c4b3ae9a7d3bfb7cbe"><td class="memItemLeft" align="right" valign="top">ID3D12Resource &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#ac0ed56d28496b9c4b3ae9a7d3bfb7cbe">GetMetalnessTexture</a> () const noexcept</td></tr>
+<tr class="memdesc:ac0ed56d28496b9c4b3ae9a7d3bfb7cbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get metalness texture.  <a href="#ac0ed56d28496b9c4b3ae9a7d3bfb7cbe">More...</a><br /></td></tr>
+<tr class="separator:ac0ed56d28496b9c4b3ae9a7d3bfb7cbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3faccbea805b74a0dfc90538cc6cc220"><td class="memItemLeft" align="right" valign="top">ID3D12Resource &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#a3faccbea805b74a0dfc90538cc6cc220">GetRoughnessTexture</a> () const noexcept</td></tr>
+<tr class="memdesc:a3faccbea805b74a0dfc90538cc6cc220"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get roughness texture.  <a href="#a3faccbea805b74a0dfc90538cc6cc220">More...</a><br /></td></tr>
+<tr class="separator:a3faccbea805b74a0dfc90538cc6cc220"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adde1b958f7fad4f66c32e061a115ec43"><td class="memItemLeft" align="right" valign="top">ID3D12Resource &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#adde1b958f7fad4f66c32e061a115ec43">GetNormalTexture</a> () const noexcept</td></tr>
 <tr class="memdesc:adde1b958f7fad4f66c32e061a115ec43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get normal texture.  <a href="#adde1b958f7fad4f66c32e061a115ec43">More...</a><br /></td></tr>
 <tr class="separator:adde1b958f7fad4f66c32e061a115ec43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b1fed7a6781af5f6ed1e4f9d3b7e7d5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#a6b1fed7a6781af5f6ed1e4f9d3b7e7d5">SetNormalTexture</a> (ID3D12Resource *texture) noexcept</td></tr>
-<tr class="memdesc:a6b1fed7a6781af5f6ed1e4f9d3b7e7d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set normal texture.  <a href="#a6b1fed7a6781af5f6ed1e4f9d3b7e7d5">More...</a><br /></td></tr>
-<tr class="separator:a6b1fed7a6781af5f6ed1e4f9d3b7e7d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b883cc2ac83c0e8fc0d535213abbe3c"><td class="memItemLeft" align="right" valign="top">ID3D12Resource &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#a8b883cc2ac83c0e8fc0d535213abbe3c">GetHeightTexture</a> () const noexcept</td></tr>
 <tr class="memdesc:a8b883cc2ac83c0e8fc0d535213abbe3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get height texture.  <a href="#a8b883cc2ac83c0e8fc0d535213abbe3c">More...</a><br /></td></tr>
 <tr class="separator:a8b883cc2ac83c0e8fc0d535213abbe3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0e3e721bc67d1bcac424e8fe11117a5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#af0e3e721bc67d1bcac424e8fe11117a5">SetBaseColorTexture</a> (ID3D12Resource *texture) noexcept</td></tr>
+<tr class="memdesc:af0e3e721bc67d1bcac424e8fe11117a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set base color texture.  <a href="#af0e3e721bc67d1bcac424e8fe11117a5">More...</a><br /></td></tr>
+<tr class="separator:af0e3e721bc67d1bcac424e8fe11117a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad875cfcd3ff51e48d70a0d6abdb84e94"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#ad875cfcd3ff51e48d70a0d6abdb84e94">SetMetalnessTexture</a> (ID3D12Resource *texture) noexcept</td></tr>
+<tr class="memdesc:ad875cfcd3ff51e48d70a0d6abdb84e94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set metalness texture.  <a href="#ad875cfcd3ff51e48d70a0d6abdb84e94">More...</a><br /></td></tr>
+<tr class="separator:ad875cfcd3ff51e48d70a0d6abdb84e94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a448b813fb0cf4513b206499a1ff39c17"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#a448b813fb0cf4513b206499a1ff39c17">SetRoughnessTexture</a> (ID3D12Resource *texture) noexcept</td></tr>
+<tr class="memdesc:a448b813fb0cf4513b206499a1ff39c17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set roughness texture.  <a href="#a448b813fb0cf4513b206499a1ff39c17">More...</a><br /></td></tr>
+<tr class="separator:a448b813fb0cf4513b206499a1ff39c17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b1fed7a6781af5f6ed1e4f9d3b7e7d5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#a6b1fed7a6781af5f6ed1e4f9d3b7e7d5">SetNormalTexture</a> (ID3D12Resource *texture) noexcept</td></tr>
+<tr class="memdesc:a6b1fed7a6781af5f6ed1e4f9d3b7e7d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set normal texture.  <a href="#a6b1fed7a6781af5f6ed1e4f9d3b7e7d5">More...</a><br /></td></tr>
+<tr class="separator:a6b1fed7a6781af5f6ed1e4f9d3b7e7d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cc7bb850d4bc0d6d0b161ea56cb7277"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_r_e_1_1_material_technique.html#a8cc7bb850d4bc0d6d0b161ea56cb7277">SetHeightTexture</a> (ID3D12Resource *texture) noexcept</td></tr>
 <tr class="memdesc:a8cc7bb850d4bc0d6d0b161ea56cb7277"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set height texture.  <a href="#a8cc7bb850d4bc0d6d0b161ea56cb7277">More...</a><br /></td></tr>
 <tr class="separator:a8cc7bb850d4bc0d6d0b161ea56cb7277"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -119,10 +131,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aba1bc3c53122b03d5dd7be9b4b87c21e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains material technique data like diffuse texture, normal texture, height texture, etc. </p>
+<div class="textblock"><p>Contains material technique data like base color texture, normal texture, height texture, etc. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="abfccef61639fad452e5ac55dc34ad861"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abfccef61639fad452e5ac55dc34ad861">&#9670;&nbsp;</a></span>GetDiffuseTexture()</h2>
+<a id="aef8d6ebf94cb2da0ec28db214c03e03c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef8d6ebf94cb2da0ec28db214c03e03c">&#9670;&nbsp;</a></span>GetBaseColorTexture()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -131,7 +143,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">ID3D12Resource&amp; BRE::MaterialTechnique::GetDiffuseTexture </td>
+          <td class="memname">ID3D12Resource&amp; BRE::MaterialTechnique::GetBaseColorTexture </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -144,8 +156,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Get diffuse texture. </p>
-<dl class="section return"><dt>Returns</dt><dd>Diffuse texture </dd></dl>
+<p>Get base color texture. </p>
+<dl class="section return"><dt>Returns</dt><dd>Base color texture </dd></dl>
 
 </div>
 </div>
@@ -177,6 +189,34 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ac0ed56d28496b9c4b3ae9a7d3bfb7cbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0ed56d28496b9c4b3ae9a7d3bfb7cbe">&#9670;&nbsp;</a></span>GetMetalnessTexture()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ID3D12Resource&amp; BRE::MaterialTechnique::GetMetalnessTexture </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get metalness texture. </p>
+<dl class="section return"><dt>Returns</dt><dd>Metalness texture </dd></dl>
+
+</div>
+</div>
 <a id="adde1b958f7fad4f66c32e061a115ec43"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adde1b958f7fad4f66c32e061a115ec43">&#9670;&nbsp;</a></span>GetNormalTexture()</h2>
 
@@ -202,6 +242,34 @@ Public Member Functions</h2></td></tr>
 
 <p>Get normal texture. </p>
 <dl class="section return"><dt>Returns</dt><dd>Normal texture </dd></dl>
+
+</div>
+</div>
+<a id="a3faccbea805b74a0dfc90538cc6cc220"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3faccbea805b74a0dfc90538cc6cc220">&#9670;&nbsp;</a></span>GetRoughnessTexture()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ID3D12Resource&amp; BRE::MaterialTechnique::GetRoughnessTexture </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get roughness texture. </p>
+<dl class="section return"><dt>Returns</dt><dd>Roughness texture </dd></dl>
 
 </div>
 </div>
@@ -233,8 +301,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="adb39c4945d24a77a605de856949de933"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adb39c4945d24a77a605de856949de933">&#9670;&nbsp;</a></span>SetDiffuseTexture()</h2>
+<a id="af0e3e721bc67d1bcac424e8fe11117a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0e3e721bc67d1bcac424e8fe11117a5">&#9670;&nbsp;</a></span>SetBaseColorTexture()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -243,7 +311,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void BRE::MaterialTechnique::SetDiffuseTexture </td>
+          <td class="memname">void BRE::MaterialTechnique::SetBaseColorTexture </td>
           <td>(</td>
           <td class="paramtype">ID3D12Resource *&#160;</td>
           <td class="paramname"><em>texture</em></td><td>)</td>
@@ -257,10 +325,10 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Set diffuse texture. </p>
+<p>Set base color texture. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">texture</td><td>New diffuse texture. </td></tr>
+    <tr><td class="paramname">texture</td><td>New base color texture. </td></tr>
   </table>
   </dd>
 </dl>
@@ -301,6 +369,40 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ad875cfcd3ff51e48d70a0d6abdb84e94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad875cfcd3ff51e48d70a0d6abdb84e94">&#9670;&nbsp;</a></span>SetMetalnessTexture()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void BRE::MaterialTechnique::SetMetalnessTexture </td>
+          <td>(</td>
+          <td class="paramtype">ID3D12Resource *&#160;</td>
+          <td class="paramname"><em>texture</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set metalness texture. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">texture</td><td>New metalness texture. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a6b1fed7a6781af5f6ed1e4f9d3b7e7d5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6b1fed7a6781af5f6ed1e4f9d3b7e7d5">&#9670;&nbsp;</a></span>SetNormalTexture()</h2>
 
@@ -329,6 +431,40 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">texture</td><td>New normal texture </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a448b813fb0cf4513b206499a1ff39c17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a448b813fb0cf4513b206499a1ff39c17">&#9670;&nbsp;</a></span>SetRoughnessTexture()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void BRE::MaterialTechnique::SetRoughnessTexture </td>
+          <td>(</td>
+          <td class="paramtype">ID3D12Resource *&#160;</td>
+          <td class="paramname"><em>texture</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set roughness texture. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">texture</td><td>New roughness texture. </td></tr>
   </table>
   </dd>
 </dl>
