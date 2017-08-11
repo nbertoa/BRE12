@@ -6,7 +6,11 @@
 
 #include <Utils\StringUtils.h>
 
+#ifdef _DEBUG
 #define BRE_ASSERT(condition) assert(condition)
+#else
+#define BRE_ASSERT(condition) {}
+#endif
 
 #define BRE_CHECK_MSG(condition, msg) \
 { \

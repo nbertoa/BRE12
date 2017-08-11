@@ -43,7 +43,11 @@ public:
     template<typename T>
     static void GetSequence(const YAML::Node& node,
                             T* const sequenceOutput,
+#ifdef _DEBUG
                             const size_t numElems) noexcept
+#else
+                            const size_t) noexcept
+#endif
     {
         BRE_ASSERT(sequenceOutput != nullptr);
         BRE_ASSERT(node.IsDefined());

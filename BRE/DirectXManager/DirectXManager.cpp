@@ -50,7 +50,11 @@ InitMainWindow(HWND& windowHandle,
     windowClass.lpszMenuName = nullptr;
     windowClass.lpszClassName = L"MainWnd";
 
+#ifdef _DEBUG
     BRE_ASSERT(RegisterClass(&windowClass));
+#else
+    RegisterClass(&windowClass);
+#endif
 
     // Compute window rectangle dimensions based on requested client area dimensions.
     RECT rect = { 0, 0, static_cast<long>(ApplicationSettings::sWindowWidth), static_cast<long>(ApplicationSettings::sWindowHeight) };

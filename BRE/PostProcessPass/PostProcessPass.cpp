@@ -35,8 +35,7 @@ PostProcessPass::Execute(ID3D12Resource& frameBuffer,
     
     std::uint32_t commandListCount = 0U;
 
-    commandListCount += RecordAndPushPrePassCommandLists(frameBuffer,
-                                                         frameBufferRenderTargetView);
+    commandListCount += RecordAndPushPrePassCommandLists(frameBuffer);
         
     commandListCount += mCommandListRecorder.RecordAndPushCommandLists(frameBufferRenderTargetView);
 
@@ -53,11 +52,9 @@ PostProcessPass::IsDataValid() const noexcept
 }
 
 std::uint32_t
-PostProcessPass::RecordAndPushPrePassCommandLists(ID3D12Resource& frameBuffer,
-                                                  const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferRenderTargetView) noexcept
+PostProcessPass::RecordAndPushPrePassCommandLists(ID3D12Resource& frameBuffer) noexcept
 {
     BRE_ASSERT(IsDataValid());
-    BRE_ASSERT(frameBufferRenderTargetView.ptr != 0UL);
 
     D3D12_RESOURCE_BARRIER barriers[2U];
     std::uint32_t barrierCount = 0UL;

@@ -48,11 +48,9 @@ private:
     /// @brief Records pre pass command lists and pushes them to 
     /// the CommandListExecutor.
     /// @param frameBuffer Frame buffer
-    /// @param renderTargetView Render target view to the frame buffer
     /// @return The number of recorded command lists
     ///
-    std::uint32_t RecordAndPushPrePassCommandLists(ID3D12Resource& frameBuffer,
-                                                   const D3D12_CPU_DESCRIPTOR_HANDLE& frameBufferRenderTargetView) noexcept;
+    std::uint32_t RecordAndPushPrePassCommandLists(ID3D12Resource& frameBuffer) noexcept;
 
     CommandListPerFrame mPrePassCommandListPerFrame;
 
