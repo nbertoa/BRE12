@@ -43,3 +43,10 @@ You can check the following blog entry where I constantly add new articles about
 
 I write a blog where I explain its design, and how I applied/learned the techniques I use.
 The blog link is https://nbertoa.wordpress.com/
+
+## License
+
+Our license is based on the modified, 3-clause BSD-License.
+
+An informal summary is: do whatever you want, but include BRE's license text with your product - and don't sue us if our code doesn't work. Note that, unlike LGPLed code, you may link statically to BRE. For the legal details, see the LICENSE file.
+
