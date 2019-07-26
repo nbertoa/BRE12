@@ -97,7 +97,7 @@ WINAPI WinMain(_In_ HINSTANCE moduleInstanceHandle,
                _In_ LPSTR /*commandLine*/,
                _In_ int /*showCommand*/)
 {
-    const char* sceneFilePath = "resources/scenes/height_mapping.yml";
+    const char* sceneFilePath = "resources/scenes/cobblestone.yml";
 
     tbb::task_scheduler_init taskSchedulerInit;
 

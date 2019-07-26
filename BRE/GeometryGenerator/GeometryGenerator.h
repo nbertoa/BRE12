@@ -25,11 +25,6 @@ struct Vertex {
                     const DirectX::XMFLOAT3& tangent,
                     const DirectX::XMFLOAT2& uv);
 
-    ~Vertex() = default;
-    Vertex(const Vertex&) = default;
-    Vertex(Vertex&&) = default;
-    Vertex& operator=(Vertex&&) = default;
-
     DirectX::XMFLOAT3 mPosition = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 mNormal = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 mTangent = { 0.0f, 0.0f, 0.0f };
