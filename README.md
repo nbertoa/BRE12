@@ -1,5 +1,7 @@
 ## BRE (Bertoa Rendering Engine)
 
+> **Historical project — 2017.** BRE is preserved as a record of my earlier DirectX 12 and real-time graphics R&D. It is not presented as current production work.
+
 BRE is a rendering framework or engine which purpose is to have a codebase on which develop techniques related to computer graphics. Among BRE features we can include:
 
     - Task-based architecture for parallel draw submission.
@@ -35,14 +37,13 @@ The directory structure is:
 ## Examples and Documentation
 
 In the Visual Studio solution, you can check scene files in BRE/Executable/resources/scenes. I use YAML format for scenes.
-You can open /doc/index.html file to read the Doxygen documentation
-You can check the following blog entry where I constantly add new articles about BRE (architecture, techniques, classes, etc). It is https://nbertoa.wordpress.com/bre/
+You can open /doc/index.html file to read the Doxygen documentation.
+The portfolio page collects the BRE architecture series, context, source links, and videos: https://nbertoa.com/bre/
 
 
 ## Blog
 
-I write a blog where I explain its design, and how I applied/learned the techniques I use.
-The blog link is https://nbertoa.wordpress.com/
+My current portfolio and R&D archive are available at https://nbertoa.com/
 
 ## License
 
